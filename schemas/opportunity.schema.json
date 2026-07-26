@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://asignal.com/schemas/opportunity.schema.json",
+  "title": "ASIGNAL Opportunity",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "opportunity_id",
+    "version",
+    "title",
+    "universe",
+    "maturity",
+    "supporting_claim_ids",
+    "contradicting_claim_ids",
+    "unknowns",
+    "invalidation_conditions",
+    "dimensions",
+    "as_of"
+  ],
+  "properties": {
+    "opportunity_id": {
+      "type": "string",
+      "pattern": "^opp_[A-Za-z0-9_-]{8,}$"
+    },
+    "version": {"type": "integer", "minimum": 1},
+    "title": {"type": "string", "minLength": 1},
+    "summary": {"type": ["string", "null"]},
+    "universe": {
+      "enum": [
+        "BUSINESS",
+        "PUBLIC_CONTRACTS",
+        "NON_DILUTIVE_CAPITAL",
+        "REAL_ASSETS",
+        "PRIVATE_COMPANIES",
+        "DIGITAL_ASSETS",
+        "TRADE_AND_SUPPLY_CHAIN",
+        "MACRO_AND_SOVEREIGN",
+        "LISTED_INSTRUMENTS",
+        "CRYPTO",
+        "REGULATION_CREATED_DEMAND",
+        "EMERGING_TECHNOLOGY"
+      ]
+    },
+    "maturity": {
+      "enum": [
+        "SIGNAL",
+        "PATTERN",
+        "EMERGING",
+        "CORROBORATED",
+        "TESTABLE",
+        "ACTIONABLE",
+        "MATURE",
+        "CONTESTED",
+        "WEAKENING",
+        "EXPIRED",
+        "INSUFFICIENT_EVIDENCE"
+      ]
+    },
+    "geography_ids": {
+      "type": "array",
+      "items": {"type": "string"},
+      "uniqueItems": true,
+      "default": []
+    },
+    "sector_ids": {
+      "type": "array",
+      "items": {"type": "string"},
+      "uniqueItems": true,
+      "default": []
+    },
+    "entity_ids": {
+      "type": "array",
+      "items": {"type": "string"},
+      "uniqueItems": true,
+      "default": []
+    },
+    "supporting_claim_ids": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string"},
+      "uniqueItems": true
+    },
+    "contradicting_claim_ids": {
+      "type": "array",
+      "items": {"type": "string"},
+      "uniqueItems": true
+    },
+    "unknowns": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    },
+    "invalidation_conditions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["condition_id", "description", "status"],
+        "properties": {
+          "condition_id": {"type": "string"},
+          "description": {"type": "string"},
+          "status": {"enum": ["NOT_TRIGGERED", "TRIGGERED", "UNKNOWN"]},
+          "claim_id": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "scenario_ids": {
+      "type": "array",
+      "items": {"type": "string"},
+      "uniqueItems": true,
+      "default": []
+    },
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidence_strength",
+        "source_independence",
+        "freshness",
+        "persistence",
+        "contradiction_pressure",
+        "scenario_stability",
+        "regulatory_complexity",
+        "ai_absorption_risk"
+      ],
+      "properties": {
+        "evidence_strength": {"type": "number", "minimum": 0, "maximum": 1},
+        "source_independence": {"type": "number", "minimum": 0, "maximum": 1},
+        "freshness": {"type": "number", "minimum": 0, "maximum": 1},
+        "persistence": {"type": "number", "minimum": 0, "maximum": 1},
+        "contradiction_pressure": {"type": "number", "minimum": 0, "maximum": 1},
+        "scenario_stability": {"type": "number", "minimum": 0, "maximum": 1},
+        "market_accessibility": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+        "liquidity": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+        "regulatory_complexity": {"type": "number", "minimum": 0, "maximum": 1},
+        "ai_absorption_risk": {"type": "number", "minimum": 0, "maximum": 1},
+        "after_sales_load": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+        "commercial_validation": {"type": ["number", "null"], "minimum": 0, "maximum": 1}
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "rights": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "customer_display": {"type": "boolean"},
+        "export": {"type": "boolean"},
+        "api_redistribution": {"type": "boolean"}
+      }
+    },
+    "as_of": {"type": "string", "format": "date-time"},
+    "valid_until": {"type": ["string", "null"], "format": "date-time"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  }
+}
