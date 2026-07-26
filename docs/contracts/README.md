@@ -1,6 +1,6 @@
 # ASIGNAL Development Contracts
 
-Status: `v0.1-foundation`
+Status: `v0.2-ux-candidate`
 
 These documents are normative specifications for the product, architecture and delivery of ASIGNAL. They are called “contracts” because they define externally testable obligations between product surfaces, data pipelines, epistemic runtime, operators and users. They are not a substitute for legal advice or customer-facing legal terms.
 
@@ -20,6 +20,18 @@ These documents are normative specifications for the product, architecture and d
 | [09 — Delivery and Acceptance](09-delivery-and-acceptance.md) | Build sequence, milestones, acceptance evidence and definition of done |
 | [10 — Documentation and Operations](10-documentation-and-operations.md) | Required docs, runbooks, ADRs, incidents and change control |
 | [11 — Product Hypothesis Register](11-hypothesis-register.md) | Buyer, pricing, wedge, regulatory and defensibility hypotheses with falsification rules |
+| [12 — Interaction Model](12-interaction-model.md) | Map-first investigation shell, context continuity, lenses and time-machine behaviour |
+| [13 — Visualisation Grammar](13-visualisation-grammar.md) | Shared semantics for heat, claims, contradiction, graph, time and missing coverage |
+
+Contracts 12 and 13 are normative candidates. They do not become final until the qualified-user prototype gate passes.
+
+## UX research and prototype
+
+- [`docs/research/ux-competitive-benchmark.md`](../research/ux-competitive-benchmark.md)
+- [`docs/research/buyer-workflows.md`](../research/buyer-workflows.md)
+- [`docs/research/prototype-test-plan.md`](../research/prototype-test-plan.md)
+- [`docs/flows/global-discovery-flow.md`](../flows/global-discovery-flow.md)
+- [`docs/prototypes/globe-opportunity-claims-v0.1.html`](../prototypes/globe-opportunity-claims-v0.1.html)
 
 ## Machine-readable specifications
 
@@ -43,4 +55,4 @@ A material change to scope, authority, data rights, claim semantics, pricing ent
 
 ## Foundation status
 
-This version freezes the desired architecture and product rules. It does not claim that the market, pricing or predictive models are already validated. Those remain hypotheses until the corresponding commercial and empirical gates pass.
+The foundation freezes the desired architecture and product rules. Buyer, pricing, predictive models and the final interaction architecture remain hypotheses until their commercial, empirical and usability gates pass.
