@@ -1,0 +1,497 @@
+version: 0.3.1
+goal_id: AXIGNAL-GOAL-001
+status: CANDIDATE
+canonical_brand: AXIGNAL
+canonical_domain: axignal.com
+
+routing:
+  always_on:
+    - goal-keeper
+    - contract-router
+    - task-orchestrator
+    - gate-evaluator
+    - naming-guardian
+    - security-reviewer
+    - privacy-reviewer
+    - observability-engineer
+  fail_when_required_skill_missing: true
+  record_versions_in_task_evidence: true
+  implementing_skill_may_self_approve_gate: false
+
+skills:
+  - skill_id: goal-keeper
+    version: 0.1.0
+    state: ACTIVE
+    category: governance
+    always_on: true
+    phases: [F0, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12]
+    contracts: [GOAL_LOCK, "00", "18"]
+    purpose: Detect goal drift, anti-goal violations and unauthorised reinterpretation.
+
+  - skill_id: contract-router
+    version: 0.1.0
+    state: ACTIVE
+    category: governance
+    always_on: true
+    phases: [F0, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12]
+    contracts: ["18"]
+    purpose: Resolve governing contracts and precedence for every task.
+
+  - skill_id: task-orchestrator
+    version: 0.1.0
+    state: ACTIVE
+    category: governance
+    always_on: true
+    phases: [F0, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12]
+    contracts: ["09", "18"]
+    purpose: Validate task schema, phase authority, dependencies and scope.
+
+  - skill_id: gate-evaluator
+    version: 0.1.0
+    state: ACTIVE
+    category: governance
+    always_on: true
+    phases: [F0, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12]
+    contracts: ["08", "09", "18"]
+    purpose: Evaluate independent evidence and issue fail-closed gate decisions.
+
+  - skill_id: naming-guardian
+    version: 0.1.0
+    state: ACTIVE
+    category: governance
+    always_on: true
+    phases: [F0, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12]
+    contracts: [GOAL_LOCK, ADR-001, "18"]
+    purpose: Enforce AXIGNAL, axignal.com, LowToHi/axignal and AXIGNAL-GOAL-001.
+
+  - skill_id: security-reviewer
+    version: 0.1.0
+    state: ACTIVE
+    category: risk
+    always_on: true
+    phases: [F0, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12]
+    contracts: ["06", "18"]
+    purpose: Identify security impact, controls, tests and incident implications.
+
+  - skill_id: privacy-reviewer
+    version: 0.1.0
+    state: ACTIVE
+    category: risk
+    always_on: true
+    phases: [F0, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12]
+    contracts: ["06", "15", "18"]
+    purpose: Enforce purpose limitation, minimisation, retention and user control.
+
+  - skill_id: observability-engineer
+    version: 0.1.0
+    state: ACTIVE
+    category: operations
+    always_on: true
+    phases: [F0, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12]
+    contracts: ["08", "10", "18"]
+    purpose: Define metrics, logs, traces, alerts and ownership.
+
+  - skill_id: ux-researcher
+    version: 0.1.0
+    state: CONTRACTED
+    category: experience
+    phases: [F1, F8, F9]
+    contracts: ["00", "01", "05", "11", "12", "14"]
+    triggers: [workflow, usability, buyer, onboarding, prototype]
+    purpose: Produce evidence-backed user problems, tests and design decisions.
+
+  - skill_id: interaction-architect
+    version: 0.1.0
+    state: CONTRACTED
+    category: experience
+    phases: [F1, F4, F5, F9]
+    contracts: ["05", "12", "14"]
+    triggers: [navigation, context, command, trail, direct-manipulation]
+    purpose: Define reversible interaction state and context continuity.
+
+  - skill_id: visualisation-designer
+    version: 0.1.0
+    state: CONTRACTED
+    category: experience
+    phases: [F1, F5, F8]
+    contracts: ["05", "13"]
+    triggers: [map, graph, timeline, chart, visualisation]
+    purpose: Define meaningful visual encodings and perceptual safeguards.
+
+  - skill_id: globe-engineer
+    version: 0.1.0
+    state: PROPOSED
+    category: experience
+    phases: [F1, F5, F8]
+    contracts: ["12", "13"]
+    triggers: [globe, geography, heatmap, tile, projection]
+    purpose: Implement geographic discovery, layers, coverage and semantic zoom.
+
+  - skill_id: graph-engineer
+    version: 0.1.0
+    state: PROPOSED
+    category: experience
+    phases: [F1, F5, F8]
+    contracts: ["02", "07", "12", "13"]
+    triggers: [graph, relationship, path, node, edge, transmission]
+    purpose: Implement typed relational exploration and bounded traversal.
+
+  - skill_id: timeline-engineer
+    version: 0.1.0
+    state: PROPOSED
+    category: experience
+    phases: [F1, F5, F8, F10]
+    contracts: ["02", "12", "13"]
+    triggers: [timeline, history, as_of, playback, forecast]
+    purpose: Preserve and render historical knowledge states without future leakage.
+
+  - skill_id: lens-router-engineer
+    version: 0.1.0
+    state: PROPOSED
+    category: experience
+    phases: [F1, F4, F5]
+    contracts: ["12", "14", "16"]
+    triggers: [auto, globe, graph, dual, lens]
+    purpose: Select and explain the correct lens while preserving explicit user override.
+
+  - skill_id: conversational-navigator
+    version: 0.1.0
+    state: CONTRACTED
+    category: experience
+    phases: [F1, F4, F5, F6]
+    contracts: ["02", "12", "14", "16"]
+    triggers: [chat, command, explain, natural-language]
+    purpose: Convert multilingual language into typed reversible product operations.
+
+  - skill_id: accessibility-auditor
+    version: 0.1.0
+    state: CONTRACTED
+    category: experience
+    phases: [F1, F4, F5, F6, F8, F9]
+    contracts: ["05", "12", "13", "16"]
+    triggers: [ui, map, graph, timeline, interaction]
+    purpose: Enforce WCAG and non-visual equivalents for all primary workflows.
+
+  - skill_id: consent-ux-reviewer
+    version: 0.1.0
+    state: CONTRACTED
+    category: risk
+    phases: [F1, F4, F7, F9]
+    contracts: ["06", "14", "15"]
+    triggers: [consent, memory, preference, sharing, private-data]
+    purpose: Design explicit, comprehensible and reversible user authority surfaces.
+
+  - skill_id: multilingual-localiser
+    version: 0.1.0
+    state: CONTRACTED
+    category: multilingual
+    phases: [F1, F4, F5, F6, F8, F9, F11, F12]
+    contracts: ["16"]
+    triggers: [language, locale, translation, terminology, transliteration]
+    purpose: Preserve semantic parity and translation provenance across launch languages.
+
+  - skill_id: ontology-engineer
+    version: 0.1.0
+    state: PROPOSED
+    category: epistemic
+    phases: [F3, F4, F6, F8]
+    contracts: ["02", "03", "14", "16"]
+    triggers: [ontology, predicate, entity, universe, terminology]
+    purpose: Maintain canonical typed concepts and multilingual mappings.
+
+  - skill_id: search-engineer
+    version: 0.1.0
+    state: PROPOSED
+    category: platform
+    phases: [F4, F5, F6, F8]
+    contracts: ["07", "16"]
+    triggers: [search, ranking, semantic, lexical, entity]
+    purpose: Implement explainable hybrid multilingual search.
+
+  - skill_id: epistemic-admission
+    version: 0.1.0
+    state: CONTRACTED
+    category: epistemic
+    phases: [F3, F4, F5, F6, F7, F8, F10, F11]
+    contracts: ["02", "08"]
+    triggers: [claim, evidence, contradiction, opportunity, scenario, outcome]
+    purpose: Enforce deterministic admission and immutable state transitions.
+
+  - skill_id: source-admission
+    version: 0.1.0
+    state: CONTRACTED
+    category: data
+    phases: [F3, F8, F11, F12]
+    contracts: ["03", "06"]
+    triggers: [source, api, connector, licence, rights, export]
+    purpose: Validate lawful source use, attribution, retention and kill switches.
+
+  - skill_id: evidence-provenance-engineer
+    version: 0.1.0
+    state: PROPOSED
+    category: epistemic
+    phases: [F3, F6, F8, F11]
+    contracts: ["02", "03", "16"]
+    triggers: [evidence, extract, provenance, hash, lineage]
+    purpose: Preserve source, raw references, transformations and reproducibility.
+
+  - skill_id: entity-resolution-engineer
+    version: 0.1.0
+    state: PROPOSED
+    category: data
+    phases: [F3, F6, F8, F11]
+    contracts: ["02", "03", "16"]
+    triggers: [entity, alias, merge, identifier, transliteration]
+    purpose: Resolve entities reversibly across sources and languages.
+
+  - skill_id: opportunity-modeler
+    version: 0.1.0
+    state: PROPOSED
+    category: epistemic
+    phases: [F3, F8, F10]
+    contracts: ["02", "11"]
+    triggers: [opportunity, maturity, invalidation, subgraph]
+    purpose: Assemble opportunities from explicit supporting, contradicting and unknown claims.
+
+  - skill_id: scenario-calibration-engineer
+    version: 0.1.0
+    state: PROPOSED
+    category: epistemic
+    phases: [F10]
+    contracts: ["02", "08"]
+    triggers: [scenario, forecast, probability, calibration, outcome]
+    purpose: Build temporally valid scenarios with baselines, calibration and demotion.
+
+  - skill_id: data-quality-auditor
+    version: 0.1.0
+    state: CONTRACTED
+    category: data
+    phases: [F2, F3, F7, F8, F10]
+    contracts: ["03", "08"]
+    triggers: [quality, drift, completeness, duplicate, batch]
+    purpose: Measure trustworthiness and quarantine degraded data.
+
+  - skill_id: intent-intelligence-designer
+    version: 0.1.0
+    state: CONTRACTED
+    category: intent
+    phases: [F1, F7]
+    contracts: ["15", "17"]
+    triggers: [preference, tide, user-intent, research-queue]
+    purpose: Design transparent private memory and aggregate attention surfaces.
+
+  - skill_id: intent-intelligence-engineer
+    version: 0.1.0
+    state: PROPOSED
+    category: intent
+    phases: [F7]
+    contracts: ["06", "15", "17"]
+    triggers: [user-intent-event, knowledge-tide, preference]
+    purpose: Implement privacy-safe intent events, memory and aggregate tide computation.
+
+  - skill_id: analytics-engineer
+    version: 0.1.0
+    state: PROPOSED
+    category: analytics
+    phases: [F7, F9, F12]
+    contracts: ["01", "08", "15"]
+    triggers: [metric, cohort, denominator, conversion, retention]
+    purpose: Define reproducible metrics, denominators and segment analysis.
+
+  - skill_id: fraud-risk-engineer
+    version: 0.1.0
+    state: PROPOSED
+    category: risk
+    phases: [F7]
+    contracts: ["06", "15"]
+    triggers: [coordination, manipulation, bot, abuse, anomaly]
+    purpose: Detect and suppress coordinated manipulation of Knowledge Tides.
+
+  - skill_id: research-queue-orchestrator
+    version: 0.1.0
+    state: PROPOSED
+    category: research
+    phases: [F7, F8]
+    contracts: ["17"]
+    triggers: [research-candidate, coverage-gap, priority]
+    purpose: Govern research candidate lifecycle, budgets and claim-admission handoff.
+
+  - skill_id: repository-architect
+    version: 0.1.0
+    state: PROPOSED
+    category: platform
+    phases: [F2]
+    contracts: ["04", "09", "18"]
+    triggers: [repository, monorepo, package, ci]
+    purpose: Build reproducible repository and module boundaries.
+
+  - skill_id: backend-architect
+    version: 0.1.0
+    state: PROPOSED
+    category: platform
+    phases: [F2, F3, F4, F8, F11]
+    contracts: ["04", "07"]
+    triggers: [api, worker, service, queue, event]
+    purpose: Implement typed backend boundaries and failure behaviour.
+
+  - skill_id: frontend-architect
+    version: 0.1.0
+    state: PROPOSED
+    category: platform
+    phases: [F2, F4, F5, F6, F8, F9]
+    contracts: ["04", "05", "12", "14", "16"]
+    triggers: [frontend, state, ui, context, rendering]
+    purpose: Implement the investigation shell and entitlement-safe client state.
+
+  - skill_id: data-architect
+    version: 0.1.0
+    state: PROPOSED
+    category: data
+    phases: [F2, F3, F4, F7, F8, F11]
+    contracts: ["02", "03", "04", "06"]
+    triggers: [database, schema, migration, retention, tenant]
+    purpose: Own canonical schemas, migrations, isolation and retention.
+
+  - skill_id: connector-engineer
+    version: 0.1.0
+    state: PROPOSED
+    category: data
+    phases: [F8, F11]
+    contracts: ["03", "06"]
+    triggers: [connector, ingestion, api, source]
+    purpose: Build idempotent source connectors with quality telemetry and kill switches.
+
+  - skill_id: test-engineer
+    version: 0.1.0
+    state: CONTRACTED
+    category: quality
+    phases: [F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12]
+    contracts: ["08", "09", "18"]
+    triggers: [test, acceptance, regression, fixture]
+    purpose: Produce automated evidence, negative cases and deterministic replay.
+
+  - skill_id: performance-engineer
+    version: 0.1.0
+    state: PROPOSED
+    category: quality
+    phases: [F2, F5, F8, F12]
+    contracts: ["04", "08", "13"]
+    triggers: [performance, latency, rendering, scale]
+    purpose: Measure performance budgets and graceful degradation.
+
+  - skill_id: identity-engineer
+    version: 0.1.0
+    state: PROPOSED
+    category: security
+    phases: [F9, F11]
+    contracts: ["04", "06", "07"]
+    triggers: [identity, role, organisation, sso, scim]
+    purpose: Implement tenant-safe identity, roles and enterprise federation.
+
+  - skill_id: billing-engineer
+    version: 0.1.0
+    state: PROPOSED
+    category: commercial
+    phases: [F9]
+    contracts: ["01", "07"]
+    triggers: [stripe, billing, subscription, entitlement]
+    purpose: Implement idempotent billing and plan entitlements.
+
+  - skill_id: api-engineer
+    version: 0.1.0
+    state: PROPOSED
+    category: platform
+    phases: [F2, F8, F11]
+    contracts: ["07"]
+    triggers: [openapi, api-key, oauth, quota, webhook]
+    purpose: Maintain versioned authorised APIs and compatibility.
+
+  - skill_id: operations-engineer
+    version: 0.1.0
+    state: PROPOSED
+    category: operations
+    phases: [F2, F3, F8, F9, F10, F11, F12]
+    contracts: ["08", "10"]
+    triggers: [deploy, backup, restore, incident, rollback]
+    purpose: Own deployment, recovery, incidents and service operations.
+
+  - skill_id: operations-writer
+    version: 0.1.0
+    state: PROPOSED
+    category: operations
+    phases: [F2, F8, F9, F11, F12]
+    contracts: ["10"]
+    triggers: [runbook, operations, documentation]
+    purpose: Produce executable operational documentation.
+
+  - skill_id: hypothesis-curator
+    version: 0.1.0
+    state: CONTRACTED
+    category: commercial
+    phases: [F0, F1, F8, F9, F12]
+    contracts: ["01", "11"]
+    triggers: [hypothesis, buyer, pricing, wedge, defence]
+    purpose: Keep product and business assumptions falsifiable and evidence-scoped.
+
+  - skill_id: product-analyst
+    version: 0.1.0
+    state: PROPOSED
+    category: commercial
+    phases: [F8, F9, F12]
+    contracts: ["01", "08", "11"]
+    triggers: [usage, retention, decision-impact, conversion]
+    purpose: Validate product outcomes and avoid misleading metric interpretation.
+
+  - skill_id: finance-operator
+    version: 0.1.0
+    state: PROPOSED
+    category: commercial
+    phases: [F8, F9, F12]
+    contracts: ["01", "08"]
+    triggers: [cost, margin, revenue, budget]
+    purpose: Maintain unit economics, AI budget and gross-margin evidence.
+
+  - skill_id: universe-selector
+    version: 0.1.0
+    state: PROPOSED
+    category: product
+    phases: [F8, F12]
+    contracts: ["00", "01", "03", "06", "11", "17"]
+    triggers: [universe, market, wedge, coverage]
+    purpose: Select opportunity universes through rights, value, cost and regulatory gates.
+
+  - skill_id: design-partner-operator
+    version: 0.1.0
+    state: PROPOSED
+    category: commercial
+    phases: [F9]
+    contracts: ["01", "11"]
+    triggers: [design-partner, paid-pilot, interview]
+    purpose: Recruit, onboard and measure independent paying design partners.
+
+  - skill_id: growth-analyst
+    version: 0.1.0
+    state: PROPOSED
+    category: commercial
+    phases: [F12]
+    contracts: ["01", "08"]
+    triggers: [acquisition, channel, payback, attribution]
+    purpose: Validate repeatable and economically sustainable acquisition.
+
+  - skill_id: regulatory-scope-reviewer
+    version: 0.1.0
+    state: PROPOSED
+    category: risk
+    phases: [F8, F9, F11, F12]
+    contracts: ["06"]
+    triggers: [financial, crypto, recommendation, jurisdiction, consumer]
+    purpose: Control jurisdiction and regulated-activity expansion.
+
+  - skill_id: legal-doc-coordinator
+    version: 0.1.0
+    state: PROPOSED
+    category: risk
+    phases: [F9, F11, F12]
+    contracts: ["06", "10"]
+    triggers: [terms, privacy-notice, acceptable-use, customer-contract]
+    purpose: Coordinate legal-review inputs and publication readiness without substituting legal counsel.
