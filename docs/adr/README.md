@@ -7,5 +7,6 @@
 | [ADR-003](ADR-003-postgresql-canonical-claim-ledger.md) | PostgreSQL is the canonical claim ledger and graph source | ACCEPTED |
 | [ADR-004](ADR-004-progressive-universe-admission.md) | Opportunity universes are admitted progressively through gates | ACCEPTED |
 | [ADR-005](ADR-005-map-first-investigation-shell.md) | Map-first investigation shell with persistent evidence and time context | PROPOSED / VALIDATION REQUIRED |
+| [ADR-006](ADR-006-layered-visual-system-candidate.md) | Layered brand, UI, epistemic and visualisation colour systems remain candidates pending evidence | PROPOSED / VALIDATION REQUIRED |
 
 ADRs record durable decisions and consequences. A later decision MUST supersede rather than erase an accepted ADR.
