@@ -1,0 +1,529 @@
+openapi: 3.1.0
+info:
+  title: ASIGNAL API
+  version: 0.1.0
+  summary: Global Opportunity Intelligence API
+  description: >-
+    Foundation contract for authorised access to ASIGNAL claims, opportunities,
+    climate state, graph exploration and user watchlists. The API exposes
+    admitted product state; it does not expose unrestricted raw sources or
+    provide personalised investment advice.
+servers:
+  - url: https://api.asignal.com/v1
+    description: Production placeholder
+  - url: http://localhost:8000/v1
+    description: Local development
+security:
+  - bearerAuth: []
+tags:
+  - name: Claims
+  - name: Opportunities
+  - name: Climate
+  - name: Graph
+  - name: Search
+  - name: Watchlists
+paths:
+  /claims:
+    get:
+      tags: [Claims]
+      operationId: listClaims
+      summary: List authorised admitted claims
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - name: epistemic_status
+          in: query
+          schema:
+            type: string
+        - name: geography
+          in: query
+          schema:
+            type: string
+        - name: observed_after
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Claim collection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClaimCollection'
+        '401':
+          $ref: '#/components/responses/Unauthorised'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /claims/{claim_id}:
+    get:
+      tags: [Claims]
+      operationId: getClaim
+      summary: Retrieve one admitted claim with provenance metadata
+      parameters:
+        - name: claim_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Claim
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/claim.schema.json'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /claims/{claim_id}/history:
+    get:
+      tags: [Claims]
+      operationId: getClaimHistory
+      summary: Retrieve immutable claim versions and state transitions
+      parameters:
+        - name: claim_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Claim history
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ClaimHistoryEvent'
+                  meta:
+                    $ref: '#/components/schemas/ResponseMeta'
+  /opportunities:
+    get:
+      tags: [Opportunities]
+      operationId: listOpportunities
+      summary: List opportunities assembled from admitted claim subgraphs
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - name: universe
+          in: query
+          schema:
+            type: string
+        - name: geography
+          in: query
+          schema:
+            type: string
+        - name: maturity
+          in: query
+          schema:
+            type: string
+        - name: evidence_strength_min
+          in: query
+          schema:
+            type: number
+            minimum: 0
+            maximum: 1
+      responses:
+        '200':
+          description: Opportunity collection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpportunityCollection'
+  /opportunities/{opportunity_id}:
+    get:
+      tags: [Opportunities]
+      operationId: getOpportunity
+      summary: Retrieve an opportunity, contradiction set and invalidation conditions
+      parameters:
+        - name: opportunity_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Opportunity
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/opportunity.schema.json'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /climate:
+    get:
+      tags: [Climate]
+      operationId: getClimate
+      summary: Retrieve market or opportunity climate dimensions
+      parameters:
+        - name: subject_id
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: as_of
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Climate state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClimateState'
+  /graph/neighbours:
+    get:
+      tags: [Graph]
+      operationId: getGraphNeighbours
+      summary: Retrieve a bounded typed neighbourhood
+      parameters:
+        - name: node_id
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: depth
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 3
+            default: 1
+        - name: edge_type
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: true
+      responses:
+        '200':
+          description: Graph neighbourhood
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphResult'
+  /search:
+    get:
+      tags: [Search]
+      operationId: searchAsignal
+      summary: Hybrid lexical, structured and semantic search
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 2
+        - name: type
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: true
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Search results with ranking explanations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResultCollection'
+  /watchlists:
+    get:
+      tags: [Watchlists]
+      operationId: listWatchlists
+      responses:
+        '200':
+          description: User or workspace watchlists
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Watchlist'
+                  meta:
+                    $ref: '#/components/schemas/ResponseMeta'
+    post:
+      tags: [Watchlists]
+      operationId: createWatchlist
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                description:
+                  type: [string, 'null']
+      responses:
+        '201':
+          description: Watchlist created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Watchlist'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    Cursor:
+      name: cursor
+      in: query
+      schema:
+        type: string
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 200
+        default: 50
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+        minLength: 8
+        maxLength: 255
+  responses:
+    Unauthorised:
+      description: Authentication required
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Forbidden:
+      description: Entitlement or source rights do not permit access
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    NotFound:
+      description: Resource does not exist or is not visible to the caller
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+  schemas:
+    ResponseMeta:
+      type: object
+      required: [request_id, as_of]
+      properties:
+        request_id:
+          type: string
+        as_of:
+          type: string
+          format: date-time
+        coverage:
+          type: object
+          additionalProperties: true
+        next_cursor:
+          type: [string, 'null']
+    ClaimCollection:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '../schemas/claim.schema.json'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+    OpportunityCollection:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '../schemas/opportunity.schema.json'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+    ClaimHistoryEvent:
+      type: object
+      required: [event_id, event_type, occurred_at, claim_id, claim_version]
+      properties:
+        event_id:
+          type: string
+        event_type:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        claim_id:
+          type: string
+        claim_version:
+          type: integer
+        reason:
+          type: [string, 'null']
+        actor_id:
+          type: [string, 'null']
+        policy_version:
+          type: [string, 'null']
+    ClimateState:
+      type: object
+      required: [subject_id, state, dimensions, as_of, method_version]
+      properties:
+        subject_id:
+          type: string
+        state:
+          enum: [EMERGING, STRENGTHENING, MATURE, STABLE, CONTESTED, WEAKENING, DISLOCATED, EXPIRED, INSUFFICIENT_EVIDENCE]
+        dimensions:
+          type: object
+          additionalProperties:
+            type: number
+            minimum: 0
+            maximum: 1
+        as_of:
+          type: string
+          format: date-time
+        method_version:
+          type: string
+        coverage:
+          type: object
+          additionalProperties: true
+    GraphNode:
+      type: object
+      required: [node_id, node_type, label]
+      properties:
+        node_id:
+          type: string
+        node_type:
+          type: string
+        label:
+          type: string
+        restricted:
+          type: boolean
+          default: false
+    GraphEdge:
+      type: object
+      required: [edge_id, source_id, target_id, edge_type]
+      properties:
+        edge_id:
+          type: string
+        source_id:
+          type: string
+        target_id:
+          type: string
+        edge_type:
+          type: string
+        valid_from:
+          type: [string, 'null']
+          format: date-time
+        valid_until:
+          type: [string, 'null']
+          format: date-time
+    GraphResult:
+      type: object
+      required: [nodes, edges, meta]
+      properties:
+        nodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/GraphNode'
+        edges:
+          type: array
+          items:
+            $ref: '#/components/schemas/GraphEdge'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+    SearchHit:
+      type: object
+      required: [resource_id, resource_type, title, score, match_explanation]
+      properties:
+        resource_id:
+          type: string
+        resource_type:
+          type: string
+        title:
+          type: string
+        excerpt:
+          type: [string, 'null']
+        score:
+          type: number
+        match_explanation:
+          type: object
+          properties:
+            lexical:
+              type: number
+            semantic:
+              type: number
+            structured:
+              type: number
+            graph:
+              type: number
+    SearchResultCollection:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/SearchHit'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+    Watchlist:
+      type: object
+      required: [watchlist_id, name, created_at, updated_at]
+      properties:
+        watchlist_id:
+          type: string
+        name:
+          type: string
+        description:
+          type: [string, 'null']
+        item_count:
+          type: integer
+          minimum: 0
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    Problem:
+      type: object
+      required: [type, title, status, request_id, code]
+      properties:
+        type:
+          type: string
+          format: uri-reference
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: [string, 'null']
+        instance:
+          type: [string, 'null']
+          format: uri-reference
+        request_id:
+          type: string
+        code:
+          type: string
