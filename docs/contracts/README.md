@@ -19,6 +19,7 @@ These documents are normative specifications for the product, architecture and d
 | [08 — Quality, Observability and Gates](08-quality-observability-gates.md) | SLOs, data quality, model calibration, release and universe gates |
 | [09 — Delivery and Acceptance](09-delivery-and-acceptance.md) | Build sequence, milestones, acceptance evidence and definition of done |
 | [10 — Documentation and Operations](10-documentation-and-operations.md) | Required docs, runbooks, ADRs, incidents and change control |
+| [11 — Product Hypothesis Register](11-hypothesis-register.md) | Buyer, pricing, wedge, regulatory and defensibility hypotheses with falsification rules |
 
 ## Machine-readable specifications
 
