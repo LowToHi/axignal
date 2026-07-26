@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://axignal.com/schemas/aggregate-intent-signal.schema.json",
+  "title": "AXIGNAL Aggregate Intent Signal",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["signal_id", "canonical_intent", "window", "cohort", "dimensions", "state", "privacy", "method_version", "computed_at"],
+  "properties": {
+    "signal_id": {"type": "string", "pattern": "^tis_[A-Za-z0-9_-]{8,}$"},
+    "canonical_intent": {"type": "string", "minLength": 3},
+    "geographies": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "entities": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "universes": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "window": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from", "to"],
+      "properties": {
+        "from": {"type": "string", "format": "date-time"},
+        "to": {"type": "string", "format": "date-time"},
+        "comparison_from": {"type": ["string", "null"], "format": "date-time"},
+        "comparison_to": {"type": ["string", "null"], "format": "date-time"}
+      }
+    },
+    "cohort": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["eligible_active_users", "unique_interested_users", "unique_organisations", "eligibility_definition"],
+      "properties": {
+        "eligible_active_users": {"type": "integer", "minimum": 0},
+        "unique_interested_users": {"type": "integer", "minimum": 0},
+        "unique_organisations": {"type": "integer", "minimum": 0},
+        "eligibility_definition": {"type": "string"},
+        "excluded_internal_users": {"type": "integer", "minimum": 0},
+        "excluded_bots": {"type": "integer", "minimum": 0},
+        "campaign_influenced_users": {"type": "integer", "minimum": 0}
+      }
+    },
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["intent_share", "intent_velocity", "persistence", "organisation_diversity", "language_diversity", "coverage_gap", "external_evidence_gap", "manipulation_risk"],
+      "properties": {
+        "intent_share": {"type": "number", "minimum": 0, "maximum": 1},
+        "intent_velocity": {"type": "number"},
+        "persistence": {"type": "number", "minimum": 0, "maximum": 1},
+        "organisation_diversity": {"type": "number", "minimum": 0, "maximum": 1},
+        "language_diversity": {"type": "number", "minimum": 0, "maximum": 1},
+        "user_geographic_diversity": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+        "repeat_interest_rate": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+        "confirmed_preference_rate": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+        "novelty": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+        "coverage_gap": {"type": "number", "minimum": 0, "maximum": 1},
+        "external_evidence_gap": {"type": "number", "minimum": 0, "maximum": 1},
+        "contradiction_pressure": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+        "research_completion_rate": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+        "manipulation_risk": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "state": {"enum": ["EMERGING_ATTENTION", "ACCELERATING_ATTENTION", "PERSISTENT_ATTENTION", "BROAD_ATTENTION", "DECLINING_ATTENTION", "COORDINATION_SUSPECTED", "INSUFFICIENT_COHORT", "PRIVACY_SUPPRESSED"]},
+    "privacy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["minimum_cohort_met", "reidentification_risk", "suppressed"],
+      "properties": {
+        "minimum_cohort_met": {"type": "boolean"},
+        "reidentification_risk": {"enum": ["LOW", "MATERIAL", "HIGH"]},
+        "suppressed": {"type": "boolean"},
+        "suppression_reason": {"type": ["string", "null"]}
+      }
+    },
+    "method_version": {"type": "string"},
+    "research_candidate_id": {"type": ["string", "null"]},
+    "computed_at": {"type": "string", "format": "date-time"}
+  }
+}
