@@ -1,10 +1,10 @@
-# ASIGNAL End-to-End Development Map
+# AXIGNAL End-to-End Development Map
 
-Version: `0.3.0`
+Version: `0.3.1`
 Status: `CANDIDATE / EVOLVING UNTIL FINAL MAP FREEZE`
-Goal ID: `ASIGNAL-GOAL-001`
+Goal ID: `AXIGNAL-GOAL-001`
 
-This directory is the execution map that connects the ASIGNAL product goal to phases, tasks, contracts, dynamic skills, evidence and gates.
+This directory is the execution map that connects the AXIGNAL product goal to phases, tasks, contracts, dynamic skills, evidence and gates.
 
 ## Execution chain
 
@@ -86,8 +86,17 @@ Task state:
   - research candidate queue;
   - privacy, manipulation and epistemic separation controls.
 
+## Canonical identity
+
+- Brand: **AXIGNAL**
+- Domain: **axignal.com**
+- Repository: `LowToHi/axignal`
+- Goal ID: `AXIGNAL-GOAL-001`
+
+Any occurrence of `ASIGNAL`, `asignal.com` or `ASIGNAL-GOAL-001` is a naming defect and blocks the relevant gate.
+
 ## Only authorised operational priority
 
 Until this map is frozen, the only authorised priority is:
 
-> Complete and validate the ASIGNAL Investigation Shell map, including Navigator, Globe/Graph parity, multilingual architecture and Intent Intelligence, before production UI implementation.
+> Complete and validate the AXIGNAL Investigation Shell map, including Navigator, Globe/Graph parity, multilingual architecture and Intent Intelligence, before production UI implementation.
