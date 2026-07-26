@@ -1,12 +1,12 @@
-# 00 — ASIGNAL Goal Lock
+# 00 — AXIGNAL Goal Lock
 
-Version: `0.3.0`
+Version: `0.3.1`
 Status: `NORMATIVE CANDIDATE`
-Goal ID: `ASIGNAL-GOAL-001`
+Goal ID: `AXIGNAL-GOAL-001`
 
 ## 1. Locked goal
 
-ASIGNAL MUST become a premium, global and multilingual **Opportunity Intelligence environment** in which professional users can discover, investigate, compare and monitor economic opportunities through a governed world model built from traceable claims, evidence, contradictions, time and outcomes.
+AXIGNAL MUST become a premium, global and multilingual **Opportunity Intelligence environment** in which professional users can discover, investigate, compare and monitor economic opportunities through a governed world model built from traceable claims, evidence, contradictions, time and outcomes.
 
 The product MUST combine:
 
@@ -40,8 +40,8 @@ intent expressed in natural language or direct interaction
 
 ## 3. Product identity
 
-- Public brand: **ASIGNAL**
-- Domain: **asignal.com**
+- Public brand: **AXIGNAL**
+- Domain: **axignal.com**
 - Technical repository: `LowToHi/axignal`
 - Category: **Global Opportunity Intelligence**
 - Default language: English
@@ -98,7 +98,7 @@ The interface MUST be cinematic in scale and institutional in detail. Motion, de
 
 ### 4.9 Observation, not personal investment advice
 
-Foundation ASIGNAL MUST NOT execute transactions, hold assets, allocate portfolios or present opportunities as personally suitable investments.
+Foundation AXIGNAL MUST NOT execute transactions, hold assets, allocate portfolios or present opportunities as personally suitable investments.
 
 ### 4.10 Lawful data only
 
@@ -107,7 +107,7 @@ Public visibility does not imply permission to collect, persist, transform or re
 ## 5. Core product subsystems
 
 ```text
-ASIGNAL
+AXIGNAL
 ├── Navigator
 │   ├── command interpretation
 │   ├── claim and view explanation
@@ -135,7 +135,7 @@ ASIGNAL
 
 ## 6. Anti-goals
 
-An implementation MUST be rejected if it turns ASIGNAL into primarily:
+An implementation MUST be rejected if it turns AXIGNAL into primarily:
 
 - a chatbot that returns unstructured financial prose;
 - a static dashboard collection;
@@ -166,7 +166,18 @@ Before any phase gate, the agent MUST answer:
 
 Any `NO` or `UNKNOWN` blocks acceptance unless the relevant contract explicitly permits the exception.
 
-## 8. Change rule
+## 8. Naming guard
+
+Canonical naming is exact:
+
+- `AXIGNAL`
+- `axignal.com`
+- `LowToHi/axignal`
+- `AXIGNAL-GOAL-001`
+
+The legacy strings `ASIGNAL`, `asignal.com` and `ASIGNAL-GOAL-001` MUST fail documentation and repository validation.
+
+## 9. Change rule
 
 The Goal Lock may be changed only by:
 
