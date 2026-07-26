@@ -1,4 +1,4 @@
-# ASIGNAL Buyer Workflows
+# AXIGNAL Buyer Workflows
 
 Version: `0.1.0`
 Status: `RESEARCH / HYPOTHESIS`
@@ -38,7 +38,7 @@ The user begins a research session and wants to know whether anything materially
 - compare with personal notes;
 - decide manually whether a signal deserves deeper research.
 
-### ASIGNAL target flow
+### AXIGNAL target flow
 
 ```text
 Open Globe
@@ -126,7 +126,7 @@ Select regulation or event
 
 ### Trigger
 
-The user intends to use an ASIGNAL finding in a meeting, investment memo, acquisition review or commercial decision.
+The user intends to use an AXIGNAL finding in a meeting, investment memo, acquisition review or commercial decision.
 
 ### Target flow
 

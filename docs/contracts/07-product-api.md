@@ -5,7 +5,7 @@ Status: `NORMATIVE`
 
 ## 1. Purpose
 
-The ASIGNAL API exposes authorised, structured product state. It MUST not expose internal prompts, restricted raw data, secrets or unadmitted candidate claims.
+The AXIGNAL API exposes authorised, structured product state. It MUST not expose internal prompts, restricted raw data, secrets or unadmitted candidate claims.
 
 ## 2. API principles
 

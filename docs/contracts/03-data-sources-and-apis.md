@@ -5,7 +5,7 @@ Status: `NORMATIVE`
 
 ## 1. Principle
 
-ASIGNAL MUST treat data rights, provenance, latency and transformation quality as product capabilities.
+AXIGNAL MUST treat data rights, provenance, latency and transformation quality as product capabilities.
 
 A source is not admissible merely because it is technically accessible or publicly visible.
 
@@ -124,7 +124,7 @@ Official resources:
 - `https://www.sec.gov/about/developer-resources`
 - `https://data.sec.gov/`
 
-ASIGNAL MUST implement the SEC identification and fair-access requirements, including an appropriate `User-Agent`.
+AXIGNAL MUST implement the SEC identification and fair-access requirements, including an appropriate `User-Agent`.
 
 ### World Bank Data and Data360
 
@@ -174,7 +174,7 @@ A commercial source contract MUST record whether derived claims may be displayed
 
 ## 7. Prohibited assumptions
 
-ASIGNAL MUST NOT assume that it can scrape or redistribute:
+AXIGNAL MUST NOT assume that it can scrape or redistribute:
 
 - banking portals;
 - Alibaba or other commercial marketplaces;

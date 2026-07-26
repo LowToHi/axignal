@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://asignal.com/schemas/claim.schema.json",
-  "title": "ASIGNAL Claim",
+  "$id": "https://axignal.com/schemas/claim.schema.json",
+  "title": "AXIGNAL Claim",
   "type": "object",
   "additionalProperties": false,
   "required": [

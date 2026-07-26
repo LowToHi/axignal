@@ -5,7 +5,7 @@
 
 ## Context
 
-ASIGNAL needs an interaction model capable of supporting discovery, spatial context, cross-market relationships, temporal replay and source-level evidence.
+AXIGNAL needs an interaction model capable of supporting discovery, spatial context, cross-market relationships, temporal replay and source-level evidence.
 
 Three primary directions were evaluated:
 
@@ -19,7 +19,7 @@ The map-first shell best expresses the product's opportunity-climate metaphor an
 
 ## Decision candidate
 
-Prototype ASIGNAL with:
+Prototype AXIGNAL with:
 
 - a map or globe as the primary discovery canvas;
 - a persistent evidence rail;

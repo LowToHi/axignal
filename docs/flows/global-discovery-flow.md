@@ -20,7 +20,7 @@ Globe
 
 ```text
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│ ASIGNAL | Context stack | Command/Search | Explain view | Save trail | User │
+│ AXIGNAL | Context stack | Command/Search | Explain view | Save trail | User │
 ├────────────┬──────────────────────────────────────────────┬─────────────────┤
 │ Universe & │                                              │ Evidence rail   │
 │ lens rail  │               Primary canvas                 │                 │
@@ -223,7 +223,7 @@ The user selects an evidence object.
 
 ### Behaviour
 
-Evidence detail MUST remain inside the ASIGNAL context while providing a clear path to the original source.
+Evidence detail MUST remain inside the AXIGNAL context while providing a clear path to the original source.
 
 Visible content:
 
@@ -237,7 +237,7 @@ Visible content:
 - claims derived from the evidence;
 - open-original-source action.
 
-The original source MAY open in a new tab so that the ASIGNAL investigation state remains intact.
+The original source MAY open in a new tab so that the AXIGNAL investigation state remains intact.
 
 ## 10. Context stack
 

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ASIGNAL — Globe to Evidence Prototype v0.1</title>
+  <title>AXIGNAL — Globe to Evidence Prototype v0.1</title>
   <style>
     :root {
       color-scheme: dark;
@@ -356,7 +356,7 @@
 <body>
   <main class="app">
     <header class="topbar">
-      <div class="brand">ASIGNAL</div>
+      <div class="brand">AXIGNAL</div>
       <nav class="context-stack" aria-label="Investigation context" id="breadcrumbs"></nav>
       <div class="search-wrap">
         <label for="command" style="position:absolute;left:-10000px">Search or command</label>
@@ -483,7 +483,7 @@
     const evidence = {
       evd_queue_es: { source:'Synthetic Iberian Grid Operator Bulletin', authority:'PRIMARY_AUTHORITY — SYNTHETIC', published:'17 Jul 2026', retrieved:'18 Jul 2026 08:15 UTC', extract:'The synthetic queue series records a 24% year-on-year increase in active connection requests and a 9% increase in completed connections.', rights:'Customer display permitted · export with attribution', method:'Structured table extraction v0.1', confidence:.97 },
       evd_reg_es: { source:'Synthetic Energy Regulation Draft 2026/14', authority:'PRIMARY_AUTHORITY — SYNTHETIC', published:'11 Jul 2026', retrieved:'12 Jul 2026 06:10 UTC', extract:'The draft introduces flexible access agreements and explicit participation pathways for storage and demand response.', rights:'Customer display permitted · source link required', method:'Document paragraph extraction v0.1', confidence:.94 },
-      evd_demand_es: { source:'ASIGNAL synthetic derivation', authority:'DERIVED', published:'20 Jul 2026', retrieved:'20 Jul 2026', extract:'The commercial hypothesis is derived from queue growth, regulatory change and comparable adoption patterns. It is not an observed sales outcome.', rights:'ASIGNAL derived claim', method:'Commercial hypothesis policy v0.1', confidence:.64 },
+      evd_demand_es: { source:'AXIGNAL synthetic derivation', authority:'DERIVED', published:'20 Jul 2026', retrieved:'20 Jul 2026', extract:'The commercial hypothesis is derived from queue growth, regulatory change and comparable adoption patterns. It is not an observed sales outcome.', rights:'AXIGNAL derived claim', method:'Commercial hypothesis policy v0.1', confidence:.64 },
       evd_capex_es: { source:'Synthetic Network Investment Plan', authority:'PRIMARY_AUTHORITY — SYNTHETIC', published:'20 Jul 2026', retrieved:'21 Jul 2026 07:40 UTC', extract:'Planned synthetic network reinforcements could add sufficient capacity to reduce selected queue pressure from 2027 onward.', rights:'Display permitted · no raw redistribution', method:'Document extraction v0.1', confidence:.90 },
       evd_generic: { source:'Synthetic multi-source evidence set', authority:'MIXED — SYNTHETIC', published:'19 Jul 2026', retrieved:'19 Jul 2026', extract:'This prototype evidence is intentionally synthetic and exists only to test interaction and epistemic comprehension.', rights:'Unrestricted prototype use', method:'Fixture generator v0.1', confidence:1 },
       evd_generic_contra: { source:'Synthetic capital expenditure series', authority:'PRIMARY MARKET — SYNTHETIC', published:'20 Jul 2026', retrieved:'20 Jul 2026', extract:'The synthetic index declined during two consecutive periods, creating contradiction pressure for the near-term thesis.', rights:'Prototype use', method:'Structured series fixture v0.1', confidence:.92 }
@@ -782,7 +782,7 @@
       historySvg.classed('hidden',!isHistory);
       document.getElementById('metricBox').classList.toggle('hidden',isGraph||isHistory);
       if(isGraph){ document.getElementById('canvasTitle').textContent='Transmission lens'; document.getElementById('canvasSubtitle').textContent='Observed, inferred and contradicting relations remain distinct'; renderGraph(); }
-      else if(isHistory){ document.getElementById('canvasTitle').textContent='Historical replay'; document.getElementById('canvasSubtitle').textContent='What ASIGNAL knew at each synthetic point in time'; renderHistory(); }
+      else if(isHistory){ document.getElementById('canvasTitle').textContent='Historical replay'; document.getElementById('canvasSubtitle').textContent='What AXIGNAL knew at each synthetic point in time'; renderHistory(); }
       else { document.getElementById('canvasTitle').textContent=state.countryId?`${countriesData[state.countryId].name} opportunity climate`:'Global opportunity climate'; document.getElementById('canvasSubtitle').textContent='Newly corroborated synthetic opportunity claims · 90-day window'; renderMap(); }
     }
 

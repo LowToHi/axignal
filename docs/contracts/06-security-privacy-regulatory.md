@@ -5,13 +5,13 @@ Status: `NORMATIVE`
 
 ## 1. Purpose
 
-ASIGNAL is designed as information, research and economic-observation infrastructure. This contract defines the foundation boundary intended to avoid accidental operation as a broker, custodian, portfolio manager or personalised investment adviser.
+AXIGNAL is designed as information, research and economic-observation infrastructure. This contract defines the foundation boundary intended to avoid accidental operation as a broker, custodian, portfolio manager or personalised investment adviser.
 
 This contract is a product and engineering specification. It does not replace jurisdiction-specific legal advice.
 
 ## 2. Foundation regulatory posture
 
-ASIGNAL MAY provide:
+AXIGNAL MAY provide:
 
 - structured market and economic data;
 - historical analysis;
@@ -22,7 +22,7 @@ ASIGNAL MAY provide:
 - general research and methodological commentary;
 - alerts about changes in observed data or claim state.
 
-ASIGNAL MUST NOT provide in the foundation scope:
+AXIGNAL MUST NOT provide in the foundation scope:
 
 - recommendations presented as personally suitable;
 - portfolio allocation percentages;
@@ -85,7 +85,7 @@ Relevant European references include MiFID II, the Market Abuse Regulation and E
 
 ## 5. Crypto boundary
 
-Crypto data and scenarios MAY be treated as a separate universe. Foundation ASIGNAL MUST NOT:
+Crypto data and scenarios MAY be treated as a separate universe. Foundation AXIGNAL MUST NOT:
 
 - execute crypto transactions;
 - custody keys or assets;
@@ -99,7 +99,7 @@ Any crypto service extension MUST be reviewed against MiCA and applicable nation
 
 The first commercial release SHOULD target professional or business users.
 
-Before B2C launch, ASIGNAL MUST implement and legally review:
+Before B2C launch, AXIGNAL MUST implement and legally review:
 
 - consumer pre-contract information;
 - cancellation or withdrawal treatment where applicable;
@@ -111,7 +111,7 @@ Before B2C launch, ASIGNAL MUST implement and legally review:
 
 ## 7. Liability posture
 
-ASIGNAL MUST NOT claim “no responsibility”.
+AXIGNAL MUST NOT claim “no responsibility”.
 
 Customer terms MAY define:
 
@@ -128,7 +128,7 @@ Terms MUST NOT attempt to exclude liability that cannot lawfully be excluded.
 
 ## 8. Privacy
 
-ASIGNAL MUST apply privacy by design.
+AXIGNAL MUST apply privacy by design.
 
 ### Data minimisation
 
@@ -143,7 +143,7 @@ The platform MUST collect only personal data necessary for:
 
 ### Sensitive financial profile
 
-Foundation ASIGNAL SHOULD NOT collect detailed personal portfolio or suitability data.
+Foundation AXIGNAL SHOULD NOT collect detailed personal portfolio or suitability data.
 
 ### User rights
 
@@ -249,7 +249,7 @@ Log at minimum:
 
 ## 14. Conflicts of interest
 
-ASIGNAL MUST maintain a conflict register for:
+AXIGNAL MUST maintain a conflict register for:
 
 - paid source placement;
 - sponsored research;
@@ -275,7 +275,7 @@ The platform MUST prevent:
 
 ## 16. Market-abuse safeguards
 
-Before supporting time-sensitive listed-instrument intelligence, ASIGNAL MUST establish controls for:
+Before supporting time-sensitive listed-instrument intelligence, AXIGNAL MUST establish controls for:
 
 - material non-public information;
 - suspicious source origin;

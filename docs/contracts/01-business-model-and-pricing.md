@@ -5,7 +5,7 @@ Status: `NORMATIVE / HYPOTHESIS-BOUND`
 
 ## 1. Commercial model
 
-ASIGNAL MUST be sold as a premium recurring intelligence product, not as a low-cost newsletter, generic AI assistant or transaction commission business.
+AXIGNAL MUST be sold as a premium recurring intelligence product, not as a low-cost newsletter, generic AI assistant or transaction commission business.
 
 The commercial stack MAY include:
 
@@ -138,7 +138,7 @@ This table is a scenario, not a forecast.
 
 ## 7. Acquisition model
 
-ASIGNAL SHOULD avoid broad consumer-performance advertising as the initial channel.
+AXIGNAL SHOULD avoid broad consumer-performance advertising as the initial channel.
 
 Priority acquisition channels:
 
@@ -190,7 +190,7 @@ Pricing MUST remain configurable and versioned. Public price changes MUST preser
 
 ### Gate B0 — Problem evidence
 
-Pass when at least 20 qualified target users confirm recurring cross-platform research fragmentation and at least 5 describe a recent decision where ASIGNAL-like evidence would have had material value.
+Pass when at least 20 qualified target users confirm recurring cross-platform research fragmentation and at least 5 describe a recent decision where AXIGNAL-like evidence would have had material value.
 
 ### Gate B1 — Paid prototype
 
@@ -210,7 +210,7 @@ Pass when a defined channel produces paying customers with contribution margin a
 
 ## 11. Cost discipline
 
-Before meaningful revenue, ASIGNAL MUST prioritise:
+Before meaningful revenue, AXIGNAL MUST prioritise:
 
 - public and contractually reusable data;
 - deterministic transforms;
@@ -264,4 +264,4 @@ The model MUST be reconsidered if, after a properly executed narrow validation:
 - data licensing makes gross margin structurally unattractive;
 - users treat the platform as entertainment rather than a decision workflow;
 - the product cannot establish trust without regulated personalised advice;
-- a general AI provider can reproduce the paid value without ASIGNAL’s proprietary data history and workflow.
+- a general AI provider can reproduce the paid value without AXIGNAL’s proprietary data history and workflow.

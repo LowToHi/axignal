@@ -5,7 +5,7 @@ Status: `NORMATIVE`
 
 ## 1. Delivery model
 
-ASIGNAL MUST be developed through evidence gates, not arbitrary calendar phases.
+AXIGNAL MUST be developed through evidence gates, not arbitrary calendar phases.
 
 A phase ends when its acceptance evidence exists. Time estimates MAY assist planning but MUST NOT substitute for proof.
 
@@ -107,7 +107,7 @@ Exit criteria:
 
 Deliverables:
 
-- ASIGNAL Globe with one meaningful layer;
+- AXIGNAL Globe with one meaningful layer;
 - Explorer filters;
 - Atlas graph;
 - claim detail;
@@ -320,7 +320,7 @@ Development of a universe MUST pause when:
 - retention is absent;
 - regulatory scope requires a business model not approved by the constitution;
 - source or AI cost destroys gross margin;
-- the same user value is reproducible by a general AI without ASIGNAL’s graph and history.
+- the same user value is reproducible by a general AI without AXIGNAL’s graph and history.
 
 ## 10. Immediate implementation priority
 

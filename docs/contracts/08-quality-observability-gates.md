@@ -5,7 +5,7 @@ Status: `NORMATIVE`
 
 ## 1. Objective
 
-ASIGNAL MUST measure whether its data, claims, scenarios, user experience and commercial model are trustworthy enough to operate. “The pipeline ran” is not evidence of product correctness.
+AXIGNAL MUST measure whether its data, claims, scenarios, user experience and commercial model are trustworthy enough to operate. “The pipeline ran” is not evidence of product correctness.
 
 ## 2. Observability dimensions
 
@@ -163,7 +163,7 @@ Analytics MUST respect privacy and source rights.
 
 ## 11. Trust metrics
 
-ASIGNAL SHOULD measure whether users understand the methodology:
+AXIGNAL SHOULD measure whether users understand the methodology:
 
 - percentage who can distinguish observation from forecast;
 - percentage who inspect sources;

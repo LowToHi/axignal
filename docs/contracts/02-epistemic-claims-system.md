@@ -5,7 +5,7 @@ Status: `NORMATIVE`
 
 ## 1. Purpose
 
-The epistemic claims system is the authoritative core of ASIGNAL. It MUST distinguish extraction, belief, evidence, inference and forecast so that no generative output becomes product truth merely because it is plausible.
+The epistemic claims system is the authoritative core of AXIGNAL. It MUST distinguish extraction, belief, evidence, inference and forecast so that no generative output becomes product truth merely because it is plausible.
 
 The core transformation is:
 
@@ -115,7 +115,7 @@ A web page, filing, API response, dataset row, document paragraph or verified ex
 
 ## 6. Provenance
 
-ASIGNAL SHOULD model provenance compatibly with the concepts of entity, activity and agent used by W3C PROV.
+AXIGNAL SHOULD model provenance compatibly with the concepts of entity, activity and agent used by W3C PROV.
 
 At minimum, the system MUST answer:
 
@@ -194,7 +194,7 @@ Contradictory claims MUST NOT automatically cancel each other. The system MUST p
 
 ## 10. Confidence model
 
-ASIGNAL MUST NOT use a single opaque truth score.
+AXIGNAL MUST NOT use a single opaque truth score.
 
 Canonical dimensions:
 

@@ -5,11 +5,11 @@
 
 ## Context
 
-ASIGNAL will structure historical, current and forecast economic claims across multiple opportunity and asset classes. Some covered domains may include financial instruments. Personal recommendations, execution or portfolio management would materially increase regulatory and operating complexity.
+AXIGNAL will structure historical, current and forecast economic claims across multiple opportunity and asset classes. Some covered domains may include financial instruments. Personal recommendations, execution or portfolio management would materially increase regulatory and operating complexity.
 
 ## Decision
 
-Foundation ASIGNAL is an information, research, observation and exploration platform.
+Foundation AXIGNAL is an information, research, observation and exploration platform.
 
 It MAY:
 

@@ -5,7 +5,7 @@ Status: `NORMATIVE`
 
 ## 1. Documentation objective
 
-ASIGNAL MUST remain understandable, reproducible and operable without relying on undocumented institutional memory or model chat history.
+AXIGNAL MUST remain understandable, reproducible and operable without relying on undocumented institutional memory or model chat history.
 
 ## 2. Required documentation classes
 
@@ -177,7 +177,7 @@ Customer-visible releases MUST maintain a change log describing:
 
 ## 11. Customer documentation
 
-Before paid beta, ASIGNAL MUST publish:
+Before paid beta, AXIGNAL MUST publish:
 
 - product methodology;
 - coverage and latency guide;

@@ -5,7 +5,7 @@ Status: `NORMATIVE / EXPERIMENTAL CONTROL`
 
 ## 1. Purpose
 
-ASIGNAL’s architecture can be specified before the market is proven. Its buyer, pricing, first universe, acquisition model and predictive value cannot.
+AXIGNAL’s architecture can be specified before the market is proven. Its buyer, pricing, first universe, acquisition model and predictive value cannot.
 
 This register prevents hypotheses from becoming undocumented assumptions.
 
@@ -74,14 +74,14 @@ A hypothesis may be `SUPPORTED` without being universally true. Every decision M
 **Claim:** A versioned graph connecting claims, evidence, contradictions, forecasts and outcomes will become a meaningful defence against general AI providers.
 
 - State: `PROPOSED`
-- Evidence required: improving retrieval and calibration from proprietary history; user preference for ASIGNAL state over fresh general-AI research; switching cost from watchlists and historical context.
+- Evidence required: improving retrieval and calibration from proprietary history; user preference for AXIGNAL state over fresh general-AI research; switching cost from watchlists and historical context.
 - Falsification: users value only fresh summarisation and do not inspect or revisit structured state.
 
 ## 10. H-008 — Deterministic admission
 
 **Claim:** Deterministic structural, rights and epistemic gates materially improve trust and data quality compared with direct model publication.
 
-- State: `SUPPORTED BY PRIOR TECHNICAL THESIS / NOT YET VALIDATED IN ASIGNAL`
+- State: `SUPPORTED BY PRIOR TECHNICAL THESIS / NOT YET VALIDATED IN AXIGNAL`
 - Test: controlled candidate-claim evaluation measuring false admission, traceability, correction cost and user trust.
 
 ## 11. H-009 — Regulatory boundary
@@ -90,7 +90,7 @@ A hypothesis may be `SUPPORTED` without being universally true. Every decision M
 
 - State: `PROPOSED`
 - Test: user research, legal review and paid usage.
-- Falsification: qualified users will only pay when ASIGNAL tells them exactly what to buy or allocates their portfolio.
+- Falsification: qualified users will only pay when AXIGNAL tells them exactly what to buy or allocates their portfolio.
 
 ## 12. H-010 — Source economics
 
@@ -110,14 +110,14 @@ A hypothesis may be `SUPPORTED` without being universally true. Every decision M
 
 ## 14. H-012 — Global architecture, selective commercialisation
 
-**Claim:** ASIGNAL can maintain global data architecture while launching commercially by admitted jurisdiction and universe.
+**Claim:** AXIGNAL can maintain global data architecture while launching commercially by admitted jurisdiction and universe.
 
 - State: `PROPOSED`
 - Test: source and entitlement isolation; jurisdiction-specific legal review; customer demand by geography.
 
 ## 15. H-013 — Brand
 
-**Claim:** ASIGNAL and `asignal.com` can communicate an authoritative, international and multiverse intelligence product.
+**Claim:** AXIGNAL and `axignal.com` can communicate an authoritative, international and multiverse intelligence product.
 
 - State: `PROPOSED`
 - Required evidence: domain control, trademark screening, pronunciation tests, buyer perception and visual-identity testing.

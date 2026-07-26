@@ -11,7 +11,7 @@ Launching all universes simultaneously would create shallow coverage, inconsiste
 
 ## Decision
 
-ASIGNAL will use one shared epistemic infrastructure while admitting each opportunity universe independently.
+AXIGNAL will use one shared epistemic infrastructure while admitting each opportunity universe independently.
 
 A universe is public and commercially supported only after passing gates for:
 
@@ -39,5 +39,5 @@ The initial commercial wedge should use a small combination of official macroeco
 ## Alternatives considered
 
 - Launch a broad aggregator immediately.
-- Restrict ASIGNAL permanently to one vertical.
+- Restrict AXIGNAL permanently to one vertical.
 - Use a single universal opportunity score and ontology.

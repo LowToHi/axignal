@@ -5,7 +5,7 @@ Status: `NORMATIVE CANDIDATE / USER VALIDATION REQUIRED`
 
 ## 1. Scope
 
-This contract defines the candidate interaction model for the ASIGNAL research shell.
+This contract defines the candidate interaction model for the AXIGNAL research shell.
 
 It refines the conceptual requirements in `05-ui-ux-exploration.md` but MUST NOT be described as final until the prototype validation gate passes.
 
@@ -20,7 +20,7 @@ Globe
 
 ## 2. Selected interaction architecture
 
-ASIGNAL MUST prototype a **Map-first Investigation Shell**.
+AXIGNAL MUST prototype a **Map-first Investigation Shell**.
 
 The shell MUST contain four persistent regions:
 
@@ -227,7 +227,7 @@ A watchlist observes resources. An investigation trail preserves a reasoning pat
 
 ## 14. Density contract
 
-ASIGNAL MAY be information-dense but MUST avoid card proliferation.
+AXIGNAL MAY be information-dense but MUST avoid card proliferation.
 
 Hierarchy preference:
 

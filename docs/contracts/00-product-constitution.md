@@ -5,7 +5,7 @@ Status: `NORMATIVE / FOUNDATION`
 
 ## 1. Product thesis
 
-ASIGNAL MUST be built as a premium global observation and exploration system for economic opportunity.
+AXIGNAL MUST be built as a premium global observation and exploration system for economic opportunity.
 
 It MUST continuously transform heterogeneous external signals into:
 
@@ -17,7 +17,7 @@ It MUST continuously transform heterogeneous external signals into:
 6. scenario distributions;
 7. explorable opportunity structures.
 
-ASIGNAL MUST NOT be reduced to a chatbot, newsletter, generic dashboard, idea generator or trading terminal.
+AXIGNAL MUST NOT be reduced to a chatbot, newsletter, generic dashboard, idea generator or trading terminal.
 
 ## 2. Category
 
@@ -31,7 +31,7 @@ Canonical descriptor:
 
 Canonical principle:
 
-> **Signals reveal change. Claims establish evidence. ASIGNAL maps opportunity.**
+> **Signals reveal change. Claims establish evidence. AXIGNAL maps opportunity.**
 
 ## 3. Buyer
 
@@ -59,11 +59,11 @@ The user’s primary scarcity is not raw information. It is:
 - confidence that a finding was not improvised by a generative model;
 - access to adjacent opportunity classes outside the user’s habitual platforms.
 
-ASIGNAL MUST optimise for **decision preparation**, not decision substitution.
+AXIGNAL MUST optimise for **decision preparation**, not decision substitution.
 
 ## 5. Product promise
 
-ASIGNAL MUST help the user answer:
+AXIGNAL MUST help the user answer:
 
 - What is changing?
 - Where is the evidence strengthening or weakening?
@@ -74,7 +74,7 @@ ASIGNAL MUST help the user answer:
 - What would invalidate it?
 - How fresh and legally usable is the underlying information?
 
-ASIGNAL MUST NOT answer “what should I personally buy?” in the foundation scope.
+AXIGNAL MUST NOT answer “what should I personally buy?” in the foundation scope.
 
 ## 6. Product invariants
 
@@ -117,31 +117,31 @@ No market universe is considered supported until it passes its admission gate. B
 
 ## 7. Product surfaces
 
-### ASIGNAL Globe
+### AXIGNAL Globe
 
 World-scale geographic exploration using heatmaps, layers, clusters and temporal playback.
 
-### ASIGNAL Explorer
+### AXIGNAL Explorer
 
 Cross-market discovery and filtering by geography, sector, asset class, event, evidence, maturity and scenario.
 
-### ASIGNAL Atlas
+### AXIGNAL Atlas
 
 Graph-based navigation of entities, markets, claims, regulations, technologies, assets and transmission paths.
 
-### ASIGNAL Climate
+### AXIGNAL Climate
 
 Market-state and opportunity-state views showing momentum, evidence density, contradiction pressure, persistence and scenario drift.
 
-### ASIGNAL Claims
+### AXIGNAL Claims
 
 Auditable claim detail including evidence, provenance, method, versions, dependencies, conflicts and expiry.
 
-### ASIGNAL Watchlists
+### AXIGNAL Watchlists
 
 User-selected observation scopes. Watchlists represent interests, not personalised recommendations.
 
-### ASIGNAL API
+### AXIGNAL API
 
 Versioned access to authorised claims, opportunities, aggregates, scenarios and metadata according to plan entitlements and source rights.
 
@@ -180,7 +180,7 @@ Listed-instrument price recommendations, crypto execution and personalised portf
 
 The leading product metric is:
 
-> **Meaningful decisions whose research process starts or materially advances inside ASIGNAL.**
+> **Meaningful decisions whose research process starts or materially advances inside AXIGNAL.**
 
 Supporting metrics:
 
@@ -200,7 +200,7 @@ Raw page views, chat messages and generated text volume MUST NOT be treated as p
 
 ## 11. Non-goals
 
-Foundation ASIGNAL MUST NOT:
+Foundation AXIGNAL MUST NOT:
 
 - act as a broker, exchange or custodian;
 - execute or route transactions;

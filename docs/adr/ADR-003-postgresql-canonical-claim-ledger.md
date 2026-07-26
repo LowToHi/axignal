@@ -5,7 +5,7 @@
 
 ## Context
 
-ASIGNAL requires relational integrity, temporal history, graph relationships, geospatial queries, vector retrieval, tenant controls and transactional state transitions. Starting with separate relational, graph, vector, geospatial and analytical databases would increase operational complexity before workload evidence exists.
+AXIGNAL requires relational integrity, temporal history, graph relationships, geospatial queries, vector retrieval, tenant controls and transactional state transitions. Starting with separate relational, graph, vector, geospatial and analytical databases would increase operational complexity before workload evidence exists.
 
 ## Decision
 

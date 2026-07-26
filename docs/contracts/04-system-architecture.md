@@ -5,7 +5,7 @@ Status: `NORMATIVE`
 
 ## 1. Architecture objective
 
-ASIGNAL MUST begin as a modular, observable and contract-first system that can run on a controlled VPS without pretending to have hyperscale requirements.
+AXIGNAL MUST begin as a modular, observable and contract-first system that can run on a controlled VPS without pretending to have hyperscale requirements.
 
 The initial architecture MUST optimise for:
 
@@ -26,7 +26,7 @@ Browser
   ↓
 Next.js Web Application
   ↓
-ASIGNAL API / BFF
+AXIGNAL API / BFF
   ↓
 Application Core
   ├── Identity and entitlements
@@ -147,7 +147,7 @@ No canonical claim state may exist only in the cache.
 ### Authentication and billing
 
 - OIDC-compatible authentication abstraction;
-- organisation, workspace, role and entitlement model owned by ASIGNAL;
+- organisation, workspace, role and entitlement model owned by AXIGNAL;
 - Stripe for subscriptions, invoicing and metered entitlements;
 - webhook verification, replay protection and idempotency are mandatory.
 

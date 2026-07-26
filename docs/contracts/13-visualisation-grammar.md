@@ -5,7 +5,7 @@ Status: `NORMATIVE CANDIDATE / USER VALIDATION REQUIRED`
 
 ## 1. Purpose
 
-This contract defines how ASIGNAL represents evidence, uncertainty, contradiction, geography, relations and time. It prevents each universe or frontend component from inventing incompatible visual semantics.
+This contract defines how AXIGNAL represents evidence, uncertainty, contradiction, geography, relations and time. It prevents each universe or frontend component from inventing incompatible visual semantics.
 
 ## 2. General rule
 
@@ -102,7 +102,7 @@ Observed, calculated, inferred and predicted claims MUST have visually distinct 
 
 ## 7. Confidence representation
 
-ASIGNAL MUST NOT present confidence as one opaque percentage.
+AXIGNAL MUST NOT present confidence as one opaque percentage.
 
 Where space permits, show dimensions separately:
 
@@ -312,7 +312,7 @@ It MUST NOT freeze, silently drop high-impact objects or display a misleading pa
 
 Screenshots and reports MUST preserve:
 
-- ASIGNAL identity;
+- AXIGNAL identity;
 - as-of time;
 - metric and legend;
 - source attribution;

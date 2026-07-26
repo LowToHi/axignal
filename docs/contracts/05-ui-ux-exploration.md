@@ -5,7 +5,7 @@ Status: `NORMATIVE`
 
 ## 1. Experience thesis
 
-ASIGNAL MUST make global economic intelligence explorable as a spatial and temporal world model.
+AXIGNAL MUST make global economic intelligence explorable as a spatial and temporal world model.
 
 The experience MUST avoid reducing the product to tables, static dashboards or an empty chatbot. Numerical detail remains essential, but navigation MUST support discovery through maps, graphs, time and semantic relationships.
 
@@ -60,7 +60,7 @@ Primary navigation:
 
 Account and workspace controls MUST remain separate from exploration navigation.
 
-## 4. ASIGNAL Globe
+## 4. AXIGNAL Globe
 
 The Globe is the primary discovery surface.
 
@@ -94,7 +94,7 @@ Supported semantic layers MAY include:
 
 A heatmap MUST always state the metric, unit, time window and coverage.
 
-## 5. ASIGNAL Atlas
+## 5. AXIGNAL Atlas
 
 The Atlas is the graph exploration surface.
 
@@ -126,7 +126,7 @@ Required interactions:
 
 Graph layouts MUST remain interpretable. The UI MUST limit uncontrolled node explosions and provide summaries when a subgraph is too dense.
 
-## 6. ASIGNAL Climate
+## 6. AXIGNAL Climate
 
 Climate views MUST communicate the current state and change trajectory of a market, geography, sector, asset or opportunity.
 

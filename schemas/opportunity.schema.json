@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://asignal.com/schemas/opportunity.schema.json",
-  "title": "ASIGNAL Opportunity",
+  "$id": "https://axignal.com/schemas/opportunity.schema.json",
+  "title": "AXIGNAL Opportunity",
   "type": "object",
   "additionalProperties": false,
   "required": [

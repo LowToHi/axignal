@@ -1,4 +1,4 @@
-# ASIGNAL Prototype Validation Plan
+# AXIGNAL Prototype Validation Plan
 
 Version: `0.1.0`
 Status: `RESEARCH PLAN`
@@ -230,7 +230,7 @@ Redesign is mandatory when:
 - the timeline creates future-evidence confusion;
 - users prefer a list-first home for the initial universe;
 - information density prevents source auditing;
-- users assume ASIGNAL is recommending an investment.
+- users assume AXIGNAL is recommending an investment.
 
 ## 10. Iteration protocol
 

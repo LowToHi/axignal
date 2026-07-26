@@ -1,4 +1,4 @@
-# ASIGNAL UX Competitive Benchmark
+# AXIGNAL UX Competitive Benchmark
 
 Version: `0.1.0`
 Status: `RESEARCH / NON-NORMATIVE`
@@ -6,7 +6,7 @@ Date: `2026-07-26`
 
 ## 1. Research scope
 
-Product: **ASIGNAL**, a premium Global Opportunity Intelligence platform.
+Product: **AXIGNAL**, a premium Global Opportunity Intelligence platform.
 
 Primary audience:
 
@@ -27,11 +27,11 @@ Globe
 
 Time horizon: current product patterns and public documentation available in July 2026.
 
-This is a fast public-source benchmark. It is not a substitute for observed sessions with qualified ASIGNAL users.
+This is a fast public-source benchmark. It is not a substitute for observed sessions with qualified AXIGNAL users.
 
 ## 2. Executive read
 
-The strongest comparable products each solve only part of ASIGNAL's desired experience.
+The strongest comparable products each solve only part of AXIGNAL's desired experience.
 
 - Bloomberg proves that breadth, speed, persistent workspaces and shortcuts can sustain mission-critical use, but its density and function memorisation create a steep learning burden.
 - AlphaSense proves that natural-language research, citations, monitoring and project workspaces reduce fragmentation, but its experience remains search- and document-centric rather than spatial.
@@ -41,7 +41,7 @@ The strongest comparable products each solve only part of ASIGNAL's desired expe
 - Google Earth proves that spatial immersion, saved places and historical replay can make exploration intrinsically satisfying.
 - Palantir provides the closest architectural analogue: maps, graphs, objects and workflows operating over one ontology rather than disconnected screens.
 
-The best ASIGNAL model is therefore **not** a Bloomberg clone, configurable dashboard builder or chat-first research assistant. It is a **map-first investigation shell with a persistent evidence rail, a shared context stack and graph/history as reversible lenses over the same canonical object state**.
+The best AXIGNAL model is therefore **not** a Bloomberg clone, configurable dashboard builder or chat-first research assistant. It is a **map-first investigation shell with a persistent evidence rail, a shared context stack and graph/history as reversible lenses over the same canonical object state**.
 
 ## 3. Product benchmark
 
@@ -140,7 +140,7 @@ Reject:
 - requiring users to build the product's information hierarchy themselves;
 - a proliferation of widgets without a canonical investigation flow.
 
-ASIGNAL SHOULD provide curated role- and universe-specific defaults before allowing advanced customisation.
+AXIGNAL SHOULD provide curated role- and universe-specific defaults before allowing advanced customisation.
 
 ### 3.4 TradingView heatmaps
 
@@ -252,7 +252,7 @@ Adopt:
 
 Reject:
 
-- operational actions that exceed ASIGNAL's information-only boundary;
+- operational actions that exceed AXIGNAL's information-only boundary;
 - enterprise-builder complexity exposed to ordinary users;
 - custom ontology configuration as a prerequisite for first value.
 
@@ -266,7 +266,7 @@ Severity: `CRITICAL`
 Frequency signal: `HIGH`
 Confidence: `HIGH`
 
-ASIGNAL response:
+AXIGNAL response:
 
 - one canonical investigation flow;
 - semantic zoom;
@@ -283,7 +283,7 @@ Severity: `CRITICAL`
 Frequency signal: `HIGH`
 Confidence: `HIGH`
 
-ASIGNAL response:
+AXIGNAL response:
 
 - all surfaces bind to one `InvestigationContext`;
 - map, graph, opportunity, claim and evidence are views of the same state;
@@ -298,7 +298,7 @@ Severity: `HIGH`
 Frequency signal: `RISING`
 Confidence: `HIGH`
 
-ASIGNAL response:
+AXIGNAL response:
 
 - AI explains the current canonical view;
 - AI never replaces the view;
@@ -314,7 +314,7 @@ Severity: `MEDIUM-HIGH`
 Frequency signal: `MEDIUM`
 Confidence: `MEDIUM-HIGH`
 
-ASIGNAL response:
+AXIGNAL response:
 
 - curated default workspace;
 - progressive customisation after value is demonstrated;
@@ -329,7 +329,7 @@ Severity: `HIGH`
 Frequency signal: `MEDIUM`
 Confidence: `HIGH`
 
-ASIGNAL response:
+AXIGNAL response:
 
 - every layer declares metric, unit, time, source coverage and aggregation;
 - only one primary heat layer is active;
@@ -352,7 +352,7 @@ Weaknesses:
 
 - resembles existing terminals;
 - high setup and learning cost;
-- weakens ASIGNAL's discovery proposition;
+- weakens AXIGNAL's discovery proposition;
 - easily becomes card and widget accumulation.
 
 Decision: `REJECT AS PRIMARY MODEL`
@@ -382,7 +382,7 @@ Primary surface: global map with layer controls, persistent time axis, contextua
 
 Strengths:
 
-- embodies ASIGNAL's climate metaphor;
+- embodies AXIGNAL's climate metaphor;
 - differentiates from chat-first research tools;
 - supports discovery before query;
 - preserves space, time and evidence together;
@@ -404,7 +404,7 @@ Mitigations:
 
 Decision: `SELECT`
 
-## 6. Recommended ASIGNAL interaction model
+## 6. Recommended AXIGNAL interaction model
 
 Canonical shell:
 
@@ -454,7 +454,7 @@ Weaker evidence:
 
 - public review and Reddit commentary is anecdotal and self-selected;
 - no authenticated product sessions were observed directly;
-- no ASIGNAL target users have yet been tested;
+- no AXIGNAL target users have yet been tested;
 - no latency or task-completion benchmark has yet been conducted.
 
 ## 9. Research decision
