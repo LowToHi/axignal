@@ -1,6 +1,6 @@
-# 01 — ASIGNAL Phase Map
+# 01 — AXIGNAL Phase Map
 
-Version: `0.3.0`
+Version: `0.3.1`
 Status: `NORMATIVE CANDIDATE`
 
 ## Phase sequence
@@ -57,7 +57,8 @@ Pass when:
 - every phase maps to tasks and skills;
 - no material iteration remains only in chat history;
 - Goal Lock tests are executable in PR review;
-- the next phase can be implemented without inventing product scope.
+- the next phase can be implemented without inventing product scope;
+- repository validation reports zero active occurrences of the forbidden legacy names `ASIGNAL`, `asignal.com` and `ASIGNAL-GOAL-001`.
 
 ---
 
