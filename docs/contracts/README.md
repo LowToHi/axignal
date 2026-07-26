@@ -1,6 +1,6 @@
 # AXIGNAL Development Contracts
 
-Status: `v0.3-roadmap-candidate`
+Status: `v0.4-stack-candidate`
 Goal ID: `AXIGNAL-GOAL-001`
 
 These documents are normative specifications for the product, architecture and delivery of AXIGNAL. They define externally testable obligations between product surfaces, data pipelines, epistemic runtime, operators, agents and users. They are not a substitute for jurisdiction-specific legal advice or customer-facing legal terms.
@@ -13,7 +13,7 @@ These documents are normative specifications for the product, architecture and d
 | [01 — Business Model and Pricing](01-business-model-and-pricing.md) | Buyer, value, packaging, pricing hypotheses and commercial gates |
 | [02 — Epistemic Claims System](02-epistemic-claims-system.md) | Claim ontology, provenance, admission, contradiction and scoring |
 | [03 — Data Sources and APIs](03-data-sources-and-apis.md) | Source admission, licensing, ingestion and initial source universe |
-| [04 — System Architecture](04-system-architecture.md) | Stack, components, storage, eventing, deployment and boundaries |
+| [04 — System Architecture](04-system-architecture.md) | Components, storage, eventing, deployment and boundaries |
 | [05 — UI and UX Exploration](05-ui-ux-exploration.md) | Globe, graph, time machine, claims, accessibility and navigation |
 | [06 — Security, Privacy and Regulatory Boundary](06-security-privacy-regulatory.md) | Threat model, privacy, financial-information boundary and controls |
 | [07 — Product API](07-product-api.md) | Resource model, endpoints, versioning, entitlements and errors |
@@ -28,8 +28,10 @@ These documents are normative specifications for the product, architecture and d
 | [16 — Multilingual Semantic System](16-multilingual-semantic-system.md) | Six-language semantics, translation provenance, aliases and locale behaviour |
 | [17 — Research Candidate Queue](17-research-candidate-queue.md) | Coverage gaps, tide-driven research, prioritisation and admission handoff |
 | [18 — Development Agent Governance](18-development-agent-governance.md) | Goal Lock, phases, tasks, dynamic skills, evidence and fail-closed gates |
+| [19 — Technology Stack and CI](19-technology-stack-and-ci.md) | Frontend, backend, data, APIs, workflow automation and secure self-hosted CI |
+| [20 — Design System and Motion](20-design-system-and-motion.md) | Palette, typography, shadcn registry, Globe–Graph motion and Remotion boundary |
 
-Contracts 12–18 remain normative candidates until their applicable phase gates pass.
+Contracts 12–20 remain normative candidates until their applicable phase gates pass.
 
 ## Roadmap and execution
 
@@ -80,7 +82,7 @@ The terms **MUST**, **MUST NOT**, **SHOULD**, **SHOULD NOT** and **MAY** express
 
 ## Change policy
 
-A material change to scope, authority, data rights, claim semantics, pricing entitlement, user-intent use, multilingual semantics, agent governance or public API MUST:
+A material change to scope, authority, data rights, claim semantics, pricing entitlement, user-intent use, multilingual semantics, agent governance, stack, design tokens or public API MUST:
 
 1. update the affected contract;
 2. add or amend an ADR;
@@ -90,4 +92,4 @@ A material change to scope, authority, data rights, claim semantics, pricing ent
 
 ## Foundation status
 
-The foundation freezes the desired architecture and product rules. Buyer, pricing, predictive models, initial universe and final interaction architecture remain hypotheses until their commercial, empirical and usability gates pass.
+The foundation freezes the desired architecture and product rules. Buyer, pricing, predictive models, initial universe, final interaction architecture and final stack remain hypotheses until their commercial, empirical, usability and performance gates pass.
