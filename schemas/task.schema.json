@@ -1,0 +1,175 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://axignal.com/schemas/task.schema.json",
+  "title": "AXIGNAL Development Task",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "task_id",
+    "goal_id",
+    "phase",
+    "state",
+    "objective",
+    "outcome",
+    "contracts",
+    "skills",
+    "dependencies",
+    "allowed_scope",
+    "prohibited_scope",
+    "acceptance_evidence",
+    "impacts",
+    "observability",
+    "rollback",
+    "goal_lock_checks"
+  ],
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "pattern": "^AX-F(0|1|2|3|4|5|6|7|8|9|10|11|12)-T[0-9]{2,}$"
+    },
+    "goal_id": {
+      "const": "AXIGNAL-GOAL-001"
+    },
+    "phase": {
+      "enum": ["F0", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12"]
+    },
+    "state": {
+      "enum": ["PROPOSED", "READY", "IN_PROGRESS", "BLOCKED", "EVIDENCE_READY", "ACCEPTED", "REJECTED", "SUPERSEDED"]
+    },
+    "objective": {
+      "type": "string",
+      "minLength": 10
+    },
+    "outcome": {
+      "type": "string",
+      "minLength": 10
+    },
+    "contracts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "pattern": "^(GOAL_LOCK|AGENTS|ADR-[0-9]{3}|[0-9]{2})$"
+      },
+      "uniqueItems": true
+    },
+    "skills": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["skill_id", "version", "activation_reason"],
+        "properties": {
+          "skill_id": {"type": "string", "pattern": "^[a-z][a-z0-9-]+$"},
+          "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+          "activation_reason": {"type": "string", "minLength": 3}
+        }
+      }
+    },
+    "dependencies": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["phases", "tasks"],
+      "properties": {
+        "phases": {
+          "type": "array",
+          "items": {"type": "string", "pattern": "^F(0|1|2|3|4|5|6|7|8|9|10|11|12)$"},
+          "uniqueItems": true
+        },
+        "tasks": {
+          "type": "array",
+          "items": {"type": "string", "pattern": "^AX-F(0|1|2|3|4|5|6|7|8|9|10|11|12)-T[0-9]{2,}$"},
+          "uniqueItems": true
+        },
+        "external": {
+          "type": "array",
+          "items": {"type": "string"},
+          "default": []
+        }
+      }
+    },
+    "allowed_scope": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string"}
+    },
+    "prohibited_scope": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string"}
+    },
+    "acceptance_evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["evidence_type", "description", "required"],
+        "properties": {
+          "evidence_type": {
+            "enum": ["TEST", "BENCHMARK", "SCHEMA", "SCREENSHOT", "RECORDING", "TRACE", "METRIC", "USER_RESEARCH", "RIGHTS_RECORD", "SECURITY_REVIEW", "RESTORE_TEST", "PAID_EVENT", "DOCUMENT"]
+          },
+          "description": {"type": "string", "minLength": 3},
+          "required": {"type": "boolean"},
+          "location": {"type": ["string", "null"]},
+          "status": {"enum": ["MISSING", "PRESENT", "PASS", "FAIL", "NOT_APPLICABLE"]}
+        }
+      }
+    },
+    "impacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["security", "privacy", "data_rights", "regulatory", "multilingual", "epistemic", "billing"],
+      "properties": {
+        "security": {"enum": ["NONE", "LOW", "MATERIAL", "CRITICAL"]},
+        "privacy": {"enum": ["NONE", "LOW", "MATERIAL", "CRITICAL"]},
+        "data_rights": {"enum": ["NONE", "LOW", "MATERIAL", "CRITICAL"]},
+        "regulatory": {"enum": ["NONE", "LOW", "MATERIAL", "CRITICAL"]},
+        "multilingual": {"enum": ["NONE", "LOW", "MATERIAL", "CRITICAL"]},
+        "epistemic": {"enum": ["NONE", "LOW", "MATERIAL", "CRITICAL"]},
+        "billing": {"enum": ["NONE", "LOW", "MATERIAL", "CRITICAL"]}
+      }
+    },
+    "observability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["metrics", "logs", "traces", "alerts"],
+      "properties": {
+        "metrics": {"type": "array", "items": {"type": "string"}},
+        "logs": {"type": "array", "items": {"type": "string"}},
+        "traces": {"type": "array", "items": {"type": "string"}},
+        "alerts": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "rollback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["strategy", "kill_switch", "tested"],
+      "properties": {
+        "strategy": {"type": "string", "minLength": 3},
+        "kill_switch": {"type": ["string", "null"]},
+        "tested": {"type": "boolean"}
+      }
+    },
+    "goal_lock_checks": {
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["check_id", "answer", "evidence"],
+        "properties": {
+          "check_id": {"type": "integer", "minimum": 1, "maximum": 10},
+          "answer": {"enum": ["YES", "NO", "UNKNOWN", "NOT_APPLICABLE"]},
+          "evidence": {"type": "string"}
+        }
+      }
+    },
+    "owner": {"type": ["string", "null"]},
+    "reviewer": {"type": ["string", "null"]},
+    "created_at": {"type": ["string", "null"], "format": "date-time"},
+    "updated_at": {"type": ["string", "null"], "format": "date-time"}
+  }
+}
