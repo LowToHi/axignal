@@ -1,6 +1,6 @@
 # AXIGNAL End-to-End Development Map
 
-Version: `0.3.1`
+Version: `0.3.2`
 Status: `CANDIDATE / EVOLVING UNTIL FINAL MAP FREEZE`
 Goal ID: `AXIGNAL-GOAL-001`
 
@@ -32,6 +32,7 @@ No development agent may skip a layer or infer a different product goal from an 
 | [03 — Contract Map](03-contract-map.md) | Which contracts govern each capability and phase |
 | [04 — Dynamic Skill Map](04-dynamic-skill-map.md) | Skill lifecycle, routing and activation rules |
 | [05 — Dependency and Gate Graph](05-dependency-and-gates.md) | Authorisation order, evidence and fail-closed transitions |
+| [07 — Visual System Validation](07-visual-system-validation.md) | Candidate brand/UI directions, automated checks, user tests and non-freeze gate |
 
 ## Normative execution contracts
 
@@ -73,10 +74,11 @@ Task state:
 
 ## Current position
 
-- Foundation contracts: created in PR #1.
-- UX research and map-first prototype: created in PR #4.
-- Final UX remains unfrozen.
-- New material requirements awaiting integration:
+- Foundation contracts: created in PR #1 and consolidated into the active roadmap PR.
+- UX research and map-first prototype: created in PR #4 and consolidated into the active roadmap PR.
+- Final UX and final visual identity remain unfrozen.
+- The current visual work is governed by Contract 20, ADR-006 and the visual-system validation work package.
+- New material requirements integrated into the active map include:
   - conversational navigation and claim explanation;
   - `AUTO / GLOBE / GRAPH / DUAL` lens routing;
   - functional parity between Globe and Graph;
@@ -84,7 +86,9 @@ Task state:
   - user-intent memory;
   - aggregate Knowledge Tides;
   - research candidate queue;
-  - privacy, manipulation and epistemic separation controls.
+  - privacy, manipulation and epistemic separation controls;
+  - layered brand, UI, epistemic and data-visualisation systems;
+  - comparison of materially different visual directions before freeze.
 
 ## Canonical identity
 
@@ -99,4 +103,4 @@ Any occurrence of `ASIGNAL`, `asignal.com` or `ASIGNAL-GOAL-001` is a naming def
 
 Until this map is frozen, the only authorised priority is:
 
-> Complete and validate the AXIGNAL Investigation Shell map, including Navigator, Globe/Graph parity, multilingual architecture and Intent Intelligence, before production UI implementation.
+> Complete and validate the AXIGNAL Investigation Shell map, including Navigator, Globe/Graph parity, multilingual architecture, Intent Intelligence and the candidate visual-system comparison, before production UI implementation.
