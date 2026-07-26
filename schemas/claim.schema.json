@@ -1,0 +1,247 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://asignal.com/schemas/claim.schema.json",
+  "title": "ASIGNAL Claim",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "claim_id",
+    "version",
+    "subject_id",
+    "predicate",
+    "claim_type",
+    "epistemic_status",
+    "observed_at",
+    "evidence_ids",
+    "source_ids",
+    "method_version",
+    "producer",
+    "rights",
+    "freshness"
+  ],
+  "properties": {
+    "claim_id": {
+      "type": "string",
+      "pattern": "^clm_[A-Za-z0-9_-]{8,}$"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "subject_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "predicate": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_.-]+$"
+    },
+    "object": {},
+    "value": {
+      "type": ["number", "integer", "string", "boolean", "null"]
+    },
+    "unit": {
+      "type": ["string", "null"]
+    },
+    "currency": {
+      "type": ["string", "null"],
+      "pattern": "^[A-Z]{3}$"
+    },
+    "claim_type": {
+      "enum": [
+        "OBSERVED_QUALITATIVE",
+        "OBSERVED_QUANTITATIVE",
+        "CALCULATED",
+        "RELATIONAL",
+        "TREND",
+        "CAUSAL_HYPOTHESIS",
+        "PREDICTIVE",
+        "COMMERCIAL_HYPOTHESIS",
+        "EXPERIMENTAL_RESULT",
+        "OUTCOME",
+        "RISK",
+        "LEGAL_OR_REGULATORY"
+      ]
+    },
+    "epistemic_status": {
+      "enum": [
+        "PROPOSED",
+        "PARSED",
+        "SOURCE_BOUND",
+        "STRUCTURALLY_VALID",
+        "RIGHTS_VALID",
+        "ADMISSIBLE",
+        "CORROBORATED",
+        "ACTIONABLE",
+        "CONTESTED",
+        "SUPERSEDED",
+        "FALSIFIED",
+        "EXPIRED",
+        "RETRACTED",
+        "REJECTED",
+        "QUARANTINED"
+      ]
+    },
+    "assertion_text": {
+      "type": ["string", "null"]
+    },
+    "source_language": {
+      "type": ["string", "null"]
+    },
+    "geography_ids": {
+      "type": "array",
+      "items": {"type": "string"},
+      "uniqueItems": true,
+      "default": []
+    },
+    "jurisdiction_ids": {
+      "type": "array",
+      "items": {"type": "string"},
+      "uniqueItems": true,
+      "default": []
+    },
+    "observed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "event_time": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "valid_from": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "valid_until": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "evidence_ids": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string"},
+      "uniqueItems": true
+    },
+    "source_ids": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string"},
+      "uniqueItems": true
+    },
+    "source_lineage_group_ids": {
+      "type": "array",
+      "items": {"type": "string"},
+      "uniqueItems": true,
+      "default": []
+    },
+    "method_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "producer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["producer_type", "producer_id"],
+      "properties": {
+        "producer_type": {
+          "enum": ["SYSTEM", "MODEL", "HUMAN", "IMPORT"]
+        },
+        "producer_id": {
+          "type": "string"
+        },
+        "model_provider": {
+          "type": ["string", "null"]
+        },
+        "model_id": {
+          "type": ["string", "null"]
+        },
+        "prompt_version": {
+          "type": ["string", "null"]
+        }
+      }
+    },
+    "depends_on_claim_ids": {
+      "type": "array",
+      "items": {"type": "string"},
+      "uniqueItems": true,
+      "default": []
+    },
+    "supports_claim_ids": {
+      "type": "array",
+      "items": {"type": "string"},
+      "uniqueItems": true,
+      "default": []
+    },
+    "contradicts_claim_ids": {
+      "type": "array",
+      "items": {"type": "string"},
+      "uniqueItems": true,
+      "default": []
+    },
+    "supersedes_claim_id": {
+      "type": ["string", "null"]
+    },
+    "confidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "evidence_strength": {"type": "number", "minimum": 0, "maximum": 1},
+        "source_authority": {"type": "number", "minimum": 0, "maximum": 1},
+        "source_independence": {"type": "number", "minimum": 0, "maximum": 1},
+        "extraction_confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "method_reproducibility": {"type": "number", "minimum": 0, "maximum": 1},
+        "freshness": {"type": "number", "minimum": 0, "maximum": 1},
+        "scope_completeness": {"type": "number", "minimum": 0, "maximum": 1},
+        "contradiction_pressure": {"type": "number", "minimum": 0, "maximum": 1},
+        "forecast_uncertainty": {"type": "number", "minimum": 0, "maximum": 1},
+        "rights_confidence": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "rights": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["internal_use", "customer_display", "export", "api_redistribution"],
+      "properties": {
+        "internal_use": {"type": "boolean"},
+        "customer_display": {"type": "boolean"},
+        "export": {"type": "boolean"},
+        "api_redistribution": {"type": "boolean"},
+        "attribution_required": {"type": "boolean", "default": false}
+      }
+    },
+    "freshness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "evaluated_at"],
+      "properties": {
+        "status": {
+          "enum": ["FRESH", "AGING", "STALE", "EXPIRED", "UNKNOWN"]
+        },
+        "evaluated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "next_expected_update": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        }
+      }
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "anyOf": [
+        {"required": ["object"]},
+        {"required": ["value"]}
+      ]
+    }
+  ]
+}
