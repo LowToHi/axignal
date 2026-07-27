@@ -1,4 +1,4 @@
-# Persistent Research Worker runbook
+# Authenticated persistent ResearchRun runbook
 
 Status: `IMPLEMENTATION CANDIDATE / PRODUCTION DISABLED`
 Goal ID: `AXIGNAL-GOAL-001`
@@ -6,38 +6,64 @@ Goal ID: `AXIGNAL-GOAL-001`
 ## Architecture
 
 ```text
-POST /v1/research-runs
+browser credentials
+→ Next.js verifies scrypt password
+→ HttpOnly signed session (subject + email; no tenant)
+→ server resolves subject → tenant UUID
+→ short-lived HMAC identity assertion
+→ FastAPI verifies identity assertion
+→ POST /v1/research-runs
 → tenant-private ResearchRun + transactional outbox
-→ outbox publisher
 → Valkey queue
 → Research Worker
 → admitted institutional connector
-→ immutable Source Object
-→ Evidence Object
+→ immutable Source Object + Evidence Object
 → Candidate Claim
 → deterministic admission runtime
 → Canonical Claim Ledger or rejection
 → tenant-private dossier
-→ ResearchRun completion event
+→ polling returns dossier, evidence and claims
+→ InvestigationContext integrates persistent results
 ```
 
-The API does not perform source retrieval inside the request transaction. A queue outage leaves the outbox event pending and does not lose the ResearchRun.
+The browser cannot send or select a tenant UUID. The legacy `X-AXIGNAL-Tenant-ID` header has no authority and is rejected when no valid identity assertion is present.
+
+The API does not retrieve sources inside the request transaction. A queue outage leaves the outbox event pending and does not lose the ResearchRun.
 
 ## Required services
 
 - PostgreSQL with PostGIS, pgvector and pgcrypto;
 - Valkey;
-- FastAPI application assembled as `axignal_api.application:app`;
-- one or more `axignal_api.worker` processes.
+- FastAPI assembled as `axignal_api.application:app`;
+- one or more `axignal_api.worker` processes;
+- Next.js as the authenticated same-origin gateway.
 
 ## Environment
 
 ```bash
+export AXIGNAL_API_URL='http://127.0.0.1:8000'
 export AXIGNAL_DATABASE_URL='postgresql://axignal:axignal@127.0.0.1:5432/axignal'
 export AXIGNAL_VALKEY_URL='redis://127.0.0.1:6379/0'
 export AXIGNAL_PERSISTENT_RESEARCH_ENABLED='true'
+export AXIGNAL_PERSISTENT_RESEARCH_UI_ENABLED='true'
 export AXIGNAL_RESEARCH_QUEUE_KEY='axignal:research:queue:v1'
+
+export AXIGNAL_AUTH_REQUIRED='true'
+export AXIGNAL_AUTH_EMAIL='operator@example.com'
+export AXIGNAL_AUTH_SUBJECT='usr_operator'
+export AXIGNAL_AUTH_TENANT_ID='11111111-1111-4111-8111-111111111111'
+export AXIGNAL_SESSION_SECRET='<at-least-32-random-bytes>'
+export AXIGNAL_IDENTITY_ASSERTION_SECRET='<different-at-least-32-random-bytes>'
 ```
+
+Generate the password verifier locally:
+
+```bash
+node scripts/generate_auth_password.mjs 'a-long-local-password'
+export AXIGNAL_AUTH_PASSWORD_SCRYPT='scrypt$<salt-hex>$<derived-key-hex>'
+```
+
+The session cookie contains only the authenticated subject and email. `AXIGNAL_AUTH_TENANT_ID` is read on the server after session verification. The API receives a signed assertion with a maximum lifetime of five minutes; the Next.js gateway currently emits assertions with a 60-second lifetime.
 
 For deterministic local and CI verification:
 
@@ -61,23 +87,19 @@ Live mode does not broaden the source contract. It still permits only the exact 
 docker compose up --build --detach --wait
 python -m uvicorn axignal_api.application:app --app-dir apps/api/src --reload --port 8000
 python -m axignal_api.worker --poll-seconds 2
+pnpm --filter @axignal/web dev
 ```
 
-Create a ResearchRun using a temporary development tenant identifier:
+Open `http://127.0.0.1:3000`, authenticate, select the opportunity and use **Investigar oportunidad**. The same-origin route creates the persistent ResearchRun, polls its state and returns the worker output to the existing `InvestigationContext`.
 
-```bash
-curl -sS -X POST 'http://127.0.0.1:8000/v1/research-runs' \
-  -H 'content-type: application/json' \
-  -H 'X-AXIGNAL-Tenant-ID: 11111111-1111-4111-8111-111111111111' \
-  -d '{
-    "context_id": "ctx_moscow_real_estate_v01",
-    "opportunity_id": "opp_moscow_ramenki",
-    "question": "Actualiza el contexto de inflación de la oportunidad.",
-    "include_private_knowledge": false
-  }'
-```
+## Fixture-to-persistent switchover
 
-The tenant header is a development boundary only. Production exposure remains prohibited until authenticated identity maps server-side to a tenant and the client cannot choose an arbitrary tenant UUID.
+- `AXIGNAL_PERSISTENT_RESEARCH_UI_ENABLED=false`: the bounded PR #14 synthetic ResearchRun remains active;
+- `AXIGNAL_PERSISTENT_RESEARCH_UI_ENABLED=true`: authentication becomes mandatory and the UI uses only the persistent API path;
+- a persistent failure is shown as a failure and never silently replaced with the fixture;
+- the base opportunity shell remains synthetic while real evidence, admitted claims and dossiers are integrated incrementally.
+
+This is the deliberate gradual replacement boundary. It avoids presenting mixed synthetic and persistent data as a fully production-backed product.
 
 ## One-shot acceptance
 
@@ -85,20 +107,18 @@ The tenant header is a development boundary only. Production exposure remains pr
 python scripts/verify_persistent_research_spine.py
 ```
 
-The acceptance script proves:
+The acceptance proves:
 
-- three PostgreSQL schemas exist;
-- World Bank is admitted and Bank of Russia is quarantined;
-- RLS and FORCE RLS are active;
-- tenant A cannot be read by tenant B;
-- the outbox reaches Valkey;
-- the worker is idempotent;
+- the legacy tenant header no longer authenticates a caller;
+- a signed identity creates a ResearchRun in its resolved tenant;
+- tenant A cannot read tenant B;
+- RLS and FORCE RLS remain active;
+- the outbox reaches Valkey and the worker is idempotent;
 - no language-model call is used for the structured indicator;
-- one Evidence Object and one Candidate Claim are persisted;
-- deterministic gates admit the exact observed fact;
-- the Claim Ledger rejects in-place mutation;
-- attribution is present in the dossier;
-- Intent Intelligence remains separate and does not create claims.
+- evidence, Candidate Claim, canonical claim and dossier are persisted;
+- deterministic admission and append-only ledger gates remain intact;
+- attribution is present;
+- Intent Intelligence remains separate and cannot create claims.
 
 ## Operational states
 
@@ -110,54 +130,37 @@ QUEUED
 → COMPLETED | FAILED
 ```
 
-A failed run retains `error_code` and `error_detail`. Workers must not substitute a source, increase budgets or remove attribution in response to a failure.
+The browser polling adapter maps worker states into Navigator states and integrates each retrieved view into the selected ResearchRun. A failed run retains `error_code` and `error_detail`. Workers must not substitute a source, increase budgets or remove attribution in response to a failure.
 
 ## Local model boundary
 
 The Research Worker is the execution process; it is not synonymous with a language model.
 
-For structured World Bank data, the worker uses a deterministic parser. A future local model adapter may propose Candidate Claims from unstructured admitted evidence, but:
+For structured World Bank data, the worker uses a deterministic parser. The next permitted extension is a local proposal model for unstructured, already admitted documents. Its output must:
 
-- its output must validate against the Candidate Claim schema;
-- its producer type must be `LOCAL_MODEL`;
-- it cannot auto-admit an observed fact;
-- it cannot write to `canonical_claims`;
-- it cannot use tenant-private content for a global proposal;
-- the deterministic runtime retains sole admission authority.
+- validate against the Candidate Claim schema;
+- declare producer type `LOCAL_MODEL`;
+- remain proposal-only;
+- never write to `canonical_claims`;
+- never auto-admit an observed fact;
+- never use tenant-private content for a global proposal;
+- pass through the deterministic admission runtime, which retains sole authority.
 
-## Metrics and alerts
+## Remaining production gates
 
-Required metrics before production:
-
-- queued ResearchRuns;
-- oldest pending outbox age;
-- queue depth;
-- worker completion and failure count;
-- source latency and response size;
-- source kill-switch state;
-- candidate admission/rejection counts;
-- duplicate deliveries;
-- RLS denial count;
-- canonical claim mutation attempts;
-- attribution omissions.
-
-Alert immediately when:
-
-- a source kill switch changes;
-- outbox age exceeds five minutes;
-- the queue is unavailable;
-- a source leaves its allowlist;
-- response size exceeds the contract;
-- a generative producer reaches automatic admission;
-- a cross-tenant query returns data;
-- an immutable ledger mutation is attempted.
+- replace the single configured identity mapping with an external OIDC provider and durable membership registry;
+- rotate and store secrets in a managed secret store;
+- add rate limiting, session revocation and security-event audit;
+- supervise workers and outbox publisher as deployed services;
+- expose queue, latency, completion, failure, RLS denial and assertion rejection metrics;
+- rehearse migration and rollback in a non-production environment;
+- obtain explicit human merge and deployment authorisation.
 
 ## Rollback
 
-1. Set `AXIGNAL_PERSISTENT_RESEARCH_ENABLED=false`.
-2. Stop the worker.
-3. Leave pending outbox and ResearchRun rows intact for audit.
-4. Set the source kill switch to `true` if source behaviour or rights are involved.
-5. Revert the API route and worker code if needed.
-6. Do not delete Source Objects, Evidence Objects, admission decisions or canonical ledger rows.
-7. The synthetic PR #14 ResearchRun remains the UI fallback until the persistent client path is accepted.
+1. Set `AXIGNAL_PERSISTENT_RESEARCH_UI_ENABLED=false` to return the UI to the bounded fixture.
+2. Set `AXIGNAL_PERSISTENT_RESEARCH_ENABLED=false` to stop new persistent creation.
+3. Stop the worker.
+4. Preserve pending outbox, ResearchRun, Source Object, Evidence Object, admission decision and ledger rows for audit.
+5. Enable the source kill switch if source behaviour or rights are implicated.
+6. Do not re-enable `X-AXIGNAL-Tenant-ID` as an authentication boundary.
