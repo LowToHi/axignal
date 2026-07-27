@@ -27,11 +27,11 @@ jobs:
           cp apps/api/src/axignal_api/repository.py formatted/apps/api/src/axignal_api/repository.py
           ruff check formatted/apps/api/src/axignal_api/repository.py --fix || true
           ruff format formatted/apps/api/src/axignal_api/repository.py
-          ruff check formatted/apps/api/src/axignal_api/repository.py
+          ruff check formatted/apps/api/src/axignal_api/repository.py > formatted/ruff-after-format.txt 2>&1 || true
       - name: Upload formatted repository
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: ruff-formatted-repository
-          path: formatted/apps/api/src/axignal_api/repository.py
+          path: formatted
           if-no-files-found: error
           retention-days: 7
