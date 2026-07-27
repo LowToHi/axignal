@@ -6,5 +6,5 @@ export default async function HomePage() {
   if (!isAuthenticationRequired()) return <InvestigationShell />;
   const identity = await getAuthenticatedIdentity();
   if (!identity) return <AuthGate />;
-  return <InvestigationShell authenticatedEmail={identity.email} />;
+  return <InvestigationShell />;
 }
