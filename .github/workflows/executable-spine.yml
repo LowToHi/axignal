@@ -101,7 +101,7 @@ jobs:
         run: pytest --cov=axignal_api --cov-report=term-missing
 
   services:
-    name: Persistent PostgreSQL, pgvector, RLS, outbox and Valkey
+    name: Authenticated ResearchRun, PostgreSQL, RLS, outbox and Valkey
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -111,6 +111,7 @@ jobs:
       AXIGNAL_LIVE_SOURCES_ENABLED: "false"
       AXIGNAL_WORLD_BANK_FIXTURE_PATH: apps/api/tests/fixtures/world_bank_rus_inflation.json
       AXIGNAL_RESEARCH_QUEUE_KEY: axignal:research:queue:ci
+      AXIGNAL_IDENTITY_ASSERTION_SECRET: ci-identity-assertion-secret-with-at-least-32-bytes
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
@@ -127,7 +128,7 @@ jobs:
           test "$count" = "3"
       - name: Verify Valkey
         run: test "$(docker compose exec -T valkey valkey-cli ping)" = "PONG"
-      - name: Run persistent research acceptance
+      - name: Run authenticated persistent research acceptance
         shell: bash
         run: |
           set -o pipefail
