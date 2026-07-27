@@ -49,7 +49,43 @@
         "source_ids": {"type": "array", "items": {"type": "string"}}
       }
     },
-    "rail_mode": {"enum": ["CONTEXT", "OPPORTUNITY", "CLAIM", "EVIDENCE", "EXPLANATION", "COVERAGE"]},
+    "rail_mode": {"enum": ["CONTEXT", "OPPORTUNITY", "CLAIM", "EVIDENCE", "EXPLANATION", "COVERAGE", "RESEARCH", "DOSSIER"]},
+    "research": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "active_run_ids": {
+          "type": "array",
+          "items": {"type": "string", "pattern": "^rr_[A-Za-z0-9_-]{8,}$"},
+          "uniqueItems": true
+        },
+        "selected_run_id": {
+          "type": ["string", "null"]
+        },
+        "last_completed_run_id": {
+          "type": ["string", "null"]
+        },
+        "selected_run_state": {
+          "type": ["string", "null"]
+        },
+        "provisional_evidence_ids": {
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        },
+        "candidate_claim_ids": {
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        },
+        "dossier_id": {
+          "type": ["string", "null"]
+        },
+        "admission_batch_id": {
+          "type": ["string", "null"]
+        }
+      }
+    },
     "history": {
       "type": "array",
       "items": {
@@ -59,7 +95,8 @@
           "event_id": {"type": "string"},
           "event_type": {"type": "string"},
           "occurred_at": {"type": "string", "format": "date-time"},
-          "command_plan_id": {"type": ["string", "null"]}
+          "command_plan_id": {"type": ["string", "null"]},
+          "research_run_id": {"type": ["string", "null"]}
         }
       }
     },
