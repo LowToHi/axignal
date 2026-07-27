@@ -34,41 +34,32 @@
       "enum": [
         "QUEUED",
         "RETRIEVING",
+        "DOCUMENT_PARSING",
+        "SECURITY_SCANNING",
         "PROPOSING",
+        "EVIDENCE_BINDING",
         "ADMISSION_PENDING",
+        "HANDOFF_PENDING",
         "COMPLETED",
+        "COMPLETED_PROVISIONAL",
+        "QUARANTINED",
         "FAILED"
       ]
     },
     "private_knowledge_authorised": {"type": "boolean"},
-    "source_plan": {
-      "type": "array",
-      "items": {"type": "object", "additionalProperties": true}
-    },
+    "source_plan": {"type": "array", "items": {"type": "object", "additionalProperties": true}},
     "budgets": {"type": "object", "additionalProperties": true},
     "actual_usage": {"type": "object", "additionalProperties": true},
-    "evidence": {
-      "type": "array",
-      "items": {"$ref": "#/$defs/evidence"}
-    },
-    "candidate_claims": {
-      "type": "array",
-      "items": {"$ref": "#/$defs/candidateClaim"}
-    },
-    "canonical_claims": {
-      "type": "array",
-      "items": {"$ref": "#/$defs/canonicalClaim"}
-    },
+    "evidence": {"type": "array", "items": {"$ref": "#/$defs/evidence"}},
+    "candidate_claims": {"type": "array", "items": {"$ref": "#/$defs/candidateClaim"}},
+    "canonical_claims": {"type": "array", "items": {"$ref": "#/$defs/canonicalClaim"}},
     "dossier": {
       "oneOf": [
         {"type": "null"},
         {"$ref": "#/$defs/dossier"}
       ]
     },
-    "admission_batch_id": {
-      "type": ["string", "null"],
-      "format": "uuid"
-    },
+    "admission_batch_id": {"type": ["string", "null"], "format": "uuid"},
     "error_code": {"type": ["string", "null"]},
     "error_detail": {"type": ["string", "null"]},
     "created_at": {"type": "string", "format": "date-time"},
@@ -126,7 +117,16 @@
         "candidate_claim_id": {"type": "string", "format": "uuid"},
         "fingerprint": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
         "statement": {"type": "string"},
-        "kind": {"enum": ["FACT", "INFERENCE", "PREDICTION", "CONTRADICTION"]},
+        "kind": {
+          "enum": [
+            "FACT",
+            "INFERENCE",
+            "PREDICTION",
+            "FORECAST",
+            "LIMITATION",
+            "CONTRADICTION"
+          ]
+        },
         "state": {"enum": ["PROPOSED", "ADMISSION_QUEUED", "ADMITTED", "REJECTED"]},
         "producer_type": {"enum": ["DETERMINISTIC_PARSER", "LOCAL_MODEL", "EXTERNAL_MODEL"]},
         "method_version": {"type": "string"},
@@ -167,14 +167,7 @@
     "dossier": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "dossier_id",
-        "status",
-        "title",
-        "summary",
-        "sections",
-        "attribution"
-      ],
+      "required": ["dossier_id", "status", "title", "summary", "sections", "attribution"],
       "properties": {
         "dossier_id": {"type": "string", "format": "uuid"},
         "status": {"enum": ["TRACEABLE_PROVISIONAL", "TRACEABLE_WITH_ADMITTED_FACTS"]},

@@ -73,7 +73,7 @@ jobs:
           retention-days: 7
 
   api:
-    name: FastAPI contract and local proposal boundary
+    name: FastAPI contracts and proposal authority
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -114,16 +114,20 @@ jobs:
           retention-days: 7
 
   services:
-    name: Authenticated ResearchRun, PostgreSQL, RLS, outbox and Valkey
+    name: Authenticated persistent research and proposal-worker isolation
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
       AXIGNAL_DATABASE_URL: postgresql://axignal:axignal@127.0.0.1:5432/axignal
+      AXIGNAL_PROPOSAL_DATABASE_URL: postgresql://axignal_proposal_worker:axignal_proposal_worker@127.0.0.1:5432/axignal
       AXIGNAL_VALKEY_URL: redis://127.0.0.1:6379/0
       AXIGNAL_PERSISTENT_RESEARCH_ENABLED: "true"
       AXIGNAL_LIVE_SOURCES_ENABLED: "false"
       AXIGNAL_WORLD_BANK_FIXTURE_PATH: apps/api/tests/fixtures/world_bank_rus_inflation.json
+      AXIGNAL_DOCUMENT_FIXTURE_PATH: apps/api/tests/fixtures/world_bank_rer41_document.json
+      AXIGNAL_DOCUMENT_PROPOSAL_FIXTURE_PATH: apps/api/tests/fixtures/world_bank_rer41_proposal.json
       AXIGNAL_RESEARCH_QUEUE_KEY: axignal:research:queue:ci
+      AXIGNAL_PROPOSAL_QUEUE_KEY: axignal:proposal:queue:ci
       AXIGNAL_IDENTITY_ASSERTION_SECRET: ci-identity-assertion-secret-with-at-least-32-bytes
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -136,8 +140,11 @@ jobs:
         run: docker compose up --build --detach --wait
       - name: Verify database extensions
         run: |
-          docker compose exec -T postgres psql -U axignal -d axignal -v ON_ERROR_STOP=1 -c "SELECT extname FROM pg_extension WHERE extname IN ('postgis', 'vector', 'pgcrypto') ORDER BY extname;"
-          count=$(docker compose exec -T postgres psql -U axignal -d axignal -Atc "SELECT count(*) FROM pg_extension WHERE extname IN ('postgis', 'vector', 'pgcrypto');")
+          docker compose exec -T postgres psql -U axignal -d axignal \
+            -v ON_ERROR_STOP=1 \
+            -c "SELECT extname FROM pg_extension WHERE extname IN ('postgis', 'vector', 'pgcrypto') ORDER BY extname;"
+          count=$(docker compose exec -T postgres psql -U axignal -d axignal \
+            -Atc "SELECT count(*) FROM pg_extension WHERE extname IN ('postgis', 'vector', 'pgcrypto');")
           test "$count" = "3"
       - name: Verify Valkey
         run: test "$(docker compose exec -T valkey valkey-cli ping)" = "PONG"
@@ -146,12 +153,19 @@ jobs:
         run: |
           set -o pipefail
           python scripts/verify_persistent_research_spine.py 2>&1 | tee persistent-research-acceptance.log
+      - name: Run persistent proposal-worker acceptance
+        shell: bash
+        run: |
+          set -o pipefail
+          python scripts/verify_persistent_proposal_worker.py 2>&1 | tee persistent-proposal-worker-acceptance.log
       - name: Upload persistent research diagnostics
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: persistent-research-diagnostics
-          path: persistent-research-acceptance.log
+          path: |
+            persistent-research-acceptance.log
+            persistent-proposal-worker-acceptance.log
           if-no-files-found: error
           retention-days: 7
       - name: Destroy disposable services

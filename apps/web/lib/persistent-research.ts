@@ -69,18 +69,50 @@ export type PersistentResearchRunView = {
   synthetic: false;
 };
 
-const terminalStates = new Set(["COMPLETED", "FAILED", "CANCELLED", "BUDGET_EXHAUSTED", "RIGHTS_BLOCKED", "INSUFFICIENT_EVIDENCE"]);
-const progressSteps = ["QUEUED", "RETRIEVING", "CLAIMS_PROPOSED", "ADMISSION_QUEUED", "COMPLETED"] as const;
+const terminalStates = new Set([
+  "COMPLETED",
+  "COMPLETED_PROVISIONAL",
+  "QUARANTINED",
+  "FAILED",
+  "CANCELLED",
+  "BUDGET_EXHAUSTED",
+  "RIGHTS_BLOCKED",
+  "INSUFFICIENT_EVIDENCE"
+]);
+const progressSteps = [
+  "QUEUED",
+  "RETRIEVING",
+  "CLAIMS_PROPOSED",
+  "ADMISSION_QUEUED",
+  "COMPLETED"
+] as const;
 
 export function isTerminalPersistentState(state: string): boolean {
   return terminalStates.has(state);
 }
 
 function mappedState(state: string): ResearchRunState {
-  if (state === "PROPOSING") return "CLAIMS_PROPOSED";
-  if (state === "ADMISSION_PENDING") return "ADMISSION_QUEUED";
-  if (state === "QUEUED" || state === "RETRIEVING" || state === "COMPLETED" || state === "FAILED") return state;
-  if (state === "CANCELLED" || state === "BUDGET_EXHAUSTED" || state === "RIGHTS_BLOCKED" || state === "INSUFFICIENT_EVIDENCE") return state;
+  if (["DOCUMENT_PARSING", "SECURITY_SCANNING"].includes(state)) return "RETRIEVING";
+  if (["PROPOSING", "EVIDENCE_BINDING"].includes(state)) return "CLAIMS_PROPOSED";
+  if (["ADMISSION_PENDING", "HANDOFF_PENDING"].includes(state)) return "ADMISSION_QUEUED";
+  if (state === "COMPLETED_PROVISIONAL") return "COMPLETED";
+  if (state === "QUARANTINED") return "FAILED";
+  if (
+    state === "QUEUED" ||
+    state === "RETRIEVING" ||
+    state === "COMPLETED" ||
+    state === "FAILED"
+  ) {
+    return state;
+  }
+  if (
+    state === "CANCELLED" ||
+    state === "BUDGET_EXHAUSTED" ||
+    state === "RIGHTS_BLOCKED" ||
+    state === "INSUFFICIENT_EVIDENCE"
+  ) {
+    return state;
+  }
   return "FAILED";
 }
 
@@ -104,12 +136,18 @@ function toEvidence(view: PersistentResearchRunView): Evidence[] {
     title: item.title,
     source: item.source_id,
     as_of: item.observed_at,
-    relationship: item.relationship === "CONTRADICT" ? "CONTRADICT" : item.relationship === "UNKNOWN" ? "UNKNOWN" : "SUPPORT",
+    relationship:
+      item.relationship === "CONTRADICT"
+        ? "CONTRADICT"
+        : item.relationship === "UNKNOWN"
+          ? "UNKNOWN"
+          : "SUPPORT",
     domain: "AXIGNAL_GLOBAL",
-    source_class: "OFFICIAL_API",
+    source_class: item.source_id === "world-bank-rer41" ? "OFFICIAL_DOCUMENT" : "OFFICIAL_API",
     rights_status: item.rights_status === "RESTRICTED" ? "RESTRICTED" : "RIGHTS_VALID",
     provisional: item.provisional,
-    content_hash: typeof item.payload.content_hash === "string" ? item.payload.content_hash : undefined,
+    content_hash:
+      typeof item.payload.content_hash === "string" ? item.payload.content_hash : undefined,
     synthetic: false
   } as unknown as Evidence));
 }
@@ -119,13 +157,20 @@ function toCandidateClaims(view: PersistentResearchRunView): CandidateClaim[] {
   return view.candidate_claims.map((item) => ({
     candidate_claim_id: item.candidate_claim_id,
     opportunity_id: view.opportunity_id,
-    kind: item.kind.toUpperCase().includes("CONTRAD") ? "CONTRADICTION" : "SUPPORT",
+    kind:
+      item.kind.toUpperCase().includes("CONTRAD") ||
+      item.kind.toUpperCase().includes("LIMIT")
+        ? "CONTRADICTION"
+        : "SUPPORT",
     text: item.statement,
     state: item.state,
     evidence_ids: evidenceIds,
     producer: {
       producer_type: item.producer_type,
-      producer_id: item.producer_type === "DETERMINISTIC_PARSER" ? "world-bank-wdi-parser" : "proposal-only-model",
+      producer_id:
+        item.producer_type === "DETERMINISTIC_PARSER"
+          ? "world-bank-wdi-parser"
+          : "proposal-only-model",
       method_version: item.method_version
     },
     canonical_claim_id: item.canonical_claim_id,
@@ -146,6 +191,12 @@ function toCanonicalClaims(view: PersistentResearchRunView): Claim[] {
   } as unknown as Claim));
 }
 
+function stringItems(value: unknown, fallback: string[]): string[] {
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === "string")
+    : fallback;
+}
+
 function toDossier(view: PersistentResearchRunView): ResearchDossier | null {
   if (!view.dossier) return null;
   const candidateIds = view.candidate_claims.map((item) => item.candidate_claim_id);
@@ -156,13 +207,16 @@ function toDossier(view: PersistentResearchRunView): ResearchDossier | null {
     status: view.dossier.status,
     summary: view.dossier.summary,
     sections: view.dossier.sections.map((section, index) => ({
-      section_id: typeof section.section_id === "string" ? section.section_id : `section_${index + 1}`,
+      section_id:
+        typeof section.section_id === "string" ? section.section_id : `section_${index + 1}`,
       title: typeof section.title === "string" ? section.title : `Sección ${index + 1}`,
       text: typeof section.text === "string" ? section.text : JSON.stringify(section),
-      evidence_ids: Array.isArray(section.evidence_ids) ? section.evidence_ids.filter((item): item is string => typeof item === "string") : evidenceIds,
-      candidate_claim_ids: Array.isArray(section.candidate_claim_ids) ? section.candidate_claim_ids.filter((item): item is string => typeof item === "string") : candidateIds
+      evidence_ids: stringItems(section.evidence_ids, evidenceIds),
+      candidate_claim_ids: stringItems(section.candidate_claim_ids, candidateIds)
     })),
-    source_result_ids: view.source_plan.map((source, index) => `${view.research_run_id}:${sourceId(source, index)}`),
+    source_result_ids: view.source_plan.map(
+      (source, index) => `${view.research_run_id}:${sourceId(source, index)}`
+    ),
     candidate_claim_ids: candidateIds,
     unknown_ids: [],
     private_context_used: view.private_knowledge_authorised,
@@ -172,7 +226,10 @@ function toDossier(view: PersistentResearchRunView): ResearchDossier | null {
 
 function toResearchRun(view: PersistentResearchRunView): ResearchRun {
   const state = mappedState(view.state);
-  const stateIndex = Math.max(0, progressSteps.indexOf(state as (typeof progressSteps)[number]));
+  const stateIndex = Math.max(
+    0,
+    progressSteps.indexOf(state as (typeof progressSteps)[number])
+  );
   return {
     research_run_id: view.research_run_id,
     context_id: view.context_id,
@@ -183,26 +240,33 @@ function toResearchRun(view: PersistentResearchRunView): ResearchRun {
       source_result_id: `${view.research_run_id}:${sourceId(source, index)}`,
       label: sourceId(source, index),
       domain: "AXIGNAL_GLOBAL",
-      source_class: "OFFICIAL_API",
+      source_class:
+        sourceId(source, index) === "world-bank-rer41" ? "OFFICIAL_DOCUMENT" : "OFFICIAL_API",
       status: "USED",
       primary: index === 0,
-      evidence_ids: view.evidence.filter((item) => item.source_id === sourceId(source, index)).map((item) => item.evidence_id),
-      note: "Fuente institucional admitida; recuperación y parsing deterministas."
+      evidence_ids: view.evidence
+        .filter((item) => item.source_id === sourceId(source, index))
+        .map((item) => item.evidence_id),
+      note:
+        sourceId(source, index) === "world-bank-rer41"
+          ? "Documento institucional admitido; propuestas locales sin autoridad canónica."
+          : "Fuente institucional admitida; recuperación y parsing deterministas."
     })),
     budgets: {
       max_searches: numberValue(view.budgets.max_api_requests),
       max_documents: numberValue(view.budgets.max_documents),
-      max_input_tokens: 0,
-      max_output_tokens: 0,
-      max_cost_minor_units: 0,
+      max_input_tokens: numberValue(view.budgets.max_input_tokens),
+      max_output_tokens: numberValue(view.budgets.max_output_tokens),
+      max_cost_minor_units: numberValue(view.budgets.max_cost_minor_units),
       currency: "EUR"
     },
     actual_usage: {
       searches: numberValue(view.actual_usage.api_requests),
-      documents: numberValue(view.actual_usage.documents) + numberValue(view.actual_usage.fixture_reads),
-      input_tokens: 0,
-      output_tokens: 0,
-      cost_minor_units: 0
+      documents:
+        numberValue(view.actual_usage.documents) + numberValue(view.actual_usage.fixture_reads),
+      input_tokens: numberValue(view.actual_usage.input_tokens),
+      output_tokens: numberValue(view.actual_usage.output_tokens),
+      cost_minor_units: numberValue(view.actual_usage.cost_minor_units)
     },
     progress: progressSteps.map((step, index) => ({
       step,
@@ -225,7 +289,9 @@ export function integratePersistentResearchRun(
   view: PersistentResearchRunView
 ): PrototypeInvestigationPayload {
   const current = structuredClone(payload);
-  const previousRun = current.research_runs.find((item) => item.research_run_id === view.research_run_id);
+  const previousRun = current.research_runs.find(
+    (item) => item.research_run_id === view.research_run_id
+  );
   const state = mappedState(view.state);
   const run = toResearchRun(view);
   const evidence = toEvidence(view);
@@ -233,16 +299,30 @@ export function integratePersistentResearchRun(
   const canonicalClaims = toCanonicalClaims(view);
   const dossier = toDossier(view);
 
-  current.research_runs = upsertById(current.research_runs, [run], (item) => item.research_run_id);
+  current.research_runs = upsertById(
+    current.research_runs,
+    [run],
+    (item) => item.research_run_id
+  );
   current.evidence = upsertById(current.evidence, evidence, (item) => item.evidence_id);
-  current.candidate_claims = upsertById(current.candidate_claims, candidates, (item) => item.candidate_claim_id);
+  current.candidate_claims = upsertById(
+    current.candidate_claims,
+    candidates,
+    (item) => item.candidate_claim_id
+  );
   current.claims = upsertById(current.claims, canonicalClaims, (item) => item.claim_id);
-  if (dossier) current.dossiers = upsertById(current.dossiers, [dossier], (item) => item.dossier_id);
+  if (dossier) {
+    current.dossiers = upsertById(current.dossiers, [dossier], (item) => item.dossier_id);
+  }
 
-  const opportunity = current.opportunities.find((item) => item.opportunity_id === view.opportunity_id);
+  const opportunity = current.opportunities.find(
+    (item) => item.opportunity_id === view.opportunity_id
+  );
   if (opportunity) {
-    opportunity.claim_ids = [...new Set([...opportunity.claim_ids, ...canonicalClaims.map((item) => item.claim_id)])];
-    opportunity.evidence_count = new Set([...current.evidence.filter((item) => opportunity.claim_ids.some((claimId) => current.claims.find((claim) => claim.claim_id === claimId)?.evidence_ids.includes(item.evidence_id)))]).size;
+    opportunity.claim_ids = [
+      ...new Set([...opportunity.claim_ids, ...canonicalClaims.map((item) => item.claim_id)])
+    ];
+    opportunity.evidence_count = evidence.length;
   }
 
   const terminal = isTerminalPersistentState(view.state);
@@ -251,27 +331,48 @@ export function integratePersistentResearchRun(
     : [...new Set([...current.context.research.active_run_ids, view.research_run_id])];
   current.context.research.selected_run_id = view.research_run_id;
   current.context.research.selected_run_state = state;
-  current.context.research.last_completed_run_id = view.state === "COMPLETED" ? view.research_run_id : current.context.research.last_completed_run_id;
-  current.context.research.provisional_evidence_ids = evidence.filter((item) => item.provisional).map((item) => item.evidence_id);
-  current.context.research.candidate_claim_ids = candidates.map((item) => item.candidate_claim_id);
+  current.context.research.last_completed_run_id =
+    view.state === "COMPLETED" || view.state === "COMPLETED_PROVISIONAL"
+      ? view.research_run_id
+      : current.context.research.last_completed_run_id;
+  current.context.research.provisional_evidence_ids = evidence
+    .filter((item) => item.provisional)
+    .map((item) => item.evidence_id);
+  current.context.research.candidate_claim_ids = candidates.map(
+    (item) => item.candidate_claim_id
+  );
   current.context.research.dossier_id = dossier?.dossier_id ?? null;
   current.context.research.admission_batch_id = view.admission_batch_id;
-  current.context.coverage.source_ids = [...new Set([...current.context.coverage.source_ids, ...evidence.map((item) => item.evidence_id)])];
-  current.context.coverage.status = view.state === "COMPLETED" ? "AVAILABLE" : current.context.coverage.status;
-  current.context.coverage.summary = view.state === "COMPLETED"
-    ? "ResearchRun persistente completada con evidencia institucional trazable."
-    : `ResearchRun persistente en estado ${view.state}.`;
+  current.context.coverage.source_ids = [
+    ...new Set([
+      ...current.context.coverage.source_ids,
+      ...evidence.map((item) => item.evidence_id)
+    ])
+  ];
+  current.context.coverage.status =
+    view.state === "COMPLETED"
+      ? "AVAILABLE"
+      : view.state === "COMPLETED_PROVISIONAL"
+        ? "PARTIAL"
+        : current.context.coverage.status;
+  current.context.coverage.summary =
+    view.state === "COMPLETED"
+      ? "ResearchRun persistente completada con hechos institucionales admitidos."
+      : view.state === "COMPLETED_PROVISIONAL"
+        ? "Dossier persistente completado con evidencia y Candidate Claims provisionales."
+        : `ResearchRun persistente en estado ${view.state}.`;
   current.context.rail_mode = dossier ? "DOSSIER" : "RESEARCH";
-  current.context.selection.evidence_ids = evidence[0] ? [evidence[0].evidence_id] : current.context.selection.evidence_ids;
-  current.context.selection.claim_ids = canonicalClaims[0] ? [canonicalClaims[0].claim_id] : current.context.selection.claim_ids;
+  current.context.selection.evidence_ids = evidence[0]
+    ? [evidence[0].evidence_id]
+    : current.context.selection.evidence_ids;
+  current.context.selection.claim_ids = canonicalClaims[0]
+    ? [canonicalClaims[0].claim_id]
+    : current.context.selection.claim_ids;
 
   if (!previousRun || previousRun.state !== state) {
-    current.context.history.push(nextHistoryEvent(
-      current.context,
-      `RESEARCH_${view.state}`,
-      null,
-      view.research_run_id
-    ));
+    current.context.history.push(
+      nextHistoryEvent(current.context, `RESEARCH_${view.state}`, null, view.research_run_id)
+    );
     current.context.version += 1;
   }
   current.context.updated_at = view.updated_at;
@@ -280,10 +381,15 @@ export function integratePersistentResearchRun(
     claim_id: canonicalClaims[0]?.claim_id ?? null,
     evidence_id: evidence[0]?.evidence_id ?? null
   };
-  current.explanation = view.state === "COMPLETED"
-    ? "La ResearchRun persistente ha devuelto dossier, evidencia y claims al InvestigationContext."
-    : view.state === "FAILED"
-      ? `La ResearchRun falló de forma cerrada: ${view.error_code ?? "UNKNOWN"}.`
-      : `ResearchRun persistente ${view.research_run_id} · ${view.state}.`;
+  current.explanation =
+    view.state === "COMPLETED"
+      ? "La ResearchRun persistente ha devuelto hechos admitidos al InvestigationContext."
+      : view.state === "COMPLETED_PROVISIONAL"
+        ? "El worker documental devolvió dossier y propuestas trazables; ninguna es canónica."
+        : view.state === "QUARANTINED"
+          ? `El documento fue puesto en cuarentena: ${view.error_code ?? "UNKNOWN"}.`
+          : view.state === "FAILED"
+            ? `La ResearchRun falló de forma cerrada: ${view.error_code ?? "UNKNOWN"}.`
+            : `ResearchRun persistente ${view.research_run_id} · ${view.state}.`;
   return current;
 }

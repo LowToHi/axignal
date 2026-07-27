@@ -26,12 +26,16 @@ export type ResearchRequest = {
   question: string;
   locale: Locale;
   includePrivateKnowledge: boolean;
+  researchMode?: "STRUCTURED_SOURCE_OBSERVATION" | "DOCUMENT_PROPOSAL";
   payload: PrototypeInvestigationPayload;
 };
 
 async function readJson<T>(response: Response, operation: string): Promise<T> {
   if (!response.ok) {
-    const body = (await response.json().catch(() => null)) as { error?: string; detail?: string } | null;
+    const body = (await response.json().catch(() => null)) as {
+      error?: string;
+      detail?: string;
+    } | null;
     throw new Error(body?.error ?? body?.detail ?? `${operation} failed with status ${response.status}`);
   }
   return (await response.json()) as T;
@@ -70,18 +74,22 @@ function queuedView(
 }
 
 function publishProgress(view: PersistentResearchRunView, explanation: string): void {
-  window.dispatchEvent(new CustomEvent<ResearchProgressEvent>(RESEARCH_PROGRESS_EVENT, {
-    detail: {
-      researchRunId: view.research_run_id,
-      state: view.state,
-      question: view.question,
-      terminal: isTerminalPersistentState(view.state),
-      explanation
-    }
-  }));
+  window.dispatchEvent(
+    new CustomEvent<ResearchProgressEvent>(RESEARCH_PROGRESS_EVENT, {
+      detail: {
+        researchRunId: view.research_run_id,
+        state: view.state,
+        question: view.question,
+        terminal: isTerminalPersistentState(view.state),
+        explanation
+      }
+    })
+  );
 }
 
-export async function runNavigatorCommand(request: NavigatorCommandRequest): Promise<PrototypeInvestigationPayload> {
+export async function runNavigatorCommand(
+  request: NavigatorCommandRequest
+): Promise<PrototypeInvestigationPayload> {
   const response = await fetch("/api/navigator/interpret", {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -99,7 +107,10 @@ export async function runResearch(
     headers: { "content-type": "application/json" },
     body: JSON.stringify(request)
   });
-  const created = await readJson<PrototypeInvestigationPayload | PersistentResearchRunAccepted>(response, "ResearchRun");
+  const created = await readJson<PrototypeInvestigationPayload | PersistentResearchRunAccepted>(
+    response,
+    "ResearchRun"
+  );
   if (isInvestigationPayload(created)) return created;
 
   let view = queuedView(created, request);
@@ -121,7 +132,9 @@ export async function runResearch(
 
   const timedOut = {
     ...current,
-    explanation: "La ResearchRun sigue activa en el worker; el contexto conserva su identificador persistente para reanudar el polling."
+    explanation:
+      "La ResearchRun sigue activa en el worker; el contexto conserva su identificador " +
+      "persistente para reanudar el polling."
   };
   publishProgress(view, timedOut.explanation);
   return timedOut;
