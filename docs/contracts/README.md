@@ -1,6 +1,6 @@
 # AXIGNAL Development Contracts
 
-Status: `v0.5-product-and-conversion-candidate`
+Status: `v0.6-research-and-retrieval-candidate`
 Goal ID: `AXIGNAL-GOAL-001`
 
 These documents are normative specifications for the product, architecture, commercial system and delivery of AXIGNAL. They define externally testable obligations between product surfaces, public surfaces, data pipelines, epistemic runtime, operators, agents and users. They are not a substitute for jurisdiction-specific legal advice or customer-facing legal terms.
@@ -34,8 +34,11 @@ These documents are normative specifications for the product, architecture, comm
 | [22 — Packaging, Pricing and Entitlements](22-packaging-pricing-and-entitlements.md) | Plans, value metrics, price disclosure, entitlements, usage, cancellation and economic gates |
 | [23 — Acquisition Analytics and Experimentation](23-acquisition-analytics-and-experimentation.md) | Funnel events, attribution, experiments, CRM automation, guardrails and channel validation |
 | [24 — Trust Center and Public Methodology](24-trust-center-and-public-methodology.md) | Public methodology, sources, AI authority, Knowledge Tides, privacy, security, status and corrections |
+| [25 — Navigator Research and Retrieval](25-navigator-research-and-retrieval.md) | Research mode, hybrid retrieval, authorised Browser, ResearchRun lifecycle and dossiers |
+| [26 — Private Knowledge and Tenant Memory](26-private-knowledge-and-tenant-memory.md) | Tenant-private knowledge, memory controls, isolation, retention and cross-domain bridges |
+| [27 — Local Research Worker and Candidate Claim Pipeline](27-local-research-worker-candidate-claim-pipeline.md) | Continuous source processing, model routing, Candidate Claims and admission handoff |
 
-Contracts 12–24 remain normative candidates until their applicable usability, commercial, legal, privacy, security, performance and economic gates pass. ADR-007 selects the Investigation Shell composition for faithful prototyping while leaving exact production tokens unfrozen.
+Contracts 12–27 remain normative candidates until their applicable usability, commercial, legal, privacy, security, performance and economic gates pass. ADR-007 selects the Investigation Shell composition for faithful prototyping while leaving exact production tokens unfrozen.
 
 ## Roadmap and execution
 
@@ -70,6 +73,9 @@ Contracts 12–24 remain normative candidates until their applicable usability, 
 - [`schemas/preference-profile.schema.json`](../../schemas/preference-profile.schema.json)
 - [`schemas/aggregate-intent-signal.schema.json`](../../schemas/aggregate-intent-signal.schema.json)
 - [`schemas/research-candidate.schema.json`](../../schemas/research-candidate.schema.json)
+- [`schemas/research-run.schema.json`](../../schemas/research-run.schema.json)
+- [`schemas/candidate-claim.schema.json`](../../schemas/candidate-claim.schema.json)
+- [`schemas/tenant-knowledge-item.schema.json`](../../schemas/tenant-knowledge-item.schema.json)
 - [`openapi/axignal-v1.yaml`](../../openapi/axignal-v1.yaml)
 - [`skills/registry.yaml`](../../skills/registry.yaml)
 
