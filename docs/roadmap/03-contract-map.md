@@ -1,6 +1,6 @@
 # 03 — AXIGNAL Contract Map
 
-Version: `0.4.0`
+Version: `0.5.0`
 Status: `NORMATIVE CANDIDATE`
 Goal ID: `AXIGNAL-GOAL-001`
 
@@ -35,55 +35,66 @@ This map prevents an implementation agent from reading one contract in isolation
 | `22` | Packaging, Pricing and Entitlements | plans, value metrics, billing disclosure, entitlements and economic gates | F1, F9, F11–F12 |
 | `23` | Acquisition Analytics and Experimentation | funnel, attribution, experiment registry, CRM, guardrails and reinvestment | F1–F2, F9, F12 |
 | `24` | Trust Center and Public Methodology | public methodology, rights, AI authority, privacy, security and status | F1, F6, F9, F11–F12 |
+| `25` | Navigator Research and Retrieval | ResearchRun, hybrid RAG, authorised Browser, dossiers and context updates | F1, F4, F8–F9 |
+| `26` | Private Knowledge and Tenant Memory | tenant knowledge, memory controls, isolation, retention and bridges | F1, F4, F7, F9, F11 |
+| `27` | Local Research Worker and Candidate Claim Pipeline | continuous research, model routing, Candidate Claims and admission handoff | F2–F4, F7–F8, F10–F12 |
 
 ## Capability-to-contract matrix
 
 | Capability | Required contracts |
 |---|---|
-| Navigator | `02`, `06`, `12`, `14`, `16`, `18`, `20` |
-| InvestigationContext | `05`, `12`, `14`, `18` |
+| Navigator | `02`, `06`, `12`, `14`, `16`, `18`, `20`, `25` |
+| Navigator Research Mode | `02`, `03`, `06–08`, `12`, `14`, `16–19`, `25`, `27` |
+| InvestigationContext | `05`, `12`, `14`, `18`, `25` |
+| ResearchRun | `02`, `03`, `06–08`, `17`, `25`, `27` |
+| Authorised Browser retrieval | `03`, `06`, `08`, `25`, `27` |
+| Research dossier | `02`, `03`, `06`, `16`, `25`, `27` |
 | Globe | `05`, `07`, `12`, `13`, `16`, `19`, `20` |
 | Graph | `02`, `05`, `07`, `12`, `13`, `16`, `19`, `20` |
-| Timeline | `02`, `05`, `12`, `13`, `20` |
-| Claim and Evidence Rail | `02`, `03`, `05`, `06`, `12`, `13`, `16`, `20` |
+| Timeline | `02`, `05`, `12`, `13`, `20`, `25` |
+| Claim and Evidence Rail | `02`, `03`, `05`, `06`, `12`, `13`, `16`, `20`, `25` |
 | AUTO lens routing | `12`, `14`, `16`, `20` |
 | Dual mode | `12`, `13`, `20` |
-| Investigation trails | `06`, `12`, `14`, `15` |
-| Personal Interest Memory | `06`, `15` |
-| Knowledge Tides | `06`, `08`, `15`, `17`, `24` |
-| Research Candidate Queue | `02`, `03`, `08`, `15`, `17` |
-| Claim Ledger | `02`, `03`, `04`, `06`, `08` |
-| Opportunity Engine | `02`, `03`, `08`, `11` |
-| Multilingual search | `02`, `07`, `16` |
+| Investigation trails | `06`, `12`, `14`, `15`, `25`, `26` |
+| Personal Interest Memory | `06`, `15`, `26` |
+| Tenant Private Knowledge | `02`, `03`, `06–08`, `16`, `25`, `26` |
+| Knowledge Tides | `06`, `08`, `15`, `17`, `24`, `26` |
+| Research Candidate Queue | `02`, `03`, `08`, `15`, `17`, `25`, `27` |
+| Local Research Worker | `02–04`, `06`, `08`, `17`, `19`, `27`, ADR-010 |
+| Candidate Claim pipeline | `02`, `03`, `06`, `08`, `17`, `27`, ADR-010 |
+| Three isolated knowledge domains | `02`, `04`, `06`, `15`, `19`, `26`, ADR-009 |
+| Claim Ledger | `02`, `03`, `04`, `06`, `08`, `27` |
+| Opportunity Engine | `02`, `03`, `08`, `11`, `27` |
+| Multilingual search | `02`, `07`, `16`, `25`, `26` |
 | Selected dark/light product shell | `05`, `12–14`, `20`, ADR-007 |
 | Marketing landing | `00`, `06`, `16`, `20`, `21`, `23`, `24` |
-| Product demonstration and sandbox | `02`, `05`, `12–14`, `20`, `21` |
+| Product demonstration and sandbox | `02`, `05`, `12–14`, `20`, `21`, `25` |
 | Pricing page and plan comparison | `01`, `06`, `11`, `21`, `22` |
-| Billing and entitlements | `01`, `04`, `06`, `07`, `08`, `22` |
+| Billing and entitlements | `01`, `04`, `06`, `07`, `08`, `22`, `25` |
 | Trial and access flow | `06`, `07`, `21–23` |
 | Conversion FAQ | `06`, `16`, `21`, `22`, `24` |
-| Trust Center and public methodology | `02`, `03`, `06`, `10`, `15`, `16`, `24` |
+| Trust Center and public methodology | `02`, `03`, `06`, `10`, `15`, `16`, `24–27` |
 | Acquisition analytics | `06`, `08`, `21`, `23` |
 | CRM and lead automation | `04`, `06`, `18`, `23` |
 | Experimentation | `06`, `08`, `11`, `21–23` |
-| Enterprise private data | `02`, `03`, `06`, `07`, `10`, `16`, `24` |
+| Enterprise private data | `02`, `03`, `06`, `07`, `10`, `16`, `24`, `26` |
 
 ## Phase-to-contract matrix
 
 | Phase | Mandatory contracts |
 |---|---|
-| F0 | Goal Lock, `00–11`, `18–24` |
-| F1 | `00`, `05`, `06`, `08`, `11–16`, `18–24` |
-| F2 | `04`, `06–10`, `18`, `19`, `21`, `23` |
-| F3 | `02–04`, `06`, `08–10`, `18`, `19` |
-| F4 | `02`, `05–08`, `12`, `14`, `16`, `18–20` |
-| F5 | `02`, `04–08`, `12–14`, `16`, `18–20` |
-| F6 | `02–08`, `12`, `14`, `16`, `18–21`, `24` |
-| F7 | `02`, `04`, `06`, `08`, `10`, `12`, `14–19`, `24` |
-| F8 | `00–20`, `24` |
-| F9 | `00–24` |
-| F10 | `02`, `04`, `06`, `08–12`, `16`, `18–20`, `24` |
-| F11 | `01–10`, `12`, `14–16`, `18–20`, `22`, `24` |
+| F0 | Goal Lock, `00–11`, `18–27` |
+| F1 | `00`, `05`, `06`, `08`, `11–16`, `18–26` |
+| F2 | `04`, `06–10`, `18`, `19`, `21`, `23`, `27` |
+| F3 | `02–04`, `06`, `08–10`, `18`, `19`, `27` |
+| F4 | `02`, `03`, `05–08`, `12`, `14`, `16`, `18–20`, `25–27` |
+| F5 | `02`, `04–08`, `12–14`, `16`, `18–20`, `25` |
+| F6 | `02–08`, `12`, `14`, `16`, `18–21`, `24–26` |
+| F7 | `02`, `04`, `06`, `08`, `10`, `12`, `14–19`, `24–27` |
+| F8 | `00–27` |
+| F9 | `00–27` |
+| F10 | `02`, `04`, `06`, `08–12`, `16`, `18–20`, `24`, `27` |
+| F11 | `01–10`, `12`, `14–16`, `18–20`, `22`, `24`, `26`, `27` |
 | F12 | all applicable contracts |
 
 ## Contract precedence
@@ -103,7 +114,7 @@ When contracts appear to conflict, precedence is:
 
 A lower layer MUST NOT silently weaken a higher layer.
 
-A conversion or pricing optimisation MUST NOT override product truth, privacy, source rights, accessibility or the non-advice boundary.
+A conversion, pricing, research-depth or model-cost optimisation MUST NOT override product truth, privacy, source rights, accessibility or the non-advice boundary.
 
 ## Required change propagation
 
