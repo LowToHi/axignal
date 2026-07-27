@@ -1,6 +1,8 @@
 from axignal_api.main import app
-from axignal_api.research import router as research_router
+from axignal_api.persistent_research import router as persistent_research_router
+from axignal_api.research import router as prototype_research_router
 
-app.include_router(research_router)
+app.include_router(prototype_research_router)
+app.include_router(persistent_research_router)
 
 __all__ = ["app"]
