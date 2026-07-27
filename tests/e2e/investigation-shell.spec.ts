@@ -9,8 +9,9 @@ test("preserves the canonical Navigator → lens → evidence workflow", async (
   await expect(page.getByText("Moscú, Rusia").first()).toBeVisible();
 
   await page.getByRole("button", { name: "GRAPH", exact: true }).click();
+  await expect(page.getByRole("button", { name: "GRAPH", exact: true })).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByText("Transmission graph")).toBeVisible();
-  await expect(page.getByText("Ramenki District")).toBeVisible();
+  await expect(page.getByText("Distrito de Ramenki")).toBeVisible();
 
   const composer = page.getByLabel("Mensaje para AXIGNAL");
   await composer.fill("Muéstrame las contradicciones");
