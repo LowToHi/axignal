@@ -8,5 +8,6 @@
 | [ADR-004](ADR-004-progressive-universe-admission.md) | Opportunity universes are admitted progressively through gates | ACCEPTED |
 | [ADR-005](ADR-005-map-first-investigation-shell.md) | Map-first investigation shell with persistent evidence and time context | PROPOSED / VALIDATION REQUIRED |
 | [ADR-006](ADR-006-layered-visual-system-candidate.md) | Layered brand, UI, epistemic and visualisation colour systems remain candidates pending evidence | PROPOSED / VALIDATION REQUIRED |
+| [ADR-007](ADR-007-selected-investigation-shell-visual-reference.md) | Selected dark/light Investigation Shell composition is the fidelity target; exact production tokens remain unfrozen | ACCEPTED FOR PROTOTYPE FIDELITY |
 
 ADRs record durable decisions and consequences. A later decision MUST supersede rather than erase an accepted ADR.
