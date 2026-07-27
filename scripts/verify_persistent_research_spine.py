@@ -19,6 +19,10 @@ DATABASE_URL = os.environ.get(
 VALKEY_URL = os.environ.get("AXIGNAL_VALKEY_URL", "redis://127.0.0.1:6379/0")
 TENANT_A = UUID("11111111-1111-4111-8111-111111111111")
 TENANT_B = UUID("22222222-2222-4222-8222-222222222222")
+IDENTITY_SECRET = os.environ.get(
+    "AXIGNAL_IDENTITY_ASSERTION_SECRET",
+    "ci-identity-assertion-secret-with-at-least-32-bytes",
+)
 
 os.environ["AXIGNAL_DATABASE_URL"] = DATABASE_URL
 os.environ["AXIGNAL_VALKEY_URL"] = VALKEY_URL
@@ -26,12 +30,25 @@ os.environ["AXIGNAL_PERSISTENT_RESEARCH_ENABLED"] = "true"
 os.environ["AXIGNAL_LIVE_SOURCES_ENABLED"] = "false"
 os.environ["AXIGNAL_WORLD_BANK_FIXTURE_PATH"] = str(FIXTURE)
 os.environ["AXIGNAL_RESEARCH_QUEUE_KEY"] = "axignal:research:queue:ci"
+os.environ["AXIGNAL_IDENTITY_ASSERTION_SECRET"] = IDENTITY_SECRET
 
 from axignal_api.application import app  # noqa: E402
+from axignal_api.identity import build_identity_assertion  # noqa: E402
 from axignal_api.queue import OutboxPublisher, ValkeyResearchQueue  # noqa: E402
 from axignal_api.repository import ResearchRepository  # noqa: E402
 from axignal_api.settings import Settings  # noqa: E402
 from axignal_api.worker import build_runtime  # noqa: E402
+
+
+def identity_headers(tenant_id: UUID, *, subject: str) -> dict[str, str]:
+    return {
+        "X-AXIGNAL-Identity-Assertion": build_identity_assertion(
+            secret=IDENTITY_SECRET,
+            subject=subject,
+            email=f"{subject}@example.test",
+            tenant_id=tenant_id,
+        )
+    }
 
 
 def assert_database_contract() -> None:
@@ -118,9 +135,20 @@ def main() -> int:
     queue.purge_for_test()
 
     client = TestClient(app)
-    create_response = client.post(
+    legacy_response = client.post(
         "/v1/research-runs",
         headers={"X-AXIGNAL-Tenant-ID": str(TENANT_A)},
+        json={
+            "context_id": "ctx_moscow_real_estate_v01",
+            "opportunity_id": "opp_moscow_ramenki",
+            "question": "La cabecera de tenant ya no debe tener autoridad.",
+        },
+    )
+    assert legacy_response.status_code == 401, legacy_response.text
+
+    create_response = client.post(
+        "/v1/research-runs",
+        headers=identity_headers(TENANT_A, subject="usr_tenant_a"),
         json={
             "context_id": "ctx_moscow_real_estate_v01",
             "opportunity_id": "opp_moscow_ramenki",
@@ -142,7 +170,7 @@ def main() -> int:
 
     get_response = client.get(
         f"/v1/research-runs/{run_id}",
-        headers={"X-AXIGNAL-Tenant-ID": str(TENANT_A)},
+        headers=identity_headers(TENANT_A, subject="usr_tenant_a"),
     )
     assert get_response.status_code == 200, get_response.text
     result = get_response.json()
@@ -152,7 +180,9 @@ def main() -> int:
     assert result["actual_usage"]["fixture_reads"] == 1
     assert len(result["evidence"]) == 1
     assert result["evidence"][0]["source_id"] == "world-bank-wdi"
-    assert result["evidence"][0]["rights_status"] == ("COMMERCIAL_REUSE_WITH_ATTRIBUTION")
+    assert result["evidence"][0]["rights_status"] == (
+        "COMMERCIAL_REUSE_WITH_ATTRIBUTION"
+    )
     assert result["evidence"][0]["numeric_value"] == "8.7"
     assert len(result["candidate_claims"]) == 1
     assert result["candidate_claims"][0]["producer_type"] == "DETERMINISTIC_PARSER"
@@ -167,7 +197,7 @@ def main() -> int:
 
     other_tenant_response = client.get(
         f"/v1/research-runs/{run_id}",
-        headers={"X-AXIGNAL-Tenant-ID": str(TENANT_B)},
+        headers=identity_headers(TENANT_B, subject="usr_tenant_b"),
     )
     assert other_tenant_response.status_code == 404
     assert repository.debug_count_for_tenant(tenant_id=TENANT_A, table="research_runs") == 1
@@ -211,7 +241,10 @@ def main() -> int:
         )
         assert cursor.fetchone()[0] == 0
 
-    print("PASS persistent ResearchRun, RLS, outbox, worker and deterministic admission")
+    print(
+        "PASS authenticated identity, server-resolved tenant, persistent ResearchRun, "
+        "RLS, outbox, worker and deterministic admission"
+    )
     return 0
 
 
