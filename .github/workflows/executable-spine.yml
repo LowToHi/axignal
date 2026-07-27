@@ -1,0 +1,95 @@
+name: Executable Spine
+
+on:
+  pull_request:
+    paths:
+      - "apps/**"
+      - "packages/**"
+      - "infra/**"
+      - "tests/**"
+      - "package.json"
+      - "pnpm-workspace.yaml"
+      - "turbo.json"
+      - "tsconfig.base.json"
+      - "pyproject.toml"
+      - "compose.yaml"
+      - ".github/workflows/executable-spine.yml"
+  push:
+    branches:
+      - main
+      - "agent/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: executable-spine-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web:
+    name: Web, landing and browser contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Enable pinned pnpm
+        run: corepack enable
+      - name: Install JavaScript dependencies
+        run: pnpm install --no-frozen-lockfile
+      - name: Typecheck workspaces
+        run: pnpm typecheck
+      - name: Build product and landing
+        run: pnpm build
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Run canonical browser workflow
+        run: pnpm test:e2e --project=chromium-desktop
+      - name: Upload browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-evidence
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore
+          retention-days: 7
+
+  api:
+    name: FastAPI contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install API and test dependencies
+        run: python -m pip install --upgrade pip && python -m pip install -e ".[dev]"
+      - name: Lint API
+        run: ruff check apps/api
+      - name: Test API
+        run: pytest --cov=axignal_api --cov-report=term-missing
+
+  services:
+    name: PostgreSQL, PostGIS, pgvector and Valkey
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start disposable services
+        run: docker compose up --build --detach --wait
+      - name: Verify database extensions
+        run: |
+          docker compose exec -T postgres psql -U axignal -d axignal -v ON_ERROR_STOP=1 -c "SELECT extname FROM pg_extension WHERE extname IN ('postgis', 'vector') ORDER BY extname;"
+          count=$(docker compose exec -T postgres psql -U axignal -d axignal -Atc "SELECT count(*) FROM pg_extension WHERE extname IN ('postgis', 'vector');")
+          test "$count" = "2"
+      - name: Verify Valkey
+        run: test "$(docker compose exec -T valkey valkey-cli ping)" = "PONG"
+      - name: Destroy disposable services
+        if: always()
+        run: docker compose down --volumes --remove-orphans
