@@ -46,20 +46,26 @@ jobs:
               print(f'PASS {path}')
           PY
 
-      - name: Validate skill registry YAML
+      - name: Validate modular skill registries
         run: |
           python - <<'PY'
           from pathlib import Path
           import yaml
 
-          path = Path('skills/registry.yaml')
-          data = yaml.safe_load(path.read_text(encoding='utf-8'))
-          assert data['goal_id'] == 'AXIGNAL-GOAL-001'
-          assert data['canonical_brand'] == 'AXIGNAL'
-          assert data['canonical_domain'] == 'axignal.com'
-          ids = [item['skill_id'] for item in data['skills']]
-          assert len(ids) == len(set(ids)), 'Duplicate skill IDs'
-          print(f'PASS {path}: {len(ids)} skills')
+          paths = [Path('skills/registry.yaml'), *sorted(Path('skills').glob('*.registry.yaml'))]
+          all_ids: list[str] = []
+          for path in paths:
+              data = yaml.safe_load(path.read_text(encoding='utf-8'))
+              assert data['goal_id'] == 'AXIGNAL-GOAL-001', path
+              assert data['canonical_brand'] == 'AXIGNAL', path
+              assert data['canonical_domain'] == 'axignal.com', path
+              ids = [item['skill_id'] for item in data['skills']]
+              assert len(ids) == len(set(ids)), f'Duplicate skill IDs inside {path}'
+              all_ids.extend(ids)
+              print(f'PASS {path}: {len(ids)} skills')
+
+          assert len(all_ids) == len(set(all_ids)), 'Duplicate skill IDs across registries'
+          print(f'PASS combined registry: {len(all_ids)} unique skills')
           PY
 
       - name: Validate OpenAPI
