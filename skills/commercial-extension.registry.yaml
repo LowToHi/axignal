@@ -1,6 +1,8 @@
 version: 0.1.0-candidate
 goal_id: AXIGNAL-GOAL-001
 status: PROPOSED_EXTENSION
+canonical_brand: AXIGNAL
+canonical_domain: axignal.com
 merge_target: skills/registry.yaml
 activation_rule: Skills in this extension MUST NOT become ACTIVE until merged into the canonical registry, validated against schemas/skill.schema.json and approved by the applicable gate.
 
