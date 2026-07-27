@@ -1,14 +1,14 @@
 from __future__ import annotations
 
+import os
 from datetime import UTC, datetime, timedelta
 from hashlib import sha256
-import os
 from pathlib import Path
 from uuid import UUID
 
 import psycopg
 from fastapi.testclient import TestClient
-from psycopg.errors import RaiseException
+from psycopg.errors import InsufficientPrivilege, RaiseException
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / "apps" / "api" / "tests" / "fixtures" / "world_bank_rus_inflation.json"
@@ -35,66 +35,79 @@ from axignal_api.worker import build_runtime  # noqa: E402
 
 
 def assert_database_contract() -> None:
-    with psycopg.connect(DATABASE_URL) as connection:
-        with connection.cursor() as cursor:
-            cursor.execute(
-                """
-                SELECT schema_name
-                FROM information_schema.schemata
-                WHERE schema_name IN ('axignal_global', 'tenant_private', 'intent_intelligence')
-                ORDER BY schema_name
-                """
-            )
-            assert [row[0] for row in cursor.fetchall()] == [
-                "axignal_global",
-                "intent_intelligence",
-                "tenant_private",
-            ]
-            cursor.execute(
-                """
-                SELECT source_id, admission_state, rights_status, kill_switch
-                FROM axignal_global.sources
-                ORDER BY source_id
-                """
-            )
-            sources = {row[0]: row[1:] for row in cursor.fetchall()}
-            assert sources["world-bank-wdi"] == (
-                "ADMITTED",
-                "COMMERCIAL_REUSE_WITH_ATTRIBUTION",
-                False,
-            )
-            assert sources["bank-of-russia-statistics"] == (
-                "QUARANTINED",
-                "RIGHTS_PENDING",
-                True,
-            )
-            cursor.execute(
-                """
-                SELECT relrowsecurity, relforcerowsecurity
-                FROM pg_class
-                WHERE oid = 'tenant_private.research_runs'::regclass
-                """
-            )
-            assert cursor.fetchone() == (True, True)
+    with psycopg.connect(DATABASE_URL) as connection, connection.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT schema_name
+            FROM information_schema.schemata
+            WHERE schema_name IN ('axignal_global', 'tenant_private', 'intent_intelligence')
+            ORDER BY schema_name
+            """
+        )
+        assert [row[0] for row in cursor.fetchall()] == [
+            "axignal_global",
+            "intent_intelligence",
+            "tenant_private",
+        ]
+        cursor.execute(
+            """
+            SELECT source_id, admission_state, rights_status, kill_switch
+            FROM axignal_global.sources
+            ORDER BY source_id
+            """
+        )
+        sources = {row[0]: row[1:] for row in cursor.fetchall()}
+        assert sources["world-bank-wdi"] == (
+            "ADMITTED",
+            "COMMERCIAL_REUSE_WITH_ATTRIBUTION",
+            False,
+        )
+        assert sources["bank-of-russia-statistics"] == (
+            "QUARANTINED",
+            "RIGHTS_PENDING",
+            True,
+        )
+        cursor.execute(
+            """
+            SELECT relrowsecurity, relforcerowsecurity
+            FROM pg_class
+            WHERE oid = 'tenant_private.research_runs'::regclass
+            """
+        )
+        assert cursor.fetchone() == (True, True)
 
 
-def assert_ledger_is_immutable(canonical_claim_id: UUID) -> None:
+def assert_ledger_is_protected(canonical_claim_id: UUID) -> None:
     try:
-        with psycopg.connect(DATABASE_URL) as connection:
-            with connection.cursor() as cursor:
-                cursor.execute("SET LOCAL ROLE axignal_worker")
-                cursor.execute(
-                    """
-                    UPDATE axignal_global.canonical_claims
-                    SET statement = 'tampered'
-                    WHERE canonical_claim_id = %s
-                    """,
-                    (canonical_claim_id,),
-                )
+        with psycopg.connect(DATABASE_URL) as connection, connection.cursor() as cursor:
+            cursor.execute("SET LOCAL ROLE axignal_worker")
+            cursor.execute(
+                """
+                UPDATE axignal_global.canonical_claims
+                SET statement = 'worker tamper attempt'
+                WHERE canonical_claim_id = %s
+                """,
+                (canonical_claim_id,),
+            )
+    except InsufficientPrivilege:
+        pass
+    else:
+        raise AssertionError("Worker unexpectedly received canonical Claim Ledger UPDATE access")
+
+    try:
+        with psycopg.connect(DATABASE_URL) as connection, connection.cursor() as cursor:
+            cursor.execute(
+                """
+                UPDATE axignal_global.canonical_claims
+                SET statement = 'owner tamper attempt'
+                WHERE canonical_claim_id = %s
+                """,
+                (canonical_claim_id,),
+            )
     except RaiseException as exc:
         assert "append-only" in str(exc)
     else:
-        raise AssertionError("Canonical Claim Ledger accepted an in-place mutation")
+        raise AssertionError("Canonical Claim Ledger trigger accepted an in-place mutation")
 
 
 def main() -> int:
@@ -182,20 +195,23 @@ def main() -> int:
         expires_at=now + timedelta(days=30),
     )
 
-    assert_ledger_is_immutable(UUID(canonical["canonical_claim_id"]))
+    assert_ledger_is_protected(UUID(canonical["canonical_claim_id"]))
 
     # Duplicate delivery is safe and must not create a second canonical fact.
     OutboxPublisher(repository, queue).publish_pending(limit=20)
-    with psycopg.connect(DATABASE_URL) as connection:
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT count(*) FROM axignal_global.canonical_claims")
-            assert cursor.fetchone()[0] == 1
-            cursor.execute("SELECT count(*) FROM axignal_global.claim_state_events")
-            assert cursor.fetchone()[0] == 1
-            cursor.execute(
-                "SELECT count(*) FROM intent_intelligence.knowledge_tides WHERE research_candidate_only"
-            )
-            assert cursor.fetchone()[0] == 0
+    with psycopg.connect(DATABASE_URL) as connection, connection.cursor() as cursor:
+        cursor.execute("SELECT count(*) FROM axignal_global.canonical_claims")
+        assert cursor.fetchone()[0] == 1
+        cursor.execute("SELECT count(*) FROM axignal_global.claim_state_events")
+        assert cursor.fetchone()[0] == 1
+        cursor.execute(
+            """
+            SELECT count(*)
+            FROM intent_intelligence.knowledge_tides
+            WHERE research_candidate_only
+            """
+        )
+        assert cursor.fetchone()[0] == 0
 
     print("PASS persistent ResearchRun, RLS, outbox, worker and deterministic admission")
     return 0
