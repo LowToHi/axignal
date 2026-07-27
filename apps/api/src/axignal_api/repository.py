@@ -1,10 +1,10 @@
 from __future__ import annotations
 
+import json
 from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import UTC, datetime
-import json
 from typing import Any, Literal
 from uuid import UUID, uuid4
 
@@ -39,15 +39,17 @@ class ResearchRepository:
         role: DatabaseRole,
         tenant_id: UUID | None = None,
     ) -> Iterator[psycopg.Cursor[dict[str, Any]]]:
-        with psycopg.connect(self.dsn, row_factory=dict_row) as connection:
-            with connection.cursor() as cursor:
-                cursor.execute(sql.SQL("SET LOCAL ROLE {}").format(sql.Identifier(role)))
-                if tenant_id is not None:
-                    cursor.execute(
-                        "SELECT set_config('app.tenant_id', %s, true)",
-                        (str(tenant_id),),
-                    )
-                yield cursor
+        with (
+            psycopg.connect(self.dsn, row_factory=dict_row) as connection,
+            connection.cursor() as cursor,
+        ):
+            cursor.execute(sql.SQL("SET LOCAL ROLE {}").format(sql.Identifier(role)))
+            if tenant_id is not None:
+                cursor.execute(
+                    "SELECT set_config('app.tenant_id', %s, true)",
+                    (str(tenant_id),),
+                )
+            yield cursor
 
     def create_run(
         self,
@@ -357,7 +359,11 @@ class ResearchRepository:
     ) -> dict[str, UUID | None]:
         with self._cursor(role="axignal_worker", tenant_id=tenant_id) as cursor:
             cursor.execute(
-                "SELECT state, opportunity_id FROM tenant_private.research_runs WHERE research_run_id = %s",
+                """
+                SELECT state, opportunity_id
+                FROM tenant_private.research_runs
+                WHERE research_run_id = %s
+                """,
                 (run_id,),
             )
             run = cursor.fetchone()
@@ -472,9 +478,7 @@ class ResearchRepository:
                 "changes": "AXIGNAL selected, normalised and contextualised the observation.",
             }
             dossier_status = (
-                "TRACEABLE_WITH_ADMITTED_FACTS"
-                if canonical_claim_id
-                else "TRACEABLE_PROVISIONAL"
+                "TRACEABLE_WITH_ADMITTED_FACTS" if canonical_claim_id else "TRACEABLE_PROVISIONAL"
             )
             cursor.execute(
                 """
@@ -811,7 +815,11 @@ class ResearchRepository:
             canonical_claim_id = row["canonical_claim_id"]
         else:
             cursor.execute(
-                "SELECT canonical_claim_id FROM axignal_global.canonical_claims WHERE fingerprint = %s",
+                """
+                SELECT canonical_claim_id
+                FROM axignal_global.canonical_claims
+                WHERE fingerprint = %s
+                """,
                 (candidate.fingerprint,),
             )
             existing = cursor.fetchone()
