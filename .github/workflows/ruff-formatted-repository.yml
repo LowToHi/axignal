@@ -25,7 +25,7 @@ jobs:
         run: |
           mkdir -p formatted/apps/api/src/axignal_api
           cp apps/api/src/axignal_api/repository.py formatted/apps/api/src/axignal_api/repository.py
-          ruff check formatted/apps/api/src/axignal_api/repository.py --fix
+          ruff check formatted/apps/api/src/axignal_api/repository.py --fix || true
           ruff format formatted/apps/api/src/axignal_api/repository.py
           ruff check formatted/apps/api/src/axignal_api/repository.py
       - name: Upload formatted repository
