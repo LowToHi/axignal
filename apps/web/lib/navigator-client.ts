@@ -6,6 +6,16 @@ import {
   type PersistentResearchRunView
 } from "./persistent-research";
 
+export const RESEARCH_PROGRESS_EVENT = "axignal:research-progress";
+
+export type ResearchProgressEvent = {
+  researchRunId: string;
+  state: string;
+  question: string;
+  terminal: boolean;
+  explanation: string;
+};
+
 export type NavigatorCommandRequest = {
   message: string;
   locale: Locale;
@@ -59,6 +69,18 @@ function queuedView(
   };
 }
 
+function publishProgress(view: PersistentResearchRunView, explanation: string): void {
+  window.dispatchEvent(new CustomEvent<ResearchProgressEvent>(RESEARCH_PROGRESS_EVENT, {
+    detail: {
+      researchRunId: view.research_run_id,
+      state: view.state,
+      question: view.question,
+      terminal: isTerminalPersistentState(view.state),
+      explanation
+    }
+  }));
+}
+
 export async function runNavigatorCommand(request: NavigatorCommandRequest): Promise<PrototypeInvestigationPayload> {
   const response = await fetch("/api/navigator/interpret", {
     method: "POST",
@@ -80,7 +102,9 @@ export async function runResearch(
   const created = await readJson<PrototypeInvestigationPayload | PersistentResearchRunAccepted>(response, "ResearchRun");
   if (isInvestigationPayload(created)) return created;
 
-  let current = integratePersistentResearchRun(request.payload, queuedView(created, request));
+  let view = queuedView(created, request);
+  let current = integratePersistentResearchRun(request.payload, view);
+  publishProgress(view, current.explanation);
   onProgress?.(current);
 
   for (let attempt = 0; attempt < 80; attempt += 1) {
@@ -88,14 +112,17 @@ export async function runResearch(
     const pollResponse = await fetch(`/api/research/runs/${created.research_run_id}`, {
       cache: "no-store"
     });
-    const view = await readJson<PersistentResearchRunView>(pollResponse, "ResearchRun polling");
+    view = await readJson<PersistentResearchRunView>(pollResponse, "ResearchRun polling");
     current = integratePersistentResearchRun(current, view);
+    publishProgress(view, current.explanation);
     onProgress?.(current);
     if (isTerminalPersistentState(view.state)) return current;
   }
 
-  return {
+  const timedOut = {
     ...current,
     explanation: "La ResearchRun sigue activa en el worker; el contexto conserva su identificador persistente para reanudar el polling."
   };
+  publishProgress(view, timedOut.explanation);
+  return timedOut;
 }
