@@ -3,8 +3,9 @@ from __future__ import annotations
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Header, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 
+from axignal_api.identity import AuthenticatedIdentity, require_identity
 from axignal_api.persistent_models import (
     PersistentResearchRunAccepted,
     PersistentResearchRunCreate,
@@ -15,7 +16,7 @@ from axignal_api.repository import ResearchRepository
 from axignal_api.settings import Settings
 
 router = APIRouter(prefix="/v1", tags=["persistent-research"])
-TenantHeader = Annotated[UUID, Header(alias="X-AXIGNAL-Tenant-ID")]
+Authenticated = Annotated[AuthenticatedIdentity, Depends(require_identity)]
 
 
 def _services() -> tuple[ResearchRepository, OutboxPublisher]:
@@ -41,14 +42,14 @@ def _services() -> tuple[ResearchRepository, OutboxPublisher]:
 )
 def create_persistent_research_run(
     command: PersistentResearchRunCreate,
-    tenant_id: TenantHeader,
+    identity: Authenticated,
     response: Response,
 ) -> PersistentResearchRunAccepted:
-    """Create a tenant-scoped ResearchRun and publish it through the transactional outbox."""
+    """Create a ResearchRun inside the tenant resolved from authenticated identity."""
     repository, publisher = _services()
     try:
         run_id = repository.create_run(
-            tenant_id=tenant_id,
+            tenant_id=identity.tenant_id,
             context_id=command.context_id,
             opportunity_id=command.opportunity_id,
             question=command.question,
@@ -77,12 +78,15 @@ def create_persistent_research_run(
 )
 def get_persistent_research_run(
     research_run_id: UUID,
-    tenant_id: TenantHeader,
+    identity: Authenticated,
 ) -> PersistentResearchRunView:
-    """Read a ResearchRun only inside the caller's tenant RLS context."""
+    """Read a ResearchRun only inside the authenticated caller's tenant RLS context."""
     repository, _ = _services()
     try:
-        view = repository.get_run_view(tenant_id=tenant_id, run_id=research_run_id)
+        view = repository.get_run_view(
+            tenant_id=identity.tenant_id,
+            run_id=research_run_id,
+        )
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
