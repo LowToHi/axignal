@@ -1,6 +1,6 @@
 # AXIGNAL End-to-End Development Map
 
-Version: `0.4.1`
+Version: `0.5.0`
 Status: `CANDIDATE / EVOLVING UNTIL FINAL MAP FREEZE`
 Goal ID: `AXIGNAL-GOAL-001`
 
@@ -35,15 +35,22 @@ No development agent may skip a layer or infer a different product goal from an 
 | [07 — Visual System Validation](07-visual-system-validation.md) | Candidate brand/UI directions, automated checks, user tests and non-freeze gate |
 | [08 — Marketing, Pricing and Conversion](08-marketing-pricing-and-conversion-work-package.md) | Product fidelity, landing, pricing, FAQ, Trust Center, analytics and commercial validation |
 | [09 — Commercial Dynamic Skills](09-commercial-dynamic-skill-map.md) | Candidate skills and task routing for fidelity, conversion, pricing, acquisition, CRM, SEO and trust |
+| [10 — Research, Retrieval and Candidate Claims](10-research-retrieval-and-candidate-claims-work-package.md) | ResearchRun, authorised retrieval, tenant memory, Candidate Claims, dossier and admission handoff |
 
 ## Normative execution contracts
 
 - [`docs/contracts/18-development-agent-governance.md`](../contracts/18-development-agent-governance.md)
 - [`AGENTS.md`](../../AGENTS.md)
 - [`skills/registry.yaml`](../../skills/registry.yaml)
-- [`skills/commercial-extension.registry.yaml`](../../skills/commercial-extension.registry.yaml) — proposed extension; fail closed until merged and validated
+- [`skills/commercial-extension.registry.yaml`](../../skills/commercial-extension.registry.yaml)
+- [`skills/research-retrieval.registry.yaml`](../../skills/research-retrieval.registry.yaml)
 - [`schemas/task.schema.json`](../../schemas/task.schema.json)
 - [`schemas/skill.schema.json`](../../schemas/skill.schema.json)
+- [`schemas/research-run.schema.json`](../../schemas/research-run.schema.json)
+- [`schemas/candidate-claim.schema.json`](../../schemas/candidate-claim.schema.json)
+- [`schemas/tenant-knowledge-item.schema.json`](../../schemas/tenant-knowledge-item.schema.json)
+
+All registry files are validated as one ID set. A duplicate skill ID, identity mismatch or missing required specialist skill fails closed.
 
 ## Status hierarchy
 
@@ -79,9 +86,10 @@ Task state:
 
 - Foundation contracts: created in PR #1 and consolidated into the active roadmap PR.
 - UX research and map-first prototype: created in PR #4 and consolidated into the active roadmap PR.
-- The selected Investigation Shell composition is now accepted as the prototype fidelity target through ADR-007.
+- The selected Investigation Shell composition is accepted as the prototype fidelity target through ADR-007.
+- The executable shell now has a typed, persistent and CI-green InvestigationContext vertical slice.
 - Exact production colours, typography, dimensions and motion remain unfrozen under Contract 20.
-- The current visual implementation must reproduce:
+- The current visual implementation must preserve:
   - persistent Navigator chat;
   - `AUTO / GLOBE / GRAPH / DUAL` in the primary context bar;
   - dominant Globe or Graph canvas;
@@ -89,25 +97,25 @@ Task state:
   - persistent Timeline;
   - dark Signal Teal and first-class light counterpart;
   - shared InvestigationContext and epistemic semantics.
-- The public acquisition system is now governed by Contracts 21–24 and Issue #6.
-- The landing is a complete conversion system including:
-  - faithful product proof;
-  - use cases and differentiation;
-  - Pricing and plan comparison;
-  - FAQ and objection handling;
-  - Trust Center and public methodology;
-  - conversion forms, CRM and onboarding handoff;
-  - acquisition analytics and experiments;
-  - six-language architecture;
-  - SEO, accessibility and performance;
-  - evidence-gated channel reinvestment.
-- Commercial dynamic skills are specified in the candidate extension but are not executable until merged into the canonical registry and validated.
-- Buyer, public copy, plan names, prices and acquisition channels remain hypotheses until their gates pass.
+- The public acquisition system is governed by Contracts 21–24 and Issue #6.
+- Navigator Research Mode is now governed by Contracts 25–27 and ADR-009–010.
+- The research architecture requires:
+  - a visible and budgeted ResearchRun;
+  - official APIs before Browser where available;
+  - authorised Browser retrieval with provenance and prompt-injection controls;
+  - three isolated logical knowledge domains on one PostgreSQL/pgvector platform initially;
+  - tenant-private memory with explicit purpose and deletion controls;
+  - Evidence Objects and Candidate Claims before admission;
+  - local and external AI with proposal authority only;
+  - contradiction and unknown discovery;
+  - a traceable dossier and admission-queue handoff.
+- The first research vertical slice must remain synthetic and bounded before real sources, live Browser, customer data or continuous production workers are authorised.
+- Buyer, public copy, plan names, prices, acquisition channels, model routes and initial source licences remain hypotheses until their gates pass.
 
 ## Canonical identity
 
 - Brand: **AXIGNAL**
-- Domain: **axignal.com**
+- Domain: `axignal.com`
 - Repository: `LowToHi/axignal`
 - Goal ID: `AXIGNAL-GOAL-001`
 
@@ -115,8 +123,8 @@ Any occurrence of `ASIGNAL`, `asignal.com` or `ASIGNAL-GOAL-001` is a naming def
 
 ## Authorised operational priority
 
-Until the product and conversion map is frozen, the authorised priority is:
+The authorised priority is:
 
-> Build and validate the faithful AXIGNAL Investigation Shell prototype and the complete conversion landing system—product proof, Pricing, FAQ, Trust Center and acquisition instrumentation—without starting unauthorised production-scale data or market expansion.
+> Preserve the faithful AXIGNAL Investigation Shell and conversion system while implementing the bounded synthetic ResearchRun vertical slice: user research request → official-API and authorised-Browser fixtures → Evidence Objects → Candidate Claims → contradictions and unknowns → dossier → admission queue → InvestigationContext update.
 
-The product UI and landing MAY advance in parallel because they share the same visual system and because conversion testing requires faithful product proof. Phase-specific production capabilities remain locked until their gates authorise them.
+This priority does not authorise production-scale source ingestion, unrestricted Browser access, customer private data, a second vector database or model-written canonical claims.
