@@ -1,6 +1,6 @@
 # AXIGNAL local development
 
-Status: `EXECUTABLE SPINE v0.1`
+Status: `EXECUTABLE SPINE v0.2 / RESEARCH RUN FIXTURE`
 Goal ID: `AXIGNAL-GOAL-001`
 
 ## Prerequisites
@@ -33,8 +33,8 @@ pnpm --filter @axignal/web dev
 # Conversion landing
 pnpm --filter @axignal/landing dev
 
-# Product API
-python -m uvicorn axignal_api.main:app --app-dir apps/api/src --reload --port 8000
+# Product API, including the bounded ResearchRun router
+python -m uvicorn axignal_api.application:app --app-dir apps/api/src --reload --port 8000
 ```
 
 Endpoints:
@@ -43,6 +43,25 @@ Endpoints:
 - landing: `http://localhost:3001`
 - API docs: `http://localhost:8000/docs`
 - API health: `http://localhost:8000/health`
+- synthetic ResearchRun: `POST http://localhost:8000/v1/prototype/research-runs`
+
+Example ResearchRun fixture:
+
+```bash
+curl -sS -X POST http://localhost:8000/v1/prototype/research-runs \
+  -H 'content-type: application/json' \
+  -d '{
+    "question": "Investiga el contexto regulatorio y socioeconómico",
+    "include_private_knowledge": false
+  }'
+```
+
+Expected authority state:
+
+```text
+run.state = ADMISSION_QUEUED
+candidate_claims[*].canonical_claim_id = null
+```
 
 ## Quality gates
 
@@ -87,8 +106,12 @@ docker compose down --volumes --remove-orphans
 
 ## Prototype boundaries
 
-- All opportunity and claim data in the executable spine is synthetic.
+- All opportunity, claim, evidence, private-memory and ResearchRun data is synthetic.
+- The Browser source is a frozen local fixture; no live web request occurs.
+- The hostile Browser instruction is a test fixture and cannot modify tools, budgets or authority.
+- Tenant-private evidence requires explicit opt-in and never supports global Candidate Claims.
 - The prototype does not provide personalised advice or execute transactions.
-- Navigator cannot write canonical claims.
+- Navigator and research workers cannot write canonical claims.
+- Candidate Claims remain proposals with `canonical_claim_id = null`.
 - Knowledge Tides are not market evidence.
 - Production credentials or customer data MUST NOT be used locally or in CI.
