@@ -243,8 +243,12 @@ export function updateContext(
 }
 
 export function findSelectedOpportunity(payload: PrototypeInvestigationPayload): Opportunity {
+  const fallback = payload.opportunities[0];
+  if (!fallback) {
+    throw new Error("The synthetic InvestigationContext must contain at least one opportunity.");
+  }
   const selectedId = payload.context.selection.opportunity_ids[0];
-  return payload.opportunities.find((item) => item.opportunity_id === selectedId) ?? payload.opportunities[0];
+  return payload.opportunities.find((item) => item.opportunity_id === selectedId) ?? fallback;
 }
 
 export function claimsForSelectedOpportunity(payload: PrototypeInvestigationPayload): Claim[] {
