@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 import json
+from dataclasses import dataclass
 from typing import Any
 from uuid import UUID
 
@@ -18,7 +18,7 @@ class ResearchJob:
     source_id: str
 
     @classmethod
-    def from_payload(cls, payload: dict[str, Any]) -> "ResearchJob":
+    def from_payload(cls, payload: dict[str, Any]) -> ResearchJob:
         if payload.get("schema_version") != 1:
             raise ValueError("Unsupported research job schema version")
         return cls(
