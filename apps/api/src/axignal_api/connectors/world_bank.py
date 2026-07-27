@@ -1,9 +1,9 @@
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from hashlib import sha256
-import json
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlencode, urlparse
@@ -92,7 +92,8 @@ class WorldBankConnector:
         try:
             response = client.get(request_url)
         except httpx.HTTPError as exc:
-            raise SourceRetrievalError(f"World Bank request failed: {exc.__class__.__name__}") from exc
+            error_name = exc.__class__.__name__
+            raise SourceRetrievalError(f"World Bank request failed: {error_name}") from exc
         finally:
             if owns_client:
                 client.close()
