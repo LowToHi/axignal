@@ -27,7 +27,15 @@
         "EXPLAIN_CURRENT_VIEW",
         "SAVE_INVESTIGATION_TRAIL",
         "UPDATE_PRIVATE_INTEREST",
-        "QUEUE_RESEARCH_CANDIDATE"
+        "QUEUE_RESEARCH_CANDIDATE",
+        "INVESTIGATE_OPPORTUNITY",
+        "RESEARCH_EXTERNAL_CONTEXT",
+        "FIND_ADVERSE_EVIDENCE",
+        "REFRESH_EVIDENCE",
+        "BUILD_RESEARCH_DOSSIER",
+        "MONITOR_SUBJECT",
+        "CANCEL_RESEARCH_RUN",
+        "EXPLAIN_RESEARCH_RUN"
       ]
     },
     "confidence": {"type": "number", "minimum": 0, "maximum": 1},
@@ -52,6 +60,35 @@
           "reversible": {"type": "boolean"},
           "entitlement_required": {"type": ["string", "null"]}
         }
+      }
+    },
+    "research_plan": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "canonical_question": {"type": "string"},
+        "source_classes": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "AXIGNAL_GLOBAL",
+              "TENANT_PRIVATE",
+              "OFFICIAL_API",
+              "LICENSED_API",
+              "INSTITUTIONAL_DOCUMENT",
+              "LICENSED_EVENT_FEED",
+              "AUTHORISED_BROWSER"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "private_knowledge_authorised": {"type": "boolean"},
+        "browser_required": {"type": "boolean"},
+        "max_cost_minor_units": {"type": "integer", "minimum": 0},
+        "currency": {"type": "string", "pattern": "^[A-Z]{3}$"},
+        "max_duration_seconds": {"type": "integer", "minimum": 1},
+        "stopping_rule": {"type": ["string", "null"]},
+        "expected_outputs": {"type": "array", "items": {"type": "string"}}
       }
     },
     "assumptions": {"type": "array", "items": {"type": "string"}},
