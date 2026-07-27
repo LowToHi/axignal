@@ -54,8 +54,11 @@ function createSignedToken(payload: object, secret: string): string {
 
 function verifySignedToken<T>(token: string, secret: string): T | null {
   const parts = token.split(".");
-  if (parts.length !== 3 || parts[0] !== SESSION_VERSION) return null;
-  const [version, payload, signature] = parts;
+  if (parts.length !== 3) return null;
+  const version = parts[0];
+  const payload = parts[1];
+  const signature = parts[2];
+  if (!version || !payload || !signature || version !== SESSION_VERSION) return null;
   if (!equalText(signature, sign(version, payload, secret))) return null;
   try {
     return JSON.parse(decode(payload).toString("utf8")) as T;
