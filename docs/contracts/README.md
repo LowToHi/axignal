@@ -1,9 +1,9 @@
 # AXIGNAL Development Contracts
 
-Status: `v0.4-stack-candidate`
+Status: `v0.5-product-and-conversion-candidate`
 Goal ID: `AXIGNAL-GOAL-001`
 
-These documents are normative specifications for the product, architecture and delivery of AXIGNAL. They define externally testable obligations between product surfaces, data pipelines, epistemic runtime, operators, agents and users. They are not a substitute for jurisdiction-specific legal advice or customer-facing legal terms.
+These documents are normative specifications for the product, architecture, commercial system and delivery of AXIGNAL. They define externally testable obligations between product surfaces, public surfaces, data pipelines, epistemic runtime, operators, agents and users. They are not a substitute for jurisdiction-specific legal advice or customer-facing legal terms.
 
 ## Contract set
 
@@ -29,9 +29,13 @@ These documents are normative specifications for the product, architecture and d
 | [17 — Research Candidate Queue](17-research-candidate-queue.md) | Coverage gaps, tide-driven research, prioritisation and admission handoff |
 | [18 — Development Agent Governance](18-development-agent-governance.md) | Goal Lock, phases, tasks, dynamic skills, evidence and fail-closed gates |
 | [19 — Technology Stack and CI](19-technology-stack-and-ci.md) | Frontend, backend, data, APIs, workflow automation and secure self-hosted CI |
-| [20 — Design System and Motion](20-design-system-and-motion.md) | Palette, typography, shadcn registry, Globe–Graph motion and Remotion boundary |
+| [20 — Design System and Motion](20-design-system-and-motion.md) | Palette, typography, shadcn registry, Globe–Graph motion, selected visual-system architecture and Remotion boundary |
+| [21 — Marketing Site and Conversion](21-marketing-site-and-conversion.md) | Landing architecture, product proof, use cases, FAQ, conversion forms, SEO and accessibility |
+| [22 — Packaging, Pricing and Entitlements](22-packaging-pricing-and-entitlements.md) | Plans, value metrics, price disclosure, entitlements, usage, cancellation and economic gates |
+| [23 — Acquisition Analytics and Experimentation](23-acquisition-analytics-and-experimentation.md) | Funnel events, attribution, experiments, CRM automation, guardrails and channel validation |
+| [24 — Trust Center and Public Methodology](24-trust-center-and-public-methodology.md) | Public methodology, sources, AI authority, Knowledge Tides, privacy, security, status and corrections |
 
-Contracts 12–20 remain normative candidates until their applicable phase gates pass.
+Contracts 12–24 remain normative candidates until their applicable usability, commercial, legal, privacy, security, performance and economic gates pass. ADR-007 selects the Investigation Shell composition for faithful prototyping while leaving exact production tokens unfrozen.
 
 ## Roadmap and execution
 
@@ -42,6 +46,8 @@ Contracts 12–20 remain normative candidates until their applicable phase gates
 - [`docs/roadmap/03-contract-map.md`](../roadmap/03-contract-map.md)
 - [`docs/roadmap/04-dynamic-skill-map.md`](../roadmap/04-dynamic-skill-map.md)
 - [`docs/roadmap/05-dependency-and-gates.md`](../roadmap/05-dependency-and-gates.md)
+- [`docs/roadmap/07-visual-system-validation.md`](../roadmap/07-visual-system-validation.md)
+- [`docs/roadmap/08-marketing-pricing-and-conversion-work-package.md`](../roadmap/08-marketing-pricing-and-conversion-work-package.md)
 
 ## UX research and prototype
 
@@ -82,7 +88,7 @@ The terms **MUST**, **MUST NOT**, **SHOULD**, **SHOULD NOT** and **MAY** express
 
 ## Change policy
 
-A material change to scope, authority, data rights, claim semantics, pricing entitlement, user-intent use, multilingual semantics, agent governance, stack, design tokens or public API MUST:
+A material change to scope, authority, data rights, claim semantics, packaging, pricing, entitlements, public conversion claims, user-intent use, multilingual semantics, agent governance, stack, design tokens, public methodology or API MUST:
 
 1. update the affected contract;
 2. add or amend an ADR;
@@ -92,4 +98,4 @@ A material change to scope, authority, data rights, claim semantics, pricing ent
 
 ## Foundation status
 
-The foundation freezes the desired architecture and product rules. Buyer, pricing, predictive models, initial universe, final interaction architecture and final stack remain hypotheses until their commercial, empirical, usability and performance gates pass.
+The foundation freezes the desired architecture and product rules. Buyer, public copy, plan names, prices, acquisition channels, predictive models, initial universe, final production tokens and some implementation choices remain hypotheses until their commercial, empirical, usability, legal, privacy, accessibility and performance gates pass.
