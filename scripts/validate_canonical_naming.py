@@ -77,7 +77,10 @@ def main() -> int:
         for line_number, line in enumerate(text.splitlines(), start=1):
             for forbidden in FORBIDDEN:
                 if forbidden in line:
-                    defects.append(f"{path.relative_to(root)}:{line_number}: superseded naming detected")
+                    relative = path.relative_to(root)
+                    defects.append(
+                        f"{relative}:{line_number}: superseded naming detected"
+                    )
 
     if defects:
         print("Canonical naming validation FAILED:")
