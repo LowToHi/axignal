@@ -1,5 +1,6 @@
 from dataclasses import replace
 from pathlib import Path
+from uuid import UUID
 
 import httpx
 import pytest
@@ -14,8 +15,11 @@ from axignal_api.connectors.world_bank import (
     SourceRetrievalError,
     WorldBankConnector,
 )
+from axignal_api.identity import build_identity_assertion
 
 FIXTURE = Path(__file__).parent / "fixtures" / "world_bank_rus_inflation.json"
+TENANT_ID = UUID("11111111-1111-4111-8111-111111111111")
+IDENTITY_SECRET = "test-identity-assertion-secret-with-32-bytes"
 
 
 def admitted_source() -> dict[str, object]:
@@ -27,6 +31,17 @@ def admitted_source() -> dict[str, object]:
         "commercial_use": True,
         "redistribution": True,
         "license_id": "CC-BY-4.0",
+    }
+
+
+def identity_headers() -> dict[str, str]:
+    return {
+        "X-AXIGNAL-Identity-Assertion": build_identity_assertion(
+            secret=IDENTITY_SECRET,
+            subject="usr_test_operator",
+            email="operator@example.test",
+            tenant_id=TENANT_ID,
+        )
     }
 
 
@@ -102,12 +117,53 @@ def test_generative_proposal_cannot_auto_admit() -> None:
     assert "generative_producer_cannot_auto_admit" in decision.reasons
 
 
-def test_persistent_endpoint_fails_closed_when_disabled(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_persistent_endpoint_rejects_legacy_tenant_header(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("AXIGNAL_IDENTITY_ASSERTION_SECRET", IDENTITY_SECRET)
+    client = TestClient(app)
+    response = client.post(
+        "/v1/research-runs",
+        headers={"X-AXIGNAL-Tenant-ID": str(TENANT_ID)},
+        json={
+            "context_id": "ctx_moscow_real_estate_v01",
+            "opportunity_id": "opp_moscow_ramenki",
+            "question": "Actualiza el contexto macroeconómico de la oportunidad.",
+        },
+    )
+
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Authenticated identity is required"
+
+
+def test_persistent_endpoint_rejects_forged_identity(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("AXIGNAL_IDENTITY_ASSERTION_SECRET", IDENTITY_SECRET)
+    client = TestClient(app)
+    response = client.post(
+        "/v1/research-runs",
+        headers={"X-AXIGNAL-Identity-Assertion": "v1.payload.forged"},
+        json={
+            "context_id": "ctx_moscow_real_estate_v01",
+            "opportunity_id": "opp_moscow_ramenki",
+            "question": "Actualiza el contexto macroeconómico de la oportunidad.",
+        },
+    )
+
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Invalid or expired identity assertion"
+
+
+def test_persistent_endpoint_fails_closed_when_disabled(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("AXIGNAL_IDENTITY_ASSERTION_SECRET", IDENTITY_SECRET)
     monkeypatch.delenv("AXIGNAL_PERSISTENT_RESEARCH_ENABLED", raising=False)
     client = TestClient(app)
     response = client.post(
         "/v1/research-runs",
-        headers={"X-AXIGNAL-Tenant-ID": "11111111-1111-4111-8111-111111111111"},
+        headers=identity_headers(),
         json={
             "context_id": "ctx_moscow_real_estate_v01",
             "opportunity_id": "opp_moscow_ramenki",
