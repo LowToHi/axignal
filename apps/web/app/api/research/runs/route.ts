@@ -6,6 +6,11 @@ import {
   type PrototypeInvestigationPayload
 } from "../../../../lib/investigation-context";
 import { executeSyntheticResearchRun } from "../../../../lib/research-fixture";
+import {
+  buildApiIdentityAssertion,
+  getAuthenticatedIdentity,
+  isPersistentResearchUiEnabled
+} from "../../../../lib/server-auth";
 
 const supportedLocales = new Set<Locale>(["en", "es", "fr", "de", "pt-BR", "zh-Hans"]);
 
@@ -14,7 +19,6 @@ function isPayload(value: unknown): value is PrototypeInvestigationPayload {
   const candidate = value as Partial<PrototypeInvestigationPayload>;
   return Boolean(
     candidate.context?.context_id === "ctx_moscow_real_estate_v01" &&
-      candidate.context.synthetic === true &&
       Array.isArray(candidate.opportunities) &&
       Array.isArray(candidate.claims) &&
       Array.isArray(candidate.evidence)
@@ -38,17 +42,53 @@ export async function POST(request: Request) {
     : "es";
   const payload = isPayload(body.payload) ? body.payload : createInitialInvestigation(locale);
 
+  if (!isPersistentResearchUiEnabled()) {
+    try {
+      return NextResponse.json(executeSyntheticResearchRun({
+        question: body.question.trim(),
+        locale,
+        includePrivateKnowledge: body.includePrivateKnowledge === true,
+        payload
+      }));
+    } catch (error) {
+      return NextResponse.json(
+        { error: error instanceof Error ? error.message : "ResearchRun failed." },
+        { status: 400 }
+      );
+    }
+  }
+
+  const identity = await getAuthenticatedIdentity();
+  if (!identity) return NextResponse.json({ error: "Authentication required." }, { status: 401 });
+  const opportunityId = payload.context.selection.opportunity_ids[0];
+  if (!opportunityId || !payload.opportunities.some((item) => item.opportunity_id === opportunityId)) {
+    return NextResponse.json({ error: "A valid selected opportunity is required." }, { status: 400 });
+  }
+  const apiUrl = process.env.AXIGNAL_API_URL?.replace(/\/$/, "");
+  if (!apiUrl) return NextResponse.json({ error: "AXIGNAL_API_URL is required." }, { status: 503 });
+
   try {
-    return NextResponse.json(executeSyntheticResearchRun({
-      question: body.question.trim(),
-      locale,
-      includePrivateKnowledge: body.includePrivateKnowledge === true,
-      payload
-    }));
-  } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "ResearchRun failed." },
-      { status: 400 }
-    );
+    const response = await fetch(`${apiUrl}/v1/research-runs`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "X-AXIGNAL-Identity-Assertion": buildApiIdentityAssertion(identity)
+      },
+      body: JSON.stringify({
+        context_id: payload.context.context_id,
+        opportunity_id: opportunityId,
+        question: body.question.trim(),
+        include_private_knowledge: body.includePrivateKnowledge === true
+      }),
+      cache: "no-store",
+      signal: AbortSignal.timeout(8_000)
+    });
+    const responseBody = await response.json().catch(() => ({ error: "Invalid API response." }));
+    return NextResponse.json(responseBody, {
+      status: response.status,
+      headers: { "cache-control": "no-store" }
+    });
+  } catch {
+    return NextResponse.json({ error: "Persistent ResearchRun API unavailable." }, { status: 503 });
   }
 }
