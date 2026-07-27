@@ -13,6 +13,7 @@ const plans = [
     audience: "Independent professionals",
     price: "Early access",
     cta: "Request access",
+    featured: false,
     features: ["Navigator", "Globe, Graph and Timeline", "Claims and evidence", "Saved investigations", "Core exports"]
   },
   {
@@ -28,6 +29,7 @@ const plans = [
     audience: "Organisations and intelligence teams",
     price: "Custom",
     cta: "Talk to AXIGNAL",
+    featured: false,
     features: ["Everything in Professional", "SSO and audit controls", "Private sources and claims", "API and custom limits", "SLA and data controls"]
   }
 ] as const;
