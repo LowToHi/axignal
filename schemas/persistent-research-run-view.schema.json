@@ -1,0 +1,188 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://axignal.com/schemas/persistent-research-run-view.schema.json",
+  "title": "AXIGNAL Persistent ResearchRun View",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "research_run_id",
+    "context_id",
+    "opportunity_id",
+    "question",
+    "state",
+    "private_knowledge_authorised",
+    "source_plan",
+    "budgets",
+    "actual_usage",
+    "evidence",
+    "candidate_claims",
+    "canonical_claims",
+    "dossier",
+    "admission_batch_id",
+    "error_code",
+    "error_detail",
+    "created_at",
+    "updated_at",
+    "synthetic"
+  ],
+  "properties": {
+    "research_run_id": {"type": "string", "format": "uuid"},
+    "context_id": {"type": "string", "pattern": "^ctx_[A-Za-z0-9_-]{8,}$"},
+    "opportunity_id": {"type": "string", "minLength": 3},
+    "question": {"type": "string", "minLength": 3, "maxLength": 8000},
+    "state": {
+      "enum": [
+        "QUEUED",
+        "RETRIEVING",
+        "PROPOSING",
+        "ADMISSION_PENDING",
+        "COMPLETED",
+        "FAILED"
+      ]
+    },
+    "private_knowledge_authorised": {"type": "boolean"},
+    "source_plan": {
+      "type": "array",
+      "items": {"type": "object", "additionalProperties": true}
+    },
+    "budgets": {"type": "object", "additionalProperties": true},
+    "actual_usage": {"type": "object", "additionalProperties": true},
+    "evidence": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/evidence"}
+    },
+    "candidate_claims": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/candidateClaim"}
+    },
+    "canonical_claims": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/canonicalClaim"}
+    },
+    "dossier": {
+      "oneOf": [
+        {"type": "null"},
+        {"$ref": "#/$defs/dossier"}
+      ]
+    },
+    "admission_batch_id": {
+      "type": ["string", "null"],
+      "format": "uuid"
+    },
+    "error_code": {"type": ["string", "null"]},
+    "error_detail": {"type": ["string", "null"]},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"},
+    "synthetic": {"const": false}
+  },
+  "$defs": {
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidence_id",
+        "source_id",
+        "title",
+        "relationship",
+        "subject_id",
+        "predicate",
+        "observed_at",
+        "numeric_value",
+        "unit",
+        "rights_status",
+        "provisional",
+        "payload"
+      ],
+      "properties": {
+        "evidence_id": {"type": "string", "format": "uuid"},
+        "source_id": {"type": "string"},
+        "title": {"type": "string"},
+        "relationship": {"enum": ["SUPPORT", "CONTRADICT", "UNKNOWN", "CONTEXT"]},
+        "subject_id": {"type": "string"},
+        "predicate": {"type": "string"},
+        "observed_at": {"type": "string", "format": "date-time"},
+        "numeric_value": {"type": ["string", "null"]},
+        "unit": {"type": ["string", "null"]},
+        "rights_status": {"type": "string"},
+        "provisional": {"type": "boolean"},
+        "payload": {"type": "object", "additionalProperties": true}
+      }
+    },
+    "candidateClaim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidate_claim_id",
+        "fingerprint",
+        "statement",
+        "kind",
+        "state",
+        "producer_type",
+        "method_version",
+        "canonical_claim_id",
+        "rejection_reasons"
+      ],
+      "properties": {
+        "candidate_claim_id": {"type": "string", "format": "uuid"},
+        "fingerprint": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "statement": {"type": "string"},
+        "kind": {"enum": ["FACT", "INFERENCE", "PREDICTION", "CONTRADICTION"]},
+        "state": {"enum": ["PROPOSED", "ADMISSION_QUEUED", "ADMITTED", "REJECTED"]},
+        "producer_type": {"enum": ["DETERMINISTIC_PARSER", "LOCAL_MODEL", "EXTERNAL_MODEL"]},
+        "method_version": {"type": "string"},
+        "canonical_claim_id": {"type": ["string", "null"], "format": "uuid"},
+        "rejection_reasons": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "canonicalClaim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "canonical_claim_id",
+        "fingerprint",
+        "statement",
+        "subject_id",
+        "predicate",
+        "object_value",
+        "observed_at",
+        "epistemic_class",
+        "state",
+        "admitted_by",
+        "admitted_at"
+      ],
+      "properties": {
+        "canonical_claim_id": {"type": "string", "format": "uuid"},
+        "fingerprint": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "statement": {"type": "string"},
+        "subject_id": {"type": "string"},
+        "predicate": {"type": "string"},
+        "object_value": {"type": "object", "additionalProperties": true},
+        "observed_at": {"type": "string", "format": "date-time"},
+        "epistemic_class": {"enum": ["OBSERVED_FACT", "DERIVED_FACT"]},
+        "state": {"const": "ADMITTED"},
+        "admitted_by": {"const": "DETERMINISTIC_RUNTIME"},
+        "admitted_at": {"type": "string", "format": "date-time"}
+      }
+    },
+    "dossier": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dossier_id",
+        "status",
+        "title",
+        "summary",
+        "sections",
+        "attribution"
+      ],
+      "properties": {
+        "dossier_id": {"type": "string", "format": "uuid"},
+        "status": {"enum": ["TRACEABLE_PROVISIONAL", "TRACEABLE_WITH_ADMITTED_FACTS"]},
+        "title": {"type": "string"},
+        "summary": {"type": "string"},
+        "sections": {"type": "array", "items": {"type": "object", "additionalProperties": true}},
+        "attribution": {"type": "object", "additionalProperties": true}
+      }
+    }
+  }
+}
