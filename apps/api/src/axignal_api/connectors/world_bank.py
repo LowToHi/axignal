@@ -13,10 +13,7 @@ import httpx
 SOURCE_ID = "world-bank-wdi"
 COUNTRY_CODE = "RUS"
 INDICATOR_CODE = "FP.CPI.TOTL.ZG"
-BASE_URL = (
-    "https://api.worldbank.org/v2/country/"
-    f"{COUNTRY_CODE}/indicator/{INDICATOR_CODE}"
-)
+BASE_URL = f"https://api.worldbank.org/v2/country/{COUNTRY_CODE}/indicator/{INDICATOR_CODE}"
 ALLOWED_HOST = "api.worldbank.org"
 MAX_RESPONSE_BYTES = 524_288
 TIMEOUT_SECONDS = 10.0

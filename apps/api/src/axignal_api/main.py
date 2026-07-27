@@ -397,11 +397,7 @@ def selected_opportunity(payload: PrototypeInvestigationPayload) -> Opportunity:
     selected_ids = payload.context.selection.opportunity_ids
     selected_id = selected_ids[0] if selected_ids else "opp_moscow_ramenki"
     return next(
-        (
-            item
-            for item in payload.opportunities
-            if item.opportunity_id == selected_id
-        ),
+        (item for item in payload.opportunities if item.opportunity_id == selected_id),
         payload.opportunities[0],
     )
 
@@ -414,10 +410,7 @@ def execute_prototype_command(
         if request.payload is not None
         else initial_payload(request.locale)
     )
-    if (
-        payload.context.context_id != "ctx_moscow_real_estate_v01"
-        or not payload.context.synthetic
-    ):
+    if payload.context.context_id != "ctx_moscow_real_estate_v01" or not payload.context.synthetic:
         raise HTTPException(
             status_code=400,
             detail="Unsupported or non-synthetic InvestigationContext",
@@ -427,9 +420,7 @@ def execute_prototype_command(
     lower = request.message.strip().casefold()
     plan_id = f"plan_{context.version + 1:04d}"
     event_type = "NAVIGATOR_COMMAND_EXECUTED"
-    explanation = (
-        "He conservado el contexto y añadido la orden al Investigation Trail."
-    )
+    explanation = "He conservado el contexto y añadido la orden al Investigation Trail."
 
     if "grafo" in lower or "graph" in lower:
         context.lens = "GRAPH"
@@ -441,9 +432,7 @@ def execute_prototype_command(
         )
     elif "dual" in lower or "compara" in lower:
         context.lens = "DUAL"
-        context.lens_reason = (
-            "El usuario ha solicitado comparar geografía y relaciones."
-        )
+        context.lens_reason = "El usuario ha solicitado comparar geografía y relaciones."
         event_type = "LENS_CHANGED"
         explanation = "He activado Dual sin perder la selección ni el historial."
     elif any(token in lower for token in ("globo", "globe", "mapa")):
@@ -453,11 +442,7 @@ def execute_prototype_command(
         explanation = "He cambiado a Globe y mantenido el contexto de investigación."
 
     requested = next(
-        (
-            item
-            for item in payload.opportunities
-            if item.name.casefold() in lower
-        ),
+        (item for item in payload.opportunities if item.name.casefold() in lower),
         None,
     )
     if requested is not None:
@@ -468,9 +453,7 @@ def execute_prototype_command(
         context.rail_mode = "OPPORTUNITY"
         payload.focus = Focus(opportunity_id=requested.opportunity_id)
         event_type = "OPPORTUNITY_SELECTED"
-        explanation = (
-            f"He seleccionado {requested.name} y sincronizado todas las superficies."
-        )
+        explanation = f"He seleccionado {requested.name} y sincronizado todas las superficies."
 
     if "contradic" in lower:
         selected = selected_opportunity(payload)
@@ -478,17 +461,12 @@ def execute_prototype_command(
             (
                 claim
                 for claim in payload.claims
-                if claim.claim_id in selected.claim_ids
-                and claim.kind == "CONTRADICCIÓN"
+                if claim.claim_id in selected.claim_ids and claim.kind == "CONTRADICCIÓN"
             ),
             None,
         )
         if contradiction is not None:
-            evidence_id = (
-                contradiction.evidence_ids[0]
-                if contradiction.evidence_ids
-                else None
-            )
+            evidence_id = contradiction.evidence_ids[0] if contradiction.evidence_ids else None
             context.selection.claim_ids = [contradiction.claim_id]
             context.selection.evidence_ids = [evidence_id] if evidence_id else []
             context.rail_mode = "CLAIM"
@@ -499,31 +477,22 @@ def execute_prototype_command(
             )
             event_type = "CONTRADICTION_FOCUSED"
             explanation = (
-                f"He aislado la contradicción material de {selected.name} "
-                "y su evidencia asociada."
+                f"He aislado la contradicción material de {selected.name} y su evidencia asociada."
             )
         else:
             context.rail_mode = "COVERAGE"
-            explanation = (
-                "No existe una contradicción admitida en la fixture seleccionada."
-            )
+            explanation = "No existe una contradicción admitida en la fixture seleccionada."
 
     if "guardar" in lower or "save trail" in lower:
-        context.saved_trail_id = (
-            context.saved_trail_id or "trail_moscow_real_estate_v01"
-        )
+        context.saved_trail_id = context.saved_trail_id or "trail_moscow_real_estate_v01"
         event_type = "TRAIL_SAVED"
-        explanation = (
-            "He guardado el Investigation Trail sintético con el contexto actual."
-        )
+        explanation = "He guardado el Investigation Trail sintético con el contexto actual."
 
     if "36" in lower:
         context.time.horizon_label = "36M"
         context.filters["horizon"] = "36 meses"
         event_type = "TIME_HORIZON_CHANGED"
-        explanation = (
-            "He ampliado el horizonte a 36 meses y conservado el resto del contexto."
-        )
+        explanation = "He ampliado el horizonte a 36 meses y conservado el resto del contexto."
 
     context.locale = request.locale
     context.version += 1
@@ -563,9 +532,7 @@ def interpret_command(command: CommandRequest) -> CommandResponse:
         opportunities=[
             LegacyOpportunity(
                 name=item.name,
-                expected_return_label=(
-                    f"{item.expected_return_label} prototype estimate"
-                ),
+                expected_return_label=(f"{item.expected_return_label} prototype estimate"),
                 confidence=item.confidence,
                 evidence_count=item.evidence_count,
                 contradiction_count=item.contradiction_count,
@@ -573,8 +540,7 @@ def interpret_command(command: CommandRequest) -> CommandResponse:
             for item in OPPORTUNITIES[:2]
         ],
         explanation=(
-            "Synthetic bounded command plan. No canonical claim write "
-            "or personalised advice."
+            "Synthetic bounded command plan. No canonical claim write or personalised advice."
         ),
     )
 

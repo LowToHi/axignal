@@ -7,8 +7,21 @@ import pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 TEXT_SUFFIXES = {
-    ".md", ".txt", ".json", ".yaml", ".yml", ".toml", ".py", ".ts",
-    ".tsx", ".js", ".jsx", ".html", ".css", ".sql", ".sh"
+    ".md",
+    ".txt",
+    ".json",
+    ".yaml",
+    ".yml",
+    ".toml",
+    ".py",
+    ".ts",
+    ".tsx",
+    ".js",
+    ".jsx",
+    ".html",
+    ".css",
+    ".sql",
+    ".sh",
 }
 EXCLUDED_PARTS = {".git", "node_modules", ".next", "dist", "build", "coverage"}
 REFERENCE_FILES = {

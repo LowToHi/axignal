@@ -78,9 +78,7 @@ def main() -> int:
             for forbidden in FORBIDDEN:
                 if forbidden in line:
                     relative = path.relative_to(root)
-                    defects.append(
-                        f"{relative}:{line_number}: superseded naming detected"
-                    )
+                    defects.append(f"{relative}:{line_number}: superseded naming detected")
 
     if defects:
         print("Canonical naming validation FAILED:")

@@ -152,9 +152,7 @@ def main() -> int:
     assert result["actual_usage"]["fixture_reads"] == 1
     assert len(result["evidence"]) == 1
     assert result["evidence"][0]["source_id"] == "world-bank-wdi"
-    assert result["evidence"][0]["rights_status"] == (
-        "COMMERCIAL_REUSE_WITH_ATTRIBUTION"
-    )
+    assert result["evidence"][0]["rights_status"] == ("COMMERCIAL_REUSE_WITH_ATTRIBUTION")
     assert result["evidence"][0]["numeric_value"] == "8.7"
     assert len(result["candidate_claims"]) == 1
     assert result["candidate_claims"][0]["producer_type"] == "DETERMINISTIC_PARSER"

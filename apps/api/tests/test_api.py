@@ -25,9 +25,7 @@ def test_legacy_interpret_command_remains_synthetic_and_bounded() -> None:
 
 
 def test_get_prototype_investigation_returns_shared_context() -> None:
-    response = client.get(
-        "/v1/prototype/investigations/ctx_moscow_real_estate_v01?locale=es"
-    )
+    response = client.get("/v1/prototype/investigations/ctx_moscow_real_estate_v01?locale=es")
     assert response.status_code == 200
     body = response.json()
     assert body["context"]["context_id"] == "ctx_moscow_real_estate_v01"
@@ -39,9 +37,7 @@ def test_get_prototype_investigation_returns_shared_context() -> None:
 
 
 def test_prototype_command_preserves_selection_and_focuses_contradiction() -> None:
-    initial = client.get(
-        "/v1/prototype/investigations/ctx_moscow_real_estate_v01?locale=es"
-    ).json()
+    initial = client.get("/v1/prototype/investigations/ctx_moscow_real_estate_v01?locale=es").json()
     select_response = client.post(
         "/v1/prototype/navigator/commands:run",
         json={"message": "Selecciona Zona ZIL", "locale": "es", "payload": initial},
