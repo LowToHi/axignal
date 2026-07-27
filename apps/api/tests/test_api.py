@@ -1,13 +1,8 @@
-from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from axignal_api.main import app
-from axignal_api.research import router as research_router
+from axignal_api.application import app
 
 client = TestClient(app)
-research_app = FastAPI()
-research_app.include_router(research_router)
-research_client = TestClient(research_app)
 
 
 def test_health() -> None:
@@ -80,7 +75,7 @@ def test_unknown_prototype_context_is_not_fabricated() -> None:
 
 
 def test_research_run_prioritises_official_api_and_never_admits_claims() -> None:
-    response = research_client.post(
+    response = client.post(
         "/v1/prototype/research-runs",
         json={
             "question": "Investiga el contexto regulatorio y socioeconómico",
@@ -105,7 +100,7 @@ def test_research_run_prioritises_official_api_and_never_admits_claims() -> None
 
 
 def test_private_fixture_requires_explicit_authority_and_stays_out_of_global_claims() -> None:
-    without_private = research_client.post(
+    without_private = client.post(
         "/v1/prototype/research-runs",
         json={"question": "Investiga la oportunidad"},
     ).json()
@@ -113,7 +108,7 @@ def test_private_fixture_requires_explicit_authority_and_stays_out_of_global_cla
     assert without_private["run"]["source_plan"][2]["status"] == "NOT_AUTHORISED"
     assert all(item["domain"] != "TENANT_PRIVATE" for item in without_private["evidence"])
 
-    with_private = research_client.post(
+    with_private = client.post(
         "/v1/prototype/research-runs",
         json={
             "question": "Investiga la oportunidad con mi memoria",
@@ -133,7 +128,7 @@ def test_private_fixture_requires_explicit_authority_and_stays_out_of_global_cla
 
 
 def test_browser_injection_does_not_change_budget_or_authority() -> None:
-    body = research_client.post(
+    body = client.post(
         "/v1/prototype/research-runs",
         json={"question": "Busca evidencia adversa"},
     ).json()
