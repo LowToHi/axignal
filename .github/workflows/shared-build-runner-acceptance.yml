@@ -1,0 +1,128 @@
+name: AXIGNAL Shared Build Runner Acceptance
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: axignal-shared-build-runner-acceptance
+  cancel-in-progress: false
+
+jobs:
+  accept-shared-build-runner:
+    name: Trusted non-privileged build workload
+    runs-on: [self-hosted, linux, x64, axignal-build]
+    timeout-minutes: 30
+    steps:
+      - name: Checkout trusted repository revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Verify shared build runner boundary
+        shell: bash
+        run: bash scripts/runner/verify-shared-build-boundary.sh
+
+      - name: Set up exact Node.js runtime
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22.14.0"
+
+      - name: Set up exact Python runtime
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.13"
+
+      - name: Verify pinned toolchain
+        shell: bash
+        run: |
+          test "$(node --version)" = "v22.14.0"
+          test "$(corepack pnpm@10.12.4 --version)" = "10.12.4"
+          python -c "import sys; assert sys.version_info[:2] == (3, 13)"
+
+      - name: Install frozen JavaScript dependency graph
+        shell: bash
+        run: |
+          corepack pnpm@10.12.4 install --frozen-lockfile
+          git diff --exit-code -- pnpm-lock.yaml
+
+      - name: Typecheck workspaces
+        run: corepack pnpm@10.12.4 typecheck
+
+      - name: Build product and landing
+        run: corepack pnpm@10.12.4 build
+
+      - name: Install API and test dependencies
+        shell: bash
+        run: |
+          python -m venv "${RUNNER_TEMP}/axignal-venv"
+          "${RUNNER_TEMP}/axignal-venv/bin/python" -m pip install --upgrade pip
+          "${RUNNER_TEMP}/axignal-venv/bin/python" -m pip install -e ".[dev]"
+          echo "${RUNNER_TEMP}/axignal-venv/bin" >> "${GITHUB_PATH}"
+
+      - name: Lint and test FastAPI
+        shell: bash
+        run: |
+          ruff check apps/api
+          pytest --cov=axignal_api --cov-report=term-missing
+
+      - name: Install browser engines without host package mutation
+        run: corepack pnpm@10.12.4 exec playwright install chromium webkit
+
+      - name: Run browser acceptance
+        run: corepack pnpm@10.12.4 test:e2e
+
+      - name: Record bounded evidence
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "## AXIGNAL shared build runner acceptance"
+            echo
+            echo "- Goal: \`AXIGNAL-GOAL-001\`"
+            echo "- Revision: \`${GITHUB_SHA}\`"
+            echo "- Runner: \`${RUNNER_NAME}\`"
+            echo "- User: \`$(id -un)\` (uid \`$(id -u)\`)"
+            echo "- Docker socket readable: \`$(test -r /var/run/docker.sock && echo yes || echo no)\`"
+            echo "- Docker group present: \`$(id -nG | tr ' ' '\n' | grep -qx docker && echo yes || echo no)\`"
+            echo "- Memory: \`$(free -h | awk '/^Mem:/ {print $3 "/" $2}')\`"
+            echo "- Workspace: \`$(du -sh "${GITHUB_WORKSPACE}" 2>/dev/null | awk '{print $1}')\`"
+            echo "- Disk: \`$(df -h "${GITHUB_WORKSPACE}" | tail -1 | tr -s ' ')\`"
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+  verify-shared-build-cleanup:
+    name: Post-job shared runner cleanup proof
+    if: ${{ always() }}
+    needs: accept-shared-build-runner
+    runs-on: [self-hosted, linux, x64, axignal-build]
+    timeout-minutes: 5
+    steps:
+      - name: Verify completed-job boundary and cleanup hook
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(id -un)" = "axignal-runner"
+          test "$(id -u)" != "0"
+          test "${RUNNER_NAME}" = "axignal-build-01"
+          test ! -r /var/run/docker.sock
+          test ! -w /var/run/docker.sock
+          ! id -nG | tr ' ' '\n' | grep -qx docker
+          test -z "$(find "${GITHUB_WORKSPACE}" -mindepth 1 -print -quit 2>/dev/null)"
+          for port in 3000 3001 8000; do
+            test -z "$(ss -H -ltn "sport = :${port}")"
+          done
+          if pgrep -u "$(id -u)" -f 'next-server|playwright.*node|uvicorn.*axignal|python.*pytest' >/dev/null; then
+            echo "A build-related process remains after cleanup." >&2
+            exit 1
+          fi
+          {
+            echo "## AXIGNAL shared build runner cleanup"
+            echo
+            echo "- Runner: \`${RUNNER_NAME}\`"
+            echo "- Prior workspace: empty"
+            echo "- Build/test ports: closed"
+            echo "- Build/test processes: absent"
+            echo "- Rootful Docker socket: inaccessible"
+          } >> "${GITHUB_STEP_SUMMARY}"
