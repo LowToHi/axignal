@@ -1,9 +1,10 @@
 # AXIGNAL persistent ResearchRun spine
 
 Goal ID: `AXIGNAL-GOAL-001`
-Status: `IN_PROGRESS / FAIL-CLOSED`
+Status: `EVIDENCE_READY / FAIL-CLOSED / NOT MERGED`
 Base: `agent/research-run-vertical-slice-v0.1`
 Head: `agent/persistent-research-spine-v0.1`
+Accepted implementation head: `6d5754dff66780c837bdb27233dd9893017f146e`
 
 ## Objective
 
@@ -61,10 +62,18 @@ transactional outbox
 - [x] persistent ResearchRun API implemented;
 - [x] frozen source fixture implemented;
 - [x] controlled live source smoke workflow implemented;
-- [ ] Ruff and API tests green at final head;
-- [ ] disposable PostgreSQL/Valkey acceptance green;
-- [ ] live World Bank source smoke green;
-- [ ] PR review evidence recorded.
+- [x] Ruff and API tests green at final head;
+- [x] disposable PostgreSQL/Valkey acceptance green;
+- [x] live World Bank source smoke green;
+- [x] PR evidence comment recorded.
+
+## Immutable evidence
+
+- Contract Validation run `30303748966`: PASS;
+- Executable Spine run `30303748961`: PASS;
+- World Bank Live Source Smoke run `30303748957`: PASS;
+- sanitised live-source artifact `8667595122`, digest `sha256:015f16d72a22735f93686e5a0fb21dc2162fcf24b32ce2aeec9aa57ad0654807`;
+- temporary formatter workflows removed before final acceptance.
 
 ## Explicit exclusions
 
@@ -76,7 +85,8 @@ transactional outbox
 - no model-based automatic admission;
 - no Knowledge Tide claim generation;
 - no production deployment;
-- no deletion of prior synthetic fixtures.
+- no deletion of prior synthetic fixtures;
+- no merge without explicit human authorisation.
 
 ## Rollback
 
