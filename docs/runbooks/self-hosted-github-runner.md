@@ -1,175 +1,140 @@
 # AXIGNAL Self-Hosted GitHub Runner Runbook
 
-Status: `OPTIONAL / DEFERRED / DO NOT EXECUTE AS ROOT`
-Runner host: `NO COMPLIANT HOST ASSIGNED`
+Status: `HYBRID CI / SHARED BUILD RUNNER CANDIDATE`
 Application host candidate: `187.124.220.48`
+Shared build runner: `axignal-build-01`
+Dedicated integration runner: `NOT ASSIGNED`
 
 ## Scope boundary
 
-This runbook governs only a persistent self-hosted GitHub Actions runner for trusted CI, tests and benchmarks.
+This runbook governs CI runners only. It does **not** prohibit AXIGNAL from using `187.124.220.48` for application hosting, staging, APIs, workers, PostgreSQL/PostGIS/pgvector, Valkey or other product services.
 
-It does **not** prohibit AXIGNAL from using `187.124.220.48` for application hosting, staging, APIs, workers, PostgreSQL/PostGIS/pgvector, Valkey or other product services. Those workloads are governed by the deployment, security and operations contracts applicable to the product environment.
+The current VPS may host AXIGNAL application services after normal deployment hardening. Its shared workload topology is compatible with a restricted non-privileged build runner, but not with a Docker-capable CI runner that controls the host daemon.
 
-The current server remains eligible as an AXIGNAL application or staging host after normal deployment hardening. It is not approved, in its present shared state, as a persistent self-hosted CI runner with Docker control.
+GitHub-hosted CI remains the canonical fallback and the default for untrusted code and Docker-backed integration.
 
-GitHub-hosted runners remain the canonical and sufficient CI path. A self-hosted runner is an optional optimisation for heavy trusted workloads; its absence does not block product development, testing, review, deployment or operation.
+## Approved hybrid topology
 
-## Security boundary
+```text
+187.124.220.48
+├── existing application services and databases
+├── existing LowToHi runner boundary
+└── axignal-build-01
+    ├── user: axignal-runner
+    ├── no root
+    ├── no Docker socket or docker group
+    ├── no application networks or volumes
+    ├── no product or production secrets
+    └── build, typecheck, Playwright and FastAPI only
 
-The SSH administration account may be `root`, but the GitHub Actions runner process MUST run under a dedicated unprivileged user such as `axignal-runner`.
+GitHub-hosted runners
+├── untrusted pull requests
+├── contract validation
+├── PostgreSQL/PostGIS/pgvector integration
+├── Valkey integration
+└── fallback for every AXIGNAL CI job
+```
 
-A runner host or isolated runner VM is for CI, tests and benchmarks. It MUST NOT contain production databases, production credentials, customer data or unrestricted deployment keys.
+Removing `iamancha.com` is not required for this topology. It would free capacity but would not replace the isolation controls.
 
-Runner provisioning MUST stop before registration when the proposed runner boundary contains production or unrelated stateful workloads. A dedicated Linux user, rootless Docker or filesystem permissions reduce blast radius but do not make production/CI colocation compliant.
+## Shared build runner preflight
 
-A strongly isolated virtual machine on a shared physical server MAY qualify when it has an independent operating system, storage, network policy, Docker daemon, resource limits and no access to host or product secrets.
+The administrative account may be `root`, but the runner MUST execute as `axignal-runner`.
 
-## Mandatory runner preflight
-
-Run against the proposed runner host or isolated VM as the administrative account without printing environment values or file contents:
+Verify without printing secrets:
 
 ```bash
 id
 cat /etc/os-release
+free -h
+df -h /
 systemctl list-units --type=service --all 'actions.runner.*'
 docker ps --format '{{.Names}}|{{.Image}}|{{.Status}}|{{.Ports}}'
-df -h /
-free -h
-systemctl is-active unattended-upgrades
-ufw status
 ```
 
-Fail closed for runner registration if any of the following is true:
+The shared build runner gate fails if:
 
-- production or unrelated persistent databases, applications or credentials are present inside the runner boundary;
-- the runner would require `/var/run/docker.sock` or membership in the rootful `docker` group;
-- the boundary cannot reserve sufficient CPU, memory and disk for bounded CI workloads;
-- outbound access, patching, cleanup or incident isolation cannot be demonstrated.
+- it executes as `root`;
+- it belongs to `sudo` or the rootful `docker` group;
+- it can read or write `/var/run/docker.sock`;
+- it can access product secret files, persistent volumes or application Docker networks;
+- trusted internal revisions cannot be enforced;
+- bounded CPU, memory, disk, cleanup and fallback cannot be demonstrated.
 
-A failed runner preflight does not reject the server as an AXIGNAL application host. It rejects only that runner topology.
+Existing application containers and databases do not fail this build-runner gate by themselves because the runner is not allowed to control or join them.
 
-## Canonical CI path
+## Shared build runner provisioning
 
-Until a compliant runner boundary exists:
-
-- Contract Validation runs on GitHub-hosted runners;
-- Executable Spine runs on GitHub-hosted runners;
-- builds, Playwright, FastAPI, PostgreSQL/PostGIS/pgvector and Valkey tests continue there;
-- development and merge readiness do not depend on self-hosted acceptance;
-- `.github/workflows/runner-acceptance.yml` remains dormant and manual-only.
-
-## Optional runner provisioning outline
-
-Provision only after a repeated preflight proves that the runner boundary is dedicated or strongly isolated. Keep the one-time registration token in an interactive shell variable; never place it in shell history, a file, process arguments, logs or repository content.
-
-1. Patch the operating system and enable unattended security updates.
-2. Create `axignal-runner` as a system account with `/home/axignal-runner`, no password and no membership in `sudo` or rootful `docker`.
-3. Configure a default-deny inbound firewall allowing only the existing administrative SSH path. Do not interrupt the current administrative session.
-4. Install Docker in rootless mode for `axignal-runner`; verify that its client targets the user socket and cannot read or write `/var/run/docker.sock`.
-5. Download the current GitHub Actions runner release from GitHub, verify its published SHA-256 checksum and extract it under `/home/axignal-runner/actions-runner`.
-6. Register it at repository scope as `axignal-ci-01` with:
+1. Preserve an inventory of all current services and networks.
+2. Create `axignal-runner` with a dedicated home, no interactive password, no `sudo` and no rootful Docker membership.
+3. Prefer an isolated runner container or VM. A systemd-sandboxed process is acceptable only when equivalent filesystem, network and privilege boundaries are demonstrated.
+4. Do not mount `/var/run/docker.sock`, `/var/lib/docker`, application volumes, `/etc/traefik`, SSH keys or project `.env` files.
+5. Place the runner under `/home/axignal-runner/actions-runner` with work directory `_work`.
+6. Register it as `axignal-build-01` with labels:
    - `self-hosted`
    - `linux`
    - `x64`
-   - `axignal-ci`
-7. Install the runner service and prove its `User=` is exactly `axignal-runner`.
-8. Copy the reviewed cleanup hook outside `_work`, owned and writable only by `axignal-runner`:
+   - `axignal-build`
+7. Configure workspace cleanup before and after every job.
+8. Limit CPU, memory, process count and writable disk.
+9. Execute `scripts/runner/verify-shared-build-boundary.sh` before any build.
+10. Run `.github/workflows/shared-build-runner-acceptance.yml` from a trusted revision.
+11. Disable the runner immediately when acceptance fails; GitHub-hosted CI remains active.
 
-   ```text
-   /home/axignal-runner/actions-runner/hooks/cleanup-workdir.sh
-   ```
+## Allowed workloads
 
-9. Set both `ACTIONS_RUNNER_HOOK_JOB_STARTED` and `ACTIONS_RUNNER_HOOK_JOB_COMPLETED` to that absolute path in the runner service environment.
-10. Add disk, CPU, memory, runner queue and job-duration monitoring.
-11. Dispatch `.github/workflows/runner-acceptance.yml` only from a trusted immutable revision.
-12. Keep the runner disabled if either acceptance job fails.
+The shared build runner MAY execute:
 
-The repository acceptance controls are:
-
-- `.github/workflows/runner-acceptance.yml`;
-- `scripts/runner/verify-host-boundary.sh`;
-- `scripts/runner/cleanup-workdir.sh`.
-
-Install a reviewed copy of `scripts/runner/cleanup-workdir.sh` at the hook path above. Configure it as both the `ACTIONS_RUNNER_HOOK_JOB_STARTED` and `ACTIONS_RUNNER_HOOK_JOB_COMPLETED` hook only after verifying that `/home/axignal-runner/actions-runner/_work` is the exact runner work directory. The script refuses any other target.
-
-The completed-job hook is independently checked by the second acceptance job, which runs without checkout and requires the previous workspace to be empty.
-
-## Workflow trust policy
-
-### Untrusted pull requests
-
-Untrusted fork or external pull-request code MUST NOT run on a persistent self-hosted runner.
-
-Allowed options:
-
-- GitHub-hosted validation;
-- static metadata checks without checking out untrusted code;
-- explicit maintainer-approved trusted branch before self-hosted execution.
-
-### Trusted workloads
-
-A compliant self-hosted runner MAY execute:
-
-- container builds;
+- frozen pnpm installation;
+- strict TypeScript;
+- Next.js product and landing builds;
 - Playwright browser suites;
-- integration tests;
-- database migration and restore tests;
-- benchmark fixtures;
-- Remotion rendering tests;
-- dependency and contract validation;
-- trusted branch or manually authorised workflows.
+- FastAPI lint and unit tests;
+- non-privileged benchmarks;
+- trusted internal revisions only.
+
+It MUST NOT execute:
+
+- Docker or Compose commands;
+- database migration or restore tests;
+- workflows containing product secrets;
+- fork or external pull-request code;
+- deployment commands;
+- jobs requiring access to product networks or persistent data.
+
+## Dedicated integration runner
+
+Docker, PostGIS/pgvector/Valkey integration, migration, restore and other privileged workloads MAY move to a future runner labelled `axignal-ci` only inside a dedicated host or strongly isolated VM with rootless Docker.
+
+The existing `.github/workflows/runner-acceptance.yml` and `scripts/runner/verify-host-boundary.sh` govern that future tier.
 
 ## Secret policy
 
 - No personal access token from an individual account.
 - Minimum GitHub token permissions.
-- No production SSH key or production `.env` file.
-- Short-lived test credentials only.
-- Secrets scoped by environment and workflow.
-- Logs and artifacts MUST be reviewed for accidental secret or dataset leakage.
+- No production SSH key, `.env` file, database credential or unrestricted deployment key.
+- No inherited environment values from application services.
+- Logs and artifacts MUST be reviewed for accidental leakage.
 
-## Isolation requirements
+## Acceptance evidence
 
-Each heavy job SHOULD run in a disposable container with:
+`axignal-build-01` passes only when a trusted acceptance run proves:
 
-- read-only repository checkout where practical;
-- bounded CPU and memory;
-- bounded disk and artifact retention;
-- no host Docker socket;
-- no access to product databases, application secrets or other job workspaces;
-- explicit network policy when testing untrusted source payloads.
+1. exact runner name and labels;
+2. non-root `axignal-runner` identity;
+3. no rootful Docker socket or group access;
+4. no forbidden environment variable, key path or product mount;
+5. frozen install, typecheck, builds, Playwright and FastAPI tests passing;
+6. bounded CPU, memory, disk and duration;
+7. empty workspace and no residual processes after completion;
+8. GitHub-hosted fallback still passes with the runner disabled.
 
-## Initial acceptance test
+## Incident response and rollback
 
-The optional runner gate passes when a trusted workflow:
-
-1. checks out the repository;
-2. validates naming, schemas, registry and OpenAPI;
-3. starts disposable PostgreSQL/PostGIS/pgvector and Valkey services;
-4. executes synthetic integration tests;
-5. destroys containers and workspace;
-6. leaves no secret, process or writable artifact outside approved caches;
-7. reports duration plus bounded CPU, memory, workspace and host-disk metrics;
-8. schedules a second job that proves the completed-job hook left no checkout, test port, process, container, volume or forbidden credential path.
-
-The acceptance workflow is manual-only (`workflow_dispatch`) and has `contents: read`. Pull-request events, especially forks, never target the persistent runner.
-
-## Incident response
-
-On suspected compromise:
-
-1. disable or remove the runner in GitHub immediately;
-2. stop the service and isolate the runner boundary;
-3. revoke all credentials accessible to the job;
-4. preserve relevant logs;
-5. rebuild the boundary from a trusted image rather than attempting in-place cleanup;
-6. record the incident under the AXIGNAL severity model.
-
-## Rollback and deprovisioning
-
-1. Disable the runner in GitHub before host changes.
-2. Stop the runner service as the administrative account.
-3. Unregister using a fresh short-lived removal token without logging it.
-4. Preserve service and runner diagnostic logs when an incident is suspected.
-5. Remove the dedicated runner directory and account only after their exact resolved paths and evidence-retention requirements are verified.
-6. Rebuild a compromised runner boundary from a trusted image; do not return an in-place cleaned boundary to service.
+1. Disable the runner in GitHub.
+2. Stop its service or isolated container without changing application workloads.
+3. Revoke short-lived registration material.
+4. Preserve logs if compromise is suspected.
+5. Remove only the exact runner boundary and work directory.
+6. Re-run GitHub-hosted Contract Validation and Executable Spine.
+7. Rebuild a compromised runner boundary rather than cleaning it in place.
