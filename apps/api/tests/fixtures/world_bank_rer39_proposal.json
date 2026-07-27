@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "producer_type": "LOCAL_MODEL",
+  "producer_id": "frozen-local-proposal-fixture",
+  "model_version": "fixture-model@0.1.0",
+  "method_version": "institutional-claim-extraction@0.1.0",
+  "prompt_version": "institutional-claim-extraction-prompt@0.1.0",
+  "claims": [
+    {
+      "subject_id": "geo_country_rus",
+      "predicate": "real_gdp_growth_annual_pct",
+      "object_value": {
+        "value": "2.3",
+        "unit": "percent_annual",
+        "period": "2018"
+      },
+      "statement": "The report states that real GDP growth reached 2.3 percent in 2018.",
+      "kind": "FACT",
+      "relationship": "SUPPORTING",
+      "source_fragments": [
+        {
+          "fragment_id": "frag_a61965dc5cafb395569c",
+          "quote_hash": "sha256:a61965dc5cafb395569cf243a7282685f6259ea201b04c50bd5486bd4930d4f9"
+        }
+      ],
+      "assumptions": [],
+      "unknowns": [
+        "The excerpt does not provide a Moscow-specific property-market measure."
+      ],
+      "extraction_confidence": 0.98
+    },
+    {
+      "subject_id": "opportunity_moscow_real_estate",
+      "predicate": "national_forecast_local_market_limitation",
+      "object_value": {
+        "scope": "national_macro_context",
+        "excluded_inference": "moscow_property_market_outcome"
+      },
+      "statement": "The national forecasts do not establish Moscow property-market conditions or a causal investment outcome.",
+      "kind": "LIMITATION",
+      "relationship": "ADVERSE",
+      "source_fragments": [
+        {
+          "fragment_id": "frag_9f683ddc31ac34a076bb",
+          "quote_hash": "sha256:9f683ddc31ac34a076bbc67f82c0762ad55bc6c1e2cfcbbc7527b22a7c42bd8b"
+        }
+      ],
+      "assumptions": [],
+      "unknowns": [
+        "No local transaction, yield, vacancy or regulatory evidence is present."
+      ],
+      "extraction_confidence": 0.99
+    }
+  ],
+  "explicit_unknowns": [
+    "The document does not establish current Moscow property prices.",
+    "The document does not establish a causal investment return."
+  ]
+}
