@@ -4,9 +4,23 @@ set -euo pipefail
 expected_user="axignal-runner"
 expected_home="/home/${expected_user}"
 expected_work_prefix="${expected_home}/actions-runner/_work/"
+expected_runner_name="axignal-ci-01"
 
 if [[ "$(id -un)" != "${expected_user}" ]] || [[ "$(id -u)" == "0" ]]; then
   echo "Runner must execute as ${expected_user}, never root." >&2
+  exit 1
+fi
+
+if [[ "${HOME}" != "${expected_home}" ]] ||
+   [[ "$(stat -c '%U:%G' "${HOME}")" != "${expected_user}:${expected_user}" ]]; then
+  echo "Runner home must be owned by ${expected_user}." >&2
+  exit 1
+fi
+
+if [[ "${RUNNER_NAME:-}" != "${expected_runner_name}" ]] ||
+   [[ "${RUNNER_OS:-}" != "Linux" ]] ||
+   [[ "${RUNNER_ARCH:-}" != "X64" ]]; then
+  echo "Runner identity or platform does not match the accepted AXIGNAL runner." >&2
   exit 1
 fi
 
@@ -25,6 +39,11 @@ case "${RUNNER_TEMP}/" in
     exit 1
     ;;
 esac
+
+if id -nG | tr ' ' '\n' | grep -qx docker; then
+  echo "The runner must not belong to the rootful docker group." >&2
+  exit 1
+fi
 
 if [[ -r /var/run/docker.sock ]] || [[ -w /var/run/docker.sock ]]; then
   echo "The runner can access the rootful Docker socket." >&2
@@ -60,4 +79,11 @@ for forbidden_path in \
   fi
 done
 
-echo "PASS non-root identity, rootless Docker, workspace boundary and secret denylist"
+if find "${GITHUB_WORKSPACE}" -xdev -type f \
+  \( -name '.env' -o -name '.env.production' -o -name 'id_rsa' -o -name 'id_ed25519' \
+     -o -name '*.pem' -o -name '*.key' \) -print -quit | grep -q .; then
+  echo "A forbidden credential-shaped file exists in the checkout." >&2
+  exit 1
+fi
+
+echo "PASS runner identity, non-root execution, rootless Docker, workspace boundary and secret denylist"

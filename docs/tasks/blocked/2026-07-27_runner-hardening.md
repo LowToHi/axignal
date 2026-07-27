@@ -10,7 +10,8 @@ Freeze JavaScript dependencies, enforce reproducible CI and accept a non-root, i
 
 ## Context and affected systems
 
-- PR `#9`, branch `agent/executable-spine-v0.1`;
+- PR `#9`, branch `agent/executable-spine-v0.1`, as the executable base;
+- hardening branch `agent/runner-hardening-v0.1`, stacked on that base;
 - Issue `#10`;
 - JavaScript dependency graph and executable-spine CI;
 - VPS `187.124.220.48`;
@@ -28,7 +29,9 @@ Freeze JavaScript dependencies, enforce reproducible CI and accept a non-root, i
 
 ## Blocker
 
-The 2026-07-27 preflight found unrelated persistent web and database workloads on the candidate VPS, including PostgreSQL containers. This conflicts with the normative prohibition on colocating AXIGNAL CI with production databases or secrets. No AXIGNAL runner account or service was created.
+The repeated 2026-07-27 read-only preflight found eight running containers, including four persistent database containers, one existing non-AXIGNAL Actions runner service, a rootful Docker socket and an inactive host firewall. This conflicts with the normative prohibition on colocating AXIGNAL CI with production databases or secrets. The required `axignal-runner` account is absent; no account, service, firewall rule or workload was changed.
+
+The acceptance workflow remains intentionally undispatched because the required runner does not exist and `workflow_dispatch` is not exposed from an unmerged workflow on the default branch. Neither condition may be bypassed by adding an untrusted automatic trigger.
 
 ## Decisions
 
@@ -50,6 +53,7 @@ The 2026-07-27 preflight found unrelated persistent web and database workloads o
 - [x] lockfile generated with pnpm `10.12.4`;
 - [x] direct and transitive production advisories patched;
 - [x] frozen install, typecheck, build and E2E pass locally;
+- [x] acceptance workflow covers exact toolchains, contract validation, full suites, rootless disposable services, bounded metrics and an independent post-job cleanup proof;
 - [ ] runner identity is exactly `axignal-runner`, uid is nonzero;
 - [ ] labels are `self-hosted`, `linux`, `x64`, `axignal-ci`;
 - [ ] Docker reports rootless and rootful socket is inaccessible;
@@ -60,3 +64,7 @@ The 2026-07-27 preflight found unrelated persistent web and database workloads o
 ## Rollback considerations
 
 Repository changes are additive or configuration-only and can be reverted as one hardening commit. Runner rollback must unregister the runner, stop its service, remove the dedicated user only after preserving incident evidence, and rebuild a compromised host rather than cleaning it in place.
+
+## Activated skills
+
+Registry `0.3.1`: `goal-keeper`, `contract-router`, `task-orchestrator`, `gate-evaluator`, `naming-guardian`, `security-reviewer`, `privacy-reviewer`, `observability-engineer`, `repository-architect`, `test-engineer`, `operations-engineer`, `operations-writer`.

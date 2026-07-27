@@ -1,6 +1,6 @@
 # AXIGNAL Self-Hosted GitHub Runner Runbook
 
-Status: `CANDIDATE / DO NOT EXECUTE AS ROOT`
+Status: `BLOCKED / FAIL-CLOSED`
 Host: `187.124.220.48`
 
 ## Security boundary
@@ -35,19 +35,29 @@ Fail closed if any of the following is true:
 
 ## Provisioning outline
 
+Provisioning is authorised only after a repeated preflight proves that the host is dedicated to AXIGNAL CI. Keep the one-time registration token in an interactive shell variable; never place it in shell history, a file, process arguments, logs or repository content.
+
 1. Patch the operating system and enable unattended security updates.
-2. Create `axignal-runner` with no interactive password and a dedicated home directory.
-3. Configure a firewall allowing only required SSH administration and outbound GitHub/container/package traffic.
-4. Install Docker in rootless mode for the runner account; do not grant access to `/var/run/docker.sock`.
-5. Register the runner with repository labels:
+2. Create `axignal-runner` as a system account with `/home/axignal-runner`, no password and no membership in `sudo` or `docker`.
+3. Configure a default-deny inbound firewall allowing only the existing administrative SSH path. Do not interrupt the current administrative session.
+4. Install Docker in rootless mode for `axignal-runner`; verify that its client targets the user socket and cannot read or write `/var/run/docker.sock`.
+5. Download the current GitHub Actions runner release from GitHub, verify its published SHA-256 checksum and extract it under `/home/axignal-runner/actions-runner`.
+6. Register it at repository scope as `axignal-ci-01` with:
    - `self-hosted`
    - `linux`
    - `x64`
    - `axignal-ci`
-6. Install the runner as a service owned by `axignal-runner`.
-7. Configure workspace cleanup after every job.
-8. Add disk, CPU, memory, runner queue and job-duration telemetry.
-9. Configure runner update monitoring and a tested unregister/re-register procedure.
+7. Install the runner service and prove its `User=` is exactly `axignal-runner`.
+8. Copy the reviewed cleanup hook outside `_work`, owned and writable only by `axignal-runner`:
+
+   ```text
+   /home/axignal-runner/actions-runner/hooks/cleanup-workdir.sh
+   ```
+
+9. Set both `ACTIONS_RUNNER_HOOK_JOB_STARTED` and `ACTIONS_RUNNER_HOOK_JOB_COMPLETED` to that absolute path in the runner service environment.
+10. Add disk, CPU, memory, runner queue and job-duration monitoring.
+11. Dispatch `.github/workflows/runner-acceptance.yml` only from a trusted immutable revision.
+12. Keep the runner disabled if either acceptance job fails.
 
 The repository acceptance controls are:
 
@@ -55,7 +65,9 @@ The repository acceptance controls are:
 - `scripts/runner/verify-host-boundary.sh`;
 - `scripts/runner/cleanup-workdir.sh`.
 
-Configure `scripts/runner/cleanup-workdir.sh` as the `ACTIONS_RUNNER_HOOK_JOB_STARTED` and `ACTIONS_RUNNER_HOOK_JOB_COMPLETED` hook only after verifying that `/home/axignal-runner/actions-runner/_work` is the exact runner work directory. The script refuses any other target.
+Install a reviewed copy of `scripts/runner/cleanup-workdir.sh` at the hook path above. Configure it as both the `ACTIONS_RUNNER_HOOK_JOB_STARTED` and `ACTIONS_RUNNER_HOOK_JOB_COMPLETED` hook only after verifying that `/home/axignal-runner/actions-runner/_work` is the exact runner work directory. The script refuses any other target.
+
+The completed-job hook is independently checked by the second acceptance job, which runs without checkout and requires the previous workspace to be empty.
 
 ## Workflow trust policy
 
@@ -112,7 +124,8 @@ The runner gate passes when a trusted workflow:
 4. executes a synthetic integration test;
 5. destroys containers and workspace;
 6. leaves no secret, process or writable artifact outside the approved cache;
-7. reports resource and duration metrics.
+7. reports duration plus bounded CPU, memory, workspace and host-disk metrics;
+8. schedules a second job that proves the completed-job hook left no checkout, test port, process, container, volume or forbidden credential path.
 
 The acceptance workflow is manual-only (`workflow_dispatch`) and has `contents: read`. It must be dispatched from a trusted repository revision after the runner is online. Pull-request events, especially forks, never target the persistent runner.
 
@@ -126,3 +139,12 @@ On suspected compromise:
 4. preserve relevant logs;
 5. rebuild the host from a trusted image rather than attempting in-place cleanup;
 6. record the incident under the AXIGNAL severity model.
+
+## Rollback and deprovisioning
+
+1. Disable the runner in GitHub before host changes.
+2. Stop the runner service as the administrative account.
+3. Unregister using a fresh short-lived removal token without logging it.
+4. Preserve service and runner diagnostic logs when an incident is suspected.
+5. Remove the dedicated runner directory and account only after their exact resolved paths and evidence-retention requirements are verified.
+6. Rebuild a compromised host from a trusted image; do not return an in-place cleaned host to service.
