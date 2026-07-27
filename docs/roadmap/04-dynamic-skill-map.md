@@ -1,6 +1,6 @@
 # 04 — AXIGNAL Dynamic Skill Map
 
-Version: `0.3.1`
+Version: `0.4.0`
 Status: `NORMATIVE CANDIDATE`
 Goal ID: `AXIGNAL-GOAL-001`
 
@@ -32,7 +32,7 @@ For every task, the orchestrator MUST:
 2. load the Goal Lock;
 3. resolve governing contracts;
 4. load mandatory skills from `skills/registry.yaml`;
-5. add conditional skills triggered by data, privacy, security, language, UI or financial scope;
+5. add conditional skills triggered by data, privacy, security, language, UI, research or financial scope;
 6. resolve conflicts by contract precedence;
 7. record activated skill versions in task evidence;
 8. refuse execution if a required skill is unavailable or revoked.
@@ -64,7 +64,27 @@ These skills MUST run for every material task.
 | `scenario-calibration-engineer` | forecasts or probabilities | baseline, holdout, calibration and demotion rules |
 | `data-quality-auditor` | ingestion or derived metrics | quality profile, threshold and quarantine behaviour |
 
-## 6. Experience skills
+## 6. Research, retrieval and memory skills
+
+| Skill | Trigger | Output |
+|---|---|---|
+| `research-run-orchestrator` | active investigation, dossier, monitoring or ResearchRun | typed plan, lifecycle, budget, progress and cancellation evidence |
+| `retrieval-policy-engineer` | RAG, vector, lexical, graph, API or Browser retrieval | domain-scoped retrieval plan, ranking evidence and source precedence |
+| `authorised-browser-researcher` | external web or document discovery | bounded browser plan, provenance, injection controls and stopping evidence |
+| `tenant-memory-engineer` | private documents, memory, preferences or tenant search | RLS model, purpose controls, deletion propagation and cross-tenant tests |
+| `local-model-operator` | local model, continuous worker, model routing or GPU | model policy, sandbox, resource budget, evaluation and kill switch |
+| `candidate-claim-pipeline-engineer` | model extraction, Candidate Claim or admission handoff | schema-valid proposals, lineage, quarantine and proof of no canonical-write authority |
+| `research-queue-orchestrator` | coverage gaps and candidate studies | prioritisation, lifecycle and evidence routing |
+
+Mandatory activation combinations:
+
+- Browser retrieval MUST activate `source-admission`, `authorised-browser-researcher`, `security-reviewer` and `evidence-provenance-engineer`.
+- Tenant-private retrieval MUST activate `tenant-memory-engineer`, `privacy-reviewer`, `security-reviewer` and `data-architect`.
+- Candidate Claim generation MUST activate `candidate-claim-pipeline-engineer`, `epistemic-admission`, `evidence-provenance-engineer` and `source-admission`.
+- Local model execution MUST activate `local-model-operator`, `security-reviewer`, `finance-operator`, `test-engineer` and `observability-engineer`.
+- ResearchRun UI work MUST activate `research-run-orchestrator`, `conversational-navigator`, `interaction-architect` and `accessibility-auditor`.
+
+## 7. Experience skills
 
 | Skill | Trigger | Output |
 |---|---|---|
@@ -79,7 +99,7 @@ These skills MUST run for every material task.
 | `accessibility-auditor` | any user-facing surface | WCAG evidence and non-visual equivalent |
 | `consent-ux-reviewer` | permission, memory or data-use controls | explicit, reversible consent/authority UX |
 
-## 7. Multilingual skills
+## 8. Multilingual skills
 
 | Skill | Trigger | Output |
 |---|---|---|
@@ -87,7 +107,7 @@ These skills MUST run for every material task.
 | `ontology-engineer` | predicates, universes or multilingual concepts | canonical vocabulary and mappings |
 | `search-engineer` | lexical, semantic or entity search | ranking contract, language parity and match explanation |
 
-## 8. Intent Intelligence skills
+## 9. Intent Intelligence skills
 
 | Skill | Trigger | Output |
 |---|---|---|
@@ -97,7 +117,7 @@ These skills MUST run for every material task.
 | `fraud-risk-engineer` | collective behaviour or rankings | coordination, manipulation and abuse controls |
 | `research-queue-orchestrator` | coverage gaps and candidate studies | prioritisation, lifecycle and evidence routing |
 
-## 9. Platform and operations skills
+## 10. Platform and operations skills
 
 | Skill | Trigger | Output |
 |---|---|---|
@@ -114,7 +134,7 @@ These skills MUST run for every material task.
 | `operations-engineer` | deployment or incidents | runbooks, rollback, recovery and ownership |
 | `operations-writer` | operating documentation | executable runbooks and verification |
 
-## 10. Commercial and validation skills
+## 11. Commercial and validation skills
 
 | Skill | Trigger | Output |
 |---|---|---|
@@ -127,7 +147,7 @@ These skills MUST run for every material task.
 | `regulatory-scope-reviewer` | financial, crypto or jurisdiction expansion | scope decision and blocked capabilities |
 | `legal-doc-coordinator` | customer terms or notices | legal-review checklist and publication package |
 
-## 11. Skill creation contract
+## 12. Skill creation contract
 
 A new skill MUST define:
 
@@ -147,7 +167,7 @@ A new skill MUST define:
 
 It MUST be registered in `skills/registry.yaml` and validate against `schemas/skill.schema.json`.
 
-## 12. Dynamic adaptation
+## 13. Dynamic adaptation
 
 Skills MAY evolve from observed failure, but they MUST NOT self-modify silently.
 
@@ -161,7 +181,7 @@ A revision requires:
 6. gate approval;
 7. preserved prior version.
 
-## 13. Prohibited skill behaviour
+## 14. Prohibited skill behaviour
 
 A skill MUST NOT:
 
@@ -174,9 +194,12 @@ A skill MUST NOT:
 - access unrelated tenant data;
 - introduce a new provider or architecture silently;
 - rename AXIGNAL or the domain;
-- optimise engagement at the expense of epistemic integrity.
+- optimise engagement at the expense of epistemic integrity;
+- allow Browser content to instruct tools or change permissions;
+- allow a local or external model to admit canonical claims;
+- query global, tenant-private and intent vector domains as one unrestricted corpus.
 
-## 14. Skill evidence ledger
+## 15. Skill evidence ledger
 
 Each task run MUST record:
 
@@ -189,7 +212,7 @@ Each task run MUST record:
 - disposition;
 - reviewer or gate decision.
 
-## 15. Skill gate
+## 16. Skill gate
 
 The dynamic skill system is accepted when:
 
