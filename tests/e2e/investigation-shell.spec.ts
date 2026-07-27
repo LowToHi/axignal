@@ -61,6 +61,48 @@ test("persists theme, horizon and saved Investigation Trail", async ({ page }) =
   await expect(page.getByRole("button", { name: "Trail guardado" })).toBeVisible();
 });
 
+test("creates a traceable ResearchRun without admitting canonical claims", async ({ page }) => {
+  await page.goto("/");
+
+  const shell = page.locator("main.shell");
+  await page.getByRole("button", { name: "Investigar oportunidad" }).click();
+
+  await expect(page.getByRole("region", { name: "ResearchRun" })).toBeVisible();
+  await expect(page.getByText("ADMISSION_QUEUED", { exact: true })).toBeVisible();
+  await expect(page.getByText("PROPUESTA · NO ADMITIDA")).toBeVisible();
+  await expect(page.getByText("OFFICIAL_API", { exact: true })).toBeVisible();
+  await expect(page.getByText("AUTHORISED_BROWSER", { exact: true })).toBeVisible();
+  await expect(page.getByText(/IGNORED_INJECTION/)).toBeVisible();
+  await expect(page.getByText(/canonical_claim_id: null/).first()).toBeVisible();
+  await expect(page.getByText("UNKNOWN", { exact: true })).toBeVisible();
+  await expect(page.getByText(/Ningún resultado ha sido admitido como claim canónico/i)).toBeVisible();
+
+  const versionAfterResearch = Number(await shell.getAttribute("data-context-version"));
+  expect(versionAfterResearch).toBeGreaterThan(1);
+
+  await page.reload();
+  await expect(page.getByText("PROPUESTA · NO ADMITIDA")).toBeVisible();
+  await expect(page.getByText("ADMISSION_QUEUED", { exact: true })).toBeVisible();
+  await expect(shell).toHaveAttribute("data-context-version", String(versionAfterResearch));
+});
+
+test("uses tenant-private fixture only after explicit authorisation", async ({ page }) => {
+  await page.goto("/");
+
+  await page.getByLabel("Memoria privada sintética para ResearchRun").check();
+  await page.getByRole("button", { name: "Investigar oportunidad" }).click();
+
+  const privateSource = page.getByText("Tenant-private note fixture");
+  await expect(privateSource).toBeVisible();
+  await expect(page.getByText(/Usada solo como contexto privado/i)).toBeVisible();
+  await expect(page.getByText(/memoria privada usada/i)).toBeVisible();
+  await expect(page.getByText(/canonical_claim_id: null/).first()).toBeVisible();
+
+  await page.reload();
+  await expect(page.getByLabel("Memoria privada sintética para ResearchRun")).toBeChecked();
+  await expect(privateSource).toBeVisible();
+});
+
 test("fails without mutating context when the Navigator route is unavailable", async ({ page }) => {
   await page.route("**/api/navigator/interpret", (route) => route.abort());
   await page.goto("/");
@@ -76,4 +118,17 @@ test("fails without mutating context when the Navigator route is unavailable", a
     "aria-pressed",
     "true",
   );
+});
+
+test("fails closed when the ResearchRun route is unavailable", async ({ page }) => {
+  await page.route("**/api/research/runs", (route) => route.abort());
+  await page.goto("/");
+
+  const shell = page.locator("main.shell");
+  await expect(shell).toHaveAttribute("data-context-version", "1");
+  await page.getByRole("button", { name: "Investigar oportunidad" }).click();
+
+  await expect(page.getByText(/No he modificado el contexto/i)).toBeVisible();
+  await expect(shell).toHaveAttribute("data-context-version", "1");
+  await expect(page.getByText("NO INICIADO")).toBeVisible();
 });
