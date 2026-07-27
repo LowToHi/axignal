@@ -9,6 +9,9 @@ import {
   findSelectedOpportunity,
   initialMessages,
   nextHistoryEvent,
+  normaliseInvestigationPayload,
+  selectedResearchDossier,
+  selectedResearchRun,
   updateContext,
   type Claim,
   type ClaimKind,
@@ -19,9 +22,9 @@ import {
   type PrototypeInvestigationPayload,
   type Theme
 } from "../lib/investigation-context";
-import { runNavigatorCommand } from "../lib/navigator-client";
+import { runNavigatorCommand, runResearch } from "../lib/navigator-client";
 
-const STORAGE_KEY = "axignal:investigation-shell:v1";
+const STORAGE_KEY = "axignal:investigation-shell:v2";
 const lensOptions: Lens[] = ["AUTO", "GLOBE", "GRAPH", "DUAL"];
 const localeOptions: { value: Locale; label: string }[] = [
   { value: "en", label: "EN" },
@@ -123,11 +126,16 @@ function PrimaryCanvas({ payload }: { payload: PrototypeInvestigationPayload }) 
 function isPersistedState(value: unknown): value is PersistedShellState {
   if (!value || typeof value !== "object") return false;
   const candidate = value as Partial<PersistedShellState>;
-  return candidate.schemaVersion === 1 && candidate.payload?.context?.context_id === "ctx_moscow_real_estate_v01" && Array.isArray(candidate.messages);
+  return candidate.schemaVersion === 2 && candidate.payload?.context?.context_id === "ctx_moscow_real_estate_v01" && Array.isArray(candidate.messages);
 }
 
 function messageNow(actor: Message["actor"], text: string): Message {
   return { id: `msg_${Date.now()}_${actor}`, actor, text, occurredAt: new Date().toISOString() };
+}
+
+function isResearchRequest(text: string): boolean {
+  const lower = text.toLocaleLowerCase("es");
+  return ["investiga", "investigar", "research", "regulator", "socioecon", "evidencia adversa", "dossier", "contexto político", "contexto cultural"].some((token) => lower.includes(token));
 }
 
 export function InvestigationShell() {
@@ -139,6 +147,7 @@ export function InvestigationShell() {
   const [requestState, setRequestState] = useState<RequestState>("idle");
   const [claimFilter, setClaimFilter] = useState<ClaimFilter>("TODOS");
   const [showInterpretation, setShowInterpretation] = useState(true);
+  const [includePrivateKnowledge, setIncludePrivateKnowledge] = useState(false);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
@@ -147,9 +156,10 @@ export function InvestigationShell() {
       try {
         const parsed: unknown = JSON.parse(raw);
         if (isPersistedState(parsed)) {
-          setPayload(parsed.payload);
+          setPayload(normaliseInvestigationPayload(parsed.payload));
           setMessages(parsed.messages);
           setTheme(parsed.theme);
+          setIncludePrivateKnowledge(parsed.includePrivateKnowledge);
           setLocale(parsed.payload.context.locale);
           document.documentElement.dataset.theme = parsed.theme;
         }
@@ -162,9 +172,15 @@ export function InvestigationShell() {
 
   useEffect(() => {
     if (!hydrated) return;
-    const persisted: PersistedShellState = { schemaVersion: 1, payload, messages, theme };
+    const persisted: PersistedShellState = {
+      schemaVersion: 2,
+      payload,
+      messages,
+      theme,
+      includePrivateKnowledge
+    };
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(persisted));
-  }, [hydrated, messages, payload, theme]);
+  }, [hydrated, includePrivateKnowledge, messages, payload, theme]);
 
   const selected = useMemo(() => findSelectedOpportunity(payload), [payload]);
   const selectedClaims = useMemo(() => claimsForSelectedOpportunity(payload), [payload]);
@@ -177,6 +193,14 @@ export function InvestigationShell() {
   const selectedClaim = payload.claims.find((claim) => claim.claim_id === selectedClaimId) ?? null;
   const selectedEvidence = payload.evidence.find((item) => item.evidence_id === selectedEvidenceId) ?? null;
   const effectiveLens = payload.context.lens === "AUTO" ? "GLOBE" : payload.context.lens;
+  const researchRun = selectedResearchRun(payload);
+  const researchDossier = selectedResearchDossier(payload);
+  const researchClaims = researchRun
+    ? payload.candidate_claims.filter((claim) => researchRun.candidate_claim_ids.includes(claim.candidate_claim_id))
+    : [];
+  const researchUnknowns = researchRun
+    ? payload.unknowns.filter((unknown) => researchRun.unknown_ids.includes(unknown.unknown_id))
+    : [];
 
   function toggleTheme() {
     const nextTheme: Theme = theme === "dark" ? "light" : "dark";
@@ -282,24 +306,28 @@ export function InvestigationShell() {
     ));
   }
 
-  async function submitMessage(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const text = draft.trim();
-    if (!text || requestState === "processing") return;
-
+  async function executeMessage(text: string) {
     setMessages((current) => [...current, messageNow("user", text)]);
-    setDraft("");
     setRequestState("processing");
-
     try {
-      const result = await runNavigatorCommand({ message: text, locale, payload });
-      setPayload(result);
+      const result = isResearchRequest(text)
+        ? await runResearch({ question: text, locale, includePrivateKnowledge, payload })
+        : await runNavigatorCommand({ message: text, locale, payload });
+      setPayload(normaliseInvestigationPayload(result));
       setMessages((current) => [...current, messageNow("axignal", result.explanation)]);
       setRequestState("idle");
     } catch {
       setMessages((current) => [...current, messageNow("axignal", "No he modificado el contexto porque la orden no pudo ejecutarse. Puedes reintentarlo sin perder el estado actual.")]);
       setRequestState("error");
     }
+  }
+
+  async function submitMessage(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const text = draft.trim();
+    if (!text || requestState === "processing") return;
+    setDraft("");
+    await executeMessage(text);
   }
 
   return (
@@ -329,7 +357,7 @@ export function InvestigationShell() {
       <section className="navigator panel" aria-label="AXIGNAL Navigator">
         <div className="panel-title">
           <strong>AXIGNAL NAVIGATOR</strong>
-          <span className={requestState === "processing" ? "online processing" : "online"}>● {requestState === "processing" ? "PROCESSING" : requestState === "error" ? "RETRY" : "ONLINE"}</span>
+          <span className={requestState === "processing" ? "online processing" : "online"}>● {requestState === "processing" ? "RESEARCHING" : requestState === "error" ? "RETRY" : "ONLINE"}</span>
         </div>
         <div className="messages" aria-live="polite">
           {messages.map((message) => (
@@ -346,10 +374,26 @@ export function InvestigationShell() {
             <b>{payload.context.lens} → {effectiveLens}</b>
             <small>{payload.context.lens_reason}</small>
             <small>Coverage: {payload.context.coverage.status} · History: {payload.context.history.length}</small>
+            <label className="private-memory-toggle">
+              <input
+                type="checkbox"
+                checked={includePrivateKnowledge}
+                onChange={(event) => setIncludePrivateKnowledge(event.target.checked)}
+              />
+              Memoria privada sintética para ResearchRun
+            </label>
           </div>
         )}
+        <button
+          className="research-shortcut"
+          type="button"
+          disabled={requestState === "processing"}
+          onClick={() => executeMessage("Investiga el contexto regulatorio y socioeconómico de esta oportunidad")}
+        >
+          Investigar oportunidad
+        </button>
         <form className="composer" onSubmit={submitMessage}>
-          <input value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="Escribe una orden o pregunta…" aria-label="Mensaje para AXIGNAL" disabled={requestState === "processing"} />
+          <input value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="Orden, pregunta o investigación…" aria-label="Mensaje para AXIGNAL" disabled={requestState === "processing"} />
           <button type="submit" aria-label="Enviar" disabled={requestState === "processing"}>➤</button>
         </form>
       </section>
@@ -373,12 +417,12 @@ export function InvestigationShell() {
           <article><span>OPORTUNIDADES EN FIXTURE</span><strong>{payload.opportunities.length}</strong><small>Contexto versionado</small></article>
           <article><span>POTENCIAL SELECCIONADO</span><strong>{selected.expected_return_label}</strong><small>Estimación prototipo</small></article>
           <article><span>CONFIANZA</span><strong>{Math.round(selected.confidence * 100)}%</strong><small>No es recomendación</small></article>
-          <article><span>CLAIMS VINCULADOS</span><strong>{selected.claim_ids.length}</strong><small>Apoyo + contradicción</small></article>
+          <article><span>CANDIDATE CLAIMS</span><strong>{researchRun?.candidate_claim_ids.length ?? 0}</strong><small>No admitidos</small></article>
           <article><span>HISTORIAL</span><strong>{payload.context.history.length}</strong><small>Eventos persistentes</small></article>
         </div>
       </section>
 
-      <aside className="right-column">
+      <aside className="right-column" data-has-research={Boolean(researchRun)}>
         <section className="opportunities panel">
           <div className="panel-title"><strong>OPORTUNIDADES ({payload.opportunities.length})</strong><span>Ordenar: Potencial</span></div>
           {payload.opportunities.map((opportunity) => (
@@ -389,6 +433,49 @@ export function InvestigationShell() {
             </button>
           ))}
         </section>
+
+        <section className="research-panel panel" aria-label="ResearchRun">
+          <div className="panel-title">
+            <strong>RESEARCH RUN</strong>
+            <span>{researchRun?.state ?? "NO INICIADO"}</span>
+          </div>
+          {!researchRun && <p className="empty-state">Solicita una investigación para crear un plan visible, recuperar fuentes autorizadas y generar propuestas trazables.</p>}
+          {researchRun && (
+            <div className="research-content">
+              <div className="research-status">
+                <span className="proposal-badge">PROPUESTA · NO ADMITIDA</span>
+                <strong>{researchRun.question}</strong>
+                <small>{researchRun.research_run_id} · presupuesto máx. {(researchRun.budgets.max_cost_minor_units / 100).toLocaleString("es-ES", { style: "currency", currency: "EUR" })}</small>
+              </div>
+              <div className="research-sources">
+                {researchRun.source_plan.map((source) => (
+                  <article key={source.source_result_id} data-domain={source.domain} data-status={source.status}>
+                    <strong>{source.source_class}</strong><span>{source.label}</span><small>{source.status} · {source.note}</small>
+                  </article>
+                ))}
+              </div>
+              <div className="research-progress" aria-label="Progreso de ResearchRun">
+                {researchRun.progress.map((step) => <span key={step.step} data-status={step.status}>{step.status === "COMPLETED" ? "✓" : "○"} {step.step}</span>)}
+              </div>
+              <div className="candidate-claims">
+                {researchClaims.map((claim) => (
+                  <article key={claim.candidate_claim_id} data-kind={claim.kind}>
+                    <span>{claim.kind}</span><p>{claim.text}</p><small>{claim.state} · canonical_claim_id: null</small>
+                  </article>
+                ))}
+              </div>
+              {researchUnknowns.map((unknown) => <div className="research-unknown" key={unknown.unknown_id}><strong>UNKNOWN</strong><p>{unknown.text}</p><small>{unknown.reason}</small></div>)}
+              {researchDossier && (
+                <div className="research-dossier">
+                  <strong>{researchDossier.title}</strong>
+                  <p>{researchDossier.summary}</p>
+                  <small>{researchDossier.status} · {researchDossier.sections.length} secciones · memoria privada {researchDossier.private_context_used ? "usada" : "no usada"}</small>
+                </div>
+              )}
+            </div>
+          )}
+        </section>
+
         <section className="claims panel">
           <div className="panel-title"><strong>CLAIM &amp; EVIDENCE RAIL</strong><span>{selected.name}</span></div>
           <div className="claim-tabs">
