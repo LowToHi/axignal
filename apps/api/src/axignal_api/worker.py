@@ -45,10 +45,16 @@ class ResearchWorker:
             run_id=job.research_run_id,
         )
         if run is None:
-            LOGGER.warning("Ignoring job for missing tenant-scoped ResearchRun %s", job.research_run_id)
+            LOGGER.warning(
+                "Ignoring job for missing tenant-scoped ResearchRun %s",
+                job.research_run_id,
+            )
             return
         if run["state"] == "COMPLETED":
-            LOGGER.info("ResearchRun %s is already complete; duplicate delivery ignored", job.research_run_id)
+            LOGGER.info(
+                "ResearchRun %s is already complete; duplicate delivery ignored",
+                job.research_run_id,
+            )
             return
         if job.source_id != SOURCE_ID:
             self.repository.fail_run(
