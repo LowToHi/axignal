@@ -2,7 +2,24 @@ export type Lens = "AUTO" | "GLOBE" | "GRAPH" | "DUAL";
 export type Theme = "dark" | "light";
 export type Locale = "en" | "es" | "fr" | "de" | "pt-BR" | "zh-Hans";
 export type ClaimKind = "HECHO" | "INFERENCIA" | "PREDICCIÓN" | "CONTRADICCIÓN" | "DESCONOCIDO";
-export type RailMode = "CONTEXT" | "OPPORTUNITY" | "CLAIM" | "EVIDENCE" | "EXPLANATION" | "COVERAGE";
+export type RailMode = "CONTEXT" | "OPPORTUNITY" | "CLAIM" | "EVIDENCE" | "EXPLANATION" | "COVERAGE" | "RESEARCH" | "DOSSIER";
+export type KnowledgeDomain = "AXIGNAL_GLOBAL" | "TENANT_PRIVATE" | "EXTERNAL_AUTHORISED";
+export type ResearchRunState =
+  | "PLANNED"
+  | "QUEUED"
+  | "RETRIEVING"
+  | "EXTRACTING"
+  | "SYNTHESISING"
+  | "EVIDENCE_COLLECTED"
+  | "CLAIMS_PROPOSED"
+  | "DOSSIER_READY"
+  | "ADMISSION_QUEUED"
+  | "COMPLETED"
+  | "CANCELLED"
+  | "BUDGET_EXHAUSTED"
+  | "RIGHTS_BLOCKED"
+  | "INSUFFICIENT_EVIDENCE"
+  | "FAILED";
 
 export type Message = {
   id: string;
@@ -17,6 +34,12 @@ export type Evidence = {
   source: string;
   as_of: string;
   relationship: "SUPPORT" | "CONTRADICT" | "UNKNOWN";
+  domain?: KnowledgeDomain;
+  source_class?: "CANONICAL" | "OFFICIAL_API" | "AUTHORISED_BROWSER" | "TENANT_PRIVATE";
+  rights_status?: "RIGHTS_VALID" | "PRIVATE_USE" | "RESTRICTED";
+  content_hash?: string;
+  provisional?: boolean;
+  injection_detected?: boolean;
   synthetic: true;
 };
 
@@ -41,11 +64,102 @@ export type Opportunity = {
   synthetic: true;
 };
 
+export type CandidateClaim = {
+  candidate_claim_id: string;
+  opportunity_id: string;
+  kind: "SUPPORT" | "CONTRADICTION";
+  text: string;
+  state: "ADMISSION_QUEUED";
+  evidence_ids: string[];
+  producer: {
+    producer_type: "DETERMINISTIC_PARSER" | "LOCAL_MODEL_FIXTURE";
+    producer_id: string;
+    method_version: string;
+  };
+  canonical_claim_id: null;
+  tenant_scope: "GLOBAL";
+  synthetic: true;
+};
+
+export type ResearchSourceResult = {
+  source_result_id: string;
+  label: string;
+  domain: KnowledgeDomain;
+  source_class: "OFFICIAL_API" | "AUTHORISED_BROWSER" | "TENANT_PRIVATE";
+  status: "USED" | "NOT_AUTHORISED" | "IGNORED_INJECTION";
+  primary: boolean;
+  evidence_ids: string[];
+  note: string;
+};
+
+export type ResearchUnknown = {
+  unknown_id: string;
+  text: string;
+  reason: string;
+};
+
+export type ResearchDossier = {
+  dossier_id: string;
+  title: string;
+  status: "TRACEABLE_PROVISIONAL";
+  summary: string;
+  sections: Array<{
+    section_id: string;
+    title: string;
+    text: string;
+    evidence_ids: string[];
+    candidate_claim_ids: string[];
+  }>;
+  source_result_ids: string[];
+  candidate_claim_ids: string[];
+  unknown_ids: string[];
+  private_context_used: boolean;
+  synthetic: true;
+};
+
+export type ResearchRun = {
+  research_run_id: string;
+  context_id: string;
+  opportunity_id: string;
+  question: string;
+  state: ResearchRunState;
+  source_plan: ResearchSourceResult[];
+  budgets: {
+    max_searches: number;
+    max_documents: number;
+    max_input_tokens: number;
+    max_output_tokens: number;
+    max_cost_minor_units: number;
+    currency: "EUR";
+  };
+  actual_usage: {
+    searches: number;
+    documents: number;
+    input_tokens: number;
+    output_tokens: number;
+    cost_minor_units: number;
+  };
+  progress: Array<{
+    step: string;
+    status: "COMPLETED" | "QUEUED";
+  }>;
+  evidence_ids: string[];
+  candidate_claim_ids: string[];
+  unknown_ids: string[];
+  dossier_id: string;
+  admission_batch_id: string;
+  private_knowledge_authorised: boolean;
+  created_at: string;
+  updated_at: string;
+  synthetic: true;
+};
+
 export type InvestigationHistoryEvent = {
   event_id: string;
   event_type: string;
   occurred_at: string;
   command_plan_id: string | null;
+  research_run_id?: string | null;
 };
 
 export type InvestigationContext = {
@@ -76,6 +190,16 @@ export type InvestigationContext = {
     source_ids: string[];
   };
   rail_mode: RailMode;
+  research: {
+    active_run_ids: string[];
+    selected_run_id: string | null;
+    last_completed_run_id: string | null;
+    selected_run_state: ResearchRunState | null;
+    provisional_evidence_ids: string[];
+    candidate_claim_ids: string[];
+    dossier_id: string | null;
+    admission_batch_id: string | null;
+  };
   history: InvestigationHistoryEvent[];
   entitlement_snapshot_id: string | null;
   saved_trail_id: string | null;
@@ -88,6 +212,10 @@ export type PrototypeInvestigationPayload = {
   opportunities: Opportunity[];
   claims: Claim[];
   evidence: Evidence[];
+  research_runs: ResearchRun[];
+  candidate_claims: CandidateClaim[];
+  dossiers: ResearchDossier[];
+  unknowns: ResearchUnknown[];
   explanation: string;
   focus: {
     opportunity_id: string | null;
@@ -97,10 +225,11 @@ export type PrototypeInvestigationPayload = {
 };
 
 export type PersistedShellState = {
-  schemaVersion: 1;
+  schemaVersion: 2;
   payload: PrototypeInvestigationPayload;
   messages: Message[];
   theme: Theme;
+  includePrivateKnowledge: boolean;
 };
 
 const FIXED_TIME = "2026-07-27T00:00:00Z";
@@ -166,12 +295,12 @@ const claims: Claim[] = [
 ];
 
 const evidence: Evidence[] = [
-  { evidence_id: "ev_cbr_rent", title: "Rental market research", source: "CBR Research", as_of: "2024-04-15", relationship: "SUPPORT", synthetic: true },
-  { evidence_id: "ev_transport_model", title: "Transport accessibility model", source: "AXIGNAL synthetic model fixture", as_of: "2024-03-03", relationship: "SUPPORT", synthetic: true },
-  { evidence_id: "ev_supply_model", title: "Premium housing supply model", source: "AXIGNAL synthetic model fixture", as_of: "2024-02-28", relationship: "SUPPORT", synthetic: true },
-  { evidence_id: "ev_bank_rates", title: "Mortgage rate environment", source: "Banco de Rusia", as_of: "2024-05-10", relationship: "CONTRADICT", synthetic: true },
-  { evidence_id: "ev_coverage_gap", title: "Tax-policy coverage gap", source: "Coverage registry", as_of: "2024-05-10", relationship: "UNKNOWN", synthetic: true },
-  { evidence_id: "ev_zil_plan", title: "ZIL regeneration programme", source: "Moscow urban plan fixture", as_of: "2024-04-02", relationship: "SUPPORT", synthetic: true }
+  { evidence_id: "ev_cbr_rent", title: "Rental market research", source: "CBR Research", as_of: "2024-04-15", relationship: "SUPPORT", domain: "AXIGNAL_GLOBAL", source_class: "CANONICAL", rights_status: "RIGHTS_VALID", synthetic: true },
+  { evidence_id: "ev_transport_model", title: "Transport accessibility model", source: "AXIGNAL synthetic model fixture", as_of: "2024-03-03", relationship: "SUPPORT", domain: "AXIGNAL_GLOBAL", source_class: "CANONICAL", rights_status: "RIGHTS_VALID", synthetic: true },
+  { evidence_id: "ev_supply_model", title: "Premium housing supply model", source: "AXIGNAL synthetic model fixture", as_of: "2024-02-28", relationship: "SUPPORT", domain: "AXIGNAL_GLOBAL", source_class: "CANONICAL", rights_status: "RIGHTS_VALID", synthetic: true },
+  { evidence_id: "ev_bank_rates", title: "Mortgage rate environment", source: "Banco de Rusia", as_of: "2024-05-10", relationship: "CONTRADICT", domain: "AXIGNAL_GLOBAL", source_class: "CANONICAL", rights_status: "RIGHTS_VALID", synthetic: true },
+  { evidence_id: "ev_coverage_gap", title: "Tax-policy coverage gap", source: "Coverage registry", as_of: "2024-05-10", relationship: "UNKNOWN", domain: "AXIGNAL_GLOBAL", source_class: "CANONICAL", rights_status: "RIGHTS_VALID", synthetic: true },
+  { evidence_id: "ev_zil_plan", title: "ZIL regeneration programme", source: "Moscow urban plan fixture", as_of: "2024-04-02", relationship: "SUPPORT", domain: "AXIGNAL_GLOBAL", source_class: "CANONICAL", rights_status: "RIGHTS_VALID", synthetic: true }
 ];
 
 export const initialMessages: Message[] = [
@@ -207,7 +336,17 @@ export function createInitialInvestigation(locale: Locale = "es"): PrototypeInve
         source_ids: evidence.map((item) => item.evidence_id)
       },
       rail_mode: "OPPORTUNITY",
-      history: [{ event_id: "evt_0001", event_type: "INVESTIGATION_CREATED", occurred_at: FIXED_TIME, command_plan_id: "plan_0001" }],
+      research: {
+        active_run_ids: [],
+        selected_run_id: null,
+        last_completed_run_id: null,
+        selected_run_state: null,
+        provisional_evidence_ids: [],
+        candidate_claim_ids: [],
+        dossier_id: null,
+        admission_batch_id: null
+      },
+      history: [{ event_id: "evt_0001", event_type: "INVESTIGATION_CREATED", occurred_at: FIXED_TIME, command_plan_id: "plan_0001", research_run_id: null }],
       entitlement_snapshot_id: null,
       saved_trail_id: null,
       updated_at: FIXED_TIME,
@@ -216,18 +355,40 @@ export function createInitialInvestigation(locale: Locale = "es"): PrototypeInve
     opportunities: structuredClone(opportunities),
     claims: structuredClone(claims),
     evidence: structuredClone(evidence),
+    research_runs: [],
+    candidate_claims: [],
+    dossiers: [],
+    unknowns: [],
     explanation: "Contexto sintético inicial cargado.",
     focus: { opportunity_id: "opp_moscow_ramenki", claim_id: null, evidence_id: null }
   };
 }
 
-export function nextHistoryEvent(context: InvestigationContext, eventType: string, commandPlanId: string | null = null): InvestigationHistoryEvent {
+export function normaliseInvestigationPayload(payload: PrototypeInvestigationPayload): PrototypeInvestigationPayload {
+  const initialResearch = createInitialInvestigation(payload.context.locale).context.research;
+  return {
+    ...payload,
+    context: { ...payload.context, research: payload.context.research ?? initialResearch },
+    research_runs: payload.research_runs ?? [],
+    candidate_claims: payload.candidate_claims ?? [],
+    dossiers: payload.dossiers ?? [],
+    unknowns: payload.unknowns ?? []
+  };
+}
+
+export function nextHistoryEvent(
+  context: InvestigationContext,
+  eventType: string,
+  commandPlanId: string | null = null,
+  researchRunId: string | null = null
+): InvestigationHistoryEvent {
   const nextVersion = context.version + 1;
   return {
     event_id: `evt_${String(nextVersion).padStart(4, "0")}`,
     event_type: eventType,
     occurred_at: new Date().toISOString(),
-    command_plan_id: commandPlanId
+    command_plan_id: commandPlanId,
+    research_run_id: researchRunId
   };
 }
 
@@ -260,4 +421,14 @@ export function claimsForSelectedOpportunity(payload: PrototypeInvestigationPayl
 export function evidenceForClaim(payload: PrototypeInvestigationPayload, claim: Claim): Evidence[] {
   const evidenceIds = new Set(claim.evidence_ids);
   return payload.evidence.filter((item) => evidenceIds.has(item.evidence_id));
+}
+
+export function selectedResearchRun(payload: PrototypeInvestigationPayload): ResearchRun | null {
+  const selectedId = payload.context.research.selected_run_id;
+  return payload.research_runs.find((item) => item.research_run_id === selectedId) ?? payload.research_runs.at(-1) ?? null;
+}
+
+export function selectedResearchDossier(payload: PrototypeInvestigationPayload): ResearchDossier | null {
+  const dossierId = payload.context.research.dossier_id;
+  return payload.dossiers.find((item) => item.dossier_id === dossierId) ?? null;
 }
