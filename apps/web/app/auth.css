@@ -71,3 +71,57 @@
 .auth-card small {
   opacity: .62;
 }
+
+.research-progress-bridge {
+  position: fixed;
+  z-index: 1000;
+  right: 1rem;
+  bottom: 1rem;
+  width: min(28rem, calc(100vw - 2rem));
+  display: grid;
+  gap: .55rem;
+  padding: 1rem;
+  border: 1px solid color-mix(in srgb, var(--axignal-accent, #80f0c0) 38%, transparent);
+  border-radius: .8rem;
+  background: color-mix(in srgb, var(--surface-1, #0d1b17) 94%, transparent);
+  color: var(--text-primary, #f4fbf8);
+  box-shadow: 0 1rem 3rem rgb(0 0 0 / 42%);
+  backdrop-filter: blur(16px);
+}
+
+.research-progress-bridge[data-terminal="false"] {
+  border-left: .25rem solid var(--axignal-accent, #80f0c0);
+}
+
+.research-progress-bridge[data-state="FAILED"] {
+  border-left: .25rem solid #ff8f8f;
+}
+
+.research-progress-bridge > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.research-progress-bridge span,
+.research-progress-bridge small {
+  font-size: .7rem;
+  letter-spacing: .08em;
+  opacity: .7;
+}
+
+.research-progress-bridge p,
+.research-progress-bridge small {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.research-progress-bridge button {
+  justify-self: end;
+  padding: .4rem .7rem;
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: .4rem;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
