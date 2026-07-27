@@ -143,7 +143,9 @@ def _identity_from_payload(payload: dict[str, Any]) -> AuthenticatedIdentity:
     )
 
 
-def require_identity(assertion: IdentityAssertionHeader) -> AuthenticatedIdentity:
+def require_identity(
+    assertion: IdentityAssertionHeader = None,
+) -> AuthenticatedIdentity:
     settings = Settings.from_env()
     try:
         settings.require_identity_assertions()
