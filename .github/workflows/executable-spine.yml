@@ -73,7 +73,7 @@ jobs:
           retention-days: 7
 
   api:
-    name: FastAPI contract
+    name: FastAPI contract and local proposal boundary
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -99,6 +99,19 @@ jobs:
         run: ruff check apps/api scripts
       - name: Test API
         run: pytest --cov=axignal_api --cov-report=term-missing
+      - name: Verify local document proposal boundary
+        shell: bash
+        run: |
+          set -o pipefail
+          python scripts/verify_local_document_proposal_pipeline.py 2>&1 | tee local-document-proposal-acceptance.log
+      - name: Upload local proposal diagnostics
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: local-document-proposal-diagnostics
+          path: local-document-proposal-acceptance.log
+          if-no-files-found: error
+          retention-days: 7
 
   services:
     name: Authenticated ResearchRun, PostgreSQL, RLS, outbox and Valkey
