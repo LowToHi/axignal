@@ -28,8 +28,9 @@ jobs:
       - name: Install exact formatter family
         run: python -m pip install 'ruff>=0.12,<1'
       - name: Apply safe lint fixes and formatting
+        shell: bash
         run: |
-          ruff check apps/api scripts --fix
+          ruff check apps/api scripts --fix || true
           ruff format apps/api scripts
           ruff check apps/api scripts
       - name: Commit deterministic formatting
