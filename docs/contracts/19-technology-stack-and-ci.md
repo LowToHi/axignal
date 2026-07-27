@@ -1,6 +1,6 @@
 # 19 — Technology Stack and CI Contract
 
-Version: `0.1.0-candidate`
+Version: `0.2.0-candidate`
 Status: `NORMATIVE CANDIDATE / STACK FREEZE REQUIRED`
 Goal ID: `AXIGNAL-GOAL-001`
 
@@ -160,35 +160,80 @@ Every command, source object, candidate claim, admitted claim, opportunity and u
 - MinIO MAY emulate S3 locally;
 - Kubernetes remains prohibited before a documented scale or isolation gate.
 
-The CI runner VPS MUST NOT also host production databases or production secrets.
+AXIGNAL application services MAY share the current VPS with other explicitly inventoried workloads during development and staging when networks, volumes, ports, resource limits, credentials, backups and rollback remain isolated.
 
-## 15. Self-hosted GitHub Actions runner
+A CI execution boundary with Docker control, production-capable secrets or unrestricted host access MUST NOT share a trust boundary with production databases or unrelated stateful services.
 
-The VPS at `187.124.220.48` is designated as a candidate AXIGNAL CI and benchmark host.
+A non-privileged build runner MAY share the physical VPS when all of the following are true:
+
+- it runs as a dedicated non-root user or inside an isolated runner container/VM;
+- it has no access to `/var/run/docker.sock`, rootful Docker groups, product volumes, product networks or product secrets;
+- it executes only trusted repository revisions;
+- it runs bounded build, typecheck, browser and API-test workloads that do not require host Docker;
+- its workspace, processes and caches are cleaned and observable;
+- GitHub-hosted CI remains available as fallback.
+
+## 15. Hybrid GitHub Actions design
+
+The VPS at `187.124.220.48` is an AXIGNAL application/staging host candidate and MAY also host a restricted AXIGNAL build runner under the boundary above. Its use as an application host is independent from runner acceptance.
+
+### GitHub-hosted tier
+
+GitHub-hosted runners MUST remain the default for:
+
+- untrusted fork or external pull requests;
+- canonical naming, schema, registry and OpenAPI validation;
+- jobs requiring disposable Docker services while no isolated Docker-capable runner exists;
+- PostgreSQL/PostGIS/pgvector and Valkey integration tests;
+- fallback when the self-hosted runner is offline, saturated or under investigation.
+
+### Shared-host build tier
+
+A restricted runner labelled `self-hosted`, `linux`, `x64`, `axignal-build` MAY execute:
+
+- `pnpm install --frozen-lockfile`;
+- strict TypeScript;
+- Next.js product and landing builds;
+- Playwright browser suites;
+- FastAPI lint and unit tests;
+- dependency and contract checks that require no privileged service;
+- trusted benchmark fixtures without product secrets.
 
 Mandatory rules:
 
-- the runner MUST NOT execute as `root`;
-- create a dedicated unprivileged `axignal-runner` account;
-- use labels such as `self-hosted`, `linux`, `x64`, `axignal-ci`;
-- isolate each job in a disposable container or equivalent clean workspace;
-- never mount production SSH keys, databases or secret directories;
-- grant the workflow minimum `GITHUB_TOKEN` permissions;
-- untrusted fork pull requests MUST NOT execute arbitrary code on the persistent runner;
-- heavy trusted jobs MAY run on the VPS after branch or maintainer authorisation;
-- runner and base images MUST be patched and monitored;
-- disk, CPU, memory, queue duration and cleanup MUST be observable.
+- runner process identity MUST be `axignal-runner` and MUST NOT be `root`;
+- the runner MUST NOT mount or access the host Docker socket;
+- no production SSH keys, `.env` files, databases, volumes or secret directories may be visible;
+- the runner MUST NOT join application Docker networks;
+- untrusted pull-request code MUST NOT execute on it;
+- CPU, memory, disk, queue duration, workspace cleanup and process residue MUST be observable;
+- failure of this optional tier MUST fall back to GitHub-hosted CI and MUST NOT stop AXIGNAL development.
 
-A hybrid CI design SHOULD retain lightweight GitHub-hosted validation for untrusted pull requests while assigning trusted container, Playwright, benchmark and integration workloads to the self-hosted runner.
+### Dedicated integration tier
 
-## 16. Acceptance gate
+A future runner labelled `axignal-ci` MAY execute trusted Docker, database, migration, restore, Remotion and benchmark workloads only inside a dedicated host or strongly isolated VM with rootless Docker and independent acceptance.
 
-The stack is frozen only when:
+Removing an application such as `iamancha.com` is not required to enable the shared-host build tier. It would free capacity but would not replace the required runner isolation.
+
+## 16. Acceptance gates
+
+The implementation stack may advance when:
 
 - prototype v0.2 proves the selected frontend libraries;
 - Globe and Graph performance budgets pass representative fixtures;
 - multilingual rendering passes six-language fixtures;
-- the self-hosted runner completes a clean, isolated trusted workflow;
+- the canonical GitHub-hosted CI path passes reproducibly;
 - dependency, licence and supply-chain review passes;
 - backup and restore paths exist for stateful development services;
 - every provisional choice has an owner, version and replacement gate.
+
+Before enabling the optional shared-host build runner:
+
+- it MUST complete a clean non-privileged build-runner acceptance workflow;
+- it MUST prove no Docker socket, product secret, product network or persistent workspace access;
+- failure MUST leave GitHub-hosted CI as the active fallback.
+
+Before enabling a Docker-capable dedicated integration runner:
+
+- it MUST complete the full rootless Docker and post-job isolation acceptance workflow;
+- the runner boundary MUST contain no production or unrelated stateful workload.
