@@ -1,77 +1,53 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 
-type Lens = "AUTO" | "GLOBE" | "GRAPH" | "DUAL";
-type Theme = "dark" | "light";
-type Message = { id: number; actor: "user" | "axignal"; text: string };
+import {
+  claimsForSelectedOpportunity,
+  createInitialInvestigation,
+  evidenceForClaim,
+  findSelectedOpportunity,
+  initialMessages,
+  nextHistoryEvent,
+  updateContext,
+  type Claim,
+  type ClaimKind,
+  type Lens,
+  type Locale,
+  type Message,
+  type PersistedShellState,
+  type PrototypeInvestigationPayload,
+  type Theme
+} from "../lib/investigation-context";
+import { runNavigatorCommand } from "../lib/navigator-client";
 
-type Claim = {
-  kind: "HECHO" | "INFERENCIA" | "PREDICCIÓN" | "CONTRADICCIÓN" | "DESCONOCIDO";
-  text: string;
-  source: string;
-};
-
-const opportunities = [
-  { name: "Distrito de Ramenki", return: "18.7%", confidence: 4, level: "ALTA" },
-  { name: "Zona ZIL", return: "16.2%", confidence: 4, level: "ALTA" },
-  { name: "Khamovniki", return: "12.1%", confidence: 3, level: "MEDIA" },
-  { name: "Basmanniy", return: "9.8%", confidence: 2, level: "MEDIA-BAJA" }
-] as const;
-
-const claims: Claim[] = [
-  {
-    kind: "HECHO",
-    text: "Los precios de alquiler en Ramenki han crecido un 14% interanual.",
-    source: "CBR Research · 15 Abr 2024"
-  },
-  {
-    kind: "INFERENCIA",
-    text: "La nueva línea de metro aumentaría la demanda en un 15–20%.",
-    source: "Modelo de transporte · 03 Mar 2024"
-  },
-  {
-    kind: "PREDICCIÓN",
-    text: "Se espera escasez de oferta de vivienda premium en 2025.",
-    source: "Modelo demográfico + oferta · 28 Feb 2024"
-  },
-  {
-    kind: "CONTRADICCIÓN",
-    text: "Altas tasas hipotecarias podrían reducir la demanda en 2025.",
-    source: "Banco de Rusia · 10 May 2024"
-  },
-  {
-    kind: "DESCONOCIDO",
-    text: "No hay evidencia suficiente sobre futuros cambios fiscales.",
-    source: "Cobertura incompleta"
-  }
+const STORAGE_KEY = "axignal:investigation-shell:v1";
+const lensOptions: Lens[] = ["AUTO", "GLOBE", "GRAPH", "DUAL"];
+const localeOptions: { value: Locale; label: string }[] = [
+  { value: "en", label: "EN" },
+  { value: "es", label: "ES" },
+  { value: "fr", label: "FR" },
+  { value: "de", label: "DE" },
+  { value: "pt-BR", label: "PT" },
+  { value: "zh-Hans", label: "中文" }
 ];
 
-const initialMessages: Message[] = [
-  { id: 1, actor: "user", text: "Quiero ver si hay oportunidades inmobiliarias en Moscú" },
-  {
-    id: 2,
-    actor: "axignal",
-    text: "He centrado la investigación en Moscú, Rusia, en oportunidades inmobiliarias para 12–24 meses."
-  },
-  {
-    id: 3,
-    actor: "axignal",
-    text: "He identificado 12 oportunidades. Ramenki, ZIL y Khamovniki concentran el potencial inicial."
-  }
-];
+type ClaimFilter = "TODOS" | ClaimKind;
+type RequestState = "idle" | "processing" | "error";
 
 function Confidence({ value }: { value: number }) {
+  const score = Math.max(0, Math.min(5, Math.round(value * 5)));
   return (
-    <span className="confidence" aria-label={`Confianza ${value} de 5`}>
+    <span className="confidence" aria-label={`Confianza ${score} de 5`}>
       {Array.from({ length: 5 }, (_, index) => (
-        <i key={index} data-on={index < value} />
+        <i key={index} data-on={index < score} />
       ))}
     </span>
   );
 }
 
-function GlobeSurface() {
+function GlobeSurface({ payload }: { payload: PrototypeInvestigationPayload }) {
+  const selected = findSelectedOpportunity(payload);
   return (
     <div className="globe-stage" aria-label="Globe centrado en Moscú">
       <div className="star-field" />
@@ -83,13 +59,13 @@ function GlobeSurface() {
         <span className="signal signal-asia" />
         <div className="moscow-card">
           <strong>Moscú, Rusia</strong>
-          <span>12 oportunidades detectadas</span>
-          <span>Potencial promedio <b>ALTO</b></span>
-          <span>Retorno esperado <b>18.7%</b></span>
+          <span>Selección <b>{selected.name}</b></span>
+          <span>Potencial <b>{selected.level}</b></span>
+          <span>Retorno prototipo <b>{selected.expected_return_label}</b></span>
         </div>
       </div>
       <div className="potential-legend">
-        <span>POTENCIAL</span>
+        <span>POTENCIAL · FIXTURE SINTÉTICA</span>
         <div className="legend-gradient" />
         <div className="legend-labels"><small>Muy bajo</small><small>Medio</small><small>Muy alto</small><small>Sin datos</small></div>
       </div>
@@ -97,60 +73,110 @@ function GlobeSurface() {
   );
 }
 
-function GraphSurface() {
+function GraphSurface({ payload }: { payload: PrototypeInvestigationPayload }) {
+  const selected = findSelectedOpportunity(payload);
   const nodes = [
     { id: "moscow", x: 50, y: 48, label: "Moscú" },
-    { id: "ramenki", x: 25, y: 26, label: "Ramenki" },
-    { id: "metro", x: 72, y: 24, label: "Metro" },
+    { id: "opportunity", x: 25, y: 26, label: selected.name.replace("Distrito de ", "") },
+    { id: "transport", x: 72, y: 24, label: "Transporte" },
     { id: "demand", x: 78, y: 66, label: "Demanda" },
     { id: "rates", x: 28, y: 74, label: "Tipos" }
   ];
 
   return (
     <div className="graph-stage" aria-label="Grafo de relaciones de la oportunidad">
-      <svg viewBox="0 0 100 100" role="img" aria-label="Relaciones causales de la investigación">
+      <svg viewBox="0 0 100 100" role="img" aria-label={`Relaciones causales de ${selected.name}`}>
         <line x1="50" y1="48" x2="25" y2="26" className="edge support" />
         <line x1="50" y1="48" x2="72" y2="24" className="edge inferred" />
         <line x1="50" y1="48" x2="78" y2="66" className="edge support" />
         <line x1="50" y1="48" x2="28" y2="74" className="edge contradiction" />
         <line x1="72" y1="24" x2="78" y2="66" className="edge inferred" />
         {nodes.map((node) => (
-          <g key={node.id} className={node.id === "moscow" ? "node selected" : "node"}>
-            <circle cx={node.x} cy={node.y} r={node.id === "moscow" ? 8 : 6} />
+          <g key={node.id} className={node.id === "opportunity" ? "node selected" : "node"}>
+            <circle cx={node.x} cy={node.y} r={node.id === "opportunity" ? 8 : 6} />
             <text x={node.x} y={node.y + 1}>{node.label}</text>
           </g>
         ))}
       </svg>
       <div className="graph-caption">
         <strong>Transmission graph</strong>
-        <span>Relaciones tipadas · contexto preservado</span>
+        <span>{selected.name} · relaciones tipadas · contexto preservado</span>
       </div>
     </div>
   );
 }
 
-function PrimaryCanvas({ lens }: { lens: Lens }) {
-  if (lens === "GRAPH") return <GraphSurface />;
-  if (lens === "DUAL") {
+function PrimaryCanvas({ payload }: { payload: PrototypeInvestigationPayload }) {
+  const effectiveLens = payload.context.lens === "AUTO" ? "GLOBE" : payload.context.lens;
+  if (effectiveLens === "GRAPH") return <GraphSurface payload={payload} />;
+  if (effectiveLens === "DUAL") {
     return (
       <div className="dual-stage">
-        <GlobeSurface />
-        <GraphSurface />
+        <GlobeSurface payload={payload} />
+        <GraphSurface payload={payload} />
       </div>
     );
   }
-  return <GlobeSurface />;
+  return <GlobeSurface payload={payload} />;
+}
+
+function isPersistedState(value: unknown): value is PersistedShellState {
+  if (!value || typeof value !== "object") return false;
+  const candidate = value as Partial<PersistedShellState>;
+  return candidate.schemaVersion === 1 && candidate.payload?.context?.context_id === "ctx_moscow_real_estate_v01" && Array.isArray(candidate.messages);
+}
+
+function messageNow(actor: Message["actor"], text: string): Message {
+  return { id: `msg_${Date.now()}_${actor}`, actor, text, occurredAt: new Date().toISOString() };
 }
 
 export function InvestigationShell() {
-  const [lens, setLens] = useState<Lens>("GLOBE");
-  const [theme, setTheme] = useState<Theme>("dark");
+  const [payload, setPayload] = useState<PrototypeInvestigationPayload>(() => createInitialInvestigation("es"));
   const [messages, setMessages] = useState<Message[]>(initialMessages);
+  const [theme, setTheme] = useState<Theme>("dark");
+  const [locale, setLocale] = useState<Locale>("es");
   const [draft, setDraft] = useState("");
-  const [selectedOpportunity, setSelectedOpportunity] = useState(0);
-  const selected = opportunities[selectedOpportunity] ?? opportunities[0];
+  const [requestState, setRequestState] = useState<RequestState>("idle");
+  const [claimFilter, setClaimFilter] = useState<ClaimFilter>("TODOS");
+  const [showInterpretation, setShowInterpretation] = useState(true);
+  const [hydrated, setHydrated] = useState(false);
 
-  const interpretedLens = useMemo(() => (lens === "AUTO" ? "GLOBE · intención geográfica" : lens), [lens]);
+  useEffect(() => {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      try {
+        const parsed: unknown = JSON.parse(raw);
+        if (isPersistedState(parsed)) {
+          setPayload(parsed.payload);
+          setMessages(parsed.messages);
+          setTheme(parsed.theme);
+          setLocale(parsed.payload.context.locale);
+          document.documentElement.dataset.theme = parsed.theme;
+        }
+      } catch {
+        window.localStorage.removeItem(STORAGE_KEY);
+      }
+    }
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    const persisted: PersistedShellState = { schemaVersion: 1, payload, messages, theme };
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(persisted));
+  }, [hydrated, messages, payload, theme]);
+
+  const selected = useMemo(() => findSelectedOpportunity(payload), [payload]);
+  const selectedClaims = useMemo(() => claimsForSelectedOpportunity(payload), [payload]);
+  const visibleClaims = useMemo(
+    () => claimFilter === "TODOS" ? selectedClaims : selectedClaims.filter((claim) => claim.kind === claimFilter),
+    [claimFilter, selectedClaims]
+  );
+  const selectedClaimId = payload.context.selection.claim_ids[0] ?? null;
+  const selectedEvidenceId = payload.context.selection.evidence_ids[0] ?? null;
+  const selectedClaim = payload.claims.find((claim) => claim.claim_id === selectedClaimId) ?? null;
+  const selectedEvidence = payload.evidence.find((item) => item.evidence_id === selectedEvidenceId) ?? null;
+  const effectiveLens = payload.context.lens === "AUTO" ? "GLOBE" : payload.context.lens;
 
   function toggleTheme() {
     const nextTheme: Theme = theme === "dark" ? "light" : "dark";
@@ -158,41 +184,140 @@ export function InvestigationShell() {
     document.documentElement.dataset.theme = nextTheme;
   }
 
-  function submitMessage(event: FormEvent<HTMLFormElement>) {
+  function chooseLens(lens: Lens) {
+    setPayload((current) => updateContext(
+      current,
+      (context) => {
+        context.lens = lens;
+        context.lens_reason = lens === "AUTO" ? "La intención geográfica mantiene Globe como lente efectiva." : "Selección explícita del usuario.";
+        context.history.push(nextHistoryEvent(context, "LENS_CHANGED"));
+        return context;
+      },
+      `Lente ${lens} activada con el contexto preservado.`
+    ));
+  }
+
+  function chooseOpportunity(opportunityId: string) {
+    const opportunity = payload.opportunities.find((item) => item.opportunity_id === opportunityId);
+    if (!opportunity) return;
+    setClaimFilter("TODOS");
+    setPayload((current) => {
+      const next = updateContext(
+        current,
+        (context) => {
+          context.selection.opportunity_ids = [opportunityId];
+          context.selection.claim_ids = [];
+          context.selection.evidence_ids = [];
+          context.selection.graph_node_ids = ["entity_moscow", opportunityId];
+          context.rail_mode = "OPPORTUNITY";
+          context.history.push(nextHistoryEvent(context, "OPPORTUNITY_SELECTED"));
+          return context;
+        },
+        `${opportunity.name} seleccionado y sincronizado en todas las superficies.`
+      );
+      return { ...next, focus: { opportunity_id: opportunityId, claim_id: null, evidence_id: null } };
+    });
+  }
+
+  function chooseClaim(claim: Claim) {
+    const evidence = evidenceForClaim(payload, claim)[0] ?? null;
+    setPayload((current) => {
+      const next = updateContext(
+        current,
+        (context) => {
+          context.selection.claim_ids = [claim.claim_id];
+          context.selection.evidence_ids = evidence ? [evidence.evidence_id] : [];
+          context.rail_mode = evidence ? "EVIDENCE" : "CLAIM";
+          context.history.push(nextHistoryEvent(context, "CLAIM_SELECTED"));
+          return context;
+        },
+        `Claim ${claim.claim_id} seleccionado con su procedencia.`
+      );
+      return {
+        ...next,
+        focus: {
+          opportunity_id: current.context.selection.opportunity_ids[0] ?? null,
+          claim_id: claim.claim_id,
+          evidence_id: evidence?.evidence_id ?? null
+        }
+      };
+    });
+  }
+
+  function changeHorizon(horizon: "12M" | "24M" | "36M") {
+    setPayload((current) => updateContext(
+      current,
+      (context) => {
+        context.time.horizon_label = horizon;
+        context.filters.horizon = horizon === "12M" ? "12 meses" : horizon === "24M" ? "12–24 meses" : "36 meses";
+        context.history.push(nextHistoryEvent(context, "TIME_HORIZON_CHANGED"));
+        return context;
+      },
+      `Horizonte cambiado a ${horizon} sin perder la selección.`
+    ));
+  }
+
+  function saveTrail() {
+    setPayload((current) => updateContext(
+      current,
+      (context) => {
+        context.saved_trail_id = context.saved_trail_id ?? "trail_moscow_real_estate_v01";
+        context.history.push(nextHistoryEvent(context, "TRAIL_SAVED"));
+        return context;
+      },
+      "Investigation Trail guardado localmente como fixture de prototipo."
+    ));
+  }
+
+  function changeLocale(nextLocale: Locale) {
+    setLocale(nextLocale);
+    setPayload((current) => updateContext(
+      current,
+      (context) => {
+        context.locale = nextLocale;
+        context.history.push(nextHistoryEvent(context, "LOCALE_CHANGED"));
+        return context;
+      },
+      `Locale cambiado a ${nextLocale}; el texto fuente conserva su idioma original.`
+    ));
+  }
+
+  async function submitMessage(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const text = draft.trim();
-    if (!text) return;
-    const userMessage: Message = { id: Date.now(), actor: "user", text };
-    const lower = text.toLocaleLowerCase("es");
-    let response = "He conservado el contexto y he añadido la orden al Investigation Trail.";
-    if (lower.includes("grafo") || lower.includes("graph")) {
-      setLens("GRAPH");
-      response = "He cambiado a Graph y conservado Moscú, la oportunidad, los claims, la evidencia y el periodo.";
-    } else if (lower.includes("globo") || lower.includes("globe") || lower.includes("mapa")) {
-      setLens("GLOBE");
-      response = "He cambiado a Globe y mantenido el contexto de investigación.";
-    } else if (lower.includes("contradic")) {
-      response = "Hay una contradicción material: las tasas hipotecarias pueden reducir la demanda en 2025.";
-    } else if (lower.includes("dual")) {
-      setLens("DUAL");
-      response = "He activado Dual para comparar geografía y relaciones simultáneamente.";
-    }
-    setMessages((current) => [...current, userMessage, { id: Date.now() + 1, actor: "axignal", text: response }]);
+    if (!text || requestState === "processing") return;
+
+    setMessages((current) => [...current, messageNow("user", text)]);
     setDraft("");
+    setRequestState("processing");
+
+    try {
+      const result = await runNavigatorCommand({ message: text, locale, payload });
+      setPayload(result);
+      setMessages((current) => [...current, messageNow("axignal", result.explanation)]);
+      setRequestState("idle");
+    } catch {
+      setMessages((current) => [...current, messageNow("axignal", "No he modificado el contexto porque la orden no pudo ejecutarse. Puedes reintentarlo sin perder el estado actual.")]);
+      setRequestState("error");
+    }
   }
 
   return (
-    <main className="shell" data-current-theme={theme}>
+    <main className="shell" data-current-theme={theme} data-context-version={payload.context.version}>
       <header className="topbar">
         <a className="brand" href="#" aria-label="AXIGNAL home">AXIGNAL</a>
-        <div className="context-path"><span>Moscú, Rusia</span><b>/</b><span>Real Estate</span><b>/</b><span>12–24 meses</span></div>
+        <div className="context-path">
+          <span>Moscú, Rusia</span><b>/</b><span>Real Estate</span><b>/</b><span>{payload.context.time.horizon_label}</span><b>/</b><span>v{payload.context.version}</span>
+        </div>
         <nav className="lens-switch" aria-label="Seleccionar lente">
-          {(["AUTO", "GLOBE", "GRAPH", "DUAL"] as Lens[]).map((item) => (
-            <button key={item} type="button" aria-pressed={lens === item} onClick={() => setLens(item)}>{item}</button>
+          {lensOptions.map((item) => (
+            <button key={item} type="button" aria-pressed={payload.context.lens === item} onClick={() => chooseLens(item)}>{item}</button>
           ))}
         </nav>
         <label className="search"><span>⌕</span><input aria-label="Buscar" placeholder="Buscar entidades, temas, fuentes…" /></label>
-        <select aria-label="Idioma" defaultValue="es"><option value="en">EN</option><option value="es">ES</option><option value="fr">FR</option><option value="de">DE</option><option value="pt-BR">PT</option><option value="zh-Hans">中文</option></select>
+        <select aria-label="Idioma" value={locale} onChange={(event) => changeLocale(event.target.value as Locale)}>
+          {localeOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+        </select>
         <button className="icon-button" type="button" onClick={toggleTheme} aria-label="Cambiar tema">{theme === "dark" ? "☾" : "☀"}</button>
       </header>
 
@@ -202,59 +327,95 @@ export function InvestigationShell() {
       </aside>
 
       <section className="navigator panel" aria-label="AXIGNAL Navigator">
-        <div className="panel-title"><strong>AXIGNAL NAVIGATOR</strong><span className="online">● ONLINE</span></div>
-        <div className="messages">
+        <div className="panel-title">
+          <strong>AXIGNAL NAVIGATOR</strong>
+          <span className={requestState === "processing" ? "online processing" : "online"}>● {requestState === "processing" ? "PROCESSING" : requestState === "error" ? "RETRY" : "ONLINE"}</span>
+        </div>
+        <div className="messages" aria-live="polite">
           {messages.map((message) => (
             <article key={message.id} className={`message ${message.actor}`}>
-              <div><strong>{message.actor === "user" ? "TÚ" : "AXIGNAL"}</strong><time>10:2{message.id % 10}</time></div>
+              <div><strong>{message.actor === "user" ? "TÚ" : "AXIGNAL"}</strong><time>{new Date(message.occurredAt).toLocaleTimeString("es", { hour: "2-digit", minute: "2-digit" })}</time></div>
               <p>{message.text}</p>
-              {message.actor === "axignal" && <button type="button">Ver interpretación</button>}
+              {message.actor === "axignal" && <button type="button" onClick={() => setShowInterpretation((value) => !value)}>Ver interpretación</button>}
             </article>
           ))}
         </div>
-        <div className="interpretation"><span>INTERPRETACIÓN ACTIVA</span><b>{interpretedLens}</b></div>
+        {showInterpretation && (
+          <div className="interpretation context-inspector">
+            <span>INTERPRETACIÓN ACTIVA</span>
+            <b>{payload.context.lens} → {effectiveLens}</b>
+            <small>{payload.context.lens_reason}</small>
+            <small>Coverage: {payload.context.coverage.status} · History: {payload.context.history.length}</small>
+          </div>
+        )}
         <form className="composer" onSubmit={submitMessage}>
-          <input value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="Escribe una orden o pregunta…" aria-label="Mensaje para AXIGNAL" />
-          <button type="submit" aria-label="Enviar">➤</button>
+          <input value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="Escribe una orden o pregunta…" aria-label="Mensaje para AXIGNAL" disabled={requestState === "processing"} />
+          <button type="submit" aria-label="Enviar" disabled={requestState === "processing"}>➤</button>
         </form>
       </section>
 
       <section className="workspace panel">
-        <div className="canvas-toolbar"><strong>{lens === "AUTO" ? "AUTO · GLOBE" : lens} VIEW</strong><span>Moscú · contexto sincronizado</span><button type="button">Filtros</button></div>
-        <PrimaryCanvas lens={lens} />
+        <div className="canvas-toolbar">
+          <strong>{payload.context.lens === "AUTO" ? "AUTO · GLOBE" : payload.context.lens} VIEW</strong>
+          <span>{selected.name} · contexto sincronizado</span>
+          <span className="synthetic-badge">SYNTHETIC</span>
+          <button type="button" onClick={saveTrail}>{payload.context.saved_trail_id ? "Trail guardado" : "Guardar Trail"}</button>
+        </div>
+        <PrimaryCanvas payload={payload} />
         <div className="timeline" aria-label="Timeline de investigación">
-          <button type="button" aria-label="Reproducir">▶</button><select aria-label="Horizonte"><option>12M</option><option>24M</option><option>36M</option></select>
+          <button type="button" aria-label="Reproducir">▶</button>
+          <select aria-label="Horizonte" value={payload.context.time.horizon_label} onChange={(event) => changeHorizon(event.target.value as "12M" | "24M" | "36M")}>
+            <option value="12M">12M</option><option value="24M">24M</option><option value="36M">36M</option>
+          </select>
           <div className="timeline-track"><i /><i /><i className="selected" /><i /><i /></div><span>HOY</span>
         </div>
         <div className="metrics">
-          <article><span>OPORTUNIDADES</span><strong>12</strong><small>↑ 20% vs. periodo anterior</small></article>
-          <article><span>POTENCIAL PROMEDIO</span><strong>18.7%</strong><small>Retorno esperado</small></article>
-          <article><span>CONFIANZA PROMEDIO</span><strong>72%</strong><small>Media-alta</small></article>
-          <article><span>SEÑALES DETECTADAS</span><strong>328</strong><small>↑ 15%</small></article>
-          <article><span>FUENTES ANALIZADAS</span><strong>142</strong><small>↑ 12%</small></article>
+          <article><span>OPORTUNIDADES EN FIXTURE</span><strong>{payload.opportunities.length}</strong><small>Contexto versionado</small></article>
+          <article><span>POTENCIAL SELECCIONADO</span><strong>{selected.expected_return_label}</strong><small>Estimación prototipo</small></article>
+          <article><span>CONFIANZA</span><strong>{Math.round(selected.confidence * 100)}%</strong><small>No es recomendación</small></article>
+          <article><span>CLAIMS VINCULADOS</span><strong>{selected.claim_ids.length}</strong><small>Apoyo + contradicción</small></article>
+          <article><span>HISTORIAL</span><strong>{payload.context.history.length}</strong><small>Eventos persistentes</small></article>
         </div>
       </section>
 
       <aside className="right-column">
         <section className="opportunities panel">
-          <div className="panel-title"><strong>OPORTUNIDADES (12)</strong><span>Ordenar: Potencial</span></div>
-          {opportunities.map((opportunity, index) => (
-            <button className="opportunity" data-selected={index === selectedOpportunity} key={opportunity.name} type="button" onClick={() => setSelectedOpportunity(index)}>
+          <div className="panel-title"><strong>OPORTUNIDADES ({payload.opportunities.length})</strong><span>Ordenar: Potencial</span></div>
+          {payload.opportunities.map((opportunity) => (
+            <button className="opportunity" data-selected={opportunity.opportunity_id === selected.opportunity_id} key={opportunity.opportunity_id} type="button" onClick={() => chooseOpportunity(opportunity.opportunity_id)}>
               <span><strong>{opportunity.name}</strong><em>{opportunity.level}</em></span>
-              <span>Retorno esperado <b>{opportunity.return}</b></span>
+              <span>Retorno prototipo <b>{opportunity.expected_return_label}</b></span>
               <span>Confianza <Confidence value={opportunity.confidence} /></span>
             </button>
           ))}
         </section>
         <section className="claims panel">
           <div className="panel-title"><strong>CLAIM &amp; EVIDENCE RAIL</strong><span>{selected.name}</span></div>
-          <div className="claim-tabs"><button className="active">Todos</button><button>Hechos</button><button>Inferencias</button><button>Predicciones</button></div>
-          {claims.map((claim) => (
-            <article className="claim" data-kind={claim.kind} key={claim.kind}>
-              <span className="claim-kind">{claim.kind}</span><p>{claim.text}</p><small>{claim.source}</small><button type="button">VER</button>
+          <div className="claim-tabs">
+            {(["TODOS", "HECHO", "INFERENCIA", "PREDICCIÓN", "CONTRADICCIÓN", "DESCONOCIDO"] as ClaimFilter[]).map((item) => (
+              <button key={item} className={claimFilter === item ? "active" : undefined} type="button" onClick={() => setClaimFilter(item)}>{item === "TODOS" ? "Todos" : item}</button>
+            ))}
+          </div>
+          <div className="coverage-strip" data-status={payload.context.coverage.status}>
+            <strong>{payload.context.coverage.status}</strong><span>{payload.context.coverage.summary}</span>
+          </div>
+          {visibleClaims.map((claim) => (
+            <article className="claim" data-kind={claim.kind} data-selected={claim.claim_id === selectedClaimId} key={claim.claim_id}>
+              <span className="claim-kind">{claim.kind}</span>
+              <p>{claim.text}</p>
+              <small>{claim.confidence === null ? "Confianza no calculable" : `Confianza ${Math.round(claim.confidence * 100)}%`} · {claim.evidence_ids.length} evidencia(s)</small>
+              <button type="button" onClick={() => chooseClaim(claim)}>VER</button>
+              {claim.claim_id === selectedClaimId && selectedEvidence && (
+                <div className="evidence-detail" data-relationship={selectedEvidence.relationship}>
+                  <strong>{selectedEvidence.title}</strong>
+                  <span>{selectedEvidence.source} · {selectedEvidence.as_of}</span>
+                  <small>{selectedEvidence.relationship} · evidencia sintética de prototipo</small>
+                </div>
+              )}
             </article>
           ))}
-          <button className="view-all" type="button">Ver evidencia completa →</button>
+          {visibleClaims.length === 0 && <p className="empty-state">No hay claims de este tipo para la oportunidad seleccionada.</p>}
+          {selectedClaim && <button className="view-all" type="button" onClick={() => chooseClaim(selectedClaim)}>Evidencia seleccionada: {selectedClaim.claim_id} →</button>}
         </section>
       </aside>
     </main>
