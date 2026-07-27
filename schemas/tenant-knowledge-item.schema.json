@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://axignal.com/schemas/tenant-knowledge-item.schema.json",
+  "title": "AXIGNAL Tenant Knowledge Item",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "knowledge_item_id",
+    "tenant_id",
+    "item_type",
+    "title",
+    "purpose_permissions",
+    "retention_class",
+    "rights_status",
+    "created_at",
+    "updated_at",
+    "deletion_state"
+  ],
+  "properties": {
+    "knowledge_item_id": {
+      "type": "string",
+      "pattern": "^tki_[A-Za-z0-9_-]{8,}$"
+    },
+    "tenant_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "owner_principal_id": {
+      "type": ["string", "null"]
+    },
+    "organisation_id": {
+      "type": ["string", "null"]
+    },
+    "item_type": {
+      "enum": [
+        "DOCUMENT",
+        "NOTE",
+        "SAVED_TRAIL",
+        "PRIVATE_EVIDENCE",
+        "PRIVATE_CANDIDATE_CLAIM",
+        "WATCHLIST",
+        "PREFERENCE",
+        "RESEARCH_DOSSIER",
+        "MONITORING_CONFIGURATION",
+        "ENTITY_ALIAS"
+      ]
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_ref": {
+      "type": ["string", "null"]
+    },
+    "object_ref": {
+      "type": ["string", "null"]
+    },
+    "content_hash": {
+      "type": ["string", "null"]
+    },
+    "language": {
+      "type": ["string", "null"]
+    },
+    "purpose_permissions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "current_request",
+        "saved_memory",
+        "product_improvement",
+        "aggregate_intelligence",
+        "external_model_processing"
+      ],
+      "properties": {
+        "current_request": {"type": "boolean"},
+        "saved_memory": {"type": "boolean"},
+        "product_improvement": {"type": "boolean"},
+        "aggregate_intelligence": {"type": "boolean"},
+        "external_model_processing": {"type": "boolean"}
+      }
+    },
+    "access_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "role_ids": {
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        },
+        "principal_ids": {
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        }
+      }
+    },
+    "retention_class": {
+      "enum": [
+        "EPHEMERAL",
+        "SESSION",
+        "SAVED_UNTIL_DELETED",
+        "ORGANISATION_POLICY",
+        "LEGAL_HOLD",
+        "EXPIRED"
+      ]
+    },
+    "expires_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "rights_status": {
+      "enum": ["UNREVIEWED", "PRIVATE_USE", "INTERNAL_USE", "CONTRIBUTION_REVIEW", "BLOCKED"]
+    },
+    "embedding_refs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["embedding_id", "index_domain", "model_id"],
+        "properties": {
+          "embedding_id": {"type": "string"},
+          "index_domain": {"const": "tenant_private"},
+          "model_id": {"type": "string"},
+          "created_at": {"type": "string", "format": "date-time"}
+        }
+      }
+    },
+    "derived_item_ids": {
+      "type": "array",
+      "items": {"type": "string"},
+      "uniqueItems": true
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deletion_state": {
+      "enum": ["ACTIVE", "DELETION_REQUESTED", "DELETING", "DELETED", "TOMBSTONED"]
+    },
+    "deleted_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    }
+  }
+}
