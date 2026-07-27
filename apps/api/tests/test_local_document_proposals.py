@@ -18,17 +18,19 @@ from axignal_api.document_proposals import (
 )
 
 FIXTURES = Path(__file__).parent / "fixtures"
+DOCUMENT_FIXTURE = FIXTURES / "world_bank_rer41_document.json"
+PROPOSAL_FIXTURE = FIXTURES / "world_bank_rer41_proposal.json"
 
 
 def load_document() -> InstitutionalDocument:
     return InstitutionalDocument.model_validate_json(
-        (FIXTURES / "world_bank_rer39_document.json").read_text(encoding="utf-8")
+        DOCUMENT_FIXTURE.read_text(encoding="utf-8")
     )
 
 
 def load_proposal() -> ProposalBatch:
     return ProposalBatch.model_validate_json(
-        (FIXTURES / "world_bank_rer39_proposal.json").read_text(encoding="utf-8")
+        PROPOSAL_FIXTURE.read_text(encoding="utf-8")
     )
 
 
@@ -60,7 +62,10 @@ def test_frozen_document_pipeline_is_traceable_reproducible_and_proposal_only() 
     assert len(first.fragments) == 2
     assert len(first.evidence) == 2
     assert len(first.candidate_claims) == 2
-    assert {claim.relationship for claim in first.candidate_claims} == {"SUPPORTING", "ADVERSE"}
+    assert {claim.relationship for claim in first.candidate_claims} == {
+        "SUPPORTING",
+        "ADVERSE",
+    }
     assert first.dossier.status == "TRACEABLE_PROVISIONAL"
     assert first.canonical_claims == []
     assert all(result.admitted is False for result in first.admission_results)
@@ -72,13 +77,14 @@ def test_frozen_document_pipeline_is_traceable_reproducible_and_proposal_only() 
     assert [item.fingerprint for item in first.candidate_claims] == [
         item.fingerprint for item in second.candidate_claims
     ]
-    assert first.actual_usage["reproducibility_hash"] == second.actual_usage["reproducibility_hash"]
+    assert (
+        first.actual_usage["reproducibility_hash"]
+        == second.actual_usage["reproducibility_hash"]
+    )
 
 
 def test_modified_document_fails_immutable_hash_validation() -> None:
-    payload = json.loads(
-        (FIXTURES / "world_bank_rer39_document.json").read_text(encoding="utf-8")
-    )
+    payload = json.loads(DOCUMENT_FIXTURE.read_text(encoding="utf-8"))
     payload["content"] += " Modified after freezing."
 
     with pytest.raises(ValueError, match="content hash"):
