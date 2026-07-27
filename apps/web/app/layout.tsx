@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import "@axignal/design-tokens/tokens.css";
 import "./globals.css";
 import "./context.css";
+import "./auth.css";
 
 export const metadata: Metadata = {
   title: "AXIGNAL — Global Opportunity Intelligence",
-  description: "Prototype investigation shell for AXIGNAL."
+  description: "Authenticated investigation shell for AXIGNAL."
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
