@@ -1,6 +1,6 @@
 # 03 — AXIGNAL Contract Map
 
-Version: `0.3.1`
+Version: `0.4.0`
 Status: `NORMATIVE CANDIDATE`
 Goal ID: `AXIGNAL-GOAL-001`
 
@@ -11,7 +11,7 @@ This map prevents an implementation agent from reading one contract in isolation
 | ID | Contract | Governs | Primary phases |
 |---:|---|---|---|
 | `00` | Product Constitution | product identity, users, value, invariants and anti-goals | F0–F12 |
-| `01` | Business Model and Pricing | buyer, plans, revenue hypotheses and commercial gates | F0, F8–F12 |
+| `01` | Business Model and Pricing | buyer, revenue hypotheses and commercial gates | F0, F8–F12 |
 | `02` | Epistemic Claims System | claims, evidence, contradiction, provenance, scenarios and outcomes | F3–F12 |
 | `03` | Data Sources and APIs | source admission, rights, ingestion and quality | F3, F8, F11–F12 |
 | `04` | System Architecture | stack, modules, storage, eventing and deployment | F2–F12 |
@@ -29,45 +29,61 @@ This map prevents an implementation agent from reading one contract in isolation
 | `16` | Multilingual Semantic System | six-language UX, evidence preservation and semantic parity | F1, F4, F6, F8–F12 |
 | `17` | Research Candidate Queue | coverage gaps, research prioritisation and investigation lifecycle | F7–F8 |
 | `18` | Development Agent Governance | Goal Lock, task routing, skill activation and gate discipline | all phases |
+| `19` | Technology Stack and CI | frontend, backend, data, APIs, automation and secure CI | F1–F12 |
+| `20` | Design System and Motion | selected shell fidelity, tokens, themes, components, motion and exports | F1–F6, F8–F12 |
+| `21` | Marketing Site and Conversion | landing, product proof, use cases, FAQ, forms, SEO and conversion | F1–F2, F6, F9, F12 |
+| `22` | Packaging, Pricing and Entitlements | plans, value metrics, billing disclosure, entitlements and economic gates | F1, F9, F11–F12 |
+| `23` | Acquisition Analytics and Experimentation | funnel, attribution, experiment registry, CRM, guardrails and reinvestment | F1–F2, F9, F12 |
+| `24` | Trust Center and Public Methodology | public methodology, rights, AI authority, privacy, security and status | F1, F6, F9, F11–F12 |
 
 ## Capability-to-contract matrix
 
 | Capability | Required contracts |
 |---|---|
-| Navigator | `02`, `06`, `12`, `14`, `16`, `18` |
+| Navigator | `02`, `06`, `12`, `14`, `16`, `18`, `20` |
 | InvestigationContext | `05`, `12`, `14`, `18` |
-| Globe | `05`, `07`, `12`, `13`, `16` |
-| Graph | `02`, `05`, `07`, `12`, `13`, `16` |
-| Timeline | `02`, `05`, `12`, `13` |
-| Claim and Evidence Rail | `02`, `03`, `05`, `06`, `12`, `13`, `16` |
-| AUTO lens routing | `12`, `14`, `16` |
-| Dual mode | `12`, `13` |
+| Globe | `05`, `07`, `12`, `13`, `16`, `19`, `20` |
+| Graph | `02`, `05`, `07`, `12`, `13`, `16`, `19`, `20` |
+| Timeline | `02`, `05`, `12`, `13`, `20` |
+| Claim and Evidence Rail | `02`, `03`, `05`, `06`, `12`, `13`, `16`, `20` |
+| AUTO lens routing | `12`, `14`, `16`, `20` |
+| Dual mode | `12`, `13`, `20` |
 | Investigation trails | `06`, `12`, `14`, `15` |
 | Personal Interest Memory | `06`, `15` |
-| Knowledge Tides | `06`, `08`, `15`, `17` |
+| Knowledge Tides | `06`, `08`, `15`, `17`, `24` |
 | Research Candidate Queue | `02`, `03`, `08`, `15`, `17` |
 | Claim Ledger | `02`, `03`, `04`, `06`, `08` |
 | Opportunity Engine | `02`, `03`, `08`, `11` |
 | Multilingual search | `02`, `07`, `16` |
-| Billing and entitlements | `01`, `04`, `06`, `07`, `08` |
-| Enterprise private data | `02`, `03`, `06`, `07`, `10`, `16` |
+| Selected dark/light product shell | `05`, `12–14`, `20`, ADR-007 |
+| Marketing landing | `00`, `06`, `16`, `20`, `21`, `23`, `24` |
+| Product demonstration and sandbox | `02`, `05`, `12–14`, `20`, `21` |
+| Pricing page and plan comparison | `01`, `06`, `11`, `21`, `22` |
+| Billing and entitlements | `01`, `04`, `06`, `07`, `08`, `22` |
+| Trial and access flow | `06`, `07`, `21–23` |
+| Conversion FAQ | `06`, `16`, `21`, `22`, `24` |
+| Trust Center and public methodology | `02`, `03`, `06`, `10`, `15`, `16`, `24` |
+| Acquisition analytics | `06`, `08`, `21`, `23` |
+| CRM and lead automation | `04`, `06`, `18`, `23` |
+| Experimentation | `06`, `08`, `11`, `21–23` |
+| Enterprise private data | `02`, `03`, `06`, `07`, `10`, `16`, `24` |
 
 ## Phase-to-contract matrix
 
 | Phase | Mandatory contracts |
 |---|---|
-| F0 | Goal Lock, `00–11`, `18` |
-| F1 | `00`, `05`, `06`, `08`, `11–16`, `18` |
-| F2 | `04`, `06–10`, `18` |
-| F3 | `02–04`, `06`, `08–10`, `18` |
-| F4 | `02`, `05–08`, `12`, `14`, `16`, `18` |
-| F5 | `02`, `04–08`, `12–14`, `16`, `18` |
-| F6 | `02–08`, `12`, `14`, `16`, `18` |
-| F7 | `02`, `04`, `06`, `08`, `10`, `12`, `14–18` |
-| F8 | `00–13`, `16–18` |
-| F9 | `00–12`, `14–18` |
-| F10 | `02`, `04`, `06`, `08–12`, `16`, `18` |
-| F11 | `01–10`, `12`, `14–16`, `18` |
+| F0 | Goal Lock, `00–11`, `18–24` |
+| F1 | `00`, `05`, `06`, `08`, `11–16`, `18–24` |
+| F2 | `04`, `06–10`, `18`, `19`, `21`, `23` |
+| F3 | `02–04`, `06`, `08–10`, `18`, `19` |
+| F4 | `02`, `05–08`, `12`, `14`, `16`, `18–20` |
+| F5 | `02`, `04–08`, `12–14`, `16`, `18–20` |
+| F6 | `02–08`, `12`, `14`, `16`, `18–21`, `24` |
+| F7 | `02`, `04`, `06`, `08`, `10`, `12`, `14–19`, `24` |
+| F8 | `00–20`, `24` |
+| F9 | `00–24` |
+| F10 | `02`, `04`, `06`, `08–12`, `16`, `18–20`, `24` |
+| F11 | `01–10`, `12`, `14–16`, `18–20`, `22`, `24` |
 | F12 | all applicable contracts |
 
 ## Contract precedence
@@ -87,6 +103,8 @@ When contracts appear to conflict, precedence is:
 
 A lower layer MUST NOT silently weaken a higher layer.
 
+A conversion or pricing optimisation MUST NOT override product truth, privacy, source rights, accessibility or the non-advice boundary.
+
 ## Required change propagation
 
 A material contract change MUST update:
@@ -95,9 +113,10 @@ A material contract change MUST update:
 - affected phase entries;
 - affected tasks;
 - skill activation rules;
-- machine-readable schemas;
+- machine-readable schemas where applicable;
 - ADRs;
 - acceptance tests;
+- public methodology or FAQ when user-facing truth changes;
 - migration and rollback documentation.
 
 ## Contract completeness gate
@@ -108,4 +127,5 @@ F0 cannot pass while any capability exists in the Goal Lock without:
 - at least one task;
 - at least one responsible skill;
 - at least one evidence gate;
-- an explicit security, privacy and rights classification.
+- an explicit security, privacy and rights classification;
+- an explicit public-truth and commercial-disclosure classification where marketed or sold.
