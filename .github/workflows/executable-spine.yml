@@ -8,6 +8,7 @@ on:
       - "infra/**"
       - "tests/**"
       - "package.json"
+      - "pnpm-lock.yaml"
       - "pnpm-workspace.yaml"
       - "turbo.json"
       - "tsconfig.base.json"
@@ -39,7 +40,7 @@ jobs:
       - name: Enable pinned pnpm
         run: corepack enable
       - name: Install JavaScript dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Typecheck workspaces
         shell: bash
         run: |

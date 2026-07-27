@@ -14,7 +14,7 @@ Goal ID: `AXIGNAL-GOAL-001`
 
 ```bash
 corepack enable
-pnpm install --no-frozen-lockfile
+pnpm install --frozen-lockfile
 python -m venv .venv
 . .venv/bin/activate
 python -m pip install --upgrade pip
@@ -22,7 +22,7 @@ python -m pip install -e ".[dev]"
 docker compose up --build --detach --wait
 ```
 
-The repository does not yet contain a generated `pnpm-lock.yaml`. Generating and reviewing the first lockfile is a required follow-up before dependency freeze; CI deliberately uses `--no-frozen-lockfile` until that evidence exists.
+The repository contains a pnpm `10.12.4` lockfile. CI and local verification fail closed when a manifest and the lockfile diverge.
 
 ## Run services
 

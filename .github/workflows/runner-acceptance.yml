@@ -1,0 +1,86 @@
+name: AXIGNAL Runner Acceptance
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: axignal-runner-acceptance
+  cancel-in-progress: false
+
+jobs:
+  accept-runner:
+    name: Non-root, isolated and clean runner
+    runs-on: [self-hosted, linux, x64, axignal-ci]
+    timeout-minutes: 20
+    env:
+      COMPOSE_PROJECT_NAME: axignal-acceptance-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - name: Checkout trusted repository revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Verify runner security boundary
+        shell: bash
+        run: bash scripts/runner/verify-host-boundary.sh
+
+      - name: Validate canonical identity
+        run: python3 scripts/validate_canonical_naming.py .
+
+      - name: Verify frozen JavaScript dependency graph
+        shell: bash
+        run: |
+          corepack pnpm@10.12.4 install --frozen-lockfile --ignore-scripts
+          git diff --exit-code -- pnpm-lock.yaml
+
+      - name: Start disposable services
+        run: docker compose up --build --detach --wait
+
+      - name: Execute synthetic PostGIS and pgvector integration
+        shell: bash
+        run: |
+          result="$(
+            docker compose exec -T postgres psql \
+              -U axignal \
+              -d axignal \
+              -v ON_ERROR_STOP=1 \
+              -Atc "SELECT ST_AsText(ST_SetSRID(ST_MakePoint(37.6173, 55.7558), 4326)) || '|' || round(('[0.1,0.2,0.3]'::vector <-> '[0.1,0.2,0.4]'::vector)::numeric, 6);"
+          )"
+          test "$result" = "POINT(37.6173 55.7558)|0.100000"
+
+      - name: Execute synthetic Valkey integration
+        shell: bash
+        run: |
+          docker compose exec -T valkey valkey-cli SET axignal:acceptance synthetic >/dev/null
+          test "$(docker compose exec -T valkey valkey-cli GET axignal:acceptance)" = "synthetic"
+          test "$(docker compose exec -T valkey valkey-cli DEL axignal:acceptance)" = "1"
+
+      - name: Record bounded runner evidence
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "## AXIGNAL runner acceptance"
+            echo
+            echo "- Goal: \`AXIGNAL-GOAL-001\`"
+            echo "- Repository: \`LowToHi/axignal\`"
+            echo "- Revision: \`${GITHUB_SHA}\`"
+            echo "- Actor: \`${GITHUB_ACTOR}\`"
+            echo "- Effective user: \`$(id -un)\` (uid \`$(id -u)\`)"
+            echo "- Required scheduling labels: \`self-hosted, linux, x64, axignal-ci\`"
+            echo "- Kernel: \`$(uname -sr)\`"
+            echo "- Docker security: \`$(docker info --format '{{join .SecurityOptions ", "}}')\`"
+            echo "- Root Docker socket accessible: \`$(test -r /var/run/docker.sock && echo yes || echo no)\`"
+            echo "- Filesystem: \`$(df -h "$GITHUB_WORKSPACE" | tail -1 | tr -s ' ')\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Destroy services and verify cleanup
+        if: always()
+        shell: bash
+        run: |
+          docker compose down --volumes --remove-orphans
+          test -z "$(docker ps -aq --filter "label=com.docker.compose.project=${COMPOSE_PROJECT_NAME}")"
+          test -z "$(docker volume ls -q --filter "label=com.docker.compose.project=${COMPOSE_PROJECT_NAME}")"

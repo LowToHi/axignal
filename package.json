@@ -16,7 +16,7 @@
     "format:check": "prettier --check ."
   },
   "devDependencies": {
-    "@playwright/test": "1.55.0",
+    "@playwright/test": "1.55.1",
     "prettier": "3.6.2",
     "turbo": "2.10.7",
     "typescript": "5.9.2"

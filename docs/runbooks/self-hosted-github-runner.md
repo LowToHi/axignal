@@ -9,12 +9,36 @@ The SSH administration account may be `root`, but the GitHub Actions runner proc
 
 The host is for CI, tests and benchmarks. It MUST NOT contain production databases, production credentials, customer data or unrestricted deployment keys.
 
+Provisioning MUST stop before runner registration when the host contains production or unrelated stateful workloads. A dedicated Linux user, rootless Docker or filesystem permissions reduce blast radius but do not make production/CI colocation compliant.
+
+## Mandatory preflight
+
+Run as the administrative account without printing environment values or file contents:
+
+```bash
+id
+cat /etc/os-release
+systemctl list-units --type=service --all 'actions.runner.*'
+docker ps --format '{{.Names}}|{{.Image}}|{{.Status}}|{{.Ports}}'
+df -h /
+free -h
+systemctl is-active unattended-upgrades
+ufw status
+```
+
+Fail closed if any of the following is true:
+
+- production or unrelated persistent databases, applications or credentials are present;
+- the runner would require `/var/run/docker.sock` or membership in the rootful `docker` group;
+- the host cannot reserve sufficient CPU, memory and disk for bounded CI workloads;
+- outbound access, patching, cleanup or incident isolation cannot be demonstrated.
+
 ## Provisioning outline
 
 1. Patch the operating system and enable unattended security updates.
 2. Create `axignal-runner` with no interactive password and a dedicated home directory.
 3. Configure a firewall allowing only required SSH administration and outbound GitHub/container/package traffic.
-4. Install Docker in rootless mode for the runner account or provide equivalent disposable job isolation.
+4. Install Docker in rootless mode for the runner account; do not grant access to `/var/run/docker.sock`.
 5. Register the runner with repository labels:
    - `self-hosted`
    - `linux`
@@ -24,6 +48,14 @@ The host is for CI, tests and benchmarks. It MUST NOT contain production databas
 7. Configure workspace cleanup after every job.
 8. Add disk, CPU, memory, runner queue and job-duration telemetry.
 9. Configure runner update monitoring and a tested unregister/re-register procedure.
+
+The repository acceptance controls are:
+
+- `.github/workflows/runner-acceptance.yml`;
+- `scripts/runner/verify-host-boundary.sh`;
+- `scripts/runner/cleanup-workdir.sh`.
+
+Configure `scripts/runner/cleanup-workdir.sh` as the `ACTIONS_RUNNER_HOOK_JOB_STARTED` and `ACTIONS_RUNNER_HOOK_JOB_COMPLETED` hook only after verifying that `/home/axignal-runner/actions-runner/_work` is the exact runner work directory. The script refuses any other target.
 
 ## Workflow trust policy
 
@@ -81,6 +113,8 @@ The runner gate passes when a trusted workflow:
 5. destroys containers and workspace;
 6. leaves no secret, process or writable artifact outside the approved cache;
 7. reports resource and duration metrics.
+
+The acceptance workflow is manual-only (`workflow_dispatch`) and has `contents: read`. It must be dispatched from a trusted repository revision after the runner is online. Pull-request events, especially forks, never target the persistent runner.
 
 ## Incident response
 
