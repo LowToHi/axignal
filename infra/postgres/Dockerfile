@@ -6,3 +6,4 @@ RUN apt-get update \
 
 COPY init.sql /docker-entrypoint-initdb.d/010-axignal-extensions.sql
 COPY 020-research-spine.sql /docker-entrypoint-initdb.d/020-axignal-research-spine.sql
+COPY 025-research-runtime-grants.sql /docker-entrypoint-initdb.d/025-axignal-research-runtime-grants.sql
