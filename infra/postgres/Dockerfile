@@ -5,3 +5,4 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 COPY init.sql /docker-entrypoint-initdb.d/010-axignal-extensions.sql
+COPY 020-research-spine.sql /docker-entrypoint-initdb.d/020-axignal-research-spine.sql
