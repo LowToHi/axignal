@@ -11,7 +11,8 @@ test("preserves the canonical Navigator → lens → evidence workflow", async (
   await page.getByRole("button", { name: "GRAPH", exact: true }).click();
   await expect(page.getByRole("button", { name: "GRAPH", exact: true })).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByText("Transmission graph")).toBeVisible();
-  await expect(page.getByText("Distrito de Ramenki")).toBeVisible();
+  await expect(page.getByRole("button", { name: /Distrito de Ramenki ALTA/ })).toBeVisible();
+  await expect(page.getByText("Distrito de Ramenki").last()).toBeVisible();
 
   const composer = page.getByLabel("Mensaje para AXIGNAL");
   await composer.fill("Muéstrame las contradicciones");
