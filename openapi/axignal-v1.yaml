@@ -1,13 +1,14 @@
 openapi: 3.1.0
 info:
   title: AXIGNAL API
-  version: 0.4.0
+  version: 0.4.1
   summary: Global Opportunity Intelligence API
   description: >-
     Contract for authorised access to AXIGNAL claims, opportunities, research runs,
     graph exploration, investigation context, Navigator commands and user workspaces.
     The API exposes admitted product state and does not provide personalised investment
-    advice. Persistent ResearchRuns remain tenant-scoped and source-rights governed.
+    advice. Persistent ResearchRuns remain tenant-scoped, identity-bound and
+    source-rights governed.
 servers:
   - url: https://api.axignal.com/v1
     description: Production placeholder
@@ -179,14 +180,14 @@ paths:
     post:
       tags: [Research]
       operationId: createResearchRun
-      summary: Queue a tenant-scoped governed ResearchRun
+      summary: Queue an authenticated tenant-scoped governed ResearchRun
       description: >-
-        Creates a ResearchRun and an outbox event in one PostgreSQL transaction. The
-        source retrieval and admission workflow executes asynchronously. In the current
-        development implementation the tenant header is mandatory; production must derive
-        tenant authority server-side from authenticated identity.
-      parameters:
-        - $ref: '#/components/parameters/DevelopmentTenantId'
+        Creates a ResearchRun and an outbox event in one PostgreSQL transaction. Source
+        retrieval and admission execute asynchronously. Tenant authority is resolved by a
+        trusted server from authenticated identity; caller-selected tenant identifiers are
+        not accepted.
+      security:
+        - identityAssertion: []
       requestBody:
         required: true
         content:
@@ -234,13 +235,14 @@ paths:
     get:
       tags: [Research]
       operationId: getResearchRun
-      summary: Read a ResearchRun within the authorised tenant boundary
+      summary: Read a ResearchRun within the authenticated tenant boundary
+      security:
+        - identityAssertion: []
       parameters:
         - name: research_run_id
           in: path
           required: true
           schema: {type: string, format: uuid}
-        - $ref: '#/components/parameters/DevelopmentTenantId'
       responses:
         '200':
           description: Tenant-scoped ResearchRun with evidence, candidate claims, admitted facts and dossier
@@ -345,6 +347,13 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+    identityAssertion:
+      type: apiKey
+      in: header
+      name: X-AXIGNAL-Identity-Assertion
+      description: >-
+        Short-lived server-to-server assertion. It is generated only after the trusted
+        gateway authenticates the user and resolves tenant membership on the server.
   parameters:
     Cursor:
       name: cursor
@@ -359,14 +368,6 @@ components:
       in: header
       required: true
       schema: {type: string, minLength: 8, maxLength: 255}
-    DevelopmentTenantId:
-      name: X-AXIGNAL-Tenant-ID
-      in: header
-      required: true
-      description: >-
-        Temporary local-development tenant boundary. Production must derive the tenant
-        from authenticated identity and must not trust a caller-selected tenant UUID.
-      schema: {type: string, format: uuid}
   responses:
     Unauthorised:
       description: Authentication required
