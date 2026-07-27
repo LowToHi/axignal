@@ -2,6 +2,11 @@ name: World Bank Live Source Smoke
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - "apps/api/src/axignal_api/connectors/world_bank.py"
+      - "scripts/verify_world_bank_live_source.py"
+      - ".github/workflows/world-bank-live-source-smoke.yml"
   push:
     branches:
       - agent/persistent-research-spine-v0.1
