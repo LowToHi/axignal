@@ -1,6 +1,6 @@
 # 02 — AXIGNAL Task Catalogue
 
-Version: `0.3.1`
+Version: `0.4.0`
 Status: `NORMATIVE CANDIDATE`
 Goal ID: `AXIGNAL-GOAL-001`
 
@@ -43,6 +43,7 @@ A discovered task that changes scope MUST be registered before execution.
 | `AX-F0-T04` | Maintain typed task and skill schemas | 18 | task-orchestrator, skill-lifecycle-manager |
 | `AX-F0-T05` | Enforce canonical `AXIGNAL / axignal.com` naming | Goal Lock, ADR-001 | naming-guardian, gate-evaluator |
 | `AX-F0-T06` | Audit roadmap completeness before freeze | all | goal-keeper, gate-evaluator |
+| `AX-F0-T07` | Integrate Contracts 21–24 and ADR-007 into indexes, gates and agent routing | 18, 21–24, ADR-007 | goal-keeper, contract-router, gate-evaluator |
 
 ## F1 — UX architecture and validation
 
@@ -50,16 +51,24 @@ A discovered task that changes scope MUST be registered before execution.
 |---|---|---|---|
 | `AX-F1-T01` | Extend competitive benchmark for command, map and graph research | 05, 12–14 | ux-researcher |
 | `AX-F1-T02` | Define buyer jobs, contexts and failure costs | 00, 01, 05 | ux-researcher, hypothesis-curator |
-| `AX-F1-T03` | Design three materially different investigation shells | 05, 12–14 | interaction-architect, visualisation-designer |
+| `AX-F1-T03` | Design three materially different investigation shells | 05, 12–14, 20 | interaction-architect, visualisation-designer |
 | `AX-F1-T04` | Prototype multilingual Navigator command interpretation | 14, 16 | conversational-navigator, multilingual-localiser |
 | `AX-F1-T05` | Prototype `AUTO / GLOBE / GRAPH / DUAL` routing | 12–14 | lens-router-engineer, interaction-architect |
-| `AX-F1-T06` | Prototype Globe–Graph parity and transitions | 12, 13 | globe-engineer, graph-engineer, visualisation-designer |
+| `AX-F1-T06` | Prototype Globe–Graph parity and transitions | 12, 13, 20 | globe-engineer, graph-engineer, visualisation-designer |
 | `AX-F1-T07` | Prototype persistent Timeline and Claim/Evidence Rail | 05, 12, 13 | timeline-engineer, interaction-architect |
 | `AX-F1-T08` | Prototype intent-memory and Knowledge Tide transparency | 15, 17 | intent-intelligence-designer, privacy-reviewer |
 | `AX-F1-T09` | Create six-language UX fixtures | 16 | multilingual-localiser |
-| `AX-F1-T10` | Run moderated comparative usability tests | 05, 12–16 | ux-researcher, gate-evaluator |
-| `AX-F1-T11` | Iterate after every two participants | 12–16 | interaction-architect, ux-researcher |
-| `AX-F1-T12` | Accept, revise or reject the selected UX architecture | ADR-005 and successors | goal-keeper, gate-evaluator |
+| `AX-F1-T10` | Run moderated comparative usability tests | 05, 12–16, 20 | ux-researcher, gate-evaluator |
+| `AX-F1-T11` | Iterate after every two participants | 12–16, 20 | interaction-architect, ux-researcher |
+| `AX-F1-T12` | Accept, revise or reject the selected UX architecture | ADR-005–ADR-007 | goal-keeper, gate-evaluator |
+| `AX-F1-T13` | Reproduce selected dark Investigation Shell reference faithfully | 05, 12–14, 20, ADR-007 | frontend-architect, interaction-architect, accessibility-auditor |
+| `AX-F1-T14` | Reproduce selected light Investigation Shell reference faithfully | 05, 20, ADR-007 | frontend-architect, accessibility-auditor, multilingual-localiser |
+| `AX-F1-T15` | Create faithful Graph and Dual states using the same component tree and fixtures | 12–14, 20, ADR-007 | graph-engineer, frontend-architect, test-engineer |
+| `AX-F1-T16` | Design the complete conversion landing architecture and page flow | 21, 24 | ux-researcher, interaction-architect, hypothesis-curator |
+| `AX-F1-T17` | Prototype hero and canonical Ask → Track product demonstration | 14, 20, 21, ADR-007 | interaction-architect, frontend-architect, conversational-navigator |
+| `AX-F1-T18` | Prototype Pricing, plan comparison, FAQ and Trust Center entry points | 21, 22, 24 | ux-researcher, hypothesis-curator, legal-doc-coordinator |
+| `AX-F1-T19` | Compare landing comprehension, trust and CTA clarity across variants | 21, 23, 24 | ux-researcher, product-analyst, gate-evaluator |
+| `AX-F1-T20` | Store versioned UI reference assets and visual-regression fixtures | 08, 10, 20, ADR-007 | test-engineer, operations-writer |
 
 ## F2 — Reproducible repository spine
 
@@ -74,6 +83,10 @@ A discovered task that changes scope MUST be registered before execution.
 | `AX-F2-T07` | Add OpenTelemetry and correlation IDs | 08, 10 | observability-engineer |
 | `AX-F2-T08` | Document startup, backup and restore | 10 | operations-writer |
 | `AX-F2-T09` | Prove clean-clone reproducibility | 08, 09 | gate-evaluator |
+| `AX-F2-T10` | Scaffold marketing routes or application with shared design-system packages | 04, 20, 21 | repository-architect, frontend-architect |
+| `AX-F2-T11` | Implement typed consent-aware acquisition event adapter | 06, 08, 23 | analytics-engineer, privacy-reviewer, test-engineer |
+| `AX-F2-T12` | Add landing performance, accessibility, SEO and visual-regression CI | 08, 20, 21, 23 | performance-engineer, accessibility-auditor, test-engineer |
+| `AX-F2-T13` | Add CRM, scheduling and lead-routing interfaces without claim authority | 04, 06, 18, 23 | backend-architect, privacy-reviewer, security-reviewer |
 
 ## F3 — Epistemic kernel
 
@@ -135,6 +148,8 @@ A discovered task that changes scope MUST be registered before execution.
 | `AX-F6-T06` | Implement locale-aware formats | 16 | frontend-architect |
 | `AX-F6-T07` | Create parity and regression corpus | 08, 16 | multilingual-localiser, test-engineer |
 | `AX-F6-T08` | Human-QA critical terminology | 16 | multilingual-localiser, gate-evaluator |
+| `AX-F6-T09` | Localise landing, pricing, FAQ, methodology and structured metadata | 16, 21–24 | multilingual-localiser, frontend-architect |
+| `AX-F6-T10` | Validate six-language commercial, methodological and legal terminology | 06, 16, 21–24 | multilingual-localiser, legal-doc-coordinator, gate-evaluator |
 
 ## F7 — Intent Intelligence and Knowledge Tides
 
@@ -173,12 +188,19 @@ A discovered task that changes scope MUST be registered before execution.
 | Task | Outcome | Governing contracts | Skills |
 |---|---|---|---|
 | `AX-F9-T01` | Implement identity, organisations and roles | 04, 06 | identity-engineer, security-reviewer |
-| `AX-F9-T02` | Implement Stripe products and entitlements | 01, 07 | billing-engineer |
-| `AX-F9-T03` | Implement onboarding and privacy controls | 01, 06, 15 | interaction-architect, privacy-reviewer |
-| `AX-F9-T04` | Implement analytics and cost ledger | 01, 08 | analytics-engineer, finance-operator |
-| `AX-F9-T05` | Publish terms, privacy and methodology | 06, 10 | legal-doc-coordinator, operations-writer |
-| `AX-F9-T06` | Recruit 10 independent paid design partners | 01, 11 | design-partner-operator |
-| `AX-F9-T07` | Measure retention and decision impact | 01, 08, 11 | product-analyst, hypothesis-curator |
+| `AX-F9-T02` | Implement Stripe products and entitlements | 01, 07, 22 | billing-engineer |
+| `AX-F9-T03` | Implement onboarding and privacy controls | 01, 06, 15, 21 | interaction-architect, privacy-reviewer |
+| `AX-F9-T04` | Implement analytics and cost ledger | 01, 08, 23 | analytics-engineer, finance-operator |
+| `AX-F9-T05` | Publish terms, privacy and methodology | 06, 10, 24 | legal-doc-coordinator, operations-writer |
+| `AX-F9-T06` | Recruit 10 independent paid design partners | 01, 11, 21–23 | design-partner-operator |
+| `AX-F9-T07` | Measure retention and decision impact | 01, 08, 11, 23 | product-analyst, hypothesis-curator |
+| `AX-F9-T08` | Validate package names and customer-facing value metrics | 01, 11, 22 | hypothesis-curator, product-analyst, finance-operator |
+| `AX-F9-T09` | Implement pricing, detailed comparison and entitlement catalogue | 07, 21, 22 | billing-engineer, frontend-architect, test-engineer |
+| `AX-F9-T10` | Implement trial, sandbox or design-partner access flow | 06, 21–23 | interaction-architect, privacy-reviewer, design-partner-operator |
+| `AX-F9-T11` | Implement self-service upgrade, downgrade and cancellation where applicable | 07, 22 | billing-engineer, test-engineer |
+| `AX-F9-T12` | Publish first validated FAQ and Trust Center | 21, 24 | legal-doc-coordinator, operations-writer, accessibility-auditor |
+| `AX-F9-T13` | Instrument acquisition-to-first-investigation funnel | 08, 21, 23 | analytics-engineer, product-analyst, privacy-reviewer |
+| `AX-F9-T14` | Execute willingness-to-pay and conversion tests | 11, 22, 23 | hypothesis-curator, product-analyst, finance-operator |
 
 ## F10 — Scenarios and outcomes
 
@@ -202,18 +224,23 @@ A discovered task that changes scope MUST be registered before execution.
 | `AX-F11-T04` | Isolate private claims and trails | 02, 06 | data-architect, security-reviewer |
 | `AX-F11-T05` | Implement export-right controls | 03, 07 | api-engineer, source-admission |
 | `AX-F11-T06` | Implement SSO/SCIM when contracted | 06 | identity-engineer |
-| `AX-F11-T07` | Produce enterprise audit package | 06, 10 | security-reviewer, operations-writer |
+| `AX-F11-T07` | Produce enterprise audit package | 06, 10, 24 | security-reviewer, operations-writer |
+| `AX-F11-T08` | Publish enterprise Trust Center package and controlled evidence room | 06, 10, 21, 24 | security-reviewer, legal-doc-coordinator, operations-writer |
+| `AX-F11-T09` | Expose API, private-source and security maturity accurately on public surfaces | 03, 06, 07, 21, 24 | api-engineer, source-admission, security-reviewer |
 
 ## F12 — General availability
 
 | Task | Outcome | Governing contracts | Skills |
 |---|---|---|---|
 | `AX-F12-T01` | Validate production SLOs and recovery | 08, 10 | operations-engineer, gate-evaluator |
-| `AX-F12-T02` | Validate retention and gross margin | 01, 08, 11 | product-analyst, finance-operator |
-| `AX-F12-T03` | Establish repeatable acquisition channel | 01 | growth-analyst, hypothesis-curator |
+| `AX-F12-T02` | Validate retention and gross margin | 01, 08, 11, 22, 23 | product-analyst, finance-operator |
+| `AX-F12-T03` | Establish repeatable acquisition channel | 01, 21, 23 | growth-analyst, hypothesis-curator |
 | `AX-F12-T04` | Admit every new universe independently | 03, 09 | universe-selector, gate-evaluator |
 | `AX-F12-T05` | Maintain jurisdiction-specific availability | 06 | regulatory-scope-reviewer |
 | `AX-F12-T06` | Run recurring Goal Lock audit | Goal Lock, 18 | goal-keeper, gate-evaluator |
+| `AX-F12-T07` | Validate repeatable acquisition against activation, retention and margin | 21–23 | growth-analyst, product-analyst, finance-operator |
+| `AX-F12-T08` | Operate experiment registry and evidence-gated reinvestment policy | 22, 23 | growth-analyst, analytics-engineer, gate-evaluator |
+| `AX-F12-T09` | Maintain public pricing, methodology, FAQ and Trust Center change control | 10, 21, 22, 24 | operations-writer, legal-doc-coordinator, contract-router |
 
 ## Task closure rule
 
@@ -224,4 +251,4 @@ A task is not complete because code exists. It reaches `ACCEPTED` only when:
 3. automated and human evidence exists;
 4. Goal Lock tests pass;
 5. rollback or disabling is demonstrated;
-6. no unresolved security, privacy, rights or naming defect remains.
+6. no unresolved security, privacy, rights, commercial-truth or naming defect remains.
