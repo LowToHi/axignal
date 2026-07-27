@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "@axignal/design-tokens/tokens.css";
 import "./globals.css";
+import "./context.css";
 
 export const metadata: Metadata = {
   title: "AXIGNAL — Global Opportunity Intelligence",
