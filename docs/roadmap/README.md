@@ -1,6 +1,6 @@
 # AXIGNAL End-to-End Development Map
 
-Version: `0.4.0`
+Version: `0.4.1`
 Status: `CANDIDATE / EVOLVING UNTIL FINAL MAP FREEZE`
 Goal ID: `AXIGNAL-GOAL-001`
 
@@ -30,16 +30,18 @@ No development agent may skip a layer or infer a different product goal from an 
 | [01 — Phase Map](01-phase-map.md) | End-to-end phases, deliverables, gates and dependencies |
 | [02 — Task Catalogue](02-task-catalogue.md) | Typed executable tasks with stable IDs |
 | [03 — Contract Map](03-contract-map.md) | Which contracts govern each capability and phase |
-| [04 — Dynamic Skill Map](04-dynamic-skill-map.md) | Skill lifecycle, routing and activation rules |
+| [04 — Dynamic Skill Map](04-dynamic-skill-map.md) | Core skill lifecycle, routing and activation rules |
 | [05 — Dependency and Gate Graph](05-dependency-and-gates.md) | Authorisation order, evidence and fail-closed transitions |
 | [07 — Visual System Validation](07-visual-system-validation.md) | Candidate brand/UI directions, automated checks, user tests and non-freeze gate |
 | [08 — Marketing, Pricing and Conversion](08-marketing-pricing-and-conversion-work-package.md) | Product fidelity, landing, pricing, FAQ, Trust Center, analytics and commercial validation |
+| [09 — Commercial Dynamic Skills](09-commercial-dynamic-skill-map.md) | Candidate skills and task routing for fidelity, conversion, pricing, acquisition, CRM, SEO and trust |
 
 ## Normative execution contracts
 
 - [`docs/contracts/18-development-agent-governance.md`](../contracts/18-development-agent-governance.md)
 - [`AGENTS.md`](../../AGENTS.md)
 - [`skills/registry.yaml`](../../skills/registry.yaml)
+- [`skills/commercial-extension.registry.yaml`](../../skills/commercial-extension.registry.yaml) — proposed extension; fail closed until merged and validated
 - [`schemas/task.schema.json`](../../schemas/task.schema.json)
 - [`schemas/skill.schema.json`](../../schemas/skill.schema.json)
 
@@ -99,6 +101,7 @@ Task state:
   - six-language architecture;
   - SEO, accessibility and performance;
   - evidence-gated channel reinvestment.
+- Commercial dynamic skills are specified in the candidate extension but are not executable until merged into the canonical registry and validated.
 - Buyer, public copy, plan names, prices and acquisition channels remain hypotheses until their gates pass.
 
 ## Canonical identity
