@@ -73,51 +73,53 @@ def main() -> int:
     admin_dsn = os.environ["AXIGNAL_DATABASE_URL"]
     validation_dsn = os.environ["AXIGNAL_VALIDATION_DATABASE_URL"]
 
-    with psycopg.connect(admin_dsn, row_factory=dict_row) as admin:
-        with admin.cursor() as cursor:
-            cursor.execute("SELECT count(*) AS count FROM evaluation.validation_tasks")
-            assert cursor.fetchone()["count"] == 6
-            cursor.execute(
-                "SELECT task_payload FROM evaluation.validation_tasks WHERE task_id=%s",
-                (TASK_ID,),
-            )
-            answer_key = cursor.fetchone()["task_payload"]
-            cursor.execute(
-                """
-                SELECT
-                  has_table_privilege(
-                    'axignal_validation_runtime_login',
-                    'axignal_global.canonical_claims','INSERT'
-                  ) AS canonical_insert,
-                  has_table_privilege(
-                    'axignal_validation_runtime_login',
-                    'axignal_global.evidence_objects','UPDATE'
-                  ) AS evidence_update,
-                  has_table_privilege(
-                    'axignal_validation_runtime_login',
-                    'evaluation.validation_sessions','SELECT'
-                  ) AS direct_session_read,
-                  has_function_privilege(
-                    'axignal_validation_runtime_login',
-                    'evaluation.start_validation_session(uuid,text,text,text)','EXECUTE'
-                  ) AS start_execute
-                """
-            )
-            assert cursor.fetchone() == {
-                "canonical_insert": False,
-                "evidence_update": False,
-                "direct_session_read": False,
-                "start_execute": True,
-            }
-            cursor.execute(
-                """
-                SELECT count(*) AS count
-                FROM information_schema.columns
-                WHERE table_schema='evaluation'
-                  AND column_name IN ('email','name','full_name','phone')
-                """
-            )
-            assert cursor.fetchone()["count"] == 0
+    with (
+        psycopg.connect(admin_dsn, row_factory=dict_row) as admin,
+        admin.cursor() as cursor,
+    ):
+        cursor.execute("SELECT count(*) AS count FROM evaluation.validation_tasks")
+        assert cursor.fetchone()["count"] == 6
+        cursor.execute(
+            "SELECT task_payload FROM evaluation.validation_tasks WHERE task_id=%s",
+            (TASK_ID,),
+        )
+        answer_key = cursor.fetchone()["task_payload"]
+        cursor.execute(
+            """
+            SELECT
+              has_table_privilege(
+                'axignal_validation_runtime_login',
+                'axignal_global.canonical_claims','INSERT'
+              ) AS canonical_insert,
+              has_table_privilege(
+                'axignal_validation_runtime_login',
+                'axignal_global.evidence_objects','UPDATE'
+              ) AS evidence_update,
+              has_table_privilege(
+                'axignal_validation_runtime_login',
+                'evaluation.validation_sessions','SELECT'
+              ) AS direct_session_read,
+              has_function_privilege(
+                'axignal_validation_runtime_login',
+                'evaluation.start_validation_session(uuid,text,text,text)','EXECUTE'
+              ) AS start_execute
+            """
+        )
+        assert cursor.fetchone() == {
+            "canonical_insert": False,
+            "evidence_update": False,
+            "direct_session_read": False,
+            "start_execute": True,
+        }
+        cursor.execute(
+            """
+            SELECT count(*) AS count
+            FROM information_schema.columns
+            WHERE table_schema='evaluation'
+              AND column_name IN ('email','name','full_name','phone')
+            """
+        )
+        assert cursor.fetchone()["count"] == 0
 
     with psycopg.connect(validation_dsn, row_factory=dict_row) as validation:
         conditions: dict[str, tuple[str, dict]] = {}
@@ -192,15 +194,14 @@ def main() -> int:
             assert {item["condition"] for item in metrics} == {"AXIGNAL", "CONTROL"}
             assert all(float(item["task_completion_rate"]) == 1.0 for item in metrics)
 
-    with psycopg.connect(admin_dsn) as admin:
-        with admin.cursor() as cursor:
-            try:
-                cursor.execute("UPDATE evaluation.validation_events SET payload='{}'::jsonb")
-            except psycopg.Error as exc:
-                assert "AXIGNAL_VALIDATION_HISTORY_APPEND_ONLY" in str(exc)
-                admin.rollback()
-            else:
-                raise AssertionError("Append-only validation history was mutable")
+    with psycopg.connect(admin_dsn) as admin, admin.cursor() as cursor:
+        try:
+            cursor.execute("UPDATE evaluation.validation_events SET payload='{}'::jsonb")
+        except psycopg.Error as exc:
+            assert "AXIGNAL_VALIDATION_HISTORY_APPEND_ONLY" in str(exc)
+            admin.rollback()
+        else:
+            raise AssertionError("Append-only validation history was mutable")
 
     print(
         json.dumps(
