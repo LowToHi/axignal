@@ -41,7 +41,7 @@ const steps = [
 
 export function DemoGuide() {
   const [index, setIndex] = useState(0);
-  const step = steps[index];
+  const step = steps[index] ?? steps[0];
 
   function resetDemo() {
     window.localStorage.removeItem(STORAGE_KEY);
