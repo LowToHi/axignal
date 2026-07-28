@@ -35,6 +35,10 @@ def scrypt_record(password: str) -> str:
     return f"scrypt${salt.hex()}${digest.hex()}"
 
 
+def random_secret(size: int = 32) -> str:
+    return secrets.token_hex(size)
+
+
 def build_environment(args: argparse.Namespace) -> dict[str, str]:
     sha = args.sha.strip().lower()
     if not SHA_RE.fullmatch(sha):
@@ -47,7 +51,6 @@ def build_environment(args: argparse.Namespace) -> dict[str, str]:
     if tenant_id != args.tenant_id.lower():
         raise ValueError("--tenant-id must use canonical UUID form")
 
-    random_secret = lambda size=32: secrets.token_hex(size)
     return {
         "AXIGNAL_BUILD_SHA": sha,
         "AXIGNAL_PILOT_SITE_ADDRESS": site_address,
@@ -95,7 +98,9 @@ def write_environment(path: Path, values: dict[str, str]) -> None:
 
 
 def parser() -> argparse.ArgumentParser:
-    result = argparse.ArgumentParser(description="Create a root-only AXIGNAL pilot environment file")
+    result = argparse.ArgumentParser(
+        description="Create a root-only AXIGNAL pilot environment file"
+    )
     result.add_argument("--output", type=Path, required=True)
     result.add_argument("--sha", required=True)
     result.add_argument("--site-address", required=True)
