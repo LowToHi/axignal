@@ -10,6 +10,11 @@ def _bool_env(name: str, default: bool = False) -> bool:
     return value.strip().casefold() in {"1", "true", "yes", "on"}
 
 
+def _csv_env(name: str) -> tuple[str, ...]:
+    value = environ.get(name, "")
+    return tuple(item.strip() for item in value.split(",") if item.strip())
+
+
 @dataclass(frozen=True)
 class Settings:
     database_url: str | None
@@ -28,6 +33,8 @@ class Settings:
     identity_assertion_secret: str | None
     admission_database_url: str | None = None
     admission_queue_key: str = "axignal:admission:queue:v1"
+    human_review_database_url: str | None = None
+    human_reviewer_subjects: tuple[str, ...] = ()
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -39,10 +46,19 @@ class Settings:
             valkey_url=environ.get("AXIGNAL_VALKEY_URL"),
             proposal_database_url=environ.get("AXIGNAL_PROPOSAL_DATABASE_URL"),
             admission_database_url=environ.get("AXIGNAL_ADMISSION_DATABASE_URL"),
-            persistent_research_enabled=_bool_env("AXIGNAL_PERSISTENT_RESEARCH_ENABLED"),
+            human_review_database_url=environ.get(
+                "AXIGNAL_HUMAN_REVIEW_DATABASE_URL"
+            ),
+            human_reviewer_subjects=_csv_env("AXIGNAL_HUMAN_REVIEWER_SUBJECTS"),
+            persistent_research_enabled=_bool_env(
+                "AXIGNAL_PERSISTENT_RESEARCH_ENABLED"
+            ),
             live_sources_enabled=_bool_env("AXIGNAL_LIVE_SOURCES_ENABLED"),
             world_bank_fixture_path=Path(fixture).resolve() if fixture else None,
-            queue_key=environ.get("AXIGNAL_RESEARCH_QUEUE_KEY", "axignal:research:queue:v1"),
+            queue_key=environ.get(
+                "AXIGNAL_RESEARCH_QUEUE_KEY",
+                "axignal:research:queue:v1",
+            ),
             proposal_queue_key=environ.get(
                 "AXIGNAL_PROPOSAL_QUEUE_KEY",
                 "axignal:proposal:queue:v1",
@@ -60,7 +76,9 @@ class Settings:
             local_model_base_url=environ.get("AXIGNAL_LOCAL_MODEL_BASE_URL"),
             local_model_name=environ.get("AXIGNAL_LOCAL_MODEL_NAME"),
             local_model_api_key=environ.get("AXIGNAL_LOCAL_MODEL_API_KEY"),
-            identity_assertion_secret=environ.get("AXIGNAL_IDENTITY_ASSERTION_SECRET"),
+            identity_assertion_secret=environ.get(
+                "AXIGNAL_IDENTITY_ASSERTION_SECRET"
+            ),
         )
 
     def require_persistent_research(self) -> None:
@@ -93,8 +111,18 @@ class Settings:
         if not self.valkey_url:
             raise RuntimeError("AXIGNAL_VALKEY_URL is required")
 
+    def require_human_review(self) -> None:
+        if not self.persistent_research_enabled:
+            raise RuntimeError("Persistent research is disabled")
+        if not self.human_review_database_url:
+            raise RuntimeError("AXIGNAL_HUMAN_REVIEW_DATABASE_URL is required")
+        if not self.human_reviewer_subjects:
+            raise RuntimeError("AXIGNAL_HUMAN_REVIEWER_SUBJECTS is required")
+
     def require_identity_assertions(self) -> None:
         if not self.identity_assertion_secret:
             raise RuntimeError("AXIGNAL_IDENTITY_ASSERTION_SECRET is required")
         if len(self.identity_assertion_secret.encode("utf-8")) < 32:
-            raise RuntimeError("AXIGNAL_IDENTITY_ASSERTION_SECRET must be at least 32 bytes")
+            raise RuntimeError(
+                "AXIGNAL_IDENTITY_ASSERTION_SECRET must be at least 32 bytes"
+            )

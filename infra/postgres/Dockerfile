@@ -9,3 +9,7 @@ COPY 020-research-spine.sql /docker-entrypoint-initdb.d/020-axignal-research-spi
 COPY 025-research-runtime-grants.sql /docker-entrypoint-initdb.d/025-axignal-research-runtime-grants.sql
 COPY 030-proposal-worker-boundary.sql /docker-entrypoint-initdb.d/030-axignal-proposal-worker.sql
 COPY 035-deterministic-admission-runtime.sql /docker-entrypoint-initdb.d/035-axignal-admission-runtime.sql
+COPY 040-bounded-human-review.sql /docker-entrypoint-initdb.d/040-axignal-bounded-human-review.sql
+COPY 041-human-review-read-functions.sql /docker-entrypoint-initdb.d/041-axignal-human-review-read.sql
+COPY 042-human-review-resolution.sql /docker-entrypoint-initdb.d/042-axignal-human-review-resolution.sql
+COPY 043-human-review-grants.sql /docker-entrypoint-initdb.d/043-axignal-human-review-grants.sql

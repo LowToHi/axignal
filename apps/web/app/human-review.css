@@ -1,0 +1,137 @@
+.human-review-bridge {
+  position: fixed;
+  z-index: 1100;
+  right: 1rem;
+  top: 4.5rem;
+  width: min(34rem, calc(100vw - 2rem));
+  max-height: calc(100dvh - 6rem);
+  overflow: auto;
+  display: grid;
+  gap: .75rem;
+  padding: 1rem;
+  border: 1px solid color-mix(in srgb, var(--ax-unknown) 48%, var(--ax-border-default));
+  border-left: .3rem solid var(--ax-unknown);
+  border-radius: .8rem;
+  background: color-mix(in srgb, var(--ax-bg-panel) 96%, transparent);
+  box-shadow: 0 1.2rem 4rem rgb(0 0 0 / 45%);
+  backdrop-filter: blur(18px);
+}
+
+.human-review-bridge[data-case-type="CONTESTED"] {
+  border-left-color: var(--ax-contradiction);
+}
+
+.human-review-bridge > header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: start;
+}
+
+.human-review-bridge header div,
+.human-review-authority-grid article {
+  display: grid;
+  gap: .3rem;
+}
+
+.human-review-bridge header span,
+.human-review-authority-grid span {
+  font-size: .65rem;
+  letter-spacing: .12em;
+  color: var(--ax-brand-signal);
+}
+
+.human-review-bridge select,
+.human-review-actions button {
+  border: 1px solid var(--ax-border-default);
+  border-radius: .45rem;
+  background: var(--ax-bg-raised);
+  color: var(--ax-fg-primary);
+  padding: .5rem .65rem;
+}
+
+.human-review-authority-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: .55rem;
+}
+
+.human-review-authority-grid article {
+  padding: .7rem;
+  border: 1px solid var(--ax-border-subtle);
+  border-radius: .55rem;
+  background: var(--ax-bg-raised);
+}
+
+.human-review-authority-grid article[data-authority="MODEL_PROPOSAL"] {
+  border-top: 2px solid var(--ax-inferred);
+}
+
+.human-review-authority-grid article[data-authority="DETERMINISTIC_DECISION"] {
+  border-top: 2px solid var(--ax-support);
+}
+
+.human-review-authority-grid article[data-authority="HUMAN_REVIEW"] {
+  border-top: 2px solid var(--ax-unknown);
+}
+
+.human-review-authority-grid p,
+.human-review-bridge details p,
+.human-review-bridge blockquote,
+.human-review-resolution,
+.human-review-error {
+  margin: 0;
+  font-size: .75rem;
+  line-height: 1.45;
+}
+
+.human-review-authority-grid small,
+.human-review-bridge details small {
+  color: var(--ax-fg-tertiary);
+  font-size: .64rem;
+  line-height: 1.4;
+}
+
+.human-review-bridge details {
+  display: grid;
+  gap: .45rem;
+  padding: .65rem;
+  border: 1px solid var(--ax-border-subtle);
+  border-radius: .5rem;
+}
+
+.human-review-bridge blockquote {
+  padding-left: .65rem;
+  border-left: 2px solid var(--ax-support);
+  color: var(--ax-fg-secondary);
+}
+
+.human-review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .45rem;
+}
+
+.human-review-actions button {
+  cursor: pointer;
+  font-size: .72rem;
+}
+
+.human-review-actions button:disabled {
+  opacity: .55;
+  cursor: wait;
+}
+
+.human-review-error {
+  color: var(--ax-critical);
+}
+
+.human-review-resolution {
+  color: var(--ax-support);
+}
+
+@media (max-width: 760px) {
+  .human-review-authority-grid {
+    grid-template-columns: 1fr;
+  }
+}
