@@ -1,21 +1,21 @@
 # 06 — AXIGNAL Current Execution State
 
-Version: `0.6.0`
-Status: `CONSOLIDATED BASELINE CANDIDATE`
+Version: `0.6.1`
+Status: `CONSOLIDATED BASELINE MERGED`
 Goal ID: `AXIGNAL-GOAL-001`
-Baseline branch: `agent/consolidated-baseline-v0.1`
+Canonical baseline: `main@cf83781766f12ebc55eeb9829d68d41e77500aa7`
 
 ## Reading rule
 
-This document records the evidence-backed implementation state. A phase is not `PASSED` merely because code exists: its contractual gate, external validation and operational dependencies must also pass.
+This document records the evidence-backed implementation state. A phase is not `PASSED` merely because code exists: its complete contractual gate, external validation and operational dependencies must also pass.
 
 ## Current phase state
 
 | Phase | State | Evidence-backed interpretation |
 |---|---|---|
-| F0 — Goal and contracts | `GATE_REVIEW` | Goal Lock, contracts `00–27`, ADRs, schemas, task/skill registries and fail-closed validation exist. Final consolidated review remains. |
-| F1 — UX architecture and validation | `GATE_REVIEW` | Investigation Shell v0.2, Navigator, lens switch, Timeline and Claim/Evidence Rail are executable. Qualified-user thresholds and multilingual equivalence remain unproven. |
-| F2 — Reproducible repository spine | `EVIDENCE_READY` | Next.js, FastAPI, PostgreSQL/PostGIS/pgvector, Valkey, migrations, clean-clone CI, tests, builds and Playwright are implemented. Consolidated-baseline CI and migration/restore rehearsal are the acceptance gate. |
+| F0 — Goal and contracts | `GATE_REVIEW` | Goal Lock, contracts `00–27`, ADRs, schemas, task/skill registries and fail-closed validation are integrated into `main`. Final cross-contract review and map freeze remain. |
+| F1 — UX architecture and validation | `GATE_REVIEW` | Investigation Shell v0.2, Navigator, lens switch, Timeline and Claim/Evidence Rail are executable. Qualified-user thresholds, control comparison and multilingual equivalence remain unproven. |
+| F2 — Reproducible repository spine | `EVIDENCE_READY` | The cumulative baseline, clean-clone CI, PostgreSQL/Valkey integration, migrations, snapshot restore, API, builds and Playwright are merged. A final F2 deliverable-gap review remains before declaring the phase passed. |
 | F3 — Epistemic kernel | `IN_PROGRESS` | One bounded end-to-end profile reaches an append-only Claim Ledger through independent deterministic admission. General entity, contradiction, correction, expiry and multi-profile coverage remain. |
 | F4 — Navigator and InvestigationContext | `IN_PROGRESS` | Authenticated persistent ResearchRuns return evidence, proposals, admitted claims and dossiers to one InvestigationContext. Full multilingual command equivalence, previews, entitlements and general undo remain. |
 | F5 — Globe, Graph and Timeline parity | `IN_PROGRESS` | Product shell and canonical browser workflow exist; complete functional parity, accessibility alternatives, performance budgets and user gate remain. |
@@ -34,7 +34,7 @@ bounded authenticated identity
 → Navigator
 → persistent ResearchRun
 → PostgreSQL RLS + transactional outbox
-→ Valkey worker queue
+→ Valkey worker queues
 → admitted structured source or immutable document
 → Evidence Objects
 → Candidate Claims
@@ -56,28 +56,32 @@ Demonstrated invariants:
 - a failpoint inside admission rolls back every related mutation;
 - `HUMAN_REVIEW_REQUIRED` remains outside the canonical ledger.
 
-## Consolidation debt resolution
+## Consolidation debt — resolved
 
-The previous work was distributed across stacked draft PRs. The consolidation baseline now requires:
+The previous implementation was distributed across stacked draft PRs. The debt was closed through PR #21 and canonical squash commit `cf83781766f12ebc55eeb9829d68d41e77500aa7`.
 
-1. current `main` to be an ancestor of the integration branch;
-2. one cumulative PR targeting `main`;
-3. canonical naming validation;
-4. contract, schema and OpenAPI validation;
-5. full API, TypeScript, build and browser acceptance;
-6. PostgreSQL/Valkey end-to-end acceptance;
-7. cumulative migration replay over seeded prior-state data;
-8. verified restoration of the pre-migration snapshot;
-9. closure of superseded stacked PRs only after the cumulative gate is green;
-10. no production deployment or secret provisioning as part of consolidation.
+Completed gates:
+
+1. current `main` lineage incorporated;
+2. one cumulative PR reviewed against `main`;
+3. canonical naming, contracts, schemas and OpenAPI validated;
+4. API, TypeScript, builds and browser workflow passed;
+5. PostgreSQL, Valkey and controlled live-source smoke passed;
+6. cumulative migrations `025`, `030` and `035` applied and replayed over seeded prior-state data;
+7. pre-migration snapshot restored into a clean database;
+8. proposal/admission credential boundaries reverified;
+9. PRs #5, #9 and #11–#19 closed as superseded while retaining branches and evidence;
+10. no production deployment or secret provisioning performed.
+
+All subsequent development MUST branch from current `main`. The superseded stack is audit history, not an execution base.
 
 ## Active gaps before phase acceptance
 
 ### F0
 
 - final cross-contract inconsistency review;
-- freeze the current execution-state authority and map precedence;
-- close or explicitly retain any obsolete issue/PR descriptions.
+- freeze current execution-state authority and map precedence;
+- decide final retention policy for superseded branches.
 
 ### F1
 
@@ -88,9 +92,9 @@ The previous work was distributed across stacked draft PRs. The consolidation ba
 
 ### F2
 
-- merge the green consolidated baseline into `main`;
-- retain a reproducible migration/restore artifact;
-- decide the production deployment topology separately.
+- complete the final deliverable-gap review against the normative phase map;
+- explicitly resolve any missing scheduler, object-storage-interface or OpenTelemetry baseline requirement;
+- decide production deployment topology separately.
 
 ### F3–F5
 
@@ -101,6 +105,6 @@ The previous work was distributed across stacked draft PRs. The consolidation ba
 
 ## Only authorised next priority
 
-> Close the consolidated-baseline gate before adding new product scope. After integration, implement the bounded human-review path for `HUMAN_REVIEW_REQUIRED` and `CONTESTED`, then return to the F1 qualified-user gate.
+> Implement the bounded human-review path for `HUMAN_REVIEW_REQUIRED` and `CONTESTED`, preserving reviewer identity, reason codes, append-only history and non-bypassable integrity gates. Then return to the F1 qualified-user gate.
 
 OCR, unrestricted browsing, broad source expansion, continuous production workers, billing and production deployment remain unauthorised until their dependencies pass.
