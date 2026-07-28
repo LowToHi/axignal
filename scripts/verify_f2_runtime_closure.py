@@ -64,8 +64,16 @@ def verify_scheduler_privileges(admin_dsn: str) -> None:
         cursor.execute(
             """
             SELECT
-              has_table_privilege('axignal_scheduler_login','axignal_global.canonical_claims','INSERT') AS canonical_insert,
-              has_table_privilege('axignal_scheduler_login','axignal_global.evidence_objects','UPDATE') AS evidence_update,
+              has_table_privilege(
+                'axignal_scheduler_login',
+                'axignal_global.canonical_claims',
+                'INSERT'
+              ) AS canonical_insert,
+              has_table_privilege(
+                'axignal_scheduler_login',
+                'axignal_global.evidence_objects',
+                'UPDATE'
+              ) AS evidence_update,
               has_function_privilege(
                 'axignal_scheduler_login',
                 'axignal_global.schedule_maintenance_job(text,text,jsonb,uuid,timestamptz,integer,jsonb)',
@@ -150,7 +158,11 @@ def main() -> int:
     assert claimed is not None
     with psycopg.connect(settings.database_url) as connection, connection.cursor() as cursor:
         cursor.execute(
-            "UPDATE axignal_global.scheduled_jobs SET lease_expires_at=%s WHERE scheduled_job_id=%s",
+            """
+            UPDATE axignal_global.scheduled_jobs
+            SET lease_expires_at = %s
+            WHERE scheduled_job_id = %s
+            """,
             (datetime.now(UTC) - timedelta(seconds=1), lease_job),
         )
     assert repository.recover_expired_leases() == 1
