@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="${AXIGNAL_REMOTE_ROOT:-/opt/axignal}"
+ENV_FILE="${AXIGNAL_PILOT_ENV_FILE:-/etc/axignal/pilot.env}"
+STATE_ROOT="${AXIGNAL_REMOTE_STATE_ROOT:-/var/lib/axignal/ops}"
+STATE_HELPER="${AXIGNAL_REMOTE_STATE_HELPER:-/usr/local/lib/axignal/remote_state.py}"
+STATE_FILE="$STATE_ROOT/current.json"
+WATCHDOG_FILE="$STATE_ROOT/watchdog.json"
+MIN_FREE_GB="${AXIGNAL_MIN_FREE_GB:-5}"
+
+current_sha="$(python3 "$STATE_HELPER" get --path "$STATE_FILE" --key current_sha)"
+[[ "$current_sha" =~ ^[0-9a-f]{40}$ ]] || { echo 'no deployed release is recorded' >&2; exit 2; }
+release="$ROOT/releases/$current_sha"
+free_kb="$(df --output=avail "$ROOT" | tail -n 1 | tr -d ' ')"
+required_kb="$((MIN_FREE_GB * 1024 * 1024))"
+if (( free_kb < required_kb )); then
+  python3 "$STATE_HELPER" write-watchdog --path "$WATCHDOG_FILE" --status FAIL --sha "$current_sha"
+  logger -t axignal-pilot-watchdog "FAIL low_disk sha=$current_sha free_kb=$free_kb"
+  exit 1
+fi
+
+if AXIGNAL_REMOTE_ROOT="$ROOT" AXIGNAL_PILOT_ENV_FILE="$ENV_FILE" AXIGNAL_REMOTE_STATE_ROOT="$STATE_ROOT" \
+  /usr/local/sbin/axignal-remote-verify "$release" >/dev/null; then
+  python3 "$STATE_HELPER" write-watchdog --path "$WATCHDOG_FILE" --status PASS --sha "$current_sha"
+  logger -t axignal-pilot-watchdog "PASS sha=$current_sha"
+else
+  python3 "$STATE_HELPER" write-watchdog --path "$WATCHDOG_FILE" --status FAIL --sha "$current_sha"
+  logger -t axignal-pilot-watchdog "FAIL sha=$current_sha"
+  exit 1
+fi
