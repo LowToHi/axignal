@@ -44,6 +44,7 @@ compose exec -T "$service" pg_dump -U axignal -d "$rehearsal_db" \
 for pass in 1 2; do
   psql_db "$rehearsal_db" < infra/postgres/060-f1-qualified-user-validation.sql
   psql_db "$rehearsal_db" < infra/postgres/061-f1-validation-answer-key-boundary.sql
+  psql_db "$rehearsal_db" < infra/postgres/062-f1-validation-pgcrypto-boundary.sql
 done
 
 test "$(scalar "$rehearsal_db" "SELECT count(*) FROM evaluation.validation_tasks;")" = "6"
@@ -61,7 +62,7 @@ test "$(scalar "$restore_db" "SELECT to_regclass('axignal_global.scheduled_jobs'
 
 cat <<'JSON'
 {
-  "f1_validation_migrations_applied": [60, 61],
+  "f1_validation_migrations_applied": [60, 61, 62],
   "migration_replay_idempotent": true,
   "frozen_tasks": 6,
   "answer_keys_hidden": true,
