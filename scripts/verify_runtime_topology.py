@@ -27,7 +27,7 @@ def main() -> int:
     identifiers = [item["id"] for item in processes]
     assert len(identifiers) == len(set(identifiers))
     for process in processes:
-        assert REQUIRED_PROCESS_FIELDS <= set(process)
+        assert set(process) >= REQUIRED_PROCESS_FIELDS
         assert process["concurrency_limit"] >= 1
         assert process["credential_env"].startswith("AXIGNAL_")
     credentials = payload["security"]["unique_runtime_credentials"]
