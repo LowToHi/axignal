@@ -52,6 +52,9 @@ jobs:
         run: python -m pip install --upgrade pip && python -m pip install -e ".[dev]"
       - name: Start disposable services
         run: docker compose up --build --detach --wait
+      - name: Capture PostgreSQL initialization logs
+        if: failure()
+        run: docker compose logs postgres > postgres-init.log 2>&1 || true
       - name: Rehearse migration and snapshot restore
         shell: bash
         run: |
@@ -68,9 +71,10 @@ jobs:
         with:
           name: human-review-diagnostics
           path: |
+            postgres-init.log
             human-review-migration.log
             bounded-human-review.log
-          if-no-files-found: error
+          if-no-files-found: ignore
           retention-days: 7
       - name: Destroy disposable services
         if: always()
