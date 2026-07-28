@@ -1,0 +1,61 @@
+name: Materialise AXIGNAL Landing
+
+on:
+  push:
+    branches: ["agent/landing-globe-v1"]
+    paths:
+      - ".github/workflows/landing-materialise.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  materialise:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "22.14.0"
+      - name: Decode reviewed landing source
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .github/landing-payload/chunk-* > /tmp/axignal-payload.b64
+          base64 --decode /tmp/axignal-payload.b64 > /tmp/axignal-landing-payload.tar.gz
+          echo "1b0424dd7c83dc1849f56f817a6cdaa7d71fb2ea4f3db0382938b47c28457b26  /tmp/axignal-landing-payload.tar.gz" | sha256sum --check
+          tar -xzf /tmp/axignal-landing-payload.tar.gz -C .
+          mkdir -p apps/landing/public/brand
+          cp apps/web/public/brand/axignal-logo-dark.svg apps/landing/public/brand/axignal-logo-dark.svg
+      - name: Generate reproducible lockfile
+        continue-on-error: true
+        shell: bash
+        run: |
+          corepack enable
+          pnpm install --no-frozen-lockfile
+      - name: Run pre-commit validation
+        continue-on-error: true
+        shell: bash
+        run: |
+          python scripts/verify_landing_foundation.py
+          python scripts/verify_landing_implementation.py
+          pnpm --filter @axignal/landing typecheck
+          pnpm --filter @axignal/landing build
+          git diff --check
+      - name: Commit materialised landing
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .github/landing-payload
+          rm -f .github/workflows/landing-materialise.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git status --short
+          git commit -m "Implement AXIGNAL landing Globe"
+          git push origin HEAD:agent/landing-globe-v1
