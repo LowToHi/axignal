@@ -8,7 +8,7 @@ AXIGNAL es una plataforma premium de observación económica y exploración mult
 - Dominio: **axignal.com**
 - Repositorio técnico: `LowToHi/axignal`
 - Goal ID: `AXIGNAL-GOAL-001`
-- Estado: **Executable spine / Contract-first**
+- Estado: **Consolidated executable baseline candidate**
 - Naturaleza: inteligencia e investigación; no ejecución, custodia ni asesoramiento personalizado
 
 ## Principio central
@@ -17,35 +17,53 @@ AXIGNAL es una plataforma premium de observación económica y exploración mult
 
 ## Contratos normativos
 
-La fuente contractual del producto vive en [`docs/contracts`](docs/contracts/README.md). El mapa de ejecución vive en [`docs/roadmap`](docs/roadmap/README.md). Ninguna implementación puede presentarse como producción si incumple esos contratos o el Goal Lock.
+La fuente contractual del producto vive en [`docs/contracts`](docs/contracts/README.md). El mapa de ejecución vive en [`docs/roadmap`](docs/roadmap/README.md). Ninguna implementación puede presentarse como producción si incumple esos contratos, el Goal Lock o sus gates.
 
 ## Espina ejecutable
 
 ```text
 apps/
-├── web       # Investigation Shell v0.2
-├── landing   # sistema público de conversión, Pricing y FAQ
-└── api       # FastAPI y contrato Navigator sintético
+├── web       # Investigation Shell y Navigator
+├── landing   # superficie pública de conversión
+└── api       # FastAPI, ResearchRuns y runtimes de propuesta/admisión
 
 packages/
 └── design-tokens
 
 infra/
-└── postgres  # PostgreSQL + PostGIS + pgvector
+└── postgres  # PostgreSQL + PostGIS + pgvector + fronteras de autoridad
 ```
 
 Servicios locales adicionales:
 
-- Valkey para estado efímero y futuras colas;
-- Playwright para el flujo Navigator → Graph → Evidence;
-- Docker Compose para pruebas desechables;
-- CI independiente para aplicaciones, API y extensiones de datos.
+- Valkey para colas y estado efímero;
+- Playwright para el workflow canónico de navegador;
+- Docker Compose para integración desechable;
+- CI independiente para contratos, API, aplicaciones y persistencia.
 
 Inicio rápido y gates: [`docs/runbooks/local-development.md`](docs/runbooks/local-development.md).
 
+## Vertical slice gobernado
+
+```text
+identidad autenticada
+→ Navigator
+→ ResearchRun persistente
+→ fuente o documento admitido
+→ Evidence Objects
+→ Candidate Claims
+→ proposal worker sin autoridad canónica
+→ admission handoff durable
+→ runtime determinista independiente
+→ Claim Ledger append-only
+→ dossier e InvestigationContext
+```
+
+Los modelos pueden proponer. Solo el runtime epistemológico independiente puede admitir un claim canónico.
+
 ## Superficies previstas
 
-- **AXIGNAL Navigator** — conversación multilingüe para navegar, filtrar y explicar claims.
+- **AXIGNAL Navigator** — conversación multilingüe para navegar, investigar y explicar claims.
 - **AXIGNAL Globe** — mapa mundial y capas de clima de oportunidad.
 - **AXIGNAL Graph** — relaciones, transmisión, propiedad, cadenas y causalidad hipotética.
 - **AXIGNAL Timeline** — reconstrucción histórica y comparación temporal.
@@ -65,4 +83,4 @@ La atención de usuarios puede priorizar una investigación. Nunca demuestra por
 
 ## Estado de madurez
 
-El repositorio contiene ya una primera espina ejecutable con datos sintéticos. No constituye producción: buyer, pricing, universo inicial, fuentes reales, modelos predictivos, tokens finales y UX validada permanecen bajo gates comerciales, empíricos, jurídicos, de rendimiento y usabilidad.
+El repositorio contiene una primera alpha vertical gobernada y reproducible. No constituye producción: UX validada, universo comercial inicial, identidad multiusuario, fuentes amplias, revisión humana, billing, observabilidad operativa, seguridad productiva, modelos predictivos y general availability permanecen bajo gates específicos.
