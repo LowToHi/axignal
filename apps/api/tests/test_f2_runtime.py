@@ -148,9 +148,12 @@ def test_trace_context_propagates_between_layers() -> None:
     consumer = tracer_for(provider, "consumer")
     with start_span(producer, "schedule", attributes={"password": "not-exported"}):
         envelope = inject_trace_envelope().as_dict()
-    with attach_trace_envelope(envelope):
-        with start_span(consumer, "execute", attributes={"scheduled_job_id": "job-1"}):
-            assert trace.get_current_span().get_span_context().is_valid
+    with attach_trace_envelope(envelope), start_span(
+        consumer,
+        "execute",
+        attributes={"scheduled_job_id": "job-1"},
+    ):
+        assert trace.get_current_span().get_span_context().is_valid
     spans = list(exporter.get_finished_spans())
     assert len(spans) == 2
     assert spans[0].context.trace_id == spans[1].context.trace_id
