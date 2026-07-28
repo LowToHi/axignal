@@ -21,6 +21,28 @@ services:
     networks:
       - backend
 
+  db-hardening:
+    image: postgres:17-alpine
+    environment:
+      AXIGNAL_POSTGRES_DB: ${AXIGNAL_POSTGRES_DB:-axignal}
+      AXIGNAL_POSTGRES_USER: ${AXIGNAL_POSTGRES_USER:-axignal}
+      AXIGNAL_POSTGRES_PASSWORD: ${AXIGNAL_POSTGRES_PASSWORD:?required}
+      AXIGNAL_PROPOSAL_DB_PASSWORD: ${AXIGNAL_PROPOSAL_DB_PASSWORD:?required}
+      AXIGNAL_ADMISSION_DB_PASSWORD: ${AXIGNAL_ADMISSION_DB_PASSWORD:?required}
+      AXIGNAL_HUMAN_REVIEW_DB_PASSWORD: ${AXIGNAL_HUMAN_REVIEW_DB_PASSWORD:?required}
+      AXIGNAL_VALIDATION_DB_PASSWORD: ${AXIGNAL_VALIDATION_DB_PASSWORD:?required}
+      AXIGNAL_VALIDATION_ANALYST_DB_PASSWORD: ${AXIGNAL_VALIDATION_ANALYST_DB_PASSWORD:?required}
+      AXIGNAL_SCHEDULER_DB_PASSWORD: ${AXIGNAL_SCHEDULER_DB_PASSWORD:?required}
+    command: ["bash", "/opt/axignal/harden-db.sh"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+    volumes:
+      - ./harden-db.sh:/opt/axignal/harden-db.sh:ro
+    networks:
+      - backend
+
   valkey:
     image: valkey/valkey:8-alpine
     command: ["valkey-server", "--appendonly", "yes", "--appendfsync", "everysec"]
@@ -66,8 +88,8 @@ services:
     expose:
       - "8000"
     depends_on:
-      postgres:
-        condition: service_healthy
+      db-hardening:
+        condition: service_completed_successfully
       valkey:
         condition: service_healthy
     healthcheck:
