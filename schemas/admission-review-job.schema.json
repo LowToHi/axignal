@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://axignal.com/schemas/admission-review-job.schema.json",
+  "title": "AXIGNAL Admission Review Job",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "job_kind",
+    "admission_handoff_id",
+    "research_run_id",
+    "tenant_id",
+    "expected_package_hash",
+    "policy_version"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "job_kind": {
+      "const": "ADMISSION_REVIEW"
+    },
+    "admission_handoff_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "research_run_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "tenant_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "expected_package_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "policy_version": {
+      "const": "document-observed-fact@0.1.0"
+    }
+  }
+}

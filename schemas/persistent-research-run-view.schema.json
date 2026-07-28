@@ -26,10 +26,23 @@
     "synthetic"
   ],
   "properties": {
-    "research_run_id": {"type": "string", "format": "uuid"},
-    "context_id": {"type": "string", "pattern": "^ctx_[A-Za-z0-9_-]{8,}$"},
-    "opportunity_id": {"type": "string", "minLength": 3},
-    "question": {"type": "string", "minLength": 3, "maxLength": 8000},
+    "research_run_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "context_id": {
+      "type": "string",
+      "pattern": "^ctx_[A-Za-z0-9_-]{8,}$"
+    },
+    "opportunity_id": {
+      "type": "string",
+      "minLength": 3
+    },
+    "question": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 8000
+    },
     "state": {
       "enum": [
         "QUEUED",
@@ -40,31 +53,91 @@
         "EVIDENCE_BINDING",
         "ADMISSION_PENDING",
         "HANDOFF_PENDING",
+        "ADMISSION_REVIEWING",
         "COMPLETED",
         "COMPLETED_PROVISIONAL",
+        "HUMAN_REVIEW_REQUIRED",
+        "CONTESTED",
         "QUARANTINED",
         "FAILED"
       ]
     },
-    "private_knowledge_authorised": {"type": "boolean"},
-    "source_plan": {"type": "array", "items": {"type": "object", "additionalProperties": true}},
-    "budgets": {"type": "object", "additionalProperties": true},
-    "actual_usage": {"type": "object", "additionalProperties": true},
-    "evidence": {"type": "array", "items": {"$ref": "#/$defs/evidence"}},
-    "candidate_claims": {"type": "array", "items": {"$ref": "#/$defs/candidateClaim"}},
-    "canonical_claims": {"type": "array", "items": {"$ref": "#/$defs/canonicalClaim"}},
+    "private_knowledge_authorised": {
+      "type": "boolean"
+    },
+    "source_plan": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "budgets": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "actual_usage": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/evidence"
+      }
+    },
+    "candidate_claims": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/candidateClaim"
+      }
+    },
+    "canonical_claims": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/canonicalClaim"
+      }
+    },
     "dossier": {
       "oneOf": [
-        {"type": "null"},
-        {"$ref": "#/$defs/dossier"}
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "#/$defs/dossier"
+        }
       ]
     },
-    "admission_batch_id": {"type": ["string", "null"], "format": "uuid"},
-    "error_code": {"type": ["string", "null"]},
-    "error_detail": {"type": ["string", "null"]},
-    "created_at": {"type": "string", "format": "date-time"},
-    "updated_at": {"type": "string", "format": "date-time"},
-    "synthetic": {"const": false}
+    "admission_batch_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "error_code": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "error_detail": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "synthetic": {
+      "const": false
+    }
   },
   "$defs": {
     "evidence": {
@@ -85,18 +158,56 @@
         "payload"
       ],
       "properties": {
-        "evidence_id": {"type": "string", "format": "uuid"},
-        "source_id": {"type": "string"},
-        "title": {"type": "string"},
-        "relationship": {"enum": ["SUPPORT", "CONTRADICT", "UNKNOWN", "CONTEXT"]},
-        "subject_id": {"type": "string"},
-        "predicate": {"type": "string"},
-        "observed_at": {"type": "string", "format": "date-time"},
-        "numeric_value": {"type": ["string", "null"]},
-        "unit": {"type": ["string", "null"]},
-        "rights_status": {"type": "string"},
-        "provisional": {"type": "boolean"},
-        "payload": {"type": "object", "additionalProperties": true}
+        "evidence_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "source_id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "relationship": {
+          "enum": [
+            "SUPPORT",
+            "CONTRADICT",
+            "UNKNOWN",
+            "CONTEXT"
+          ]
+        },
+        "subject_id": {
+          "type": "string"
+        },
+        "predicate": {
+          "type": "string"
+        },
+        "observed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "numeric_value": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "unit": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "rights_status": {
+          "type": "string"
+        },
+        "provisional": {
+          "type": "boolean"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": true
+        }
       }
     },
     "candidateClaim": {
@@ -114,9 +225,17 @@
         "rejection_reasons"
       ],
       "properties": {
-        "candidate_claim_id": {"type": "string", "format": "uuid"},
-        "fingerprint": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
-        "statement": {"type": "string"},
+        "candidate_claim_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "fingerprint": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "statement": {
+          "type": "string"
+        },
         "kind": {
           "enum": [
             "FACT",
@@ -127,11 +246,39 @@
             "CONTRADICTION"
           ]
         },
-        "state": {"enum": ["PROPOSED", "ADMISSION_QUEUED", "ADMITTED", "REJECTED"]},
-        "producer_type": {"enum": ["DETERMINISTIC_PARSER", "LOCAL_MODEL", "EXTERNAL_MODEL"]},
-        "method_version": {"type": "string"},
-        "canonical_claim_id": {"type": ["string", "null"], "format": "uuid"},
-        "rejection_reasons": {"type": "array", "items": {"type": "string"}}
+        "state": {
+          "enum": [
+            "PROPOSED",
+            "ADMISSION_QUEUED",
+            "ADMITTED",
+            "REJECTED",
+            "CONTESTED",
+            "HUMAN_REVIEW_REQUIRED"
+          ]
+        },
+        "producer_type": {
+          "enum": [
+            "DETERMINISTIC_PARSER",
+            "LOCAL_MODEL",
+            "EXTERNAL_MODEL"
+          ]
+        },
+        "method_version": {
+          "type": "string"
+        },
+        "canonical_claim_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uuid"
+        },
+        "rejection_reasons": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
       }
     },
     "canonicalClaim": {
@@ -151,30 +298,88 @@
         "admitted_at"
       ],
       "properties": {
-        "canonical_claim_id": {"type": "string", "format": "uuid"},
-        "fingerprint": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
-        "statement": {"type": "string"},
-        "subject_id": {"type": "string"},
-        "predicate": {"type": "string"},
-        "object_value": {"type": "object", "additionalProperties": true},
-        "observed_at": {"type": "string", "format": "date-time"},
-        "epistemic_class": {"enum": ["OBSERVED_FACT", "DERIVED_FACT"]},
-        "state": {"const": "ADMITTED"},
-        "admitted_by": {"const": "DETERMINISTIC_RUNTIME"},
-        "admitted_at": {"type": "string", "format": "date-time"}
+        "canonical_claim_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "fingerprint": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "statement": {
+          "type": "string"
+        },
+        "subject_id": {
+          "type": "string"
+        },
+        "predicate": {
+          "type": "string"
+        },
+        "object_value": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "observed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "epistemic_class": {
+          "enum": [
+            "OBSERVED_FACT",
+            "DERIVED_FACT"
+          ]
+        },
+        "state": {
+          "const": "ADMITTED"
+        },
+        "admitted_by": {
+          "const": "DETERMINISTIC_RUNTIME"
+        },
+        "admitted_at": {
+          "type": "string",
+          "format": "date-time"
+        }
       }
     },
     "dossier": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["dossier_id", "status", "title", "summary", "sections", "attribution"],
+      "required": [
+        "dossier_id",
+        "status",
+        "title",
+        "summary",
+        "sections",
+        "attribution"
+      ],
       "properties": {
-        "dossier_id": {"type": "string", "format": "uuid"},
-        "status": {"enum": ["TRACEABLE_PROVISIONAL", "TRACEABLE_WITH_ADMITTED_FACTS"]},
-        "title": {"type": "string"},
-        "summary": {"type": "string"},
-        "sections": {"type": "array", "items": {"type": "object", "additionalProperties": true}},
-        "attribution": {"type": "object", "additionalProperties": true}
+        "dossier_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "status": {
+          "enum": [
+            "TRACEABLE_PROVISIONAL",
+            "TRACEABLE_WITH_ADMITTED_FACTS"
+          ]
+        },
+        "title": {
+          "type": "string"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "sections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "attribution": {
+          "type": "object",
+          "additionalProperties": true
+        }
       }
     }
   }

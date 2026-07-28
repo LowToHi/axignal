@@ -26,6 +26,8 @@ class Settings:
     local_model_name: str | None
     local_model_api_key: str | None
     identity_assertion_secret: str | None
+    admission_database_url: str | None = None
+    admission_queue_key: str = "axignal:admission:queue:v1"
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -36,6 +38,7 @@ class Settings:
             database_url=environ.get("AXIGNAL_DATABASE_URL"),
             valkey_url=environ.get("AXIGNAL_VALKEY_URL"),
             proposal_database_url=environ.get("AXIGNAL_PROPOSAL_DATABASE_URL"),
+            admission_database_url=environ.get("AXIGNAL_ADMISSION_DATABASE_URL"),
             persistent_research_enabled=_bool_env("AXIGNAL_PERSISTENT_RESEARCH_ENABLED"),
             live_sources_enabled=_bool_env("AXIGNAL_LIVE_SOURCES_ENABLED"),
             world_bank_fixture_path=Path(fixture).resolve() if fixture else None,
@@ -43,6 +46,10 @@ class Settings:
             proposal_queue_key=environ.get(
                 "AXIGNAL_PROPOSAL_QUEUE_KEY",
                 "axignal:proposal:queue:v1",
+            ),
+            admission_queue_key=environ.get(
+                "AXIGNAL_ADMISSION_QUEUE_KEY",
+                "axignal:admission:queue:v1",
             ),
             document_fixture_path=(
                 Path(document_fixture).resolve() if document_fixture else None
@@ -77,6 +84,14 @@ class Settings:
             raise RuntimeError(
                 "AXIGNAL_DOCUMENT_PROPOSAL_FIXTURE_PATH is required without a local endpoint"
             )
+
+    def require_admission_runtime(self) -> None:
+        if not self.persistent_research_enabled:
+            raise RuntimeError("Persistent research is disabled")
+        if not self.admission_database_url:
+            raise RuntimeError("AXIGNAL_ADMISSION_DATABASE_URL is required")
+        if not self.valkey_url:
+            raise RuntimeError("AXIGNAL_VALKEY_URL is required")
 
     def require_identity_assertions(self) -> None:
         if not self.identity_assertion_secret:

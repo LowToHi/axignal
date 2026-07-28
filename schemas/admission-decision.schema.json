@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://axignal.com/schemas/admission-decision.schema.json",
+  "title": "AXIGNAL Admission Decision",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "admission_decision_id",
+    "admission_batch_id",
+    "admission_handoff_id",
+    "candidate_claim_id",
+    "outcome",
+    "policy_version",
+    "gate_results",
+    "rejection_reasons",
+    "canonical_claim_id",
+    "rederived_fingerprint",
+    "human_review_required",
+    "created_at"
+  ],
+  "properties": {
+    "admission_decision_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "admission_batch_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "admission_handoff_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "candidate_claim_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "outcome": {
+      "enum": [
+        "ADMITTED_REDERIVED",
+        "REJECTED",
+        "QUARANTINED",
+        "CONTESTED",
+        "HUMAN_REVIEW_REQUIRED",
+        "DUPLICATE",
+        "SUPERSEDED"
+      ]
+    },
+    "policy_version": {
+      "const": "document-observed-fact@0.1.0"
+    },
+    "gate_results": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "boolean"
+      }
+    },
+    "rejection_reasons": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "canonical_claim_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "rederived_fingerprint": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "human_review_required": {
+      "type": "boolean"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}
