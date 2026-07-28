@@ -1,20 +1,20 @@
 # 11 — Consolidated Executable Baseline
 
-Version: `0.1.0`
-Status: `INTEGRATION GATE`
+Version: `0.1.1`
+Status: `MERGED / GATE PASSED`
 Goal ID: `AXIGNAL-GOAL-001`
-Target: `main`
-Integration branch: `agent/consolidated-baseline-v0.1`
+Canonical baseline: `main@cf83781766f12ebc55eeb9829d68d41e77500aa7`
+Cumulative PR: `#21`
 
-## Purpose
+## Result
 
-Replace the long-lived stacked draft-PR chain with one reviewable, reproducible and reversible baseline against current `main` before any new capability is developed.
+The long-lived stacked draft-PR chain has been replaced by one reviewable, reproducible and reversible baseline on `main`.
 
-This is an integration operation. It does not expand product scope, admit new sources, deploy production services or declare roadmap phases passed.
+This integration did not expand product scope, admit new source classes, deploy production services or declare unrelated roadmap phases passed.
 
-## Source chain
+## Source chain retained for audit
 
-The cumulative baseline preserves the accepted implementation and evidence from:
+The baseline preserves the implementation and specialised evidence from:
 
 - PR #5 — end-to-end roadmap, contracts and governance;
 - PR #9 — executable spine;
@@ -28,86 +28,95 @@ The cumulative baseline preserves the accepted implementation and evidence from:
 - PR #18 — persistent proposal worker with credential separation;
 - PR #19 — independent deterministic admission runtime.
 
-The integration branch also contains the canonical AXIGNAL naming correction already present on `main`. The two histories are joined by a two-parent merge commit before the cumulative PR is opened.
+All source PRs are closed as `SUPERSEDED_BY_CONSOLIDATED_BASELINE`. Their branches and conversations remain available for audit, but MUST NOT be used as the base for new development.
 
-## Baseline invariants
+## History resolution
 
-The consolidation MUST preserve:
-
-1. `AXIGNAL`, `axignal.com`, `LowToHi/axignal` and `AXIGNAL-GOAL-001` as canonical identity;
-2. models with proposal authority only;
-3. deterministic runtime as the sole automatic admission authority;
-4. physically separated application, proposal-worker and admission-runtime credentials;
-5. tenant isolation through RLS and server-resolved identity;
-6. immutable source/evidence lineage and append-only canonical ledger events;
-7. contradiction, limitation and unknown preservation;
-8. fail-closed rights, integrity, scope, temporal and quantitative gates;
-9. idempotent queues and atomic admission transactions;
-10. explicit feature flags and synthetic fallback where production capability is not authorised.
-
-## Integration gates
-
-The baseline is mergeable only when all gates pass on the cumulative head:
+The cumulative technical history originally diverged from `main` by one canonical naming commit. A two-parent integration commit joined current `main` and the CI-green runtime head before PR #21 was reviewed. PR #21 was then squash-merged into `main` as:
 
 ```text
-CURRENT_MAIN_ANCESTOR
-CANONICAL_NAMING_GREEN
-CONTRACTS_SCHEMAS_OPENAPI_GREEN
-RUFF_GREEN
-API_TESTS_GREEN
-TYPESCRIPT_GREEN
-BUILDS_GREEN
-PLAYWRIGHT_GREEN
-POSTGRES_EXTENSIONS_GREEN
-VALKEY_GREEN
-PERSISTENT_RESEARCH_GREEN
-PROPOSAL_ISOLATION_GREEN
-DETERMINISTIC_ADMISSION_GREEN
-MIGRATION_REPLAY_GREEN
-SNAPSHOT_RESTORE_GREEN
-NO_PRODUCTION_DEPLOYMENT
-```
-
-## Migration and restore rehearsal
-
-The cumulative rehearsal creates a database at the pre-proposal boundary, inserts representative governed data, snapshots it, applies migrations `025`, `030` and `035`, reapplies the same sequence, and verifies:
-
-- existing Source Objects, Evidence Objects, Candidate Claims and ResearchRuns survive unchanged;
-- new tables and columns exist;
-- the proposal worker cannot insert canonical claims;
-- the admission runtime cannot mutate Evidence Objects;
-- the admission login remains available under its bounded role;
-- replay does not duplicate or corrupt schema/data.
-
-The snapshot is then restored into a clean database and must reproduce the pre-migration schema and seeded data. Snapshot restore is the authorised rollback proof for this baseline; production-specific down migrations remain a separate decision.
-
-## Supersession procedure
-
-After the cumulative PR is green and merged:
-
-1. record the final merge SHA and CI runs here or in the PR body;
-2. close PRs #5, #9 and #11–#19 as `SUPERSEDED_BY_CONSOLIDATED_BASELINE`;
-3. add a comment to each source PR pointing to the cumulative baseline and preserving its specialised evidence;
-4. do not delete source branches until audit retention is explicitly decided;
-5. continue development from updated `main`, never from the old stacked heads.
-
-## Merge strategy
-
-Use a squash merge for the cumulative PR so `main` receives one clearly named baseline commit while the original commit and PR evidence remains available in GitHub history.
-
-Recommended commit title:
-
-```text
+cf83781766f12ebc55eeb9829d68d41e77500aa7
 Establish AXIGNAL consolidated executable baseline v0.1
 ```
 
+## Preserved invariants
+
+1. `AXIGNAL`, `axignal.com`, `LowToHi/axignal` and `AXIGNAL-GOAL-001` are canonical identity.
+2. Models have proposal authority only.
+3. The deterministic runtime is the sole automatic admission authority.
+4. Application, proposal-worker and admission-runtime credentials are physically separated.
+5. Tenant isolation is enforced through RLS and server-resolved identity.
+6. Source/evidence lineage is immutable and canonical ledger events are append-only.
+7. Contradiction, limitation and unknown information are preserved.
+8. Rights, integrity, scope, temporal and quantitative gates fail closed.
+9. Queues are idempotent and admission transactions are atomic.
+10. Production capability remains behind explicit authorisation and feature gates.
+
+## Gate evidence
+
+All cumulative gates passed:
+
+```text
+CURRENT_MAIN_ANCESTOR                 PASS
+CANONICAL_NAMING_GREEN                PASS
+CONTRACTS_SCHEMAS_OPENAPI_GREEN       PASS
+RUFF_GREEN                            PASS
+API_TESTS_GREEN                       PASS
+TYPESCRIPT_GREEN                      PASS
+BUILDS_GREEN                          PASS
+PLAYWRIGHT_GREEN                      PASS
+POSTGRES_EXTENSIONS_GREEN             PASS
+VALKEY_GREEN                          PASS
+PERSISTENT_RESEARCH_GREEN             PASS
+PROPOSAL_ISOLATION_GREEN              PASS
+DETERMINISTIC_ADMISSION_GREEN         PASS
+MIGRATION_REPLAY_GREEN                PASS
+SNAPSHOT_RESTORE_GREEN                PASS
+NO_PRODUCTION_DEPLOYMENT               PASS
+```
+
+CI evidence:
+
+- Contract Validation `30340309234` — success;
+- Executable Spine `30340309338` — success;
+- World Bank Live Source Smoke `30340309404` — success.
+
+## Migration and restore result
+
+The rehearsal reconstructed the pre-proposal database boundary, inserted representative governed data, captured a snapshot, applied migrations `025`, `030` and `035`, and reapplied the same sequence.
+
+```json
+{
+  "baseline_snapshot_created": true,
+  "cumulative_migrations_applied": [25, 30, 35],
+  "migration_replay_idempotent": true,
+  "seeded_data_preserved": true,
+  "proposal_worker_canonical_insert": false,
+  "admission_runtime_evidence_update": false,
+  "snapshot_restore_verified": true,
+  "partial_state_detected": false
+}
+```
+
+Snapshot restore reproduced the pre-migration schema and seeded data in a clean database. Production-specific down migrations remain a separate decision.
+
+## Development rule after consolidation
+
+```text
+current main
+→ new bounded branch
+→ independent PR
+→ relevant gates
+→ merge or reject
+```
+
+The superseded PR chain must never be extended.
+
 ## Rollback
 
-No production data or deployment is part of this integration. Repository rollback is one revert of the consolidated squash commit. Migration rollback evidence is the tested pre-migration snapshot restore.
+No production deployment or customer data migration occurred. Repository rollback is one revert of commit `cf83781766f12ebc55eeb9829d68d41e77500aa7`. The tested pre-migration snapshot restore is the database rollback evidence for this baseline.
 
 ## Post-baseline priority
-
-Only after the baseline is merged:
 
 ```text
 bounded human-review queue
@@ -117,4 +126,4 @@ bounded human-review queue
 → F1 qualified-user validation
 ```
 
-New sources, OCR, unrestricted browsing, continuous operation, billing and production deployment remain outside this integration gate.
+New sources, OCR, unrestricted browsing, continuous operation, billing and production deployment remain outside this completed integration gate.

@@ -1,8 +1,9 @@
 # AXIGNAL End-to-End Development Map
 
-Version: `0.6.0`
-Status: `CANDIDATE / CONSOLIDATED EXECUTION MAP`
+Version: `0.6.1`
+Status: `CANDIDATE / CONSOLIDATED BASELINE ACTIVE`
 Goal ID: `AXIGNAL-GOAL-001`
+Canonical baseline: `main@cf83781766f12ebc55eeb9829d68d41e77500aa7`
 
 This directory connects the AXIGNAL product goal to phases, tasks, contracts, dynamic skills, implementation evidence and independent gates.
 
@@ -37,7 +38,7 @@ No development agent may skip a layer, infer a different product goal from an is
 | [08 — Marketing, Pricing and Conversion](08-marketing-pricing-and-conversion-work-package.md) | Landing, pricing, FAQ, Trust Center, analytics and commercial validation |
 | [09 — Commercial Dynamic Skills](09-commercial-dynamic-skill-map.md) | Candidate skills for conversion, pricing, acquisition, CRM, SEO and trust |
 | [10 — Research, Retrieval and Candidate Claims](10-research-retrieval-and-candidate-claims-work-package.md) | ResearchRun, retrieval, tenant memory, proposals, dossier and admission handoff |
-| [11 — Consolidated Executable Baseline](11-consolidated-baseline.md) | Integration, migration rehearsal, supersession and rollback gate |
+| [11 — Consolidated Executable Baseline](11-consolidated-baseline.md) | Completed integration, migration rehearsal, supersession and rollback evidence |
 
 ## Normative execution contracts
 
@@ -87,7 +88,7 @@ Task state:
 
 ## Current position
 
-The repository now contains an executable, governed alpha vertical slice rather than only a prototype:
+The canonical `main` branch contains an executable, governed alpha vertical slice:
 
 ```text
 identity
@@ -104,29 +105,26 @@ identity
 
 The current evidence supports these statements:
 
-- F0 is in gate review, not merely initial drafting;
+- F0 remains in gate review pending final map and cross-contract freeze;
 - F1 has an executable prototype but still lacks qualified-user acceptance;
-- F2 is evidence-ready pending cumulative-baseline integration;
+- F2 is evidence-ready with the cumulative baseline integrated and migration/restore rehearsed;
 - F3 and F4 have bounded vertical slices but are not general implementations;
 - F5 has a product shell and browser workflow but not validated full parity;
 - F6–F12 remain locked.
 
 The authoritative detailed status is [`06-current-execution-state.md`](06-current-execution-state.md). Static state labels in older roadmap sections must be interpreted through that current evidence document until the next full phase-map revision.
 
-## Consolidation rule
+## Consolidated baseline rule
 
-No new functional scope is authorised while the cumulative baseline remains outside `main`.
+PR #21 was squash-merged as `cf83781766f12ebc55eeb9829d68d41e77500aa7`. PRs #5, #9 and #11–#19 are superseded audit evidence.
 
-The consolidation gate requires:
+Every new development unit MUST:
 
-- current `main` ancestry;
-- one cumulative PR;
-- canonical naming and contract validation;
-- full application/API/browser CI;
-- PostgreSQL and Valkey acceptance;
-- cumulative migration replay over seeded prior-state data;
-- snapshot restore proof;
-- closure of superseded stacked PRs after merge.
+- branch from current `main`;
+- remain independently reviewable;
+- declare its contracts, authority boundary, exclusions and rollback;
+- pass only the gates relevant to its scope;
+- avoid reopening or extending the superseded stack.
 
 ## Canonical identity
 
@@ -139,6 +137,6 @@ Any active occurrence of `ASIGNAL`, `asignal.com` or `ASIGNAL-GOAL-001` outside 
 
 ## Authorised operational priority
 
-> Finish and merge the consolidated executable baseline. Then implement bounded human review for `HUMAN_REVIEW_REQUIRED` and `CONTESTED`, followed by F1 qualified-user validation.
+> Implement bounded human review for `HUMAN_REVIEW_REQUIRED` and `CONTESTED`, preserving reviewer identity, reason codes, append-only history and non-bypassable deterministic gates. Then execute F1 qualified-user validation.
 
 This priority does not authorise production deployment, unrestricted Browser access, customer private documents, OCR, broad source expansion, billing or model-written canonical claims.
