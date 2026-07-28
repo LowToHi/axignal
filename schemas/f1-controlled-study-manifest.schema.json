@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://axignal.local/schemas/f1-controlled-study-manifest.schema.json",
+  "title": "AXIGNAL F1 controlled-study manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "study_id",
+    "protocol_version",
+    "status",
+    "frozen_on",
+    "baseline",
+    "experiment",
+    "tasks",
+    "cohort",
+    "analysis",
+    "thresholds",
+    "guardrails",
+    "stopping_rule",
+    "exclusion_rules",
+    "decision_rule",
+    "prohibited_changes_after_first_session"
+  ],
+  "properties": {
+    "$schema": {"type": "string"},
+    "study_id": {"const": "AXIGNAL-F1-CONTROLLED-001"},
+    "protocol_version": {"const": "1.0.0"},
+    "status": {"const": "FROZEN_PRE_RECRUITMENT"},
+    "frozen_on": {"type": "string", "format": "date"},
+    "baseline": {
+      "type": "object",
+      "required": [
+        "repository",
+        "commit_sha",
+        "task_and_scoring_source",
+        "answer_key_boundary",
+        "crypto_boundary"
+      ],
+      "properties": {
+        "repository": {"const": "LowToHi/axignal"},
+        "commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "task_and_scoring_source": {"$ref": "#/$defs/sourceLock"},
+        "answer_key_boundary": {"$ref": "#/$defs/sourceLock"},
+        "crypto_boundary": {"$ref": "#/$defs/sourceLock"}
+      },
+      "additionalProperties": false
+    },
+    "experiment": {
+      "type": "object",
+      "required": ["experiment_version", "language", "conditions", "assignment"],
+      "properties": {
+        "experiment_version": {"const": "f1-qualified-user@0.1.0"},
+        "language": {"enum": ["en"]},
+        "conditions": {"const": ["AXIGNAL", "CONTROL"]},
+        "assignment": {"type": "object"}
+      },
+      "additionalProperties": false
+    },
+    "tasks": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^F1-[A-Z]+-[0-9]{3}$"}
+    },
+    "cohort": {"type": "object"},
+    "analysis": {"type": "object"},
+    "thresholds": {"type": "object"},
+    "guardrails": {"type": "object"},
+    "stopping_rule": {"type": "object"},
+    "exclusion_rules": {"type": "array", "minItems": 1},
+    "decision_rule": {"type": "object"},
+    "prohibited_changes_after_first_session": {
+      "type": "array",
+      "minItems": 1
+    }
+  },
+  "$defs": {
+    "sourceLock": {
+      "type": "object",
+      "required": ["path", "git_blob_sha1"],
+      "properties": {
+        "path": {"type": "string"},
+        "git_blob_sha1": {"type": "string", "pattern": "^[0-9a-f]{40}$"}
+      },
+      "additionalProperties": false
+    }
+  }
+}

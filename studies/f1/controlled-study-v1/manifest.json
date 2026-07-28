@@ -1,0 +1,143 @@
+{
+  "$schema": "../../../schemas/f1-controlled-study-manifest.schema.json",
+  "study_id": "AXIGNAL-F1-CONTROLLED-001",
+  "protocol_version": "1.0.0",
+  "status": "FROZEN_PRE_RECRUITMENT",
+  "frozen_on": "2026-07-28",
+  "baseline": {
+    "repository": "LowToHi/axignal",
+    "commit_sha": "03471bd3764e8696b86380fd8a83f6356ac92f7a",
+    "task_and_scoring_source": {
+      "path": "infra/postgres/060-f1-qualified-user-validation.sql",
+      "git_blob_sha1": "9c72c2c6838674f7047237f4cd28af939236ad4c"
+    },
+    "answer_key_boundary": {
+      "path": "infra/postgres/061-f1-validation-answer-key-boundary.sql",
+      "git_blob_sha1": "ea4c4a6672dcd130ccd70bd1a7997581dd1b4db3"
+    },
+    "crypto_boundary": {
+      "path": "infra/postgres/062-f1-validation-pgcrypto-boundary.sql",
+      "git_blob_sha1": "5dfbbd860563319c760371986a73270bf300763c"
+    }
+  },
+  "experiment": {
+    "experiment_version": "f1-qualified-user@0.1.0",
+    "language": "en",
+    "conditions": ["AXIGNAL", "CONTROL"],
+    "assignment": {
+      "algorithm": "sha256_first_byte_parity_v1",
+      "input": "participant_id_hash|task_id|experiment_version",
+      "even_byte": "AXIGNAL",
+      "odd_byte": "CONTROL",
+      "rerandomisation": false,
+      "condition_mutation_after_start": false
+    }
+  },
+  "tasks": [
+    "F1-AUTHORITY-001",
+    "F1-RIGHTS-002",
+    "F1-CONTEXT-003",
+    "F1-CONTRADICTION-004",
+    "F1-TRACE-005",
+    "F1-TEMPORAL-006"
+  ],
+  "cohort": {
+    "qualified_profiles": [
+      "DOMAIN_EXPERT",
+      "ANALYST",
+      "DECISION_MAKER",
+      "OTHER_QUALIFIED"
+    ],
+    "minimum_distinct_participants": 6,
+    "minimum_valid_sessions": 12,
+    "maximum_valid_sessions": 24,
+    "minimum_sessions_per_condition": 4,
+    "one_session_per_participant_task": true
+  },
+  "analysis": {
+    "primary_population": "INTENTION_TO_TREAT",
+    "incomplete_or_abandoned": "COUNT_AS_NOT_COMPLETED",
+    "confidence_interval": "WILSON_95",
+    "primary_metrics": [
+      "task_completion_rate",
+      "critical_error_rate",
+      "authority_layer_comprehension",
+      "evidence_traceability_rate",
+      "unknowns_identification_rate"
+    ],
+    "secondary_metrics": [
+      "condition_session_count",
+      "distinct_participant_count",
+      "condition_imbalance",
+      "mean_confidence"
+    ],
+    "report_absolute_and_relative_differences": true,
+    "no_optional_stopping_on_performance": true
+  },
+  "thresholds": {
+    "axignal_absolute": {
+      "task_completion_rate_min": 0.8,
+      "critical_error_rate_max": 0.1,
+      "authority_layer_comprehension_min": 0.85,
+      "evidence_traceability_rate_min": 0.8,
+      "unknowns_identification_rate_min": 0.8
+    },
+    "comparative_non_inferiority": {
+      "task_completion_rate_difference_min": -0.1,
+      "critical_error_rate_difference_max": 0.05,
+      "authority_layer_comprehension_difference_min": -0.1,
+      "evidence_traceability_rate_difference_min": -0.1
+    }
+  },
+  "guardrails": {
+    "privacy_incidents_max": 0,
+    "cross_tenant_incidents_max": 0,
+    "canonical_mutations_max": 0,
+    "answer_key_exposures_max": 0,
+    "direct_participant_pii_records_max": 0
+  },
+  "stopping_rule": {
+    "evaluate_after_each_completed_session": true,
+    "stop_at_first_checkpoint_meeting_all_sample_minima": true,
+    "hard_stop_at_maximum_valid_sessions": true,
+    "performance_based_early_stop": false
+  },
+  "exclusion_rules": [
+    {
+      "code": "WRONG_PROTOCOL_VERSION",
+      "rule": "Exclude sessions whose study_id or protocol_version does not match this manifest."
+    },
+    {
+      "code": "UNQUALIFIED_PROFILE",
+      "rule": "Exclude sessions whose frozen participant profile is outside the qualified_profiles allowlist."
+    },
+    {
+      "code": "TECHNICAL_PRE_RESPONSE_FAILURE",
+      "rule": "Exclude only documented platform failures that prevented the participant from receiving or submitting the task."
+    },
+    {
+      "code": "DUPLICATE_PARTICIPANT_TASK",
+      "rule": "Retain the first durable participant/task session and reject later duplicates; idempotent replay is not a duplicate."
+    },
+    {
+      "code": "NO_OUTCOME_BASED_EXCLUSION",
+      "rule": "Never exclude a session because of condition, answer correctness, completion result or confidence."
+    }
+  ],
+  "decision_rule": {
+    "not_ready": "Any sample minimum is unmet.",
+    "fail_candidate": "A guardrail is violated or an AXIGNAL absolute threshold fails after sample readiness.",
+    "pass_candidate": "All sample minima, guardrails, AXIGNAL absolute thresholds and comparative non-inferiority margins pass.",
+    "inconclusive": "Sample and guardrails pass, AXIGNAL absolute thresholds pass, but one or more comparative margins fail.",
+    "human_gate_required": true
+  },
+  "prohibited_changes_after_first_session": [
+    "task payloads or answer keys",
+    "assignment algorithm",
+    "primary metrics",
+    "thresholds or non-inferiority margins",
+    "exclusion rules",
+    "stopping rule",
+    "analysis population"
+  ]
+}
