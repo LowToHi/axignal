@@ -1,5 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const useDevelopmentServer = process.env.AXIGNAL_PLAYWRIGHT_DEV_SERVER === "true";
+
 export default defineConfig({
   testDir: "./tests/e2e",
   fullyParallel: true,
@@ -16,7 +18,11 @@ export default defineConfig({
     { name: "chromium-tablet", use: { ...devices["iPad Pro 11"] } }
   ],
   webServer: {
-    command: process.env.CI ? "pnpm --filter @axignal/web start" : "pnpm --filter @axignal/web dev",
+    command: useDevelopmentServer
+      ? "pnpm --filter @axignal/web dev"
+      : process.env.CI
+        ? "pnpm --filter @axignal/web start"
+        : "pnpm --filter @axignal/web dev",
     url: "http://127.0.0.1:3000",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000
