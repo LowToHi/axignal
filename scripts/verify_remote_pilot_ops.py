@@ -94,8 +94,16 @@ def main() -> int:
         ],
         'backup',
     )
-    require(rollback, ['previous_sha', 'pg_restore', '--clean', 'axignal-remote-verify'], 'rollback')
-    require(watchdog, ['AXIGNAL_MIN_FREE_GB', 'df --output=avail', 'write-watchdog'], 'watchdog')
+    require(
+        rollback,
+        ['previous_sha', 'pg_restore', '--clean', 'axignal-remote-verify'],
+        'rollback',
+    )
+    require(
+        watchdog,
+        ['AXIGNAL_MIN_FREE_GB', 'df --output=avail', 'write-watchdog'],
+        'watchdog',
+    )
     require(
         prepare,
         [
