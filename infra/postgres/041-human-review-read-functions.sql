@@ -84,9 +84,9 @@ SELECT jsonb_build_object(
 )
 FROM tenant_private.human_review_cases AS review_case
 JOIN axignal_global.admission_decisions AS decision
-  USING (admission_decision_id)
+  ON decision.admission_decision_id = review_case.admission_decision_id
 JOIN axignal_global.candidate_claims AS candidate
-  USING (candidate_claim_id)
+  ON candidate.candidate_claim_id = review_case.candidate_claim_id
 LEFT JOIN axignal_global.evidence_objects AS first_evidence
   ON first_evidence.evidence_id = candidate.evidence_ids[1]
 LEFT JOIN axignal_global.sources AS source
@@ -116,4 +116,3 @@ ORDER BY
   review_case.created_at,
   review_case.human_review_case_id;
 $$;
-
