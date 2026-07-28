@@ -17,3 +17,4 @@ COPY 050-f2-runtime-spine.sql /docker-entrypoint-initdb.d/050-axignal-f2-runtime
 COPY 060-f1-qualified-user-validation.sql /docker-entrypoint-initdb.d/060-axignal-f1-validation.sql
 COPY 061-f1-validation-answer-key-boundary.sql /docker-entrypoint-initdb.d/061-axignal-f1-answer-key-boundary.sql
 COPY 062-f1-validation-pgcrypto-boundary.sql /docker-entrypoint-initdb.d/062-axignal-f1-pgcrypto-boundary.sql
+COPY 063-f1-controlled-study-export.sql /docker-entrypoint-initdb.d/063-axignal-f1-controlled-study-export.sql
