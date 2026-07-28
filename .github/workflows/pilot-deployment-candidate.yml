@@ -132,14 +132,26 @@ jobs:
       - name: Verify authenticated demo route
         shell: bash
         run: |
-          curl --fail --silent --cookie-jar /tmp/pilot.cookies \
+          set -o pipefail
+          curl --fail --silent --show-error \
+            --dump-header pilot-login-headers.txt \
+            --output pilot-login.json \
+            --cookie-jar pilot-cookie-jar.txt \
             -H 'content-type: application/json' \
             -d '{"email":"pilot@example.test","password":"pilot-password"}' \
-            http://127.0.0.1:18080/api/auth/login >/dev/null
-          COOKIE_VALUE="$(awk '$6 == "axignal_session" {print $7}' /tmp/pilot.cookies)"
+            http://127.0.0.1:18080/api/auth/login
+          grep -q '"authenticated":true' pilot-login.json
+          COOKIE_VALUE="$(
+            sed -n 's/^[Ss]et-[Cc]ookie: axignal_session=\([^;]*\).*/\1/p' \
+              pilot-login-headers.txt | tr -d '\r' | tail -n 1
+          )"
           test -n "$COOKIE_VALUE"
-          curl --fail --silent -H "Cookie: axignal_session=$COOKIE_VALUE" \
-            http://127.0.0.1:18080/demo | grep -q "From proposal to defensible knowledge"
+          curl --fail --silent --show-error \
+            --dump-header pilot-demo-headers.txt \
+            --output pilot-demo.html \
+            -H "Cookie: axignal_session=$COOKIE_VALUE" \
+            http://127.0.0.1:18080/demo
+          grep -q "From proposal to defensible knowledge" pilot-demo.html
       - name: Verify edge security headers
         shell: bash
         run: |
@@ -157,6 +169,11 @@ jobs:
           path: |
             pilot-web-health.json
             pilot-api-readiness.json
+            pilot-login-headers.txt
+            pilot-login.json
+            pilot-cookie-jar.txt
+            pilot-demo-headers.txt
+            pilot-demo.html
             pilot-headers.txt
             pilot-restore.json
           if-no-files-found: ignore
