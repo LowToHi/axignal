@@ -88,6 +88,7 @@ jobs:
     env:
       AXIGNAL_PILOT_ENV_FILE: /tmp/axignal-pilot-ci.env
       AXIGNAL_PILOT_COMPOSE_FILE: infra/pilot/compose.yaml
+      AXIGNAL_PILOT_COMPOSE_EDGE_FILE: infra/pilot/remote/compose.shared-traefik.yaml
       AXIGNAL_POSTGRES_USER: axignal
       AXIGNAL_POSTGRES_DB: axignal
     steps:
@@ -98,6 +99,9 @@ jobs:
           cat > "$AXIGNAL_PILOT_ENV_FILE" <<'ENV'
           AXIGNAL_BUILD_SHA=${{ github.sha }}
           AXIGNAL_PILOT_SITE_ADDRESS=:80
+          AXIGNAL_PILOT_CADDY_SITE_ADDRESS=:80
+          AXIGNAL_PILOT_EDGE_MODE=shared-traefik
+          AXIGNAL_PILOT_BIND_ADDRESS=127.0.0.1
           AXIGNAL_PILOT_HTTP_PORT=18080
           AXIGNAL_PILOT_HTTPS_PORT=18443
           AXIGNAL_POSTGRES_DB=axignal
@@ -119,14 +123,14 @@ jobs:
           AXIGNAL_OTEL_ENABLED=false
           ENV
       - name: Validate Compose rendering
-        run: docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" -f "$AXIGNAL_PILOT_COMPOSE_FILE" config >/dev/null
+        run: docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" -f "$AXIGNAL_PILOT_COMPOSE_FILE" -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE" config >/dev/null
       - name: Start private pilot core
-        run: docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" -f "$AXIGNAL_PILOT_COMPOSE_FILE" up --build --detach --wait
+        run: docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" -f "$AXIGNAL_PILOT_COMPOSE_FILE" -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE" up --build --detach --wait
       - name: Verify web and API readiness
         shell: bash
         run: |
           curl --fail --silent http://127.0.0.1:18080/api/health | tee pilot-web-health.json
-          docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" -f "$AXIGNAL_PILOT_COMPOSE_FILE" exec -T api \
+          docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" -f "$AXIGNAL_PILOT_COMPOSE_FILE" -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE" exec -T api \
             python -c "import urllib.request; print(urllib.request.urlopen('http://127.0.0.1:8000/readyz').read().decode())" \
             | tee pilot-api-readiness.json
       - name: Verify authenticated demo route
@@ -180,7 +184,7 @@ jobs:
           retention-days: 14
       - name: Capture service logs
         if: failure()
-        run: docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" -f "$AXIGNAL_PILOT_COMPOSE_FILE" logs > pilot-services.log 2>&1 || true
+        run: docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" -f "$AXIGNAL_PILOT_COMPOSE_FILE" -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE" logs > pilot-services.log 2>&1 || true
       - name: Upload failure logs
         if: failure()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -191,4 +195,4 @@ jobs:
           retention-days: 7
       - name: Destroy pilot services
         if: always()
-        run: docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" -f "$AXIGNAL_PILOT_COMPOSE_FILE" down --volumes --remove-orphans
+        run: docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" -f "$AXIGNAL_PILOT_COMPOSE_FILE" -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE" down --volumes --remove-orphans

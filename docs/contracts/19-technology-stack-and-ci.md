@@ -1,6 +1,6 @@
 # 19 — Technology Stack and CI Contract
 
-Version: `0.2.0-candidate`
+Version: `0.3.0-candidate`
 Status: `NORMATIVE CANDIDATE / STACK FREEZE REQUIRED`
 Goal ID: `AXIGNAL-GOAL-001`
 
@@ -154,13 +154,24 @@ Every command, source object, candidate claim, admitted claim, opportunity and u
 ## 14. Infrastructure
 
 - Docker and Docker Compose for development and alpha;
-- Caddy as the preferred initial edge proxy;
+- Caddy as the preferred initial AXIGNAL application proxy;
 - OpenTofu/Terraform plus Ansible;
 - Cloudflare R2 or another approved S3-compatible service for production objects;
 - MinIO MAY emulate S3 locally;
 - Kubernetes remains prohibited before a documented scale or isolation gate.
 
 AXIGNAL application services MAY share the current VPS with other explicitly inventoried workloads during development and staging when networks, volumes, ports, resource limits, credentials, backups and rollback remain isolated.
+
+A pre-existing host edge proxy MAY remain the exclusive owner of public `80/tcp` and `443/tcp`. In that topology:
+
+- AXIGNAL Caddy MUST publish only an explicitly configured high port on `127.0.0.1`;
+- the incumbent edge MUST route only the approved AXIGNAL hostname to that loopback endpoint;
+- the AXIGNAL route MUST use a dedicated, removable dynamic configuration file;
+- AXIGNAL automation MUST NOT replace, restart or rewrite unrelated edge configuration;
+- no AXIGNAL service may publish another host address or public port;
+- host-only credentials MUST be generated under `umask 077`, remain outside repository and controller workspaces, and use mode `0600`;
+- plaintext operator credentials MUST be rotated after first access and removed after verified secure handoff;
+- deployment health evidence MUST remain separate from the independent acceptance decision.
 
 A CI execution boundary with Docker control, production-capable secrets or unrestricted host access MUST NOT share a trust boundary with production databases or unrelated stateful services.
 

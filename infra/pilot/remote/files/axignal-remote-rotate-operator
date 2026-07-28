@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+ROOT="${AXIGNAL_REMOTE_ROOT:-/opt/axignal}"
+ENV_FILE="${AXIGNAL_PILOT_ENV_FILE:-/etc/axignal/pilot.env}"
+STATE_ROOT="${AXIGNAL_REMOTE_STATE_ROOT:-/var/lib/axignal/ops}"
+STATE_HELPER="${AXIGNAL_REMOTE_STATE_HELPER:-/usr/local/lib/axignal/remote_state.py}"
+CREDENTIAL_HELPER="${AXIGNAL_CREDENTIAL_HELPER:-/usr/local/lib/axignal/prepare_env.py}"
+COMPOSE_HELPER="${AXIGNAL_COMPOSE_HELPER:-/usr/local/lib/axignal/compose_boundary.sh}"
+CURRENT_PASSWORD_FILE="${1:-/etc/axignal/private/operator-password.pending}"
+ROTATED_PASSWORD_FILE="${2:-/etc/axignal/private/operator-password.rotated}"
+METADATA_FILE="${3:-$STATE_ROOT/credential-metadata.json}"
+STATE_FILE="$STATE_ROOT/current.json"
+
+[[ "$EUID" -eq 0 ]] || { echo 'operator credential rotation must run as root' >&2; exit 2; }
+[[ -f "$CREDENTIAL_HELPER" ]] || { echo 'missing credential helper' >&2; exit 2; }
+[[ -f "$COMPOSE_HELPER" ]] || { echo 'missing Compose boundary helper' >&2; exit 2; }
+
+current_sha="$(python3 "$STATE_HELPER" get --path "$STATE_FILE" --key current_sha)"
+[[ "$current_sha" =~ ^[0-9a-f]{40}$ ]] || { echo 'no deployed release is recorded' >&2; exit 2; }
+release="$ROOT/releases/$current_sha"
+
+umask 077
+python3 "$CREDENTIAL_HELPER" rotate \
+  --environment "$ENV_FILE" \
+  --current-password-file "$CURRENT_PASSWORD_FILE" \
+  --password-output "$ROTATED_PASSWORD_FILE" \
+  --metadata-output "$METADATA_FILE"
+
+# shellcheck disable=SC1090
+source "$COMPOSE_HELPER"
+axignal_compose_args "$release" "$ENV_FILE"
+"${AXIGNAL_COMPOSE[@]}" up --detach --no-deps --force-recreate --wait web
+
+AXIGNAL_REMOTE_ROOT="$ROOT" \
+AXIGNAL_PILOT_ENV_FILE="$ENV_FILE" \
+AXIGNAL_REMOTE_STATE_ROOT="$STATE_ROOT" \
+  /usr/local/sbin/axignal-remote-verify "$release" "$ROTATED_PASSWORD_FILE"

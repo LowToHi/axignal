@@ -31,6 +31,7 @@ These tasks extend the canonical catalogue and MUST be folded into `02-task-cata
 | `AX-F2-T13` | Scaffold pnpm/Turborepo, uv, Next.js, FastAPI and generated OpenAPI clients | 04, 19 | repository-architect, frontend-architect, backend-architect |
 | `AX-F2-T14` | Scaffold AXIGNAL-owned shadcn registry and domain components | 19, 20 | frontend-architect, interaction-architect |
 | `AX-F2-T15` | Add separate Remotion render package without loading it into the interactive shell | 19, 20 | frontend-architect, visualisation-designer, performance-engineer |
+| `AX-F2-T16` | Add isolated shared-Traefik pilot edge and host-only credential lifecycle | 06, 08, 09, 10, 18, 19 | repository-architect, security-reviewer, test-engineer, operations-engineer, operations-writer |
 
 ## Gate additions
 

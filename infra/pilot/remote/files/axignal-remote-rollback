@@ -8,9 +8,11 @@ ROOT="${AXIGNAL_REMOTE_ROOT:-/opt/axignal}"
 ENV_FILE="${AXIGNAL_PILOT_ENV_FILE:-/etc/axignal/pilot.env}"
 STATE_ROOT="${AXIGNAL_REMOTE_STATE_ROOT:-/var/lib/axignal/ops}"
 STATE_HELPER="${AXIGNAL_REMOTE_STATE_HELPER:-/usr/local/lib/axignal/remote_state.py}"
+COMPOSE_HELPER="${AXIGNAL_COMPOSE_HELPER:-/usr/local/lib/axignal/compose_boundary.sh}"
 STATE_FILE="$STATE_ROOT/current.json"
 
 [[ "$EUID" -eq 0 ]] || { echo 'remote rollback must run as root' >&2; exit 2; }
+[[ -f "$COMPOSE_HELPER" ]] || { echo "missing Compose boundary helper: $COMPOSE_HELPER" >&2; exit 2; }
 if [[ "$TARGET" == "previous" ]]; then
   TARGET="$(python3 "$STATE_HELPER" get --path "$STATE_FILE" --key previous_sha)"
 fi
@@ -30,7 +32,10 @@ if [[ -n "$DATABASE_DUMP" ]]; then
   source "$ENV_FILE"
   set +a
   release="$ROOT/releases/$TARGET"
-  compose=(docker compose --env-file "$ENV_FILE" -f "$release/infra/pilot/compose.yaml")
+  # shellcheck disable=SC1090
+  source "$COMPOSE_HELPER"
+  axignal_compose_args "$release" "$ENV_FILE"
+  compose=("${AXIGNAL_COMPOSE[@]}")
   "${compose[@]}" exec -T postgres pg_restore \
     --username "${AXIGNAL_POSTGRES_USER:-axignal}" \
     --dbname "${AXIGNAL_POSTGRES_DB:-axignal}" \

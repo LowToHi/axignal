@@ -52,7 +52,8 @@ def set_build_sha(args: argparse.Namespace) -> int:
 
 def write_deployment(args: argparse.Namespace) -> int:
     payload = {
-        'status': 'REMOTE_PILOT_ACCEPTED',
+        'status': 'DEPLOYED_AWAITING_ACCEPTANCE',
+        'acceptance_status': 'BLOCKED',
         'current_sha': args.current_sha,
         'previous_sha': args.previous_sha or None,
         'release_path': str(args.release_path),

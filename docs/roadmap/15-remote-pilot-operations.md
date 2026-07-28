@@ -1,8 +1,8 @@
-# Remote Pilot Operations v0.1
+# Remote Pilot Operations v0.2
 
 ## Status
 
-`IMPLEMENTED / CI-GATED / NOT DEPLOYED / PRIVATE PILOT ONLY`
+`IMPLEMENTED / SHARED-EDGE REVIEW REQUIRED / NOT DEPLOYED / PRIVATE PILOT ONLY`
 
 ## Objective
 
@@ -11,30 +11,37 @@ Turn the local Pilot Deployment Candidate into an exact-SHA remote deployment an
 ## Operational path
 
 ```text
-controller
-→ root-only environment generation
+controller without pilot secrets
 → Ansible host bootstrap
+→ host-only credential generation under umask 077
 → UFW allowlist
 → exact-SHA release fetch
 → candidate contract verification
 → pre-change backup
-→ Docker Compose deployment
+→ loopback-only Caddy deployment
+→ isolated Traefik dynamic route
 → HTTPS and authenticated demo smoke test
-→ immutable deployment state
+→ deployment state awaiting independent acceptance
 → watchdog and scheduled backup timers
 ```
 
 ## Invariants
 
 - only a full 40-character commit SHA may be deployed;
-- the private environment file is copied with mode `0600` and never committed;
-- the plaintext operator password is used only for an optional smoke test and removed from `/run`;
+- UUID, operator password and service secrets are generated only on the authorised host;
+- the private environment, credential metadata and pending password use `umask 077`, root ownership and mode `0600`;
+- plaintext credentials never appear in command arguments, logs, CI, evidence or messages;
+- the temporary operator password requires first-access rotation and deletion after verified secure handoff;
+- Traefik remains the exclusive owner of public `80/443`;
+- shared-edge Caddy binds only `127.0.0.1:<configurable-high-port>:80`;
+- AXIGNAL owns one removable Traefik dynamic route and does not restart the incumbent proxy;
 - UFW denies inbound traffic except the configured SSH port, `80/tcp` and `443/tcp`;
 - each upgrade creates a PostgreSQL and content-addressed object backup first;
 - a failed candidate automatically attempts to restore the previous exact release;
 - database restoration during rollback requires an explicit dump argument;
 - the watchdog verifies edge health, API readiness, identity boundary and minimum free disk;
 - backup and watchdog schedules are systemd timers, not manual calendar promises.
+- deployment automation records `DEPLOYED_AWAITING_ACCEPTANCE`, never the reserved acceptance state.
 
 ## Acceptance gate
 
@@ -44,7 +51,12 @@ controller
   "ubuntu_24_04_guard": true,
   "exact_sha_only": true,
   "private_environment_mode": "0600",
-  "plaintext_password_persisted": false,
+  "plaintext_password_committed_or_logged": false,
+  "temporary_password_file_mode": "0600",
+  "credentials_generated_on_authorised_host": true,
+  "temporary_password_rotation_required": true,
+  "traefik_public_port_owner": true,
+  "axignal_loopback_only": true,
   "firewall_allowlist": ["ssh", "80/tcp", "443/tcp"],
   "pre_change_backup": true,
   "postgres_backup": true,
@@ -55,10 +67,12 @@ controller
   "authenticated_demo_verification": true,
   "watchdog_timer": true,
   "backup_timer": true,
-  "public_launch": false
+  "public_launch": false,
+  "deployment_state": "DEPLOYED_AWAITING_ACCEPTANCE",
+  "acceptance_status": "BLOCKED"
 }
 ```
 
 ## Remaining external gate
 
-`REMOTE_PILOT_ACCEPTED` can only be declared after running the playbook against the real VPS with the real domain, TLS certificate and private secrets. CI validates the automation and recovery contracts but cannot fabricate host access.
+The reserved acceptance state can only be declared after the reviewed PR is merged, the exact canonical SHA is deployed to the authorised VPS, both pending emails are confirmed, credential rotation and handoff finish, and Issue #31 contains redacted physical evidence for TLS, Traefik connectivity, tenant resolution, authenticated access, persistence, recovery and exact-SHA traceability. CI validates automation and recovery contracts but cannot fabricate host access or independent acceptance.

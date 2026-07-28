@@ -1,0 +1,15 @@
+http:
+  routers:
+    axignal-pilot:
+      rule: "Host(`{{ axignal_site_address | regex_replace('^https://', '') }}`)"
+      entryPoints:
+        - "{{ axignal_traefik_entrypoint }}"
+      service: axignal-pilot
+      tls:
+        certResolver: "{{ axignal_traefik_cert_resolver }}"
+  services:
+    axignal-pilot:
+      loadBalancer:
+        passHostHeader: true
+        servers:
+          - url: "http://127.0.0.1:{{ axignal_internal_http_port }}"

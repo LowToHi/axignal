@@ -8,9 +8,20 @@
     axignal_state_root: /var/lib/axignal/ops
     axignal_backup_root: /var/backups/axignal
     axignal_env_path: /etc/axignal/pilot.env
+    axignal_credential_root: /etc/axignal/private
+    axignal_operator_password_path: /etc/axignal/private/operator-password.pending
+    axignal_credential_metadata_path: /var/lib/axignal/ops/credential-metadata.json
     axignal_repo_url: https://github.com/LowToHi/axignal.git
     axignal_backup_retention_days: 14
     axignal_min_free_gb: 5
+    axignal_edge_mode: standalone
+    axignal_standalone_http_port: 80
+    axignal_standalone_https_port: 443
+    axignal_internal_http_port: 18080
+    axignal_traefik_container_name: traefik-aiwf-traefik-1
+    axignal_traefik_dynamic_dir: /etc/traefik/dynamic
+    axignal_traefik_entrypoint: websecure
+    axignal_traefik_cert_resolver: letsencrypt
   pre_tasks:
     - name: Require Ubuntu 24.04
       ansible.builtin.assert:
@@ -23,25 +34,15 @@
       ansible.builtin.assert:
         that:
           - axignal_deploy_sha is match('^[0-9a-f]{40}$')
-          - axignal_env_source | length > 0
-          - axignal_site_address is match('^https://')
-        fail_msg: Exact SHA, private environment source and HTTPS site address are required.
-
-    - name: Check private environment source on controller
-      ansible.builtin.stat:
-        path: "{{ axignal_env_source }}"
-      delegate_to: localhost
-      become: false
-      register: axignal_env_source_stat
-      no_log: true
-
-    - name: Require private environment source
-      ansible.builtin.assert:
-        that:
-          - axignal_env_source_stat.stat.exists
-          - axignal_env_source_stat.stat.isreg
-        fail_msg: The private environment source does not exist on the controller.
-      no_log: true
+          - axignal_site_address is match('^https://[A-Za-z0-9.-]+$')
+          - axignal_acme_email is match('^[^@ ]+@[^@ ]+\.[^@ ]+$')
+          - axignal_auth_email is match('^[^@ ]+@[^@ ]+\.[^@ ]+$')
+          - axignal_auth_subject | length >= 3
+          - axignal_edge_mode in ['standalone', 'shared-traefik']
+          - axignal_edge_mode != 'shared-traefik' or axignal_internal_http_port | int >= 1024
+          - axignal_edge_mode != 'shared-traefik' or axignal_internal_http_port | int <= 65535
+          - axignal_internal_http_port | int not in [80, 443]
+        fail_msg: Exact SHA, confirmed identities, HTTPS site and valid edge boundary are required.
 
   tasks:
     - name: Install host dependencies
@@ -91,6 +92,7 @@
         mode: "{{ item.mode }}"
       loop:
         - {path: /etc/axignal, owner: root, group: axignal, mode: '0750'}
+        - {path: "{{ axignal_credential_root }}", owner: root, group: root, mode: '0700'}
         - {path: /usr/local/lib/axignal, owner: root, group: root, mode: '0755'}
         - {path: "{{ axignal_root }}", owner: root, group: axignal, mode: '0750'}
         - {path: "{{ axignal_root }}/releases", owner: root, group: axignal, mode: '0750'}
@@ -110,16 +112,181 @@
         - {src: files/axignal-remote-backup, dest: /usr/local/sbin/axignal-remote-backup, mode: '0755'}
         - {src: files/axignal-remote-rollback, dest: /usr/local/sbin/axignal-remote-rollback, mode: '0755'}
         - {src: files/axignal-remote-watchdog, dest: /usr/local/sbin/axignal-remote-watchdog, mode: '0755'}
+        - {src: files/axignal-remote-rotate-operator, dest: /usr/local/sbin/axignal-remote-rotate-operator, mode: '0755'}
+        - {src: files/axignal-remote-retire-operator-credential, dest: /usr/local/sbin/axignal-remote-retire-operator-credential, mode: '0755'}
+        - {src: files/compose_boundary.sh, dest: /usr/local/lib/axignal/compose_boundary.sh, mode: '0644'}
+        - {src: prepare_env.py, dest: /usr/local/lib/axignal/prepare_env.py, mode: '0755'}
         - {src: files/remote_state.py, dest: /usr/local/lib/axignal/remote_state.py, mode: '0755'}
 
-    - name: Install root-only pilot environment
-      ansible.builtin.copy:
-        src: "{{ axignal_env_source }}"
-        dest: "{{ axignal_env_path }}"
+    - name: Inspect shared Traefik runtime boundary
+      ansible.builtin.command:
+        argv:
+          - docker
+          - inspect
+          - "--format={{ '{{.State.Running}}|{{.HostConfig.NetworkMode}}|{{.State.StartedAt}}' }}"
+          - "{{ axignal_traefik_container_name }}"
+      register: axignal_traefik_runtime
+      changed_when: false
+      when: axignal_edge_mode == 'shared-traefik'
+      no_log: true
+
+    - name: Require running host-network Traefik
+      ansible.builtin.assert:
+        that:
+          - axignal_traefik_runtime.stdout is match('^true\|host\|.+$')
+        fail_msg: Shared edge mode requires the approved running host-network Traefik boundary.
+      when: axignal_edge_mode == 'shared-traefik'
+
+    - name: Inspect approved Traefik static arguments
+      ansible.builtin.command:
+        argv:
+          - docker
+          - inspect
+          - "--format={{ '{{json .Config.Cmd}}' }}"
+          - "{{ axignal_traefik_container_name }}"
+      register: axignal_traefik_static
+      changed_when: false
+      when: axignal_edge_mode == 'shared-traefik'
+      no_log: true
+
+    - name: Require the confirmed Traefik resolver and ACME contact
+      ansible.builtin.assert:
+        that:
+          - "'--entrypoints.' ~ axignal_traefik_entrypoint ~ '.address=:443' in axignal_traefik_static.stdout"
+          - "'--providers.file.directory=' ~ axignal_traefik_dynamic_dir in axignal_traefik_static.stdout"
+          - "'--certificatesresolvers.' ~ axignal_traefik_cert_resolver ~ '.acme.email=' ~ axignal_acme_email in axignal_traefik_static.stdout"
+        fail_msg: Confirmed Traefik entrypoint, file provider and ACME contact must match the existing static boundary.
+      when: axignal_edge_mode == 'shared-traefik'
+      no_log: true
+
+    - name: Snapshot running containers before AXIGNAL deployment
+      ansible.builtin.command:
+        argv:
+          - docker
+          - ps
+          - "--format={{ '{{.Names}}' }}"
+      register: axignal_preexisting_containers
+      changed_when: false
+      no_log: true
+
+    - name: Inspect Traefik dynamic configuration directory
+      ansible.builtin.stat:
+        path: "{{ axignal_traefik_dynamic_dir }}"
+      register: axignal_traefik_dynamic
+      when: axignal_edge_mode == 'shared-traefik'
+
+    - name: Require existing Traefik file-provider directory
+      ansible.builtin.assert:
+        that:
+          - axignal_traefik_dynamic.stat.exists
+          - axignal_traefik_dynamic.stat.isdir
+        fail_msg: Shared edge mode will not create or replace the Traefik file-provider boundary.
+      when: axignal_edge_mode == 'shared-traefik'
+
+    - name: Inspect existing private pilot environment
+      ansible.builtin.stat:
+        path: "{{ axignal_env_path }}"
+      register: axignal_env
+      no_log: true
+
+    - name: Inspect first-deployment loopback port
+      ansible.builtin.command:
+        argv:
+          - ss
+          - -H
+          - -ltn
+          - "sport = :{{ axignal_internal_http_port }}"
+      register: axignal_internal_port_listener
+      changed_when: false
+      when:
+        - axignal_edge_mode == 'shared-traefik'
+        - not axignal_env.stat.exists
+
+    - name: Require an unused first-deployment loopback port
+      ansible.builtin.assert:
+        that:
+          - axignal_internal_port_listener.stdout | length == 0
+        fail_msg: The selected AXIGNAL loopback port is already in use.
+      when:
+        - axignal_edge_mode == 'shared-traefik'
+        - not axignal_env.stat.exists
+
+    - name: Generate host-only pilot credentials and environment
+      ansible.builtin.command:
+        argv:
+          - python3
+          - /usr/local/lib/axignal/prepare_env.py
+          - create
+          - --output
+          - "{{ axignal_env_path }}"
+          - --password-output
+          - "{{ axignal_operator_password_path }}"
+          - --metadata-output
+          - "{{ axignal_credential_metadata_path }}"
+          - --sha
+          - "{{ axignal_deploy_sha }}"
+          - --site-address
+          - "{{ axignal_site_address }}"
+          - --acme-email
+          - "{{ axignal_acme_email }}"
+          - --auth-email
+          - "{{ axignal_auth_email }}"
+          - --auth-subject
+          - "{{ axignal_auth_subject }}"
+          - --edge-mode
+          - "{{ axignal_edge_mode }}"
+          - --http-port
+          - "{{ axignal_internal_http_port if axignal_edge_mode == 'shared-traefik' else axignal_standalone_http_port }}"
+          - --https-port
+          - "{{ axignal_standalone_https_port }}"
+      when: not axignal_env.stat.exists
+      no_log: true
+
+    - name: Inspect generated private files
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      loop:
+        - "{{ axignal_env_path }}"
+        - "{{ axignal_credential_metadata_path }}"
+      register: axignal_private_files
+      no_log: true
+
+    - name: Require root-owned mode-0600 private files
+      ansible.builtin.assert:
+        that:
+          - item.stat.exists
+          - item.stat.isreg
+          - item.stat.pw_name == 'root'
+          - item.stat.mode == '0600'
+        fail_msg: Pilot credentials and metadata must be root-owned regular files with mode 0600.
+      loop: "{{ axignal_private_files.results }}"
+      no_log: true
+
+    - name: Inspect pending operator password
+      ansible.builtin.stat:
+        path: "{{ axignal_operator_password_path }}"
+      register: axignal_operator_password
+      no_log: true
+
+    - name: Require a protected temporary password after initial generation
+      ansible.builtin.assert:
+        that:
+          - axignal_operator_password.stat.exists
+          - axignal_operator_password.stat.isreg
+          - axignal_operator_password.stat.pw_name == 'root'
+          - axignal_operator_password.stat.mode == '0600'
+        fail_msg: Initial host-only credential generation did not create a protected password file.
+      when: not axignal_env.stat.exists
+      no_log: true
+
+    - name: Install isolated AXIGNAL Traefik route
+      ansible.builtin.template:
+        src: templates/axignal-pilot-traefik.yml.j2
+        dest: "{{ axignal_traefik_dynamic_dir }}/axignal-pilot.yml"
         owner: root
         group: root
-        mode: '0600'
-      no_log: true
+        mode: '0644'
+      when: axignal_edge_mode == 'shared-traefik'
 
     - name: Configure firewall defaults
       community.general.ufw:
@@ -157,22 +324,12 @@
         - {src: templates/axignal-pilot-watchdog.timer.j2, dest: axignal-pilot-watchdog.timer}
       notify: Reload systemd
 
-    - name: Copy temporary operator password for authenticated smoke test
-      ansible.builtin.copy:
-        src: "{{ axignal_operator_password_source }}"
-        dest: /run/axignal-operator-password
-        owner: root
-        group: root
-        mode: '0600'
-      when: axignal_operator_password_source is defined
-      no_log: true
-
     - name: Deploy exact approved SHA
       ansible.builtin.command:
         argv:
           - /usr/local/sbin/axignal-remote-deploy
           - "{{ axignal_deploy_sha }}"
-          - "{{ '/run/axignal-operator-password' if axignal_operator_password_source is defined else '' }}"
+          - "{{ axignal_operator_password_path if axignal_operator_password.stat.exists else '' }}"
       environment:
         AXIGNAL_REMOTE_ROOT: "{{ axignal_root }}"
         AXIGNAL_PILOT_ENV_FILE: "{{ axignal_env_path }}"
@@ -180,13 +337,7 @@
         AXIGNAL_REMOTE_BACKUP_ROOT: "{{ axignal_backup_root }}"
         AXIGNAL_REPO_URL: "{{ axignal_repo_url }}"
       register: axignal_deployment
-      changed_when: "'REMOTE_PILOT_ACCEPTED' in axignal_deployment.stdout"
-
-    - name: Remove temporary operator password
-      ansible.builtin.file:
-        path: /run/axignal-operator-password
-        state: absent
-      no_log: true
+      changed_when: "'DEPLOYED_AWAITING_ACCEPTANCE' in axignal_deployment.stdout"
 
     - name: Enable backup and watchdog timers
       ansible.builtin.systemd_service:
@@ -211,6 +362,42 @@
       until:
         - axignal_public_health.json.status == 'ok'
         - axignal_public_health.json.build_sha == axignal_deploy_sha
+
+    - name: Inspect running containers after AXIGNAL deployment
+      ansible.builtin.command:
+        argv:
+          - docker
+          - ps
+          - "--format={{ '{{.Names}}' }}"
+      register: axignal_postdeployment_containers
+      changed_when: false
+      no_log: true
+
+    - name: Preserve every pre-existing running container
+      ansible.builtin.assert:
+        that:
+          - axignal_preexisting_containers.stdout_lines | difference(axignal_postdeployment_containers.stdout_lines) | length == 0
+        fail_msg: At least one pre-existing container stopped during AXIGNAL deployment.
+      no_log: true
+
+    - name: Verify Traefik was not restarted
+      ansible.builtin.command:
+        argv:
+          - docker
+          - inspect
+          - "--format={{ '{{.State.Running}}|{{.HostConfig.NetworkMode}}|{{.State.StartedAt}}' }}"
+          - "{{ axignal_traefik_container_name }}"
+      register: axignal_traefik_after
+      changed_when: false
+      when: axignal_edge_mode == 'shared-traefik'
+      no_log: true
+
+    - name: Require uninterrupted Traefik runtime
+      ansible.builtin.assert:
+        that:
+          - axignal_traefik_after.stdout == axignal_traefik_runtime.stdout
+        fail_msg: Traefik changed runtime identity or restart time during AXIGNAL deployment.
+      when: axignal_edge_mode == 'shared-traefik'
 
   handlers:
     - name: Reload systemd

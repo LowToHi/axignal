@@ -27,7 +27,13 @@ def main() -> int:
     backup = text('infra/pilot/remote/files/axignal-remote-backup')
     rollback = text('infra/pilot/remote/files/axignal-remote-rollback')
     watchdog = text('infra/pilot/remote/files/axignal-remote-watchdog')
+    rotate = text('infra/pilot/remote/files/axignal-remote-rotate-operator')
     prepare = text('infra/pilot/remote/prepare_env.py')
+    state = text('infra/pilot/remote/files/remote_state.py')
+    compose = text('infra/pilot/compose.yaml')
+    shared_edge = text('infra/pilot/remote/compose.shared-traefik.yaml')
+    standalone_edge = text('infra/pilot/remote/compose.standalone.yaml')
+    traefik = text('infra/pilot/remote/templates/axignal-pilot-traefik.yml.j2')
 
     require(
         playbook,
@@ -40,16 +46,26 @@ def main() -> int:
             'policy: deny',
             "- '80'",
             "- '443'",
-            "mode: '0600'",
+            "item.stat.mode == '0600'",
             'no_log: true',
             'axignal-pilot-backup.timer',
             'axignal-pilot-watchdog.timer',
             'validate_certs: true',
+            "axignal_edge_mode == 'shared-traefik'",
+            'axignal_internal_http_port',
+            'axignal-pilot.yml',
+            '/usr/local/lib/axignal/prepare_env.py',
+            'DEPLOYED_AWAITING_ACCEPTANCE',
+            'axignal_preexisting_containers.stdout_lines',
+            'axignal_traefik_after.stdout == axignal_traefik_runtime.stdout',
+            "'.acme.email=' ~ axignal_acme_email",
+            'axignal_internal_port_listener.stdout | length == 0',
         ],
         'playbook',
     )
     assert '0.0.0.0/0' not in playbook
     assert 'password=' not in playbook.lower()
+    assert 'axignal_env_source' not in playbook
 
     require(
         deploy,
@@ -105,21 +121,64 @@ def main() -> int:
         'watchdog',
     )
     require(
+        rotate,
+        [
+            'umask 077',
+            'prepare_env.py',
+            'rotate',
+            'operator-password.rotated',
+            'axignal-remote-verify',
+        ],
+        'credential-rotation',
+    )
+    require(
         prepare,
         [
             'hashlib.scrypt',
             '0o600',
+            'os.umask(0o077)',
+            'uuid.uuid4()',
+            'secrets.token_urlsafe',
+            'TEMPORARY_CREDENTIAL_PENDING_ROTATION',
+            'ROTATED_CREDENTIAL_PENDING_HANDOFF',
+            'PLAINTEXT_CREDENTIAL_RETIRED',
             'AXIGNAL_LIVE_SOURCES_ENABLED',
             'AXIGNAL_VALIDATION_UI_ENABLED',
             'AXIGNAL_PUBLIC_LAUNCH',
             'AXIGNAL_BILLING_ENABLED',
-            'plaintext_operator_password_stored',
+            'acceptance_evidence',
         ],
         'prepare-env',
     )
-    assert re.search(r'operator_password\)\s*$', prepare, re.MULTILINE) is None
+    assert '--operator-password' not in prepare
+    assert re.search(r'print\([^)]*operator_password', prepare) is None
 
-    units = sorted((REMOTE / 'templates').glob('*.j2'))
+    assert 'ports:' not in compose
+    require(
+        shared_edge,
+        ['127.0.0.1:${AXIGNAL_PILOT_HTTP_PORT:-18080}:80'],
+        'shared Traefik Compose edge',
+    )
+    assert ':443' not in shared_edge
+    require(
+        standalone_edge,
+        ['AXIGNAL_PILOT_BIND_ADDRESS', 'AXIGNAL_PILOT_HTTP_PORT', 'AXIGNAL_PILOT_HTTPS_PORT'],
+        'standalone Compose edge',
+    )
+    require(
+        traefik,
+        [
+            'Host(`{{ axignal_site_address',
+            'axignal_traefik_entrypoint',
+            'http://127.0.0.1:{{ axignal_internal_http_port }}',
+        ],
+        'Traefik route',
+    )
+    assert 'DEPLOYED_AWAITING_ACCEPTANCE' in state
+    assert "'status': 'REMOTE_PILOT_ACCEPTED'" not in state
+
+    units = sorted((REMOTE / 'templates').glob('axignal-pilot-*.service.j2'))
+    units += sorted((REMOTE / 'templates').glob('axignal-pilot-*.timer.j2'))
     assert len(units) == 4
     payload = {
         'status': 'PASS',
@@ -127,7 +186,16 @@ def main() -> int:
         'idempotent_bootstrap': True,
         'firewall_allowlist': ['ssh', '80/tcp', '443/tcp'],
         'private_env_mode': '0600',
-        'plaintext_operator_password_stored': False,
+        'plaintext_operator_password_in_environment': False,
+        'temporary_plaintext_password_file': True,
+        'temporary_password_file_mode': '0600',
+        'host_only_credential_generation': True,
+        'credential_rotation_required': True,
+        'edge_mode': 'shared-traefik',
+        'edge_bind_address': '127.0.0.1',
+        'traefik_owns_public_ports': True,
+        'deployment_state': 'DEPLOYED_AWAITING_ACCEPTANCE',
+        'acceptance_status': 'BLOCKED',
         'backup_covers': ['postgresql', 'content_addressed_objects'],
         'rollback_explicit': True,
         'watchdog_checks': ['edge', 'postgresql', 'valkey', 'object_store', 'disk'],

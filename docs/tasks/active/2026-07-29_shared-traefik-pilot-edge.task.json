@@ -1,0 +1,99 @@
+{
+  "task_id": "AX-F2-T16",
+  "goal_id": "AXIGNAL-GOAL-001",
+  "phase": "F2",
+  "state": "IN_PROGRESS",
+  "objective": "Add an isolated shared-Traefik private-pilot edge and host-only credential lifecycle.",
+  "outcome": "Traefik retains public ports, AXIGNAL binds only to loopback, credentials stay on the host, and deployment cannot self-approve acceptance.",
+  "contracts": [
+    "GOAL_LOCK",
+    "AGENTS",
+    "06",
+    "08",
+    "09",
+    "10",
+    "18",
+    "19",
+    "ADR-011"
+  ],
+  "skills": [
+    {"skill_id": "goal-keeper", "version": "0.1.0", "activation_reason": "Preserve AXIGNAL-GOAL-001 and the private-pilot boundary."},
+    {"skill_id": "contract-router", "version": "0.1.0", "activation_reason": "Resolve governance, security, delivery and operations contracts."},
+    {"skill_id": "task-orchestrator", "version": "0.1.0", "activation_reason": "Register the discovered material infrastructure task before deployment."},
+    {"skill_id": "gate-evaluator", "version": "0.1.0", "activation_reason": "Keep physical deployment and independent acceptance fail-closed."},
+    {"skill_id": "naming-guardian", "version": "0.1.0", "activation_reason": "Enforce canonical AXIGNAL identity."},
+    {"skill_id": "security-reviewer", "version": "0.1.0", "activation_reason": "Review public ports, proxy trust and secret custody."},
+    {"skill_id": "privacy-reviewer", "version": "0.1.0", "activation_reason": "Minimise operator identity and credential exposure."},
+    {"skill_id": "observability-engineer", "version": "0.1.0", "activation_reason": "Define non-sensitive deployment and credential metadata."},
+    {"skill_id": "repository-architect", "version": "0.1.0", "activation_reason": "Preserve reproducible Compose and CI boundaries."},
+    {"skill_id": "test-engineer", "version": "0.1.0", "activation_reason": "Add negative port, secret and acceptance-state tests."},
+    {"skill_id": "operations-engineer", "version": "0.1.0", "activation_reason": "Design deploy, rotate, verify and rollback operations."},
+    {"skill_id": "operations-writer", "version": "0.1.0", "activation_reason": "Maintain executable deployment and credential runbooks."}
+  ],
+  "dependencies": {
+    "phases": ["F2"],
+    "tasks": ["AX-F2-T08", "AX-F2-T09"],
+    "external": [
+      "Issue #31 remains open",
+      "ACME email pending",
+      "operator email pending",
+      "review and merge required before VPS mutation"
+    ]
+  },
+  "allowed_scope": [
+    "infra/pilot",
+    "infra/pilot/remote",
+    "affected pilot workflows and verification scripts",
+    "Contracts 19, ADR-011, roadmap, task and runbook documentation"
+  ],
+  "prohibited_scope": [
+    "Any mutation of 187.124.220.48",
+    "Deployment of an unmerged revision",
+    "Modification or restart of incumbent Traefik services",
+    "Storage of credential values in Git, CI, logs, captures or messages",
+    "Closing Issue #31 or declaring REMOTE_PILOT_ACCEPTED"
+  ],
+  "acceptance_evidence": [
+    {"evidence_type": "TEST", "description": "Host-only credential lifecycle unit tests", "required": true, "location": "infra/pilot/remote/tests/test_remote_ops.py", "status": "PASS"},
+    {"evidence_type": "TEST", "description": "Remote operations contract verifier", "required": true, "location": "scripts/verify_remote_pilot_ops.py", "status": "PASS"},
+    {"evidence_type": "TEST", "description": "Loopback-only Compose rendering on Ubuntu", "required": true, "location": ".github/workflows/remote-pilot-operations.yml", "status": "PRESENT"},
+    {"evidence_type": "SECURITY_REVIEW", "description": "No public AXIGNAL port and no deployment self-acceptance", "required": true, "location": "docs/adr/ADR-011-shared-traefik-private-pilot-edge.md", "status": "PRESENT"},
+    {"evidence_type": "DOCUMENT", "description": "Executable shared-edge and credential lifecycle runbook", "required": true, "location": "docs/runbooks/remote-pilot-operations.md", "status": "PRESENT"}
+  ],
+  "impacts": {
+    "security": "MATERIAL",
+    "privacy": "LOW",
+    "data_rights": "NONE",
+    "regulatory": "NONE",
+    "multilingual": "NONE",
+    "epistemic": "NONE",
+    "billing": "NONE"
+  },
+  "observability": {
+    "metrics": ["public and internal health", "free disk", "backup freshness"],
+    "logs": ["deploy SHA", "watchdog status", "credential lifecycle metadata without values"],
+    "traces": [],
+    "alerts": ["watchdog failure", "public health failure", "credential rotation or handoff pending"]
+  },
+  "rollback": {
+    "strategy": "Revert the PR before deployment; after deployment stop only AXIGNAL and remove only its dynamic route.",
+    "kill_switch": "Remove /etc/traefik/dynamic/axignal-pilot.yml and stop the axignal-pilot Compose project.",
+    "tested": false
+  },
+  "goal_lock_checks": [
+    {"check_id": 1, "answer": "YES", "evidence": "A reliable private pilot enables governed investigation evidence to be exercised."},
+    {"check_id": 2, "answer": "YES", "evidence": "No claim, evidence or provenance semantics change."},
+    {"check_id": 3, "answer": "YES", "evidence": "All product lenses and shared context remain unchanged."},
+    {"check_id": 4, "answer": "YES", "evidence": "No intent or economic-evidence boundary changes."},
+    {"check_id": 5, "answer": "YES", "evidence": "Infrastructure remains locale-neutral and preserves six-language architecture."},
+    {"check_id": 6, "answer": "YES", "evidence": "Operational trust and reproducibility strengthen the differentiated governed product."},
+    {"check_id": 7, "answer": "YES", "evidence": "Private pilot flags keep public launch, billing and live sources disabled."},
+    {"check_id": 8, "answer": "YES", "evidence": "Only minimum operator identity is used and credentials remain host-local."},
+    {"check_id": 9, "answer": "YES", "evidence": "The AXIGNAL route and Compose project have narrow rollback and kill switches."},
+    {"check_id": 10, "answer": "YES", "evidence": "Local tests and CI definitions directly advance the authorised compatibility PR gate."}
+  ],
+  "owner": "Platform and Security",
+  "reviewer": null,
+  "created_at": "2026-07-29T00:00:00Z",
+  "updated_at": "2026-07-29T00:00:00Z"
+}
