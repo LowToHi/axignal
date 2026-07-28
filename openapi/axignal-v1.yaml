@@ -1,0 +1,450 @@
+openapi: 3.1.0
+info:
+  title: AXIGNAL API
+  version: 0.4.1
+  summary: Global Opportunity Intelligence API
+  description: >-
+    Contract for authorised access to AXIGNAL claims, opportunities, research runs,
+    graph exploration, investigation context, Navigator commands and user workspaces.
+    The API exposes admitted product state and does not provide personalised investment
+    advice. Persistent ResearchRuns remain tenant-scoped, identity-bound and
+    source-rights governed.
+servers:
+  - url: https://api.axignal.com/v1
+    description: Production placeholder
+  - url: http://localhost:8000/v1
+    description: Local development
+security:
+  - bearerAuth: []
+tags:
+  - name: Claims
+  - name: Opportunities
+  - name: Investigation
+  - name: Navigator
+  - name: Research
+  - name: Graph
+  - name: Search
+  - name: Intent
+paths:
+  /claims:
+    get:
+      tags: [Claims]
+      operationId: listClaims
+      summary: List authorised admitted claims
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Claim collection
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '../schemas/claim.schema.json'
+                  meta:
+                    $ref: '#/components/schemas/ResponseMeta'
+        '401':
+          $ref: '#/components/responses/Unauthorised'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /claims/{claim_id}:
+    get:
+      tags: [Claims]
+      operationId: getClaim
+      parameters:
+        - name: claim_id
+          in: path
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: Claim
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/claim.schema.json'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /opportunities:
+    get:
+      tags: [Opportunities]
+      operationId: listOpportunities
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - name: universe
+          in: query
+          schema: {type: string}
+        - name: geography
+          in: query
+          schema: {type: string}
+      responses:
+        '200':
+          description: Opportunity collection
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '../schemas/opportunity.schema.json'
+                  meta:
+                    $ref: '#/components/schemas/ResponseMeta'
+  /opportunities/{opportunity_id}:
+    get:
+      tags: [Opportunities]
+      operationId: getOpportunity
+      parameters:
+        - name: opportunity_id
+          in: path
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: Opportunity
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/opportunity.schema.json'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /investigations/{context_id}:
+    get:
+      tags: [Investigation]
+      operationId: getInvestigationContext
+      parameters:
+        - name: context_id
+          in: path
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: Shared InvestigationContext
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/investigation-context.schema.json'
+  /navigator/interpret:
+    post:
+      tags: [Navigator]
+      operationId: interpretNavigatorCommand
+      summary: Interpret a multilingual command without executing it
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [context_id, message, locale]
+              properties:
+                context_id: {type: string}
+                message: {type: string, minLength: 1}
+                locale:
+                  enum: [en, es, fr, de, pt-BR, zh-Hans]
+      responses:
+        '200':
+          description: Typed command plan
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/command-plan.schema.json'
+  /navigator/execute:
+    post:
+      tags: [Navigator]
+      operationId: executeNavigatorCommand
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/command-plan.schema.json'
+      responses:
+        '200':
+          description: Updated InvestigationContext
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/investigation-context.schema.json'
+  /research-runs:
+    post:
+      tags: [Research]
+      operationId: createResearchRun
+      summary: Queue an authenticated tenant-scoped governed ResearchRun
+      description: >-
+        Creates a ResearchRun and an outbox event in one PostgreSQL transaction. Source
+        retrieval and admission execute asynchronously. Tenant authority is resolved by a
+        trusted server from authenticated identity; caller-selected tenant identifiers are
+        not accepted.
+      security:
+        - identityAssertion: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [context_id, opportunity_id, question]
+              properties:
+                context_id:
+                  type: string
+                  pattern: '^ctx_[A-Za-z0-9_-]{8,}$'
+                opportunity_id:
+                  type: string
+                  minLength: 3
+                  maxLength: 200
+                question:
+                  type: string
+                  minLength: 3
+                  maxLength: 8000
+                include_private_knowledge:
+                  type: boolean
+                  default: false
+      responses:
+        '202':
+          description: ResearchRun persisted and queued or retained in the transactional outbox
+          headers:
+            Location:
+              description: Relative URI of the persisted ResearchRun
+              schema: {type: string}
+            Retry-After:
+              description: Suggested polling delay in seconds
+              schema: {type: integer, minimum: 1}
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/persistent-research-run-accepted.schema.json'
+        '401':
+          $ref: '#/components/responses/Unauthorised'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /research-runs/{research_run_id}:
+    get:
+      tags: [Research]
+      operationId: getResearchRun
+      summary: Read a ResearchRun within the authenticated tenant boundary
+      security:
+        - identityAssertion: []
+      parameters:
+        - name: research_run_id
+          in: path
+          required: true
+          schema: {type: string, format: uuid}
+      responses:
+        '200':
+          description: Tenant-scoped ResearchRun with evidence, candidate claims, admitted facts and dossier
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/persistent-research-run-view.schema.json'
+        '401':
+          $ref: '#/components/responses/Unauthorised'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /graph/neighbours:
+    get:
+      tags: [Graph]
+      operationId: getGraphNeighbours
+      parameters:
+        - name: node_id
+          in: query
+          required: true
+          schema: {type: string}
+        - name: depth
+          in: query
+          schema: {type: integer, minimum: 1, maximum: 3, default: 1}
+      responses:
+        '200':
+          description: Bounded graph neighbourhood
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphResult'
+  /search:
+    get:
+      tags: [Search]
+      operationId: searchAxignal
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema: {type: string, minLength: 2}
+        - name: locale
+          in: query
+          schema:
+            enum: [en, es, fr, de, pt-BR, zh-Hans]
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Explainable hybrid search results
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SearchHit'
+                  meta:
+                    $ref: '#/components/schemas/ResponseMeta'
+  /intent-events:
+    post:
+      tags: [Intent]
+      operationId: recordUserIntentEvent
+      summary: Record a purpose-authorised interpreted intent event
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/user-intent-event.schema.json'
+      responses:
+        '202':
+          description: Event accepted for privacy and eligibility processing
+  /knowledge-tides/{signal_id}:
+    get:
+      tags: [Intent]
+      operationId: getKnowledgeTide
+      parameters:
+        - name: signal_id
+          in: path
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: Privacy-safe aggregate intent signal
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/aggregate-intent-signal.schema.json'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    identityAssertion:
+      type: apiKey
+      in: header
+      name: X-AXIGNAL-Identity-Assertion
+      description: >-
+        Short-lived server-to-server assertion. It is generated only after the trusted
+        gateway authenticates the user and resolves tenant membership on the server.
+  parameters:
+    Cursor:
+      name: cursor
+      in: query
+      schema: {type: string}
+    Limit:
+      name: limit
+      in: query
+      schema: {type: integer, minimum: 1, maximum: 200, default: 50}
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema: {type: string, minLength: 8, maxLength: 255}
+  responses:
+    Unauthorised:
+      description: Authentication required
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Forbidden:
+      description: Entitlement, privacy or source rights prohibit access
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    NotFound:
+      description: Resource does not exist or is not visible to the caller
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    ServiceUnavailable:
+      description: Persistent research is disabled or a required dependency is unavailable
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+  schemas:
+    ResponseMeta:
+      type: object
+      required: [request_id, as_of]
+      properties:
+        request_id: {type: string}
+        as_of: {type: string, format: date-time}
+        coverage: {type: object, additionalProperties: true}
+        next_cursor: {type: [string, 'null']}
+    GraphResult:
+      type: object
+      required: [nodes, edges, meta]
+      properties:
+        nodes:
+          type: array
+          items:
+            type: object
+            required: [node_id, node_type, label]
+            properties:
+              node_id: {type: string}
+              node_type: {type: string}
+              label: {type: string}
+        edges:
+          type: array
+          items:
+            type: object
+            required: [edge_id, source_id, target_id, edge_type]
+            properties:
+              edge_id: {type: string}
+              source_id: {type: string}
+              target_id: {type: string}
+              edge_type: {type: string}
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+    SearchHit:
+      type: object
+      required: [resource_id, resource_type, title, score, match_explanation]
+      properties:
+        resource_id: {type: string}
+        resource_type: {type: string}
+        title: {type: string}
+        excerpt: {type: [string, 'null']}
+        score: {type: number}
+        match_explanation: {type: object, additionalProperties: true}
+    Problem:
+      type: object
+      required: [type, title, status, request_id, code]
+      properties:
+        type: {type: string, format: uri-reference}
+        title: {type: string}
+        status: {type: integer}
+        detail: {type: [string, 'null']}
+        instance: {type: [string, 'null'], format: uri-reference}
+        request_id: {type: string}
+        code: {type: string}

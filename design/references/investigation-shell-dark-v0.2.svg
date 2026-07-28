@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1672" height="941" viewBox="0 0 1672 941" role="img" aria-labelledby="title desc">
+  <title id="title">AXIGNAL Investigation Shell dark structural reference</title>
+  <desc id="desc">Signal Teal dark shell with persistent Navigator, Globe, opportunities, Claim and Evidence Rail, Timeline and metrics.</desc>
+  <defs>
+    <radialGradient id="space" cx="50%" cy="45%" r="60%"><stop offset="0" stop-color="#12303a"/><stop offset="0.6" stop-color="#081219"/><stop offset="1" stop-color="#03070a"/></radialGradient>
+    <radialGradient id="earth" cx="35%" cy="25%" r="72%"><stop offset="0" stop-color="#dae8e8"/><stop offset="0.23" stop-color="#668287"/><stop offset="0.58" stop-color="#183b43"/><stop offset="1" stop-color="#061218"/></radialGradient>
+    <style>
+      .panel{fill:#0d141b;stroke:#263746;stroke-width:1}.raised{fill:#131d27;stroke:#17232e;stroke-width:1}.muted{fill:#aab6c2;font:12px system-ui}.label{fill:#f3f7fa;font:700 12px system-ui}.small{fill:#72808e;font:10px system-ui}.signal{fill:#43c8c8}.teal{fill:#43c8c8;font:700 10px system-ui}.line{stroke:#263746;stroke-width:1}.support{stroke:#43c8c8;stroke-width:3}.infer{stroke:#f1b44c;stroke-width:3}.predict{stroke:#b99cff;stroke-width:3}.contra{stroke:#ff7182;stroke-width:3}
+    </style>
+  </defs>
+  <rect width="1672" height="941" fill="#070a0e"/>
+  <rect x="8" y="8" width="1656" height="48" rx="8" class="panel"/>
+  <text x="22" y="39" fill="#f3f7fa" font-family="system-ui" font-size="22" font-weight="700" letter-spacing="3">AXIGNAL</text>
+  <text x="309" y="37" class="muted">Moscú, Rusia  /  Real Estate  /  12–24 meses</text>
+  <rect x="660" y="16" width="295" height="32" rx="6" class="raised"/>
+  <text x="684" y="36" class="small">AUTO</text><rect x="731" y="19" width="66" height="26" rx="5" fill="#174e55"/><text x="746" y="36" class="label">GLOBE</text><text x="818" y="36" class="small">GRAPH</text><text x="888" y="36" class="small">DUAL</text>
+  <rect x="1067" y="16" width="273" height="32" rx="6" class="raised"/><text x="1090" y="36" class="small">Buscar entidades, temas, fuentes…</text>
+
+  <rect x="8" y="64" width="52" height="869" rx="8" class="panel"/>
+  <g class="small" text-anchor="middle"><text x="34" y="105">⌂</text><text x="34" y="160" class="teal">◎</text><text x="34" y="215">⌘</text><text x="34" y="270">◇</text><text x="34" y="325">▱</text><text x="34" y="380">↺</text></g>
+  <circle cx="34" cy="893" r="17" fill="#1b2936"/><text x="34" y="897" text-anchor="middle" class="small">AN</text>
+
+  <rect x="68" y="64" width="230" height="869" rx="8" class="panel"/>
+  <text x="84" y="89" class="label">AXIGNAL NAVIGATOR</text><text x="253" y="89" class="teal">● ONLINE</text>
+  <rect x="80" y="104" width="206" height="70" rx="7" class="raised"/><text x="92" y="124" class="teal">TÚ · 10:21</text><text x="92" y="145" class="muted">Quiero ver si hay oportunidades</text><text x="92" y="161" class="muted">inmobiliarias en Moscú</text>
+  <rect x="80" y="184" width="206" height="116" rx="7" fill="#112028" stroke="#21434a"/><text x="92" y="205" class="teal">AXIGNAL · 10:21</text><text x="92" y="228" class="muted">He centrado la investigación en</text><text x="92" y="245" class="muted">Moscú para 12–24 meses.</text><rect x="92" y="263" width="182" height="24" rx="5" fill="#1b2936"/><text x="183" y="280" text-anchor="middle" class="small">Ver interpretación</text>
+  <rect x="80" y="310" width="206" height="136" rx="7" fill="#112028" stroke="#21434a"/><text x="92" y="331" class="teal">AXIGNAL · 10:22</text><text x="92" y="354" class="muted">12 oportunidades detectadas.</text><text x="92" y="374" class="muted">Ramenki 18.7%</text><text x="92" y="394" class="muted">ZIL 16.2%</text><text x="92" y="414" class="muted">Khamovniki 12.1%</text><rect x="92" y="420" width="182" height="24" rx="5" fill="#1b2936"/>
+  <rect x="80" y="457" width="206" height="70" rx="7" class="raised"/><text x="92" y="478" class="teal">TÚ · 10:23</text><text x="92" y="500" class="muted">¿Qué riesgos podrían afectar</text><text x="92" y="516" class="muted">a la demanda?</text>
+  <rect x="80" y="538" width="206" height="110" rx="7" fill="#112028" stroke="#21434a"/><text x="92" y="559" class="teal">AXIGNAL · 10:23</text><text x="92" y="582" class="muted">3 contradicciones materiales.</text><text x="92" y="602" class="muted">Las tasas pueden reducir</text><text x="92" y="618" class="muted">la demanda en 2025.</text>
+  <rect x="80" y="844" width="206" height="42" rx="7" class="raised"/><text x="94" y="870" class="small">Escribe una orden o pregunta…</text><rect x="252" y="850" width="28" height="30" rx="6" fill="#15999a"/><text x="266" y="870" text-anchor="middle" fill="#071014" font-size="15">➤</text>
+
+  <rect x="306" y="64" width="894" height="869" rx="8" class="panel"/>
+  <text x="324" y="91" class="label">GLOBE VIEW</text><text x="405" y="91" class="small">Moscú · contexto sincronizado</text>
+  <rect x="316" y="104" width="874" height="570" rx="7" fill="url(#space)"/>
+  <circle cx="744" cy="372" r="273" fill="url(#earth)" stroke="#376373" stroke-width="2"/>
+  <circle cx="840" cy="270" r="9" class="signal"/><circle cx="840" cy="270" r="20" fill="none" stroke="#43c8c8" opacity=".35" stroke-width="4"/>
+  <circle cx="698" cy="324" r="6" class="signal"/><circle cx="640" cy="468" r="6" class="signal"/><circle cx="903" cy="431" r="6" class="signal"/>
+  <rect x="858" y="199" width="208" height="112" rx="7" fill="#081015" stroke="#263746"/><text x="874" y="224" class="label">Moscú, Rusia</text><text x="874" y="246" class="muted">12 oportunidades detectadas</text><text x="874" y="268" class="muted">Potencial promedio</text><text x="1020" y="268" class="teal">ALTO</text><text x="874" y="289" class="muted">Retorno esperado</text><text x="1018" y="289" class="teal">18.7%</text>
+  <rect x="334" y="575" width="424" height="72" rx="7" fill="#081015" stroke="#263746"/><text x="350" y="598" class="label">POTENCIAL</text><rect x="350" y="610" width="390" height="6" fill="#43c8c8"/><text x="350" y="635" class="small">Muy bajo      Bajo        Medio        Alto        Muy alto       Sin datos</text>
+  <rect x="316" y="683" width="874" height="64" rx="6" class="raised"/><text x="336" y="721" class="label">▶</text><text x="382" y="721" class="small">12M</text><line x1="460" y1="715" x2="1110" y2="715" class="line"/><circle cx="780" cy="715" r="7" class="signal"/><text x="1125" y="721" class="small">HOY</text>
+  <g>
+    <rect x="316" y="757" width="168" height="160" rx="6" class="raised"/><text x="332" y="784" class="small">OPORTUNIDADES</text><text x="332" y="824" fill="#f3f7fa" font-size="34" font-family="system-ui">12</text><text x="332" y="852" class="teal">↑ 20%</text>
+    <rect x="493" y="757" width="168" height="160" rx="6" class="raised"/><text x="509" y="784" class="small">POTENCIAL PROMEDIO</text><text x="509" y="824" fill="#43c8c8" font-size="30" font-family="system-ui">18.7%</text>
+    <rect x="670" y="757" width="168" height="160" rx="6" class="raised"/><text x="686" y="784" class="small">CONFIANZA PROMEDIO</text><text x="686" y="824" fill="#67d39f" font-size="30" font-family="system-ui">72%</text>
+    <rect x="847" y="757" width="168" height="160" rx="6" class="raised"/><text x="863" y="784" class="small">SEÑALES DETECTADAS</text><text x="863" y="824" fill="#f3f7fa" font-size="30" font-family="system-ui">328</text>
+    <rect x="1024" y="757" width="166" height="160" rx="6" class="raised"/><text x="1040" y="784" class="small">FUENTES ANALIZADAS</text><text x="1040" y="824" fill="#f3f7fa" font-size="30" font-family="system-ui">142</text>
+  </g>
+
+  <rect x="1208" y="64" width="456" height="869" rx="8" class="panel"/>
+  <text x="1224" y="91" class="label">OPORTUNIDADES (12)</text>
+  <g><rect x="1220" y="105" width="432" height="82" rx="6" class="raised"/><text x="1236" y="131" class="label">Distrito de Ramenki</text><text x="1550" y="131" class="teal">ALTA</text><text x="1236" y="157" class="small">Retorno esperado</text><text x="1350" y="157" class="teal">18.7%</text></g>
+  <g><rect x="1220" y="195" width="432" height="82" rx="6" class="raised"/><text x="1236" y="221" class="label">Zona ZIL</text><text x="1550" y="221" class="teal">ALTA</text><text x="1236" y="247" class="small">Retorno esperado</text><text x="1350" y="247" class="teal">16.2%</text></g>
+  <g><rect x="1220" y="285" width="432" height="82" rx="6" class="raised"/><text x="1236" y="311" class="label">Khamovniki</text><text x="1540" y="311" fill="#f1b44c" font-size="10">MEDIA</text><text x="1236" y="337" class="small">Retorno esperado</text><text x="1350" y="337" class="teal">12.1%</text></g>
+  <g><rect x="1220" y="375" width="432" height="82" rx="6" class="raised"/><text x="1236" y="401" class="label">Basmanniy</text><text x="1505" y="401" fill="#f1b44c" font-size="10">MEDIA-BAJA</text><text x="1236" y="427" class="small">Retorno esperado</text><text x="1350" y="427" class="teal">9.8%</text></g>
+  <line x1="1220" y1="481" x2="1652" y2="481" class="line"/><text x="1224" y="510" class="label">CLAIM &amp; EVIDENCE RAIL</text>
+  <g><rect x="1220" y="530" width="432" height="70" rx="6" class="raised"/><line x1="1221" y1="531" x2="1221" y2="599" class="support"/><text x="1238" y="552" class="teal">HECHO</text><text x="1310" y="552" class="muted">Alquileres +14% interanual</text><text x="1310" y="577" class="small">CBR Research · 15 Abr 2024</text></g>
+  <g><rect x="1220" y="608" width="432" height="70" rx="6" class="raised"/><line x1="1221" y1="609" x2="1221" y2="677" class="infer"/><text x="1238" y="630" fill="#f1b44c" font-size="10">INFERENCIA</text><text x="1325" y="630" class="muted">Metro aumentaría demanda</text><text x="1325" y="655" class="small">Modelo transporte</text></g>
+  <g><rect x="1220" y="686" width="432" height="70" rx="6" class="raised"/><line x1="1221" y1="687" x2="1221" y2="755" class="predict"/><text x="1238" y="708" fill="#b99cff" font-size="10">PREDICCIÓN</text><text x="1325" y="708" class="muted">Escasez premium en 2025</text></g>
+  <g><rect x="1220" y="764" width="432" height="70" rx="6" class="raised"/><line x1="1221" y1="765" x2="1221" y2="833" class="contra"/><text x="1238" y="786" fill="#ff7182" font-size="10">CONTRADICCIÓN</text><text x="1340" y="786" class="muted">Tasas podrían reducir demanda</text></g>
+  <text x="1436" y="889" text-anchor="middle" class="muted">Ver evidencia completa →</text>
+</svg>

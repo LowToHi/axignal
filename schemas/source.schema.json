@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://axignal.com/schemas/source.schema.json",
+  "title": "AXIGNAL Source Admission Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source_id",
+    "name",
+    "owner",
+    "jurisdiction",
+    "access",
+    "rights",
+    "freshness",
+    "reliability_tier",
+    "lineage_group_id",
+    "status"
+  ],
+  "properties": {
+    "source_id": {
+      "type": "string",
+      "pattern": "^src_[A-Za-z0-9_-]{3,}$"
+    },
+    "name": {"type": "string", "minLength": 1},
+    "owner": {"type": "string", "minLength": 1},
+    "jurisdiction": {"type": "string", "minLength": 1},
+    "documentation_url": {"type": ["string", "null"], "format": "uri"},
+    "licence_url": {"type": ["string", "null"], "format": "uri"},
+    "access": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mechanism", "authentication"],
+      "properties": {
+        "mechanism": {
+          "enum": ["API", "BULK_DOWNLOAD", "RSS", "WEBHOOK", "USER_AUTHORISED", "MANUAL_IMPORT", "OTHER"]
+        },
+        "authentication": {
+          "enum": ["NONE", "API_KEY", "OAUTH2", "OIDC", "BASIC", "CERTIFICATE", "OTHER"]
+        },
+        "rate_limit_description": {"type": ["string", "null"]},
+        "base_url": {"type": ["string", "null"], "format": "uri"}
+      }
+    },
+    "rights": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "collection",
+        "transient_processing",
+        "persistent_storage",
+        "derived_calculations",
+        "internal_display",
+        "customer_display",
+        "export",
+        "api_redistribution",
+        "model_training"
+      ],
+      "properties": {
+        "collection": {"enum": ["PERMITTED", "CONDITIONAL", "PROHIBITED", "UNKNOWN"]},
+        "transient_processing": {"enum": ["PERMITTED", "CONDITIONAL", "PROHIBITED", "UNKNOWN"]},
+        "persistent_storage": {"enum": ["PERMITTED", "CONDITIONAL", "PROHIBITED", "UNKNOWN"]},
+        "derived_calculations": {"enum": ["PERMITTED", "CONDITIONAL", "PROHIBITED", "UNKNOWN"]},
+        "internal_display": {"enum": ["PERMITTED", "CONDITIONAL", "PROHIBITED", "UNKNOWN"]},
+        "customer_display": {"enum": ["PERMITTED", "CONDITIONAL", "PROHIBITED", "UNKNOWN"]},
+        "export": {"enum": ["PERMITTED", "CONDITIONAL", "PROHIBITED", "UNKNOWN"]},
+        "api_redistribution": {"enum": ["PERMITTED", "CONDITIONAL", "PROHIBITED", "UNKNOWN"]},
+        "model_training": {"enum": ["PERMITTED", "CONDITIONAL", "PROHIBITED", "UNKNOWN"]},
+        "attribution_required": {"type": "boolean", "default": false},
+        "retention_days": {"type": ["integer", "null"], "minimum": 0},
+        "notes": {"type": ["string", "null"]},
+        "reviewed_at": {"type": ["string", "null"], "format": "date-time"}
+      }
+    },
+    "freshness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["expected_cadence", "stale_after_seconds", "expire_after_seconds"],
+      "properties": {
+        "expected_cadence": {"type": "string"},
+        "expected_delay_seconds": {"type": ["integer", "null"], "minimum": 0},
+        "stale_after_seconds": {"type": "integer", "minimum": 0},
+        "expire_after_seconds": {"type": "integer", "minimum": 0}
+      }
+    },
+    "reliability_tier": {
+      "enum": ["PRIMARY_AUTHORITY", "PRIMARY_MARKET", "SECONDARY_REPUTABLE", "COMMERCIAL_AGGREGATOR", "COMMUNITY", "EXPERIMENTAL"]
+    },
+    "lineage_group_id": {"type": "string", "minLength": 1},
+    "contains_personal_data": {"type": "boolean", "default": false},
+    "contains_market_data": {"type": "boolean", "default": false},
+    "parser_version": {"type": ["string", "null"]},
+    "operational_owner": {"type": ["string", "null"]},
+    "status": {
+      "enum": [
+        "DISCOVERED",
+        "LEGAL_REVIEW",
+        "TECHNICAL_PROBE",
+        "SANDBOX",
+        "INTERNAL_ONLY",
+        "PRODUCT_ADMITTED",
+        "RESTRICTED",
+        "SUSPENDED",
+        "REVOKED"
+      ]
+    },
+    "kill_switch_enabled": {"type": "boolean", "default": true},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  }
+}

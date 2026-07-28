@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://axignal.com/schemas/persistent-research-run-accepted.schema.json",
+  "title": "AXIGNAL Persistent ResearchRun Accepted",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "research_run_id",
+    "state",
+    "queue_delivery",
+    "source_ids",
+    "synthetic"
+  ],
+  "properties": {
+    "research_run_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "state": {
+      "const": "QUEUED"
+    },
+    "queue_delivery": {
+      "enum": ["PUBLISHED", "OUTBOX_PENDING"]
+    },
+    "source_ids": {
+      "type": "array",
+      "items": {
+        "const": "world-bank-wdi"
+      },
+      "minItems": 1,
+      "maxItems": 1,
+      "uniqueItems": true
+    },
+    "synthetic": {
+      "const": false
+    }
+  }
+}

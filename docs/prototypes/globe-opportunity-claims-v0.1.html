@@ -1,0 +1,831 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AXIGNAL — Globe to Evidence Prototype v0.1</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #09100f;
+      --panel: #101817;
+      --panel-2: #151f1e;
+      --text: #eef5f1;
+      --muted: #9aacaa;
+      --border: #2a3936;
+      --accent: #72e2b5;
+      --accent-soft: #17382e;
+      --support: #72e2b5;
+      --contra: #f1a56f;
+      --unknown: #a9b1c5;
+      --predicted: #a99ae8;
+      --focus: #d8fff0;
+      --danger: #f09a90;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      overflow: hidden;
+    }
+    button, input { font: inherit; }
+    button { color: inherit; }
+    button:focus-visible, input:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+    .app {
+      height: 100vh;
+      display: grid;
+      grid-template-rows: 58px minmax(0, 1fr) 72px;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: auto minmax(160px, 1fr) minmax(240px, 420px) auto;
+      gap: 16px;
+      align-items: center;
+      padding: 0 18px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(9, 16, 15, 0.96);
+    }
+    .brand {
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      font-size: 14px;
+    }
+    .context-stack {
+      display: flex;
+      gap: 6px;
+      min-width: 0;
+      color: var(--muted);
+      font-size: 13px;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    .crumb {
+      border: 0;
+      background: transparent;
+      padding: 6px 2px;
+      cursor: pointer;
+      color: inherit;
+    }
+    .crumb.active { color: var(--text); }
+    .search-wrap { position: relative; }
+    .search-wrap input {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 9px 42px 9px 12px;
+      background: var(--panel);
+      color: var(--text);
+    }
+    .shortcut {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 12px;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 1px 6px;
+    }
+    .top-actions { display: flex; gap: 8px; }
+    .top-actions button, .rail-button, .secondary-button {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      border-radius: 9px;
+      padding: 8px 10px;
+      cursor: pointer;
+    }
+    .top-actions button:hover, .rail-button:hover, .secondary-button:hover { border-color: #48615c; }
+    .primary-button {
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: #062018;
+      border-radius: 9px;
+      padding: 8px 11px;
+      cursor: pointer;
+      font-weight: 650;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 72px minmax(0, 1fr) 360px;
+      min-height: 0;
+    }
+
+    .lens-rail {
+      border-right: 1px solid var(--border);
+      background: var(--panel);
+      padding: 12px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .lens-button {
+      border: 1px solid transparent;
+      background: transparent;
+      border-radius: 10px;
+      min-height: 54px;
+      padding: 7px 4px;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 11px;
+      line-height: 1.2;
+    }
+    .lens-button strong { display: block; color: inherit; font-size: 15px; margin-bottom: 3px; }
+    .lens-button.active {
+      background: var(--accent-soft);
+      border-color: #2e6755;
+      color: var(--text);
+    }
+
+    .canvas {
+      min-width: 0;
+      min-height: 0;
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 28% 24%, rgba(114, 226, 181, 0.06), transparent 32%),
+        var(--bg);
+    }
+    .canvas-header {
+      position: absolute;
+      z-index: 5;
+      top: 14px;
+      left: 16px;
+      right: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      pointer-events: none;
+    }
+    .canvas-title { pointer-events: auto; }
+    .canvas-title h1 { margin: 0 0 4px; font-size: 20px; font-weight: 650; }
+    .canvas-title p { margin: 0; color: var(--muted); font-size: 13px; }
+    .metric-box {
+      pointer-events: auto;
+      background: rgba(16, 24, 23, 0.92);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 9px 11px;
+      min-width: 220px;
+      font-size: 12px;
+    }
+    .metric-box strong { display: block; margin-bottom: 5px; }
+    .legend {
+      height: 7px;
+      border-radius: 99px;
+      background: linear-gradient(90deg, #1c2b28, #295547, #3f8d72, #72e2b5);
+      margin: 6px 0 4px;
+    }
+    .legend-row { display: flex; justify-content: space-between; color: var(--muted); }
+
+    #mapSvg, #graphSvg, #historySvg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .hidden { display: none !important; }
+    .country {
+      stroke: #243532;
+      stroke-width: 0.7;
+      cursor: pointer;
+      transition: opacity 140ms ease, stroke 140ms ease;
+    }
+    .country:hover, .country:focus { stroke: var(--focus); stroke-width: 1.4; }
+    .country.selected { stroke: var(--focus); stroke-width: 2; }
+    .country.uncovered { fill: #111a19; stroke-dasharray: 2 2; }
+    .opportunity-marker { cursor: pointer; }
+    .opportunity-marker circle { fill: var(--accent); stroke: #062018; stroke-width: 1.5; }
+    .opportunity-marker.selected circle { stroke: var(--focus); stroke-width: 3; }
+    .opportunity-marker text { fill: var(--text); font-size: 10px; paint-order: stroke; stroke: var(--bg); stroke-width: 3px; }
+
+    .canvas-status {
+      position: absolute;
+      left: 16px;
+      bottom: 14px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 12px;
+      background: rgba(9, 16, 15, 0.88);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 10px;
+    }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+
+    .evidence-rail {
+      border-left: 1px solid var(--border);
+      background: var(--panel);
+      min-height: 0;
+      overflow-y: auto;
+      padding: 18px;
+    }
+    .eyebrow {
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .evidence-rail h2 { margin: 7px 0 7px; font-size: 21px; line-height: 1.2; }
+    .evidence-rail h3 { margin: 20px 0 8px; font-size: 14px; }
+    .muted { color: var(--muted); }
+    .small { font-size: 12px; }
+    .body { font-size: 14px; line-height: 1.55; }
+    .badge-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 4px 7px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+    .badge.support { color: var(--support); border-color: #2b6653; }
+    .badge.contra { color: var(--contra); border-color: #714d35; }
+    .badge.predicted { color: var(--predicted); border-color: #554d7f; }
+    .dimension-list { display: grid; gap: 8px; margin-top: 10px; }
+    .dimension-row { display: grid; grid-template-columns: 1fr 46px; gap: 10px; align-items: center; }
+    .dimension-label { font-size: 12px; color: var(--muted); }
+    .bar { height: 8px; background: #202e2b; border-radius: 99px; overflow: hidden; margin-top: 4px; }
+    .bar > span { display: block; height: 100%; background: var(--accent); }
+    .dimension-value { font-size: 12px; text-align: right; }
+    .claim-list, .opportunity-list, .country-list { display: grid; gap: 7px; }
+    .claim, .opportunity-item, .country-item {
+      width: 100%;
+      text-align: left;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      background: var(--panel-2);
+      cursor: pointer;
+    }
+    .claim:hover, .opportunity-item:hover, .country-item:hover { border-color: #49645e; }
+    .claim strong, .opportunity-item strong { display: block; font-size: 13px; margin-bottom: 5px; }
+    .claim-meta, .opportunity-meta { display: flex; gap: 7px; flex-wrap: wrap; color: var(--muted); font-size: 11px; }
+    .claim.supporting { border-left: 3px solid var(--support); }
+    .claim.contradicting { border-left: 3px solid var(--contra); }
+    .claim.inferred { border-left: 3px dashed var(--predicted); }
+    .rail-actions { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+    .section-divider { border: 0; border-top: 1px solid var(--border); margin: 18px 0; }
+    .source-extract {
+      border-left: 2px solid var(--accent);
+      background: #0d1514;
+      padding: 10px 12px;
+      margin: 12px 0;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .coverage-note {
+      border: 1px dashed #5d675f;
+      background: rgba(169, 177, 197, 0.06);
+      border-radius: 10px;
+      padding: 9px;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 12px;
+    }
+
+    .timeline {
+      border-top: 1px solid var(--border);
+      background: var(--panel);
+      display: grid;
+      grid-template-columns: 150px minmax(0, 1fr) 190px;
+      gap: 14px;
+      align-items: center;
+      padding: 10px 18px;
+    }
+    .timeline-label strong { display: block; font-size: 13px; }
+    .timeline-label span { color: var(--muted); font-size: 11px; }
+    .timeline input[type="range"] { width: 100%; accent-color: var(--accent); }
+    .timeline-dates { display: flex; justify-content: space-between; color: var(--muted); font-size: 10px; }
+    .timeline-actions { display: flex; justify-content: flex-end; gap: 7px; }
+    .timeline-actions button {
+      border: 1px solid var(--border);
+      background: var(--panel-2);
+      border-radius: 8px;
+      padding: 7px 9px;
+      cursor: pointer;
+    }
+
+    .graph-node rect { fill: var(--panel-2); stroke: var(--border); rx: 10; }
+    .graph-node text { fill: var(--text); font-size: 11px; }
+    .graph-edge { fill: none; stroke-width: 2; }
+    .edge-observed { stroke: var(--support); }
+    .edge-inferred { stroke: var(--predicted); stroke-dasharray: 6 5; }
+    .edge-contradiction { stroke: var(--contra); stroke-dasharray: 2 4; }
+    .edge-label { fill: var(--muted); font-size: 9px; }
+
+    .history-axis { stroke: var(--border); }
+    .history-line { fill: none; stroke: var(--accent); stroke-width: 3; }
+    .history-area { fill: rgba(114, 226, 181, 0.1); }
+    .history-event { stroke: var(--bg); stroke-width: 2; }
+    .history-label { fill: var(--muted); font-size: 10px; }
+
+    @media (max-width: 980px) {
+      .workspace { grid-template-columns: 62px minmax(0, 1fr); }
+      .evidence-rail {
+        position: absolute;
+        z-index: 20;
+        right: 0;
+        top: 58px;
+        bottom: 72px;
+        width: min(380px, calc(100vw - 62px));
+        box-shadow: -10px 0 30px rgba(0,0,0,.35);
+      }
+      .topbar { grid-template-columns: auto 1fr auto; }
+      .context-stack { display: none; }
+      .search-wrap { grid-column: 2; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition-duration: 0.001ms !important; animation-duration: 0.001ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">AXIGNAL</div>
+      <nav class="context-stack" aria-label="Investigation context" id="breadcrumbs"></nav>
+      <div class="search-wrap">
+        <label for="command" style="position:absolute;left:-10000px">Search or command</label>
+        <input id="command" type="search" placeholder="Search markets, opportunities, claims…" autocomplete="off" />
+        <span class="shortcut">/</span>
+      </div>
+      <div class="top-actions">
+        <button type="button" id="explainBtn">Explain view</button>
+        <button type="button" class="primary-button" id="saveBtn">Save trail</button>
+      </div>
+    </header>
+
+    <section class="workspace">
+      <aside class="lens-rail" aria-label="Investigation lenses">
+        <button class="lens-button active" data-lens="OPPORTUNITY"><strong>◎</strong>Opportunity</button>
+        <button class="lens-button" data-lens="EVIDENCE"><strong>≋</strong>Evidence</button>
+        <button class="lens-button" data-lens="CONTRADICTION"><strong>⇄</strong>Contradiction</button>
+        <button class="lens-button" data-lens="TRANSMISSION"><strong>⌘</strong>Transmission</button>
+        <button class="lens-button" data-lens="HISTORY"><strong>◷</strong>History</button>
+      </aside>
+
+      <section class="canvas" aria-label="Primary investigation canvas">
+        <div class="canvas-header">
+          <div class="canvas-title">
+            <h1 id="canvasTitle">Global opportunity climate</h1>
+            <p id="canvasSubtitle">Newly corroborated synthetic opportunity claims · 90-day window</p>
+          </div>
+          <div class="metric-box" id="metricBox">
+            <strong>Claim momentum index</strong>
+            <div class="legend" aria-hidden="true"></div>
+            <div class="legend-row"><span>Lower</span><span>Higher</span></div>
+            <div class="muted" style="margin-top:6px">Country aggregation · synthetic coverage</div>
+          </div>
+        </div>
+
+        <svg id="mapSvg" role="img" aria-label="World map of synthetic opportunity claim momentum"></svg>
+        <svg id="graphSvg" class="hidden" role="img" aria-label="Bounded transmission graph"></svg>
+        <svg id="historySvg" class="hidden" role="img" aria-label="Historical opportunity state chart"></svg>
+
+        <div class="canvas-status" aria-live="polite">
+          <span class="status-dot"></span>
+          <span id="canvasStatus">Synthetic prototype · 12 countries covered · as of 26 July 2026</span>
+        </div>
+      </section>
+
+      <aside class="evidence-rail" id="evidenceRail" aria-live="polite"></aside>
+    </section>
+
+    <footer class="timeline">
+      <div class="timeline-label">
+        <strong>Time machine</strong>
+        <span id="timeLabel">Current · 26 Jul 2026</span>
+      </div>
+      <div>
+        <label for="timeRange" style="position:absolute;left:-10000px">Historical as-of date</label>
+        <input id="timeRange" type="range" min="0" max="6" value="6" step="1" />
+        <div class="timeline-dates"><span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span><span>Jul</span></div>
+      </div>
+      <div class="timeline-actions">
+        <button type="button" id="compareBtn">Compare</button>
+        <button type="button" id="playBtn">Play</button>
+        <button type="button" id="currentBtn">Current</button>
+      </div>
+    </footer>
+  </main>
+
+  <script type="module">
+    import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm';
+    import { feature } from 'https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/+esm';
+    import world from 'https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json/+esm';
+
+    const dates = ['26 Jan 2026','26 Feb 2026','26 Mar 2026','26 Apr 2026','26 May 2026','26 Jun 2026','26 Jul 2026'];
+
+    const countriesData = {
+      '724': { name: 'Spain', metric: [0.42,0.46,0.51,0.58,0.63,0.71,0.78], center: [-3.7,40.3], opportunityIds: ['opp_grid_es','opp_water_es'] },
+      '250': { name: 'France', metric: [0.48,0.49,0.52,0.55,0.58,0.60,0.63], center: [2.2,46.2], opportunityIds: ['opp_heat_fr'] },
+      '276': { name: 'Germany', metric: [0.44,0.48,0.50,0.54,0.57,0.55,0.56], center: [10.4,51.1], opportunityIds: ['opp_industrial_de'] },
+      '528': { name: 'Netherlands', metric: [0.52,0.55,0.58,0.61,0.65,0.68,0.69], center: [5.4,52.2], opportunityIds: ['opp_logistics_nl'] },
+      '616': { name: 'Poland', metric: [0.38,0.44,0.49,0.55,0.63,0.69,0.74], center: [19.1,52.0], opportunityIds: ['opp_grid_pl'] },
+      '826': { name: 'United Kingdom', metric: [0.57,0.55,0.56,0.59,0.61,0.59,0.58], center: [-2.5,54.0], opportunityIds: ['opp_retrofit_uk'] },
+      '840': { name: 'United States', metric: [0.50,0.52,0.57,0.61,0.64,0.67,0.66], center: [-98.5,39.8], opportunityIds: ['opp_compute_us'] },
+      '076': { name: 'Brazil', metric: [0.35,0.37,0.40,0.44,0.47,0.48,0.49], center: [-51.9,-14.2], opportunityIds: ['opp_bio_br'] },
+      '356': { name: 'India', metric: [0.45,0.49,0.54,0.59,0.64,0.68,0.72], center: [78.9,22.6], opportunityIds: ['opp_cooling_in'] },
+      '752': { name: 'Sweden', metric: [0.51,0.53,0.57,0.61,0.64,0.66,0.65], center: [15.0,62.0], opportunityIds: ['opp_storage_se'] },
+      '380': { name: 'Italy', metric: [0.39,0.43,0.47,0.50,0.55,0.60,0.62], center: [12.6,42.8], opportunityIds: ['opp_water_it'] },
+      '620': { name: 'Portugal', metric: [0.46,0.49,0.53,0.59,0.64,0.66,0.68], center: [-8.2,39.6], opportunityIds: ['opp_grid_pt'] }
+    };
+
+    const opportunities = {
+      opp_grid_es: {
+        title: 'Grid connection bottlenecks create flexibility demand',
+        countryId: '724',
+        state: 'STRENGTHENING',
+        summary: 'Synthetic evidence indicates rising queues and regulatory pressure around grid access, increasing demand for storage, demand response and connection-management software.',
+        dimensions: { 'Evidence strength': .84, 'Source independence': .73, 'Freshness': .92, 'Persistence': .76, 'Contradiction pressure': .28 },
+        claims: ['clm_queue_es','clm_reg_es','clm_demand_es','clm_capex_es'],
+        unknowns: ['Regional interconnection capacity after 2027', 'Procurement conversion rate'],
+        invalidation: 'Connection queue growth reverses for two consecutive reporting periods.'
+      },
+      opp_water_es: { title: 'Industrial water reuse infrastructure', countryId:'724', state:'EMERGING', summary:'Synthetic regulation and drought signals suggest increased demand for industrial reuse systems.', dimensions:{'Evidence strength':.67,'Source independence':.61,'Freshness':.80,'Persistence':.57,'Contradiction pressure':.34}, claims:['clm_water_es'], unknowns:['Project finance availability'], invalidation:'Industrial water restrictions are withdrawn.' },
+      opp_heat_fr: { title:'Industrial heat electrification services', countryId:'250', state:'STABLE', summary:'Synthetic policy and energy-cost claims support an established retrofit market.', dimensions:{'Evidence strength':.72,'Source independence':.69,'Freshness':.75,'Persistence':.74,'Contradiction pressure':.31}, claims:['clm_generic_support'], unknowns:['SME adoption speed'], invalidation:'Relative operating economics deteriorate materially.' },
+      opp_industrial_de: { title:'Factory energy orchestration software', countryId:'276', state:'CONTESTED', summary:'Synthetic demand exists, but capex delays and industrial weakness create material contradiction.', dimensions:{'Evidence strength':.69,'Source independence':.72,'Freshness':.82,'Persistence':.58,'Contradiction pressure':.61}, claims:['clm_generic_support','clm_generic_contra'], unknowns:['Budget release timing'], invalidation:'Industrial capex remains below threshold through 2027.' },
+      opp_logistics_nl: { title:'Port electrification coordination', countryId:'528', state:'STRENGTHENING', summary:'Synthetic port and grid signals indicate coordination demand across shore power and flexibility assets.', dimensions:{'Evidence strength':.77,'Source independence':.70,'Freshness':.88,'Persistence':.71,'Contradiction pressure':.25}, claims:['clm_generic_support'], unknowns:['Grid delivery dates'], invalidation:'Shore-power milestones are delayed beyond 2028.' },
+      opp_grid_pl: { title:'Grid modernisation supply chain', countryId:'616', state:'STRENGTHENING', summary:'Synthetic investment and connection claims indicate accelerating modernisation demand.', dimensions:{'Evidence strength':.79,'Source independence':.66,'Freshness':.86,'Persistence':.70,'Contradiction pressure':.30}, claims:['clm_generic_support'], unknowns:['Local supplier capacity'], invalidation:'Tender volume falls below historical baseline.' },
+      opp_retrofit_uk: { title:'Commercial retrofit verification', countryId:'826', state:'STABLE', summary:'Synthetic compliance claims support verification and measurement workflows.', dimensions:{'Evidence strength':.71,'Source independence':.68,'Freshness':.72,'Persistence':.69,'Contradiction pressure':.36}, claims:['clm_generic_support'], unknowns:['Enforcement intensity'], invalidation:'Reporting requirements are materially reduced.' },
+      opp_compute_us: { title:'Power-aware compute siting', countryId:'840', state:'MATURE', summary:'Synthetic grid and compute-demand claims support location intelligence and energy optimisation.', dimensions:{'Evidence strength':.81,'Source independence':.75,'Freshness':.89,'Persistence':.82,'Contradiction pressure':.33}, claims:['clm_generic_support'], unknowns:['Interconnection reform speed'], invalidation:'Compute demand growth drops materially.' },
+      opp_bio_br: { title:'Bio-input distribution infrastructure', countryId:'076', state:'EMERGING', summary:'Synthetic agricultural adoption claims suggest fragmented distribution opportunities.', dimensions:{'Evidence strength':.61,'Source independence':.58,'Freshness':.69,'Persistence':.54,'Contradiction pressure':.39}, claims:['clm_generic_support'], unknowns:['Regional dealer economics'], invalidation:'Adoption remains concentrated in pilot markets.' },
+      opp_cooling_in: { title:'Industrial cooling efficiency services', countryId:'356', state:'STRENGTHENING', summary:'Synthetic heat, industrial and power reliability claims support efficiency demand.', dimensions:{'Evidence strength':.76,'Source independence':.67,'Freshness':.90,'Persistence':.73,'Contradiction pressure':.29}, claims:['clm_generic_support'], unknowns:['Customer financing'], invalidation:'Power-price incentives weaken materially.' },
+      opp_storage_se: { title:'Long-duration storage integration', countryId:'752', state:'STABLE', summary:'Synthetic grid balancing claims support integration and control services.', dimensions:{'Evidence strength':.74,'Source independence':.71,'Freshness':.77,'Persistence':.75,'Contradiction pressure':.32}, claims:['clm_generic_support'], unknowns:['Commercial model durability'], invalidation:'Balancing spreads compress below project viability.' },
+      opp_water_it: { title:'Municipal leakage detection', countryId:'380', state:'STRENGTHENING', summary:'Synthetic infrastructure and loss-rate claims support monitoring and repair workflows.', dimensions:{'Evidence strength':.73,'Source independence':.64,'Freshness':.81,'Persistence':.69,'Contradiction pressure':.27}, claims:['clm_generic_support'], unknowns:['Procurement cycle length'], invalidation:'Capital allocations are deferred.' },
+      opp_grid_pt: { title:'Renewable curtailment optimisation', countryId:'620', state:'STRENGTHENING', summary:'Synthetic generation and grid claims support optimisation and flexibility tools.', dimensions:{'Evidence strength':.78,'Source independence':.69,'Freshness':.87,'Persistence':.72,'Contradiction pressure':.26}, claims:['clm_generic_support'], unknowns:['Market-access rules'], invalidation:'Curtailment frequency normalises.' }
+    };
+
+    const claims = {
+      clm_queue_es: { assertion:'Grid connection requests increased faster than completed connections in the synthetic 2026 series.', type:'OBSERVED_QUANTITATIVE', status:'CORROBORATED', role:'supporting', observed:'18 Jul 2026', evidence:'evd_queue_es', strength:.88 },
+      clm_reg_es: { assertion:'A synthetic regulatory draft prioritises flexible connection agreements and storage participation.', type:'LEGAL_OR_REGULATORY', status:'ADMISSIBLE', role:'supporting', observed:'12 Jul 2026', evidence:'evd_reg_es', strength:.81 },
+      clm_demand_es: { assertion:'Connection congestion is likely to increase demand for orchestration software and flexible assets.', type:'COMMERCIAL_HYPOTHESIS', status:'CONTESTED', role:'inferred', observed:'20 Jul 2026', evidence:'evd_demand_es', strength:.64 },
+      clm_capex_es: { assertion:'Near-term grid capital delivery may reduce bottlenecks faster than the opportunity thesis assumes.', type:'PREDICTIVE', status:'CONTESTED', role:'contradicting', observed:'21 Jul 2026', evidence:'evd_capex_es', strength:.59 },
+      clm_water_es: { assertion:'Synthetic water-stress rules expand reuse requirements for selected industrial facilities.', type:'LEGAL_OR_REGULATORY', status:'ADMISSIBLE', role:'supporting', observed:'15 Jul 2026', evidence:'evd_generic', strength:.70 },
+      clm_generic_support: { assertion:'Multiple independent synthetic sources support the selected opportunity thesis.', type:'TREND', status:'CORROBORATED', role:'supporting', observed:'19 Jul 2026', evidence:'evd_generic', strength:.74 },
+      clm_generic_contra: { assertion:'Synthetic capital expenditure indicators weaken the near-term adoption case.', type:'OBSERVED_QUANTITATIVE', status:'CONTESTED', role:'contradicting', observed:'20 Jul 2026', evidence:'evd_generic_contra', strength:.68 }
+    };
+
+    const evidence = {
+      evd_queue_es: { source:'Synthetic Iberian Grid Operator Bulletin', authority:'PRIMARY_AUTHORITY — SYNTHETIC', published:'17 Jul 2026', retrieved:'18 Jul 2026 08:15 UTC', extract:'The synthetic queue series records a 24% year-on-year increase in active connection requests and a 9% increase in completed connections.', rights:'Customer display permitted · export with attribution', method:'Structured table extraction v0.1', confidence:.97 },
+      evd_reg_es: { source:'Synthetic Energy Regulation Draft 2026/14', authority:'PRIMARY_AUTHORITY — SYNTHETIC', published:'11 Jul 2026', retrieved:'12 Jul 2026 06:10 UTC', extract:'The draft introduces flexible access agreements and explicit participation pathways for storage and demand response.', rights:'Customer display permitted · source link required', method:'Document paragraph extraction v0.1', confidence:.94 },
+      evd_demand_es: { source:'AXIGNAL synthetic derivation', authority:'DERIVED', published:'20 Jul 2026', retrieved:'20 Jul 2026', extract:'The commercial hypothesis is derived from queue growth, regulatory change and comparable adoption patterns. It is not an observed sales outcome.', rights:'AXIGNAL derived claim', method:'Commercial hypothesis policy v0.1', confidence:.64 },
+      evd_capex_es: { source:'Synthetic Network Investment Plan', authority:'PRIMARY_AUTHORITY — SYNTHETIC', published:'20 Jul 2026', retrieved:'21 Jul 2026 07:40 UTC', extract:'Planned synthetic network reinforcements could add sufficient capacity to reduce selected queue pressure from 2027 onward.', rights:'Display permitted · no raw redistribution', method:'Document extraction v0.1', confidence:.90 },
+      evd_generic: { source:'Synthetic multi-source evidence set', authority:'MIXED — SYNTHETIC', published:'19 Jul 2026', retrieved:'19 Jul 2026', extract:'This prototype evidence is intentionally synthetic and exists only to test interaction and epistemic comprehension.', rights:'Unrestricted prototype use', method:'Fixture generator v0.1', confidence:1 },
+      evd_generic_contra: { source:'Synthetic capital expenditure series', authority:'PRIMARY MARKET — SYNTHETIC', published:'20 Jul 2026', retrieved:'20 Jul 2026', extract:'The synthetic index declined during two consecutive periods, creating contradiction pressure for the near-term thesis.', rights:'Prototype use', method:'Structured series fixture v0.1', confidence:.92 }
+    };
+
+    const state = {
+      lens: 'OPPORTUNITY',
+      countryId: null,
+      opportunityId: null,
+      claimId: null,
+      evidenceId: null,
+      timeIndex: 6,
+      compare: false,
+      saved: false,
+      explanation: false
+    };
+
+    const mapSvg = d3.select('#mapSvg');
+    const graphSvg = d3.select('#graphSvg');
+    const historySvg = d3.select('#historySvg');
+    const countries = feature(world, world.objects.countries);
+    let projection;
+    let path;
+
+    function heatColor(value) {
+      if (value == null) return '#111a19';
+      return d3.interpolateRgbBasis(['#1c2b28','#295547','#3f8d72','#72e2b5'])(Math.max(0, Math.min(1, value)));
+    }
+
+    function renderMap() {
+      const node = mapSvg.node();
+      const width = node.clientWidth || 900;
+      const height = node.clientHeight || 620;
+      mapSvg.attr('viewBox', `0 0 ${width} ${height}`);
+      projection = d3.geoNaturalEarth1().fitExtent([[20,70],[width-20,height-40]], countries);
+      path = d3.geoPath(projection);
+      mapSvg.selectAll('*').remove();
+
+      mapSvg.append('g')
+        .selectAll('path')
+        .data(countries.features)
+        .join('path')
+        .attr('class', d => `country ${countriesData[String(d.id)] ? '' : 'uncovered'} ${state.countryId === String(d.id) ? 'selected' : ''}`)
+        .attr('d', path)
+        .attr('fill', d => heatColor(countriesData[String(d.id)]?.metric[state.timeIndex]))
+        .attr('tabindex', d => countriesData[String(d.id)] ? 0 : null)
+        .attr('aria-label', d => {
+          const c = countriesData[String(d.id)];
+          return c ? `${c.name}, claim momentum ${Math.round(c.metric[state.timeIndex]*100)}` : 'Not covered';
+        })
+        .on('click', (_, d) => selectCountry(String(d.id)))
+        .on('keydown', (event, d) => { if (event.key === 'Enter' || event.key === ' ') selectCountry(String(d.id)); });
+
+      const markerData = Object.entries(opportunities)
+        .filter(([,opp]) => !state.countryId || opp.countryId === state.countryId)
+        .map(([id,opp]) => ({id, ...opp, country: countriesData[opp.countryId]}));
+
+      const markers = mapSvg.append('g').selectAll('g')
+        .data(markerData)
+        .join('g')
+        .attr('class', d => `opportunity-marker ${state.opportunityId === d.id ? 'selected' : ''}`)
+        .attr('transform', d => {
+          const p = projection(d.country.center);
+          const offset = d.id.includes('water') ? [11,10] : [0,0];
+          return `translate(${p[0]+offset[0]},${p[1]+offset[1]})`;
+        })
+        .attr('tabindex', 0)
+        .attr('role','button')
+        .attr('aria-label', d => d.title)
+        .on('click', (_,d) => selectOpportunity(d.id))
+        .on('keydown', (event,d) => { if (event.key === 'Enter' || event.key === ' ') selectOpportunity(d.id); });
+
+      markers.append('circle').attr('r', d => 5 + opportunities[d.id].dimensions['Evidence strength'] * 5);
+      markers.filter(d => state.countryId || state.opportunityId === d.id)
+        .append('text').attr('x', 11).attr('y', 4).text(d => d.title.length > 34 ? `${d.title.slice(0,34)}…` : d.title);
+    }
+
+    function renderGraph() {
+      const node = graphSvg.node();
+      const width = node.clientWidth || 900;
+      const height = node.clientHeight || 620;
+      graphSvg.attr('viewBox', `0 0 ${width} ${height}`).selectAll('*').remove();
+      const opp = opportunities[state.opportunityId || 'opp_grid_es'];
+      const x = [width*.12,width*.38,width*.66,width*.87];
+      const y = [height*.35,height*.35,height*.35,height*.35];
+      const nodes = [
+        {id:'reg',label:'Regulatory change',x:x[0],y:y[0],type:'observed'},
+        {id:'queue',label:'Connection queue',x:x[1],y:y[1],type:'observed'},
+        {id:'flex',label:'Flexibility demand',x:x[2],y:y[2],type:'inferred'},
+        {id:'opp',label:opp.title,x:x[3],y:y[3],type:'opportunity'},
+        {id:'capex',label:'Grid capex relief',x:x[1],y:height*.68,type:'contradiction'}
+      ];
+      const edges = [
+        {a:'reg',b:'queue',label:'changes access',kind:'observed'},
+        {a:'queue',b:'flex',label:'may increase',kind:'inferred'},
+        {a:'flex',b:'opp',label:'supports',kind:'inferred'},
+        {a:'capex',b:'queue',label:'may reduce',kind:'contradiction'}
+      ];
+      const byId = Object.fromEntries(nodes.map(n => [n.id,n]));
+      const g = graphSvg.append('g');
+      edges.forEach(e => {
+        const a = byId[e.a], b = byId[e.b];
+        g.append('line').attr('x1',a.x+70).attr('y1',a.y).attr('x2',b.x-70).attr('y2',b.y)
+          .attr('class',`graph-edge edge-${e.kind}`);
+        g.append('text').attr('x',(a.x+b.x)/2).attr('y',(a.y+b.y)/2-8).attr('text-anchor','middle').attr('class','edge-label').text(e.label);
+      });
+      const ng = g.selectAll('.graph-node').data(nodes).join('g').attr('class','graph-node').attr('transform',d=>`translate(${d.x-68},${d.y-27})`);
+      ng.append('rect').attr('width',136).attr('height',54).attr('stroke',d=>d.type==='contradiction'?'var(--contra)':d.type==='inferred'?'var(--predicted)':'var(--border)');
+      ng.append('text').attr('x',68).attr('y',23).attr('text-anchor','middle').text(d=>d.label.length>22?`${d.label.slice(0,22)}…`:d.label);
+      ng.append('text').attr('x',68).attr('y',39).attr('text-anchor','middle').attr('class','edge-label').text(d=>d.type.toUpperCase());
+    }
+
+    function renderHistory() {
+      const node = historySvg.node();
+      const width = node.clientWidth || 900;
+      const height = node.clientHeight || 620;
+      historySvg.attr('viewBox',`0 0 ${width} ${height}`).selectAll('*').remove();
+      const opp = opportunities[state.opportunityId || 'opp_grid_es'];
+      const series = [0.41,0.45,0.52,0.57,0.62,0.71,opp.dimensions['Evidence strength']];
+      const margin = {top:120,right:60,bottom:90,left:70};
+      const x = d3.scalePoint().domain(dates).range([margin.left,width-margin.right]);
+      const y = d3.scaleLinear().domain([0,1]).range([height-margin.bottom,margin.top]);
+      const line = d3.line().x((d,i)=>x(dates[i])).y(d=>y(d)).curve(d3.curveMonotoneX);
+      const area = d3.area().x((d,i)=>x(dates[i])).y0(y(0)).y1(d=>y(d)).curve(d3.curveMonotoneX);
+      historySvg.append('path').datum(series).attr('class','history-area').attr('d',area);
+      historySvg.append('path').datum(series).attr('class','history-line').attr('d',line);
+      historySvg.append('line').attr('x1',margin.left).attr('x2',width-margin.right).attr('y1',y(0)).attr('y2',y(0)).attr('class','history-axis');
+      dates.forEach((d,i)=>{
+        historySvg.append('circle').attr('cx',x(d)).attr('cy',y(series[i])).attr('r',i===state.timeIndex?7:5).attr('fill',i===3?'var(--predicted)':i===5?'var(--contra)':'var(--accent)').attr('class','history-event');
+        historySvg.append('text').attr('x',x(d)).attr('y',height-margin.bottom+24).attr('text-anchor','middle').attr('class','history-label').text(d.slice(3,6));
+      });
+      historySvg.append('text').attr('x',margin.left).attr('y',margin.top-38).attr('fill','var(--text)').attr('font-size',18).text(opp.title);
+      historySvg.append('text').attr('x',margin.left).attr('y',margin.top-14).attr('class','history-label').text('Evidence strength and material claim events · synthetic history');
+      const eventLabels = [
+        {i:3,label:'Scenario published'},
+        {i:5,label:'Contradicting capex claim'},
+        {i:6,label:'New corroboration'}
+      ];
+      eventLabels.forEach(e=>historySvg.append('text').attr('x',x(dates[e.i])).attr('y',y(series[e.i])-18).attr('text-anchor','middle').attr('class','history-label').text(e.label));
+    }
+
+    function renderBreadcrumbs() {
+      const el = document.getElementById('breadcrumbs');
+      const items = [{label:'Global',action:()=>resetSelection()}];
+      if (state.countryId) items.push({label:countriesData[state.countryId].name,action:()=>selectCountry(state.countryId)});
+      if (state.opportunityId) items.push({label:opportunities[state.opportunityId].title,action:()=>selectOpportunity(state.opportunityId)});
+      if (state.claimId) items.push({label:state.claimId,action:()=>selectClaim(state.claimId)});
+      if (state.evidenceId) items.push({label:state.evidenceId,action:()=>selectEvidence(state.evidenceId)});
+      el.innerHTML='';
+      items.forEach((item,i)=>{
+        if(i) el.append(document.createTextNode('›'));
+        const b=document.createElement('button'); b.className=`crumb ${i===items.length-1?'active':''}`; b.textContent=item.label; b.addEventListener('click',item.action); el.append(b);
+      });
+    }
+
+    function renderRail() {
+      const rail = document.getElementById('evidenceRail');
+      if (state.explanation) return renderExplanation(rail);
+      if (state.evidenceId) return renderEvidence(rail, evidence[state.evidenceId]);
+      if (state.claimId) return renderClaim(rail, claims[state.claimId]);
+      if (state.opportunityId) return renderOpportunity(rail, opportunities[state.opportunityId]);
+      if (state.countryId) return renderCountry(rail, countriesData[state.countryId]);
+      renderGlobal(rail);
+    }
+
+    function renderGlobal(rail) {
+      const sorted = Object.entries(countriesData).sort((a,b)=>b[1].metric[state.timeIndex]-a[1].metric[state.timeIndex]).slice(0,5);
+      rail.innerHTML = `
+        <div class="eyebrow">Global scope · synthetic</div>
+        <h2>Where opportunity evidence is accelerating</h2>
+        <p class="body muted">Select a country or opportunity marker. The heat represents the change in newly corroborated opportunity claims during the selected window—not expected return.</p>
+        <div class="coverage-note">Coverage: 12 synthetic countries. Uncovered geography is hatched and must not be interpreted as low opportunity.</div>
+        <h3>Highest current momentum</h3>
+        <div class="country-list" id="countryList"></div>
+        <hr class="section-divider" />
+        <h3>What changed since June</h3>
+        <div class="body">Spain and Poland gained the largest synthetic momentum increase. Germany remained contested because capital-expenditure claims offset demand evidence.</div>
+      `;
+      const list=rail.querySelector('#countryList');
+      sorted.forEach(([id,c])=>{
+        const b=document.createElement('button'); b.className='country-item'; b.innerHTML=`<strong>${c.name}</strong><div class="opportunity-meta"><span>Momentum ${Math.round(c.metric[state.timeIndex]*100)}</span><span>${c.opportunityIds.length} opportunities</span></div>`; b.addEventListener('click',()=>selectCountry(id)); list.append(b);
+      });
+    }
+
+    function renderCountry(rail,country) {
+      rail.innerHTML = `
+        <div class="eyebrow">Country climate</div>
+        <h2>${country.name}</h2>
+        <div class="badge-row"><span class="badge support">Momentum ${Math.round(country.metric[state.timeIndex]*100)}</span><span class="badge">${country.opportunityIds.length} opportunities</span><span class="badge">As of ${dates[state.timeIndex]}</span></div>
+        <p class="body muted">Opportunity claim activity for the selected synthetic country. Values are aggregated and should be investigated at opportunity and claim level.</p>
+        <h3>Visible opportunities</h3>
+        <div class="opportunity-list" id="oppList"></div>
+        <div class="coverage-note">Country coverage is synthetic and incomplete. The prototype tests navigation, not market conclusions.</div>
+      `;
+      const list=rail.querySelector('#oppList');
+      country.opportunityIds.forEach(id=>{
+        const o=opportunities[id]; const b=document.createElement('button'); b.className='opportunity-item'; b.innerHTML=`<strong>${o.title}</strong><div class="opportunity-meta"><span>${o.state}</span><span>Evidence ${Math.round(o.dimensions['Evidence strength']*100)}</span><span>Contradiction ${Math.round(o.dimensions['Contradiction pressure']*100)}</span></div>`; b.addEventListener('click',()=>selectOpportunity(id)); list.append(b);
+      });
+    }
+
+    function renderOpportunity(rail,opp) {
+      rail.innerHTML = `
+        <div class="eyebrow">Opportunity · ${state.lens.toLowerCase()}</div>
+        <h2>${opp.title}</h2>
+        <div class="badge-row"><span class="badge support">${opp.state}</span><span class="badge">${countriesData[opp.countryId].name}</span><span class="badge">As of ${dates[state.timeIndex]}</span></div>
+        <p class="body">${opp.summary}</p>
+        <div class="dimension-list" id="dimensions"></div>
+        <h3>${state.lens==='CONTRADICTION'?'Contradicting claims':'Material claims'}</h3>
+        <div class="claim-list" id="claimList"></div>
+        <h3>Unknowns</h3>
+        <ul class="body muted">${opp.unknowns.map(x=>`<li>${x}</li>`).join('')}</ul>
+        <h3>Invalidation condition</h3>
+        <div class="coverage-note">${opp.invalidation}</div>
+        <div class="rail-actions"><button class="secondary-button" id="watchBtn">Add to watchlist</button><button class="secondary-button" id="sourceBtn">View all sources</button></div>
+      `;
+      const dims=rail.querySelector('#dimensions');
+      Object.entries(opp.dimensions).forEach(([k,v])=>{ const row=document.createElement('div'); row.className='dimension-row'; row.innerHTML=`<div><div class="dimension-label">${k}</div><div class="bar"><span style="width:${Math.round(v*100)}%"></span></div></div><div class="dimension-value">${Math.round(v*100)}</div>`; dims.append(row); });
+      const list=rail.querySelector('#claimList');
+      let ids=opp.claims;
+      if(state.lens==='CONTRADICTION') ids=[...ids].sort((a,b)=>(claims[a].role==='contradicting'?-1:1));
+      ids.forEach(id=>{
+        const c=claims[id]; const b=document.createElement('button'); b.className=`claim ${c.role}`; b.innerHTML=`<strong>${c.assertion}</strong><div class="claim-meta"><span>${c.type}</span><span>${c.status}</span><span>Strength ${Math.round(c.strength*100)}</span></div>`; b.addEventListener('click',()=>selectClaim(id)); list.append(b);
+      });
+    }
+
+    function renderClaim(rail,claim) {
+      rail.innerHTML = `
+        <div class="eyebrow">Claim</div>
+        <h2>${claim.assertion}</h2>
+        <div class="badge-row"><span class="badge ${claim.role==='contradicting'?'contra':claim.role==='inferred'?'predicted':'support'}">${claim.role}</span><span class="badge">${claim.type}</span><span class="badge">${claim.status}</span></div>
+        <div class="body"><strong>Observed:</strong> ${claim.observed}</div>
+        <div class="body"><strong>Evidence strength:</strong> ${Math.round(claim.strength*100)}/100</div>
+        <h3>Epistemic interpretation</h3>
+        <p class="body muted">${claim.type.includes('OBSERVED')?'This claim reports a synthetic observation. It does not establish causation.':claim.type==='PREDICTIVE'?'This is a forecast claim and must be evaluated against later outcomes.':'This claim contains inference and must not be presented as direct observation.'}</p>
+        <h3>Evidence</h3>
+        <button class="claim supporting" id="evidenceBtn"><strong>${evidence[claim.evidence].source}</strong><div class="claim-meta"><span>${evidence[claim.evidence].authority}</span><span>Extraction ${Math.round(evidence[claim.evidence].confidence*100)}</span></div></button>
+        <h3>Relations</h3>
+        <div class="coverage-note">Supporting and contradicting relations remain visible at opportunity level. This prototype uses a bounded fixture graph.</div>
+      `;
+      rail.querySelector('#evidenceBtn').addEventListener('click',()=>selectEvidence(claim.evidence));
+    }
+
+    function renderEvidence(rail,ev) {
+      rail.innerHTML = `
+        <div class="eyebrow">Evidence</div>
+        <h2>${ev.source}</h2>
+        <div class="badge-row"><span class="badge">${ev.authority}</span><span class="badge support">Extraction ${Math.round(ev.confidence*100)}</span></div>
+        <div class="body"><strong>Published:</strong> ${ev.published}</div>
+        <div class="body"><strong>Retrieved:</strong> ${ev.retrieved}</div>
+        <div class="source-extract">${ev.extract}</div>
+        <div class="body"><strong>Method:</strong> ${ev.method}</div>
+        <div class="body"><strong>Rights:</strong> ${ev.rights}</div>
+        <div class="coverage-note">All evidence in this prototype is synthetic. The open-source action is intentionally disabled.</div>
+        <div class="rail-actions"><button class="secondary-button" disabled>Open original source</button><button class="secondary-button" id="copyClaimBtn">Copy citation metadata</button></div>
+      `;
+    }
+
+    function renderExplanation(rail) {
+      const opp=opportunities[state.opportunityId || 'opp_grid_es'];
+      rail.innerHTML=`
+        <div class="eyebrow">Generated explanation · synthetic</div>
+        <h2>What the current view shows</h2>
+        <p class="body">${opp.title} is visible because evidence strength and freshness are high in the synthetic fixture, while contradiction pressure remains material but not dominant.</p>
+        <h3>Supporting</h3><p class="body muted">The strongest visible support comes from claim <strong>${opp.claims[0]}</strong> and its linked evidence.</p>
+        <h3>Contradiction</h3><p class="body muted">The current thesis is weakened by the possibility that planned capacity investment reduces the bottleneck earlier than expected.</p>
+        <h3>Unknown</h3><p class="body muted">${opp.unknowns[0]} remains unresolved.</p>
+        <div class="coverage-note">This explanation is generated from the visible synthetic context. It does not create canonical claims.</div>
+        <div class="rail-actions"><button class="secondary-button" id="closeExplain">Return to canonical view</button></div>
+      `;
+      rail.querySelector('#closeExplain').addEventListener('click',()=>{state.explanation=false;renderAll();});
+    }
+
+    function selectCountry(id) {
+      if(!countriesData[id]) return;
+      state.countryId=id; state.opportunityId=null; state.claimId=null; state.evidenceId=null; state.explanation=false; state.lens='OPPORTUNITY'; renderAll();
+    }
+    function selectOpportunity(id) {
+      const o=opportunities[id]; state.countryId=o.countryId; state.opportunityId=id; state.claimId=null; state.evidenceId=null; state.explanation=false; renderAll();
+    }
+    function selectClaim(id) { state.claimId=id; state.evidenceId=null; state.explanation=false; renderAll(); }
+    function selectEvidence(id) { state.evidenceId=id; state.explanation=false; renderAll(); }
+    function resetSelection() { state.countryId=null; state.opportunityId=null; state.claimId=null; state.evidenceId=null; state.explanation=false; state.lens='OPPORTUNITY'; renderAll(); }
+
+    function setLens(lens) {
+      state.lens=lens; state.claimId=null; state.evidenceId=null; state.explanation=false;
+      if(!state.opportunityId && (lens==='TRANSMISSION'||lens==='HISTORY'||lens==='EVIDENCE'||lens==='CONTRADICTION')) selectOpportunity('opp_grid_es');
+      document.querySelectorAll('.lens-button').forEach(b=>b.classList.toggle('active',b.dataset.lens===lens));
+      renderAll();
+    }
+
+    function renderCanvasMode() {
+      const isGraph=state.lens==='TRANSMISSION';
+      const isHistory=state.lens==='HISTORY';
+      mapSvg.classed('hidden',isGraph||isHistory);
+      graphSvg.classed('hidden',!isGraph);
+      historySvg.classed('hidden',!isHistory);
+      document.getElementById('metricBox').classList.toggle('hidden',isGraph||isHistory);
+      if(isGraph){ document.getElementById('canvasTitle').textContent='Transmission lens'; document.getElementById('canvasSubtitle').textContent='Observed, inferred and contradicting relations remain distinct'; renderGraph(); }
+      else if(isHistory){ document.getElementById('canvasTitle').textContent='Historical replay'; document.getElementById('canvasSubtitle').textContent='What AXIGNAL knew at each synthetic point in time'; renderHistory(); }
+      else { document.getElementById('canvasTitle').textContent=state.countryId?`${countriesData[state.countryId].name} opportunity climate`:'Global opportunity climate'; document.getElementById('canvasSubtitle').textContent='Newly corroborated synthetic opportunity claims · 90-day window'; renderMap(); }
+    }
+
+    function renderAll() {
+      renderBreadcrumbs();
+      renderCanvasMode();
+      renderRail();
+      document.getElementById('timeRange').value=state.timeIndex;
+      document.getElementById('timeLabel').textContent=`${state.timeIndex===6?'Current':'As of'} · ${dates[state.timeIndex]}${state.compare?' · comparing current':''}`;
+      document.getElementById('canvasStatus').textContent=`Synthetic prototype · 12 countries covered · as of ${dates[state.timeIndex]}`;
+      document.getElementById('saveBtn').textContent=state.saved?'Trail saved':'Save trail';
+      document.querySelectorAll('.lens-button').forEach(b=>b.classList.toggle('active',b.dataset.lens===state.lens));
+    }
+
+    document.querySelectorAll('.lens-button').forEach(b=>b.addEventListener('click',()=>setLens(b.dataset.lens)));
+    document.getElementById('timeRange').addEventListener('input',e=>{state.timeIndex=Number(e.target.value); renderAll();});
+    document.getElementById('currentBtn').addEventListener('click',()=>{state.timeIndex=6;state.compare=false;renderAll();});
+    document.getElementById('compareBtn').addEventListener('click',()=>{state.compare=!state.compare;renderAll();});
+    let timer=null;
+    document.getElementById('playBtn').addEventListener('click',()=>{
+      if(timer){clearInterval(timer);timer=null;document.getElementById('playBtn').textContent='Play';return;}
+      document.getElementById('playBtn').textContent='Pause';
+      timer=setInterval(()=>{state.timeIndex=(state.timeIndex+1)%7;renderAll();},850);
+    });
+    document.getElementById('saveBtn').addEventListener('click',()=>{state.saved=!state.saved;renderAll();});
+    document.getElementById('explainBtn').addEventListener('click',()=>{state.explanation=true;if(!state.opportunityId)state.opportunityId='opp_grid_es';renderAll();});
+    document.getElementById('command').addEventListener('input',e=>{
+      const q=e.target.value.trim().toLowerCase();
+      if(!q)return;
+      const c=Object.entries(countriesData).find(([,v])=>v.name.toLowerCase().includes(q));
+      const o=Object.entries(opportunities).find(([,v])=>v.title.toLowerCase().includes(q));
+      if(o) selectOpportunity(o[0]); else if(c) selectCountry(c[0]);
+    });
+    document.addEventListener('keydown',e=>{
+      if(e.key==='/' && document.activeElement.tagName!=='INPUT'){e.preventDefault();document.getElementById('command').focus();}
+      if(document.activeElement.tagName==='INPUT')return;
+      const key=e.key.toLowerCase();
+      if(key==='g')setLens('OPPORTUNITY'); if(key==='a')setLens('TRANSMISSION'); if(key==='h')setLens('HISTORY'); if(key==='e')setLens('EVIDENCE'); if(key==='c')setLens('CONTRADICTION'); if(key==='s'){state.saved=true;renderAll();}
+      if(e.key==='Escape'){ if(state.evidenceId)state.evidenceId=null; else if(state.claimId)state.claimId=null; else if(state.opportunityId)state.opportunityId=null; else if(state.countryId)state.countryId=null; state.explanation=false; renderAll(); }
+    });
+    window.addEventListener('resize',()=>renderCanvasMode());
+
+    renderAll();
+  </script>
+</body>
+</html>

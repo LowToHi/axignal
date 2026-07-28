@@ -1,0 +1,274 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://axignal.com/schemas/research-run.schema.json",
+  "title": "AXIGNAL ResearchRun",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "research_run_id",
+    "context_id",
+    "tenant_scope",
+    "question",
+    "locale",
+    "state",
+    "source_plan",
+    "budgets",
+    "outputs",
+    "created_at",
+    "updated_at"
+  ],
+  "properties": {
+    "research_run_id": {
+      "type": "string",
+      "pattern": "^rr_[A-Za-z0-9_-]{8,}$"
+    },
+    "context_id": {
+      "type": "string",
+      "pattern": "^ctx_[A-Za-z0-9_-]{8,}$"
+    },
+    "tenant_scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scope_type"],
+      "properties": {
+        "scope_type": {
+          "enum": ["GLOBAL", "TENANT_PRIVATE", "ENTERPRISE_PRIVATE"]
+        },
+        "tenant_id": {
+          "type": ["string", "null"]
+        },
+        "private_knowledge_authorised": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "question": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 8000
+    },
+    "original_message": {
+      "type": ["string", "null"]
+    },
+    "locale": {
+      "enum": ["en", "es", "fr", "de", "pt-BR", "zh-Hans"]
+    },
+    "intent": {
+      "enum": [
+        "INVESTIGATE_OPPORTUNITY",
+        "RESEARCH_EXTERNAL_CONTEXT",
+        "FIND_ADVERSE_EVIDENCE",
+        "REFRESH_EVIDENCE",
+        "BUILD_RESEARCH_DOSSIER",
+        "MONITOR_SUBJECT"
+      ]
+    },
+    "state": {
+      "enum": [
+        "PLANNED",
+        "AWAITING_CONFIRMATION",
+        "QUEUED",
+        "RETRIEVING",
+        "EXTRACTING",
+        "SYNTHESISING",
+        "EVIDENCE_COLLECTED",
+        "CLAIMS_PROPOSED",
+        "DOSSIER_READY",
+        "ADMISSION_QUEUED",
+        "COMPLETED",
+        "CANCELLED",
+        "BUDGET_EXHAUSTED",
+        "RIGHTS_BLOCKED",
+        "SOURCE_UNAVAILABLE",
+        "INSUFFICIENT_EVIDENCE",
+        "CONTESTED",
+        "FAILED",
+        "EXPIRED"
+      ]
+    },
+    "subjects": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "opportunity_ids": {
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        },
+        "claim_ids": {
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        },
+        "entity_ids": {
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        },
+        "geography_ids": {
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        },
+        "universes": {
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        }
+      }
+    },
+    "source_plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["classes", "browser_allowed", "primary_sources_preferred"],
+      "properties": {
+        "classes": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "AXIGNAL_GLOBAL",
+              "TENANT_PRIVATE",
+              "OFFICIAL_API",
+              "LICENSED_API",
+              "INSTITUTIONAL_DOCUMENT",
+              "LICENSED_EVENT_FEED",
+              "AUTHORISED_BROWSER"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "source_ids": {
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        },
+        "browser_allowed": {
+          "type": "boolean"
+        },
+        "primary_sources_preferred": {
+          "type": "boolean"
+        },
+        "rights_policy_version": {
+          "type": ["string", "null"]
+        }
+      }
+    },
+    "budgets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_searches",
+        "max_documents",
+        "max_input_tokens",
+        "max_output_tokens",
+        "max_cost_minor_units",
+        "currency",
+        "max_duration_seconds"
+      ],
+      "properties": {
+        "max_searches": {"type": "integer", "minimum": 0},
+        "max_documents": {"type": "integer", "minimum": 0},
+        "max_input_tokens": {"type": "integer", "minimum": 0},
+        "max_output_tokens": {"type": "integer", "minimum": 0},
+        "max_cost_minor_units": {"type": "integer", "minimum": 0},
+        "currency": {"type": "string", "pattern": "^[A-Z]{3}$"},
+        "max_duration_seconds": {"type": "integer", "minimum": 1}
+      }
+    },
+    "actual_usage": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "searches": {"type": "integer", "minimum": 0},
+        "documents": {"type": "integer", "minimum": 0},
+        "input_tokens": {"type": "integer", "minimum": 0},
+        "cached_input_tokens": {"type": "integer", "minimum": 0},
+        "output_tokens": {"type": "integer", "minimum": 0},
+        "cost_minor_units": {"type": "integer", "minimum": 0},
+        "duration_seconds": {"type": "number", "minimum": 0}
+      }
+    },
+    "stopping_rule": {
+      "type": ["string", "null"]
+    },
+    "falsification_conditions": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "outputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidence_ids",
+        "candidate_claim_ids",
+        "contradiction_ids",
+        "unknown_ids"
+      ],
+      "properties": {
+        "evidence_ids": {
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        },
+        "candidate_claim_ids": {
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        },
+        "contradiction_ids": {
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        },
+        "unknown_ids": {
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        },
+        "dossier_id": {
+          "type": ["string", "null"]
+        },
+        "admission_batch_id": {
+          "type": ["string", "null"]
+        }
+      }
+    },
+    "model_routes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["route_id", "provider_type", "model_id", "purpose"],
+        "properties": {
+          "route_id": {"type": "string"},
+          "provider_type": {"enum": ["LOCAL", "EXTERNAL_API", "DETERMINISTIC"]},
+          "model_id": {"type": "string"},
+          "purpose": {"type": "string"},
+          "method_version": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "failure": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "code": {"type": "string"},
+        "message": {"type": "string"},
+        "retryable": {"type": "boolean"}
+      }
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    }
+  }
+}

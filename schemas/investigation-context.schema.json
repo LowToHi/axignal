@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://axignal.com/schemas/investigation-context.schema.json",
+  "title": "AXIGNAL Investigation Context",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["context_id", "version", "locale", "lens", "time", "geographies", "entities", "universes", "filters", "selection", "coverage", "history"],
+  "properties": {
+    "context_id": {"type": "string", "pattern": "^ctx_[A-Za-z0-9_-]{8,}$"},
+    "version": {"type": "integer", "minimum": 1},
+    "locale": {"enum": ["en", "es", "fr", "de", "pt-BR", "zh-Hans"]},
+    "original_query": {"type": ["string", "null"]},
+    "query_language": {"type": ["string", "null"]},
+    "lens": {"enum": ["AUTO", "GLOBE", "GRAPH", "DUAL"]},
+    "lens_reason": {"type": ["string", "null"]},
+    "time": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode"],
+      "properties": {
+        "mode": {"enum": ["CURRENT", "AS_OF", "RANGE", "COMPARE"]},
+        "as_of": {"type": ["string", "null"], "format": "date-time"},
+        "from": {"type": ["string", "null"], "format": "date-time"},
+        "to": {"type": ["string", "null"], "format": "date-time"},
+        "compare_to": {"type": ["string", "null"], "format": "date-time"}
+      }
+    },
+    "geographies": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "entities": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "universes": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "filters": {"type": "object", "additionalProperties": true},
+    "selection": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "opportunity_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "claim_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "evidence_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "graph_node_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": {"enum": ["AVAILABLE", "PARTIAL", "UNAVAILABLE", "UNLICENSED", "UNKNOWN"]},
+        "summary": {"type": ["string", "null"]},
+        "source_ids": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "rail_mode": {"enum": ["CONTEXT", "OPPORTUNITY", "CLAIM", "EVIDENCE", "EXPLANATION", "COVERAGE", "RESEARCH", "DOSSIER"]},
+    "research": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "active_run_ids": {
+          "type": "array",
+          "items": {"type": "string", "pattern": "^rr_[A-Za-z0-9_-]{8,}$"},
+          "uniqueItems": true
+        },
+        "selected_run_id": {
+          "type": ["string", "null"]
+        },
+        "last_completed_run_id": {
+          "type": ["string", "null"]
+        },
+        "selected_run_state": {
+          "type": ["string", "null"]
+        },
+        "provisional_evidence_ids": {
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        },
+        "candidate_claim_ids": {
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        },
+        "dossier_id": {
+          "type": ["string", "null"]
+        },
+        "admission_batch_id": {
+          "type": ["string", "null"]
+        }
+      }
+    },
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["event_id", "event_type", "occurred_at"],
+        "properties": {
+          "event_id": {"type": "string"},
+          "event_type": {"type": "string"},
+          "occurred_at": {"type": "string", "format": "date-time"},
+          "command_plan_id": {"type": ["string", "null"]},
+          "research_run_id": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "entitlement_snapshot_id": {"type": ["string", "null"]},
+    "saved_trail_id": {"type": ["string", "null"]},
+    "updated_at": {"type": "string", "format": "date-time"}
+  }
+}

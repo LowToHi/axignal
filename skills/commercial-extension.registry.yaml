@@ -1,0 +1,125 @@
+version: 0.1.0-candidate
+goal_id: AXIGNAL-GOAL-001
+status: PROPOSED_EXTENSION
+canonical_brand: AXIGNAL
+canonical_domain: axignal.com
+merge_target: skills/registry.yaml
+activation_rule: Skills in this extension MUST NOT become ACTIVE until merged into the canonical registry, validated against schemas/skill.schema.json and approved by the applicable gate.
+
+skills:
+  - skill_id: conversion-copy-strategist
+    version: 0.1.0
+    state: PROPOSED
+    category: commercial
+    phases: [F1, F6, F9, F12]
+    contracts: ["00", "06", "16", "21", "24"]
+    triggers: [headline, copy, value-proposition, faq, cta, landing]
+    purpose: Produce truthful, differentiated and testable conversion copy grounded in deployed product capability.
+    prohibited_actions:
+      - invent customers, metrics, coverage or endorsements
+      - imply personalised investment advice
+      - hide uncertainty, limits or pricing terms
+
+  - skill_id: pricing-and-packaging-analyst
+    version: 0.1.0
+    state: PROPOSED
+    category: commercial
+    phases: [F1, F9, F12]
+    contracts: ["01", "08", "11", "22", "23"]
+    triggers: [pricing, package, plan, willingness-to-pay, value-metric]
+    purpose: Design and validate packaging, value metrics, price hypotheses and commercial gates.
+    prohibited_actions:
+      - publish unvalidated prices as established facts
+      - optimise revenue without margin, retention and support evidence
+      - use fake discount or scarcity patterns
+
+  - skill_id: entitlement-architect
+    version: 0.1.0
+    state: PROPOSED
+    category: platform
+    phases: [F2, F9, F11, F12]
+    contracts: ["04", "06", "07", "22"]
+    triggers: [entitlement, quota, capability, plan-limit, overage]
+    purpose: Map marketed capabilities to versioned server-enforced entitlements and source-right constraints.
+    prohibited_actions:
+      - rely on frontend-only enforcement
+      - let plan grants override source rights or jurisdiction limits
+      - allow silent paid overages
+
+  - skill_id: experimentation-engineer
+    version: 0.1.0
+    state: PROPOSED
+    category: analytics
+    phases: [F1, F2, F9, F12]
+    contracts: ["06", "08", "11", "21", "22", "23"]
+    triggers: [experiment, ab-test, variant, assignment, conversion]
+    purpose: Implement registered, reproducible experiments with guardrails, stopping rules and rollback.
+    prohibited_actions:
+      - select primary metrics after results are known
+      - run deceptive, inaccessible or privacy-weakening variants
+      - ship conversion gains with material guardrail failure
+
+  - skill_id: seo-architect
+    version: 0.1.0
+    state: PROPOSED
+    category: acquisition
+    phases: [F1, F2, F6, F9, F12]
+    contracts: ["16", "21", "23", "24"]
+    triggers: [seo, metadata, structured-data, sitemap, hreflang, content]
+    purpose: Build crawlable multilingual acquisition surfaces with accurate structured data and material user value.
+    prohibited_actions:
+      - generate thin programmatic pages for ranking manipulation
+      - publish unsupported economic assertions
+      - let SEO requirements override accessibility or performance
+
+  - skill_id: crm-automation-engineer
+    version: 0.1.0
+    state: PROPOSED
+    category: operations
+    phases: [F2, F9, F12]
+    contracts: ["04", "06", "18", "23"]
+    triggers: [crm, lead, scheduling, lifecycle, follow-up, routing]
+    purpose: Implement auditable, purpose-limited lead routing, scheduling, lifecycle and communication automation.
+    prohibited_actions:
+      - write to canonical claims or research state
+      - ignore communication preferences
+      - create unbounded or unauditable outreach loops
+
+  - skill_id: trust-center-editor
+    version: 0.1.0
+    state: PROPOSED
+    category: trust
+    phases: [F1, F6, F9, F11, F12]
+    contracts: ["02", "03", "06", "10", "15", "16", "24"]
+    triggers: [methodology, trust-center, security-page, privacy-page, status, correction]
+    purpose: Maintain public methodology and trust statements against current contracts, evidence and review ownership.
+    prohibited_actions:
+      - invent certifications or controls
+      - hide known limitations or correction history
+      - publish claims without accountable review source
+
+  - skill_id: acquisition-funnel-analyst
+    version: 0.1.0
+    state: PROPOSED
+    category: analytics
+    phases: [F1, F2, F9, F12]
+    contracts: ["01", "06", "08", "21", "23"]
+    triggers: [funnel, activation, attribution, retention, acquisition-cost, payback]
+    purpose: Connect acquisition activity to first-investigation value, paid conversion, retention and economics.
+    prohibited_actions:
+      - validate channels from traffic or CTR alone
+      - present attribution estimates as causal truth
+      - recommend scaling without activation, margin and payback evidence
+
+  - skill_id: visual-fidelity-auditor
+    version: 0.1.0
+    state: PROPOSED
+    category: experience
+    phases: [F1, F2, F5, F9]
+    contracts: ["05", "08", "12", "13", "20", "21"]
+    triggers: [reference, fidelity, screenshot, visual-regression, drift]
+    purpose: Compare implementation with ADR-007 and versioned reference assets while preserving accessibility and semantics.
+    prohibited_actions:
+      - approve generic-dashboard substitution
+      - prefer pixel similarity when it breaks interaction or accessibility
+      - freeze candidate tokens without gate evidence

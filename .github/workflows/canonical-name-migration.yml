@@ -1,0 +1,40 @@
+name: Canonical Name Migration
+
+on:
+  push:
+    branches:
+      - agent/end-to-end-roadmap-v0.3
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/end-to-end-roadmap-v0.3
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Migrate active text artifacts
+        run: python scripts/migrate_canonical_naming.py
+
+      - name: Commit migration if needed
+        run: |
+          if git diff --quiet; then
+            echo "No naming migration required"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Migrate active artifacts to canonical AXIGNAL naming"
+          git push origin HEAD:agent/end-to-end-roadmap-v0.3

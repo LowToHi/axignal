@@ -1,0 +1,62 @@
+:root {
+  color-scheme: dark;
+  --ax-bg-canvas: #070a0e;
+  --ax-bg-panel: #0d141b;
+  --ax-bg-raised: #131d27;
+  --ax-bg-active: #1b2936;
+  --ax-fg-primary: #f3f7fa;
+  --ax-fg-secondary: #aab6c2;
+  --ax-fg-tertiary: #72808e;
+  --ax-border-subtle: #17232e;
+  --ax-border-default: #263746;
+  --ax-brand-signal: #43c8c8;
+  --ax-selection: #72a7ff;
+  --ax-support: #67d39f;
+  --ax-contradiction: #f1b44c;
+  --ax-inferred: #b99cff;
+  --ax-critical: #ff7182;
+  --ax-unknown: #81909e;
+  --ax-font-ui: "Geist", "Noto Sans SC", system-ui, sans-serif;
+  --ax-font-mono: "Geist Mono", ui-monospace, monospace;
+  --ax-radius-xs: 4px;
+  --ax-radius-sm: 7px;
+  --ax-radius-md: 10px;
+  --ax-radius-lg: 14px;
+  --ax-space-1: 0.25rem;
+  --ax-space-2: 0.5rem;
+  --ax-space-3: 0.75rem;
+  --ax-space-4: 1rem;
+  --ax-space-6: 1.5rem;
+  --ax-duration-fast: 140ms;
+  --ax-duration-base: 240ms;
+  --ax-duration-transform: 720ms;
+  --ax-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --ax-bg-canvas: #f5f6f7;
+  --ax-bg-panel: #ffffff;
+  --ax-bg-raised: #f7f9fa;
+  --ax-bg-active: #e9eef1;
+  --ax-fg-primary: #111820;
+  --ax-fg-secondary: #52606e;
+  --ax-fg-tertiary: #74818e;
+  --ax-border-subtle: #e3e8ec;
+  --ax-border-default: #cdd6dd;
+  --ax-brand-signal: #149f9d;
+  --ax-selection: #2768bd;
+  --ax-support: #218b61;
+  --ax-contradiction: #a86b00;
+  --ax-inferred: #7052b8;
+  --ax-critical: #c8394a;
+  --ax-unknown: #6e7781;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --ax-duration-fast: 1ms;
+    --ax-duration-base: 1ms;
+    --ax-duration-transform: 1ms;
+  }
+}

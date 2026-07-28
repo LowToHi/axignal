@@ -1,0 +1,61 @@
+version: 0.1.0
+goal_id: AXIGNAL-GOAL-001
+status: CANDIDATE
+canonical_brand: AXIGNAL
+canonical_domain: axignal.com
+registry_scope: research-retrieval-and-private-knowledge
+
+skills:
+  - skill_id: research-run-orchestrator
+    version: 0.1.0
+    state: CONTRACTED
+    category: research
+    phases: [F1, F4, F7, F8, F9]
+    contracts: ["17", "25", "27"]
+    triggers: [research-run, investigate, dossier, monitor, cancellation, research-progress]
+    purpose: Govern typed ResearchRun planning, budgets, lifecycle, progress, cancellation and outputs.
+
+  - skill_id: retrieval-policy-engineer
+    version: 0.1.0
+    state: CONTRACTED
+    category: research
+    phases: [F4, F6, F8, F11]
+    contracts: ["03", "07", "16", "25", "26"]
+    triggers: [rag, retrieval, vector, lexical, graph-search, source-precedence]
+    purpose: Enforce domain-scoped hybrid retrieval, source precedence, metadata filters and explainable ranking.
+
+  - skill_id: authorised-browser-researcher
+    version: 0.1.0
+    state: CONTRACTED
+    category: research
+    phases: [F4, F8, F11]
+    contracts: ["03", "06", "08", "25", "27"]
+    triggers: [browser, web-research, document-discovery, external-event, primary-source]
+    purpose: Execute bounded lawful Browser research with provenance, prompt-injection resistance and stopping rules.
+
+  - skill_id: tenant-memory-engineer
+    version: 0.1.0
+    state: CONTRACTED
+    category: privacy
+    phases: [F4, F7, F9, F11]
+    contracts: ["06", "15", "25", "26"]
+    triggers: [private-knowledge, tenant-memory, upload, private-document, preference, deletion]
+    purpose: Implement tenant isolation, purpose controls, RLS, private retrieval and deletion propagation.
+
+  - skill_id: local-model-operator
+    version: 0.1.0
+    state: CONTRACTED
+    category: operations
+    phases: [F2, F3, F7, F8, F10, F11, F12]
+    contracts: ["08", "19", "27", ADR-010]
+    triggers: [local-model, gpu, continuous-worker, model-routing, inference-budget]
+    purpose: Operate bounded local model routes with evaluation, resource controls, telemetry and kill switches.
+
+  - skill_id: candidate-claim-pipeline-engineer
+    version: 0.1.0
+    state: CONTRACTED
+    category: epistemic
+    phases: [F3, F4, F7, F8, F10, F11]
+    contracts: ["02", "03", "17", "25", "27", ADR-010]
+    triggers: [candidate-claim, extraction, contradiction, admission-handoff, proposal-authority]
+    purpose: Produce schema-valid Candidate Claims and evidence lineage while proving models lack canonical admission authority.

@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://axignal.com/schemas/user-intent-event.schema.json",
+  "title": "AXIGNAL User Intent Event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["event_id", "occurred_at", "pseudonymous_user_id", "pseudonymous_org_id", "intent", "language", "origin_surface", "geographies", "entities", "universes", "interpretation_confidence", "purpose_permissions", "retention_class"],
+  "properties": {
+    "event_id": {"type": "string", "pattern": "^uie_[A-Za-z0-9_-]{8,}$"},
+    "occurred_at": {"type": "string", "format": "date-time"},
+    "pseudonymous_user_id": {"type": "string", "minLength": 8},
+    "pseudonymous_org_id": {"type": "string", "minLength": 8},
+    "intent": {"type": "string", "minLength": 3},
+    "language": {"enum": ["en", "es", "fr", "de", "pt-BR", "zh-Hans"]},
+    "origin_surface": {"enum": ["NAVIGATOR", "GLOBE", "GRAPH", "TIMELINE", "CLAIM_RAIL", "SEARCH", "WATCHLIST", "API"]},
+    "geographies": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "entities": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "universes": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "time_horizon": {"type": ["object", "null"], "additionalProperties": true},
+    "interpretation_confidence": {"type": "number", "minimum": 0, "maximum": 1},
+    "interaction_origin": {"enum": ["SPONTANEOUS", "SUGGESTED_PROMPT", "CAMPAIGN", "INTERNAL_TEST", "API_AUTOMATION", "UNKNOWN"]},
+    "raw_message_reference": {"type": ["string", "null"]},
+    "purpose_permissions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["execute_investigation", "private_memory", "product_improvement", "aggregate_tides", "model_evaluation"],
+      "properties": {
+        "execute_investigation": {"type": "boolean"},
+        "private_memory": {"type": "boolean"},
+        "product_improvement": {"type": "boolean"},
+        "aggregate_tides": {"type": "boolean"},
+        "model_evaluation": {"type": "boolean"}
+      }
+    },
+    "retention_class": {"enum": ["TRANSIENT", "SHORT", "STANDARD", "CONFIRMED_PREFERENCE", "AUDIT"]},
+    "bot_or_internal": {"type": "boolean", "default": false},
+    "eligible_for_tides": {"type": "boolean"},
+    "deletion_requested_at": {"type": ["string", "null"], "format": "date-time"}
+  }
+}

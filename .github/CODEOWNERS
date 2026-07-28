@@ -1,0 +1,12 @@
+# Initial single-owner map. Replace with team ownership as maintainers are added.
+* @LowToHi
+
+/docs/contracts/ @LowToHi
+/docs/adr/ @LowToHi
+/schemas/ @LowToHi
+/openapi/ @LowToHi
+/skills/ @LowToHi
+/apps/web/ @LowToHi
+/apps/landing/ @LowToHi
+/apps/api/ @LowToHi
+/.github/workflows/ @LowToHi

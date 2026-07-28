@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://axignal.com/schemas/skill.schema.json",
+  "title": "AXIGNAL Dynamic Skill",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "skill_id",
+    "version",
+    "state",
+    "purpose",
+    "triggers",
+    "contracts",
+    "inputs",
+    "outputs",
+    "prohibited_actions",
+    "tests",
+    "telemetry",
+    "owner",
+    "conflict_precedence"
+  ],
+  "properties": {
+    "skill_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]+$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "state": {
+      "enum": ["DISCOVERED", "PROPOSED", "CONTRACTED", "TESTED", "ACTIVE", "MONITORED", "REVISED", "DEPRECATED", "REVOKED"]
+    },
+    "purpose": {
+      "type": "string",
+      "minLength": 10
+    },
+    "triggers": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["task_types", "impact_levels", "keywords"],
+      "properties": {
+        "task_types": {
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        },
+        "impact_levels": {
+          "type": "array",
+          "items": {"enum": ["SECURITY", "PRIVACY", "DATA_RIGHTS", "REGULATORY", "MULTILINGUAL", "EPISTEMIC", "BILLING", "UX", "OPERATIONS"]},
+          "uniqueItems": true
+        },
+        "keywords": {
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        },
+        "always_on": {"type": "boolean", "default": false}
+      }
+    },
+    "contracts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string"},
+      "uniqueItems": true
+    },
+    "inputs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string"}
+    },
+    "outputs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string"}
+    },
+    "prohibited_actions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string"}
+    },
+    "tests": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["test_id", "description", "required"],
+        "properties": {
+          "test_id": {"type": "string"},
+          "description": {"type": "string"},
+          "required": {"type": "boolean"},
+          "fixture": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "telemetry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["record_activation", "record_version", "record_outputs", "record_failures"],
+      "properties": {
+        "record_activation": {"type": "boolean"},
+        "record_version": {"type": "boolean"},
+        "record_outputs": {"type": "boolean"},
+        "record_failures": {"type": "boolean"}
+      }
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "conflict_precedence": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1000
+    },
+    "supersedes": {
+      "type": ["string", "null"]
+    },
+    "deactivation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kill_switch": {"type": ["string", "null"]},
+        "rollback": {"type": ["string", "null"]}
+      }
+    }
+  }
+}
