@@ -1,0 +1,25 @@
+[Unit]
+Description=AXIGNAL private pilot backup
+Requires=docker.service
+After=docker.service network-online.target
+ConditionPathExists={{ axignal_env_path }}
+ConditionPathExists={{ axignal_state_root }}/current.json
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+Environment=AXIGNAL_REMOTE_ROOT={{ axignal_root }}
+Environment=AXIGNAL_PILOT_ENV_FILE={{ axignal_env_path }}
+Environment=AXIGNAL_REMOTE_STATE_ROOT={{ axignal_state_root }}
+Environment=AXIGNAL_REMOTE_BACKUP_ROOT={{ axignal_backup_root }}
+Environment=AXIGNAL_BACKUP_RETENTION_DAYS={{ axignal_backup_retention_days }}
+ExecStart=/usr/local/sbin/axignal-remote-backup
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths={{ axignal_backup_root }} {{ axignal_state_root }} /var/run/docker.sock
