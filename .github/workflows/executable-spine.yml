@@ -8,6 +8,7 @@ on:
       - "infra/**"
       - "scripts/**"
       - "tests/**"
+      - "docs/roadmap/**"
       - "package.json"
       - "pnpm-lock.yaml"
       - "pnpm-workspace.yaml"
@@ -114,9 +115,9 @@ jobs:
           retention-days: 7
 
   services:
-    name: Persistent research, proposal isolation and deterministic admission
+    name: Persistent research, authority isolation and migration rehearsal
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     env:
       AXIGNAL_DATABASE_URL: postgresql://axignal:axignal@127.0.0.1:5432/axignal
       AXIGNAL_PROPOSAL_DATABASE_URL: postgresql://axignal_proposal_worker:axignal_proposal_worker@127.0.0.1:5432/axignal
@@ -150,6 +151,11 @@ jobs:
           test "$count" = "3"
       - name: Verify Valkey
         run: test "$(docker compose exec -T valkey valkey-cli ping)" = "PONG"
+      - name: Rehearse cumulative migrations and snapshot restore
+        shell: bash
+        run: |
+          set -o pipefail
+          bash scripts/verify_cumulative_migration_rehearsal.sh 2>&1 | tee cumulative-migration-rehearsal.log
       - name: Run authenticated persistent research acceptance
         shell: bash
         run: |
@@ -165,12 +171,13 @@ jobs:
         run: |
           set -o pipefail
           python scripts/verify_deterministic_admission_runtime.py 2>&1 | tee deterministic-admission-acceptance.log
-      - name: Upload persistent research diagnostics
+      - name: Upload persistent and migration diagnostics
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: persistent-research-diagnostics
           path: |
+            cumulative-migration-rehearsal.log
             persistent-research-acceptance.log
             persistent-proposal-worker-acceptance.log
             deterministic-admission-acceptance.log

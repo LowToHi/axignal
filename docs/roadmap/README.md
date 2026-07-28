@@ -1,10 +1,10 @@
 # AXIGNAL End-to-End Development Map
 
-Version: `0.5.0`
-Status: `CANDIDATE / EVOLVING UNTIL FINAL MAP FREEZE`
+Version: `0.6.0`
+Status: `CANDIDATE / CONSOLIDATED EXECUTION MAP`
 Goal ID: `AXIGNAL-GOAL-001`
 
-This directory is the execution map that connects the AXIGNAL product goal to phases, tasks, contracts, dynamic skills, evidence and gates.
+This directory connects the AXIGNAL product goal to phases, tasks, contracts, dynamic skills, implementation evidence and independent gates.
 
 ## Execution chain
 
@@ -20,7 +20,7 @@ Goal Lock
 → Next authorised phase
 ```
 
-No development agent may skip a layer or infer a different product goal from an isolated task.
+No development agent may skip a layer, infer a different product goal from an isolated task or represent implemented code as an accepted phase without its gate evidence.
 
 ## Documents
 
@@ -32,10 +32,12 @@ No development agent may skip a layer or infer a different product goal from an 
 | [03 — Contract Map](03-contract-map.md) | Which contracts govern each capability and phase |
 | [04 — Dynamic Skill Map](04-dynamic-skill-map.md) | Core skill lifecycle, routing and activation rules |
 | [05 — Dependency and Gate Graph](05-dependency-and-gates.md) | Authorisation order, evidence and fail-closed transitions |
-| [07 — Visual System Validation](07-visual-system-validation.md) | Candidate brand/UI directions, automated checks, user tests and non-freeze gate |
-| [08 — Marketing, Pricing and Conversion](08-marketing-pricing-and-conversion-work-package.md) | Product fidelity, landing, pricing, FAQ, Trust Center, analytics and commercial validation |
-| [09 — Commercial Dynamic Skills](09-commercial-dynamic-skill-map.md) | Candidate skills and task routing for fidelity, conversion, pricing, acquisition, CRM, SEO and trust |
-| [10 — Research, Retrieval and Candidate Claims](10-research-retrieval-and-candidate-claims-work-package.md) | ResearchRun, authorised retrieval, tenant memory, Candidate Claims, dossier and admission handoff |
+| [06 — Current Execution State](06-current-execution-state.md) | Evidence-backed phase status and currently authorised priority |
+| [07 — Visual System Validation](07-visual-system-validation.md) | Candidate UI directions, automated checks and user-test gate |
+| [08 — Marketing, Pricing and Conversion](08-marketing-pricing-and-conversion-work-package.md) | Landing, pricing, FAQ, Trust Center, analytics and commercial validation |
+| [09 — Commercial Dynamic Skills](09-commercial-dynamic-skill-map.md) | Candidate skills for conversion, pricing, acquisition, CRM, SEO and trust |
+| [10 — Research, Retrieval and Candidate Claims](10-research-retrieval-and-candidate-claims-work-package.md) | ResearchRun, retrieval, tenant memory, proposals, dossier and admission handoff |
+| [11 — Consolidated Executable Baseline](11-consolidated-baseline.md) | Integration, migration rehearsal, supersession and rollback gate |
 
 ## Normative execution contracts
 
@@ -50,7 +52,7 @@ No development agent may skip a layer or infer a different product goal from an 
 - [`schemas/candidate-claim.schema.json`](../../schemas/candidate-claim.schema.json)
 - [`schemas/tenant-knowledge-item.schema.json`](../../schemas/tenant-knowledge-item.schema.json)
 
-All registry files are validated as one ID set. A duplicate skill ID, identity mismatch or missing required specialist skill fails closed.
+All registry files are validated as one ID set. Duplicate IDs, identity mismatches or missing required specialist skills fail closed.
 
 ## Status hierarchy
 
@@ -66,6 +68,7 @@ Phase state:
 - `LOCKED`
 - `AUTHORISED`
 - `IN_PROGRESS`
+- `EVIDENCE_READY`
 - `GATE_REVIEW`
 - `PASSED`
 - `FAILED`
@@ -84,33 +87,46 @@ Task state:
 
 ## Current position
 
-- Foundation contracts: created in PR #1 and consolidated into the active roadmap PR.
-- UX research and map-first prototype: created in PR #4 and consolidated into the active roadmap PR.
-- The selected Investigation Shell composition is accepted as the prototype fidelity target through ADR-007.
-- The executable shell now has a typed, persistent and CI-green InvestigationContext vertical slice.
-- Exact production colours, typography, dimensions and motion remain unfrozen under Contract 20.
-- The current visual implementation must preserve:
-  - persistent Navigator chat;
-  - `AUTO / GLOBE / GRAPH / DUAL` in the primary context bar;
-  - dominant Globe or Graph canvas;
-  - opportunities and Claim/Evidence Rail;
-  - persistent Timeline;
-  - dark Signal Teal and first-class light counterpart;
-  - shared InvestigationContext and epistemic semantics.
-- The public acquisition system is governed by Contracts 21–24 and Issue #6.
-- Navigator Research Mode is now governed by Contracts 25–27 and ADR-009–010.
-- The research architecture requires:
-  - a visible and budgeted ResearchRun;
-  - official APIs before Browser where available;
-  - authorised Browser retrieval with provenance and prompt-injection controls;
-  - three isolated logical knowledge domains on one PostgreSQL/pgvector platform initially;
-  - tenant-private memory with explicit purpose and deletion controls;
-  - Evidence Objects and Candidate Claims before admission;
-  - local and external AI with proposal authority only;
-  - contradiction and unknown discovery;
-  - a traceable dossier and admission-queue handoff.
-- The first research vertical slice must remain synthetic and bounded before real sources, live Browser, customer data or continuous production workers are authorised.
-- Buyer, public copy, plan names, prices, acquisition channels, model routes and initial source licences remain hypotheses until their gates pass.
+The repository now contains an executable, governed alpha vertical slice rather than only a prototype:
+
+```text
+identity
+→ Navigator
+→ persistent ResearchRun
+→ governed source/document processing
+→ Evidence Objects
+→ Candidate Claims
+→ proposal-only AI
+→ independent deterministic admission
+→ append-only Claim Ledger
+→ InvestigationContext
+```
+
+The current evidence supports these statements:
+
+- F0 is in gate review, not merely initial drafting;
+- F1 has an executable prototype but still lacks qualified-user acceptance;
+- F2 is evidence-ready pending cumulative-baseline integration;
+- F3 and F4 have bounded vertical slices but are not general implementations;
+- F5 has a product shell and browser workflow but not validated full parity;
+- F6–F12 remain locked.
+
+The authoritative detailed status is [`06-current-execution-state.md`](06-current-execution-state.md). Static state labels in older roadmap sections must be interpreted through that current evidence document until the next full phase-map revision.
+
+## Consolidation rule
+
+No new functional scope is authorised while the cumulative baseline remains outside `main`.
+
+The consolidation gate requires:
+
+- current `main` ancestry;
+- one cumulative PR;
+- canonical naming and contract validation;
+- full application/API/browser CI;
+- PostgreSQL and Valkey acceptance;
+- cumulative migration replay over seeded prior-state data;
+- snapshot restore proof;
+- closure of superseded stacked PRs after merge.
 
 ## Canonical identity
 
@@ -119,12 +135,10 @@ Task state:
 - Repository: `LowToHi/axignal`
 - Goal ID: `AXIGNAL-GOAL-001`
 
-Any occurrence of `ASIGNAL`, `asignal.com` or `ASIGNAL-GOAL-001` is a naming defect and blocks the relevant gate.
+Any active occurrence of `ASIGNAL`, `asignal.com` or `ASIGNAL-GOAL-001` outside explicitly permitted correction history is a naming defect and blocks the relevant gate.
 
 ## Authorised operational priority
 
-The authorised priority is:
+> Finish and merge the consolidated executable baseline. Then implement bounded human review for `HUMAN_REVIEW_REQUIRED` and `CONTESTED`, followed by F1 qualified-user validation.
 
-> Preserve the faithful AXIGNAL Investigation Shell and conversion system while implementing the bounded synthetic ResearchRun vertical slice: user research request → official-API and authorised-Browser fixtures → Evidence Objects → Candidate Claims → contradictions and unknowns → dossier → admission queue → InvestigationContext update.
-
-This priority does not authorise production-scale source ingestion, unrestricted Browser access, customer private data, a second vector database or model-written canonical claims.
+This priority does not authorise production deployment, unrestricted Browser access, customer private documents, OCR, broad source expansion, billing or model-written canonical claims.
