@@ -1,0 +1,97 @@
+version: 1
+status: private-pilot-candidate
+purpose: investor-incubator-demo
+public_launch_authorised: false
+billing_enabled: false
+human_study_required_before_public_claims: true
+
+entrypoint:
+  service: caddy
+  tls: automatic-when-domain-configured
+  direct_api_exposure: false
+  security_headers: required
+
+services:
+  - id: caddy
+    exposure: edge
+    healthcheck: GET /api/health
+    restart_policy: unless-stopped
+  - id: web
+    exposure: internal
+    credential_env: AXIGNAL_SESSION_SECRET
+    healthcheck: GET /api/health
+    restart_policy: unless-stopped
+  - id: api
+    exposure: internal
+    credential_env: AXIGNAL_DATABASE_URL
+    healthcheck: GET /readyz
+    restart_policy: unless-stopped
+  - id: postgres
+    exposure: internal
+    persistence: pilot-postgres
+    backup: pg_dump-custom-format
+  - id: valkey
+    exposure: internal
+    persistence: pilot-valkey
+    durability: appendonly-everysec
+  - id: object-store
+    exposure: internal
+    persistence: pilot-objects
+    integrity: sha256-content-addressed
+  - id: research-worker
+    profile: workers
+    credential_env: AXIGNAL_DATABASE_URL
+    restart_policy: on-failure
+  - id: proposal-worker
+    profile: workers
+    credential_env: AXIGNAL_PROPOSAL_DATABASE_URL
+    restart_policy: on-failure
+  - id: admission-runtime
+    profile: workers
+    credential_env: AXIGNAL_ADMISSION_DATABASE_URL
+    restart_policy: on-failure
+  - id: scheduler
+    profile: workers
+    credential_env: AXIGNAL_SCHEDULER_DATABASE_URL
+    restart_policy: unless-stopped
+  - id: otel-collector
+    profile: observability
+    exposure: internal
+
+security:
+  repository_secrets_allowed: 0
+  api_public_ports_allowed: 0
+  database_public_ports_allowed: 0
+  direct_participant_pii: false
+  live_sources_enabled: false
+  validation_campaign_enabled: false
+  required_secret_classes:
+    - database-admin
+    - proposal-runtime
+    - admission-runtime
+    - human-review-runtime
+    - validation-runtime
+    - validation-analyst
+    - scheduler-runtime
+    - web-session
+    - identity-assertion
+
+canonical_demo:
+  route: /demo
+  fixture: ctx_moscow_real_estate_v01
+  synthetic: true
+  required_states:
+    - model-proposal
+    - deterministic-decision
+    - human-review
+    - canonical-claim
+    - contradiction
+    - unknown
+  reset: browser-local-state-only
+  canonical_mutation_allowed: false
+
+operations:
+  backup_required_before_upgrade: true
+  restore_rehearsal_required: true
+  deployment_manifest_sha_required: true
+  rollback: restore-database-and-redeploy-previous-sha

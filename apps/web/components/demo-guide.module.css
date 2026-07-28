@@ -1,0 +1,150 @@
+.guide {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: grid;
+  gap: 1rem;
+  padding: 1.1rem 1.25rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--border, #3b3b3b) 75%, transparent);
+  background: color-mix(in srgb, var(--surface, #111) 94%, transparent);
+  backdrop-filter: blur(18px);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.header h1 {
+  max-width: 34rem;
+  margin: 0.2rem 0 0;
+  font-size: clamp(1.25rem, 2.8vw, 2.2rem);
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+}
+
+.kicker,
+.step span {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--muted-foreground, #9a9a9a);
+}
+
+.reset,
+.actions button {
+  border: 1px solid var(--border, #444);
+  border-radius: 999px;
+  padding: 0.58rem 0.82rem;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+
+.reset:hover,
+.actions button:hover:not(:disabled) {
+  border-color: currentColor;
+}
+
+.progress {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(1.75rem, 1fr));
+  gap: 0.45rem;
+}
+
+.dot,
+.activeDot {
+  height: 0.3rem;
+  border: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, currentColor 18%, transparent);
+  cursor: pointer;
+}
+
+.activeDot {
+  background: currentColor;
+}
+
+.step {
+  display: grid;
+  grid-template-columns: minmax(11rem, 0.7fr) minmax(16rem, 1fr);
+  gap: 0.35rem 1.5rem;
+  align-items: baseline;
+}
+
+.step span {
+  grid-column: 1;
+}
+
+.step h2 {
+  grid-column: 1;
+  margin: 0;
+  font-size: clamp(1rem, 2vw, 1.35rem);
+}
+
+.step p {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  max-width: 54rem;
+  margin: 0;
+  color: var(--muted-foreground, #a7a7a7);
+  line-height: 1.55;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem 1rem;
+  font-size: 0.72rem;
+  color: var(--muted-foreground, #a7a7a7);
+}
+
+.legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+}
+
+.legend i {
+  width: 0.52rem;
+  height: 0.52rem;
+  border-radius: 50%;
+  background: #8b8b8b;
+}
+
+.legend i[data-kind="proposal"] { background: #9d8cff; }
+.legend i[data-kind="decision"] { background: #f5b942; }
+.legend i[data-kind="human"] { background: #4fc3b3; }
+.legend i[data-kind="canonical"] { background: #75d06f; }
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.8rem;
+}
+
+.actions button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.actions strong {
+  min-width: 3.5rem;
+  text-align: center;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 760px) {
+  .guide { position: relative; }
+  .header { align-items: center; }
+  .step { grid-template-columns: 1fr; }
+  .step p { grid-column: 1; grid-row: auto; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guide { scroll-behavior: auto; }
+}

@@ -1,0 +1,267 @@
+name: axignal-pilot
+
+services:
+  postgres:
+    build:
+      context: ../postgres
+    environment:
+      POSTGRES_DB: ${AXIGNAL_POSTGRES_DB:-axignal}
+      POSTGRES_USER: ${AXIGNAL_POSTGRES_USER:-axignal}
+      POSTGRES_PASSWORD: ${AXIGNAL_POSTGRES_PASSWORD:?required}
+    expose:
+      - "5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${AXIGNAL_POSTGRES_USER:-axignal} -d ${AXIGNAL_POSTGRES_DB:-axignal}"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+    volumes:
+      - pilot-postgres:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  db-hardening:
+    image: postgres:17-alpine
+    environment:
+      AXIGNAL_POSTGRES_DB: ${AXIGNAL_POSTGRES_DB:-axignal}
+      AXIGNAL_POSTGRES_USER: ${AXIGNAL_POSTGRES_USER:-axignal}
+      AXIGNAL_POSTGRES_PASSWORD: ${AXIGNAL_POSTGRES_PASSWORD:?required}
+      AXIGNAL_PROPOSAL_DB_PASSWORD: ${AXIGNAL_PROPOSAL_DB_PASSWORD:?required}
+      AXIGNAL_ADMISSION_DB_PASSWORD: ${AXIGNAL_ADMISSION_DB_PASSWORD:?required}
+      AXIGNAL_HUMAN_REVIEW_DB_PASSWORD: ${AXIGNAL_HUMAN_REVIEW_DB_PASSWORD:?required}
+      AXIGNAL_VALIDATION_DB_PASSWORD: ${AXIGNAL_VALIDATION_DB_PASSWORD:?required}
+      AXIGNAL_VALIDATION_ANALYST_DB_PASSWORD: ${AXIGNAL_VALIDATION_ANALYST_DB_PASSWORD:?required}
+      AXIGNAL_SCHEDULER_DB_PASSWORD: ${AXIGNAL_SCHEDULER_DB_PASSWORD:?required}
+    command: ["bash", "/opt/axignal/harden-db.sh"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+    volumes:
+      - ./harden-db.sh:/opt/axignal/harden-db.sh:ro
+    networks:
+      - backend
+
+  valkey:
+    image: valkey/valkey:8-alpine
+    command: ["valkey-server", "--appendonly", "yes", "--appendfsync", "everysec"]
+    expose:
+      - "6379"
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+    volumes:
+      - pilot-valkey:/data
+    networks:
+      - backend
+
+  api:
+    build:
+      context: ../..
+      dockerfile: infra/runtime/Dockerfile
+    command: ["uvicorn", "axignal_api.application:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
+    environment:
+      AXIGNAL_ENV: pilot
+      AXIGNAL_PILOT_MODE: "true"
+      AXIGNAL_BUILD_SHA: ${AXIGNAL_BUILD_SHA:?required}
+      AXIGNAL_DATABASE_URL: postgresql://${AXIGNAL_POSTGRES_USER:-axignal}:${AXIGNAL_POSTGRES_PASSWORD}@postgres:5432/${AXIGNAL_POSTGRES_DB:-axignal}
+      AXIGNAL_PROPOSAL_DATABASE_URL: postgresql://axignal_proposal_worker:${AXIGNAL_PROPOSAL_DB_PASSWORD:?required}@postgres:5432/${AXIGNAL_POSTGRES_DB:-axignal}
+      AXIGNAL_ADMISSION_DATABASE_URL: postgresql://axignal_admission_runtime_login:${AXIGNAL_ADMISSION_DB_PASSWORD:?required}@postgres:5432/${AXIGNAL_POSTGRES_DB:-axignal}
+      AXIGNAL_HUMAN_REVIEW_DATABASE_URL: postgresql://axignal_human_reviewer_login:${AXIGNAL_HUMAN_REVIEW_DB_PASSWORD:?required}@postgres:5432/${AXIGNAL_POSTGRES_DB:-axignal}
+      AXIGNAL_VALIDATION_DATABASE_URL: postgresql://axignal_validation_runtime_login:${AXIGNAL_VALIDATION_DB_PASSWORD:?required}@postgres:5432/${AXIGNAL_POSTGRES_DB:-axignal}
+      AXIGNAL_VALIDATION_ANALYST_DATABASE_URL: postgresql://axignal_validation_analyst_login:${AXIGNAL_VALIDATION_ANALYST_DB_PASSWORD:?required}@postgres:5432/${AXIGNAL_POSTGRES_DB:-axignal}
+      AXIGNAL_VALKEY_URL: redis://valkey:6379/0
+      AXIGNAL_OBJECT_STORE_BACKEND: local
+      AXIGNAL_OBJECT_STORE_ROOT: /var/lib/axignal/objects
+      AXIGNAL_PERSISTENT_RESEARCH_ENABLED: "true"
+      AXIGNAL_LIVE_SOURCES_ENABLED: "false"
+      AXIGNAL_HUMAN_REVIEWER_SUBJECTS: ${AXIGNAL_AUTH_SUBJECT:?required}
+      AXIGNAL_IDENTITY_ASSERTION_SECRET: ${AXIGNAL_IDENTITY_ASSERTION_SECRET:?required}
+      AXIGNAL_VALIDATION_PARTICIPANT_SALT: ${AXIGNAL_VALIDATION_PARTICIPANT_SALT:?required}
+      AXIGNAL_OTEL_ENABLED: ${AXIGNAL_OTEL_ENABLED:-false}
+      OTEL_SERVICE_NAME: axignal-pilot-api
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+    expose:
+      - "8000"
+    depends_on:
+      db-hardening:
+        condition: service_completed_successfully
+      valkey:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/readyz', timeout=4).read()"]
+      interval: 10s
+      timeout: 6s
+      retries: 30
+    restart: unless-stopped
+    volumes:
+      - pilot-objects:/var/lib/axignal/objects
+    networks:
+      - backend
+
+  web:
+    build:
+      context: ../..
+      dockerfile: infra/pilot/Dockerfile.web
+    environment:
+      AXIGNAL_ENV: pilot
+      AXIGNAL_PILOT_MODE: "true"
+      AXIGNAL_BUILD_SHA: ${AXIGNAL_BUILD_SHA:?required}
+      AXIGNAL_API_URL: http://api:8000
+      AXIGNAL_AUTH_REQUIRED: "true"
+      AXIGNAL_AUTH_EMAIL: ${AXIGNAL_AUTH_EMAIL:?required}
+      AXIGNAL_AUTH_SUBJECT: ${AXIGNAL_AUTH_SUBJECT:?required}
+      AXIGNAL_AUTH_TENANT_ID: ${AXIGNAL_AUTH_TENANT_ID:?required}
+      AXIGNAL_AUTH_PASSWORD_SCRYPT: ${AXIGNAL_AUTH_PASSWORD_SCRYPT:?required}
+      AXIGNAL_SESSION_SECRET: ${AXIGNAL_SESSION_SECRET:?required}
+      AXIGNAL_IDENTITY_ASSERTION_SECRET: ${AXIGNAL_IDENTITY_ASSERTION_SECRET:?required}
+      AXIGNAL_PERSISTENT_RESEARCH_UI_ENABLED: "true"
+      AXIGNAL_DOCUMENT_PROPOSAL_UI_ENABLED: "true"
+      AXIGNAL_HUMAN_REVIEW_UI_ENABLED: "true"
+      AXIGNAL_VALIDATION_UI_ENABLED: "false"
+    expose:
+      - "3000"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(r=>{if(!r.ok)process.exit(1)})"]
+      interval: 10s
+      timeout: 6s
+      retries: 30
+    restart: unless-stopped
+    networks:
+      - backend
+      - edge
+
+  caddy:
+    image: caddy:2.10.0-alpine
+    environment:
+      AXIGNAL_PILOT_SITE_ADDRESS: ${AXIGNAL_PILOT_SITE_ADDRESS:-http://localhost}
+      AXIGNAL_PILOT_ACME_EMAIL: ${AXIGNAL_PILOT_ACME_EMAIL:-}
+    ports:
+      - "${AXIGNAL_PILOT_HTTP_PORT:-8080}:80"
+      - "${AXIGNAL_PILOT_HTTPS_PORT:-8443}:443"
+    depends_on:
+      web:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - pilot-caddy-data:/data
+      - pilot-caddy-config:/config
+    networks:
+      - edge
+
+  research-worker:
+    profiles: ["workers"]
+    build:
+      context: ../..
+      dockerfile: infra/runtime/Dockerfile
+    command: ["python", "-m", "axignal_api.research_worker"]
+    environment:
+      AXIGNAL_DATABASE_URL: postgresql://${AXIGNAL_POSTGRES_USER:-axignal}:${AXIGNAL_POSTGRES_PASSWORD}@postgres:5432/${AXIGNAL_POSTGRES_DB:-axignal}
+      AXIGNAL_VALKEY_URL: redis://valkey:6379/0
+      AXIGNAL_PERSISTENT_RESEARCH_ENABLED: "true"
+      AXIGNAL_LIVE_SOURCES_ENABLED: "false"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: on-failure:5
+    networks:
+      - backend
+
+  proposal-worker:
+    profiles: ["workers"]
+    build:
+      context: ../..
+      dockerfile: infra/runtime/Dockerfile
+    command: ["python", "-m", "axignal_api.proposal_worker"]
+    environment:
+      AXIGNAL_PROPOSAL_DATABASE_URL: postgresql://axignal_proposal_worker:${AXIGNAL_PROPOSAL_DB_PASSWORD:?required}@postgres:5432/${AXIGNAL_POSTGRES_DB:-axignal}
+      AXIGNAL_VALKEY_URL: redis://valkey:6379/0
+      AXIGNAL_LIVE_SOURCES_ENABLED: "false"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: on-failure:5
+    networks:
+      - backend
+
+  admission-runtime:
+    profiles: ["workers"]
+    build:
+      context: ../..
+      dockerfile: infra/runtime/Dockerfile
+    command: ["python", "-m", "axignal_api.admission_runtime"]
+    environment:
+      AXIGNAL_ADMISSION_DATABASE_URL: postgresql://axignal_admission_runtime_login:${AXIGNAL_ADMISSION_DB_PASSWORD:?required}@postgres:5432/${AXIGNAL_POSTGRES_DB:-axignal}
+      AXIGNAL_VALKEY_URL: redis://valkey:6379/0
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: on-failure:5
+    networks:
+      - backend
+
+  scheduler:
+    profiles: ["workers"]
+    build:
+      context: ../..
+      dockerfile: infra/runtime/Dockerfile
+    command: ["python", "-m", "axignal_api.scheduler_service"]
+    environment:
+      AXIGNAL_SCHEDULER_ENABLED: "true"
+      AXIGNAL_SCHEDULER_DATABASE_URL: postgresql://axignal_scheduler_login:${AXIGNAL_SCHEDULER_DB_PASSWORD:?required}@postgres:5432/${AXIGNAL_POSTGRES_DB:-axignal}
+      AXIGNAL_VALKEY_URL: redis://valkey:6379/0
+      AXIGNAL_OBJECT_STORE_BACKEND: local
+      AXIGNAL_OBJECT_STORE_ROOT: /var/lib/axignal/objects
+      AXIGNAL_OTEL_ENABLED: ${AXIGNAL_OTEL_ENABLED:-false}
+      OTEL_SERVICE_NAME: axignal-pilot-scheduler
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-m", "axignal_api.scheduler_service", "--healthcheck"]
+      interval: 10s
+      timeout: 6s
+      retries: 30
+    restart: unless-stopped
+    volumes:
+      - pilot-objects:/var/lib/axignal/objects
+    networks:
+      - backend
+
+  otel-collector:
+    profiles: ["observability"]
+    image: otel/opentelemetry-collector-contrib:0.130.0
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    volumes:
+      - ../otel/collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
+    expose:
+      - "4318"
+    restart: unless-stopped
+    networks:
+      - backend
+
+volumes:
+  pilot-postgres:
+  pilot-valkey:
+  pilot-objects:
+  pilot-caddy-data:
+  pilot-caddy-config:
+
+networks:
+  edge:
+  backend:
+    internal: true
