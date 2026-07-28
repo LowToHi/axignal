@@ -1,0 +1,174 @@
+.shell {
+  min-height: 100vh;
+  padding: 48px;
+  background: #f5f3ee;
+  color: #151515;
+}
+
+.shell h1 {
+  max-width: 900px;
+  font-size: clamp(2rem, 5vw, 4.5rem);
+  line-height: 0.98;
+  letter-spacing: -0.05em;
+}
+
+.eyebrow {
+  font: 600 0.72rem/1.2 ui-monospace, monospace;
+  letter-spacing: 0.14em;
+}
+
+.launchCard,
+.prompt,
+.responseCard,
+.outcome {
+  max-width: 920px;
+  margin-top: 32px;
+  padding: 24px;
+  border: 1px solid #242424;
+  background: #fff;
+}
+
+.launchCard {
+  display: grid;
+  gap: 18px;
+}
+
+.launchCard label,
+.responseCard label,
+.panel label {
+  display: grid;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.launchCard select,
+.responseCard textarea,
+.panel select {
+  min-height: 44px;
+  padding: 10px;
+  border: 1px solid #545454;
+  background: #fff;
+}
+
+.launchCard button,
+.responseCard button {
+  width: fit-content;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid #111;
+  background: #111;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.launchCard button:disabled,
+.responseCard button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.sessionHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.condition {
+  padding: 8px 12px;
+  border: 1px solid currentColor;
+  font: 700 0.78rem/1 ui-monospace, monospace;
+}
+
+.prompt blockquote {
+  margin: 20px 0 0;
+  padding-left: 18px;
+  border-left: 4px solid #111;
+  font-size: 1.35rem;
+}
+
+.axignalGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.controlStack {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  max-width: 920px;
+  margin-top: 24px;
+  border: 1px solid #242424;
+  background: #fff;
+}
+
+.controlStack .panel {
+  border: 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.panel {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid #242424;
+  background: #fff;
+}
+
+.panel h2 {
+  font: 700 0.78rem/1 ui-monospace, monospace;
+  letter-spacing: 0.1em;
+}
+
+.evidence {
+  grid-template-columns: auto 1fr !important;
+  align-items: start;
+  margin-top: 16px;
+  font-weight: 400 !important;
+}
+
+.evidence small {
+  display: block;
+  margin-top: 4px;
+  font-family: ui-monospace, monospace;
+}
+
+.responseCard {
+  display: grid;
+  gap: 20px;
+}
+
+.responseCard textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.outcome pre {
+  overflow: auto;
+  padding: 16px;
+  background: #111;
+  color: #fff;
+}
+
+.error {
+  max-width: 920px;
+  padding: 14px;
+  background: #7a1111;
+  color: #fff;
+}
+
+@media (max-width: 900px) {
+  .shell {
+    padding: 24px;
+  }
+
+  .axignalGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .sessionHeader {
+    flex-direction: column;
+  }
+}
