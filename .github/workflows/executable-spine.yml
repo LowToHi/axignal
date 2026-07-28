@@ -90,7 +90,7 @@ jobs:
         run: ruff check apps/api scripts --output-format=json > ruff-report.json || true
       - name: Upload Ruff diagnostics
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b54449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: ruff-diagnostics
           path: ruff-report.json
@@ -162,7 +162,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          bash scripts/verifw_human_review_migration_rehearsal.sh 2>&1 | tee human-review-migration-rehearsal.log
+          bash scripts/verify_human_review_migration_rehearsal.sh 2>&1 | tee human-review-migration-rehearsal.log
       - name: Run authenticated persistent research acceptance
         shell: bash
         run: |
