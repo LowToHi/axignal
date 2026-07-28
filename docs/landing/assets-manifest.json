@@ -1,0 +1,71 @@
+{
+  "version": "1.0.0",
+  "status": "SOURCES_APPROVED_DERIVATIVES_NOT_PRODUCTION_LOCKED",
+  "external_assets": [
+    {
+      "id": "earth-albedo-february",
+      "source": "NASA Blue Marble: Next Generation",
+      "source_page": "https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/base-map/",
+      "acquisition_url": "https://assets.science.nasa.gov/content/dam/science/esd/eo/images/bmng/bmng-base/february/world.200402.3x21600x10800.jpg",
+      "rights_basis": "NASA media resource; verify current NASA media-use guidance before public release",
+      "original_dimensions": [21600, 10800],
+      "derivatives": ["earth-albedo-desktop.ktx2", "earth-albedo-mobile.ktx2"],
+      "hotlink": false
+    },
+    {
+      "id": "earth-night-lights-2016",
+      "source": "NASA Black Marble 2016 Color",
+      "source_page": "https://science.nasa.gov/earth/earth-observatory/earth-at-night/maps/",
+      "acquisition_url": "https://assets.science.nasa.gov/content/dam/science/esd/eo/images/imagerecords/144000/144898/BlackMarble_2016_3km.jpg",
+      "rights_basis": "NASA media resource; verify current NASA media-use guidance before public release",
+      "original_dimensions": [13500, 6750],
+      "derivatives": ["earth-night-desktop.ktx2", "earth-night-mobile.ktx2"],
+      "hotlink": false
+    },
+    {
+      "id": "countries-110m",
+      "source": "Natural Earth",
+      "source_page": "https://www.naturalearthdata.com/downloads/110m-cultural-vectors/110m-admin-0-countries/",
+      "acquisition_url": "https://naturalearth.s3.amazonaws.com/110m_cultural/ne_110m_admin_0_countries.zip",
+      "rights_basis": "public domain",
+      "derivatives": ["countries-110m.simplified.geojson"],
+      "hotlink": false
+    },
+    {
+      "id": "boundaries-50m",
+      "source": "Natural Earth",
+      "source_page": "https://www.naturalearthdata.com/downloads/50m-cultural-vectors/50m-admin-0-boundary-lines/",
+      "acquisition_url": "https://naturalearth.s3.amazonaws.com/50m_cultural/ne_50m_admin_0_boundary_lines_land.zip",
+      "rights_basis": "public domain",
+      "derivatives": ["boundaries-50m.simplified.geojson"],
+      "hotlink": false
+    },
+    {
+      "id": "coastline-50m",
+      "source": "Natural Earth",
+      "source_page": "https://www.naturalearthdata.com/downloads/50m-physical-vectors/50m-coastline/",
+      "acquisition_url": "https://naturalearth.s3.amazonaws.com/50m_physical/ne_50m_coastline.zip",
+      "rights_basis": "public domain",
+      "derivatives": ["coastline-50m.simplified.geojson"],
+      "hotlink": false
+    }
+  ],
+  "owned_assets": [
+    "apps/web/public/brand/axignal-logo.svg",
+    "apps/web/public/brand/axignal-logo-dark.svg",
+    "apps/web/public/brand/axignal-isotipo.svg"
+  ],
+  "required_fallbacks": [
+    "opengraph-image.jpg",
+    "twitter-image.jpg",
+    "seo-hero.webp",
+    "globe-poster-desktop.webp",
+    "globe-poster-tablet.webp",
+    "globe-poster-mobile.webp",
+    "favicon.ico",
+    "apple-touch-icon.png",
+    "icon-192.png",
+    "icon-512.png"
+  ],
+  "production_rule": "External originals are cached outside Git; only optimised derivatives and recorded provenance may ship."
+}

@@ -1,0 +1,30 @@
+{
+  "version": "1.0.0",
+  "brand": "AXIGNAL",
+  "direction": "dark photographic executive intelligence",
+  "colors": {
+    "background": "#030d12",
+    "surface": "#0b171d",
+    "text": "#e7f2f1",
+    "primary": "#00e1cf",
+    "inference": "#f5b942",
+    "prediction": "#8d6cff",
+    "contradiction": "#ff5b52",
+    "unknown": "#7f8b91"
+  },
+  "globe": {
+    "initial_view": "Europe / North Africa / Western Asia",
+    "cities": [
+      "Madrid",
+      "London",
+      "Paris",
+      "Berlin"
+    ],
+    "style": "photographic, restrained HUD, no videogame aesthetic"
+  },
+  "conversion": {
+    "primary_cta": "Request access",
+    "secondary_cta": "Watch demo",
+    "commercial_status": "private pilot"
+  }
+}

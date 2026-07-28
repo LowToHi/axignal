@@ -1,0 +1,20 @@
+{
+  "version": "1.0.0",
+  "status": "GENERATED_OUTSIDE_GIT",
+  "assets": [
+    {"file":"apple-touch-icon.png","bytes":10377,"sha256":"56647aa8cb11de873acd4131f8d7a68e420487d448bcfdbe16607d9880033b86"},
+    {"file":"favicon-16.png","bytes":448,"sha256":"87edad1f611c8544372adb972058b3efcf8b2fcb8f271889b4dbdb908a4b0a1d"},
+    {"file":"favicon-32.png","bytes":1191,"sha256":"6ba15b2b9230b744b3901a56c90fc9c3343b3ee49ef6e6ec000f9f2c163b78f5"},
+    {"file":"favicon-64.png","bytes":2979,"sha256":"ca03baa9cfeaabb89511cb9cfbb8c99c8427e4c962368cfb7ec6773ffce8115b"},
+    {"file":"favicon.ico","bytes":22382,"sha256":"8b7d10575e9c7f311e0e54cccb849e2e91cf4f7009559f553b4c595769631416"},
+    {"file":"globe-poster-desktop.webp","bytes":205322,"sha256":"ca4feeb55450bce63c8a5dc416bfd678ea0f994bf570fa1f70d7567f23a32788"},
+    {"file":"globe-poster-mobile.webp","bytes":101716,"sha256":"9863d4f7cc13f34e5f08c33c0a4241324dd488c559a0cd673babf89a1c48a57c"},
+    {"file":"globe-poster-tablet.webp","bytes":153054,"sha256":"18faf36b2570d1715ddcd8337149f44926140229d5113e4ebe51554e4e2bf913"},
+    {"file":"icon-192.png","bytes":11116,"sha256":"3fe3a3fbaaf62812f58c7d9eb4b93b92e3e6ec3e720bebf7c987a21f85935d73"},
+    {"file":"icon-512.png","bytes":33129,"sha256":"6a97523bf8c7a0fa2d1dfba8bf845f9a52b26e229dc2eef1a0d73ec7e6d0a06d"},
+    {"file":"landing-reference-board.webp","bytes":156750,"sha256":"63f4f17eb890953a5ac7bc2c032147f56cfc292e78275f4b6f44c84681785d5f"},
+    {"file":"opengraph-image.jpg","bytes":203804,"sha256":"07d5b3791e822b79bb54e27918b67f1137d6f581a461841816f57dcd28697179"},
+    {"file":"seo-hero.webp","bytes":193884,"sha256":"842fadb3a59a4fc7c52e5d1a3ae2b8650551ee92a2f85a07ae0b00cad645f3b5"},
+    {"file":"twitter-image.jpg","bytes":196095,"sha256":"94f67cb495e5f41e643ca8962e4a174bce55a3b050197d7133ad5f1cb3ef5f0f"}
+  ]
+}

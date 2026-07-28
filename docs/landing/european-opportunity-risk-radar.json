@@ -1,0 +1,75 @@
+{
+  "dataset_id": "AXIGNAL-LANDING-EUROPE-001",
+  "version": "1.0.0",
+  "synthetic": true,
+  "disclaimer": "All metrics, signals, opportunities and evidence references are synthetic demonstration content and are not investment advice or current market facts.",
+  "question": "Where are risk-adjusted strategic opportunities emerging across major European cities over the next 12–24 months?",
+  "cities": [
+    {
+      "id": "madrid",
+      "name": "Madrid",
+      "country": "Spain",
+      "lat": 40.4168,
+      "lon": -3.7038,
+      "themes": ["digital infrastructure", "logistics", "energy resilience"],
+      "demo_score": 78,
+      "confidence": 72,
+      "risk": "medium"
+    },
+    {
+      "id": "london",
+      "name": "London",
+      "country": "United Kingdom",
+      "lat": 51.5074,
+      "lon": -0.1278,
+      "themes": ["financial infrastructure", "AI services", "asset repricing"],
+      "demo_score": 74,
+      "confidence": 69,
+      "risk": "medium-high"
+    },
+    {
+      "id": "paris",
+      "name": "Paris",
+      "country": "France",
+      "lat": 48.8566,
+      "lon": 2.3522,
+      "themes": ["urban regeneration", "mobility", "decarbonisation"],
+      "demo_score": 71,
+      "confidence": 75,
+      "risk": "medium"
+    },
+    {
+      "id": "berlin",
+      "name": "Berlin",
+      "country": "Germany",
+      "lat": 52.52,
+      "lon": 13.405,
+      "themes": ["industrial technology", "energy systems", "advanced manufacturing"],
+      "demo_score": 68,
+      "confidence": 64,
+      "risk": "medium-high"
+    }
+  ],
+  "claim_types": ["FACT", "INFERENCE", "PREDICTION", "CONTRADICTION", "UNKNOWN"],
+  "scenarios": ["BASE_CASE", "ACCELERATED_GROWTH", "DOWNSIDE"],
+  "relationships": [
+    {
+      "from": "madrid",
+      "to": "paris",
+      "type": "SUPPORTED_DEPENDENCY",
+      "label": "synthetic capital and infrastructure linkage"
+    },
+    {
+      "from": "paris",
+      "to": "berlin",
+      "type": "INFERRED_RELATIONSHIP",
+      "label": "synthetic industrial transition linkage"
+    },
+    {
+      "from": "london",
+      "to": "madrid",
+      "type": "INFERRED_RELATIONSHIP",
+      "label": "synthetic investment-flow linkage"
+    }
+  ]
+}
