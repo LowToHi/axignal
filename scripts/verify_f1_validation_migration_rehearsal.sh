@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+service="${AXIGNAL_POSTGRES_SERVICE:-postgres}"
+rehearsal_db="${AXIGNAL_F1_MIGRATION_DB:-axignal_f1_migration_rehearsal}"
+restore_db="${AXIGNAL_F1_RESTORE_DB:-axignal_f1_migration_restore}"
+dump_file="$(mktemp -t axignal-pre-f1-XXXXXX.dump)"
+
+compose() { docker compose "$@"; }
+psql_db() {
+  local database="$1"; shift
+  compose exec -T "$service" psql -U axignal -d "$database" -v ON_ERROR_STOP=1 "$@"
+}
+scalar() { local database="$1"; local sql="$2"; psql_db "$database" -Atc "$sql"; }
+cleanup() {
+  compose exec -T "$service" dropdb -U axignal --if-exists --force "$rehearsal_db" >/dev/null 2>&1 || true
+  compose exec -T "$service" dropdb -U axignal --if-exists --force "$restore_db" >/dev/null 2>&1 || true
+  rm -f "$dump_file"
+}
+trap cleanup EXIT
+
+for database in "$rehearsal_db" "$restore_db"; do
+  compose exec -T "$service" dropdb -U axignal --if-exists --force "$database" >/dev/null
+  compose exec -T "$service" createdb -U axignal "$database"
+done
+
+baseline=(
+  infra/postgres/init.sql
+  infra/postgres/020-research-spine.sql
+  infra/postgres/025-research-runtime-grants.sql
+  infra/postgres/030-proposal-worker-boundary.sql
+  infra/postgres/035-deterministic-admission-runtime.sql
+  infra/postgres/040-bounded-human-review.sql
+  infra/postgres/041-human-review-read-functions.sql
+  infra/postgres/042-human-review-resolution.sql
+  infra/postgres/043-human-review-grants.sql
+  infra/postgres/050-f2-runtime-spine.sql
+)
+for migration in "${baseline[@]}"; do psql_db "$rehearsal_db" < "$migration"; done
+
+compose exec -T "$service" pg_dump -U axignal -d "$rehearsal_db" \
+  --format=custom --no-owner --no-privileges > "$dump_file"
+
+for pass in 1 2; do
+  psql_db "$rehearsal_db" < infra/postgres/060-f1-qualified-user-validation.sql
+done
+
+test "$(scalar "$rehearsal_db" "SELECT count(*) FROM evaluation.validation_tasks;")" = "6"
+test "$(scalar "$rehearsal_db" "SELECT count(DISTINCT content_hash) FROM evaluation.validation_tasks;")" = "6"
+test "$(scalar "$rehearsal_db" "SELECT rolcanlogin FROM pg_roles WHERE rolname='axignal_validation_runtime_login';")" = "t"
+test "$(scalar "$rehearsal_db" "SELECT has_table_privilege('axignal_validation_runtime_login','axignal_global.canonical_claims','INSERT');")" = "f"
+test "$(scalar "$rehearsal_db" "SELECT has_table_privilege('axignal_validation_runtime_login','evaluation.validation_sessions','SELECT');")" = "f"
+test "$(scalar "$rehearsal_db" "SELECT has_function_privilege('axignal_validation_runtime_login','evaluation.start_validation_session(uuid,text,text,text)','EXECUTE');")" = "t"
+test "$(scalar "$rehearsal_db" "SELECT count(*) FROM information_schema.columns WHERE table_schema='evaluation' AND column_name IN ('email','name','full_name');")" = "0"
+
+compose exec -T "$service" pg_restore -U axignal -d "$restore_db" \
+  --no-owner --no-privileges < "$dump_file"
+test "$(scalar "$restore_db" "SELECT to_regnamespace('evaluation') IS NULL;")" = "t"
+test "$(scalar "$restore_db" "SELECT to_regclass('axignal_global.scheduled_jobs') IS NOT NULL;")" = "t"
+
+cat <<'JSON'
+{
+  "f1_validation_migration_applied": 60,
+  "migration_replay_idempotent": true,
+  "frozen_tasks": 6,
+  "validation_role_separated": true,
+  "validation_canonical_insert": false,
+  "direct_validation_table_read": false,
+  "validation_function_execute": true,
+  "participant_pii_columns": 0,
+  "snapshot_restore_verified": true,
+  "partial_state_detected": false
+}
+JSON
