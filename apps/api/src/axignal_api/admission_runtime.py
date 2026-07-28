@@ -5,10 +5,10 @@ import logging
 import time
 
 from axignal_api.admission_queue import AdmissionReviewJob, ValkeyAdmissionQueue
-from axignal_api.admission_repository import (
+from axignal_api.admission_repository import AdmissionRepository
+from axignal_api.admission_types import (
     AdmissionIntegrityError,
     AdmissionPolicyError,
-    AdmissionRepository,
     AdmissionRuntimeError,
 )
 from axignal_api.settings import Settings
