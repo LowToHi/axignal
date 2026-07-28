@@ -75,8 +75,16 @@ export function isPersistentResearchUiEnabled(): boolean {
   return boolEnv("AXIGNAL_PERSISTENT_RESEARCH_UI_ENABLED");
 }
 
+export function isValidationUiEnabled(): boolean {
+  return boolEnv("AXIGNAL_VALIDATION_UI_ENABLED");
+}
+
 export function isAuthenticationRequired(): boolean {
-  return boolEnv("AXIGNAL_AUTH_REQUIRED") || isPersistentResearchUiEnabled();
+  return (
+    boolEnv("AXIGNAL_AUTH_REQUIRED") ||
+    isPersistentResearchUiEnabled() ||
+    isValidationUiEnabled()
+  );
 }
 
 export function verifyPassword(password: string): boolean {
