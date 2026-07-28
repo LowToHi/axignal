@@ -16,10 +16,12 @@ def _database_ready() -> bool:
     database_url = os.environ.get("AXIGNAL_DATABASE_URL")
     if not database_url:
         return False
-    with psycopg.connect(database_url, connect_timeout=3) as connection:
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT 1")
-            return cursor.fetchone() == (1,)
+    with (
+        psycopg.connect(database_url, connect_timeout=3) as connection,
+        connection.cursor() as cursor,
+    ):
+        cursor.execute("SELECT 1")
+        return cursor.fetchone() == (1,)
 
 
 def _valkey_ready() -> bool:
