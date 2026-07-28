@@ -1,5 +1,10 @@
 import { expect, test, type Page } from "@playwright/test";
 
+test.skip(
+  process.env.AXIGNAL_VALIDATION_UI_ENABLED !== "true",
+  "F1 validation UI is not enabled for this workflow."
+);
+
 const sessionId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const task = {
   task_id: "F1-AUTHORITY-001",
