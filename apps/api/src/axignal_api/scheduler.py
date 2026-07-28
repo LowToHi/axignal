@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Callable
+from typing import Any
 from uuid import UUID
 
 import psycopg
@@ -217,18 +218,17 @@ class SchedulerOutboxPublisher:
         count = 0
         for event in self.repository.pending_outbox(limit):
             trace_context = event.payload.get("trace_context") or {}
-            with attach_trace_envelope(trace_context):
-                with start_span(
-                    self.tracer,
-                    "axignal.scheduler.publish",
-                    attributes={
-                        "scheduled_job_id": str(event.scheduled_job_id),
-                        "scheduler_outbox_event_id": str(event.scheduler_outbox_event_id),
-                    },
-                ):
-                    self.queue.publish(event)
-                    self.repository.mark_published(event.scheduler_outbox_event_id)
-                    count += 1
+            with attach_trace_envelope(trace_context), start_span(
+                self.tracer,
+                "axignal.scheduler.publish",
+                attributes={
+                    "scheduled_job_id": str(event.scheduled_job_id),
+                    "scheduler_outbox_event_id": str(event.scheduler_outbox_event_id),
+                },
+            ):
+                self.queue.publish(event)
+                self.repository.mark_published(event.scheduler_outbox_event_id)
+                count += 1
         return count
 
 
@@ -265,42 +265,41 @@ class SchedulerWorker:
         )
         if job is None:
             return True
-        with attach_trace_envelope(job.trace_context):
-            with start_span(
-                self.tracer,
-                "axignal.scheduler.execute",
-                attributes={
-                    "scheduled_job_id": str(job.scheduled_job_id),
-                    "job_kind": job.job_kind,
-                    "attempt_count": job.attempt_count,
-                    "tenant_id_hash": (
-                        str(job.tenant_id).split("-")[0] if job.tenant_id else "global"
-                    ),
-                },
-            ):
-                handler = self.handlers.get(job.job_kind)
-                if handler is None:
-                    self.repository.fail(
-                        job.scheduled_job_id,
-                        worker_id=self.worker_id,
-                        error_code="UNSUPPORTED_JOB_KIND",
-                    )
-                    return True
-                try:
-                    result = handler(job)
-                except Exception as exc:
-                    self.repository.fail(
-                        job.scheduled_job_id,
-                        worker_id=self.worker_id,
-                        error_code=exc.__class__.__name__.upper(),
-                    )
-                    return True
-                self.repository.complete(
+        with attach_trace_envelope(job.trace_context), start_span(
+            self.tracer,
+            "axignal.scheduler.execute",
+            attributes={
+                "scheduled_job_id": str(job.scheduled_job_id),
+                "job_kind": job.job_kind,
+                "attempt_count": job.attempt_count,
+                "tenant_id_hash": (
+                    str(job.tenant_id).split("-")[0] if job.tenant_id else "global"
+                ),
+            },
+        ):
+            handler = self.handlers.get(job.job_kind)
+            if handler is None:
+                self.repository.fail(
                     job.scheduled_job_id,
                     worker_id=self.worker_id,
-                    result=result,
+                    error_code="UNSUPPORTED_JOB_KIND",
                 )
                 return True
+            try:
+                result = handler(job)
+            except Exception as exc:
+                self.repository.fail(
+                    job.scheduled_job_id,
+                    worker_id=self.worker_id,
+                    error_code=exc.__class__.__name__.upper(),
+                )
+                return True
+            self.repository.complete(
+                job.scheduled_job_id,
+                worker_id=self.worker_id,
+                result=result,
+            )
+            return True
 
 
 def default_handlers(repository: SchedulerRepository) -> dict[str, Handler]:
