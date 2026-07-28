@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://axignal.com/schemas/human-review-case.schema.json",
+  "title": "AXIGNAL Human Review Case",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "human_review_case_id",
+    "tenant_id",
+    "research_run_id",
+    "admission_decision_id",
+    "candidate_claim_id",
+    "case_type",
+    "state",
+    "priority",
+    "deterministic_decision",
+    "candidate_claim",
+    "events"
+  ],
+  "properties": {
+    "human_review_case_id": { "type": "string", "format": "uuid" },
+    "tenant_id": { "type": "string", "format": "uuid" },
+    "research_run_id": { "type": "string", "format": "uuid" },
+    "admission_decision_id": { "type": "string", "format": "uuid" },
+    "candidate_claim_id": { "type": "string", "format": "uuid" },
+    "case_type": {
+      "enum": ["HUMAN_REVIEW_REQUIRED", "CONTESTED"]
+    },
+    "state": {
+      "enum": [
+        "OPEN",
+        "IN_REVIEW",
+        "MORE_EVIDENCE_REQUIRED",
+        "RESOLVED",
+        "CANCELLED"
+      ]
+    },
+    "priority": { "enum": ["LOW", "NORMAL", "HIGH"] },
+    "resolution": {
+      "type": ["string", "null"],
+      "enum": [
+        "ACCEPT_AS_CONTEXT",
+        "REJECT_PROPOSAL",
+        "CONFIRM_CONTESTED",
+        "RETURN_TO_DETERMINISTIC_REVIEW",
+        "MARK_OUT_OF_SCOPE",
+        null
+      ]
+    },
+    "deterministic_decision": { "type": "object" },
+    "candidate_claim": { "type": "object" },
+    "source": { "type": ["object", "null"] },
+    "evidence": { "type": "array", "items": { "type": "object" } },
+    "events": { "type": "array", "items": { "type": "object" } }
+  }
+}

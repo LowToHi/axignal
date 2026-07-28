@@ -3,6 +3,7 @@ import "@axignal/design-tokens/tokens.css";
 import "./globals.css";
 import "./context.css";
 import "./auth.css";
+import "./human-review.css";
 
 export const metadata: Metadata = {
   title: "AXIGNAL — Global Opportunity Intelligence",
