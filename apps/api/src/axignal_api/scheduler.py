@@ -34,6 +34,7 @@ class ScheduledJob:
 class SchedulerOutboxEvent:
     scheduler_outbox_event_id: UUID
     scheduled_job_id: UUID
+    publish_attempts: int
     payload: dict[str, Any]
 
 
@@ -90,6 +91,7 @@ class SchedulerRepository:
                 SchedulerOutboxEvent(
                     scheduler_outbox_event_id=row["scheduler_outbox_event_id"],
                     scheduled_job_id=row["scheduled_job_id"],
+                    publish_attempts=row["publish_attempts"],
                     payload=row["payload"],
                 )
                 for row in cursor.fetchall()
@@ -177,11 +179,13 @@ class ValkeySchedulerQueue:
             {
                 "scheduler_outbox_event_id": str(event.scheduler_outbox_event_id),
                 "scheduled_job_id": str(event.scheduled_job_id),
+                "publish_attempts": event.publish_attempts,
                 "payload": event.payload,
             },
             sort_keys=True,
         )
-        dedupe_key = f"{self.queue_key}:published:{event.scheduler_outbox_event_id}"
+        delivery_id = f"{event.scheduler_outbox_event_id}:{event.publish_attempts}"
+        dedupe_key = f"{self.queue_key}:published:{delivery_id}"
         script = """
         if redis.call('SETNX', KEYS[1], '1') == 1 then
           redis.call('EXPIRE', KEYS[1], 604800)
@@ -224,6 +228,7 @@ class SchedulerOutboxPublisher:
                 attributes={
                     "scheduled_job_id": str(event.scheduled_job_id),
                     "scheduler_outbox_event_id": str(event.scheduler_outbox_event_id),
+                    "publish_attempts": event.publish_attempts,
                 },
             ):
                 self.queue.publish(event)
