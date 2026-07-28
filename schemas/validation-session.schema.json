@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://axignal.com/schemas/validation-session.schema.json",
+  "title": "AXIGNAL Qualified-User Validation Session",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "validation_session_id",
+    "tenant_id",
+    "participant_id_hash",
+    "participant_profile",
+    "task_id",
+    "experiment_version",
+    "condition",
+    "language",
+    "state",
+    "started_at"
+  ],
+  "properties": {
+    "validation_session_id": { "type": "string", "format": "uuid" },
+    "tenant_id": { "type": "string", "format": "uuid" },
+    "participant_id_hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "participant_profile": {
+      "enum": ["DOMAIN_EXPERT", "ANALYST", "DECISION_MAKER", "OTHER_QUALIFIED"]
+    },
+    "task_id": { "type": "string", "pattern": "^F1-[A-Z0-9-]+$" },
+    "experiment_version": { "const": "f1-qualified-user@0.1.0" },
+    "condition": { "enum": ["AXIGNAL", "CONTROL"] },
+    "language": { "enum": ["en", "es"] },
+    "state": { "enum": ["STARTED", "COMPLETED", "ABANDONED"] },
+    "outcome": { "type": ["object", "null"] },
+    "response_hash": {
+      "type": ["string", "null"],
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "started_at": { "type": "string", "format": "date-time" },
+    "completed_at": { "type": ["string", "null"], "format": "date-time" }
+  }
+}
