@@ -14,3 +14,4 @@ COPY 041-human-review-read-functions.sql /docker-entrypoint-initdb.d/041-axignal
 COPY 042-human-review-resolution.sql /docker-entrypoint-initdb.d/042-axignal-human-review-resolution.sql
 COPY 043-human-review-grants.sql /docker-entrypoint-initdb.d/043-axignal-human-review-grants.sql
 COPY 050-f2-runtime-spine.sql /docker-entrypoint-initdb.d/050-axignal-f2-runtime-spine.sql
+COPY 060-f1-qualified-user-validation.sql /docker-entrypoint-initdb.d/060-axignal-f1-validation.sql
