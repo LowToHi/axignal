@@ -1,6 +1,5 @@
 {
   admin off
-  email {$AXIGNAL_PILOT_ACME_EMAIL:}
 }
 
 {$AXIGNAL_PILOT_SITE_ADDRESS:http://localhost} {
