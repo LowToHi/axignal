@@ -35,12 +35,21 @@ class Settings:
     admission_queue_key: str = "axignal:admission:queue:v1"
     human_review_database_url: str | None = None
     human_reviewer_subjects: tuple[str, ...] = ()
+    scheduler_database_url: str | None = None
+    scheduler_queue_key: str = "axignal:scheduler:queue:v1"
+    scheduler_enabled: bool = False
+    object_store_backend: str = "local"
+    object_store_root: Path = Path(".axignal/objects")
+    otel_enabled: bool = False
+    otel_service_name: str = "axignal-local"
+    otel_exporter_otlp_endpoint: str | None = None
 
     @classmethod
     def from_env(cls) -> "Settings":
         fixture = environ.get("AXIGNAL_WORLD_BANK_FIXTURE_PATH")
         document_fixture = environ.get("AXIGNAL_DOCUMENT_FIXTURE_PATH")
         proposal_fixture = environ.get("AXIGNAL_DOCUMENT_PROPOSAL_FIXTURE_PATH")
+        object_store_root = environ.get("AXIGNAL_OBJECT_STORE_ROOT", ".axignal/objects")
         return cls(
             database_url=environ.get("AXIGNAL_DATABASE_URL"),
             valkey_url=environ.get("AXIGNAL_VALKEY_URL"),
@@ -50,6 +59,22 @@ class Settings:
                 "AXIGNAL_HUMAN_REVIEW_DATABASE_URL"
             ),
             human_reviewer_subjects=_csv_env("AXIGNAL_HUMAN_REVIEWER_SUBJECTS"),
+            scheduler_database_url=environ.get("AXIGNAL_SCHEDULER_DATABASE_URL"),
+            scheduler_queue_key=environ.get(
+                "AXIGNAL_SCHEDULER_QUEUE_KEY",
+                "axignal:scheduler:queue:v1",
+            ),
+            scheduler_enabled=_bool_env("AXIGNAL_SCHEDULER_ENABLED"),
+            object_store_backend=environ.get(
+                "AXIGNAL_OBJECT_STORE_BACKEND",
+                "local",
+            ).strip().casefold(),
+            object_store_root=Path(object_store_root).resolve(),
+            otel_enabled=_bool_env("AXIGNAL_OTEL_ENABLED"),
+            otel_service_name=environ.get("OTEL_SERVICE_NAME", "axignal-local"),
+            otel_exporter_otlp_endpoint=environ.get(
+                "OTEL_EXPORTER_OTLP_ENDPOINT"
+            ),
             persistent_research_enabled=_bool_env(
                 "AXIGNAL_PERSISTENT_RESEARCH_ENABLED"
             ),
@@ -118,6 +143,20 @@ class Settings:
             raise RuntimeError("AXIGNAL_HUMAN_REVIEW_DATABASE_URL is required")
         if not self.human_reviewer_subjects:
             raise RuntimeError("AXIGNAL_HUMAN_REVIEWER_SUBJECTS is required")
+
+    def require_scheduler(self) -> None:
+        if not self.scheduler_enabled:
+            raise RuntimeError("Scheduler is disabled")
+        if not self.scheduler_database_url:
+            raise RuntimeError("AXIGNAL_SCHEDULER_DATABASE_URL is required")
+        if not self.valkey_url:
+            raise RuntimeError("AXIGNAL_VALKEY_URL is required")
+
+    def require_object_store(self) -> None:
+        if self.object_store_backend not in {"memory", "local", "s3"}:
+            raise RuntimeError("AXIGNAL_OBJECT_STORE_BACKEND is unsupported")
+        if self.object_store_backend == "local":
+            self.object_store_root.mkdir(parents=True, exist_ok=True)
 
     def require_identity_assertions(self) -> None:
         if not self.identity_assertion_secret:
