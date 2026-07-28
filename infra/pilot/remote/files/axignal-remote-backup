@@ -8,11 +8,13 @@ ENV_FILE="${AXIGNAL_PILOT_ENV_FILE:-/etc/axignal/pilot.env}"
 STATE_ROOT="${AXIGNAL_REMOTE_STATE_ROOT:-/var/lib/axignal/ops}"
 BACKUP_ROOT="${AXIGNAL_REMOTE_BACKUP_ROOT:-/var/backups/axignal}"
 STATE_HELPER="${AXIGNAL_REMOTE_STATE_HELPER:-/usr/local/lib/axignal/remote_state.py}"
+COMPOSE_HELPER="${AXIGNAL_COMPOSE_HELPER:-/usr/local/lib/axignal/compose_boundary.sh}"
 RETENTION_DAYS="${AXIGNAL_BACKUP_RETENTION_DAYS:-14}"
 STATE_FILE="$STATE_ROOT/current.json"
 
 [[ "$EUID" -eq 0 ]] || { echo 'remote backup must run as root' >&2; exit 2; }
 [[ -f "$ENV_FILE" ]] || { echo "missing environment file: $ENV_FILE" >&2; exit 2; }
+[[ -f "$COMPOSE_HELPER" ]] || { echo "missing Compose boundary helper: $COMPOSE_HELPER" >&2; exit 2; }
 current_sha="$(python3 "$STATE_HELPER" get --path "$STATE_FILE" --key current_sha)"
 [[ "$current_sha" =~ ^[0-9a-f]{40}$ ]] || { echo 'no deployed release is recorded' >&2; exit 2; }
 release="$ROOT/releases/$current_sha"
@@ -26,7 +28,10 @@ set +a
 stamp="$(date -u +%Y%m%dT%H%M%SZ)"
 backup_dir="$BACKUP_ROOT/$stamp-${current_sha:0:12}"
 mkdir -p "$backup_dir"
-compose=(docker compose --env-file "$ENV_FILE" -f "$release/infra/pilot/compose.yaml")
+# shellcheck disable=SC1090
+source "$COMPOSE_HELPER"
+axignal_compose_args "$release" "$ENV_FILE"
+compose=("${AXIGNAL_COMPOSE[@]}")
 
 "${compose[@]}" exec -T postgres pg_dump \
   --username "${AXIGNAL_POSTGRES_USER:-axignal}" \

@@ -9,6 +9,7 @@ STATE_ROOT="${AXIGNAL_REMOTE_STATE_ROOT:-/var/lib/axignal/ops}"
 BACKUP_ROOT="${AXIGNAL_REMOTE_BACKUP_ROOT:-/var/backups/axignal}"
 REPO_URL="${AXIGNAL_REPO_URL:-https://github.com/LowToHi/axignal.git}"
 STATE_HELPER="${AXIGNAL_REMOTE_STATE_HELPER:-/usr/local/lib/axignal/remote_state.py}"
+COMPOSE_HELPER="${AXIGNAL_COMPOSE_HELPER:-/usr/local/lib/axignal/compose_boundary.sh}"
 LOCK_FILE="$STATE_ROOT/deployment.lock"
 STATE_FILE="$STATE_ROOT/current.json"
 CURRENT_LINK="$ROOT/current"
@@ -18,6 +19,7 @@ CURRENT_LINK="$ROOT/current"
 [[ -f "$ENV_FILE" ]] || { echo "missing private environment file: $ENV_FILE" >&2; exit 2; }
 [[ "$(stat -c '%a' "$ENV_FILE")" == "600" ]] || { echo 'private environment file must have mode 600' >&2; exit 2; }
 [[ -f "$STATE_HELPER" ]] || { echo "missing state helper: $STATE_HELPER" >&2; exit 2; }
+[[ -f "$COMPOSE_HELPER" ]] || { echo "missing Compose boundary helper: $COMPOSE_HELPER" >&2; exit 2; }
 if [[ -n "$PASSWORD_FILE" ]]; then
   [[ -f "$PASSWORD_FILE" ]] || { echo "missing operator password file: $PASSWORD_FILE" >&2; exit 2; }
   [[ "$(stat -c '%a' "$PASSWORD_FILE")" == "600" ]] || { echo 'operator password file must have mode 600' >&2; exit 2; }
@@ -54,7 +56,10 @@ else
 fi
 
 python3 "$STATE_HELPER" set-build-sha --path "$ENV_FILE" --sha "$TARGET_SHA"
-compose=(docker compose --env-file "$ENV_FILE" -f "$release/infra/pilot/compose.yaml")
+# shellcheck disable=SC1090
+source "$COMPOSE_HELPER"
+axignal_compose_args "$release" "$ENV_FILE"
+compose=("${AXIGNAL_COMPOSE[@]}")
 (
   cd "$release"
   python3 scripts/verify_pilot_candidate.py
@@ -70,8 +75,9 @@ fi
 rollback_previous() {
   if [[ -n "$previous_release" && -d "$previous_release" ]]; then
     python3 "$STATE_HELPER" set-build-sha --path "$ENV_FILE" --sha "$previous_sha" || true
-    docker compose --env-file "$ENV_FILE" -f "$previous_release/infra/pilot/compose.yaml" \
-      up --build --detach --wait || true
+    if axignal_compose_args "$previous_release" "$ENV_FILE"; then
+      "${AXIGNAL_COMPOSE[@]}" up --build --detach --wait || true
+    fi
     ln -sfn "$previous_release" "$CURRENT_LINK"
   fi
 }

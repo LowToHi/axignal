@@ -2,7 +2,7 @@
   admin off
 }
 
-{$AXIGNAL_PILOT_SITE_ADDRESS:http://localhost} {
+{$AXIGNAL_PILOT_CADDY_SITE_ADDRESS:http://localhost} {
   encode zstd gzip
 
   header {

@@ -54,19 +54,24 @@ jobs:
           retention-days: 2
       - name: Validate shell syntax
         run: |
+          bash -n infra/pilot/remote/files/compose_boundary.sh
           bash -n infra/pilot/remote/files/axignal-remote-deploy
           bash -n infra/pilot/remote/files/axignal-remote-verify
           bash -n infra/pilot/remote/files/axignal-remote-backup
           bash -n infra/pilot/remote/files/axignal-remote-rollback
           bash -n infra/pilot/remote/files/axignal-remote-watchdog
+          bash -n infra/pilot/remote/files/axignal-remote-rotate-operator
+          bash -n infra/pilot/remote/files/axignal-remote-retire-operator-credential
       - name: Verify Ansible syntax
         working-directory: infra/pilot/remote
         run: |
           cp inventory.example.ini inventory.ci.ini
           ansible-playbook --syntax-check -i inventory.ci.ini playbook.yml \
             -e axignal_deploy_sha=${{ github.sha }} \
-            -e axignal_env_source=/tmp/axignal-pilot-ci.env \
-            -e axignal_site_address=https://pilot.example.com
+            -e axignal_site_address=https://pilot.example.com \
+            -e axignal_acme_email=ops@example.test \
+            -e axignal_auth_email=pilot@example.test \
+            -e axignal_auth_subject=usr_pilot_ci
       - name: Test secret preparation and state boundary
         run: pytest -q infra/pilot/remote/tests/test_remote_ops.py
       - name: Verify remote operations contract
@@ -74,21 +79,48 @@ jobs:
       - name: Generate synthetic root-only environment
         shell: bash
         run: |
+          umask 077
           python infra/pilot/remote/prepare_env.py \
+            create \
             --output /tmp/axignal-pilot-ci.env \
+            --password-output /tmp/axignal-operator-password.pending \
+            --metadata-output /tmp/axignal-credential-metadata.json \
             --sha "${{ github.sha }}" \
-            --site-address http://localhost \
-            --allow-http \
+            --site-address https://pilot.example.com \
             --acme-email ops@example.test \
             --auth-email pilot@example.test \
             --auth-subject usr_pilot_ci \
-            --tenant-id 11111111-1111-4111-8111-111111111111 \
-            --operator-password 'pilot-password-longer-than-14' \
+            --edge-mode shared-traefik \
+            --http-port 18080 \
             | tee remote-environment-evidence.json
           test "$(stat -c '%a' /tmp/axignal-pilot-ci.env)" = "600"
-          ! grep -q 'pilot-password-longer-than-14' /tmp/axignal-pilot-ci.env
+          test "$(stat -c '%a' /tmp/axignal-operator-password.pending)" = "600"
+          test "$(stat -c '%a' /tmp/axignal-credential-metadata.json)" = "600"
+          python - <<'PY'
+          from pathlib import Path
+          password = Path('/tmp/axignal-operator-password.pending').read_text().strip()
+          environment = Path('/tmp/axignal-pilot-ci.env').read_text()
+          evidence = Path('remote-environment-evidence.json').read_text()
+          assert password not in environment
+          assert password not in evidence
+          PY
       - name: Validate pilot Compose with generated secrets
-        run: docker compose --env-file /tmp/axignal-pilot-ci.env -f infra/pilot/compose.yaml config >/dev/null
+        run: |
+          docker compose \
+            --env-file /tmp/axignal-pilot-ci.env \
+            -f infra/pilot/compose.yaml \
+            -f infra/pilot/remote/compose.shared-traefik.yaml \
+            config > /tmp/axignal-shared-compose.yaml
+          python - <<'PY'
+          from pathlib import Path
+          import yaml
+          config = yaml.safe_load(Path('/tmp/axignal-shared-compose.yaml').read_text())
+          published = config['services']['caddy']['ports']
+          assert len(published) == 1, published
+          assert published[0]['host_ip'] == '127.0.0.1', published
+          assert published[0]['published'] == '18080', published
+          assert published[0]['target'] == 80, published
+          PY
       - name: Upload remote operations evidence
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
@@ -97,3 +129,10 @@ jobs:
             remote-operations-contract.json
             remote-environment-evidence.json
           retention-days: 14
+      - name: Remove synthetic private files
+        if: always()
+        run: |
+          rm -f \
+            /tmp/axignal-pilot-ci.env \
+            /tmp/axignal-operator-password.pending \
+            /tmp/axignal-credential-metadata.json

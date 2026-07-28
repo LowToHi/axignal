@@ -4,9 +4,11 @@ set -euo pipefail
 RELEASE="${1:?usage: axignal-remote-verify <release-path> [operator-password-file]}"
 PASSWORD_FILE="${2:-}"
 ENV_FILE="${AXIGNAL_PILOT_ENV_FILE:-/etc/axignal/pilot.env}"
+COMPOSE_HELPER="${AXIGNAL_COMPOSE_HELPER:-/usr/local/lib/axignal/compose_boundary.sh}"
 
 [[ -d "$RELEASE" ]] || { echo "missing release directory: $RELEASE" >&2; exit 2; }
 [[ -f "$ENV_FILE" ]] || { echo "missing environment file: $ENV_FILE" >&2; exit 2; }
+[[ -f "$COMPOSE_HELPER" ]] || { echo "missing Compose boundary helper: $COMPOSE_HELPER" >&2; exit 2; }
 if [[ -n "$PASSWORD_FILE" ]]; then
   [[ -f "$PASSWORD_FILE" ]] || { echo "missing operator password file: $PASSWORD_FILE" >&2; exit 2; }
 fi
@@ -18,7 +20,10 @@ set +a
 
 SITE="${AXIGNAL_PILOT_SITE_ADDRESS%/}"
 EXPECTED_SHA="${AXIGNAL_BUILD_SHA:?AXIGNAL_BUILD_SHA is required}"
-COMPOSE=(docker compose --env-file "$ENV_FILE" -f "$RELEASE/infra/pilot/compose.yaml")
+# shellcheck disable=SC1090
+source "$COMPOSE_HELPER"
+axignal_compose_args "$RELEASE" "$ENV_FILE"
+COMPOSE=("${AXIGNAL_COMPOSE[@]}")
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 

@@ -8,6 +8,8 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 COMPOSE_PATH = ROOT / "infra/pilot/compose.yaml"
+STANDALONE_EDGE_PATH = ROOT / "infra/pilot/remote/compose.standalone.yaml"
+SHARED_TRAEFIK_EDGE_PATH = ROOT / "infra/pilot/remote/compose.shared-traefik.yaml"
 TOPOLOGY_PATH = ROOT / "infra/pilot/topology.yaml"
 CADDY_PATH = ROOT / "infra/pilot/Caddyfile"
 ENV_EXAMPLE_PATH = ROOT / "infra/pilot/env.example"
@@ -22,6 +24,8 @@ def load_yaml(path: Path) -> dict[str, Any]:
 
 def main() -> None:
     compose = load_yaml(COMPOSE_PATH)
+    standalone_edge = load_yaml(STANDALONE_EDGE_PATH)
+    shared_traefik_edge = load_yaml(SHARED_TRAEFIK_EDGE_PATH)
     topology = load_yaml(TOPOLOGY_PATH)
     services = compose.get("services", {})
     expected = {
@@ -39,12 +43,17 @@ def main() -> None:
     }
     assert expected <= set(services), "pilot topology is incomplete"
 
-    public_ports = {
+    base_public_ports = {
         service_id: service.get("ports", [])
         for service_id, service in services.items()
         if service.get("ports")
     }
-    assert set(public_ports) == {"caddy"}, "only Caddy may publish host ports"
+    assert not base_public_ports, "the base topology must not publish host ports"
+    assert set(standalone_edge["services"]) == {"caddy"}
+    assert set(shared_traefik_edge["services"]) == {"caddy"}
+    shared_ports = shared_traefik_edge["services"]["caddy"]["ports"]
+    assert shared_ports == ["127.0.0.1:${AXIGNAL_PILOT_HTTP_PORT:-18080}:80"]
+    assert all(":443" not in port for port in shared_ports)
     assert compose["networks"]["backend"]["internal"] is True
 
     valkey_command = " ".join(services["valkey"]["command"])
@@ -77,9 +86,15 @@ def main() -> None:
     assert topology["public_launch_authorised"] is False
     assert topology["billing_enabled"] is False
     assert topology["entrypoint"]["direct_api_exposure"] is False
+    assert topology["entrypoint"]["modes"]["shared-traefik"]["public_port_owner"] == "traefik"
+    assert topology["entrypoint"]["modes"]["shared-traefik"]["caddy_bind_address"] == (
+        "127.0.0.1"
+    )
     assert topology["canonical_demo"]["synthetic"] is True
     assert topology["canonical_demo"]["canonical_mutation_allowed"] is False
     assert topology["operations"]["restore_rehearsal_required"] is True
+    assert topology["operations"]["deployment_state"] == "DEPLOYED_AWAITING_ACCEPTANCE"
+    assert topology["operations"]["independent_acceptance_required"] is True
 
     required_files = (
         ROOT / "apps/web/app/demo/page.tsx",
@@ -96,6 +111,8 @@ def main() -> None:
     evidence = {
         "private_pilot_topology": True,
         "only_edge_ports_published": True,
+        "shared_edge_loopback_only": True,
+        "traefik_retains_public_ports": True,
         "direct_api_exposure": False,
         "valkey_persistence": "appendonly-everysec",
         "runtime_database_credentials_rotated": True,

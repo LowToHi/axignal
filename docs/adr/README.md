@@ -12,5 +12,6 @@
 | [ADR-008](ADR-008-hybrid-ci-shared-build-runner.md) | Hybrid CI uses GitHub-hosted validation plus a restricted shared-host build runner without Docker or product-secret access | ACCEPTED / IMPLEMENTATION REQUIRED |
 | [ADR-009](ADR-009-one-pgvector-three-knowledge-domains.md) | One PostgreSQL/pgvector platform contains three isolated global, tenant-private and intent domains | ACCEPTED / IMPLEMENTATION REQUIRED |
 | [ADR-010](ADR-010-local-ai-proposal-not-admission.md) | Local and external AI may propose evidence and Candidate Claims but never admit canonical truth | ACCEPTED / IMPLEMENTATION REQUIRED |
+| [ADR-011](ADR-011-shared-traefik-private-pilot-edge.md) | The private pilot reuses the incumbent Traefik edge while AXIGNAL binds only to loopback | PROPOSED / REVIEW REQUIRED |
 
 ADRs record durable decisions and consequences. A later decision MUST supersede rather than erase an accepted ADR.

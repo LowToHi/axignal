@@ -1,0 +1,4 @@
+services:
+  caddy:
+    ports:
+      - "127.0.0.1:${AXIGNAL_PILOT_HTTP_PORT:-18080}:80"

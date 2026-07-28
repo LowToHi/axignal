@@ -23,7 +23,8 @@ Generate independent random values for every database runtime, the web session, 
 python scripts/verify_pilot_candidate.py
 python scripts/verify_demo_contract.py
 docker compose --env-file /secure/axignal-pilot.env \
-  -f infra/pilot/compose.yaml config >/dev/null
+  -f infra/pilot/compose.yaml \
+  -f infra/pilot/remote/compose.standalone.yaml config >/dev/null
 ```
 
 The deployed `AXIGNAL_BUILD_SHA` must equal the checked-out commit.
@@ -32,21 +33,24 @@ The deployed `AXIGNAL_BUILD_SHA` must equal the checked-out commit.
 
 ```bash
 docker compose --env-file /secure/axignal-pilot.env \
-  -f infra/pilot/compose.yaml up --build --detach --wait
+  -f infra/pilot/compose.yaml \
+  -f infra/pilot/remote/compose.standalone.yaml up --build --detach --wait
 ```
 
 The default topology starts PostgreSQL, credential rotation, persistent Valkey, API, web and Caddy. Start bounded workers only after the core is healthy:
 
 ```bash
 docker compose --env-file /secure/axignal-pilot.env \
-  -f infra/pilot/compose.yaml --profile workers up --detach --wait
+  -f infra/pilot/compose.yaml \
+  -f infra/pilot/remote/compose.standalone.yaml --profile workers up --detach --wait
 ```
 
 Observability is optional:
 
 ```bash
 docker compose --env-file /secure/axignal-pilot.env \
-  -f infra/pilot/compose.yaml --profile observability up --detach
+  -f infra/pilot/compose.yaml \
+  -f infra/pilot/remote/compose.standalone.yaml --profile observability up --detach
 ```
 
 ## Verification
@@ -62,6 +66,7 @@ docker compose --env-file /secure/axignal-pilot.env \
 
 ```bash
 export AXIGNAL_PILOT_ENV_FILE=/secure/axignal-pilot.env
+export AXIGNAL_PILOT_COMPOSE_EDGE_FILE=infra/pilot/remote/compose.standalone.yaml
 bash infra/pilot/backup.sh /secure/backups/axignal-before-change.dump
 bash infra/pilot/restore-rehearsal.sh
 ```

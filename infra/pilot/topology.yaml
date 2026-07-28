@@ -7,7 +7,16 @@ human_study_required_before_public_claims: true
 
 entrypoint:
   service: caddy
-  tls: automatic-when-domain-configured
+  modes:
+    standalone:
+      public_port_owner: caddy
+      bind_address: configurable
+      tls: caddy
+    shared-traefik:
+      public_port_owner: traefik
+      caddy_bind_address: 127.0.0.1
+      caddy_protocol: http
+      tls: traefik
   direct_api_exposure: false
   security_headers: required
 
@@ -94,4 +103,6 @@ operations:
   backup_required_before_upgrade: true
   restore_rehearsal_required: true
   deployment_manifest_sha_required: true
+  deployment_state: DEPLOYED_AWAITING_ACCEPTANCE
+  independent_acceptance_required: true
   rollback: restore-database-and-redeploy-previous-sha
