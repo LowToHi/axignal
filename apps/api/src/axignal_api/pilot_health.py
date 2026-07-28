@@ -7,6 +7,7 @@ from typing import Any
 import psycopg
 from fastapi import APIRouter, HTTPException
 from redis import Redis
+from redis.exceptions import RedisError
 
 router = APIRouter(tags=["operations"])
 
@@ -66,7 +67,7 @@ def readiness() -> dict[str, Any]:
         checks["postgres"] = _database_ready()
         checks["valkey"] = _valkey_ready()
         checks["object_store"] = _object_store_ready()
-    except (OSError, psycopg.Error, ValueError) as exc:
+    except (OSError, psycopg.Error, RedisError, ValueError) as exc:
         raise HTTPException(status_code=503, detail="AXIGNAL_PILOT_NOT_READY") from exc
 
     if not all(checks.values()):
