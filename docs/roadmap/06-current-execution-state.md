@@ -1,28 +1,28 @@
 # 06 — AXIGNAL Current Execution State
 
-Version: `0.6.1`
-Status: `CONSOLIDATED BASELINE MERGED`
+Version: `0.7.0`
+Status: `F2 INTEGRATED / F1 VALIDATION AUTHORISED`
 Goal ID: `AXIGNAL-GOAL-001`
-Canonical baseline: `main@cf83781766f12ebc55eeb9829d68d41e77500aa7`
+Canonical baseline: `main@15a232249736658dbe05a67d1f2541384848f5b3`
 
 ## Reading rule
 
-This document records the evidence-backed implementation state. A phase is not `PASSED` merely because code exists: its complete contractual gate, external validation and operational dependencies must also pass.
+This document records the evidence-backed implementation state. A phase is not `PASSED` merely because code exists: its complete contractual gate, external validation and operational dependencies must also be accepted.
 
 ## Current phase state
 
 | Phase | State | Evidence-backed interpretation |
 |---|---|---|
-| F0 — Goal and contracts | `GATE_REVIEW` | Goal Lock, contracts `00–27`, ADRs, schemas, task/skill registries and fail-closed validation are integrated into `main`. Final cross-contract review and map freeze remain. |
-| F1 — UX architecture and validation | `GATE_REVIEW` | Investigation Shell v0.2, Navigator, lens switch, Timeline and Claim/Evidence Rail are executable. Qualified-user thresholds, control comparison and multilingual equivalence remain unproven. |
-| F2 — Reproducible repository spine | `EVIDENCE_READY` | The cumulative baseline, clean-clone CI, PostgreSQL/Valkey integration, migrations, snapshot restore, API, builds and Playwright are merged. A final F2 deliverable-gap review remains before declaring the phase passed. |
-| F3 — Epistemic kernel | `IN_PROGRESS` | One bounded end-to-end profile reaches an append-only Claim Ledger through independent deterministic admission. General entity, contradiction, correction, expiry and multi-profile coverage remain. |
-| F4 — Navigator and InvestigationContext | `IN_PROGRESS` | Authenticated persistent ResearchRuns return evidence, proposals, admitted claims and dossiers to one InvestigationContext. Full multilingual command equivalence, previews, entitlements and general undo remain. |
-| F5 — Globe, Graph and Timeline parity | `IN_PROGRESS` | Product shell and canonical browser workflow exist; complete functional parity, accessibility alternatives, performance budgets and user gate remain. |
+| F0 — Goal and contracts | `GATE_REVIEW` | Goal Lock, contracts, ADRs, schemas and registries are integrated. Final cross-contract review and map freeze remain. |
+| F1 — UX architecture and validation | `GATE_REVIEW` | Investigation Shell, Navigator, lens switch, Timeline and Claim/Evidence Rail are executable. Qualified-user thresholds, control comparison, multilingual equivalence and accessibility acceptance remain unproven. |
+| F2 — Reproducible repository spine | `GATE_REVIEW` | Scheduler, content-addressed object storage, OpenTelemetry baseline, explicit runtime topology, migration replay, snapshot restore and clean-clone CI are integrated through PR #24. Formal phase acceptance remains a separate gate decision. |
+| F3 — Epistemic kernel | `IN_PROGRESS` | A bounded profile reaches the append-only Claim Ledger through independent deterministic admission and bounded human review. General entity, contradiction, correction, expiry and multi-profile coverage remain. |
+| F4 — Navigator and InvestigationContext | `IN_PROGRESS` | Authenticated ResearchRuns return evidence, proposals, admitted claims, human-review context and dossiers. Full multilingual command equivalence, previews, entitlements and general undo remain. |
+| F5 — Globe, Graph and Timeline parity | `IN_PROGRESS` | Product shell and canonical browser workflow exist; full parity, accessibility alternatives, performance budgets and user validation remain. |
 | F6 — Multilingual semantic system | `LOCKED` | Contracts exist; the canonical multilingual data and QA system is not implemented. |
-| F7 — Intent Intelligence and Knowledge Tides | `LOCKED` | Schemas and isolated knowledge-domain foundations exist; privacy-thresholded operational aggregation is not implemented. |
-| F8 — First lawful opportunity universe | `LOCKED` | World Bank sources prove ingestion and rights gates but do not constitute a commercially admitted opportunity universe. |
-| F9 — Paid design-partner product | `LOCKED` | Production organisations, entitlements, billing, onboarding and paying design partners are absent. |
+| F7 — Intent Intelligence and Knowledge Tides | `LOCKED` | Privacy-thresholded operational aggregation is not implemented. |
+| F8 — First lawful opportunity universe | `LOCKED` | Current institutional fixtures prove ingestion and rights gates but do not form a commercial universe. |
+| F9 — Paid design-partner product | `LOCKED` | Production organisations, entitlements, billing, onboarding and paying partners are absent. |
 | F10 — Scenarios, calibration and outcomes | `LOCKED` | Requires admitted historical universe data and commercial usage. |
 | F11 — Enterprise, API and private data | `LOCKED` | Tenant RLS is foundational evidence, not an accepted enterprise product. |
 | F12 — General availability | `LOCKED` | No production deployment, SLO, disaster recovery, retention or operating-economics gate has passed. |
@@ -35,76 +35,82 @@ bounded authenticated identity
 → persistent ResearchRun
 → PostgreSQL RLS + transactional outbox
 → Valkey worker queues
-→ admitted structured source or immutable document
+→ admitted source or immutable document
 → Evidence Objects
 → Candidate Claims
 → proposal-only model worker
-→ durable admission handoff
-→ independent deterministic rederivation
+→ deterministic admission
 → atomic Claim Ledger write or bounded escalation
+→ human review with append-only events and no canonical authority
 → dossier and InvestigationContext
 ```
 
-Demonstrated invariants:
+The supporting runtime spine now includes:
 
-- a model cannot write canonical state;
-- proposal and admission processes use separate PostgreSQL credentials;
+```text
+persistent scheduler
+→ lease-bound jobs
+→ deduplicated outbox delivery
+→ retry / dead-letter / lease recovery
+→ content-addressed object storage
+→ trace-context propagation and telemetry redaction
+→ machine-readable non-production topology
+```
+
+## Demonstrated invariants
+
+- models and human reviewers cannot write canonical state directly;
+- proposal, admission, reviewer and scheduler processes use separate PostgreSQL credentials;
 - source, rights, hash, scope, value, unit and period gates fail closed;
 - tenant isolation is enforced by RLS;
-- queue replay is idempotent;
-- canonical writes and state events are append-only;
-- a failpoint inside admission rolls back every related mutation;
-- `HUMAN_REVIEW_REQUIRED` remains outside the canonical ledger.
+- queue and scheduling replay are idempotent;
+- canonical, review and scheduler histories are append-only;
+- failpoints roll back related mutations atomically;
+- expired scheduler leases recover without duplicate logical jobs;
+- object-store tampering is rejected;
+- prohibited telemetry fields are redacted;
+- production deployment remains disabled.
 
-## Consolidation debt — resolved
+## Integrated baselines
 
-The previous implementation was distributed across stacked draft PRs. The debt was closed through PR #21 and canonical squash commit `cf83781766f12ebc55eeb9829d68d41e77500aa7`.
+| Unit | PR | Canonical squash commit |
+|---|---:|---|
+| Consolidated executable baseline | #21 | `cf83781766f12ebc55eeb9829d68d41e77500aa7` |
+| Governance closure | #22 | `cb2c966d36207e908a19dd5381f9179d3c6fa406` |
+| Bounded human review | #23 | `76ca919fea0d5740e80729aa7f9332f6aa6c5857` |
+| F2 reproducible runtime closure | #24 | `15a232249736658dbe05a67d1f2541384848f5b3` |
 
-Completed gates:
-
-1. current `main` lineage incorporated;
-2. one cumulative PR reviewed against `main`;
-3. canonical naming, contracts, schemas and OpenAPI validated;
-4. API, TypeScript, builds and browser workflow passed;
-5. PostgreSQL, Valkey and controlled live-source smoke passed;
-6. cumulative migrations `025`, `030` and `035` applied and replayed over seeded prior-state data;
-7. pre-migration snapshot restored into a clean database;
-8. proposal/admission credential boundaries reverified;
-9. PRs #5, #9 and #11–#19 closed as superseded while retaining branches and evidence;
-10. no production deployment or secret provisioning performed.
-
-All subsequent development MUST branch from current `main`. The superseded stack is audit history, not an execution base.
+All subsequent development MUST branch from current `main`. Superseded branches are audit history, not execution bases.
 
 ## Active gaps before phase acceptance
 
 ### F0
 
 - final cross-contract inconsistency review;
-- freeze current execution-state authority and map precedence;
-- decide final retention policy for superseded branches.
+- freeze execution-state authority and map precedence;
+- decide retention policy for superseded branches.
 
 ### F1
 
-- qualified-user testing against declared thresholds;
-- comparison with a control direction;
+- qualified-user testing against frozen thresholds;
+- AXIGNAL-versus-control comparison using equivalent content;
+- authority-layer and evidence-traceability comprehension;
 - multilingual and accessibility acceptance;
 - final visual-system gate.
 
 ### F2
 
-- complete the final deliverable-gap review against the normative phase map;
-- explicitly resolve any missing scheduler, object-storage-interface or OpenTelemetry baseline requirement;
-- decide production deployment topology separately.
+- formal roadmap authority decision: `PASSED` or remain `GATE_REVIEW`;
+- production topology, secrets, SLOs and disaster recovery remain explicitly separate and unauthorised.
 
 ### F3–F5
 
-- bounded human-review workflow;
 - additional deterministic claim profiles and contradiction lifecycle;
 - source/entity expansion only through independent gates;
-- complete Globe/Graph/Timeline parity and user validation.
+- complete Globe/Graph/Timeline parity after user evidence.
 
 ## Only authorised next priority
 
-> Implement the bounded human-review path for `HUMAN_REVIEW_REQUIRED` and `CONTESTED`, preserving reviewer identity, reason codes, append-only history and non-bypassable integrity gates. Then return to the F1 qualified-user gate.
+> Build the F1 qualified-user validation harness with pseudonymised sessions, frozen tasks, deterministic AXIGNAL/control assignment, append-only interaction events, reproducible metrics and zero canonical-state authority. Then execute controlled sessions with qualified users.
 
-OCR, unrestricted browsing, broad source expansion, continuous production workers, billing and production deployment remain unauthorised until their dependencies pass.
+OCR, unrestricted browsing, broad source expansion, billing, new model authority and production deployment remain unauthorised until their dependencies pass.
