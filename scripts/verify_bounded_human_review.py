@@ -215,12 +215,8 @@ def verify_append_only(admin_dsn: str, case_id: UUID) -> None:
 def verify_atomic_failpoint(
     admin_dsn: str,
     reviewer_dsn: str,
-    client: TestClient,
-    settings: Settings,
+    case_id: UUID,
 ) -> None:
-    run_id = create_reviewable_run(client, settings)
-    review_case = list_cases(client, run_id)[0]
-    case_id = UUID(review_case["human_review_case_id"])
     with psycopg.connect(reviewer_dsn) as connection, connection.cursor() as cursor:
         cursor.execute(
             "SELECT set_config('app.tenant_id', %s, false)",
@@ -309,11 +305,35 @@ def main() -> int:
         "dossier_context": 0,
     }
 
+    verify_atomic_failpoint(
+        settings.database_url,
+        settings.human_review_database_url,
+        case_id,
+    )
+    assert database_counts(settings.database_url, run_id) == before
+
     action_payload = {
         "action": "ACCEPT_AS_CONTEXT",
         "reason_code": "LIMITATION_CONFIRMED",
         "note": "The national report is valid context but not local-market evidence.",
     }
+    with psycopg.connect(settings.database_url) as connection, connection.cursor() as cursor:
+        cursor.execute(
+            "UPDATE axignal_global.sources SET kill_switch = true "
+            "WHERE source_id = 'world-bank-rer41'"
+        )
+    blocked_response = client.post(
+        f"/v1/human-review-cases/{case_id}/actions",
+        headers=identity_headers(TENANT),
+        json=action_payload,
+    )
+    assert blocked_response.status_code == 409, blocked_response.text
+    assert database_counts(settings.database_url, run_id) == before
+    with psycopg.connect(settings.database_url) as connection, connection.cursor() as cursor:
+        cursor.execute(
+            "UPDATE axignal_global.sources SET kill_switch = false "
+            "WHERE source_id = 'world-bank-rer41'"
+        )
     resolved_response = client.post(
         f"/v1/human-review-cases/{case_id}/actions",
         headers=identity_headers(TENANT),
@@ -351,32 +371,6 @@ def main() -> int:
     )
     assert denied.status_code == 403
     verify_append_only(settings.database_url, case_id)
-
-    blocked_run = create_reviewable_run(client, settings)
-    blocked_case = list_cases(client, blocked_run)[0]
-    with psycopg.connect(settings.database_url) as connection, connection.cursor() as cursor:
-        cursor.execute(
-            "UPDATE axignal_global.sources SET kill_switch = true "
-            "WHERE source_id = 'world-bank-rer41'"
-        )
-    blocked_response = client.post(
-        f"/v1/human-review-cases/{blocked_case['human_review_case_id']}/actions",
-        headers=identity_headers(TENANT),
-        json=action_payload,
-    )
-    assert blocked_response.status_code == 409, blocked_response.text
-    with psycopg.connect(settings.database_url) as connection, connection.cursor() as cursor:
-        cursor.execute(
-            "UPDATE axignal_global.sources SET kill_switch = false "
-            "WHERE source_id = 'world-bank-rer41'"
-        )
-
-    verify_atomic_failpoint(
-        settings.database_url,
-        settings.human_review_database_url,
-        client,
-        settings,
-    )
 
     output = {
         "research_run_id": str(run_id),
