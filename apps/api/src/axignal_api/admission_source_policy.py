@@ -11,6 +11,7 @@ from axignal_api.document_proposals import (
     DeterministicInstitutionalParser,
     InstitutionalDocument,
     PromptInjectionScanner,
+    canonical_hash,
 )
 
 
@@ -22,7 +23,7 @@ class AdmissionSourcePolicyMixin:
     ) -> tuple[dict[str, Any], dict[str, Any], dict[str, dict[str, Any]]]:
         packaged_source = package["source"]
         source_id = packaged_source.get("source_id")
-        if source_id != _ALLOWED_SOURCE:
+        if source_id != ALLOWED_SOURCE:
             raise AdmissionPolicyError("Source is outside the first admission profile")
         cursor.execute(
             "SELECT * FROM axignal_global.sources WHERE source_id = %s",
