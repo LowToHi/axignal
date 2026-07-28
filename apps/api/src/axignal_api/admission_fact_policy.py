@@ -3,10 +3,10 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from decimal import Decimal, InvalidOperation
 from typing import Any
+from uuid import UUID
 
 from axignal_api.admission_types import (
     ALLOWED_PREDICATE,
-    ALLOWED_SOURCE,
     ALLOWED_SUBJECT,
     ALLOWED_UNIT,
     NUMBER_PATTERN,
