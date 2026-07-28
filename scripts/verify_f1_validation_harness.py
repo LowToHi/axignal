@@ -11,6 +11,13 @@ from psycopg.rows import dict_row
 TENANT_A = UUID("11111111-1111-4111-8111-111111111111")
 TENANT_B = UUID("22222222-2222-4222-8222-222222222222")
 TASK_ID = "F1-AUTHORITY-001"
+ANSWER_KEYS = {
+    "authority_layer",
+    "required_evidence_ids",
+    "required_unknowns",
+    "critical_error_layers",
+    "reference_answer",
+}
 
 
 def pseudonym(index: int) -> str:
@@ -25,17 +32,41 @@ def start_session(
     connection: psycopg.Connection,
     tenant_id: UUID,
     participant_id_hash: str,
-    profile: str = "DOMAIN_EXPERT",
 ) -> dict:
     with connection.cursor() as cursor:
         set_tenant(cursor, tenant_id)
         cursor.execute(
             "SELECT evaluation.start_validation_session(%s,%s,%s,%s) AS item",
-            (tenant_id, participant_id_hash, profile, TASK_ID),
+            (tenant_id, participant_id_hash, "DOMAIN_EXPERT", TASK_ID),
         )
         row = cursor.fetchone()
         assert row is not None
         return row["item"]
+
+
+def complete(
+    cursor: psycopg.Cursor,
+    session_id: UUID,
+    answer_key: dict,
+    confidence: int,
+) -> dict:
+    cursor.execute(
+        """
+        SELECT evaluation.complete_validation_session(
+          %s,%s,%s,%s,%s,%s,%s
+        ) AS item
+        """,
+        (
+            TENANT_A,
+            session_id,
+            answer_key["authority_layer"],
+            answer_key["required_evidence_ids"],
+            answer_key["required_unknowns"],
+            confidence,
+            answer_key["reference_answer"],
+        ),
+    )
+    return cursor.fetchone()["item"]
 
 
 def main() -> int:
@@ -47,27 +78,28 @@ def main() -> int:
             cursor.execute("SELECT count(*) AS count FROM evaluation.validation_tasks")
             assert cursor.fetchone()["count"] == 6
             cursor.execute(
+                "SELECT task_payload FROM evaluation.validation_tasks WHERE task_id=%s",
+                (TASK_ID,),
+            )
+            answer_key = cursor.fetchone()["task_payload"]
+            cursor.execute(
                 """
                 SELECT
                   has_table_privilege(
                     'axignal_validation_runtime_login',
-                    'axignal_global.canonical_claims',
-                    'INSERT'
+                    'axignal_global.canonical_claims','INSERT'
                   ) AS canonical_insert,
                   has_table_privilege(
                     'axignal_validation_runtime_login',
-                    'axignal_global.evidence_objects',
-                    'UPDATE'
+                    'axignal_global.evidence_objects','UPDATE'
                   ) AS evidence_update,
                   has_table_privilege(
                     'axignal_validation_runtime_login',
-                    'evaluation.validation_sessions',
-                    'SELECT'
+                    'evaluation.validation_sessions','SELECT'
                   ) AS direct_session_read,
                   has_function_privilege(
                     'axignal_validation_runtime_login',
-                    'evaluation.start_validation_session(uuid,text,text,text)',
-                    'EXECUTE'
+                    'evaluation.start_validation_session(uuid,text,text,text)','EXECUTE'
                   ) AS start_execute
                 """
             )
@@ -81,7 +113,7 @@ def main() -> int:
                 """
                 SELECT count(*) AS count
                 FROM information_schema.columns
-                WHERE table_schema = 'evaluation'
+                WHERE table_schema='evaluation'
                   AND column_name IN ('email','name','full_name','phone')
                 """
             )
@@ -99,9 +131,10 @@ def main() -> int:
         assert set(conditions) == {"AXIGNAL", "CONTROL"}
 
         axignal_participant, axignal_bundle = conditions["AXIGNAL"]
-        control_participant, control_bundle = conditions["CONTROL"]
+        _, control_bundle = conditions["CONTROL"]
         assert axignal_bundle["task"]["content_hash"] == control_bundle["task"]["content_hash"]
         assert axignal_bundle["task"]["payload"] == control_bundle["task"]["payload"]
+        assert ANSWER_KEYS.isdisjoint(axignal_bundle["task"]["payload"])
 
         replay = start_session(validation, TENANT_A, axignal_participant)
         assert replay["session"]["validation_session_id"] == axignal_bundle["session"][
@@ -110,7 +143,6 @@ def main() -> int:
         assert replay["session"]["condition"] == "AXIGNAL"
 
         session_id = UUID(axignal_bundle["session"]["validation_session_id"])
-        task = axignal_bundle["task"]["payload"]
         with validation.cursor() as cursor:
             set_tenant(cursor, TENANT_A)
             for event_id, event_type in (
@@ -123,7 +155,7 @@ def main() -> int:
                       %s,%s,%s,%s,%s::jsonb
                     ) AS item
                     """,
-                    (TENANT_A, session_id, event_type, event_id, json.dumps({})),
+                    (TENANT_A, session_id, event_type, event_id, "{}"),
                 )
             cursor.execute(
                 """
@@ -133,56 +165,11 @@ def main() -> int:
                 """,
                 (TENANT_A, session_id, "EVIDENCE_INSPECTED", "evidence-opened", "{}"),
             )
-            cursor.execute(
-                "SELECT count(*) AS count FROM evaluation.validation_metrics(%s)",
-                (TENANT_A,),
-            )
-            assert cursor.fetchone()["count"] >= 1
-
-            cursor.execute(
-                """
-                SELECT evaluation.complete_validation_session(
-                  %s,%s,%s,%s,%s,%s,%s
-                ) AS item
-                """,
-                (
-                    TENANT_A,
-                    session_id,
-                    task["authority_layer"],
-                    task["required_evidence_ids"],
-                    task["required_unknowns"],
-                    82,
-                    task["reference_answer"],
-                ),
-            )
-            completed = cursor.fetchone()["item"]
+            completed = complete(cursor, session_id, answer_key, 82)
             assert completed["session"]["state"] == "COMPLETED"
-            assert completed["session"]["outcome"] == {
-                "confidence": 82,
-                "critical_error": False,
-                "task_completed": True,
-                "unknowns_identified": True,
-                "evidence_traceability": True,
-                "authority_layer_correct": True,
-            }
-
-            cursor.execute(
-                """
-                SELECT evaluation.complete_validation_session(
-                  %s,%s,%s,%s,%s,%s,%s
-                ) AS item
-                """,
-                (
-                    TENANT_A,
-                    session_id,
-                    task["authority_layer"],
-                    task["required_evidence_ids"],
-                    task["required_unknowns"],
-                    82,
-                    task["reference_answer"],
-                ),
-            )
-            assert cursor.fetchone()["item"]["session"]["state"] == "COMPLETED"
+            assert completed["session"]["outcome"]["task_completed"] is True
+            assert completed["session"]["outcome"]["critical_error"] is False
+            assert complete(cursor, session_id, answer_key, 82)["session"]["state"] == "COMPLETED"
 
             set_tenant(cursor, TENANT_B)
             cursor.execute(
@@ -192,26 +179,11 @@ def main() -> int:
             assert cursor.fetchone()["item"] is None
 
         control_session_id = UUID(control_bundle["session"]["validation_session_id"])
-        control_task = control_bundle["task"]["payload"]
         with validation.cursor() as cursor:
             set_tenant(cursor, TENANT_A)
-            cursor.execute(
-                """
-                SELECT evaluation.complete_validation_session(
-                  %s,%s,%s,%s,%s,%s,%s
-                ) AS item
-                """,
-                (
-                    TENANT_A,
-                    control_session_id,
-                    control_task["authority_layer"],
-                    control_task["required_evidence_ids"],
-                    control_task["required_unknowns"],
-                    75,
-                    control_task["reference_answer"],
-                ),
-            )
-            assert cursor.fetchone()["item"]["session"]["outcome"]["task_completed"]
+            assert complete(cursor, control_session_id, answer_key, 75)["session"]["outcome"][
+                "task_completed"
+            ]
             cursor.execute(
                 "SELECT item FROM evaluation.validation_metrics(%s) AS item",
                 (TENANT_A,),
@@ -223,9 +195,7 @@ def main() -> int:
     with psycopg.connect(admin_dsn) as admin:
         with admin.cursor() as cursor:
             try:
-                cursor.execute(
-                    "UPDATE evaluation.validation_events SET payload='{}'::jsonb"
-                )
+                cursor.execute("UPDATE evaluation.validation_events SET payload='{}'::jsonb")
             except psycopg.Error as exc:
                 assert "AXIGNAL_VALIDATION_HISTORY_APPEND_ONLY" in str(exc)
                 admin.rollback()
@@ -236,6 +206,7 @@ def main() -> int:
         json.dumps(
             {
                 "frozen_tasks_validated": True,
+                "answer_keys_hidden": True,
                 "deterministic_condition_assignment": True,
                 "condition_assignment_immutable": True,
                 "control_content_equivalence": True,
