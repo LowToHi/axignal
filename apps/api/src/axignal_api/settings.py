@@ -43,6 +43,9 @@ class Settings:
     otel_enabled: bool = False
     otel_service_name: str = "axignal-local"
     otel_exporter_otlp_endpoint: str | None = None
+    validation_database_url: str | None = None
+    validation_participant_salt: str | None = None
+    validation_enabled: bool = False
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -75,6 +78,11 @@ class Settings:
             otel_exporter_otlp_endpoint=environ.get(
                 "OTEL_EXPORTER_OTLP_ENDPOINT"
             ),
+            validation_database_url=environ.get("AXIGNAL_VALIDATION_DATABASE_URL"),
+            validation_participant_salt=environ.get(
+                "AXIGNAL_VALIDATION_PARTICIPANT_SALT"
+            ),
+            validation_enabled=_bool_env("AXIGNAL_VALIDATION_ENABLED"),
             persistent_research_enabled=_bool_env(
                 "AXIGNAL_PERSISTENT_RESEARCH_ENABLED"
             ),
@@ -157,6 +165,18 @@ class Settings:
             raise RuntimeError("AXIGNAL_OBJECT_STORE_BACKEND is unsupported")
         if self.object_store_backend == "local":
             self.object_store_root.mkdir(parents=True, exist_ok=True)
+
+    def require_validation(self) -> None:
+        if not self.validation_enabled:
+            raise RuntimeError("Qualified-user validation is disabled")
+        if not self.validation_database_url:
+            raise RuntimeError("AXIGNAL_VALIDATION_DATABASE_URL is required")
+        if not self.validation_participant_salt:
+            raise RuntimeError("AXIGNAL_VALIDATION_PARTICIPANT_SALT is required")
+        if len(self.validation_participant_salt.encode("utf-8")) < 32:
+            raise RuntimeError(
+                "AXIGNAL_VALIDATION_PARTICIPANT_SALT must be at least 32 bytes"
+            )
 
     def require_identity_assertions(self) -> None:
         if not self.identity_assertion_secret:
