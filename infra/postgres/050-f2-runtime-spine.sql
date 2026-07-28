@@ -112,10 +112,16 @@ BEGIN
   RETURN created_id;
 END $$;
 
-CREATE OR REPLACE FUNCTION axignal_global.scheduler_pending_outbox(p_limit integer DEFAULT 100)
-RETURNS TABLE(scheduler_outbox_event_id uuid,scheduled_job_id uuid,payload jsonb)
+DROP FUNCTION IF EXISTS axignal_global.scheduler_pending_outbox(integer);
+CREATE FUNCTION axignal_global.scheduler_pending_outbox(p_limit integer DEFAULT 100)
+RETURNS TABLE(
+  scheduler_outbox_event_id uuid,
+  scheduled_job_id uuid,
+  publish_attempts integer,
+  payload jsonb
+)
 LANGUAGE sql SECURITY DEFINER SET search_path=pg_catalog,axignal_global AS $$
-  SELECT e.scheduler_outbox_event_id,e.scheduled_job_id,e.payload
+  SELECT e.scheduler_outbox_event_id,e.scheduled_job_id,e.publish_attempts,e.payload
   FROM axignal_global.scheduler_outbox_events e
   JOIN axignal_global.scheduled_jobs j USING(scheduled_job_id)
   WHERE e.status='PENDING' AND j.state='SCHEDULED' AND j.run_at<=now()
