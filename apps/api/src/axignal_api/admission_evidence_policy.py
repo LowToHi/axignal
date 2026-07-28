@@ -119,7 +119,7 @@ class AdmissionEvidencePolicyMixin:
             "object_value",
             "statement",
             "kind",
-            "relationshhip",
+            "relationship",
             "producer_type",
             "producer_id",
             "model_version",
@@ -127,7 +127,7 @@ class AdmissionEvidencePolicyMixin:
             "prompt_version",
             "assumptions",
             "unknowns",
-      )
+        )
         if any(candidate[field] != packaged[field] for field in fields):
             raise AdmissionIntegrityError("Candidate Claim differs from handoff package")
         if float(candidate["extraction_confidence"]) != float(
