@@ -97,7 +97,7 @@ jobs:
         run: |
           cat > "$AXIGNAL_PILOT_ENV_FILE" <<'ENV'
           AXIGNAL_BUILD_SHA=${{ github.sha }}
-          AXIGNAL_PILOT_SITE_ADDRESS=http://localhost
+          AXIGNAL_PILOT_SITE_ADDRESS=:80
           AXIGNAL_PILOT_HTTP_PORT=18080
           AXIGNAL_PILOT_HTTPS_PORT=18443
           AXIGNAL_POSTGRES_DB=axignal
