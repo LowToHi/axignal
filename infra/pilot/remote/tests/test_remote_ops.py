@@ -17,7 +17,9 @@ def load(name: str, filename: str):
     return module
 
 
-def test_prepare_environment_is_root_only_and_contains_no_plaintext_password(tmp_path: Path) -> None:
+def test_prepare_environment_is_root_only_and_contains_no_plaintext_password(
+    tmp_path: Path,
+) -> None:
     module = load('prepare_env', 'prepare_env.py')
     output = tmp_path / 'pilot.env'
     args = argparse.Namespace(
@@ -69,7 +71,10 @@ def test_prepare_environment_rejects_short_sha() -> None:
 def test_remote_state_updates_only_build_sha_and_writes_deployment(tmp_path: Path) -> None:
     module = load('remote_state', 'files/remote_state.py')
     env_file = tmp_path / 'pilot.env'
-    env_file.write_text("AXIGNAL_BUILD_SHA='" + ('a' * 40) + "'\nSECRET='keep'\n", encoding='utf-8')
+    env_file.write_text(
+        "AXIGNAL_BUILD_SHA='" + ('a' * 40) + "'\nSECRET='keep'\n",
+        encoding='utf-8',
+    )
     os.chmod(env_file, 0o600)
     module.set_build_sha(argparse.Namespace(path=env_file, sha='b' * 40))
     assert "SECRET='keep'" in env_file.read_text(encoding='utf-8')
