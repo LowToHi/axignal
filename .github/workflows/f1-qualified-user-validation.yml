@@ -116,6 +116,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
+      AXIGNAL_PLAYWRIGHT_DEV_SERVER: "true"
       AXIGNAL_VALIDATION_UI_ENABLED: "true"
       AXIGNAL_AUTH_REQUIRED: "true"
       AXIGNAL_AUTH_EMAIL: validation@example.test
