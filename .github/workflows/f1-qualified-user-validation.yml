@@ -43,13 +43,23 @@ jobs:
       - name: Install API dependencies
         run: python -m pip install --upgrade pip && python -m pip install -e ".[dev]"
       - name: Lint validation boundary
+        shell: bash
         run: |
+          set -o pipefail
           ruff check \
             apps/api/src/axignal_api/validation.py \
             apps/api/src/axignal_api/settings.py \
             apps/api/src/axignal_api/application.py \
             apps/api/tests/test_validation.py \
-            scripts/verify_f1_validation_harness.py
+            scripts/verify_f1_validation_harness.py 2>&1 | tee f1-ruff.log
+      - name: Upload static diagnostics
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: f1-static-diagnostics
+          path: f1-ruff.log
+          if-no-files-found: error
+          retention-days: 7
       - name: Run validation unit tests
         run: pytest apps/api/tests/test_validation.py
 
