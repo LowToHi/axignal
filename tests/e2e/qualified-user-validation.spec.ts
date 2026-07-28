@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 const sessionId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const task = {
@@ -59,7 +59,7 @@ function bundle(condition: "AXIGNAL" | "CONTROL", completed = false) {
   };
 }
 
-async function installRoutes(page: Parameters<typeof test>[0]["page"], condition: "AXIGNAL" | "CONTROL") {
+async function installRoutes(page: Page, condition: "AXIGNAL" | "CONTROL") {
   await page.route("**/api/validation/tasks?language=en", async (route) => {
     await route.fulfill({
       status: 200,
@@ -90,9 +90,20 @@ async function installRoutes(page: Parameters<typeof test>[0]["page"], condition
   });
 }
 
+async function authenticate(page: Page) {
+  const response = await page.request.post("/api/auth/login", {
+    data: {
+      email: "validation@example.test",
+      password: "validation-ci-password"
+    }
+  });
+  expect(response.ok()).toBeTruthy();
+}
+
 for (const condition of ["AXIGNAL", "CONTROL"] as const) {
   test(`renders equivalent content in the ${condition} condition`, async ({ page }) => {
     await installRoutes(page, condition);
+    await authenticate(page);
     await page.goto("/validation");
     await page.getByRole("button", { name: "Start controlled session" }).click();
 
@@ -107,7 +118,9 @@ for (const condition of ["AXIGNAL", "CONTROL"] as const) {
     await page.getByLabel("Authority state").selectOption("CANONICAL_CLAIM");
     await page.getByLabel(/World Bank Russia Economic Report 41/).check();
     await page.getByLabel(/national report does not establish Moscow-specific/).check();
-    await page.getByLabel("Explanation").fill("The evidence supports the national fact but not a local claim.");
+    await page.getByLabel("Explanation").fill(
+      "The evidence supports the national fact but not a local claim."
+    );
     await page.getByRole("button", { name: "Submit immutable response" }).click();
 
     await expect(page.getByTestId("validation-outcome")).toContainText("task_completed");
