@@ -1,0 +1,90 @@
+version: 1
+status: reproducible-non-production
+processes:
+  - id: web
+    command: pnpm --filter @axignal/web start
+    credential_env: AXIGNAL_SESSION_SECRET
+    feature_flag: AXIGNAL_AUTH_REQUIRED
+    healthcheck: GET /api/health
+    readiness: identity configuration loaded
+    restart_policy: unless-stopped
+    concurrency_limit: 1
+  - id: api
+    command: uvicorn axignal_api.application:app --host 0.0.0.0 --port 8000
+    credential_env: AXIGNAL_DATABASE_URL
+    feature_flag: AXIGNAL_PERSISTENT_RESEARCH_ENABLED
+    healthcheck: GET /healthz
+    readiness: PostgreSQL and Valkey reachable
+    restart_policy: unless-stopped
+    concurrency_limit: 4
+  - id: research-worker
+    command: python -m axignal_api.research_worker
+    credential_env: AXIGNAL_DATABASE_URL
+    feature_flag: AXIGNAL_PERSISTENT_RESEARCH_ENABLED
+    healthcheck: process heartbeat
+    readiness: PostgreSQL and research queue reachable
+    restart_policy: on-failure
+    concurrency_limit: 1
+  - id: proposal-worker
+    command: python -m axignal_api.proposal_worker
+    credential_env: AXIGNAL_PROPOSAL_DATABASE_URL
+    feature_flag: AXIGNAL_PERSISTENT_RESEARCH_ENABLED
+    healthcheck: process heartbeat
+    readiness: proposal queue and fixture/model endpoint reachable
+    restart_policy: on-failure
+    concurrency_limit: 1
+  - id: admission-runtime
+    command: python -m axignal_api.admission_runtime
+    credential_env: AXIGNAL_ADMISSION_DATABASE_URL
+    feature_flag: AXIGNAL_PERSISTENT_RESEARCH_ENABLED
+    healthcheck: process heartbeat
+    readiness: admission queue reachable
+    restart_policy: on-failure
+    concurrency_limit: 1
+  - id: scheduler
+    command: python -m axignal_api.scheduler_service
+    credential_env: AXIGNAL_SCHEDULER_DATABASE_URL
+    feature_flag: AXIGNAL_SCHEDULER_ENABLED
+    healthcheck: python -m axignal_api.scheduler_service --healthcheck
+    readiness: PostgreSQL, Valkey and object store writable
+    restart_policy: unless-stopped
+    concurrency_limit: 1
+  - id: human-review-api
+    command: served by api
+    credential_env: AXIGNAL_HUMAN_REVIEW_DATABASE_URL
+    feature_flag: AXIGNAL_HUMAN_REVIEW_UI_ENABLED
+    healthcheck: GET /v1/human-review-cases
+    readiness: reviewer allowlist loaded
+    restart_policy: inherited-api
+    concurrency_limit: 1
+dependencies:
+  - id: postgres
+    healthcheck: pg_isready
+    persistence: axignal-postgres
+  - id: valkey
+    healthcheck: valkey-cli ping
+    persistence: none-in-development
+  - id: object-store
+    healthcheck: content-addressed put/head/get/verify
+    persistence: axignal-objects
+  - id: otel-collector
+    healthcheck: optional OTLP HTTP endpoint
+    persistence: none
+security:
+  unique_runtime_credentials:
+    - AXIGNAL_DATABASE_URL
+    - AXIGNAL_PROPOSAL_DATABASE_URL
+    - AXIGNAL_ADMISSION_DATABASE_URL
+    - AXIGNAL_HUMAN_REVIEW_DATABASE_URL
+    - AXIGNAL_SCHEDULER_DATABASE_URL
+  forbidden_telemetry_fields:
+    - authorization
+    - api_key
+    - password
+    - secret
+    - prompt
+    - document
+    - email
+deployment:
+  production_authorised: false
+  rollback: revert F2 closure commit and restore pre-050 snapshot

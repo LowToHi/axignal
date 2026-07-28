@@ -27,5 +27,43 @@ services:
       timeout: 5s
       retries: 20
 
+  scheduler:
+    profiles: ["runtime"]
+    build:
+      context: .
+      dockerfile: infra/runtime/Dockerfile
+    environment:
+      AXIGNAL_SCHEDULER_ENABLED: "true"
+      AXIGNAL_SCHEDULER_DATABASE_URL: postgresql://axignal_scheduler_login:axignal_scheduler@postgres:5432/axignal
+      AXIGNAL_VALKEY_URL: redis://valkey:6379/0
+      AXIGNAL_SCHEDULER_QUEUE_KEY: axignal:scheduler:queue:runtime
+      AXIGNAL_OBJECT_STORE_BACKEND: local
+      AXIGNAL_OBJECT_STORE_ROOT: /var/lib/axignal/objects
+      AXIGNAL_OTEL_ENABLED: "false"
+      OTEL_SERVICE_NAME: axignal-scheduler
+    depends_on:
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-m", "axignal_api.scheduler_service", "--healthcheck"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    volumes:
+      - axignal-objects:/var/lib/axignal/objects
+
+  otel-collector:
+    profiles: ["observability"]
+    image: otel/opentelemetry-collector-contrib:0.130.0
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    volumes:
+      - ./infra/otel/collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
+    ports:
+      - "127.0.0.1:4318:4318"
+
 volumes:
   axignal-postgres:
+  axignal-objects:
