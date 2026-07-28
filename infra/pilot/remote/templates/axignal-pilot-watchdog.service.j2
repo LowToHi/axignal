@@ -1,0 +1,21 @@
+[Unit]
+Description=AXIGNAL private pilot dependency and disk watchdog
+Requires=docker.service
+After=docker.service network-online.target
+ConditionPathExists={{ axignal_env_path }}
+ConditionPathExists={{ axignal_state_root }}/current.json
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+Environment=AXIGNAL_REMOTE_ROOT={{ axignal_root }}
+Environment=AXIGNAL_PILOT_ENV_FILE={{ axignal_env_path }}
+Environment=AXIGNAL_REMOTE_STATE_ROOT={{ axignal_state_root }}
+Environment=AXIGNAL_MIN_FREE_GB={{ axignal_min_free_gb }}
+ExecStart=/usr/local/sbin/axignal-remote-watchdog
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths={{ axignal_state_root }} /var/run/docker.sock

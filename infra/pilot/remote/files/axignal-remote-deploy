@@ -1,0 +1,101 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+TARGET_SHA="${1:?usage: axignal-remote-deploy <40-char-sha> [operator-password-file]}"
+PASSWORD_FILE="${2:-}"
+ROOT="${AXIGNAL_REMOTE_ROOT:-/opt/axignal}"
+ENV_FILE="${AXIGNAL_PILOT_ENV_FILE:-/etc/axignal/pilot.env}"
+STATE_ROOT="${AXIGNAL_REMOTE_STATE_ROOT:-/var/lib/axignal/ops}"
+BACKUP_ROOT="${AXIGNAL_REMOTE_BACKUP_ROOT:-/var/backups/axignal}"
+REPO_URL="${AXIGNAL_REPO_URL:-https://github.com/LowToHi/axignal.git}"
+STATE_HELPER="${AXIGNAL_REMOTE_STATE_HELPER:-/usr/local/lib/axignal/remote_state.py}"
+LOCK_FILE="$STATE_ROOT/deployment.lock"
+STATE_FILE="$STATE_ROOT/current.json"
+CURRENT_LINK="$ROOT/current"
+
+[[ "$TARGET_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo 'target SHA must be 40 lowercase hexadecimal characters' >&2; exit 2; }
+[[ "$EUID" -eq 0 ]] || { echo 'remote deployment must run as root' >&2; exit 2; }
+[[ -f "$ENV_FILE" ]] || { echo "missing private environment file: $ENV_FILE" >&2; exit 2; }
+[[ "$(stat -c '%a' "$ENV_FILE")" == "600" ]] || { echo 'private environment file must have mode 600' >&2; exit 2; }
+[[ -f "$STATE_HELPER" ]] || { echo "missing state helper: $STATE_HELPER" >&2; exit 2; }
+if [[ -n "$PASSWORD_FILE" ]]; then
+  [[ -f "$PASSWORD_FILE" ]] || { echo "missing operator password file: $PASSWORD_FILE" >&2; exit 2; }
+  [[ "$(stat -c '%a' "$PASSWORD_FILE")" == "600" ]] || { echo 'operator password file must have mode 600' >&2; exit 2; }
+fi
+
+mkdir -p "$ROOT/releases" "$STATE_ROOT" "$BACKUP_ROOT"
+exec 9>"$LOCK_FILE"
+flock -x 9
+
+previous_sha="$(python3 "$STATE_HELPER" get --path "$STATE_FILE" --key current_sha)"
+previous_release=""
+[[ -n "$previous_sha" ]] && previous_release="$ROOT/releases/$previous_sha"
+release="$ROOT/releases/$TARGET_SHA"
+temporary="$ROOT/releases/.$TARGET_SHA.tmp"
+
+cleanup() { rm -rf "$temporary"; }
+trap cleanup EXIT
+
+if [[ -d "$release/.git" ]]; then
+  [[ "$(git -C "$release" rev-parse HEAD)" == "$TARGET_SHA" ]] || {
+    echo 'existing release directory has an unexpected commit' >&2
+    exit 1
+  }
+else
+  rm -rf "$temporary"
+  git clone --filter=blob:none --no-checkout "$REPO_URL" "$temporary"
+  git -C "$temporary" fetch --depth 1 origin "$TARGET_SHA"
+  git -C "$temporary" checkout --detach "$TARGET_SHA"
+  [[ "$(git -C "$temporary" rev-parse HEAD)" == "$TARGET_SHA" ]] || {
+    echo 'fetched release does not match target SHA' >&2
+    exit 1
+  }
+  mv "$temporary" "$release"
+fi
+
+python3 "$STATE_HELPER" set-build-sha --path "$ENV_FILE" --sha "$TARGET_SHA"
+compose=(docker compose --env-file "$ENV_FILE" -f "$release/infra/pilot/compose.yaml")
+(
+  cd "$release"
+  python3 scripts/verify_pilot_candidate.py
+  python3 scripts/verify_demo_contract.py
+  "${compose[@]}" config >/dev/null
+)
+
+backup_path=""
+if [[ -n "$previous_release" && -d "$previous_release" ]]; then
+  backup_path="$(env AXIGNAL_REMOTE_ROOT="$ROOT" AXIGNAL_PILOT_ENV_FILE="$ENV_FILE" AXIGNAL_REMOTE_STATE_ROOT="$STATE_ROOT" AXIGNAL_REMOTE_BACKUP_ROOT="$BACKUP_ROOT" /usr/local/sbin/axignal-remote-backup --print-path)"
+fi
+
+rollback_previous() {
+  if [[ -n "$previous_release" && -d "$previous_release" ]]; then
+    python3 "$STATE_HELPER" set-build-sha --path "$ENV_FILE" --sha "$previous_sha" || true
+    docker compose --env-file "$ENV_FILE" -f "$previous_release/infra/pilot/compose.yaml" \
+      up --build --detach --wait || true
+    ln -sfn "$previous_release" "$CURRENT_LINK"
+  fi
+}
+trap rollback_previous ERR
+
+(
+  cd "$release"
+  "${compose[@]}" up --build --detach --wait
+)
+
+verify_args=("$release")
+[[ -n "$PASSWORD_FILE" ]] && verify_args+=("$PASSWORD_FILE")
+AXIGNAL_REMOTE_ROOT="$ROOT" \
+AXIGNAL_PILOT_ENV_FILE="$ENV_FILE" \
+AXIGNAL_REMOTE_STATE_ROOT="$STATE_ROOT" \
+  /usr/local/sbin/axignal-remote-verify "${verify_args[@]}"
+
+ln -sfn "$release" "$CURRENT_LINK.tmp"
+mv -Tf "$CURRENT_LINK.tmp" "$CURRENT_LINK"
+python3 "$STATE_HELPER" write-deployment \
+  --path "$STATE_FILE" \
+  --current-sha "$TARGET_SHA" \
+  --previous-sha "$previous_sha" \
+  --release-path "$release" \
+  --backup-path "$backup_path"
+
+trap - ERR

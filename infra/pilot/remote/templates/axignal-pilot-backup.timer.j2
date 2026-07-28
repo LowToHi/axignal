@@ -1,0 +1,11 @@
+[Unit]
+Description=Schedule AXIGNAL private pilot backups
+
+[Timer]
+OnCalendar=*-*-* 03:17:00 UTC
+RandomizedDelaySec=15m
+Persistent=true
+Unit=axignal-pilot-backup.service
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,218 @@
+---
+- name: Bootstrap and deploy the AXIGNAL private pilot
+  hosts: pilot
+  become: true
+  gather_facts: true
+  vars:
+    axignal_root: /opt/axignal
+    axignal_state_root: /var/lib/axignal/ops
+    axignal_backup_root: /var/backups/axignal
+    axignal_env_path: /etc/axignal/pilot.env
+    axignal_repo_url: https://github.com/LowToHi/axignal.git
+    axignal_backup_retention_days: 14
+    axignal_min_free_gb: 5
+  pre_tasks:
+    - name: Require Ubuntu 24.04
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Ubuntu"
+          - ansible_distribution_version is version('24.04', '>=')
+        fail_msg: AXIGNAL remote pilot requires Ubuntu 24.04 or newer.
+
+    - name: Validate deployment inputs
+      ansible.builtin.assert:
+        that:
+          - axignal_deploy_sha is match('^[0-9a-f]{40}$')
+          - axignal_env_source | length > 0
+          - axignal_site_address is match('^https://')
+        fail_msg: Exact SHA, private environment source and HTTPS site address are required.
+
+    - name: Check private environment source on controller
+      ansible.builtin.stat:
+        path: "{{ axignal_env_source }}"
+      delegate_to: localhost
+      become: false
+      register: axignal_env_source_stat
+      no_log: true
+
+    - name: Require private environment source
+      ansible.builtin.assert:
+        that:
+          - axignal_env_source_stat.stat.exists
+          - axignal_env_source_stat.stat.isreg
+        fail_msg: The private environment source does not exist on the controller.
+      no_log: true
+
+  tasks:
+    - name: Install host dependencies
+      ansible.builtin.apt:
+        name:
+          - ca-certificates
+          - curl
+          - docker.io
+          - docker-compose-v2
+          - git
+          - python3
+          - python3-apt
+          - ufw
+          - unattended-upgrades
+          - util-linux
+        state: present
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Enable Docker
+      ansible.builtin.systemd_service:
+        name: docker
+        enabled: true
+        state: started
+
+    - name: Create AXIGNAL operator group
+      ansible.builtin.group:
+        name: axignal
+        system: true
+
+    - name: Create AXIGNAL operator user
+      ansible.builtin.user:
+        name: axignal
+        group: axignal
+        groups: docker
+        append: true
+        system: true
+        create_home: false
+        shell: /usr/sbin/nologin
+
+    - name: Create protected AXIGNAL directories
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        state: directory
+        owner: "{{ item.owner }}"
+        group: "{{ item.group }}"
+        mode: "{{ item.mode }}"
+      loop:
+        - {path: /etc/axignal, owner: root, group: axignal, mode: '0750'}
+        - {path: /usr/local/lib/axignal, owner: root, group: root, mode: '0755'}
+        - {path: "{{ axignal_root }}", owner: root, group: axignal, mode: '0750'}
+        - {path: "{{ axignal_root }}/releases", owner: root, group: axignal, mode: '0750'}
+        - {path: "{{ axignal_state_root }}", owner: root, group: axignal, mode: '0750'}
+        - {path: "{{ axignal_backup_root }}", owner: root, group: axignal, mode: '0750'}
+
+    - name: Install remote operation helpers
+      ansible.builtin.copy:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        owner: root
+        group: root
+        mode: "{{ item.mode }}"
+      loop:
+        - {src: files/axignal-remote-deploy, dest: /usr/local/sbin/axignal-remote-deploy, mode: '0755'}
+        - {src: files/axignal-remote-verify, dest: /usr/local/sbin/axignal-remote-verify, mode: '0755'}
+        - {src: files/axignal-remote-backup, dest: /usr/local/sbin/axignal-remote-backup, mode: '0755'}
+        - {src: files/axignal-remote-rollback, dest: /usr/local/sbin/axignal-remote-rollback, mode: '0755'}
+        - {src: files/axignal-remote-watchdog, dest: /usr/local/sbin/axignal-remote-watchdog, mode: '0755'}
+        - {src: files/remote_state.py, dest: /usr/local/lib/axignal/remote_state.py, mode: '0755'}
+
+    - name: Install root-only pilot environment
+      ansible.builtin.copy:
+        src: "{{ axignal_env_source }}"
+        dest: "{{ axignal_env_path }}"
+        owner: root
+        group: root
+        mode: '0600'
+      no_log: true
+
+    - name: Configure firewall defaults
+      community.general.ufw:
+        direction: "{{ item.direction }}"
+        policy: "{{ item.policy }}"
+      loop:
+        - {direction: incoming, policy: deny}
+        - {direction: outgoing, policy: allow}
+
+    - name: Allow SSH, HTTP and HTTPS only
+      community.general.ufw:
+        rule: allow
+        port: "{{ item }}"
+        proto: tcp
+      loop:
+        - "{{ ansible_port | default(22) }}"
+        - '80'
+        - '443'
+
+    - name: Enable firewall
+      community.general.ufw:
+        state: enabled
+
+    - name: Install systemd services and timers
+      ansible.builtin.template:
+        src: "{{ item.src }}"
+        dest: "/etc/systemd/system/{{ item.dest }}"
+        owner: root
+        group: root
+        mode: '0644'
+      loop:
+        - {src: templates/axignal-pilot-backup.service.j2, dest: axignal-pilot-backup.service}
+        - {src: templates/axignal-pilot-backup.timer.j2, dest: axignal-pilot-backup.timer}
+        - {src: templates/axignal-pilot-watchdog.service.j2, dest: axignal-pilot-watchdog.service}
+        - {src: templates/axignal-pilot-watchdog.timer.j2, dest: axignal-pilot-watchdog.timer}
+      notify: Reload systemd
+
+    - name: Copy temporary operator password for authenticated smoke test
+      ansible.builtin.copy:
+        src: "{{ axignal_operator_password_source }}"
+        dest: /run/axignal-operator-password
+        owner: root
+        group: root
+        mode: '0600'
+      when: axignal_operator_password_source is defined
+      no_log: true
+
+    - name: Deploy exact approved SHA
+      ansible.builtin.command:
+        argv:
+          - /usr/local/sbin/axignal-remote-deploy
+          - "{{ axignal_deploy_sha }}"
+          - "{{ '/run/axignal-operator-password' if axignal_operator_password_source is defined else '' }}"
+      environment:
+        AXIGNAL_REMOTE_ROOT: "{{ axignal_root }}"
+        AXIGNAL_PILOT_ENV_FILE: "{{ axignal_env_path }}"
+        AXIGNAL_REMOTE_STATE_ROOT: "{{ axignal_state_root }}"
+        AXIGNAL_REMOTE_BACKUP_ROOT: "{{ axignal_backup_root }}"
+        AXIGNAL_REPO_URL: "{{ axignal_repo_url }}"
+      register: axignal_deployment
+      changed_when: "'REMOTE_PILOT_ACCEPTED' in axignal_deployment.stdout"
+
+    - name: Remove temporary operator password
+      ansible.builtin.file:
+        path: /run/axignal-operator-password
+        state: absent
+      no_log: true
+
+    - name: Enable backup and watchdog timers
+      ansible.builtin.systemd_service:
+        name: "{{ item }}"
+        enabled: true
+        state: started
+        daemon_reload: true
+      loop:
+        - axignal-pilot-backup.timer
+        - axignal-pilot-watchdog.timer
+
+    - name: Verify public pilot health over HTTPS
+      ansible.builtin.uri:
+        url: "{{ axignal_site_address }}/api/health"
+        method: GET
+        status_code: 200
+        return_content: true
+        validate_certs: true
+      register: axignal_public_health
+      retries: 6
+      delay: 5
+      until:
+        - axignal_public_health.json.status == 'ok'
+        - axignal_public_health.json.build_sha == axignal_deploy_sha
+
+  handlers:
+    - name: Reload systemd
+      ansible.builtin.systemd_service:
+        daemon_reload: true

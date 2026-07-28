@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+RELEASE="${1:?usage: axignal-remote-verify <release-path> [operator-password-file]}"
+PASSWORD_FILE="${2:-}"
+ENV_FILE="${AXIGNAL_PILOT_ENV_FILE:-/etc/axignal/pilot.env}"
+
+[[ -d "$RELEASE" ]] || { echo "missing release directory: $RELEASE" >&2; exit 2; }
+[[ -f "$ENV_FILE" ]] || { echo "missing environment file: $ENV_FILE" >&2; exit 2; }
+if [[ -n "$PASSWORD_FILE" ]]; then
+  [[ -f "$PASSWORD_FILE" ]] || { echo "missing operator password file: $PASSWORD_FILE" >&2; exit 2; }
+fi
+
+set -a
+# shellcheck disable=SC1090
+source "$ENV_FILE"
+set +a
+
+SITE="${AXIGNAL_PILOT_SITE_ADDRESS%/}"
+EXPECTED_SHA="${AXIGNAL_BUILD_SHA:?AXIGNAL_BUILD_SHA is required}"
+COMPOSE=(docker compose --env-file "$ENV_FILE" -f "$RELEASE/infra/pilot/compose.yaml")
+TMP="$(mktemp -d)"
+trap 'rm -rf "$TMP"' EXIT
+
+curl --fail --silent --show-error --dump-header "$TMP/headers" \
+  "$SITE/api/health" > "$TMP/health.json"
+python3 - "$TMP/health.json" "$EXPECTED_SHA" <<'PY'
+import json, pathlib, sys
+payload = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding='utf-8'))
+assert payload.get('status') == 'ok', payload
+assert payload.get('build_sha') == sys.argv[2], payload
+PY
+
+grep -qi '^x-frame-options: DENY' "$TMP/headers"
+grep -qi '^x-content-type-options: nosniff' "$TMP/headers"
+grep -qi '^content-security-policy:' "$TMP/headers"
+
+"${COMPOSE[@]}" exec -T api python -c \
+  "import json,urllib.request;p=json.loads(urllib.request.urlopen('http://127.0.0.1:8000/readyz',timeout=5).read());assert p['status']=='ready'"
+
+curl --fail --silent --show-error "$SITE/demo" > "$TMP/unauthenticated-demo.html"
+grep -q 'IDENTITY BOUNDARY' "$TMP/unauthenticated-demo.html"
+
+authenticated=false
+if [[ -n "$PASSWORD_FILE" ]]; then
+  password="$(<"$PASSWORD_FILE")"
+  python3 - "$AXIGNAL_AUTH_EMAIL" "$password" > "$TMP/login.json" <<'PY'
+import json, sys
+print(json.dumps({'email': sys.argv[1], 'password': sys.argv[2]}))
+PY
+  curl --fail --silent --show-error --cookie-jar "$TMP/cookies" \
+    -H 'content-type: application/json' \
+    --data-binary "@$TMP/login.json" \
+    "$SITE/api/auth/login" > "$TMP/login-response.json"
+  grep -q 'axignal_session' "$TMP/cookies"
+  curl --fail --silent --show-error --cookie "$TMP/cookies" \
+    "$SITE/demo" > "$TMP/authenticated-demo.html"
+  grep -q 'From proposal to defensible knowledge' "$TMP/authenticated-demo.html"
+  authenticated=true
+fi
+
+python3 - "$SITE" "$EXPECTED_SHA" "$authenticated" <<'PY'
+import json, sys
+print(json.dumps({
+    'status': 'PASS',
+    'site_address': sys.argv[1],
+    'build_sha': sys.argv[2],
+    'postgres_ready': True,
+    'valkey_ready': True,
+    'object_store_ready': True,
+    'identity_boundary': True,
+    'authenticated_demo': sys.argv[3] == 'true',
+    'security_headers': True,
+}, sort_keys=True))
+PY

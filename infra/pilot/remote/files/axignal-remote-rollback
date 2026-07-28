@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+TARGET="${1:-previous}"
+DATABASE_DUMP="${2:-}"
+PASSWORD_FILE="${3:-}"
+ROOT="${AXIGNAL_REMOTE_ROOT:-/opt/axignal}"
+ENV_FILE="${AXIGNAL_PILOT_ENV_FILE:-/etc/axignal/pilot.env}"
+STATE_ROOT="${AXIGNAL_REMOTE_STATE_ROOT:-/var/lib/axignal/ops}"
+STATE_HELPER="${AXIGNAL_REMOTE_STATE_HELPER:-/usr/local/lib/axignal/remote_state.py}"
+STATE_FILE="$STATE_ROOT/current.json"
+
+[[ "$EUID" -eq 0 ]] || { echo 'remote rollback must run as root' >&2; exit 2; }
+if [[ "$TARGET" == "previous" ]]; then
+  TARGET="$(python3 "$STATE_HELPER" get --path "$STATE_FILE" --key previous_sha)"
+fi
+[[ "$TARGET" =~ ^[0-9a-f]{40}$ ]] || { echo 'rollback target is unavailable or invalid' >&2; exit 2; }
+
+args=("$TARGET")
+[[ -n "$PASSWORD_FILE" ]] && args+=("$PASSWORD_FILE")
+AXIGNAL_REMOTE_ROOT="$ROOT" \
+AXIGNAL_PILOT_ENV_FILE="$ENV_FILE" \
+AXIGNAL_REMOTE_STATE_ROOT="$STATE_ROOT" \
+  /usr/local/sbin/axignal-remote-deploy "${args[@]}"
+
+if [[ -n "$DATABASE_DUMP" ]]; then
+  [[ -s "$DATABASE_DUMP" ]] || { echo 'database restore dump is missing or empty' >&2; exit 2; }
+  set -a
+  # shellcheck disable=SC1090
+  source "$ENV_FILE"
+  set +a
+  release="$ROOT/releases/$TARGET"
+  compose=(docker compose --env-file "$ENV_FILE" -f "$release/infra/pilot/compose.yaml")
+  "${compose[@]}" exec -T postgres pg_restore \
+    --username "${AXIGNAL_POSTGRES_USER:-axignal}" \
+    --dbname "${AXIGNAL_POSTGRES_DB:-axignal}" \
+    --clean --if-exists --no-owner < "$DATABASE_DUMP"
+  verify_args=("$release")
+  [[ -n "$PASSWORD_FILE" ]] && verify_args+=("$PASSWORD_FILE")
+  /usr/local/sbin/axignal-remote-verify "${verify_args[@]}"
+fi
+
+python3 - "$TARGET" "$DATABASE_DUMP" <<'PY'
+import json, sys
+print(json.dumps({
+    'status': 'PASS',
+    'rollback': True,
+    'target_sha': sys.argv[1],
+    'database_restored': sys.argv[2] or None,
+}, sort_keys=True))
+PY

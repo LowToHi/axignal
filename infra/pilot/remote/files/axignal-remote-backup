@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PRINT_PATH=false
+[[ "${1:-}" == "--print-path" ]] && PRINT_PATH=true
+ROOT="${AXIGNAL_REMOTE_ROOT:-/opt/axignal}"
+ENV_FILE="${AXIGNAL_PILOT_ENV_FILE:-/etc/axignal/pilot.env}"
+STATE_ROOT="${AXIGNAL_REMOTE_STATE_ROOT:-/var/lib/axignal/ops}"
+BACKUP_ROOT="${AXIGNAL_REMOTE_BACKUP_ROOT:-/var/backups/axignal}"
+STATE_HELPER="${AXIGNAL_REMOTE_STATE_HELPER:-/usr/local/lib/axignal/remote_state.py}"
+RETENTION_DAYS="${AXIGNAL_BACKUP_RETENTION_DAYS:-14}"
+STATE_FILE="$STATE_ROOT/current.json"
+
+[[ "$EUID" -eq 0 ]] || { echo 'remote backup must run as root' >&2; exit 2; }
+[[ -f "$ENV_FILE" ]] || { echo "missing environment file: $ENV_FILE" >&2; exit 2; }
+current_sha="$(python3 "$STATE_HELPER" get --path "$STATE_FILE" --key current_sha)"
+[[ "$current_sha" =~ ^[0-9a-f]{40}$ ]] || { echo 'no deployed release is recorded' >&2; exit 2; }
+release="$ROOT/releases/$current_sha"
+[[ -d "$release" ]] || { echo "missing deployed release: $release" >&2; exit 2; }
+
+set -a
+# shellcheck disable=SC1090
+source "$ENV_FILE"
+set +a
+
+stamp="$(date -u +%Y%m%dT%H%M%SZ)"
+backup_dir="$BACKUP_ROOT/$stamp-${current_sha:0:12}"
+mkdir -p "$backup_dir"
+compose=(docker compose --env-file "$ENV_FILE" -f "$release/infra/pilot/compose.yaml")
+
+"${compose[@]}" exec -T postgres pg_dump \
+  --username "${AXIGNAL_POSTGRES_USER:-axignal}" \
+  --dbname "${AXIGNAL_POSTGRES_DB:-axignal}" \
+  --format custom > "$backup_dir/database.dump"
+test -s "$backup_dir/database.dump"
+
+docker run --rm \
+  -v axignal-pilot_pilot-objects:/data:ro \
+  -v "$backup_dir:/backup" \
+  alpine:3.21 tar -C /data -czf /backup/objects.tar.gz .
+test -s "$backup_dir/objects.tar.gz"
+
+(
+  cd "$backup_dir"
+  sha256sum database.dump > database.dump.sha256
+  sha256sum objects.tar.gz > objects.tar.gz.sha256
+)
+
+python3 - "$backup_dir" "$current_sha" <<'PY'
+import hashlib, json, pathlib, sys
+from datetime import UTC, datetime
+root = pathlib.Path(sys.argv[1])
+def digest(path):
+    value = hashlib.sha256()
+    with path.open('rb') as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b''):
+            value.update(chunk)
+    return value.hexdigest()
+payload = {
+    'status': 'PASS',
+    'created_at': datetime.now(UTC).isoformat().replace('+00:00', 'Z'),
+    'build_sha': sys.argv[2],
+    'database_dump': 'database.dump',
+    'database_sha256': digest(root / 'database.dump'),
+    'objects_archive': 'objects.tar.gz',
+    'objects_sha256': digest(root / 'objects.tar.gz'),
+}
+(root / 'manifest.json').write_text(json.dumps(payload, indent=2, sort_keys=True) + '\n', encoding='utf-8')
+PY
+
+find "$BACKUP_ROOT" -mindepth 1 -maxdepth 1 -type d -mtime "+$RETENTION_DAYS" -print0 | xargs -0r rm -rf
+if [[ "$PRINT_PATH" == true ]]; then
+  printf '%s\n' "$backup_dir"
+else
+  cat "$backup_dir/manifest.json"
+fi
