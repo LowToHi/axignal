@@ -1,30 +1,35 @@
 # 06 — AXIGNAL Current Execution State
 
-Version: `0.8.2`
-Status: `PUBLIC LANDING DEPLOYED / F8 WEDGE SELECTED / TED XML PARSER EVIDENCE READY`
+Version: `0.8.3`
+Status: `PUBLIC LANDING DEPLOYED / AX-F8-T14 ACCEPTED / BOUNDED TED PRIVATE-PILOT RUNTIME`
 Goal ID: `AXIGNAL-GOAL-001`
-Canonical baseline: `main@ecba05dd18f62be0d5aaf558e994df0d28aea454`
+Canonical candidate: `PR #50 / agent/ax-f8-t14-ted-persistent-runtime`
 
 ## Reading rule
 
-This document records the evidence-backed implementation state. A phase is not `PASSED` merely because code exists: its complete contractual gate, external validation and operational dependencies must also be accepted.
+This document records the evidence-backed implementation state. A phase is not
+`PASSED` merely because code exists: its complete contractual gate, external
+validation and operational dependencies must also be accepted.
 
-A deployed public landing is not evidence that the authenticated product, private pilot, source universe, billing or general availability has passed.
+A deployed public landing is not evidence that the authenticated product,
+private pilot, source universe, billing or general availability has passed.
+Likewise, acceptance of one bounded source profile does not admit arbitrary TED
+queries, full eForms semantics, another jurisdiction or worldwide coverage.
 
 ## Current phase state
 
 | Phase | State | Evidence-backed interpretation |
 |---|---|---|
-| F0 — Goal and contracts | `GATE_REVIEW` | Goal Lock, contracts, ADRs, schemas and registries are integrated. ADR-012 records the first-universe wedge and AX-F8-T11 records its first XML parser profile. Final cross-contract review and map freeze remain. |
-| F1 — UX architecture and validation | `GATE_REVIEW` | Investigation Shell, Navigator, lens switch, Timeline and Claim/Evidence Rail are executable; the public Globe landing is deployed. Qualified-user thresholds, control comparison, multilingual equivalence and accessibility acceptance remain unproven. |
-| F2 — Reproducible repository spine | `GATE_REVIEW` | Runtime spine, CI, migration replay, restore evidence and the reproducible public landing release are integrated. Formal phase acceptance, restricted deploy identity, product SLOs and private-pilot acceptance remain separate gates. |
-| F3 — Epistemic kernel | `IN_PROGRESS` | A bounded macro profile reaches the append-only Claim Ledger through independent deterministic admission and bounded human review. Procurement XML now produces deterministic Candidate Claims, but the procurement admission policy remains disabled. |
-| F4 — Navigator and InvestigationContext | `IN_PROGRESS` | Authenticated ResearchRuns return evidence, proposals, admitted claims, human-review context and dossiers. Procurement commands and live procurement ResearchRuns are not implemented. |
-| F5 — Globe, Graph and Timeline parity | `IN_PROGRESS` | Product shell and canonical browser workflow exist; procurement data layers, full parity, accessibility alternatives, performance budgets and user validation remain. |
+| F0 — Goal and contracts | `GATE_REVIEW` | Goal Lock, contracts, ADRs, schemas and registries are integrated. Final cross-contract review and map freeze remain. |
+| F1 — UX architecture and validation | `GATE_REVIEW` | Investigation Shell, Navigator, lens switch, Timeline and Claim/Evidence Rail are executable; the public Globe landing is deployed. Qualified-user controlled sessions, multilingual equivalence and accessibility acceptance remain separate gates. |
+| F2 — Reproducible repository spine | `GATE_REVIEW` | Runtime spine, CI, migration replay, restore evidence and the reproducible public landing release are integrated. Formal phase acceptance, restricted deploy identity, product SLOs and private-pilot operational acceptance remain. |
+| F3 — Epistemic kernel | `IN_PROGRESS` | A bounded macro profile and the accepted TED Search projection reach the append-only Claim Ledger through deterministic admission. The full XML procurement policy remains disabled. |
+| F4 — Navigator and InvestigationContext | `IN_PROGRESS` | Authenticated ResearchRuns return evidence, proposals, admitted claims, human-review context and dossiers. The bounded TED Search profile is wired to Navigator; broader procurement commands remain outside the admitted profile. |
+| F5 — Globe, Graph and Timeline parity | `IN_PROGRESS` | Product shell and canonical browser workflow exist; full procurement data layers, accessibility alternatives, performance budgets and user validation remain. |
 | F6 — Multilingual semantic system | `LOCKED` | eForms source-language values are preserved by the parser, but AXIGNAL's canonical multilingual data and QA system is not implemented. |
 | F7 — Intent Intelligence and Knowledge Tides | `LOCKED` | Privacy-thresholded operational aggregation is not implemented. |
-| F8 — First lawful opportunity universe | `IN_PROGRESS` | European Public Procurement Intelligence is selected at 96/100. The six-block ontology, bounded Search API connector and SDK 1.14 ContractNotice subtype 16 XML parser are evidence-ready. TED remains `TECHNICAL_PROBE`, `NOT_PRODUCT_ADMITTED`; policy, runtime and public support remain disabled. |
-| F9 — Paid design-partner product | `LOCKED` | Production organisations, entitlements, billing, onboarding and paying procurement design partners are absent. |
+| F8 — First lawful opportunity universe | `IN_PROGRESS` | `AX-F8-T14` is `ACCEPTED`: the non-personal TED Search profile is product-admitted and enabled only for authenticated private-pilot organisations. Complete XML semantics, correction/award lineage and broader universe coverage remain unaccepted. |
+| F9 — Paid design-partner product | `PROPOSED` | B2G buyer research, willingness to pay, paid evidence, trial entitlements, billing and public commercial activation remain in `AX-F9-T15`; none is implied by F8 acceptance. |
 | F10 — Scenarios, calibration and outcomes | `LOCKED` | Requires admitted historical universe data and commercial usage. |
 | F11 — Enterprise, API and private data | `LOCKED` | Tenant RLS is foundational evidence, not an accepted enterprise product. |
 | F12 — General availability | `LOCKED` | The public landing is live, but product SLO, disaster recovery, retention, private-pilot acceptance and operating-economics gates have not passed. |
@@ -33,18 +38,19 @@ A deployed public landing is not evidence that the authenticated product, privat
 
 ```text
 bounded authenticated identity
+→ server-resolved tenant
 → Navigator
 → persistent ResearchRun
-→ PostgreSQL RLS + transactional outbox
-→ Valkey worker queues
+→ PostgreSQL FORCE RLS + transactional outbox
+→ Valkey worker queue
 → admitted source or immutable document
+→ sanitised Source Object
 → Evidence Objects
 → Candidate Claims
-→ proposal-only model worker
 → deterministic admission
-→ atomic Claim Ledger write or bounded escalation
-→ human review with append-only events and no canonical authority
-→ dossier and InvestigationContext
+→ atomic Claim Ledger write
+→ attributed dossier
+→ polling back into InvestigationContext
 ```
 
 The supporting runtime spine includes:
@@ -70,19 +76,67 @@ main exact SHA
 → deployment evidence and rollback
 ```
 
-## First-universe state
+## Accepted bounded TED runtime
+
+`AX-F8-T14` is accepted for the following exact profile:
+
+```text
+ted-search-non-personal-projection@0.1.0
+```
+
+```text
+signed short-lived identity assertion
+→ tenant resolved only in server code
+→ fixed TED HTTPS endpoint
+→ fixed query: place-of-performance IN (LUX)
+→ one page / maximum three notices
+→ publication number, title, buyer name and notice type only
+→ no contact or natural-person fields
+→ no arbitrary query
+→ no tenant-private knowledge
+→ no model calls
+→ deterministic admission
+→ attributed dossier
+```
+
+Runtime state:
+
+```json
+{
+  "task_id": "AX-F8-T14",
+  "task_state": "ACCEPTED",
+  "source_state": "PRODUCT_ADMITTED",
+  "profile_state": "PRODUCT_ADMITTED_BOUNDED_PROFILE",
+  "runtime_default": "DISABLED",
+  "activation_state": "PRIVATE_PILOT_ENABLED",
+  "activation_scope": "AUTHENTICATED_VERIFIED_ORGANISATIONS",
+  "workflow_flag": "AXIGNAL_TED_PROCUREMENT_ENABLED",
+  "live_source_flag": "AXIGNAL_TED_LIVE_SOURCES_ENABLED",
+  "ui_flag": "AXIGNAL_TED_PROCUREMENT_UI_ENABLED",
+  "global_live_sources_enabled": false,
+  "model_calls": 0,
+  "api_redistribution": false,
+  "public_general_availability": false,
+  "billing_enabled": false
+}
+```
+
+The default remains disabled. The private-pilot Compose profile explicitly
+enables only the admitted TED source path. The global live-source flag remains
+false, so activation cannot silently open World Bank or another institutional
+connector.
+
+## Historical first-universe evidence
+
+The original selection decision remains immutable audit history:
 
 ```text
 seven candidates scored
 → European Public Procurement Intelligence selected
-→ eForms six-block ontology defined
-→ TED source registered as TECHNICAL_PROBE
-→ fixed non-personal Search API connector implemented
-→ official live Search API probe: PASS
-→ eForms SDK 1.14 ContractNotice subtype 16 parser implemented
-→ official pinned SDK XML example: PASS
-→ deterministic non-personal Candidate Claims produced
-→ procurement admission policy remains disabled
+→ selection did not itself admit a source
+→ fixed non-personal Search API technical probe passed
+→ eForms SDK 1.14 ContractNotice subtype 16 parser became evidence-ready
+→ later AX-F8-T14 source-specific admission and runtime acceptance
 ```
 
 Search API technical-probe evidence from GitHub Actions run `30442505574`:
@@ -100,6 +154,9 @@ Search API technical-probe evidence from GitHub Actions run `30442505574`:
   "runtime_enabled": false
 }
 ```
+
+That record describes the historical probe, not the later bounded product
+admission.
 
 Pinned official eForms SDK example evidence from run `30444435253`:
 
@@ -128,46 +185,29 @@ Pinned official eForms SDK example evidence from run `30444435253`:
 }
 ```
 
-Current exact boundaries:
-
-```json
-{
-  "selected_universe": "eu_public_procurement",
-  "selection_state": "ACCEPTED",
-  "ontology_state": "ACCEPTED",
-  "source_state": "TECHNICAL_PROBE",
-  "source_product_admitted": false,
-  "search_connector_state": "EVIDENCE_READY",
-  "xml_parser_profile": "ted-eforms-cn16@0.1.0",
-  "xml_parser_state": "EVIDENCE_READY",
-  "connector_runtime_enabled": false,
-  "claim_policy_state": "DISABLED_PENDING_PRODUCT_ADMISSION_AND_XML_PARSER",
-  "canonical_procurement_claims": 0,
-  "universe_supported": false,
-  "public_marketing_authorised": false
-}
-```
+The XML parser remains evidence-ready and does not inherit the Search profile's
+runtime admission.
 
 ## Demonstrated invariants
 
+- missing, forged and expired identity assertions fail closed;
+- client-supplied tenant identifiers are rejected;
+- tenant identity is resolved in server code and enforced with FORCE RLS;
 - models and human reviewers cannot write canonical state directly;
 - proposal, admission, reviewer and scheduler processes use separate PostgreSQL credentials;
 - source, rights, hash, scope, value, unit and period gates fail closed;
-- tenant isolation is enforced by RLS;
 - queue and scheduling replay are idempotent;
 - canonical, review and scheduler histories are append-only;
 - failpoints roll back related mutations atomically;
 - object-store tampering is rejected;
 - prohibited telemetry fields are redacted;
-- public landing deployment is exact-SHA, TLS-verified and rollback-protected;
-- procurement selection does not imply source or universe admission;
-- missing procurement fields remain unknown instead of becoming zero or negative evidence;
-- the TED Search connector requests no personal contact fields and remains disabled by default;
-- the XML parser rejects unknown SDK, UBL, document, notice type and subtype profiles;
-- DTD, entity and oversized XML inputs fail closed;
-- official personal contact elements are counted but their values are not emitted;
-- Candidate Claim fingerprints are deterministic and unique;
-- XML parsing performs zero model calls and zero canonical writes.
+- the TED Search connector accepts only its fixed HTTPS host, path, query and field allowlist;
+- contact and personal fields are prohibited from the admitted projection;
+- API redistribution, bulk redistribution and model training are prohibited;
+- the workflow, live-source and database source kill switches operate independently;
+- kill-switch rollback creates zero evidence, candidate, canonical or dossier residue;
+- TED live activation does not enable global live sources;
+- the bounded profile performs zero model calls.
 
 ## Integrated baselines
 
@@ -181,8 +221,11 @@ Current exact boundaries:
 | Public landing release system | #35 | `fbb421ba9e817c11576d87b36bd6b9b01fd2e2be` |
 | Release observability and hotfixes | #36–#39 | `2c51c340cd2a7a0e0dc1db0017452e723136d77b` |
 | First lawful universe selection and TED Search probe | #40 | `ecba05dd18f62be0d5aaf558e994df0d28aea454` |
+| Bounded AXIGNAL AI and token policy | #49 | `a7e42db131c2e7515538ee3cbae6e48102b8cdc6` |
+| Bounded TED private-pilot runtime | #50 | `CANDIDATE_PENDING_MERGE` |
 
-All subsequent development MUST branch from current `main`. Superseded branches are audit history, not execution bases.
+All subsequent development must branch from current `main`. Superseded branches
+are audit history, not execution bases.
 
 ## Active gaps before phase acceptance
 
@@ -191,7 +234,7 @@ All subsequent development MUST branch from current `main`. Superseded branches 
 - final cross-contract inconsistency review;
 - formal F0/F1/F2 gate decisions;
 - restricted `axignal-deploy` identity instead of root SSH;
-- private-pilot deployment and independent acceptance;
+- private-pilot operational deployment and independent acceptance;
 - product SLO, recovery and incident ownership.
 
 ### F1
@@ -203,8 +246,7 @@ All subsequent development MUST branch from current `main`. Superseded branches 
 
 ### F3–F5
 
-- run independent deterministic procurement admission over frozen parser outputs;
-- prove rollback and idempotent replay with zero model or reviewer canonical authority;
+- complete the XML-derived deterministic procurement policy;
 - implement notice correction, cancellation, award and expiry propagation;
 - complete Globe/Graph/Timeline parity after real-user evidence.
 
@@ -212,15 +254,25 @@ All subsequent development MUST branch from current `main`. Superseded branches 
 
 - define XSD and applicable Schematron validation strategy;
 - validate a live TED notice XML retrieval path without persisting raw or personal values in CI;
-- measure field completeness by notice subtype, country and period;
+- measure XML field completeness by notice subtype, country and period;
 - prove notice correction, cancellation and award lineage;
-- complete source-specific privacy and attribution review;
-- keep `PRODUCT_ADMITTED` blocked until every source gate passes;
-- implement a real procurement ResearchRun only after source and policy activation evidence;
-- validate buyer workflow, willingness to pay and operating cost.
+- keep arbitrary TED queries and non-admitted profiles blocked;
+- preserve the Search profile as an independently revocable bounded capability.
+
+### F9
+
+- recruit and execute qualified B2G design-partner sessions;
+- validate category comprehension and willingness to pay;
+- obtain independent paid evidence;
+- implement trial, plan, token-entitlement and billing gates;
+- keep public commercial activation blocked until `AX-F9-T15` is accepted.
 
 ## Only authorised next priority
 
-> Feed frozen, version-pinned XML parser outputs into the independent deterministic admission runtime. Prove policy decisions, idempotent replay, rollback after a forced post-insert failure, append-only lineage and zero model or reviewer canonical authority before any live procurement ResearchRun or UI integration.
+> Merge and deploy the accepted bounded TED Search runtime to the authenticated
+> private pilot, then execute `AX-F9-T15` buyer and paid-design-partner validation
+> without broadening source, AI or canonical authority.
 
-OCR, unrestricted browsing, national-portal scraping, simultaneous universe expansion, billing, new model authority and public procurement-support claims remain unauthorised until their dependencies pass.
+OCR, unrestricted browsing, national-portal scraping, simultaneous universe
+expansion, billing, new model authority and public procurement-support claims
+remain unauthorised until their own dependencies pass.
