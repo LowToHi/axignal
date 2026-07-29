@@ -38,7 +38,7 @@ def main() -> None:
     request_contract = api.split(
         "class PersistentTEDResearchRunAccepted", 1
     )[0]
-    require("ConfigDict(extra=\"forbid\")" in request_contract, "extra fields are accepted")
+    require('ConfigDict(extra="forbid")' in request_contract, "extra fields are accepted")
     require("tenant_id:" not in request_contract, "client tenant field entered request schema")
     require(
         "include_private_knowledge: Literal[False]" in request_contract,
@@ -64,18 +64,26 @@ def main() -> None:
         "application outbox grant is absent",
     )
     require(
-        "canonical_claims" not in grants_sql.split(
-            "GRANT INSERT ON axignal_global.outbox_events TO axignal_app", 1
-        )[0].split("GRANT SELECT ON", 1)[0],
-        "application role received canonical write authority",
+        "GRANT INSERT ON axignal_global.canonical_claims" not in grants_sql,
+        "application role received canonical insert authority",
+    )
+    require(
+        "GRANT UPDATE ON axignal_global.canonical_claims" not in grants_sql,
+        "application role received canonical update authority",
+    )
+    require(
+        "GRANT DELETE ON axignal_global.canonical_claims" not in grants_sql,
+        "application role received canonical delete authority",
     )
 
     require("sanitised_projection(page)" in ted_repository, "raw TED payload can enter storage")
     require('"api_redistribution": False' in ted_repository, "redistribution guard is absent")
     require('"model_calls": 0' in ted_repository, "model-free authority evidence is absent")
-    require("source.get(\"kill_switch\")" in worker, "source kill switch is not enforced")
+    require('source.get("kill_switch")' in worker, "source kill switch is not enforced")
     require("AXIGNAL_TED_LIVE_SOURCES_ENABLED" in pilot, "pilot lacks source-specific activation")
+    require('AXIGNAL_LIVE_SOURCES_ENABLED: "false"' in pilot, "global live sources were enabled")
 
+    require(profile["activation_state"] == "PRIVATE_PILOT_ENABLED", "pilot activation absent")
     require(profile["rights_boundary"]["personal_contact_data"] == "PROHIBITED", "PII enabled")
     require(profile["rights_boundary"]["api_redistribution"] == "PROHIBITED", "API resale enabled")
     require(profile["authority"]["generative_model_calls"] == 0, "model authority enabled")
@@ -86,6 +94,7 @@ def main() -> None:
         "status": "PASS",
         "task": "AX-F8-T14",
         "review_type": "INDEPENDENT_AUTOMATED_SECURITY_BOUNDARY",
+        "activation_scope": profile["activation_scope"],
         "identity_signature": "HMAC_SHA256_CONSTANT_TIME",
         "identity_ttl_seconds_max": MAX_ASSERTION_TTL_SECONDS,
         "tenant_source": "SIGNED_ASSERTION_SERVER_SIDE",
@@ -96,8 +105,9 @@ def main() -> None:
         "personal_contact_fields": "PROHIBITED",
         "arbitrary_query": "PROHIBITED",
         "api_redistribution": "PROHIBITED",
+        "global_live_sources": False,
         "source_specific_activation": True,
-        "kill_switches": ["WORKFLOW", "SOURCE"],
+        "kill_switches": ["WORKFLOW", "LIVE_SOURCE", "SOURCE"],
         "residual_risk": {
             "identity_assertion_replay_window_seconds": MAX_ASSERTION_TTL_SECONDS,
             "acceptance": "PRIVATE_INTERNAL_GATEWAY_ONLY; TLS AND NETWORK ISOLATION REQUIRED",
