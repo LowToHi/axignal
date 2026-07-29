@@ -41,7 +41,7 @@ class ResearchWorker:
         repository: TEDResearchRepository,
         queue: ValkeyResearchQueue,
         world_bank_connector: WorldBankConnector,
-        ted_connector: TEDSearchConnector,
+        ted_connector: TEDSearchConnector | None = None,
     ) -> None:
         self.repository = repository
         self.queue = queue
@@ -173,6 +173,8 @@ class ResearchWorker:
     ) -> None:
         if run.get("job_kind") != "TED_PROCUREMENT":
             raise ValueError("TED source was requested by a non-TED ResearchRun")
+        if self.ted_connector is None:
+            raise RuntimeError("TED connector is not configured")
         self.repository.transition_run(
             tenant_id=job.tenant_id,
             run_id=job.research_run_id,
