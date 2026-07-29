@@ -21,6 +21,9 @@ def main() -> int:
     migration = (ROOT / "infra/postgres/080-entitlement-token-ledger.sql").read_text(
         encoding="utf-8"
     )
+    hardening = (
+        ROOT / "infra/postgres/081-entitlement-ledger-hardening.sql"
+    ).read_text(encoding="utf-8")
     config = (ROOT / "apps/api/src/axignal_api/entitlement_config.py").read_text(
         encoding="utf-8"
     )
@@ -78,9 +81,21 @@ def main() -> int:
     for marker in required_sql:
         require(marker in migration, f"Missing SQL contract marker: {marker}")
 
+    required_hardening = (
+        "SECURITY DEFINER",
+        "SET search_path TO pg_catalog",
+        "REVOKE ALL ON FUNCTION",
+        "REVOKE INSERT, UPDATE, DELETE, TRUNCATE",
+        "FROM PUBLIC",
+        "FROM axignal_app",
+        "Concurrent retries of the same operation",
+    )
+    for marker in required_hardening:
+        require(marker in hardening, f"Missing authority hardening marker: {marker}")
+
     require(
-        'trial_runtime_enabled: bool' in config
-        and 'end_user_ai_enabled: bool' in config,
+        "trial_runtime_enabled: bool" in config
+        and "end_user_ai_enabled: bool" in config,
         "Independent trial and AI flags are required",
     )
     require(
@@ -89,11 +104,17 @@ def main() -> int:
         "Runtime flags must default disabled",
     )
     require("app.include_router(entitlement_router)" in application, "Router not wired")
-    require("080-entitlement-token-ledger.sql" in dockerfile, "Migration not installed")
+    require("080-entitlement-token-ledger.sql" in dockerfile, "Ledger migration not installed")
+    require(
+        "081-entitlement-ledger-hardening.sql" in dockerfile,
+        "Authority hardening migration not installed",
+    )
     require("stripe" not in combined_runtime.casefold(), "Stripe is outside this runtime cut")
-    require("tenant_id" not in combined_runtime.split("class TrialActivationCommand", 1)[1].split(
-        "class AIRequestAuthorizationCommand", 1
-    )[0], "Trial command cannot accept tenant_id")
+    activation_command = combined_runtime.split("class TrialActivationCommand", 1)[1].split(
+        "class AIRequestAuthorizationCommand",
+        1,
+    )[0]
+    require("tenant_id" not in activation_command, "Trial command cannot accept tenant_id")
 
     result = {
         "schema": "axignal.entitlement-contract-verification.v0.1",
@@ -104,6 +125,8 @@ def main() -> int:
         "trial_token_budget_total": 1_000_000,
         "paid_monthly_token_quota": None,
         "token_overage_billing": False,
+        "direct_app_table_mutation": False,
+        "security_definer_search_path_fixed": True,
         "stripe_wired": False,
     }
     print(json.dumps(result, sort_keys=True))
