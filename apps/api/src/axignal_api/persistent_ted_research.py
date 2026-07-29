@@ -36,6 +36,11 @@ class PersistentTEDResearchRunAccepted(BaseModel):
 
 def _services() -> tuple[TEDResearchRepository, OutboxPublisher]:
     settings = Settings.from_env()
+    if not settings.ted_procurement_enabled:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="TED procurement runtime is disabled",
+        )
     try:
         settings.require_ted_procurement()
     except RuntimeError as exc:
