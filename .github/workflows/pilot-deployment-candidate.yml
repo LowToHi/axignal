@@ -4,6 +4,9 @@ on:
   pull_request:
     paths:
       - "apps/api/src/axignal_api/application.py"
+      - "apps/api/src/axignal_api/persistent_ted_research.py"
+      - "apps/api/src/axignal_api/settings.py"
+      - "apps/api/src/axignal_api/worker.py"
       - "apps/api/src/axignal_api/pilot_health.py"
       - "apps/api/tests/test_pilot_health.py"
       - "apps/web/app/api/health/**"
@@ -12,6 +15,8 @@ on:
       - "infra/pilot/**"
       - "scripts/verify_pilot_candidate.py"
       - "scripts/verify_demo_contract.py"
+      - "scripts/verify_ted_product_runtime.py"
+      - "scripts/verify_ted_security_review.py"
       - "docs/roadmap/14-pilot-deployment-candidate.md"
       - "docs/runbooks/pilot-deployment.md"
       - ".github/workflows/pilot-deployment-candidate.yml"
@@ -45,13 +50,19 @@ jobs:
             apps/api/src/axignal_api/pilot_health.py \
             apps/api/tests/test_pilot_health.py \
             scripts/verify_pilot_candidate.py \
-            scripts/verify_demo_contract.py
+            scripts/verify_demo_contract.py \
+            scripts/verify_ted_product_runtime.py \
+            scripts/verify_ted_security_review.py
       - name: Test pilot health boundary
         run: pytest apps/api/tests/test_pilot_health.py
       - name: Verify deployment contract
         run: python scripts/verify_pilot_candidate.py | tee pilot-contract.json
       - name: Verify canonical demo
         run: python scripts/verify_demo_contract.py | tee pilot-demo.json
+      - name: Verify accepted TED runtime contract
+        run: |
+          python scripts/verify_ted_product_runtime.py | tee pilot-ted-contract.json
+          python scripts/verify_ted_security_review.py | tee pilot-ted-security.json
       - name: Validate shell syntax
         run: |
           bash -n infra/pilot/backup.sh
@@ -64,6 +75,8 @@ jobs:
           path: |
             pilot-contract.json
             pilot-demo.json
+            pilot-ted-contract.json
+            pilot-ted-security.json
           retention-days: 14
 
   web-build:
@@ -81,9 +94,9 @@ jobs:
       - run: pnpm build
 
   runtime-acceptance:
-    name: Private edge, health, auth, backup and restore
+    name: Private edge, live TED, health, auth, backup and restore
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 50
     needs: [static-contract, web-build]
     env:
       AXIGNAL_PILOT_ENV_FILE: /tmp/axignal-pilot-ci.env
@@ -156,6 +169,94 @@ jobs:
             -H "Cookie: axignal_session=$COOKIE_VALUE" \
             http://127.0.0.1:18080/demo
           grep -q "From proposal to defensible knowledge" pilot-demo.html
+      - name: Start only the bounded TED research worker
+        run: |
+          docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" \
+            -f "$AXIGNAL_PILOT_COMPOSE_FILE" \
+            -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE" \
+            --profile workers up --build --detach research-worker
+      - name: Execute live authenticated TED ResearchRun
+        shell: bash
+        run: |
+          set -o pipefail
+          docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" \
+            -f "$AXIGNAL_PILOT_COMPOSE_FILE" \
+            -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE" exec -T api \
+            python - <<'PY' | tee pilot-ted-runtime.json
+          import json
+          import os
+          import time
+          import urllib.error
+          import urllib.request
+          from uuid import UUID
+
+          from axignal_api.identity import build_identity_assertion
+
+          assertion = build_identity_assertion(
+              secret=os.environ["AXIGNAL_IDENTITY_ASSERTION_SECRET"],
+              subject=os.environ["AXIGNAL_AUTH_SUBJECT"],
+              email="pilot@example.test",
+              tenant_id=UUID(os.environ["AXIGNAL_AUTH_TENANT_ID"]),
+              ttl_seconds=300,
+          )
+          headers = {
+              "content-type": "application/json",
+              "X-AXIGNAL-Identity-Assertion": assertion,
+          }
+          command = {
+              "context_id": "ctx_eu_procurement_pilot",
+              "opportunity_id": "opp_eu_procurement_pilot_live",
+              "question": "Investiga las oportunidades públicas europeas activas.",
+              "include_private_knowledge": False,
+          }
+          request = urllib.request.Request(
+              "http://127.0.0.1:8000/v1/research-runs/ted-procurement",
+              data=json.dumps(command).encode(),
+              headers=headers,
+              method="POST",
+          )
+          with urllib.request.urlopen(request, timeout=10) as response:
+              accepted = json.load(response)
+          run_id = accepted["research_run_id"]
+          view = None
+          for _ in range(60):
+              poll = urllib.request.Request(
+                  f"http://127.0.0.1:8000/v1/research-runs/{run_id}",
+                  headers={"X-AXIGNAL-Identity-Assertion": assertion},
+              )
+              with urllib.request.urlopen(poll, timeout=10) as response:
+                  view = json.load(response)
+              if view["state"] in {"COMPLETED", "FAILED"}:
+                  break
+              time.sleep(1)
+          assert view is not None
+          assert view["state"] == "COMPLETED", view
+          assert view["synthetic"] is False
+          assert view["private_knowledge_authorised"] is False
+          assert view["actual_usage"]["api_requests"] == 1
+          assert view["actual_usage"]["model_calls"] == 0
+          assert len(view["evidence"]) > 0
+          assert len(view["candidate_claims"]) == len(view["canonical_claims"])
+          assert view["dossier"]["status"] == "TRACEABLE_WITH_ADMITTED_FACTS"
+          attribution = view["dossier"]["attribution"]
+          assert attribution["source_id"] == "src_ted_search_api_v3"
+          assert attribution["api_redistribution"] is False
+          print(json.dumps({
+              "status": "PASS",
+              "task": "AX-F8-T14",
+              "research_run_id": run_id,
+              "state": view["state"],
+              "live_api_requests": view["actual_usage"]["api_requests"],
+              "notice_count": view["actual_usage"]["notices"],
+              "evidence_count": len(view["evidence"]),
+              "candidate_claim_count": len(view["candidate_claims"]),
+              "canonical_claim_count": len(view["canonical_claims"]),
+              "model_calls": view["actual_usage"]["model_calls"],
+              "dossier_status": view["dossier"]["status"],
+              "api_redistribution": attribution["api_redistribution"],
+              "public_general_availability": False,
+          }, sort_keys=True))
+          PY
       - name: Verify edge security headers
         shell: bash
         run: |
@@ -178,13 +279,14 @@ jobs:
             pilot-cookie-jar.txt
             pilot-demo-headers.txt
             pilot-demo.html
+            pilot-ted-runtime.json
             pilot-headers.txt
             pilot-restore.json
           if-no-files-found: ignore
           retention-days: 14
       - name: Capture service logs
         if: failure()
-        run: docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" -f "$AXIGNAL_PILOT_COMPOSE_FILE" -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE" logs > pilot-services.log 2>&1 || true
+        run: docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" -f "$AXIGNAL_PILOT_COMPOSE_FILE" -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE" --profile workers logs > pilot-services.log 2>&1 || true
       - name: Upload failure logs
         if: failure()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -195,4 +297,4 @@ jobs:
           retention-days: 7
       - name: Destroy pilot services
         if: always()
-        run: docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" -f "$AXIGNAL_PILOT_COMPOSE_FILE" -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE" down --volumes --remove-orphans
+        run: docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" -f "$AXIGNAL_PILOT_COMPOSE_FILE" -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE" --profile workers down --volumes --remove-orphans

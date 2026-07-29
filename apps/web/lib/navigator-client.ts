@@ -26,7 +26,10 @@ export type ResearchRequest = {
   question: string;
   locale: Locale;
   includePrivateKnowledge: boolean;
-  researchMode?: "STRUCTURED_SOURCE_OBSERVATION" | "DOCUMENT_PROPOSAL";
+  researchMode?:
+    | "STRUCTURED_SOURCE_OBSERVATION"
+    | "DOCUMENT_PROPOSAL"
+    | "TED_PROCUREMENT";
   payload: PrototypeInvestigationPayload;
 };
 

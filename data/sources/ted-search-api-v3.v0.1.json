@@ -8,23 +8,23 @@
   "access": {
     "mechanism": "API",
     "authentication": "NONE",
-    "rate_limit_description": "Search API pagination is bounded to 250 notices and 10000 fields per page; iteration mode supports complete result traversal. Direct visualisation/download fair-use limits are separate and must not be conflated with Search API limits.",
+    "rate_limit_description": "The admitted AXIGNAL profile performs one fixed Search API request, one page and at most three active notices. Wider pagination and arbitrary expert queries are outside this admission.",
     "base_url": "https://api.ted.europa.eu/v3/notices/search"
   },
   "rights": {
     "collection": "PERMITTED",
     "transient_processing": "PERMITTED",
-    "persistent_storage": "CONDITIONAL",
-    "derived_calculations": "CONDITIONAL",
-    "internal_display": "CONDITIONAL",
-    "customer_display": "CONDITIONAL",
-    "export": "CONDITIONAL",
-    "api_redistribution": "CONDITIONAL",
-    "model_training": "UNKNOWN",
+    "persistent_storage": "PERMITTED",
+    "derived_calculations": "PERMITTED",
+    "internal_display": "PERMITTED",
+    "customer_display": "PERMITTED",
+    "export": "PERMITTED",
+    "api_redistribution": "PROHIBITED",
+    "model_training": "PROHIBITED",
     "attribution_required": true,
     "retention_days": null,
-    "notes": "TED states that procurement notices in the OJ S may generally be reused for commercial or non-commercial purposes. SIMAP metadata is CC0 and editorial website content is CC BY 4.0. Reuse remains conditional on attribution, indication of changes, non-distortion, personal-data minimisation, third-party rights and exclusion of protected logos or industrial-property content. This source record authorises only a transient technical probe and frozen non-personal fixtures; it does not admit customer display, export, API redistribution or model training.",
-    "reviewed_at": "2026-07-29T09:24:00Z"
+    "notes": "Product admission is limited to the fixed non-personal Search API projection in ted-search-non-personal-projection@0.1.0. Procurement notices may be reused subject to source acknowledgement, indication of changes, non-distortion and additional rights. Contact data, protected logos, third-party protected material, arbitrary queries, API redistribution, bulk redistribution and model training are excluded.",
+    "reviewed_at": "2026-07-29T14:49:00Z"
   },
   "freshness": {
     "expected_cadence": "Weekday OJ S publication; official TED daily XML package available by 09:30 on publication days according to the source help page.",
@@ -38,8 +38,8 @@
   "contains_market_data": false,
   "parser_version": "ted-search-envelope@0.1.0",
   "operational_owner": "source-admission",
-  "status": "TECHNICAL_PROBE",
-  "kill_switch_enabled": true,
+  "status": "PRODUCT_ADMITTED",
+  "kill_switch_enabled": false,
   "created_at": "2026-07-29T09:24:00Z",
-  "updated_at": "2026-07-29T09:24:00Z"
+  "updated_at": "2026-07-29T14:49:00Z"
 }

@@ -55,6 +55,7 @@ def main() -> None:
     assert shared_ports == ["127.0.0.1:${AXIGNAL_PILOT_HTTP_PORT:-18080}:80"]
     assert all(":443" not in port for port in shared_ports)
     assert compose["networks"]["backend"]["internal"] is True
+    assert compose["networks"]["ted-egress"]["internal"] is False
 
     valkey_command = " ".join(services["valkey"]["command"])
     assert "--appendonly yes" in valkey_command
@@ -62,9 +63,27 @@ def main() -> None:
     assert services["api"]["depends_on"]["db-hardening"]["condition"] == (
         "service_completed_successfully"
     )
-    assert services["api"]["environment"]["AXIGNAL_LIVE_SOURCES_ENABLED"] == "false"
-    assert services["web"]["environment"]["AXIGNAL_AUTH_REQUIRED"] == "true"
-    assert services["web"]["environment"]["AXIGNAL_VALIDATION_UI_ENABLED"] == "false"
+
+    api_environment = services["api"]["environment"]
+    worker_environment = services["research-worker"]["environment"]
+    web_environment = services["web"]["environment"]
+    assert api_environment["AXIGNAL_LIVE_SOURCES_ENABLED"] == "false"
+    assert worker_environment["AXIGNAL_LIVE_SOURCES_ENABLED"] == "false"
+    assert api_environment["AXIGNAL_TED_PROCUREMENT_ENABLED"] == "true"
+    assert api_environment["AXIGNAL_TED_LIVE_SOURCES_ENABLED"] == "true"
+    assert worker_environment["AXIGNAL_TED_PROCUREMENT_ENABLED"] == "true"
+    assert worker_environment["AXIGNAL_TED_LIVE_SOURCES_ENABLED"] == "true"
+    assert web_environment["AXIGNAL_TED_PROCUREMENT_UI_ENABLED"] == "true"
+    assert web_environment["AXIGNAL_AUTH_REQUIRED"] == "true"
+    assert web_environment["AXIGNAL_VALIDATION_UI_ENABLED"] == "false"
+
+    egress_services = {
+        service_id
+        for service_id, service in services.items()
+        if "ted-egress" in service.get("networks", [])
+    }
+    assert egress_services == {"research-worker"}, "TED egress is not worker-exclusive"
+    assert services["research-worker"]["networks"] == ["backend", "ted-egress"]
 
     caddy = CADDY_PATH.read_text(encoding="utf-8")
     for required in (
@@ -86,10 +105,17 @@ def main() -> None:
     assert topology["public_launch_authorised"] is False
     assert topology["billing_enabled"] is False
     assert topology["entrypoint"]["direct_api_exposure"] is False
-    assert topology["entrypoint"]["modes"]["shared-traefik"]["public_port_owner"] == "traefik"
+    assert topology["entrypoint"]["modes"]["shared-traefik"]["public_port_owner"] == (
+        "traefik"
+    )
     assert topology["entrypoint"]["modes"]["shared-traefik"]["caddy_bind_address"] == (
         "127.0.0.1"
     )
+    assert topology["security"]["global_live_sources_enabled"] is False
+    assert topology["security"]["ted_bounded_live_source_enabled"] is True
+    assert topology["security"]["ted_egress_service_allowlist"] == ["research-worker"]
+    assert topology["bounded_ted_runtime"]["task_state"] == "ACCEPTED"
+    assert topology["bounded_ted_runtime"]["public_general_availability"] is False
     assert topology["canonical_demo"]["synthetic"] is True
     assert topology["canonical_demo"]["canonical_mutation_allowed"] is False
     assert topology["operations"]["restore_rehearsal_required"] is True
@@ -104,6 +130,7 @@ def main() -> None:
         ROOT / "infra/pilot/backup.sh",
         ROOT / "infra/pilot/restore-rehearsal.sh",
         ROOT / "infra/pilot/harden-db.sh",
+        ROOT / "docs/security/AX-F8-T14-ted-runtime-security-review.md",
     )
     for path in required_files:
         assert path.is_file(), f"missing {path.relative_to(ROOT)}"
@@ -117,9 +144,12 @@ def main() -> None:
         "valkey_persistence": "appendonly-everysec",
         "runtime_database_credentials_rotated": True,
         "authentication_required": True,
-        "live_sources_enabled": False,
+        "global_live_sources_enabled": False,
+        "ted_bounded_live_source_enabled": True,
+        "ted_egress_service_allowlist": ["research-worker"],
         "human_study_enabled": False,
         "canonical_demo_synthetic": True,
+        "bounded_ted_runtime_state": "ACCEPTED_PRIVATE_PILOT",
         "backup_restore_contract": True,
         "public_launch_authorised": False,
         "billing_enabled": False,

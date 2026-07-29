@@ -14,7 +14,10 @@ import {
 
 const supportedLocales = new Set<Locale>(["en", "es", "fr", "de", "pt-BR", "zh-Hans"]);
 
-type ResearchMode = "STRUCTURED_SOURCE_OBSERVATION" | "DOCUMENT_PROPOSAL";
+type ResearchMode =
+  | "STRUCTURED_SOURCE_OBSERVATION"
+  | "DOCUMENT_PROPOSAL"
+  | "TED_PROCUREMENT";
 
 function isPayload(value: unknown): value is PrototypeInvestigationPayload {
   if (!value || typeof value !== "object") return false;
@@ -28,7 +31,11 @@ function isPayload(value: unknown): value is PrototypeInvestigationPayload {
 }
 
 function requestedMode(value: unknown): ResearchMode {
+  if (value === "TED_PROCUREMENT") return value;
   if (value === "DOCUMENT_PROPOSAL") return value;
+  if (process.env.AXIGNAL_TED_PROCUREMENT_UI_ENABLED === "true") {
+    return "TED_PROCUREMENT";
+  }
   if (process.env.AXIGNAL_DOCUMENT_PROPOSAL_UI_ENABLED === "true") {
     return "DOCUMENT_PROPOSAL";
   }
@@ -88,16 +95,18 @@ export async function POST(request: Request) {
   if (!apiUrl) return NextResponse.json({ error: "AXIGNAL_API_URL is required." }, { status: 503 });
 
   const mode = requestedMode(body.researchMode);
-  if (mode === "DOCUMENT_PROPOSAL" && body.includePrivateKnowledge === true) {
+  if (mode !== "STRUCTURED_SOURCE_OBSERVATION" && body.includePrivateKnowledge === true) {
     return NextResponse.json(
-      { error: "Document proposal v0.1 does not accept tenant-private knowledge." },
+      { error: `${mode} v0.1 does not accept tenant-private knowledge.` },
       { status: 400 }
     );
   }
   const endpoint =
     mode === "DOCUMENT_PROPOSAL"
       ? "/v1/research-runs/document-proposals"
-      : "/v1/research-runs";
+      : mode === "TED_PROCUREMENT"
+        ? "/v1/research-runs/ted-procurement"
+        : "/v1/research-runs";
 
   try {
     const response = await fetch(`${apiUrl}${endpoint}`, {
@@ -111,7 +120,9 @@ export async function POST(request: Request) {
         opportunity_id: opportunityId,
         question: body.question.trim(),
         include_private_knowledge:
-          mode === "DOCUMENT_PROPOSAL" ? false : body.includePrivateKnowledge === true
+          mode === "STRUCTURED_SOURCE_OBSERVATION"
+            ? body.includePrivateKnowledge === true
+            : false
       }),
       cache: "no-store",
       signal: AbortSignal.timeout(8_000)

@@ -1,0 +1,77 @@
+{
+  "schema": "axignal.ted-product-admission-profile.v0.1",
+  "goal_id": "AXIGNAL-GOAL-001",
+  "task_id": "AX-F8-T14",
+  "profile_id": "ted-search-non-personal-projection@0.1.0",
+  "status": "PRODUCT_ADMITTED_BOUNDED_PROFILE",
+  "source_id": "src_ted_search_api_v3",
+  "runtime_default": "DISABLED",
+  "activation_state": "PRIVATE_PILOT_ENABLED",
+  "activation_scope": "AUTHENTICATED_VERIFIED_ORGANISATIONS",
+  "activation_flag": "AXIGNAL_TED_PROCUREMENT_ENABLED",
+  "live_source_flag": "AXIGNAL_TED_LIVE_SOURCES_ENABLED",
+  "ui_flag": "AXIGNAL_TED_PROCUREMENT_UI_ENABLED",
+  "query_contract": {
+    "query": "place-of-performance IN (LUX)",
+    "scope": "ACTIVE",
+    "page": 1,
+    "limit": 3,
+    "pagination_mode": "PAGE_NUMBER",
+    "arbitrary_query_allowed": false
+  },
+  "field_allowlist": [
+    "publication-number",
+    "notice-title",
+    "buyer-name",
+    "notice-type"
+  ],
+  "prohibited_field_tokens": [
+    "contact",
+    "email",
+    "person",
+    "phone",
+    "telephone"
+  ],
+  "rights_boundary": {
+    "collection": "PERMITTED",
+    "persistent_storage": "PERMITTED_FOR_ALLOWLISTED_PROJECTION",
+    "customer_display": "PERMITTED_WITH_ATTRIBUTION_AND_CHANGE_NOTICE",
+    "dossier_export": "PERMITTED_WITH_ATTRIBUTION_AND_CHANGE_NOTICE",
+    "api_redistribution": "PROHIBITED",
+    "bulk_source_redistribution": "PROHIBITED",
+    "model_training": "PROHIBITED",
+    "official_logos": "PROHIBITED",
+    "third_party_protected_material": "PROHIBITED",
+    "personal_contact_data": "PROHIBITED"
+  },
+  "authority": {
+    "connector": "RETRIEVAL_ONLY",
+    "deterministic_parser": "CANDIDATE_PROPOSAL_ONLY",
+    "generative_model_calls": 0,
+    "canonical_writer": "DETERMINISTIC_ADMISSION_RUNTIME",
+    "user_can_admit_claims": false
+  },
+  "budgets": {
+    "max_api_requests": 1,
+    "max_notices": 3,
+    "max_response_bytes": 1048576,
+    "max_duration_seconds": 30,
+    "max_model_calls": 0
+  },
+  "required_attribution": "Source: TED (Tenders Electronic Daily), Supplement to the Official Journal of the European Union. AXIGNAL selected and normalised the allowlisted fields; changes are indicated in the dossier methodology.",
+  "rights_evidence": [
+    "https://ted.europa.eu/en/legal-notice",
+    "https://docs.ted.europa.eu/api/latest/search.html",
+    "https://docs.ted.europa.eu/ODS/latest/reuse/search-api.html",
+    "https://eur-lex.europa.eu/eli/dec/2011/833/oj"
+  ],
+  "rollback": {
+    "source_kill_switch": true,
+    "workflow_kill_switch": "AXIGNAL_TED_PROCUREMENT_ENABLED=false",
+    "live_source_kill_switch": "AXIGNAL_TED_LIVE_SOURCES_ENABLED=false",
+    "preserve_prior_evidence": true,
+    "delete_canonical_history": false
+  },
+  "admitted_at": "2026-07-29T14:49:00Z",
+  "private_pilot_activated_at": "2026-07-29T17:36:00Z"
+}
