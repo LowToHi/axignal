@@ -84,7 +84,7 @@ def main() -> int:
             content = chat_body["choices"][0]["message"]["content"]
             decoded = json.loads(content)
             usage = chat_body.get("usage") or {}
-        except (KeyError, IndexError, TypeError, ValueError, json.JSONDecodeError) as exc:
+        except (KeyError, IndexError, TypeError, ValueError) as exc:
             raise PreflightError("DeepSeek chat response was malformed") from exc
         if decoded != {"status": "ok"}:
             raise PreflightError("DeepSeek chat preflight returned an unexpected JSON contract")
