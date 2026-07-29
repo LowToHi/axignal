@@ -1,0 +1,151 @@
+name: Public Landing Release Candidate
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "apps/landing/**"
+      - "infra/landing/**"
+      - "packages/design-tokens/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - ".github/workflows/public-landing-release-candidate.yml"
+      - ".github/workflows/public-landing-release.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: axignal-public-landing-candidate-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate reproducible landing release
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Install deterministic workspace dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack prepare pnpm@10.12.4 --activate
+          pnpm install --frozen-lockfile
+
+      - name: Validate landing TypeScript and production build
+        shell: bash
+        run: |
+          set -euo pipefail
+          pnpm --filter @axignal/landing typecheck
+          pnpm --filter @axignal/landing build
+
+      - name: Validate release contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash -n infra/landing/deploy.sh
+          grep -Fq 'StrictHostKeyChecking=yes' .github/workflows/public-landing-ssh-channel-preflight.yml
+          ! grep -Fq 'StrictHostKeyChecking=no' infra/landing/deploy.sh
+          AXIGNAL_LANDING_IMAGE=axignal-landing:candidate \
+          AXIGNAL_BUILD_SHA="${GITHUB_SHA}" \
+          AXIGNAL_LANDING_PORT=18181 \
+          AXIGNAL_LANDING_INTAKE_DIR=/tmp/axignal-intake \
+            docker compose -p axignal-landing-candidate -f infra/landing/compose.yaml config -q
+
+      - name: Build immutable candidate image
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker build \
+            --pull \
+            --file infra/landing/Dockerfile \
+            --tag "axignal-landing:${GITHUB_SHA}" \
+            .
+
+      - name: Exercise health and private intake persistence
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          intake_dir="$(mktemp -d)"
+          cleanup() {
+            docker rm -f axignal-landing-candidate >/dev/null 2>&1 || true
+            sudo rm -rf "${intake_dir}"
+          }
+          trap cleanup EXIT
+          sudo chown 1000:1000 "${intake_dir}"
+          sudo chmod 0700 "${intake_dir}"
+
+          docker run -d \
+            --name axignal-landing-candidate \
+            --read-only \
+            --tmpfs /tmp:rw,nosuid,nodev,size=32m,mode=1777 \
+            --tmpfs /app/apps/landing/.next/cache:rw,nosuid,nodev,size=64m,uid=1000,gid=1000,mode=0700 \
+            --cap-drop ALL \
+            --security-opt no-new-privileges:true \
+            -p 127.0.0.1:18181:3000 \
+            -e AXIGNAL_BUILD_SHA="${GITHUB_SHA}" \
+            -e AXIGNAL_PILOT_INTAKE_FILE=/var/lib/axignal/intake/requests.jsonl \
+            -v "${intake_dir}:/var/lib/axignal/intake" \
+            "axignal-landing:${GITHUB_SHA}"
+
+          for _ in $(seq 1 48); do
+            if curl -fsS --max-time 4 http://127.0.0.1:18181/api/health > /tmp/landing-health.json; then
+              break
+            fi
+            sleep 2
+          done
+
+          EXPECTED_SHA="${GITHUB_SHA}" python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          health = json.loads(Path('/tmp/landing-health.json').read_text(encoding='utf-8'))
+          assert health == {
+              'status': 'ok',
+              'service': 'axignal-landing',
+              'buildSha': os.environ['EXPECTED_SHA'],
+              'intakeConfigured': True,
+          }
+          PY
+
+          status="$(curl -sS -o /tmp/intake-response.json -w '%{http_code}' \
+            -H 'content-type: application/json' \
+            --data '{"email":"pilot@example.com","role":"Investor","company":"Example","useCase":"Evaluate a cross-border investment decision with explicit evidence limits.","consent":true,"website":""}' \
+            http://127.0.0.1:18181/api/pilot-intake)"
+          test "${status}" = "202"
+
+          invalid_status="$(curl -sS -o /tmp/intake-invalid.json -w '%{http_code}' \
+            -H 'content-type: application/json' \
+            --data '{"email":"invalid","role":"Investor","company":"","useCase":"short","consent":false,"website":""}' \
+            http://127.0.0.1:18181/api/pilot-intake)"
+          test "${invalid_status}" = "422"
+
+          sudo INTAKE_FILE="${intake_dir}/requests.jsonl" python3 - <<'PY'
+          import json
+          import os
+          import stat
+          from pathlib import Path
+
+          path = Path(os.environ['INTAKE_FILE'])
+          lines = path.read_text(encoding='utf-8').splitlines()
+          assert len(lines) == 1
+          record = json.loads(lines[0])
+          assert record['schema'] == 'axignal.pilot-intake.v1'
+          assert record['source'] == 'landing_globe_v0_1'
+          assert record['email'] == 'pilot@example.com'
+          assert record['consent'] is True
+          assert record['submissionId']
+          assert stat.S_IMODE(path.stat().st_mode) == 0o600
+          PY
+
+          test "$(docker inspect --format '{{.Config.User}}' axignal-landing-candidate)" = "node"
+          test "$(docker inspect --format '{{.HostConfig.ReadonlyRootfs}}' axignal-landing-candidate)" = "true"
