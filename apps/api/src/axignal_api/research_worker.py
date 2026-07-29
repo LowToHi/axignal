@@ -1,4 +1,4 @@
-from axignal_api.worker import main
+from .worker import main
 
 
 if __name__ == "__main__":
