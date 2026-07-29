@@ -12,7 +12,10 @@ POLICY_PATH = ROOT / "config" / "ai-assistance-policy.v0.1.json"
 CONTRACT_PATH = (
     ROOT / "docs" / "contracts" / "29-bounded-ai-assistance-and-token-entitlements.md"
 )
-INDEX_PATH = ROOT / "docs" / "contracts" / "README.md"
+CONTRACT_INDEX_PATH = ROOT / "docs" / "contracts" / "README.md"
+ADR_PATH = ROOT / "docs" / "adr" / "ADR-014-bounded-ai-and-token-entitlements.md"
+ADR_INDEX_PATH = ROOT / "docs" / "adr" / "README.md"
+TASK_PATH = ROOT / "docs" / "roadmap" / "tasks" / "AX-F9-T15.json"
 
 EXPECTED_ALLOWED = {
     "NAVIGATE_AXIGNAL",
@@ -49,7 +52,14 @@ REQUIRED_CONTRACT_MARKERS = (
     "generate, debug, review or execute software code",
     "Only `IN_SCOPE_AXIGNAL` MAY proceed to an AI model or AXIGNAL tool",
     "No frontend-only check, system prompt or model self-refusal satisfies this contract",
-    "GENERATE_GROUNDED_PDF_REPORT",
+    "generate an AXIGNAL report in PDF form",
+)
+
+REQUIRED_ADR_MARKERS = (
+    "exactly `1,000,000` AI tokens per organisation",
+    "unlimited monthly AI tokens",
+    "Psychology, therapy, emotional companionship",
+    "code generation or execution",
 )
 
 
@@ -70,8 +80,11 @@ def _require(condition: bool, message: str) -> None:
 
 def main() -> None:
     policy = _load_json(POLICY_PATH)
+    task = _load_json(TASK_PATH)
     contract = CONTRACT_PATH.read_text(encoding="utf-8")
-    index = INDEX_PATH.read_text(encoding="utf-8")
+    contract_index = CONTRACT_INDEX_PATH.read_text(encoding="utf-8")
+    adr = ADR_PATH.read_text(encoding="utf-8")
+    adr_index = ADR_INDEX_PATH.read_text(encoding="utf-8")
 
     _require(
         policy.get("schema") == "axignal.ai-assistance-policy.v0.1",
@@ -153,20 +166,50 @@ def main() -> None:
 
     for marker in REQUIRED_CONTRACT_MARKERS:
         _require(marker in contract, f"contract marker missing: {marker}")
+    for marker in REQUIRED_ADR_MARKERS:
+        _require(marker in adr, f"ADR marker missing: {marker}")
 
     _require(
-        "29-bounded-ai-assistance-and-token-entitlements.md" in index,
+        "29-bounded-ai-assistance-and-token-entitlements.md" in contract_index,
         "contract 29 is not indexed",
     )
     _require(
-        "config/ai-assistance-policy.v0.1.json" in index,
+        "config/ai-assistance-policy.v0.1.json" in contract_index,
         "machine-readable AI policy is not indexed",
+    )
+    _require(
+        "ADR-014-bounded-ai-and-token-entitlements.md" in adr_index,
+        "ADR-014 is not indexed",
+    )
+
+    contracts = set(task.get("contracts", []))
+    _require(
+        {"29", "ADR-014"} <= contracts,
+        "AX-F9-T15 must depend on Contract 29 and ADR-014",
+    )
+    allowed_scope = "\n".join(task.get("allowed_scope", []))
+    prohibited_scope = "\n".join(task.get("prohibited_scope", []))
+    _require(
+        "1,000,000 cumulative AI tokens" in allowed_scope,
+        "AX-F9-T15 must include the exact trial token budget",
+    )
+    _require(
+        "Unlimited monthly AI tokens" in allowed_scope,
+        "AX-F9-T15 must include unlimited paid monthly tokens",
+    )
+    _require(
+        "General-purpose AI" in prohibited_scope
+        and "psychology" in prohibited_scope
+        and "code generation" in prohibited_scope,
+        "AX-F9-T15 must prohibit general-purpose, psychology and code assistance",
     )
 
     print(
         json.dumps(
             {
                 "contract": "29",
+                "adr": "ADR-014",
+                "task": task["task_id"],
                 "policy_version": policy["policy_version"],
                 "status": policy["status"],
                 "default_decision": policy["default_decision"],
