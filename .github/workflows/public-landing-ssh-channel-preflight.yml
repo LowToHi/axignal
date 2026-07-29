@@ -17,76 +17,100 @@ permissions:
 
 jobs:
   ssh-channel:
-    name: Verify deploy credential presence and host key
+    name: Verify production deploy credential and SSH reachability
     runs-on: ubuntu-24.04
+    environment: production-landing
     timeout-minutes: 10
     env:
-      AXIGNAL_VPS_SSH_PRIVATE_KEY: ${{ secrets.AXIGNAL_VPS_SSH_PRIVATE_KEY }}
-      VPS_SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
-      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-      HOSTINGER_SSH_PRIVATE_KEY: ${{ secrets.HOSTINGER_SSH_PRIVATE_KEY }}
+      VPS_HOST: ${{ vars.AXIGNAL_VPS_HOST }}
+      VPS_PORT: ${{ vars.AXIGNAL_VPS_SSH_PORT }}
     steps:
-      - name: Scan authorised VPS host key
+      - name: Validate deploy key without disclosure
         shell: bash
+        env:
+          DEPLOY_KEY: ${{ secrets.AXIGNAL_VPS_SSH_PRIVATE_KEY }}
         run: |
           set -euo pipefail
+          umask 077
           mkdir -p /tmp/axignal-ssh
-          ssh-keyscan -T 10 -t ed25519,rsa 187.124.220.48 > /tmp/axignal-ssh/known_hosts 2>/dev/null
-          test -s /tmp/axignal-ssh/known_hosts
-          ssh-keygen -lf /tmp/axignal-ssh/known_hosts -E sha256 > /tmp/axignal-ssh/fingerprints.txt
+          configured=false
+          parseable=false
+          fingerprint=""
+          if [[ -n "${DEPLOY_KEY:-}" ]]; then
+            configured=true
+            printf '%s\n' "${DEPLOY_KEY}" > /tmp/axignal-ssh/deploy_key
+            if ssh-keygen -y -f /tmp/axignal-ssh/deploy_key </dev/null > /tmp/axignal-ssh/deploy_key.pub 2>/dev/null; then
+              parseable=true
+              fingerprint="$(ssh-keygen -lf /tmp/axignal-ssh/deploy_key.pub -E sha256 | awk '{print $2}')"
+            fi
+          fi
+          echo "DEPLOY_KEY_CONFIGURED=${configured}" >> "${GITHUB_ENV}"
+          echo "DEPLOY_KEY_PARSEABLE=${parseable}" >> "${GITHUB_ENV}"
+          echo "DEPLOY_KEY_FINGERPRINT=${fingerprint}" >> "${GITHUB_ENV}"
 
-      - name: Detect configured deploy key without disclosure
+      - name: Probe SSH transport and collect host fingerprint
         shell: bash
         run: |
           set -euo pipefail
-          configured_name=""
-          configured_value=""
-          for name in AXIGNAL_VPS_SSH_PRIVATE_KEY VPS_SSH_PRIVATE_KEY SSH_PRIVATE_KEY HOSTINGER_SSH_PRIVATE_KEY; do
-            value="${!name:-}"
-            if [[ -n "${value}" ]]; then
-              configured_name="${name}"
-              configured_value="${value}"
-              break
-            fi
-          done
+          host="${VPS_HOST:-187.124.220.48}"
+          port="${VPS_PORT:-22}"
+          reachable=false
+          host_key_available=false
+          host_fingerprints=""
 
-          key_valid=false
-          if [[ -n "${configured_value}" ]]; then
-            umask 077
-            printf '%s\n' "${configured_value}" > /tmp/axignal-ssh/deploy_key
-            if ssh-keygen -y -f /tmp/axignal-ssh/deploy_key >/dev/null 2>&1; then
-              key_valid=true
+          if timeout 8 bash -c "</dev/tcp/${host}/${port}" 2>/dev/null; then
+            reachable=true
+            if ssh-keyscan -T 8 -p "${port}" -t ed25519,rsa "${host}" > /tmp/axignal-ssh/known_hosts 2>/dev/null; then
+              if [[ -s /tmp/axignal-ssh/known_hosts ]]; then
+                host_key_available=true
+                host_fingerprints="$(ssh-keygen -lf /tmp/axignal-ssh/known_hosts -E sha256 | awk '{print $2}' | sort -u | paste -sd, -)"
+              fi
             fi
           fi
 
-          export CONFIGURED_NAME="${configured_name}"
-          export KEY_VALID="${key_valid}"
+          export TARGET_HOST="${host}"
+          export TARGET_PORT="${port}"
+          export SSH_REACHABLE="${reachable}"
+          export HOST_KEY_AVAILABLE="${host_key_available}"
+          export HOST_FINGERPRINTS="${host_fingerprints}"
           python - <<'PY'
           import json
           import os
           from pathlib import Path
 
-          fingerprints = [
-              line.strip()
-              for line in Path('/tmp/axignal-ssh/fingerprints.txt').read_text(encoding='utf-8').splitlines()
-              if line.strip()
-          ]
           evidence = {
-              'schema': 'axignal.public-landing-ssh-channel-preflight.v1',
-              'goal_id': 'AXIGNAL-GOAL-001',
-              'target': '187.124.220.48',
-              'host_key_fingerprints': fingerprints,
-              'deploy_secret_name': os.environ.get('CONFIGURED_NAME') or None,
-              'deploy_key_configured': bool(os.environ.get('CONFIGURED_NAME')),
-              'deploy_key_parseable': os.environ.get('KEY_VALID') == 'true',
-              'connection_attempted': False,
-              'mutation_performed': False,
+              "schema": "axignal.public-landing-ssh-channel-preflight.v2",
+              "goal_id": "AXIGNAL-GOAL-001",
+              "environment": "production-landing",
+              "target": {
+                  "host": os.environ["TARGET_HOST"],
+                  "port": int(os.environ["TARGET_PORT"]),
+              },
+              "deploy_key": {
+                  "secret_name": "AXIGNAL_VPS_SSH_PRIVATE_KEY",
+                  "configured": os.environ.get("DEPLOY_KEY_CONFIGURED") == "true",
+                  "parseable": os.environ.get("DEPLOY_KEY_PARSEABLE") == "true",
+                  "public_fingerprint": os.environ.get("DEPLOY_KEY_FINGERPRINT") or None,
+              },
+              "transport": {
+                  "reachable": os.environ.get("SSH_REACHABLE") == "true",
+                  "host_key_available": os.environ.get("HOST_KEY_AVAILABLE") == "true",
+                  "host_key_fingerprints": [
+                      value for value in os.environ.get("HOST_FINGERPRINTS", "").split(",") if value
+                  ],
+              },
+              "authentication_attempted": False,
+              "mutation_performed": False,
           }
-          Path('public-landing-ssh-channel-preflight.json').write_text(
-              json.dumps(evidence, indent=2, sort_keys=True) + '\n',
-              encoding='utf-8',
+          Path("public-landing-ssh-channel-preflight.json").write_text(
+              json.dumps(evidence, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
           )
           print(json.dumps(evidence, indent=2, sort_keys=True))
+          if not evidence["deploy_key"]["configured"]:
+              raise SystemExit("AXIGNAL_VPS_SSH_PRIVATE_KEY is not available to production-landing")
+          if not evidence["deploy_key"]["parseable"]:
+              raise SystemExit("AXIGNAL_VPS_SSH_PRIVATE_KEY is not a non-interactive OpenSSH private key")
           PY
 
       - name: Remove temporary key material
@@ -94,8 +118,10 @@ jobs:
         run: rm -rf /tmp/axignal-ssh
 
       - name: Upload redacted SSH channel evidence
+        if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: public-landing-ssh-channel-preflight
           path: public-landing-ssh-channel-preflight.json
+          if-no-files-found: ignore
           retention-days: 7
