@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from axignal_api.worker import main
 
 
