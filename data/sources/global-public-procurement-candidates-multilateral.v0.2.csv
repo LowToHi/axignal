@@ -1,0 +1,7 @@
+source_id,region,jurisdiction,government_level,system_name,official_entry_point,access_class,priority_class,state,discovery_basis,notes
+UN_UNGM,GLOBAL,United Nations system,MULTILATERAL,United Nations Global Marketplace,https://www.ungm.org/,OFFICIAL_PORTAL_FEED_FEASIBILITY,P1,DISCOVERED,OFFICIAL_SITE_OR_REGISTRY,Cross-agency global opportunity and award platform.
+WB_PROCUREMENT_NOTICES,GLOBAL,World Bank financed projects,MULTILATERAL,World Bank Procurement Notices,https://financesone.worldbank.org/procurement-notice/DS00979,OFFICIAL_API_BULK,P1,DISCOVERED,OFFICIAL_SITE_OR_REGISTRY,Daily global dataset with API and bulk access.
+ADB_BUSINESS_OPPORTUNITIES,ASIA_PACIFIC,Asian Development Bank member operations,MULTILATERAL,ADB Project Procurement Business Opportunities,https://www.adb.org/business/project-procurement/business-opportunities,OFFICIAL_PORTAL_FEASIBILITY,P2,DISCOVERED,OFFICIAL_SITE_OR_REGISTRY,
+EBRD_ECEPP,EUROPE_CENTRAL_ASIA,EBRD countries of operation,MULTILATERAL,EBRD ECEPP,https://ecepp.ebrd.com/,OFFICIAL_PORTAL_FEASIBILITY,P2,DISCOVERED,OFFICIAL_SITE_OR_REGISTRY,
+EIB_PROCUREMENT,EUROPE_GLOBAL,European Investment Bank operations,MULTILATERAL,EIB Procurement,https://www.eib.org/en/about/procurement/index.htm,OFFICIAL_PORTAL_FEASIBILITY,P3,DISCOVERED,OFFICIAL_SITE_OR_REGISTRY,
+NATO_NSPA_PROCUREMENT,GLOBAL,NATO Support and Procurement Organisation,MULTILATERAL,NSPA Procurement,https://www.nspa.nato.int/business/procurement,OFFICIAL_PORTAL_FEASIBILITY,P3,DISCOVERED,OFFICIAL_SITE_OR_REGISTRY,
