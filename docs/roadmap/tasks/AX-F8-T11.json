@@ -1,0 +1,234 @@
+{
+  "task_id": "AX-F8-T11",
+  "goal_id": "AXIGNAL-GOAL-001",
+  "phase": "F8",
+  "state": "IN_PROGRESS",
+  "objective": "Implement and validate one fail-closed, version-pinned TED eForms XML parser profile that emits deterministic non-personal Candidate Claims without activating source or canonical authority.",
+  "outcome": "ContractNotice subtype 16 under eForms SDK 1.14 is parsed with hardened XML handling, explicit required and optional fields, buyer-reference resolution, personal-field exclusion and deterministic Candidate Claim fingerprints against synthetic and official SDK examples.",
+  "contracts": [
+    "GOAL_LOCK",
+    "02",
+    "03",
+    "04",
+    "06",
+    "08",
+    "09",
+    "10",
+    "18",
+    "19",
+    "27",
+    "ADR-004",
+    "ADR-010",
+    "ADR-012"
+  ],
+  "skills": [
+    {
+      "skill_id": "connector-engineer",
+      "version": "0.1.0",
+      "activation_reason": "Implement the canonical XML retrieval and parser boundary after Search API discovery."
+    },
+    {
+      "skill_id": "ontology-engineer",
+      "version": "0.1.0",
+      "activation_reason": "Map the version-pinned eForms structure to the accepted procurement ontology."
+    },
+    {
+      "skill_id": "epistemic-admission",
+      "version": "0.1.0",
+      "activation_reason": "Ensure parser outputs remain Candidate Claims and cannot create canonical truth."
+    },
+    {
+      "skill_id": "privacy-reviewer",
+      "version": "0.1.0",
+      "activation_reason": "Count but never emit natural-person contact fields from official examples."
+    },
+    {
+      "skill_id": "security-reviewer",
+      "version": "0.1.0",
+      "activation_reason": "Enforce payload limits, safe XML parsing, exact profile checks and pinned-source allowlisting."
+    },
+    {
+      "skill_id": "test-engineer",
+      "version": "0.1.0",
+      "activation_reason": "Prove deterministic extraction, drift rejection and official-example compatibility."
+    },
+    {
+      "skill_id": "gate-evaluator",
+      "version": "0.1.0",
+      "activation_reason": "Keep parser evidence separate from source admission and runtime activation."
+    }
+  ],
+  "dependencies": {
+    "phases": [
+      "F2",
+      "F3"
+    ],
+    "tasks": [
+      "AX-F8-T03",
+      "AX-F8-T04",
+      "AX-F8-T05",
+      "AX-F8-T06"
+    ],
+    "external": [
+      "OP-TED eForms-SDK release 1.14.2",
+      "Official example examples/notices/cn_24_minimal.xml",
+      "TED Developer Docs eForms SDK 1.14 schema and notice information"
+    ]
+  },
+  "allowed_scope": [
+    "ContractNotice subtype 16 only",
+    "eForms customization eforms-sdk-1.14 only",
+    "UBL 2.3 only",
+    "Hardened transient XML parsing",
+    "Synthetic schema-faithful fixture",
+    "Pinned official SDK example retrieval",
+    "Non-personal Candidate Claims",
+    "Aggregate non-sensitive evidence artifact"
+  ],
+  "prohibited_scope": [
+    "Other document types, subtypes or SDK versions",
+    "Persistent raw official XML",
+    "Persistent official notice values or notice identifiers in CI artifacts",
+    "Personal contact fields in Candidate Claims, prompts, analytics or exports",
+    "Database persistence",
+    "Policy activation",
+    "Canonical claim writes",
+    "Navigator, ResearchRun, Globe or Graph integration",
+    "Public universe-support claims"
+  ],
+  "acceptance_evidence": [
+    {
+      "evidence_type": "SCHEMA",
+      "description": "Versioned parser profile pins SDK 1.14.2, customization eforms-sdk-1.14, UBL 2.3, ContractNotice, cn-standard and subtype 16.",
+      "required": true,
+      "location": "data/universes/eu-public-procurement/xml-parser-profile.v0.1.json",
+      "status": "PASS"
+    },
+    {
+      "evidence_type": "TEST",
+      "description": "Synthetic fixture tests extraction, optional unknowns, deterministic fingerprints, personal-field exclusion and fail-closed profile drift.",
+      "required": true,
+      "location": "apps/api/tests/test_ted_eforms_parser.py",
+      "status": "PRESENT"
+    },
+    {
+      "evidence_type": "TRACE",
+      "description": "Pinned official SDK 1.14.2 example parses transiently and emits only aggregate, hashed evidence.",
+      "required": true,
+      "location": "ted-eforms-sdk-example-evidence.json",
+      "status": "MISSING"
+    },
+    {
+      "evidence_type": "SECURITY_REVIEW",
+      "description": "defusedxml, DTD/entity rejection, exact profile checks, size limit and URL allowlist pass.",
+      "required": true,
+      "location": "apps/api/src/axignal_api/connectors/ted_eforms.py",
+      "status": "PRESENT"
+    },
+    {
+      "evidence_type": "DOCUMENT",
+      "description": "Parser runbook records exact authority, versioning, privacy, evidence and rollback boundaries.",
+      "required": true,
+      "location": "docs/sources/ted-eforms-xml-parser-v0.1.md",
+      "status": "MISSING"
+    }
+  ],
+  "impacts": {
+    "security": "MATERIAL",
+    "privacy": "MATERIAL",
+    "data_rights": "MATERIAL",
+    "regulatory": "LOW",
+    "multilingual": "MATERIAL",
+    "epistemic": "CRITICAL",
+    "billing": "NONE"
+  },
+  "observability": {
+    "metrics": [
+      "xml_parse_success_rate",
+      "unsupported_profile_count",
+      "candidate_claim_count",
+      "candidate_fingerprint_collision_count",
+      "personal_element_count",
+      "personal_value_emission_count"
+    ],
+    "logs": [
+      "raw XML hash",
+      "SDK and notice profile",
+      "aggregate entity and claim counts",
+      "failure class",
+      "runtime and source state"
+    ],
+    "traces": [
+      "official SDK example download to transient parser",
+      "XML source path to Candidate Claim fingerprint"
+    ],
+    "alerts": [
+      "unknown SDK or subtype",
+      "unsafe XML",
+      "buyer reference unresolved",
+      "personal value emitted",
+      "policy or runtime activated"
+    ]
+  },
+  "rollback": {
+    "strategy": "Remove the parser from all execution paths, retain raw hashes and synthetic fixtures, quarantine outputs from the profile and preserve the previous Search API-only technical-probe state.",
+    "kill_switch": "ted-eforms-cn16@0.1.0 remains absent from production runtime wiring and accepts only one exact profile.",
+    "tested": true
+  },
+  "goal_lock_checks": [
+    {
+      "check_id": 1,
+      "answer": "YES",
+      "evidence": "The parser moves discovery from Search API projection to complete official evidence."
+    },
+    {
+      "check_id": 2,
+      "answer": "YES",
+      "evidence": "Raw hashes, XML source paths, SDK version and deterministic fingerprints preserve provenance."
+    },
+    {
+      "check_id": 3,
+      "answer": "YES",
+      "evidence": "Extracted geography, organisations, lots and notice timing support future Globe, Graph and Timeline parity."
+    },
+    {
+      "check_id": 4,
+      "answer": "YES",
+      "evidence": "The parser has no user-interest input and cannot infer truth from attention."
+    },
+    {
+      "check_id": 5,
+      "answer": "YES",
+      "evidence": "Localised text preserves each source language explicitly."
+    },
+    {
+      "check_id": 6,
+      "answer": "YES",
+      "evidence": "Versioned raw evidence and deterministic claim fingerprints create reusable state beyond generic AI."
+    },
+    {
+      "check_id": 7,
+      "answer": "YES",
+      "evidence": "No suitability, advice, bid execution or transaction behaviour is added."
+    },
+    {
+      "check_id": 8,
+      "answer": "YES",
+      "evidence": "Personal fields are counted for audit but never emitted, persisted or used as evidence."
+    },
+    {
+      "check_id": 9,
+      "answer": "YES",
+      "evidence": "Exact version gates and absent runtime wiring provide immediate disabling and rollback."
+    },
+    {
+      "check_id": 10,
+      "answer": "YES",
+      "evidence": "This task is the explicitly authorised dependency before deterministic procurement admission."
+    }
+  ],
+  "owner": "connector-engineer",
+  "reviewer": "epistemic-admission",
+  "created_at": "2026-07-29T10:24:00Z",
+  "updated_at": "2026-07-29T10:24:00Z"
+}
