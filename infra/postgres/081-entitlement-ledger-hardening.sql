@@ -59,6 +59,15 @@ REVOKE INSERT, UPDATE, DELETE, TRUNCATE
   ON tenant_private.entitlement_events
   FROM axignal_app;
 
+-- Revoke grants that migration 080 intentionally provided by column before
+-- the definer boundary existed. Table-level REVOKE does not remove them.
+REVOKE UPDATE (state, token_budget_reserved, token_budget_consumed, updated_at)
+  ON tenant_private.organisation_entitlements
+  FROM axignal_app;
+REVOKE UPDATE (state, actual_tokens, reconciled_at)
+  ON tenant_private.ai_token_reservations
+  FROM axignal_app;
+
 -- Re-materialise the reservation function so an operation id is checked again
 -- after the entitlement row lock. Concurrent retries of the same operation are
 -- therefore idempotent rather than surfacing a unique-index race.
