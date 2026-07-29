@@ -1,9 +1,9 @@
 # AXIGNAL End-to-End Development Map
 
-Version: `0.7.0`
-Status: `CANDIDATE / F2 INTEGRATED / F1 VALIDATION AUTHORISED`
+Version: `0.8.0`
+Status: `CANDIDATE / F8 PROCUREMENT EVIDENCE READY / TED PRODUCT ADMISSION NEXT`
 Goal ID: `AXIGNAL-GOAL-001`
-Canonical baseline: `main@15a232249736658dbe05a67d1f2541384848f5b3`
+Canonical baseline: `main@9484c4ecce8ebe31484ef4f1f5e602f6c9cdfac9`
 
 This directory connects the AXIGNAL product goal to phases, tasks, contracts, dynamic skills, implementation evidence and independent gates.
 
@@ -40,10 +40,12 @@ No development agent may skip a layer or represent implemented code as an accept
 | [10 — Research, Retrieval and Candidate Claims](10-research-retrieval-and-candidate-claims-work-package.md) | Research and admission work package |
 | [11 — Consolidated Executable Baseline](11-consolidated-baseline.md) | Integration, migration rehearsal, supersession and rollback evidence |
 | [12 — F2 Deliverable-Gap Closure](12-f2-deliverable-gap-closure.md) | Scheduler, object storage, OpenTelemetry and runtime-topology evidence |
+| [13 — B2G Pricing, Trial and Global Procurement Sources](13-b2g-pricing-trial-and-global-procurement-source-program.md) | TED E2E priority, B2G price validation, safe seven-day trial and federated source-expansion gates |
 
 ## Normative execution contracts
 
 - [`docs/contracts/18-development-agent-governance.md`](../contracts/18-development-agent-governance.md)
+- [`docs/contracts/28-b2g-procurement-commercial-and-global-source-program.md`](../contracts/28-b2g-procurement-commercial-and-global-source-program.md)
 - [`AGENTS.md`](../../AGENTS.md)
 - [`skills/registry.yaml`](../../skills/registry.yaml)
 - [`schemas/task.schema.json`](../../schemas/task.schema.json)
@@ -61,7 +63,7 @@ Task: `PROPOSED`, `READY`, `IN_PROGRESS`, `BLOCKED`, `EVIDENCE_READY`, `ACCEPTED
 
 ## Current position
 
-The canonical `main` branch contains a governed alpha vertical slice:
+The canonical `main` branch contains a governed alpha vertical slice and the first bounded procurement-lifecycle evidence:
 
 ```text
 identity
@@ -77,27 +79,37 @@ identity
 → InvestigationContext
 ```
 
-Its reproducible runtime foundation now includes a persistent scheduler, content-addressed object storage, OpenTelemetry context/redaction and an explicit non-production topology.
+For European procurement, `main` additionally contains:
 
-Current evidence supports:
+```text
+TED bounded Search API probe
+→ eForms SDK 1.14.2 parser
+→ CN16 correction and notice-cancellation lineage
+→ CAN29 result lineage
+→ 50 immutable provisional Evidence Objects
+→ deterministic sandbox admission
+→ traceable procurement dossier
+```
 
-- F0 remains in gate review pending final map freeze;
-- F1 has an executable product but lacks qualified-user acceptance;
-- F2 is integrated and in formal gate review;
-- F3–F5 have bounded vertical slices but are not general implementations;
-- F6–F12 remain locked.
+Current authority boundary:
 
-The authoritative detailed status is [`06-current-execution-state.md`](06-current-execution-state.md).
+- TED remains `TECHNICAL_PROBE`;
+- production procurement policy and runtime remain disabled;
+- product admission remains incomplete;
+- no public procurement-support or global-coverage claim is authorised;
+- no billing or seven-day trial is active;
+- non-TED global sources are catalogue-only.
 
 ## Integrated baseline rule
 
-Canonical integrations:
+The latest canonical procurement evidence baseline is:
 
 ```text
-PR #21 → cf83781766f12ebc55eeb9829d68d41e77500aa7
-PR #22 → cb2c966d36207e908a19dd5381f9179d3c6fa406
-PR #23 → 76ca919fea0d5740e80729aa7f9332f6aa6c5857
-PR #24 → 15a232249736658dbe05a67d1f2541384848f5b3
+PR #40 → first lawful European procurement wedge
+PR #41 → version-pinned TED eForms XML parser
+PR #42 → deterministic procurement admission rehearsal
+PR #44 → procurement lifecycle Evidence Objects and dossier
+main    → 9484c4ecce8ebe31484ef4f1f5e602f6c9cdfac9
 ```
 
 Every new development unit MUST:
@@ -117,8 +129,16 @@ Every new development unit MUST:
 
 Any active occurrence of `ASIGNAL`, `asignal.com` or `ASIGNAL-GOAL-001` outside permitted correction history is a naming defect.
 
-## Authorised operational priority
+## Authorised development order
 
-> Build and execute the F1 qualified-user validation harness: pseudonymised sessions, frozen tasks, deterministic AXIGNAL/control assignment, append-only interaction history and reproducible metrics.
+The highest-value next task is `AX-F8-T14`:
 
-This priority does not authorise production deployment, unrestricted Browser access, customer private documents, OCR, broad source expansion, billing or model-written canonical claims.
+> Complete TED source-specific product admission and wire authenticated identity → server-resolved tenant → persistent ResearchRun → polling/SSE progress → worker → Evidence Objects and Candidate Claims → deterministic admission → dossier and claims returned to InvestigationContext → progressive fixture removal.
+
+After that gate:
+
+1. execute `AX-F9-T15` as a paid B2G Design Partner, pricing and private seven-day trial validation task;
+2. keep `AX-F12-T10` blocked until European paid-value and source-admission evidence exists;
+3. use the global source catalogue for research prioritisation only.
+
+This order does not authorise production trial activation, public prices, Stripe billing, API redistribution, private customer documents, predictive procurement claims, broad source expansion or model-written canonical truth.
