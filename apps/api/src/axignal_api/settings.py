@@ -52,6 +52,7 @@ class Settings:
     local_model_api_key: str | None
     identity_assertion_secret: str | None
     ted_procurement_enabled: bool = False
+    ted_live_sources_enabled: bool = False
     ted_fixture_path: Path | None = None
     admission_database_url: str | None = None
     admission_queue_key: str = "axignal:admission:queue:v1"
@@ -117,6 +118,9 @@ class Settings:
             ),
             live_sources_enabled=_bool_env("AXIGNAL_LIVE_SOURCES_ENABLED"),
             ted_procurement_enabled=_bool_env("AXIGNAL_TED_PROCUREMENT_ENABLED"),
+            ted_live_sources_enabled=_bool_env(
+                "AXIGNAL_TED_LIVE_SOURCES_ENABLED"
+            ),
             world_bank_fixture_path=Path(fixture).resolve() if fixture else None,
             ted_fixture_path=Path(ted_fixture).resolve() if ted_fixture else None,
             queue_key=environ.get(
@@ -177,9 +181,9 @@ class Settings:
         self.require_persistent_research()
         if not self.ted_procurement_enabled:
             raise RuntimeError("TED procurement runtime is disabled")
-        if not self.live_sources_enabled and not self.ted_fixture_path:
+        if not self.ted_live_sources_enabled and not self.ted_fixture_path:
             raise RuntimeError(
-                "AXIGNAL_TED_FIXTURE_PATH is required when live sources are disabled"
+                "AXIGNAL_TED_FIXTURE_PATH is required when TED live sources are disabled"
             )
 
     def require_document_proposal_worker(self) -> None:
