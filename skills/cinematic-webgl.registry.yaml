@@ -1,0 +1,33 @@
+version: 0.1.0
+status: CANDIDATE
+goal_id: AXIGNAL-GOAL-001
+canonical_brand: AXIGNAL
+canonical_domain: axignal.com
+
+skills:
+  - skill_id: axignal-cinematic-webgl-scroll
+    version: 0.1.0
+    state: CONTRACTED
+    category: experience
+    phases: [F1, F5, F8, F9]
+    contracts: ["05", "08", "12", "13", "18", "20", "21"]
+    triggers:
+      - globe
+      - webgl
+      - threejs
+      - react-three-fiber
+      - shader
+      - texture
+      - ktx2
+      - lod
+      - gsap
+      - scrolltrigger
+      - cinematic-scroll
+      - visual-performance
+    purpose: Build and audit AXIGNAL cinematic WebGL experiences with adaptive texture quality, semantic geographic rendering, scroll-governed choreography, accessible fallbacks and measured performance.
+    prohibited_actions:
+      - substitute a primary Globe workflow with a flat image or decorative animation
+      - approve visual quality without measuring canvas resolution, texture quality and runtime performance
+      - load unlicensed assets or undocumented derivatives
+      - use one global raster texture for unrestricted regional zoom
+      - hide product-state, evidence or accessibility defects behind visual effects
