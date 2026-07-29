@@ -1,6 +1,6 @@
 # AXIGNAL Development Contracts
 
-Status: `v0.7-b2g-procurement-commercial-candidate`
+Status: `v0.8-b2g-global-procurement-catalogue-candidate`
 Goal ID: `AXIGNAL-GOAL-001`
 
 These documents are normative specifications for the product, architecture, commercial system and delivery of AXIGNAL. They define externally testable obligations between product surfaces, public surfaces, data pipelines, epistemic runtime, operators, agents and users. They are not a substitute for jurisdiction-specific legal advice or customer-facing legal terms.
@@ -54,12 +54,13 @@ Contracts 12–28 remain normative candidates until their applicable usability, 
 - [`docs/roadmap/08-marketing-pricing-and-conversion-work-package.md`](../roadmap/08-marketing-pricing-and-conversion-work-package.md)
 - [`docs/roadmap/13-b2g-pricing-trial-and-global-procurement-source-program.md`](../roadmap/13-b2g-pricing-trial-and-global-procurement-source-program.md)
 
-## UX research and prototype
+## Research and prototype
 
 - [`docs/research/ux-competitive-benchmark.md`](../research/ux-competitive-benchmark.md)
 - [`docs/research/buyer-workflows.md`](../research/buyer-workflows.md)
 - [`docs/research/prototype-test-plan.md`](../research/prototype-test-plan.md)
 - [`docs/research/b2g-pricing-trial-and-global-procurement-source-strategy-v0.1.md`](../research/b2g-pricing-trial-and-global-procurement-source-strategy-v0.1.md)
+- [`docs/research/global-public-procurement-catalogue-v0.2.md`](../research/global-public-procurement-catalogue-v0.2.md)
 - [`docs/flows/global-discovery-flow.md`](../flows/global-discovery-flow.md)
 - [`docs/prototypes/globe-opportunity-claims-v0.1.html`](../prototypes/globe-opportunity-claims-v0.1.html)
 
@@ -81,7 +82,10 @@ Contracts 12–28 remain normative candidates until their applicable usability, 
 - [`schemas/tenant-knowledge-item.schema.json`](../../schemas/tenant-knowledge-item.schema.json)
 - [`openapi/axignal-v1.yaml`](../../openapi/axignal-v1.yaml)
 - [`skills/registry.yaml`](../../skills/registry.yaml)
-- [`data/sources/global-public-procurement-catalogue.v0.1.json`](../../data/sources/global-public-procurement-catalogue.v0.1.json)
+- [`data/sources/global-public-procurement-catalogue.v0.2.json`](../../data/sources/global-public-procurement-catalogue.v0.2.json)
+- [`scripts/verify_global_procurement_catalogue.py`](../../scripts/verify_global_procurement_catalogue.py)
+
+The v0.2 catalogue indexes 146 source families across 140 jurisdiction and government-level scopes. Its eight regional CSV inventories are discovery and prioritisation evidence only. No inventory row authorises ingestion, product admission or public global-coverage claims.
 
 ## Canonical identity
 
@@ -108,4 +112,4 @@ A material change to scope, authority, data rights, claim semantics, packaging, 
 
 ## Foundation status
 
-The foundation freezes the desired architecture and product rules. European procurement is the selected first implementation wedge; the B2G narrative, plan names, candidate price bands, controlled seven-day trial and federated global-source programme remain hypotheses until their commercial, empirical, usability, legal, privacy, security, rights, performance and economic gates pass. No catalogue entry authorises ingestion or a public coverage claim.
+The foundation freezes the desired architecture and product rules. European procurement is the selected first implementation wedge; the B2G narrative, plan names, candidate price bands, controlled seven-day trial and federated global-source programme remain hypotheses until their commercial, empirical, usability, legal, privacy, security, rights, performance and economic gates pass. Catalogue v0.2 expands the worldwide discovery backlog but does not change the authorised implementation order or admit any source.
