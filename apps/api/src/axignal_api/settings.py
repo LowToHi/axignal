@@ -46,12 +46,20 @@ class Settings:
     validation_database_url: str | None = None
     validation_participant_salt: str | None = None
     validation_enabled: bool = False
+    ted_worker_database_url: str | None = None
+    ted_admission_database_url: str | None = None
+    ted_research_enabled: bool = False
+    ted_live_sources_enabled: bool = False
+    ted_fixture_manifest_path: Path | None = None
+    ted_retrieval_queue_key: str = "axignal:procurement:retrieval:queue:v1"
+    ted_admission_queue_key: str = "axignal:procurement:admission:queue:v1"
 
     @classmethod
     def from_env(cls) -> "Settings":
         fixture = environ.get("AXIGNAL_WORLD_BANK_FIXTURE_PATH")
         document_fixture = environ.get("AXIGNAL_DOCUMENT_FIXTURE_PATH")
         proposal_fixture = environ.get("AXIGNAL_DOCUMENT_PROPOSAL_FIXTURE_PATH")
+        ted_fixture_manifest = environ.get("AXIGNAL_TED_FIXTURE_MANIFEST_PATH")
         object_store_root = environ.get("AXIGNAL_OBJECT_STORE_ROOT", ".axignal/objects")
         return cls(
             database_url=environ.get("AXIGNAL_DATABASE_URL"),
@@ -111,6 +119,23 @@ class Settings:
             local_model_api_key=environ.get("AXIGNAL_LOCAL_MODEL_API_KEY"),
             identity_assertion_secret=environ.get(
                 "AXIGNAL_IDENTITY_ASSERTION_SECRET"
+            ),
+            ted_worker_database_url=environ.get("AXIGNAL_TED_DATABASE_URL"),
+            ted_admission_database_url=environ.get(
+                "AXIGNAL_TED_ADMISSION_DATABASE_URL"
+            ),
+            ted_research_enabled=_bool_env("AXIGNAL_TED_RESEARCH_ENABLED"),
+            ted_live_sources_enabled=_bool_env("AXIGNAL_TED_LIVE_SOURCES_ENABLED"),
+            ted_fixture_manifest_path=(
+                Path(ted_fixture_manifest).resolve() if ted_fixture_manifest else None
+            ),
+            ted_retrieval_queue_key=environ.get(
+                "AXIGNAL_TED_RETRIEVAL_QUEUE_KEY",
+                "axignal:procurement:retrieval:queue:v1",
+            ),
+            ted_admission_queue_key=environ.get(
+                "AXIGNAL_TED_ADMISSION_QUEUE_KEY",
+                "axignal:procurement:admission:queue:v1",
             ),
         )
 
@@ -184,4 +209,38 @@ class Settings:
         if len(self.identity_assertion_secret.encode("utf-8")) < 32:
             raise RuntimeError(
                 "AXIGNAL_IDENTITY_ASSERTION_SECRET must be at least 32 bytes"
+            )
+
+    def require_ted_research_api(self) -> None:
+        if not self.ted_research_enabled:
+            raise RuntimeError("TED procurement research is disabled")
+        if not self.persistent_research_enabled:
+            raise RuntimeError("Persistent research is disabled")
+        if not self.database_url:
+            raise RuntimeError("AXIGNAL_DATABASE_URL is required")
+        if not self.valkey_url:
+            raise RuntimeError("AXIGNAL_VALKEY_URL is required")
+
+    def require_ted_retrieval_runtime(self) -> None:
+        if not self.ted_research_enabled:
+            raise RuntimeError("TED procurement research is disabled")
+        if not self.ted_worker_database_url:
+            raise RuntimeError("AXIGNAL_TED_DATABASE_URL is required")
+        if not self.valkey_url:
+            raise RuntimeError("AXIGNAL_VALKEY_URL is required")
+        if not self.ted_live_sources_enabled and not self.ted_fixture_manifest_path:
+            raise RuntimeError(
+                "AXIGNAL_TED_FIXTURE_MANIFEST_PATH is required when live TED is disabled"
+            )
+
+    def require_ted_admission_runtime(self) -> None:
+        if not self.ted_research_enabled:
+            raise RuntimeError("TED procurement research is disabled")
+        if not self.ted_admission_database_url:
+            raise RuntimeError("AXIGNAL_TED_ADMISSION_DATABASE_URL is required")
+        if not self.valkey_url:
+            raise RuntimeError("AXIGNAL_VALKEY_URL is required")
+        if not self.ted_live_sources_enabled and not self.ted_fixture_manifest_path:
+            raise RuntimeError(
+                "AXIGNAL_TED_FIXTURE_MANIFEST_PATH is required when live TED is disabled"
             )
