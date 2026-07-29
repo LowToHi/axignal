@@ -15,6 +15,26 @@ def _csv_env(name: str) -> tuple[str, ...]:
     return tuple(item.strip() for item in value.split(",") if item.strip())
 
 
+def _int_env(name: str, default: int) -> int:
+    value = environ.get(name)
+    if value is None:
+        return default
+    try:
+        return int(value)
+    except ValueError as exc:
+        raise RuntimeError(f"{name} must be an integer") from exc
+
+
+def _float_env(name: str, default: float) -> float:
+    value = environ.get(name)
+    if value is None:
+        return default
+    try:
+        return float(value)
+    except ValueError as exc:
+        raise RuntimeError(f"{name} must be numeric") from exc
+
+
 @dataclass(frozen=True)
 class Settings:
     database_url: str | None
@@ -46,6 +66,12 @@ class Settings:
     validation_database_url: str | None = None
     validation_participant_salt: str | None = None
     validation_enabled: bool = False
+    deepseek_proposal_enabled: bool = False
+    deepseek_base_url: str = "https://api.deepseek.com"
+    deepseek_model: str = "deepseek-v4-flash"
+    deepseek_api_key: str | None = None
+    deepseek_max_output_tokens: int = 1_200
+    deepseek_timeout_seconds: float = 45.0
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -112,6 +138,26 @@ class Settings:
             identity_assertion_secret=environ.get(
                 "AXIGNAL_IDENTITY_ASSERTION_SECRET"
             ),
+            deepseek_proposal_enabled=_bool_env(
+                "AXIGNAL_DEEPSEEK_PROPOSAL_ENABLED"
+            ),
+            deepseek_base_url=environ.get(
+                "AXIGNAL_DEEPSEEK_BASE_URL",
+                "https://api.deepseek.com",
+            ).rstrip("/"),
+            deepseek_model=environ.get(
+                "AXIGNAL_DEEPSEEK_MODEL",
+                "deepseek-v4-flash",
+            ),
+            deepseek_api_key=environ.get("DEEPSEEK_API_KEY"),
+            deepseek_max_output_tokens=_int_env(
+                "AXIGNAL_DEEPSEEK_MAX_OUTPUT_TOKENS",
+                1_200,
+            ),
+            deepseek_timeout_seconds=_float_env(
+                "AXIGNAL_DEEPSEEK_TIMEOUT_SECONDS",
+                45.0,
+            ),
         )
 
     def require_persistent_research(self) -> None:
@@ -131,9 +177,21 @@ class Settings:
             raise RuntimeError("AXIGNAL_VALKEY_URL is required")
         if not self.document_fixture_path:
             raise RuntimeError("AXIGNAL_DOCUMENT_FIXTURE_PATH is required")
+        if self.deepseek_proposal_enabled and self.local_model_base_url:
+            raise RuntimeError(
+                "DeepSeek and the local proposal endpoint cannot be enabled together"
+            )
+        if self.deepseek_proposal_enabled:
+            if not self.deepseek_api_key:
+                raise RuntimeError("DEEPSEEK_API_KEY is required")
+            if self.deepseek_model != "deepseek-v4-flash":
+                raise RuntimeError(
+                    "AXIGNAL_DEEPSEEK_MODEL must be deepseek-v4-flash"
+                )
+            return
         if not self.local_model_base_url and not self.document_proposal_fixture_path:
             raise RuntimeError(
-                "AXIGNAL_DOCUMENT_PROPOSAL_FIXTURE_PATH is required without a local endpoint"
+                "AXIGNAL_DOCUMENT_PROPOSAL_FIXTURE_PATH is required without a model endpoint"
             )
 
     def require_admission_runtime(self) -> None:
