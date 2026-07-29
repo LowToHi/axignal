@@ -113,7 +113,8 @@ def _concurrent_idempotent_reservation(
         )
 
     with ThreadPoolExecutor(max_workers=2) as executor:
-        results = [future.result() for future in (executor.submit(reserve), executor.submit(reserve))]
+        futures = (executor.submit(reserve), executor.submit(reserve))
+        results = [future.result() for future in futures]
     reservation_ids = {UUID(str(result["reservation_id"])) for result in results}
     if len(reservation_ids) != 1:
         raise AssertionError(f"Concurrent retry created multiple reservations: {reservation_ids}")
