@@ -1,0 +1,233 @@
+{
+  "task_id": "AX-F8-T12",
+  "goal_id": "AXIGNAL-GOAL-001",
+  "phase": "F8",
+  "state": "IN_PROGRESS",
+  "objective": "Rehearse deterministic procurement admission over frozen eForms parser outputs while proving that the real TED source state remains blocked and no rehearsal component receives canonical-ledger authority.",
+  "outcome": "A bounded policy rehearsal independently reparses XML, compares Candidate Claim fingerprints, records append-only sandbox decisions transactionally, proves idempotent replay and forced rollback, and produces zero canonical, model or reviewer writes.",
+  "contracts": [
+    "GOAL_LOCK",
+    "02",
+    "03",
+    "04",
+    "06",
+    "08",
+    "09",
+    "10",
+    "18",
+    "19",
+    "27",
+    "ADR-004",
+    "ADR-010",
+    "ADR-012"
+  ],
+  "skills": [
+    {
+      "skill_id": "epistemic-admission",
+      "version": "0.1.0",
+      "activation_reason": "Own deterministic procurement policy decisions without enabling canonical authority."
+    },
+    {
+      "skill_id": "evidence-provenance-engineer",
+      "version": "0.1.0",
+      "activation_reason": "Bind decisions to raw XML hashes, parser profiles and Candidate Claim fingerprints."
+    },
+    {
+      "skill_id": "source-admission",
+      "version": "0.1.0",
+      "activation_reason": "Prove the actual TECHNICAL_PROBE source state blocks product admission."
+    },
+    {
+      "skill_id": "privacy-reviewer",
+      "version": "0.1.0",
+      "activation_reason": "Reject personal predicates and preserve zero personal-value emission."
+    },
+    {
+      "skill_id": "security-reviewer",
+      "version": "0.1.0",
+      "activation_reason": "Review fail-closed profile checks, failpoints and authority separation."
+    },
+    {
+      "skill_id": "test-engineer",
+      "version": "0.1.0",
+      "activation_reason": "Prove tamper rejection, replay, append-only events and atomic rollback."
+    },
+    {
+      "skill_id": "gate-evaluator",
+      "version": "0.1.0",
+      "activation_reason": "Prevent sandbox admissibility from being represented as canonical or product admission."
+    }
+  ],
+  "dependencies": {
+    "phases": [
+      "F2",
+      "F3"
+    ],
+    "tasks": [
+      "AX-F8-T04",
+      "AX-F8-T06",
+      "AX-F8-T11"
+    ],
+    "external": [
+      "Pinned OP-TED eForms SDK 1.14.2 ContractNotice example"
+    ]
+  },
+  "allowed_scope": [
+    "Frozen synthetic and pinned official XML",
+    "Independent XML reparse",
+    "Deterministic policy decisions",
+    "CI-only transactional rehearsal store",
+    "Append-only hashed events",
+    "Idempotent replay",
+    "Forced-failure rollback",
+    "Aggregate non-sensitive evidence"
+  ],
+  "prohibited_scope": [
+    "Procurement canonical ledger writes",
+    "TED PRODUCT_ADMITTED state",
+    "Procurement policy production activation",
+    "Production database or queue wiring",
+    "Personal values in decisions, logs or artifacts",
+    "Model or reviewer canonical authority",
+    "Navigator, ResearchRun, Globe or Graph integration",
+    "Public procurement-support claims"
+  ],
+  "acceptance_evidence": [
+    {
+      "evidence_type": "SCHEMA",
+      "description": "Machine-readable rehearsal profile fixes actual and sandbox contexts, outcomes, authority and promotion requirements.",
+      "required": true,
+      "location": "data/universes/eu-public-procurement/admission-rehearsal-profile.v0.1.json",
+      "status": "PASS"
+    },
+    {
+      "evidence_type": "TEST",
+      "description": "Tests prove real-source blocking, sandbox rederivation, proposal-only models, personal/prohibited rejection, tamper rejection, replay and rollback.",
+      "required": true,
+      "location": "apps/api/tests/test_procurement_admission_rehearsal.py",
+      "status": "PRESENT"
+    },
+    {
+      "evidence_type": "TRACE",
+      "description": "Pinned official XML produces aggregate rehearsal decisions with zero canonical writes and actual-source blocking.",
+      "required": true,
+      "location": "procurement-admission-rehearsal-evidence.json",
+      "status": "MISSING"
+    },
+    {
+      "evidence_type": "TEST",
+      "description": "Forced failure after the first decision leaves zero batches, decisions and events.",
+      "required": true,
+      "location": "apps/api/tests/test_procurement_admission_rehearsal.py",
+      "status": "PRESENT"
+    },
+    {
+      "evidence_type": "DOCUMENT",
+      "description": "Runbook documents sandbox-only authority, outcomes, promotion gate and rollback.",
+      "required": true,
+      "location": "docs/sources/procurement-admission-rehearsal-v0.1.md",
+      "status": "MISSING"
+    }
+  ],
+  "impacts": {
+    "security": "MATERIAL",
+    "privacy": "MATERIAL",
+    "data_rights": "MATERIAL",
+    "regulatory": "LOW",
+    "multilingual": "LOW",
+    "epistemic": "CRITICAL",
+    "billing": "NONE"
+  },
+  "observability": {
+    "metrics": [
+      "actual_source_blocked_decision_count",
+      "sandbox_admissible_count",
+      "human_review_required_count",
+      "tamper_rejection_count",
+      "prohibited_rejection_count",
+      "idempotent_replay_count",
+      "rollback_residue_count",
+      "canonical_claim_write_count"
+    ],
+    "logs": [
+      "raw XML hash",
+      "policy and parser profile",
+      "aggregate outcome counts",
+      "append-only event hashes",
+      "source and policy context"
+    ],
+    "traces": [
+      "frozen XML to independent rederivation",
+      "Candidate Claim to sandbox decision",
+      "forced failure to rollback"
+    ],
+    "alerts": [
+      "actual TECHNICAL_PROBE source produces a positive outcome",
+      "ADMITTED_REDERIVED appears in sandbox",
+      "canonical write count differs from zero",
+      "personal predicate accepted",
+      "rollback leaves residue"
+    ]
+  },
+  "rollback": {
+    "strategy": "Remove the rehearsal module and workflow, preserve aggregate evidence, and return to parser-only evidence without changing any source, policy, database or canonical state.",
+    "kill_switch": "The store is CI-only, in-memory and not wired into the production admission runtime.",
+    "tested": true
+  },
+  "goal_lock_checks": [
+    {
+      "check_id": 1,
+      "answer": "YES",
+      "evidence": "The rehearsal advances official procurement evidence toward governed admission."
+    },
+    {
+      "check_id": 2,
+      "answer": "YES",
+      "evidence": "Raw hashes, parser profile, policy version and Candidate Claim fingerprints bind every decision."
+    },
+    {
+      "check_id": 3,
+      "answer": "YES",
+      "evidence": "It preserves the same geographic, relational and temporal Candidate Claims for future lenses."
+    },
+    {
+      "check_id": 4,
+      "answer": "YES",
+      "evidence": "No user-interest signal participates in policy evidence."
+    },
+    {
+      "check_id": 5,
+      "answer": "YES",
+      "evidence": "Source-language values remain unchanged through deterministic fingerprints."
+    },
+    {
+      "check_id": 6,
+      "answer": "YES",
+      "evidence": "Independent rederivation, append-only history and replay strengthen the claims-graph defence."
+    },
+    {
+      "check_id": 7,
+      "answer": "YES",
+      "evidence": "Suitability, profitability, bid execution and personalised advice remain prohibited."
+    },
+    {
+      "check_id": 8,
+      "answer": "YES",
+      "evidence": "The actual rights/source gate blocks admission and personal predicates are rejected."
+    },
+    {
+      "check_id": 9,
+      "answer": "YES",
+      "evidence": "The CI-only store can be removed without migration and forced rollback is tested."
+    },
+    {
+      "check_id": 10,
+      "answer": "YES",
+      "evidence": "This is the authorised bounded gate before product source admission and runtime integration."
+    }
+  ],
+  "owner": "epistemic-admission",
+  "reviewer": "gate-evaluator",
+  "created_at": "2026-07-29T10:47:00Z",
+  "updated_at": "2026-07-29T10:47:00Z"
+}
