@@ -25,7 +25,7 @@ jobs:
       VPS_HOST: ${{ vars.AXIGNAL_VPS_HOST }}
       VPS_PORT: ${{ vars.AXIGNAL_VPS_SSH_PORT }}
     steps:
-      - name: Validate deploy key without disclosure
+      - name: Validate and classify deploy key without disclosure
         shell: bash
         env:
           DEPLOY_KEY: ${{ secrets.AXIGNAL_VPS_SSH_PRIVATE_KEY }}
@@ -33,20 +33,76 @@ jobs:
           set -euo pipefail
           umask 077
           mkdir -p /tmp/axignal-ssh
+
           configured=false
           parseable=false
+          encrypted=false
+          normalized_literal_newlines=false
+          key_kind=missing
           fingerprint=""
+          line_count=0
+          byte_count=0
+
           if [[ -n "${DEPLOY_KEY:-}" ]]; then
             configured=true
-            printf '%s\n' "${DEPLOY_KEY}" > /tmp/axignal-ssh/deploy_key
-            if ssh-keygen -y -f /tmp/axignal-ssh/deploy_key </dev/null > /tmp/axignal-ssh/deploy_key.pub 2>/dev/null; then
+            DEPLOY_KEY_RAW="${DEPLOY_KEY}" python - <<'PY'
+          import os
+          from pathlib import Path
+
+          value = os.environ["DEPLOY_KEY_RAW"]
+          value = value.lstrip("\ufeff").replace("\r\n", "\n").replace("\r", "\n").strip()
+          literal_newlines = "\\n" in value and "\n" not in value
+          if literal_newlines:
+              value = value.replace("\\n", "\n")
+          if len(value) >= 2 and value[0] == value[-1] and value[0] in {'"', "'"}:
+              value = value[1:-1].strip()
+          Path("/tmp/axignal-ssh/deploy_key").write_text(value + "\n", encoding="utf-8")
+          Path("/tmp/axignal-ssh/normalization.flag").write_text(
+              "true" if literal_newlines else "false",
+              encoding="utf-8",
+          )
+          PY
+            chmod 600 /tmp/axignal-ssh/deploy_key
+            normalized_literal_newlines="$(cat /tmp/axignal-ssh/normalization.flag)"
+            line_count="$(wc -l < /tmp/axignal-ssh/deploy_key | tr -d ' ')"
+            byte_count="$(wc -c < /tmp/axignal-ssh/deploy_key | tr -d ' ')"
+
+            first_line="$(head -n 1 /tmp/axignal-ssh/deploy_key)"
+            case "${first_line}" in
+              "-----BEGIN OPENSSH PRIVATE KEY-----") key_kind=openssh-private ;;
+              "-----BEGIN RSA PRIVATE KEY-----") key_kind=pem-rsa-private ;;
+              "-----BEGIN EC PRIVATE KEY-----") key_kind=pem-ec-private ;;
+              "-----BEGIN PRIVATE KEY-----") key_kind=pkcs8-private ;;
+              "-----BEGIN ENCRYPTED PRIVATE KEY-----") key_kind=encrypted-pkcs8-private ; encrypted=true ;;
+              "PuTTY-User-Key-File-"*) key_kind=putty-private ;;
+              ssh-ed25519\ *|ssh-rsa\ *|ecdsa-sha2-*\ *) key_kind=public-key ;;
+              *)
+                if [[ -f "${first_line}" ]]; then
+                  key_kind=filesystem-path
+                else
+                  key_kind=unknown
+                fi
+                ;;
+            esac
+
+            if ssh-keygen -y -P "" -f /tmp/axignal-ssh/deploy_key </dev/null > /tmp/axignal-ssh/deploy_key.pub 2>/tmp/axignal-ssh/key-error; then
               parseable=true
               fingerprint="$(ssh-keygen -lf /tmp/axignal-ssh/deploy_key.pub -E sha256 | awk '{print $2}')"
+            elif grep -Eqi 'incorrect passphrase|passphrase' /tmp/axignal-ssh/key-error; then
+              encrypted=true
             fi
           fi
-          echo "DEPLOY_KEY_CONFIGURED=${configured}" >> "${GITHUB_ENV}"
-          echo "DEPLOY_KEY_PARSEABLE=${parseable}" >> "${GITHUB_ENV}"
-          echo "DEPLOY_KEY_FINGERPRINT=${fingerprint}" >> "${GITHUB_ENV}"
+
+          {
+            echo "DEPLOY_KEY_CONFIGURED=${configured}"
+            echo "DEPLOY_KEY_PARSEABLE=${parseable}"
+            echo "DEPLOY_KEY_ENCRYPTED=${encrypted}"
+            echo "DEPLOY_KEY_KIND=${key_kind}"
+            echo "DEPLOY_KEY_FINGERPRINT=${fingerprint}"
+            echo "DEPLOY_KEY_LITERAL_NEWLINES_NORMALIZED=${normalized_literal_newlines}"
+            echo "DEPLOY_KEY_LINE_COUNT=${line_count}"
+            echo "DEPLOY_KEY_BYTE_COUNT=${byte_count}"
+          } >> "${GITHUB_ENV}"
 
       - name: Probe SSH transport and collect host fingerprint
         shell: bash
@@ -79,7 +135,7 @@ jobs:
           from pathlib import Path
 
           evidence = {
-              "schema": "axignal.public-landing-ssh-channel-preflight.v2",
+              "schema": "axignal.public-landing-ssh-channel-preflight.v3",
               "goal_id": "AXIGNAL-GOAL-001",
               "environment": "production-landing",
               "target": {
@@ -90,7 +146,12 @@ jobs:
                   "secret_name": "AXIGNAL_VPS_SSH_PRIVATE_KEY",
                   "configured": os.environ.get("DEPLOY_KEY_CONFIGURED") == "true",
                   "parseable": os.environ.get("DEPLOY_KEY_PARSEABLE") == "true",
+                  "encrypted": os.environ.get("DEPLOY_KEY_ENCRYPTED") == "true",
+                  "kind": os.environ.get("DEPLOY_KEY_KIND"),
                   "public_fingerprint": os.environ.get("DEPLOY_KEY_FINGERPRINT") or None,
+                  "literal_newlines_normalized": os.environ.get("DEPLOY_KEY_LITERAL_NEWLINES_NORMALIZED") == "true",
+                  "line_count": int(os.environ.get("DEPLOY_KEY_LINE_COUNT", "0")),
+                  "byte_count": int(os.environ.get("DEPLOY_KEY_BYTE_COUNT", "0")),
               },
               "transport": {
                   "reachable": os.environ.get("SSH_REACHABLE") == "true",
@@ -110,7 +171,9 @@ jobs:
           if not evidence["deploy_key"]["configured"]:
               raise SystemExit("AXIGNAL_VPS_SSH_PRIVATE_KEY is not available to production-landing")
           if not evidence["deploy_key"]["parseable"]:
-              raise SystemExit("AXIGNAL_VPS_SSH_PRIVATE_KEY is not a non-interactive OpenSSH private key")
+              raise SystemExit("AXIGNAL_VPS_SSH_PRIVATE_KEY is not a usable non-interactive private key")
+          if not evidence["transport"]["reachable"] or not evidence["transport"]["host_key_available"]:
+              raise SystemExit("SSH transport or host key discovery is unavailable")
           PY
 
       - name: Remove temporary key material
