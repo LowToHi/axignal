@@ -15,6 +15,9 @@ def main() -> int:
     migration = (ROOT / "infra/postgres/090-trial-retention-lifecycle.sql").read_text(
         encoding="utf-8"
     )
+    pgcrypto_boundary = (
+        ROOT / "infra/postgres/091-retention-pgcrypto-boundary.sql"
+    ).read_text(encoding="utf-8")
     config = (ROOT / "apps/api/src/axignal_api/retention_config.py").read_text(
         encoding="utf-8"
     )
@@ -54,6 +57,16 @@ def main() -> int:
     for marker in required_sql:
         require(marker in migration, f"Missing retention SQL marker: {marker}")
 
+    required_pgcrypto_boundary = (
+        "REVOKE CREATE ON SCHEMA public FROM PUBLIC",
+        "SET search_path TO pg_catalog, public",
+        "reject_terminally_deleted_tenant",
+        "purge_claimed_workspace",
+        "reapply_deletion_tombstone",
+    )
+    for marker in required_pgcrypto_boundary:
+        require(marker in pgcrypto_boundary, f"Missing pgcrypto boundary marker: {marker}")
+
     require(
         '_bool_env("AXIGNAL_DELETION_REQUESTS_ENABLED")' in config,
         "Deletion request flag must default disabled",
@@ -71,12 +84,15 @@ def main() -> int:
         "Retention duration must remain unconfigured by default",
     )
     require("ConfigDict(extra=\"forbid\")" in routes, "Request body must reject extras")
-    require("tenant_id" not in routes.split("class DeletionRequestCommand", 1)[1].split(
-        "class WorkspaceLifecycleView", 1
-    )[0], "Deletion command cannot accept tenant_id")
+    deletion_command = routes.split("class DeletionRequestCommand", 1)[1].split(
+        "class WorkspaceLifecycleView",
+        1,
+    )[0]
+    require("tenant_id" not in deletion_command, "Deletion command cannot accept tenant_id")
     require("settings.require_purge_worker()" in worker, "Worker must enforce its kill switch")
     require("app.include_router(retention_router)" in application, "Retention router not wired")
-    require("090-trial-retention-lifecycle.sql" in dockerfile, "Migration not installed")
+    require("090-trial-retention-lifecycle.sql" in dockerfile, "Lifecycle migration not installed")
+    require("091-retention-pgcrypto-boundary.sql" in dockerfile, "Pgcrypto boundary not installed")
     require("stripe" not in migration.casefold(), "Stripe is outside this runtime cut")
 
     result = {
@@ -88,6 +104,8 @@ def main() -> int:
         "retention_policy_configured_by_default": False,
         "tenant_id_accepted_from_client": False,
         "tombstone_append_only": True,
+        "public_schema_create_revoked": True,
+        "pgcrypto_resolution_explicit": True,
         "stripe_wired": False,
         "model_calls": 0,
     }
