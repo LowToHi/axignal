@@ -2,7 +2,7 @@
 
 ## Status
 
-`IMPLEMENTED CANDIDATE / LOCKFILE FROZEN / CI EVIDENCE REQUIRED / VISUAL REVIEW REQUIRED / NOT DEPLOYED`
+`IMPLEMENTED / LOCKFILE FROZEN / CI GREEN / VISUAL REVIEW PASS / READY FOR REVIEW / NOT DEPLOYED`
 
 ## Goal
 
@@ -47,21 +47,38 @@ These values remain outside Git. Only the webhook URL and token are secret-beari
 
 ## Acceptance evidence
 
-- `python scripts/verify_landing_foundation.py`;
-- `python scripts/verify_landing_implementation.py`;
-- `pnpm --filter @axignal/landing typecheck`;
-- `pnpm --filter @axignal/landing build`;
-- `pnpm exec playwright test -c playwright.landing.config.ts`;
-- human visual review of scroll pacing, Globe framing, mobile composition and final conversion surface.
+Implementation evidence head: `8b0650418994f2203d0e2e0b97d64472d892542e`.
+
+- `Contract Validation`: PASS;
+- `F1 Controlled Study Protocol`: PASS;
+- `Human Review Acceptance`: PASS;
+- `Executable Spine`: PASS;
+- `Landing Globe`: PASS;
+- `python scripts/verify_landing_foundation.py`: PASS;
+- `python scripts/verify_landing_implementation.py`: PASS;
+- `pnpm --filter @axignal/landing typecheck`: PASS;
+- `pnpm --filter @axignal/landing build`: PASS;
+- desktop and mobile Playwright browser contracts: PASS;
+- reduced-motion and direct-access contracts: PASS;
+- evidence artifact: `landing-globe-evidence`, SHA-256 `4cdbb2a90f1edb8cdb28145dc1739d9f70643e837010203fa8970c9df5bb6920`.
+
+## Visual review
+
+Human review of browser-generated evidence passed after two corrective iterations.
+
+- desktop hero at 1280×720 preserves the primary and secondary CTA inside the first viewport;
+- the Globe remains the dominant analytical surface while the narrative occupies a dedicated high-contrast rail;
+- Navigator, location context, state transitions and synthetic-data disclosure remain legible;
+- compact-height desktop presentation keeps the complete private-pilot form and submit action visible;
+- mobile hero, story cards and private-pilot anchor render without horizontal overflow or fixed-header clipping;
+- synthetic demonstration labels remain present on desktop and mobile.
 
 ## Dependency evidence
 
-The production dependencies and their transitive graph are frozen in `pnpm-lock.yaml`. The temporary lockfile and identifier-correction workflows have retired themselves and are not part of the proposed tree.
+The production dependencies and their transitive graph are frozen in `pnpm-lock.yaml`. Temporary bootstrap and correction workflows retired themselves and are not part of the proposed tree.
 
 ## Remaining gates
 
-- obtain green GitHub Actions evidence;
-- complete human visual review from browser screenshots;
-- merge the exact reviewed SHA;
+- review and merge the exact final PR head;
 - configure a real intake delivery endpoint before treating the form as operational;
 - deploy the public landing only under a separately authorised release gate.
