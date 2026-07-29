@@ -24,6 +24,9 @@ def main() -> int:
     hardening = (
         ROOT / "infra/postgres/081-entitlement-ledger-hardening.sql"
     ).read_text(encoding="utf-8")
+    expiry = (ROOT / "infra/postgres/082-entitlement-expiry-sweep.sql").read_text(
+        encoding="utf-8"
+    )
     config = (ROOT / "apps/api/src/axignal_api/entitlement_config.py").read_text(
         encoding="utf-8"
     )
@@ -95,6 +98,17 @@ def main() -> int:
     for marker in required_hardening:
         require(marker in hardening, f"Missing authority hardening marker: {marker}")
 
+    required_expiry = (
+        "expire_due_trial",
+        "SECURITY DEFINER",
+        "SET search_path TO pg_catalog",
+        "state = 'READ_ONLY'",
+        "PRE_AUTHORIZATION_SWEEP",
+        "REVOKE ALL ON FUNCTION",
+    )
+    for marker in required_expiry:
+        require(marker in expiry, f"Missing expiry contract marker: {marker}")
+
     require(
         "trial_runtime_enabled: bool" in config
         and "end_user_ai_enabled: bool" in config,
@@ -111,12 +125,20 @@ def main() -> int:
         "081-entitlement-ledger-hardening.sql" in dockerfile,
         "Authority hardening migration not installed",
     )
+    require(
+        "082-entitlement-expiry-sweep.sql" in dockerfile,
+        "Expiry sweep migration not installed",
+    )
     require("stripe" not in combined_runtime.casefold(), "Stripe is outside this runtime cut")
     activation_command = combined_runtime.split("class TrialActivationCommand", 1)[1].split(
         "class AIRequestAuthorizationCommand",
         1,
     )[0]
     require("tenant_id" not in activation_command, "Trial command cannot accept tenant_id")
+    require(
+        "expire_due_trial" in combined_runtime,
+        "Repository must persist expiry before reservation denial",
+    )
 
     result = {
         "schema": "axignal.entitlement-contract-verification.v0.1",
@@ -130,6 +152,7 @@ def main() -> int:
         "direct_app_table_mutation": False,
         "column_level_mutation_grants": False,
         "security_definer_search_path_fixed": True,
+        "expiry_transition_persists_before_denial": True,
         "stripe_wired": False,
     }
     print(json.dumps(result, sort_keys=True))
