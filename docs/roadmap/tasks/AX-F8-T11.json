@@ -2,7 +2,7 @@
   "task_id": "AX-F8-T11",
   "goal_id": "AXIGNAL-GOAL-001",
   "phase": "F8",
-  "state": "IN_PROGRESS",
+  "state": "EVIDENCE_READY",
   "objective": "Implement and validate one fail-closed, version-pinned TED eForms XML parser profile that emits deterministic non-personal Candidate Claims without activating source or canonical authority.",
   "outcome": "ContractNotice subtype 16 under eForms SDK 1.14 is parsed with hardened XML handling, explicit required and optional fields, buyer-reference resolution, personal-field exclusion and deterministic Candidate Claim fingerprints against synthetic and official SDK examples.",
   "contracts": [
@@ -109,28 +109,28 @@
       "description": "Synthetic fixture tests extraction, optional unknowns, deterministic fingerprints, personal-field exclusion and fail-closed profile drift.",
       "required": true,
       "location": "apps/api/tests/test_ted_eforms_parser.py",
-      "status": "PRESENT"
+      "status": "PASS"
     },
     {
       "evidence_type": "TRACE",
-      "description": "Pinned official SDK 1.14.2 example parses transiently and emits only aggregate, hashed evidence.",
+      "description": "Pinned official SDK 1.14.2 example parsed transiently: 17 unique Candidate Claims, two organisations, one lot, three personal-field elements observed, zero personal values emitted, zero model calls and zero canonical writes.",
       "required": true,
-      "location": "ted-eforms-sdk-example-evidence.json",
-      "status": "MISSING"
+      "location": "GitHub Actions run 30444435253 / artifact ted-eforms-sdk-example-db045dd20fcc75427d7b3e39c71d0be40feac1cd",
+      "status": "PASS"
     },
     {
       "evidence_type": "SECURITY_REVIEW",
       "description": "defusedxml, DTD/entity rejection, exact profile checks, size limit and URL allowlist pass.",
       "required": true,
       "location": "apps/api/src/axignal_api/connectors/ted_eforms.py",
-      "status": "PRESENT"
+      "status": "PASS"
     },
     {
       "evidence_type": "DOCUMENT",
       "description": "Parser runbook records exact authority, versioning, privacy, evidence and rollback boundaries.",
       "required": true,
       "location": "docs/sources/ted-eforms-xml-parser-v0.1.md",
-      "status": "MISSING"
+      "status": "PASS"
     }
   ],
   "impacts": {
@@ -230,5 +230,5 @@
   "owner": "connector-engineer",
   "reviewer": "epistemic-admission",
   "created_at": "2026-07-29T10:24:00Z",
-  "updated_at": "2026-07-29T10:24:00Z"
+  "updated_at": "2026-07-29T10:38:52Z"
 }
