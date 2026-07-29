@@ -1,0 +1,279 @@
+name: Public Landing Release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/landing/**"
+      - "infra/landing/**"
+      - "packages/design-tokens/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - ".github/workflows/public-landing-release.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: axignal-public-landing-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Build, deploy and verify axignal.com
+    runs-on: ubuntu-24.04
+    environment: production-landing
+    timeout-minutes: 45
+    env:
+      VPS_HOST: ${{ vars.AXIGNAL_VPS_HOST }}
+      VPS_PORT: ${{ vars.AXIGNAL_VPS_SSH_PORT }}
+      VPS_USER: ${{ vars.AXIGNAL_VPS_USER }}
+    steps:
+      - name: Checkout exact main revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Validate exact release source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_SHA}" = "$(git rev-parse HEAD)"
+          corepack enable
+          corepack prepare pnpm@10.12.4 --activate
+          pnpm install --frozen-lockfile
+          pnpm --filter @axignal/landing typecheck
+          pnpm --filter @axignal/landing build
+          bash -n infra/landing/deploy.sh
+
+      - name: Build immutable landing image
+        shell: bash
+        run: |
+          set -euo pipefail
+          image="axignal-landing:${GITHUB_SHA}"
+          docker build --pull --file infra/landing/Dockerfile --tag "${image}" .
+          docker image inspect "${image}" >/dev/null
+          docker save "${image}" | gzip -9 > /tmp/axignal-landing-image.tar.gz
+          sha256sum /tmp/axignal-landing-image.tar.gz > /tmp/axignal-landing-image.tar.gz.sha256
+
+      - name: Materialise deploy credential and pin host identity
+        shell: bash
+        env:
+          DEPLOY_KEY: ${{ secrets.AXIGNAL_VPS_SSH_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p /tmp/axignal-release-ssh
+          DEPLOY_KEY_RAW="${DEPLOY_KEY}" python3 - <<'PY'
+          import os
+          from pathlib import Path
+
+          value = os.environ['DEPLOY_KEY_RAW']
+          value = value.lstrip('\ufeff').replace('\r\n', '\n').replace('\r', '\n').strip()
+          if '\\n' in value and '\n' not in value:
+              value = value.replace('\\n', '\n')
+          Path('/tmp/axignal-release-ssh/deploy_key').write_text(value + '\n', encoding='utf-8')
+          PY
+          chmod 0600 /tmp/axignal-release-ssh/deploy_key
+          ssh-keygen -y -P "" -f /tmp/axignal-release-ssh/deploy_key </dev/null >/dev/null 2>&1
+
+          host="${VPS_HOST:-187.124.220.48}"
+          port="${VPS_PORT:-22}"
+          ssh-keyscan -T 10 -p "${port}" -t ed25519,rsa "${host}" > /tmp/axignal-release-ssh/known_hosts 2>/dev/null
+          observed="$(ssh-keygen -lf /tmp/axignal-release-ssh/known_hosts -E sha256 | awk '{print $2}' | sort -u)"
+          expected="$(printf '%s\n' \
+            'SHA256:0VkIkIO1lCe8xEG0WUK+ty/ZFupJ4DW4IL+AedF8TBg' \
+            'SHA256:m7nw4JpSz97tsAAqV6PZQAddTn3iUjbeD5WD3eUa/2o' | sort -u)"
+          test "${observed}" = "${expected}"
+
+      - name: Transfer exact release bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          host="${VPS_HOST:-187.124.220.48}"
+          port="${VPS_PORT:-22}"
+          user="${VPS_USER:-root}"
+          remote_dir="/tmp/axignal-landing-release-${GITHUB_SHA}"
+          ssh_opts=(
+            -i /tmp/axignal-release-ssh/deploy_key
+            -p "${port}"
+            -o BatchMode=yes
+            -o IdentitiesOnly=yes
+            -o PasswordAuthentication=no
+            -o KbdInteractiveAuthentication=no
+            -o PreferredAuthentications=publickey
+            -o StrictHostKeyChecking=yes
+            -o UserKnownHostsFile=/tmp/axignal-release-ssh/known_hosts
+            -o ConnectTimeout=10
+            -o LogLevel=ERROR
+          )
+          scp_opts=(
+            -i /tmp/axignal-release-ssh/deploy_key
+            -P "${port}"
+            -o BatchMode=yes
+            -o IdentitiesOnly=yes
+            -o PasswordAuthentication=no
+            -o KbdInteractiveAuthentication=no
+            -o PreferredAuthentications=publickey
+            -o StrictHostKeyChecking=yes
+            -o UserKnownHostsFile=/tmp/axignal-release-ssh/known_hosts
+            -o ConnectTimeout=10
+            -o LogLevel=ERROR
+          )
+
+          ssh "${ssh_opts[@]}" "${user}@${host}" "umask 077; rm -rf '${remote_dir}'; mkdir -p '${remote_dir}'"
+          scp "${scp_opts[@]}" \
+            /tmp/axignal-landing-image.tar.gz \
+            /tmp/axignal-landing-image.tar.gz.sha256 \
+            infra/landing/compose.yaml \
+            infra/landing/deploy.sh \
+            "${user}@${host}:${remote_dir}/"
+
+      - name: Deploy with rollback armed
+        shell: bash
+        run: |
+          set -euo pipefail
+          host="${VPS_HOST:-187.124.220.48}"
+          port="${VPS_PORT:-22}"
+          user="${VPS_USER:-root}"
+          remote_dir="/tmp/axignal-landing-release-${GITHUB_SHA}"
+          ssh_opts=(
+            -i /tmp/axignal-release-ssh/deploy_key
+            -p "${port}"
+            -o BatchMode=yes
+            -o IdentitiesOnly=yes
+            -o PasswordAuthentication=no
+            -o KbdInteractiveAuthentication=no
+            -o PreferredAuthentications=publickey
+            -o StrictHostKeyChecking=yes
+            -o UserKnownHostsFile=/tmp/axignal-release-ssh/known_hosts
+            -o ConnectTimeout=10
+            -o LogLevel=ERROR
+          )
+          scp_opts=(
+            -i /tmp/axignal-release-ssh/deploy_key
+            -P "${port}"
+            -o BatchMode=yes
+            -o IdentitiesOnly=yes
+            -o PasswordAuthentication=no
+            -o KbdInteractiveAuthentication=no
+            -o PreferredAuthentications=publickey
+            -o StrictHostKeyChecking=yes
+            -o UserKnownHostsFile=/tmp/axignal-release-ssh/known_hosts
+            -o ConnectTimeout=10
+            -o LogLevel=ERROR
+          )
+
+          ssh "${ssh_opts[@]}" "${user}@${host}" \
+            "cd '${remote_dir}' && sha256sum -c axignal-landing-image.tar.gz.sha256 && chmod 0750 deploy.sh && ./deploy.sh '${GITHUB_SHA}' 'axignal-landing:${GITHUB_SHA}' '${remote_dir}/axignal-landing-image.tar.gz' '${remote_dir}'"
+          scp "${scp_opts[@]}" "${user}@${host}:${remote_dir}/deployment-evidence.json" deployment-evidence.json
+
+      - name: Verify public route externally
+        shell: bash
+        run: |
+          set -euo pipefail
+          https_ready=false
+          for _ in $(seq 1 36); do
+            if curl -fsS --max-time 10 https://axignal.com/api/health > public-health.json; then
+              if EXPECTED_SHA="${GITHUB_SHA}" python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          health = json.loads(Path('public-health.json').read_text(encoding='utf-8'))
+          valid = (
+              health.get('status') == 'ok'
+              and health.get('service') == 'axignal-landing'
+              and health.get('buildSha') == os.environ['EXPECTED_SHA']
+              and health.get('intakeConfigured') is True
+          )
+          raise SystemExit(0 if valid else 1)
+          PY
+              then
+                https_ready=true
+                break
+              fi
+            fi
+            sleep 5
+          done
+          test "${https_ready}" = true
+
+          http_code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 10 http://axignal.com/)"
+          case "${http_code}" in
+            301|302|307|308) ;;
+            *) exit 1 ;;
+          esac
+
+          EXPECTED_SHA="${GITHUB_SHA}" python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          path = Path('deployment-evidence.json')
+          evidence = json.loads(path.read_text(encoding='utf-8'))
+          assert evidence['release_sha'] == os.environ['EXPECTED_SHA']
+          evidence['checks']['external_https_health'] = True
+          evidence['checks']['external_http_redirect'] = True
+          evidence['status'] = 'DEPLOYED_AWAITING_ACCEPTANCE'
+          path.write_text(json.dumps(evidence, indent=2, sort_keys=True) + '\n', encoding='utf-8')
+          PY
+
+      - name: Persist final deployment evidence on host
+        shell: bash
+        run: |
+          set -euo pipefail
+          host="${VPS_HOST:-187.124.220.48}"
+          port="${VPS_PORT:-22}"
+          user="${VPS_USER:-root}"
+          scp_opts=(
+            -i /tmp/axignal-release-ssh/deploy_key
+            -P "${port}"
+            -o BatchMode=yes
+            -o IdentitiesOnly=yes
+            -o PasswordAuthentication=no
+            -o KbdInteractiveAuthentication=no
+            -o PreferredAuthentications=publickey
+            -o StrictHostKeyChecking=yes
+            -o UserKnownHostsFile=/tmp/axignal-release-ssh/known_hosts
+            -o ConnectTimeout=10
+            -o LogLevel=ERROR
+          )
+          scp "${scp_opts[@]}" deployment-evidence.json \
+            "${user}@${host}:/opt/axignal/landing/releases/${GITHUB_SHA}/deployment-evidence.json"
+
+      - name: Upload deployment evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: public-landing-deployment-${{ github.sha }}
+          path: |
+            deployment-evidence.json
+            public-health.json
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Remove temporary credentials and staging
+        if: always()
+        shell: bash
+        run: |
+          set +e
+          host="${VPS_HOST:-187.124.220.48}"
+          port="${VPS_PORT:-22}"
+          user="${VPS_USER:-root}"
+          remote_dir="/tmp/axignal-landing-release-${GITHUB_SHA}"
+          if [[ -f /tmp/axignal-release-ssh/deploy_key && -f /tmp/axignal-release-ssh/known_hosts ]]; then
+            ssh \
+              -i /tmp/axignal-release-ssh/deploy_key \
+              -p "${port}" \
+              -o BatchMode=yes \
+              -o IdentitiesOnly=yes \
+              -o StrictHostKeyChecking=yes \
+              -o UserKnownHostsFile=/tmp/axignal-release-ssh/known_hosts \
+              -o ConnectTimeout=5 \
+              -o LogLevel=ERROR \
+              "${user}@${host}" "rm -rf '${remote_dir}'" >/dev/null 2>&1
+          fi
+          rm -rf /tmp/axignal-release-ssh /tmp/axignal-landing-image.tar.gz /tmp/axignal-landing-image.tar.gz.sha256
