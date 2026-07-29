@@ -19,3 +19,4 @@ COPY 061-f1-validation-answer-key-boundary.sql /docker-entrypoint-initdb.d/061-a
 COPY 062-f1-validation-pgcrypto-boundary.sql /docker-entrypoint-initdb.d/062-axignal-f1-pgcrypto-boundary.sql
 COPY 063-f1-controlled-study-export.sql /docker-entrypoint-initdb.d/063-axignal-f1-controlled-study-export.sql
 COPY 070-ted-persistent-source.sql /docker-entrypoint-initdb.d/070-axignal-ted-persistent-source.sql
+COPY 071-ted-worker-idempotent-replay-grant.sql /docker-entrypoint-initdb.d/071-axignal-ted-worker-replay-grant.sql
