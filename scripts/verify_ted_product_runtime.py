@@ -21,8 +21,11 @@ PROFILE_PATH = (
     / "ted-product-admission-profile.v0.1.json"
 )
 RIGHTS_PATH = ROOT / "docs" / "sources" / "ted-product-admission-v0.1.md"
+SECURITY_PATH = ROOT / "docs" / "security" / "AX-F8-T14-ted-runtime-security-review.md"
 TASK_PATH = ROOT / "docs" / "roadmap" / "tasks" / "AX-F8-T14.json"
+F9_TASK_PATH = ROOT / "docs" / "roadmap" / "tasks" / "AX-F9-T15.json"
 MIGRATION_PATH = ROOT / "infra" / "postgres" / "070-ted-product-runtime.sql"
+PILOT_PATH = ROOT / "infra" / "pilot" / "compose.yaml"
 API_PATH = ROOT / "apps" / "api" / "src" / "axignal_api" / "persistent_ted_research.py"
 WORKER_PATH = ROOT / "apps" / "api" / "src" / "axignal_api" / "worker.py"
 REPOSITORY_PATH = ROOT / "apps" / "api" / "src" / "axignal_api" / "ted_repository.py"
@@ -88,6 +91,18 @@ def validate_source_and_profile() -> tuple[dict, dict]:
     require(profile["profile_id"] == PROFILE_ID, "TED profile identifier drifted")
     require(profile["runtime_default"] == "DISABLED", "TED runtime default was enabled")
     require(
+        profile["activation_state"] == "PRIVATE_PILOT_ENABLED",
+        "TED private-pilot activation is absent",
+    )
+    require(
+        profile["activation_scope"] == "AUTHENTICATED_VERIFIED_ORGANISATIONS",
+        "TED activation scope is too broad",
+    )
+    require(
+        profile["live_source_flag"] == "AXIGNAL_TED_LIVE_SOURCES_ENABLED",
+        "TED live-source flag drifted",
+    )
+    require(
         tuple(profile["field_allowlist"]) == FIXED_FIELDS,
         "TED field allowlist differs from connector contract",
     )
@@ -147,23 +162,39 @@ def validate_wiring() -> None:
     worker = WORKER_PATH.read_text(encoding="utf-8")
     repository = REPOSITORY_PATH.read_text(encoding="utf-8")
     web_route = WEB_ROUTE_PATH.read_text(encoding="utf-8")
+    pilot = PILOT_PATH.read_text(encoding="utf-8")
     rights = RIGHTS_PATH.read_text(encoding="utf-8")
+    security = SECURITY_PATH.read_text(encoding="utf-8")
     task = load_json(TASK_PATH)
+    f9_task = load_json(F9_TASK_PATH)
 
     require("'TED_PROCUREMENT'" in migration, "TED job kind is absent from migration")
     require("'ADMITTED'" in migration, "TED source is not admitted in PostgreSQL")
     require("api_redistribution_allowed', false" in migration, "SQL redistribution guard missing")
     require("/research-runs/ted-procurement" in api, "TED API route is absent")
     require("settings.require_ted_procurement()" in api, "TED API flag gate is absent")
+    require('ConfigDict(extra="forbid")' in api, "TED request does not reject extra fields")
     require("build_ted_search_artifacts" in worker, "TED worker route is absent")
     require("complete_ted_run" in worker, "TED completion path is absent")
+    require("ted_live_sources_enabled" in worker, "TED live activation is not source-specific")
     require("sanitised_projection(page)" in repository, "TED projection sanitisation is absent")
-    require("model_calls\": 0" in repository, "TED zero-model usage evidence is absent")
+    require('model_calls": 0' in repository, "TED zero-model usage evidence is absent")
     require("TED_PROCUREMENT" in web_route, "Navigator TED route is absent")
     require("AXIGNAL_TED_PROCUREMENT_UI_ENABLED" in web_route, "TED UI flag is absent")
+    require('AXIGNAL_TED_PROCUREMENT_ENABLED: "true"' in pilot, "pilot API/worker flag is absent")
+    require('AXIGNAL_TED_LIVE_SOURCES_ENABLED: "true"' in pilot, "pilot live TED flag is absent")
+    require('AXIGNAL_TED_PROCUREMENT_UI_ENABLED: "true"' in pilot, "pilot TED UI is absent")
+    require('AXIGNAL_LIVE_SOURCES_ENABLED: "false"' in pilot, "pilot enabled all live sources")
     require("PRODUCT_ADMITTED" in rights, "TED rights record does not state admission")
-    require(task["state"] in {"IN_PROGRESS", "EVIDENCE_READY"}, "AX-F8-T14 is not active")
+    require("PASS / PRIVATE-PILOT PRODUCT RUNTIME" in security, "security decision is absent")
+    require(task["state"] == "ACCEPTED", "AX-F8-T14 is not accepted")
     require(task["rollback"]["tested"] is True, "TED rollback is not declared tested")
+    user_research = next(
+        item for item in task["acceptance_evidence"] if item["evidence_type"] == "USER_RESEARCH"
+    )
+    require(user_research["required"] is False, "F9 commercial research still blocks F8")
+    require(user_research["status"] == "NOT_APPLICABLE", "F8 fabricates user research")
+    require(f9_task["state"] != "ACCEPTED", "F9 commercial validation was silently accepted")
 
 
 def main() -> None:
@@ -175,9 +206,13 @@ def main() -> None:
             {
                 "status": "PASS",
                 "task": "AX-F8-T14",
+                "task_state": "ACCEPTED",
                 "source_id": SOURCE_ID,
                 "profile_id": PROFILE_ID,
                 "runtime_default": "DISABLED",
+                "activation_state": "PRIVATE_PILOT_ENABLED",
+                "activation_scope": "AUTHENTICATED_VERIFIED_ORGANISATIONS",
+                "public_general_availability": False,
                 "tenant_resolution": "SERVER_AUTHENTICATED_IDENTITY",
                 "model_calls": 0,
                 "api_redistribution": False,
