@@ -6,6 +6,7 @@ import logging
 import time
 from pathlib import Path
 
+from axignal_api.deepseek_proposals import DeepSeekV4FlashProposalAdapter
 from axignal_api.document_proposals import (
     DocumentPipelineError,
     DocumentSecurityError,
@@ -195,7 +196,16 @@ def build_runtime(settings: Settings) -> PersistentDocumentProposalWorker:
     )
     document = InstitutionalDocument.model_validate(_load_json(settings.document_fixture_path))
 
-    if settings.local_model_base_url:
+    if settings.deepseek_proposal_enabled:
+        assert settings.deepseek_api_key is not None
+        gateway = DeepSeekV4FlashProposalAdapter(
+            api_key=settings.deepseek_api_key,
+            base_url=settings.deepseek_base_url,
+            model=settings.deepseek_model,
+            max_output_tokens=settings.deepseek_max_output_tokens,
+            timeout_seconds=settings.deepseek_timeout_seconds,
+        )
+    elif settings.local_model_base_url:
         if not settings.local_model_name:
             raise RuntimeError("AXIGNAL_LOCAL_MODEL_NAME is required with local model endpoint")
         gateway = OpenAICompatibleLocalModelAdapter(
