@@ -19,7 +19,7 @@ TASK_STATES = {
     "AX-F8-T02.json": "ACCEPTED",
     "AX-F8-T03.json": "ACCEPTED",
     "AX-F8-T04.json": "IN_PROGRESS",
-    "AX-F8-T05.json": "IN_PROGRESS",
+    "AX-F8-T05.json": "EVIDENCE_READY",
     "AX-F8-T06.json": "EVIDENCE_READY",
 }
 TASK_PATHS = [ROOT / "docs/roadmap/tasks" / name for name in TASK_STATES]
