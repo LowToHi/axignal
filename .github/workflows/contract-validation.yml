@@ -55,14 +55,20 @@ jobs:
 
           schema = json.loads(Path('schemas/task.schema.json').read_text(encoding='utf-8'))
           validator = Draft202012Validator(schema)
-          paths = sorted(Path('docs/tasks').glob('**/*.task.json'))
+          paths = [
+              *sorted(Path('docs/tasks').glob('**/*.task.json')),
+              *sorted(Path('docs/roadmap/tasks').glob('AX-F*.json')),
+          ]
           if not paths:
               raise SystemExit('No typed task instances found')
+          task_ids: list[str] = []
           for path in paths:
               instance = json.loads(path.read_text(encoding='utf-8'))
               errors = sorted(validator.iter_errors(instance), key=lambda error: list(error.path))
               assert not errors, f"{path}: {[error.message for error in errors]}"
+              task_ids.append(instance['task_id'])
               print(f'PASS {path}: {instance["task_id"]}')
+          assert len(task_ids) == len(set(task_ids)), 'Duplicate typed task IDs across task locations'
           PY
 
       - name: Validate modular skill registries
