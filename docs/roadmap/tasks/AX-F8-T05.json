@@ -1,0 +1,207 @@
+{
+  "task_id": "AX-F8-T05",
+  "goal_id": "AXIGNAL-GOAL-001",
+  "phase": "F8",
+  "state": "EVIDENCE_READY",
+  "objective": "Implement a bounded TED Search API connector and source-quality probe without enabling production ingestion or canonical procurement claims.",
+  "outcome": "A fixed-profile connector performs one allowlisted, non-personal Search API POST, validates the response envelope, preserves optional fields, records hashes and fails closed on redirects, endpoint drift, duplicates, malformed publication numbers, oversized responses or empty results; fixture, mock and live-probe evidence pass.",
+  "contracts": [
+    "GOAL_LOCK",
+    "03",
+    "04",
+    "06",
+    "08",
+    "09",
+    "18",
+    "19",
+    "ADR-004",
+    "ADR-012"
+  ],
+  "skills": [
+    {
+      "skill_id": "connector-engineer",
+      "version": "0.1.0",
+      "activation_reason": "Implement the official TED Search API transport contract."
+    },
+    {
+      "skill_id": "data-quality-auditor",
+      "version": "0.1.0",
+      "activation_reason": "Validate response shape, duplicates, optionality and quality evidence."
+    },
+    {
+      "skill_id": "security-reviewer",
+      "version": "0.1.0",
+      "activation_reason": "Enforce host/path allowlists, HTTPS, response budgets and no redirects."
+    },
+    {
+      "skill_id": "privacy-reviewer",
+      "version": "0.1.0",
+      "activation_reason": "Prove that the fixed projection requests no personal contact fields."
+    },
+    {
+      "skill_id": "test-engineer",
+      "version": "0.1.0",
+      "activation_reason": "Provide fixture, mock-transport and live technical-probe evidence."
+    }
+  ],
+  "dependencies": {
+    "phases": [
+      "F2",
+      "F3"
+    ],
+    "tasks": [
+      "AX-F8-T03",
+      "AX-F8-T04"
+    ],
+    "external": [
+      "Official TED Search API endpoint availability"
+    ]
+  },
+  "allowed_scope": [
+    "Fixed reviewed Search API query",
+    "Four non-personal projected fields",
+    "Page limit of three notices",
+    "Frozen fixture and mock transport",
+    "Live technical probe with retries",
+    "Non-sensitive evidence artifact",
+    "Source health metrics"
+  ],
+  "prohibited_scope": [
+    "Arbitrary user expert-query strings",
+    "Arbitrary return fields",
+    "Personal contact fields",
+    "Iteration or bulk ingestion",
+    "Canonical XML parsing",
+    "Database persistence",
+    "Runtime activation",
+    "Canonical claim creation",
+    "Silent fallback to scraping or another source"
+  ],
+  "acceptance_evidence": [
+    {
+      "evidence_type": "TEST",
+      "description": "Fixture and mock tests prove exact request, optional-field preservation and fail-closed URL and response handling.",
+      "required": true,
+      "location": "apps/api/tests/test_ted_connector.py",
+      "status": "PASS"
+    },
+    {
+      "evidence_type": "TRACE",
+      "description": "The official live endpoint returned three bounded notices from totalNoticeCount 2023, with zero missing requested fields, request/content hashes and no persisted notice values or personal fields.",
+      "required": true,
+      "location": "GitHub Actions run 30442505574 / artifact ted-live-source-evidence-dbfedbe827e038c6a213280d2b1b2cf8c8ab4d70",
+      "status": "PASS"
+    },
+    {
+      "evidence_type": "SECURITY_REVIEW",
+      "description": "Connector refuses redirects, credentials in URLs, non-standard ports, unexpected hosts, paths, queries and fragments.",
+      "required": true,
+      "location": "apps/api/src/axignal_api/connectors/ted.py",
+      "status": "PASS"
+    },
+    {
+      "evidence_type": "DOCUMENT",
+      "description": "Source runbook separates JSON projection, XML notice and SDK JSON metadata.",
+      "required": true,
+      "location": "docs/sources/ted-search-api-v3.md",
+      "status": "PASS"
+    }
+  ],
+  "impacts": {
+    "security": "MATERIAL",
+    "privacy": "LOW",
+    "data_rights": "MATERIAL",
+    "regulatory": "LOW",
+    "multilingual": "LOW",
+    "epistemic": "MATERIAL",
+    "billing": "NONE"
+  },
+  "observability": {
+    "metrics": [
+      "ted_probe_success_rate",
+      "ted_probe_latency_ms",
+      "ted_response_size_bytes",
+      "ted_total_notice_count",
+      "ted_returned_notice_count",
+      "ted_missing_requested_fields"
+    ],
+    "logs": [
+      "request hash",
+      "content hash",
+      "retrieval mode",
+      "source state",
+      "failure class"
+    ],
+    "traces": [
+      "TED fixed technical-probe request"
+    ],
+    "alerts": [
+      "TED endpoint or content-type drift",
+      "personal field added to projection",
+      "response budget exceeded",
+      "duplicate publication number",
+      "live probe repeatedly fails"
+    ]
+  },
+  "rollback": {
+    "strategy": "Remove the connector from execution paths, set the source state to RESTRICTED and preserve only frozen non-personal fixtures and audit evidence.",
+    "kill_switch": "The connector is not wired into the runtime and live_enabled must be explicitly true.",
+    "tested": true
+  },
+  "goal_lock_checks": [
+    {
+      "check_id": 1,
+      "answer": "YES",
+      "evidence": "The connector retrieves official procurement discovery evidence."
+    },
+    {
+      "check_id": 2,
+      "answer": "YES",
+      "evidence": "Content and request hashes support later provenance; no claim is admitted."
+    },
+    {
+      "check_id": 3,
+      "answer": "YES",
+      "evidence": "The probe fields are precursors to geography, buyer and lifecycle views."
+    },
+    {
+      "check_id": 4,
+      "answer": "YES",
+      "evidence": "The connector has no user-interest input and cannot rank truth by attention."
+    },
+    {
+      "check_id": 5,
+      "answer": "YES",
+      "evidence": "Multilingual titles and buyers are preserved as source values without lossy flattening."
+    },
+    {
+      "check_id": 6,
+      "answer": "YES",
+      "evidence": "Official source retrieval and persistent lineage are prerequisites for differentiated research state."
+    },
+    {
+      "check_id": 7,
+      "answer": "YES",
+      "evidence": "The connector performs read-only observation and no bid or investment action."
+    },
+    {
+      "check_id": 8,
+      "answer": "YES",
+      "evidence": "Only approved non-personal fields are requested under a documented source record."
+    },
+    {
+      "check_id": 9,
+      "answer": "YES",
+      "evidence": "Live retrieval is off by default and no runtime wiring exists."
+    },
+    {
+      "check_id": 10,
+      "answer": "YES",
+      "evidence": "The connector advances the authorised first-source technical probe."
+    }
+  ],
+  "owner": "connector-engineer",
+  "reviewer": "security-reviewer",
+  "created_at": "2026-07-29T09:24:00Z",
+  "updated_at": "2026-07-29T10:09:34Z"
+}

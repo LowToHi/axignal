@@ -1,0 +1,327 @@
+{
+  "schema": "axignal.eu-public-procurement-ontology.v1",
+  "ontology_id": "eu-public-procurement@0.1.0",
+  "goal_id": "AXIGNAL-GOAL-001",
+  "status": "IMPLEMENTATION_PROFILE_NOT_UNIVERSE_ADMISSION",
+  "source_standard": {
+    "name": "EU eForms",
+    "sdk_version_observed": "1.14",
+    "ontology_version_observed": "5.2.0",
+    "observed_at": "2026-07-29",
+    "compatibility_policy": "Pin every parser to an explicit eForms SDK and notice subtype; reject unknown versions or preserve them as raw-only evidence until mapped."
+  },
+  "transport_contract": {
+    "search_api": {
+      "endpoint": "https://api.ted.europa.eu/v3/notices/search",
+      "method": "POST",
+      "authentication": "NONE",
+      "response_representation": "JSON search envelope containing requested fields and notice-format/language URLs",
+      "purpose": "Discovery, bounded field projection, pagination or iteration checkpointing"
+    },
+    "canonical_notice": {
+      "representation": "XML eForms notice or legacy TED XML retrieved from an official TED URL",
+      "purpose": "Immutable raw evidence, notice-version lineage and deterministic field extraction",
+      "rule": "A Search API projection is not sufficient canonical evidence when the relevant claim depends on a field available only in the complete notice."
+    },
+    "sdk_field_repository": {
+      "representation": "JSON metadata repository",
+      "purpose": "Versioned mapping from eForms business terms and contexts to XML paths, field types and code lists",
+      "rule": "SDK metadata is parser configuration, not procurement evidence."
+    }
+  },
+  "notice_blocks": [
+    {
+      "block_id": "notice_identity_metadata",
+      "label": "Notice identification and metadata",
+      "entities": ["ProcurementNotice", "NoticeVersion", "ProcurementProcedure"],
+      "fields": [
+        "publication_number",
+        "notice_identifier",
+        "notice_version_identifier",
+        "procedure_identifier",
+        "notice_form_type",
+        "notice_subtype",
+        "notice_type",
+        "legal_basis",
+        "dispatch_datetime",
+        "publication_date",
+        "submission_deadline",
+        "opening_datetime",
+        "official_languages",
+        "original_language",
+        "related_notice_identifiers"
+      ],
+      "optionality": "Dates, languages and identifiers vary by form, subtype and procedure lifecycle. Opening time is not assumed present.",
+      "authority": "OBSERVED"
+    },
+    {
+      "block_id": "buyer",
+      "label": "Buyer or contracting authority/entity",
+      "entities": ["BuyerOrganisation", "BuyerOffice", "NUTSRegion"],
+      "fields": [
+        "official_name",
+        "national_registration_identifier",
+        "organisation_identifier",
+        "postal_address",
+        "country_code",
+        "nuts_codes",
+        "buyer_type",
+        "contracting_authority_or_entity",
+        "main_activity",
+        "website_url",
+        "buyer_profile_url",
+        "procurement_document_url",
+        "public_contact_email",
+        "public_contact_phone"
+      ],
+      "optionality": "Organisation identifiers and NUTS precision are source-dependent; natural-person contact fields are privacy-restricted metadata, not canonical opportunity claims.",
+      "authority": "OBSERVED"
+    },
+    {
+      "block_id": "procurement_object",
+      "label": "Procurement object",
+      "entities": ["ProcurementProcedure", "ProcurementLot", "CPVConcept", "NUTSRegion"],
+      "fields": [
+        "internal_reference",
+        "title",
+        "description",
+        "main_cpv_codes",
+        "additional_cpv_codes",
+        "contract_nature",
+        "lot_identifiers",
+        "lot_title",
+        "lot_description",
+        "place_of_performance",
+        "duration",
+        "variants",
+        "options"
+      ],
+      "optionality": "A procedure may have one or many lots; descriptions are multilingual free text and must preserve original language separately from localised rendering.",
+      "authority": "OBSERVED"
+    },
+    {
+      "block_id": "economics_financing",
+      "label": "Economics, funding and award criteria",
+      "entities": ["MonetaryAmount", "FundingProgramme", "AwardCriterion"],
+      "fields": [
+        "estimated_procedure_value",
+        "estimated_lot_value",
+        "maximum_framework_value",
+        "currency",
+        "vat_inclusion_state",
+        "eu_funds_indicator",
+        "funding_programme",
+        "award_criteria",
+        "award_criterion_type",
+        "award_criterion_weight"
+      ],
+      "optionality": "Estimated value, VAT treatment, funding programme and criterion weights are not universally published; missing values remain UNKNOWN and must never be imputed as zero.",
+      "authority": "OBSERVED"
+    },
+    {
+      "block_id": "participation_and_access",
+      "label": "Participation, procedure and document access",
+      "entities": ["ParticipationCondition", "ProcedureRule", "ProcurementDocumentLink"],
+      "fields": [
+        "procedure_type",
+        "professional_suitability_conditions",
+        "economic_financial_standing_conditions",
+        "technical_professional_ability_conditions",
+        "reserved_contract",
+        "contract_performance_conditions",
+        "accepted_submission_languages",
+        "electronic_submission_url",
+        "procurement_documents_url",
+        "review_body",
+        "review_deadlines"
+      ],
+      "optionality": "National platform URLs are evidence links, not an authorisation to crawl linked documents; document ingestion requires separate source and rights admission.",
+      "authority": "OBSERVED"
+    },
+    {
+      "block_id": "result_award",
+      "label": "Results, awards and competition statistics",
+      "entities": ["ContractAward", "WinnerOrganisation", "TenderStatistics", "SubcontractingStatement"],
+      "fields": [
+        "award_status",
+        "non_award_reason",
+        "contract_identifier",
+        "contract_conclusion_date",
+        "winner_names",
+        "winner_identifiers",
+        "winner_addresses",
+        "awarded_value",
+        "currency",
+        "tenders_received_count",
+        "electronic_tenders_count",
+        "sme_tenders_count",
+        "subcontracting_indicator",
+        "subcontracting_value"
+      ],
+      "optionality": "Award information occurs only in relevant result notices and may be incomplete. TED Open Data documents known gaps in winner information and some relationships.",
+      "authority": "OBSERVED"
+    }
+  ],
+  "entity_types": [
+    "ProcurementNotice",
+    "NoticeVersion",
+    "ProcurementProcedure",
+    "BuyerOrganisation",
+    "BuyerOffice",
+    "ProcurementLot",
+    "CPVConcept",
+    "NUTSRegion",
+    "MonetaryAmount",
+    "FundingProgramme",
+    "AwardCriterion",
+    "ParticipationCondition",
+    "ProcedureRule",
+    "ProcurementDocumentLink",
+    "ContractAward",
+    "WinnerOrganisation",
+    "TenderStatistics",
+    "SubcontractingStatement"
+  ],
+  "relationships": [
+    "NOTICE_VERSION_OF_NOTICE",
+    "NOTICE_DESCRIBES_PROCEDURE",
+    "NOTICE_CORRECTS_NOTICE",
+    "NOTICE_REPLACES_NOTICE",
+    "PROCEDURE_PUBLISHED_BY_BUYER",
+    "PROCEDURE_HAS_LOT",
+    "LOT_CLASSIFIED_BY_CPV",
+    "LOT_PERFORMED_IN_NUTS",
+    "LOT_HAS_ESTIMATED_VALUE",
+    "LOT_HAS_AWARD_CRITERION",
+    "LOT_HAS_PARTICIPATION_CONDITION",
+    "PROCEDURE_FINANCED_BY_PROGRAMME",
+    "AWARD_RESOLVES_LOT",
+    "AWARD_GRANTED_TO_WINNER",
+    "AWARD_HAS_ACTUAL_VALUE",
+    "AWARD_HAS_TENDER_STATISTICS",
+    "NOTICE_LINKS_PROCUREMENT_DOCUMENTS"
+  ],
+  "canonical_observed_claims": [
+    "notice publication, modification, correction or cancellation",
+    "buyer organisation and officially published identifiers",
+    "procedure and notice type",
+    "lot identity and hierarchy",
+    "CPV classification",
+    "place of performance and NUTS codes",
+    "published deadlines",
+    "stated estimated or awarded value and currency",
+    "published EU-funding indicator and programme",
+    "published award criteria",
+    "published participation conditions",
+    "published winner organisation and award result",
+    "published tender statistics"
+  ],
+  "canonical_calculated_claims": [
+    {
+      "claim": "time remaining to submission deadline",
+      "requirements": ["admitted deadline", "calculation timestamp", "timezone policy"]
+    },
+    {
+      "claim": "currency-normalised value",
+      "requirements": ["admitted monetary amount", "admitted currency", "admitted FX source", "FX observation timestamp"]
+    },
+    {
+      "claim": "buyer recurrence",
+      "requirements": ["reversible buyer entity resolution", "bounded observation window", "notice deduplication"]
+    },
+    {
+      "claim": "award concentration",
+      "requirements": ["admitted awards", "reversible winner resolution", "explicit denominator and period"]
+    },
+    {
+      "claim": "notice modification or cancellation rate",
+      "requirements": ["version lineage", "notice lifecycle classification", "explicit period"]
+    }
+  ],
+  "proposal_only_claims": [
+    "semantic fit between a supplier and a tender",
+    "expected bid complexity",
+    "inferred procurement theme not established by CPV or explicit text",
+    "suggested adjacent markets",
+    "regulation-created demand interpretation"
+  ],
+  "prohibited_claims": [
+    "probability of winning",
+    "supplier eligibility or legal suitability",
+    "expected profitability",
+    "guaranteed market opportunity",
+    "personalised investment recommendation",
+    "bid submission or representation",
+    "canonical opportunity claim derived from natural-person contact data"
+  ],
+  "privacy_policy": {
+    "personal_data_present": true,
+    "restricted_fields": [
+      "contact_person_name",
+      "personal_professional_email",
+      "personal_professional_phone",
+      "natural_person_winner_identity"
+    ],
+    "default_actions": [
+      "exclude from canonical opportunity claims",
+      "exclude from model prompts",
+      "exclude from analytics",
+      "exclude from public API and exports",
+      "retain only when source-specific purpose and legal basis are recorded"
+    ]
+  },
+  "initial_query_dimensions": [
+    "publication_date",
+    "notice_type",
+    "procedure_type",
+    "buyer_country",
+    "buyer_name",
+    "buyer_type",
+    "place_of_performance_nuts",
+    "cpv_code",
+    "contract_nature",
+    "estimated_value_band",
+    "currency",
+    "submission_deadline",
+    "eu_funds_indicator",
+    "award_status",
+    "winner_name"
+  ],
+  "first_query_contract": {
+    "natural_language_example": "Show newly published cybersecurity procurements above EUR 500000 in Spain, France and Germany with more than 15 days remaining; explain recurring buyers, changed or cancelled notices and the official evidence.",
+    "deterministic_filters": [
+      "CPV subtree",
+      "place-of-performance country or NUTS hierarchy",
+      "published monetary value and currency-normalised threshold",
+      "submission deadline relative to a declared clock",
+      "notice lifecycle state"
+    ],
+    "unknown_handling": "A notice missing value, deadline, NUTS or award fields is excluded only from the corresponding filter result and remains visible as uncovered or incomplete where relevant."
+  },
+  "quality_dimensions": [
+    "notice subtype coverage",
+    "required-field completeness by country and subtype",
+    "publication-number uniqueness",
+    "notice-version lineage completeness",
+    "procedure-link confidence",
+    "buyer identifier coverage",
+    "CPV validity",
+    "NUTS validity",
+    "monetary amount and currency validity",
+    "deadline plausibility",
+    "winner completeness",
+    "tender-statistics completeness",
+    "language coverage",
+    "personal-data minimisation",
+    "source attribution completeness"
+  ],
+  "kill_switches": [
+    "disable TED Search API discovery",
+    "disable canonical XML retrieval",
+    "disable a notice subtype parser",
+    "disable a field mapping",
+    "quarantine a publication period or country",
+    "retract dependent calculated claims",
+    "disable public rendering and export independently"
+  ]
+}

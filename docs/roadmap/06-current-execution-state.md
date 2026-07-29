@@ -1,31 +1,33 @@
 # 06 — AXIGNAL Current Execution State
 
-Version: `0.7.0`
-Status: `F2 INTEGRATED / F1 VALIDATION AUTHORISED`
+Version: `0.8.1`
+Status: `PUBLIC LANDING DEPLOYED / F8 WEDGE SELECTED / TED LIVE TECHNICAL PROBE PASSED`
 Goal ID: `AXIGNAL-GOAL-001`
-Canonical baseline: `main@15a232249736658dbe05a67d1f2541384848f5b3`
+Canonical baseline: `main@2c51c340cd2a7a0e0dc1db0017452e723136d77b`
 
 ## Reading rule
 
 This document records the evidence-backed implementation state. A phase is not `PASSED` merely because code exists: its complete contractual gate, external validation and operational dependencies must also be accepted.
 
+A deployed public landing is not evidence that the authenticated product, private pilot, source universe, billing or general availability has passed.
+
 ## Current phase state
 
 | Phase | State | Evidence-backed interpretation |
 |---|---|---|
-| F0 — Goal and contracts | `GATE_REVIEW` | Goal Lock, contracts, ADRs, schemas and registries are integrated. Final cross-contract review and map freeze remain. |
-| F1 — UX architecture and validation | `GATE_REVIEW` | Investigation Shell, Navigator, lens switch, Timeline and Claim/Evidence Rail are executable. Qualified-user thresholds, control comparison, multilingual equivalence and accessibility acceptance remain unproven. |
-| F2 — Reproducible repository spine | `GATE_REVIEW` | Scheduler, content-addressed object storage, OpenTelemetry baseline, explicit runtime topology, migration replay, snapshot restore and clean-clone CI are integrated through PR #24. Formal phase acceptance remains a separate gate decision. |
-| F3 — Epistemic kernel | `IN_PROGRESS` | A bounded profile reaches the append-only Claim Ledger through independent deterministic admission and bounded human review. General entity, contradiction, correction, expiry and multi-profile coverage remain. |
-| F4 — Navigator and InvestigationContext | `IN_PROGRESS` | Authenticated ResearchRuns return evidence, proposals, admitted claims, human-review context and dossiers. Full multilingual command equivalence, previews, entitlements and general undo remain. |
-| F5 — Globe, Graph and Timeline parity | `IN_PROGRESS` | Product shell and canonical browser workflow exist; full parity, accessibility alternatives, performance budgets and user validation remain. |
-| F6 — Multilingual semantic system | `LOCKED` | Contracts exist; the canonical multilingual data and QA system is not implemented. |
+| F0 — Goal and contracts | `GATE_REVIEW` | Goal Lock, contracts, ADRs, schemas and registries are integrated. ADR-012 now records the first-universe wedge. Final cross-contract review and map freeze remain. |
+| F1 — UX architecture and validation | `GATE_REVIEW` | Investigation Shell, Navigator, lens switch, Timeline and Claim/Evidence Rail are executable; the public Globe landing is deployed. Qualified-user thresholds, control comparison, multilingual equivalence and accessibility acceptance remain unproven. |
+| F2 — Reproducible repository spine | `GATE_REVIEW` | Runtime spine, CI, migration replay, restore evidence and the reproducible public landing release are integrated. Formal phase acceptance, restricted deploy identity, product SLOs and private-pilot acceptance remain separate gates. |
+| F3 — Epistemic kernel | `IN_PROGRESS` | A bounded macro profile reaches the append-only Claim Ledger through independent deterministic admission and bounded human review. Procurement claim policy is specified but disabled pending source and XML-parser admission. |
+| F4 — Navigator and InvestigationContext | `IN_PROGRESS` | Authenticated ResearchRuns return evidence, proposals, admitted claims, human-review context and dossiers. Procurement commands and live procurement ResearchRuns are not implemented. |
+| F5 — Globe, Graph and Timeline parity | `IN_PROGRESS` | Product shell and canonical browser workflow exist; procurement data layers, full parity, accessibility alternatives, performance budgets and user validation remain. |
+| F6 — Multilingual semantic system | `LOCKED` | eForms preserves official source languages by design, but AXIGNAL's canonical multilingual data and QA system is not implemented. |
 | F7 — Intent Intelligence and Knowledge Tides | `LOCKED` | Privacy-thresholded operational aggregation is not implemented. |
-| F8 — First lawful opportunity universe | `LOCKED` | Current institutional fixtures prove ingestion and rights gates but do not form a commercial universe. |
-| F9 — Paid design-partner product | `LOCKED` | Production organisations, entitlements, billing, onboarding and paying partners are absent. |
+| F8 — First lawful opportunity universe | `IN_PROGRESS` | `AX-F8-T01` and `T02` select European Public Procurement Intelligence at 96/100. `T03` defines the six-block eForms ontology. The bounded TED connector and official live Search API probe are `EVIDENCE_READY`; TED remains `TECHNICAL_PROBE`, `NOT_PRODUCT_ADMITTED`, and the claim policy remains disabled. |
+| F9 — Paid design-partner product | `LOCKED` | Production organisations, entitlements, billing, onboarding and paying procurement design partners are absent. |
 | F10 — Scenarios, calibration and outcomes | `LOCKED` | Requires admitted historical universe data and commercial usage. |
 | F11 — Enterprise, API and private data | `LOCKED` | Tenant RLS is foundational evidence, not an accepted enterprise product. |
-| F12 — General availability | `LOCKED` | No production deployment, SLO, disaster recovery, retention or operating-economics gate has passed. |
+| F12 — General availability | `LOCKED` | The public landing is live, but product SLO, disaster recovery, retention, private-pilot acceptance and operating-economics gates have not passed. |
 
 ## Implemented governed vertical slice
 
@@ -45,7 +47,7 @@ bounded authenticated identity
 → dossier and InvestigationContext
 ```
 
-The supporting runtime spine now includes:
+The supporting runtime spine includes:
 
 ```text
 persistent scheduler
@@ -54,7 +56,65 @@ persistent scheduler
 → retry / dead-letter / lease recovery
 → content-addressed object storage
 → trace-context propagation and telemetry redaction
-→ machine-readable non-production topology
+→ machine-readable deployment topology
+```
+
+The public surface additionally includes:
+
+```text
+main exact SHA
+→ immutable landing image
+→ incumbent Traefik
+→ TLS and external health verification
+→ private append-only consent-aware intake
+→ deployment evidence and rollback
+```
+
+## First-universe state
+
+```text
+seven candidates scored
+→ European Public Procurement Intelligence selected
+→ eForms six-block ontology defined
+→ TED source registered as TECHNICAL_PROBE
+→ fixed non-personal Search API connector implemented
+→ official live probe: PASS
+→ procurement claim policy defined but disabled
+```
+
+Live technical-probe evidence from GitHub Actions run `30442505574`:
+
+```json
+{
+  "endpoint": "https://api.ted.europa.eu/v3/notices/search",
+  "returned_notice_count": 3,
+  "total_notice_count": 2023,
+  "missing_requested_field_counts": 0,
+  "personal_contact_fields_requested": false,
+  "raw_payload_persisted": false,
+  "notice_values_persisted": false,
+  "source_state": "TECHNICAL_PROBE",
+  "product_admitted": false,
+  "runtime_enabled": false,
+  "public_marketing_authorised": false
+}
+```
+
+Current exact boundaries:
+
+```json
+{
+  "selected_universe": "eu_public_procurement",
+  "selection_state": "ACCEPTED",
+  "ontology_state": "ACCEPTED",
+  "source_state": "TECHNICAL_PROBE",
+  "source_product_admitted": false,
+  "connector_evidence_state": "EVIDENCE_READY",
+  "connector_runtime_enabled": false,
+  "claim_policy_state": "DISABLED_PENDING_PRODUCT_ADMISSION_AND_XML_PARSER",
+  "universe_supported": false,
+  "public_marketing_authorised": false
+}
 ```
 
 ## Demonstrated invariants
@@ -66,10 +126,13 @@ persistent scheduler
 - queue and scheduling replay are idempotent;
 - canonical, review and scheduler histories are append-only;
 - failpoints roll back related mutations atomically;
-- expired scheduler leases recover without duplicate logical jobs;
 - object-store tampering is rejected;
 - prohibited telemetry fields are redacted;
-- production deployment remains disabled.
+- public landing deployment is exact-SHA, TLS-verified and rollback-protected;
+- procurement selection does not imply source or universe admission;
+- missing procurement fields remain unknown instead of becoming zero or negative evidence;
+- the TED connector requests no personal contact fields and remains disabled by default;
+- the live probe persists hashes and aggregate quality evidence, not notice values or raw payload.
 
 ## Integrated baselines
 
@@ -79,38 +142,47 @@ persistent scheduler
 | Governance closure | #22 | `cb2c966d36207e908a19dd5381f9179d3c6fa406` |
 | Bounded human review | #23 | `76ca919fea0d5740e80729aa7f9332f6aa6c5857` |
 | F2 reproducible runtime closure | #24 | `15a232249736658dbe05a67d1f2541384848f5b3` |
+| Public Globe landing implementation | #34 | `4e03c5fdef40c4d269fd5daf1005a29afb90a853` |
+| Public landing release system | #35 | `fbb421ba9e817c11576d87b36bd6b9b01fd2e2be` |
+| Release observability and hotfixes | #36–#39 | `2c51c340cd2a7a0e0dc1db0017452e723136d77b` |
 
 All subsequent development MUST branch from current `main`. Superseded branches are audit history, not execution bases.
 
 ## Active gaps before phase acceptance
 
-### F0
+### F0–F2
 
 - final cross-contract inconsistency review;
-- freeze execution-state authority and map precedence;
-- decide retention policy for superseded branches.
+- formal F0/F1/F2 gate decisions;
+- restricted `axignal-deploy` identity instead of root SSH;
+- private-pilot deployment and independent acceptance;
+- product SLO, recovery and incident ownership.
 
 ### F1
 
-- qualified-user testing against frozen thresholds;
-- AXIGNAL-versus-control comparison using equivalent content;
+- execute qualified-user controlled sessions;
 - authority-layer and evidence-traceability comprehension;
 - multilingual and accessibility acceptance;
 - final visual-system gate.
 
-### F2
-
-- formal roadmap authority decision: `PASSED` or remain `GATE_REVIEW`;
-- production topology, secrets, SLOs and disaster recovery remain explicitly separate and unauthorised.
-
 ### F3–F5
 
 - additional deterministic claim profiles and contradiction lifecycle;
-- source/entity expansion only through independent gates;
-- complete Globe/Graph/Timeline parity after user evidence.
+- complete procurement XML rederivation and notice-version propagation;
+- complete Globe/Graph/Timeline parity after real-user evidence.
+
+### F8
+
+- map and hash a complete official XML notice under an explicit SDK version;
+- measure field completeness by notice subtype, country and period;
+- prove notice correction, cancellation and award lineage;
+- complete source-specific privacy and attribution review;
+- keep `PRODUCT_ADMITTED` blocked until every source gate passes;
+- implement a real procurement ResearchRun only after source and policy activation evidence;
+- validate buyer workflow, willingness to pay and operating cost.
 
 ## Only authorised next priority
 
-> Build the F1 qualified-user validation harness with pseudonymised sessions, frozen tasks, deterministic AXIGNAL/control assignment, append-only interaction events, reproducible metrics and zero canonical-state authority. Then execute controlled sessions with qualified users.
+> Implement the first complete official XML notice parser profile pinned to an explicit eForms SDK version. Then run deterministic procurement admission against frozen official notices before wiring European procurement into Navigator, ResearchRuns, Globe, Graph or public marketing.
 
-OCR, unrestricted browsing, broad source expansion, billing, new model authority and production deployment remain unauthorised until their dependencies pass.
+OCR, unrestricted browsing, national-portal scraping, simultaneous universe expansion, billing, new model authority and public procurement-support claims remain unauthorised until their dependencies pass.

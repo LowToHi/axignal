@@ -1,0 +1,207 @@
+{
+  "task_id": "AX-F8-T03",
+  "goal_id": "AXIGNAL-GOAL-001",
+  "phase": "F8",
+  "state": "ACCEPTED",
+  "objective": "Define a versioned European public procurement ontology aligned with eForms while preserving notice optionality, provenance, privacy and deterministic claim boundaries.",
+  "outcome": "The first universe ontology models six notice blocks, eighteen entity types, version and lifecycle relations, eligible observed and calculated claims, proposal-only claims, prohibited claims, quality dimensions and independent kill switches.",
+  "contracts": [
+    "GOAL_LOCK",
+    "00",
+    "02",
+    "03",
+    "06",
+    "08",
+    "12",
+    "13",
+    "16",
+    "18",
+    "ADR-004",
+    "ADR-012"
+  ],
+  "skills": [
+    {
+      "skill_id": "ontology-engineer",
+      "version": "0.1.0",
+      "activation_reason": "Map eForms concepts into bounded AXIGNAL entities, relations and claim classes."
+    },
+    {
+      "skill_id": "epistemic-admission",
+      "version": "0.1.0",
+      "activation_reason": "Separate observed, calculated, proposal-only and prohibited procurement claims."
+    },
+    {
+      "skill_id": "source-admission",
+      "version": "0.1.0",
+      "activation_reason": "Preserve source-version, raw-notice and field-mapping boundaries."
+    },
+    {
+      "skill_id": "privacy-reviewer",
+      "version": "0.1.0",
+      "activation_reason": "Minimise natural-person contact and award data."
+    },
+    {
+      "skill_id": "multilingual-localiser",
+      "version": "0.1.0",
+      "activation_reason": "Preserve original notice language separately from localised rendering."
+    },
+    {
+      "skill_id": "gate-evaluator",
+      "version": "0.1.0",
+      "activation_reason": "Validate completeness, optionality, forbidden claims and non-admission state."
+    }
+  ],
+  "dependencies": {
+    "phases": [
+      "F2",
+      "F3",
+      "F4",
+      "F5"
+    ],
+    "tasks": [
+      "AX-F8-T01",
+      "AX-F8-T02"
+    ],
+    "external": [
+      "EU eForms SDK 1.14 notice-content documentation",
+      "EU eProcurement Ontology 5.2.0",
+      "TED Search API and Open Data documentation",
+      "User-supplied domain decomposition reviewed against official documentation"
+    ]
+  },
+  "allowed_scope": [
+    "Versioned universe ontology",
+    "Search-envelope and canonical-XML transport contract",
+    "Entity and relationship definitions",
+    "Claim-authority classification",
+    "Privacy and multilingual rules",
+    "Quality dimensions and kill switches",
+    "Deterministic ontology validation"
+  ],
+  "prohibited_scope": [
+    "Claim that every notice contains every field",
+    "Treat missing value, deadline, award or winner as zero or negative evidence",
+    "Use contact-person data as canonical opportunity evidence",
+    "Treat search-result JSON as sufficient raw evidence for every claim",
+    "Infer supplier suitability, profitability or win probability",
+    "Activate live ingestion or public universe support"
+  ],
+  "acceptance_evidence": [
+    {
+      "evidence_type": "SCHEMA",
+      "description": "Machine-readable procurement ontology with six notice blocks and explicit optionality.",
+      "required": true,
+      "location": "data/universes/eu-public-procurement/ontology.v0.1.json",
+      "status": "PASS"
+    },
+    {
+      "evidence_type": "DOCUMENT",
+      "description": "Official eForms notice content and field metadata corroborate the six-block decomposition.",
+      "required": true,
+      "location": "docs/research/first-lawful-universe-selection-v0.1.md",
+      "status": "PASS"
+    },
+    {
+      "evidence_type": "TEST",
+      "description": "First-universe verifier checks ontology block IDs, authority classes, privacy restrictions and disabled runtime state.",
+      "required": true,
+      "location": "scripts/verify_first_lawful_universe.py",
+      "status": "PASS"
+    }
+  ],
+  "impacts": {
+    "security": "LOW",
+    "privacy": "MATERIAL",
+    "data_rights": "MATERIAL",
+    "regulatory": "MATERIAL",
+    "multilingual": "MATERIAL",
+    "epistemic": "CRITICAL",
+    "billing": "NONE"
+  },
+  "observability": {
+    "metrics": [
+      "mapped_notice_block_count",
+      "mapped_entity_type_count",
+      "unknown_field_rate_by_notice_subtype",
+      "personal_field_exclusion_rate",
+      "unmapped_eforms_version_count"
+    ],
+    "logs": [
+      "ontology version",
+      "eForms SDK version",
+      "field-mapping status",
+      "claim-policy classification"
+    ],
+    "traces": [
+      "notice projection to canonical XML evidence",
+      "raw field to canonical claim"
+    ],
+    "alerts": [
+      "unknown eForms SDK version",
+      "personal field enters canonical claim",
+      "missing field represented as zero",
+      "prohibited claim policy activated"
+    ]
+  },
+  "rollback": {
+    "strategy": "Pin the previous ontology version, quarantine claims produced by the superseded mapping and preserve raw notices for deterministic replay.",
+    "kill_switch": "Disable the affected SDK version, notice subtype, field mapping or entire TED source independently.",
+    "tested": true
+  },
+  "goal_lock_checks": [
+    {
+      "check_id": 1,
+      "answer": "YES",
+      "evidence": "The ontology connects discovery filters to complete official notice evidence."
+    },
+    {
+      "check_id": 2,
+      "answer": "YES",
+      "evidence": "Every canonical class requires raw notice lineage and versioned mapping."
+    },
+    {
+      "check_id": 3,
+      "answer": "YES",
+      "evidence": "NUTS and place fields support Globe, organisations and awards support Graph, and notice versions support Timeline."
+    },
+    {
+      "check_id": 4,
+      "answer": "YES",
+      "evidence": "Query demand and saved investigations remain separate from procurement evidence."
+    },
+    {
+      "check_id": 5,
+      "answer": "YES",
+      "evidence": "Original languages and localised renderings are separate ontology dimensions."
+    },
+    {
+      "check_id": 6,
+      "answer": "YES",
+      "evidence": "Versioned procedure and award state creates durable structured knowledge beyond generic search."
+    },
+    {
+      "check_id": 7,
+      "answer": "YES",
+      "evidence": "Suitability, profitability, win probability and bid execution are prohibited."
+    },
+    {
+      "check_id": 8,
+      "answer": "YES",
+      "evidence": "Personal contact fields are restricted and linked documents require separate source admission."
+    },
+    {
+      "check_id": 9,
+      "answer": "YES",
+      "evidence": "The ontology defines source, subtype, SDK and field-level kill switches."
+    },
+    {
+      "check_id": 10,
+      "answer": "YES",
+      "evidence": "This task completes the authorised ontology dependency for the first universe."
+    }
+  ],
+  "owner": "ontology-engineer",
+  "reviewer": "epistemic-admission",
+  "created_at": "2026-07-29T09:24:00Z",
+  "updated_at": "2026-07-29T09:24:00Z"
+}

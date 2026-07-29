@@ -1,0 +1,214 @@
+{
+  "task_id": "AX-F8-T04",
+  "goal_id": "AXIGNAL-GOAL-001",
+  "phase": "F8",
+  "state": "IN_PROGRESS",
+  "objective": "Admit the minimum lawful source set for the European procurement universe through independent rights, privacy, quality, attribution and revocation gates.",
+  "outcome": "TED Search API v3 is registered for a non-personal technical probe with documented commercial-reuse basis, conditional rights dimensions, privacy exclusions, successful live access and an enabled kill switch; PRODUCT_ADMITTED remains blocked.",
+  "contracts": [
+    "GOAL_LOCK",
+    "02",
+    "03",
+    "06",
+    "08",
+    "09",
+    "10",
+    "18",
+    "ADR-004",
+    "ADR-012"
+  ],
+  "skills": [
+    {
+      "skill_id": "source-admission",
+      "version": "0.1.0",
+      "activation_reason": "Own TED rights, access, attribution, quality and revocation decisions."
+    },
+    {
+      "skill_id": "privacy-reviewer",
+      "version": "0.1.0",
+      "activation_reason": "Control natural-person and professional contact fields present in notices."
+    },
+    {
+      "skill_id": "security-reviewer",
+      "version": "0.1.0",
+      "activation_reason": "Review endpoint allowlisting, response budgets, redirects and kill switches."
+    },
+    {
+      "skill_id": "data-quality-auditor",
+      "version": "0.1.0",
+      "activation_reason": "Define subtype, country, field and lineage quality gates."
+    },
+    {
+      "skill_id": "gate-evaluator",
+      "version": "0.1.0",
+      "activation_reason": "Prevent technical access from being equated with product admission."
+    }
+  ],
+  "dependencies": {
+    "phases": [
+      "F2",
+      "F3"
+    ],
+    "tasks": [
+      "AX-F8-T02",
+      "AX-F8-T03"
+    ],
+    "external": [
+      "TED legal notice and privacy statement",
+      "Commission Decision 2011/833/EU",
+      "TED Search API and Open Data reuse documentation"
+    ]
+  },
+  "allowed_scope": [
+    "Source admission record",
+    "Technical-probe access",
+    "Rights-dimension decision",
+    "Personal-data minimisation",
+    "Attribution policy",
+    "Quality and revocation gates",
+    "Non-sensitive live-probe evidence"
+  ],
+  "prohibited_scope": [
+    "PRODUCT_ADMITTED state before complete gate evidence",
+    "Persistent personal contact data",
+    "Customer display, export or API redistribution",
+    "Model training",
+    "National portal scraping",
+    "Silent source substitution",
+    "Marketing the universe as supported"
+  ],
+  "acceptance_evidence": [
+    {
+      "evidence_type": "RIGHTS_RECORD",
+      "description": "Typed source record separates permitted, conditional and unknown reuse dimensions.",
+      "required": true,
+      "location": "data/sources/ted-search-api-v3.v0.1.json",
+      "status": "PASS"
+    },
+    {
+      "evidence_type": "DOCUMENT",
+      "description": "Source review documents API, JSON/XML roles, rights, privacy, limitations and promotion gates.",
+      "required": true,
+      "location": "docs/sources/ted-search-api-v3.md",
+      "status": "PASS"
+    },
+    {
+      "evidence_type": "TRACE",
+      "description": "Official endpoint returned a bounded non-personal projection: three notices, totalNoticeCount 2023, zero missing requested fields and no persisted notice values.",
+      "required": true,
+      "location": "GitHub Actions run 30442505574 / artifact ted-live-source-evidence-dbfedbe827e038c6a213280d2b1b2cf8c8ab4d70",
+      "status": "PASS"
+    },
+    {
+      "evidence_type": "SECURITY_REVIEW",
+      "description": "Endpoint allowlist, redirects, response-size limit and personal-field exclusion pass.",
+      "required": true,
+      "location": "apps/api/tests/test_ted_connector.py",
+      "status": "PASS"
+    },
+    {
+      "evidence_type": "METRIC",
+      "description": "Country and notice-subtype completeness, version lineage and winner coverage meet declared thresholds.",
+      "required": true,
+      "location": null,
+      "status": "MISSING"
+    }
+  ],
+  "impacts": {
+    "security": "MATERIAL",
+    "privacy": "MATERIAL",
+    "data_rights": "CRITICAL",
+    "regulatory": "MATERIAL",
+    "multilingual": "MATERIAL",
+    "epistemic": "CRITICAL",
+    "billing": "LOW"
+  },
+  "observability": {
+    "metrics": [
+      "source_request_success_rate",
+      "response_size_bytes",
+      "field_completeness_by_subtype_country",
+      "personal_fields_requested_count",
+      "attribution_completeness",
+      "source_state"
+    ],
+    "logs": [
+      "request hash",
+      "content hash",
+      "source state",
+      "rights snapshot version",
+      "kill-switch decision"
+    ],
+    "traces": [
+      "fixed Search API request",
+      "official XML retrieval after future admission"
+    ],
+    "alerts": [
+      "source rights changed",
+      "personal field requested",
+      "endpoint or schema drift",
+      "source state escalated without required evidence"
+    ]
+  },
+  "rollback": {
+    "strategy": "Set source to RESTRICTED or REVOKED, disable the connector, preserve non-sensitive evidence and re-evaluate dependent claims before any future product admission.",
+    "kill_switch": "src_ted_search_api_v3 kill switch remains enabled and runtime integration remains absent.",
+    "tested": true
+  },
+  "goal_lock_checks": [
+    {
+      "check_id": 1,
+      "answer": "YES",
+      "evidence": "The source is official primary evidence for procurement discovery."
+    },
+    {
+      "check_id": 2,
+      "answer": "YES",
+      "evidence": "Raw response hashes and future XML lineage are mandatory."
+    },
+    {
+      "check_id": 3,
+      "answer": "YES",
+      "evidence": "TED provides geography, organisations and lifecycle fields for all three lenses."
+    },
+    {
+      "check_id": 4,
+      "answer": "YES",
+      "evidence": "User demand cannot alter source facts or admission state."
+    },
+    {
+      "check_id": 5,
+      "answer": "YES",
+      "evidence": "Official languages and source-language preservation are part of the access contract."
+    },
+    {
+      "check_id": 6,
+      "answer": "YES",
+      "evidence": "Primary-source history and lineage strengthen differentiation from general AI."
+    },
+    {
+      "check_id": 7,
+      "answer": "YES",
+      "evidence": "The source is used for observation, not advice or bid execution."
+    },
+    {
+      "check_id": 8,
+      "answer": "YES",
+      "evidence": "Rights and personal-data dimensions are explicit and fail closed."
+    },
+    {
+      "check_id": 9,
+      "answer": "YES",
+      "evidence": "The source has an independent kill switch and no runtime dependency yet."
+    },
+    {
+      "check_id": 10,
+      "answer": "YES",
+      "evidence": "The technical probe advances the minimum-source admission gate without overstating it."
+    }
+  ],
+  "owner": "source-admission",
+  "reviewer": "privacy-reviewer",
+  "created_at": "2026-07-29T09:24:00Z",
+  "updated_at": "2026-07-29T10:09:34Z"
+}

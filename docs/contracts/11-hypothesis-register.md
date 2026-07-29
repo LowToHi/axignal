@@ -1,6 +1,6 @@
 # 11 — Product Hypothesis Register
 
-Version: `0.1.0`
+Version: `0.2.0`
 Status: `NORMATIVE / EXPERIMENTAL CONTROL`
 
 ## 1. Purpose
@@ -63,11 +63,16 @@ A hypothesis may be `SUPPORTED` without being universally true. Every decision M
 
 ## 8. H-006 — Initial universe
 
-**Claim:** The strongest initial combination is official macro/sovereign context plus European procurement, non-dilutive capital, public-company disclosures and regulation-created business demand.
+**Claim:** The strongest first commercial wedge is **European Public Procurement Intelligence**, beginning with the official TED source family; macroeconomic and trade data should act as context layers, while grants and regulation-created demand remain adjacent universes subject to independent admission.
 
-- State: `PROPOSED`
-- Test dimensions: rights, coverage, buyer value, frequency, differentiation, acquisition relevance, operating cost and regulatory complexity.
-- Falsification: no coherent recurring user workflow or insufficient willingness to pay.
+- State: `TEST_DESIGNED`
+- Selection evidence: versioned comparative scorecard `AX-F8-UNIVERSE-001`; European procurement ranked first at `96/100` and passed all declared rights, access, buyer-value and regulatory knockout thresholds.
+- Decision: ADR-012 selects the implementation wedge but explicitly does not admit TED as a product source or establish user demand.
+- Bounded workflow: discover newly published procurement demand by geography, CPV sector, buyer, value and deadline; inspect notice and award evidence, changes, cancellations, contradictions, missing fields and historical relationships; save and monitor the investigation.
+- Initial cohort: European SMEs and growth operators, bid and market-entry advisers, holdings, venture studios, corporate-development teams and professional research users.
+- Predeclared next evidence: at least five qualified workflow interviews; three design partners provide real criteria and a recent costly or missed research case; one admitted end-to-end dossier; two independent return visits to a saved investigation or alert; one paid event or signed design-partner commitment; acceptable measured source and compute cost; zero critical rights, privacy or regulatory defects.
+- Falsification: source-specific rights fail; the workflow requires unauthorised national-portal scraping; notice completeness cannot support the use case; privacy minimisation destroys essential value; qualified users want only commodity alerts and will not pay for evidence-led investigation; operating cost makes target margin structurally unattractive; or the value requires suitability, bid execution or misleading certainty.
+- Current boundary: `WEDGE_SELECTED / SOURCE_NOT_PRODUCT_ADMITTED / UNIVERSE_NOT_SUPPORTED / RUNTIME_DISABLED / PUBLIC_MARKETING_PROHIBITED`.
 
 ## 9. H-007 — Claims graph defence
 
