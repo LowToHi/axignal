@@ -3,17 +3,17 @@
   "goal_id": "AXIGNAL-GOAL-001",
   "phase": "F9",
   "state": "PROPOSED",
-  "objective": "Validate AXIGNAL's B2G procurement narrative, paid packaging and premium price bands, then implement a disabled-by-default seven-day controlled trial with server-side entitlements, cost ceilings and explicit expiry.",
-  "outcome": "Qualified B2G design partners can purchase a clearly bounded professional workflow, while an approved private trial cohort can complete one evidence-linked value loop without silent billing, source-right bypass, tenant leakage, unbounded processing or premium-positioning ambiguity.",
-  "contracts": ["GOAL_LOCK", "01", "04", "06", "07", "08", "09", "10", "11", "18", "19", "21", "22", "23", "24", "25", "26", "28", "ADR-013"],
+  "objective": "Validate AXIGNAL's B2G procurement narrative, paid packaging and premium price bands, then implement a disabled-by-default seven-day controlled trial with server-side entitlements, a cumulative 1,000,000-token organisation budget, bounded AXIGNAL-only AI and explicit expiry; monthly paid subscriptions must have unlimited AI tokens without a monthly token quota or token overage billing.",
+  "outcome": "Qualified B2G design partners can purchase a clearly bounded professional workflow with unlimited monthly AI tokens inside AXIGNAL's safety and product scope, while an approved private trial cohort can complete one evidence-linked value loop without silent billing, source-right bypass, tenant leakage, general-purpose AI, token-budget overspend or premium-positioning ambiguity.",
+  "contracts": ["GOAL_LOCK", "01", "04", "06", "07", "08", "09", "10", "11", "14", "18", "19", "21", "22", "23", "24", "25", "26", "28", "29", "ADR-013", "ADR-014"],
   "skills": [
-    {"skill_id": "pricing-and-packaging-analyst", "version": "0.1.0", "activation_reason": "Design and test B2G price bands, value metrics and rejection conditions."},
-    {"skill_id": "entitlement-architect", "version": "0.1.0", "activation_reason": "Express every plan and trial limit as a versioned server-side capability grant."},
+    {"skill_id": "pricing-and-packaging-analyst", "version": "0.1.0", "activation_reason": "Design and test B2G price bands, value metrics, unlimited paid-token positioning and rejection conditions."},
+    {"skill_id": "entitlement-architect", "version": "0.1.0", "activation_reason": "Express every plan, scope and trial limit as a versioned server-side capability grant."},
     {"skill_id": "experimentation-engineer", "version": "0.1.0", "activation_reason": "Predeclare paid, trial and premium-perception experiments with guardrails."},
     {"skill_id": "acquisition-funnel-analyst", "version": "0.1.0", "activation_reason": "Measure qualified activation, value-loop completion, paid conversion and payback."},
-    {"skill_id": "billing-engineer", "version": "0.1.0", "activation_reason": "Implement explicit plan selection and prevent silent trial conversion or uncontrolled overage."},
+    {"skill_id": "billing-engineer", "version": "0.1.0", "activation_reason": "Implement explicit plan selection, prevent silent trial conversion and guarantee no paid token-overage path."},
     {"skill_id": "privacy-reviewer", "version": "0.1.0", "activation_reason": "Govern trial identity, tenant-private data, retention and deletion."},
-    {"skill_id": "security-reviewer", "version": "0.1.0", "activation_reason": "Review tenant isolation, abuse controls, file boundaries and administrative suspension."},
+    {"skill_id": "security-reviewer", "version": "0.1.0", "activation_reason": "Review tenant isolation, AI scope gates, abuse controls, file boundaries and administrative suspension."},
     {"skill_id": "gate-evaluator", "version": "0.1.0", "activation_reason": "Keep hypotheses, private trial evidence and public commercial states distinct."}
   ],
   "dependencies": {
@@ -25,19 +25,25 @@
     "B2G narrative comprehension testing",
     "Paid Design Partner offers",
     "Professional, Team and Enterprise pricing experiments within Contract 28 bands",
-    "Server-side plan and trial entitlements",
+    "Server-side plan, AI-scope and trial entitlements",
     "Seven-day private controlled trial behind feature flag",
-    "Hard ResearchRun, dossier, document, page, export and cost limits",
+    "Exactly 1,000,000 cumulative AI tokens per trial organisation with transactional reservation and reconciliation",
+    "Unlimited monthly AI tokens for active paid subscriptions with no monthly token quota or token overage billing",
+    "Hard ResearchRun, dossier, document, page, export, concurrency, safety and source-right controls",
     "Business-domain and organisation verification",
     "Explicit expiry and read-only transition",
     "Trial retention and deletion",
     "Qualified activation, conversion, margin, abuse and support telemetry",
-    "Explicit paid plan selection"
+    "Explicit paid plan selection",
+    "AXIGNAL-only AI intents, evidence explanations, dossiers and grounded PDF reports"
   ],
   "prohibited_scope": [
     "Public unrestricted trial before gate acceptance",
     "Silent paid conversion",
-    "Unlimited AI or document processing",
+    "Trial AI use beyond the cumulative 1,000,000-token organisation budget",
+    "Monthly paid token quotas, token hard stops or token overage invoices",
+    "Unlimited document processing, concurrency, exports, API or source redistribution",
+    "General-purpose AI, psychology, therapy, code generation, unrestricted browsing or arbitrary tools",
     "API or bulk source redistribution in trial",
     "Private connectors in trial",
     "Cross-jurisdiction access to unadmitted sources",
@@ -46,23 +52,23 @@
     "Pricing represented as validated before paid evidence"
   ],
   "acceptance_evidence": [
-    {"evidence_type": "USER_RESEARCH", "description": "Qualified B2G buyers correctly understand the category, plan differences and evidence boundary without perceiving the product as a commodity alert service.", "required": true, "location": null, "status": "MISSING"},
+    {"evidence_type": "USER_RESEARCH", "description": "Qualified B2G buyers correctly understand the category, plan differences, unlimited paid-token entitlement and evidence boundary without perceiving the product as a commodity alert service or generic chatbot.", "required": true, "location": null, "status": "MISSING"},
     {"evidence_type": "PAID_EVENT", "description": "Independent paid Design Partner or equivalent annual-contract evidence tests at least two materially different offers.", "required": true, "location": null, "status": "MISSING"},
-    {"evidence_type": "SCHEMA", "description": "Versioned entitlement and trial-state models map every marketed capability to server-side enforcement.", "required": true, "location": null, "status": "MISSING"},
-    {"evidence_type": "TEST", "description": "E2E tests prove activation, hard limits, expiry, read-only transition, no auto-charge, upgrade, cancellation and deletion.", "required": true, "location": null, "status": "MISSING"},
-    {"evidence_type": "SECURITY_REVIEW", "description": "Trial tenancy, organisation verification, abuse controls, file processing, export and operator suspension pass review.", "required": true, "location": null, "status": "MISSING"},
-    {"evidence_type": "METRIC", "description": "Activation, value-loop completion, paid intent, variable cost, support burden, abuse and gross-margin evidence are denominator-safe and reproducible.", "required": true, "location": null, "status": "MISSING"}
+    {"evidence_type": "SCHEMA", "description": "Versioned entitlement, AI capability, trial-state and token-ledger models map every marketed capability and limit to server-side enforcement.", "required": true, "location": null, "status": "MISSING"},
+    {"evidence_type": "TEST", "description": "E2E tests prove AXIGNAL-only scope decisions, exact trial token reservation and exhaustion, concurrent overspend prevention, paid no-quota semantics, activation, expiry, read-only transition, no auto-charge, upgrade, cancellation and deletion.", "required": true, "location": null, "status": "MISSING"},
+    {"evidence_type": "SECURITY_REVIEW", "description": "Trial tenancy, organisation verification, prompt injection, prohibited capability blocking, abuse controls, file processing, export and operator suspension pass review.", "required": true, "location": null, "status": "MISSING"},
+    {"evidence_type": "METRIC", "description": "Activation, value-loop completion, paid intent, high-usage paid cost, variable cost, support burden, abuse and gross-margin evidence are denominator-safe and reproducible.", "required": true, "location": null, "status": "MISSING"}
   ],
   "impacts": {"security": "CRITICAL", "privacy": "CRITICAL", "data_rights": "CRITICAL", "regulatory": "MATERIAL", "multilingual": "MATERIAL", "epistemic": "MATERIAL", "billing": "CRITICAL"},
   "observability": {
-    "metrics": ["qualified_trial_signup_total", "trial_activation_rate", "trial_research_run_started_total", "trial_dossier_completed_total", "trial_evidence_drilldown_rate", "trial_to_paid_rate", "design_partner_paid_total", "trial_variable_cost", "support_minutes_per_trial", "abuse_block_total", "trial_deletion_residue_count"],
-    "logs": ["entitlement version", "trial start and expiry", "hard-limit decisions", "explicit plan selection", "retention and deletion transitions", "source-right denials"],
-    "traces": ["verified organisation to tenant", "trial entitlement to ResearchRun", "ResearchRun to dossier", "expiry to read-only", "upgrade to paid entitlement", "deletion request to terminal purge state"],
-    "alerts": ["cross-tenant access", "trial budget bypass", "unexpected charge", "source export bypass", "deletion residue", "automated multi-account abuse", "gross-margin breach"]
+    "metrics": ["qualified_trial_signup_total", "trial_activation_rate", "trial_research_run_started_total", "trial_dossier_completed_total", "trial_evidence_drilldown_rate", "trial_to_paid_rate", "design_partner_paid_total", "trial_ai_tokens_reserved_total", "trial_ai_tokens_reconciled_total", "trial_token_budget_exhausted_total", "paid_ai_tokens_total", "paid_high_usage_tenant_count", "trial_variable_cost", "paid_variable_cost", "support_minutes_per_trial", "assistant_out_of_scope_total", "assistant_safety_block_total", "abuse_block_total", "trial_deletion_residue_count"],
+    "logs": ["entitlement version", "AI policy and capability version", "scope decision", "trial start and expiry", "token reservation and reconciliation", "hard-limit decisions", "explicit plan selection", "retention and deletion transitions", "source-right denials"],
+    "traces": ["verified organisation to tenant", "user request to scope decision", "scope decision to capability", "trial entitlement to token reservation", "paid entitlement to no-quota execution", "ResearchRun to dossier", "expiry to read-only", "upgrade to paid entitlement", "deletion request to terminal purge state"],
+    "alerts": ["cross-tenant access", "trial token overspend", "paid token quota detected", "unexpected token charge", "scope-gate bypass", "prohibited tool invocation", "source export bypass", "deletion residue", "automated multi-account abuse", "gross-margin breach"]
   },
   "rollback": {
-    "strategy": "Disable trial and new-plan feature flags, stop new activations, preserve existing paid agreements under their versioned entitlements, and migrate active trial workspaces to declared read-only or deletion states.",
-    "kill_switch": "Separate commercial, trial, source and payment kill switches must prevent new execution or charging independently.",
+    "strategy": "Disable end-user AI, trial and new-plan feature flags, stop new activations, preserve existing paid agreements under their versioned unlimited-token entitlement, and migrate active trial workspaces to declared read-only or deletion states.",
+    "kill_switch": "Separate AI, commercial, trial, source and payment kill switches must prevent new execution or charging independently.",
     "tested": false
   },
   "goal_lock_checks": [
@@ -71,14 +77,14 @@
     {"check_id": 3, "answer": "YES", "evidence": "Plans grant capacity across the same InvestigationContext rather than fragmented feature pages."},
     {"check_id": 4, "answer": "YES", "evidence": "Acquisition behaviour is analysed separately from procurement truth."},
     {"check_id": 5, "answer": "YES", "evidence": "Locale, currency, language and original evidence requirements remain explicit."},
-    {"check_id": 6, "answer": "YES", "evidence": "Premium value is tied to persistent evidence workflow, not generic AI access."},
+    {"check_id": 6, "answer": "YES", "evidence": "Premium value is tied to persistent evidence workflow, not generic AI access or token bundles."},
     {"check_id": 7, "answer": "YES", "evidence": "The trial prepares professional investigation without executing bids or guaranteeing outcomes."},
-    {"check_id": 8, "answer": "YES", "evidence": "Security, privacy, rights and billing are critical acceptance gates."},
-    {"check_id": 9, "answer": "YES", "evidence": "Feature flags, hard stops, no auto-charge and explicit deletion provide bounded rollback."},
+    {"check_id": 8, "answer": "YES", "evidence": "Security, privacy, rights, AI scope and billing are critical acceptance gates."},
+    {"check_id": 9, "answer": "YES", "evidence": "Feature flags, token reservations, hard stops, no auto-charge and explicit deletion provide bounded rollback."},
     {"check_id": 10, "answer": "YES", "evidence": "The task follows rather than bypasses the TED end-to-end product-admission gate."}
   ],
   "owner": "pricing-and-packaging-analyst",
   "reviewer": "gate-evaluator",
   "created_at": "2026-07-29T12:35:00Z",
-  "updated_at": "2026-07-29T12:35:00Z"
+  "updated_at": "2026-07-29T15:00:00Z"
 }
