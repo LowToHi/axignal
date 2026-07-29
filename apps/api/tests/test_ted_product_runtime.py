@@ -1,18 +1,20 @@
 from dataclasses import replace
 from pathlib import Path
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from fastapi.testclient import TestClient
 
 from axignal_api.application import app
 from axignal_api.connectors.ted import TEDSearchConnector
 from axignal_api.identity import build_identity_assertion
+from axignal_api.queue import ResearchJob
 from axignal_api.ted_runtime import (
     PROFILE_ID,
     build_ted_search_artifacts,
     evaluate_ted_observed_field,
     sanitised_projection,
 )
+from axignal_api.worker import ResearchWorker
 
 FIXTURE = Path(__file__).parent / "fixtures" / "ted_search_probe.json"
 TENANT_ID = UUID("11111111-1111-4111-8111-111111111111")
@@ -44,6 +46,24 @@ def identity_headers() -> dict[str, str]:
             tenant_id=TENANT_ID,
         )
     }
+
+
+class KillSwitchRepository:
+    def __init__(self) -> None:
+        self.failures: list[dict[str, object]] = []
+
+    def get_run_for_worker(self, **_: object) -> dict[str, object]:
+        return {
+            "state": "QUEUED",
+            "opportunity_id": "opp_eu_procurement",
+            "job_kind": "TED_PROCUREMENT",
+        }
+
+    def get_source(self, _: str) -> dict[str, object]:
+        return admitted_source() | {"kill_switch": True}
+
+    def fail_run(self, **values: object) -> None:
+        self.failures.append(values)
 
 
 def test_ted_projection_is_sanitised_and_deterministic() -> None:
@@ -117,6 +137,27 @@ def test_ted_kill_switch_blocks_admission() -> None:
 
     assert decision.admitted is False
     assert "source_kill_switch_enabled" in decision.reasons
+
+
+def test_ted_source_kill_switch_blocks_worker_before_retrieval() -> None:
+    repository = KillSwitchRepository()
+    worker = ResearchWorker(
+        repository=repository,  # type: ignore[arg-type]
+        queue=object(),  # type: ignore[arg-type]
+        world_bank_connector=object(),  # type: ignore[arg-type]
+    )
+    worker.process(
+        ResearchJob(
+            tenant_id=TENANT_ID,
+            research_run_id=uuid4(),
+            source_id="src_ted_search_api_v3",
+        )
+    )
+
+    assert len(repository.failures) == 1
+    failure = repository.failures[0]
+    assert failure["error_code"] == "SOURCE_NOT_ADMITTED"
+    assert failure["error_detail"] == "Source kill switch is enabled"
 
 
 def test_generative_ted_candidate_cannot_auto_admit() -> None:
