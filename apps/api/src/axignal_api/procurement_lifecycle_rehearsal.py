@@ -396,7 +396,9 @@ class TEDEFormsLifecycleParser:
                 "cac:LegalMonetaryTotal/cbc:PayableAmount", NS
             )
             amount = self._text(amount_element) or None
-            currency = amount_element.get("currencyID") if amount_element is not None else None
+            currency = (
+                amount_element.get("currencyID") if amount_element is not None else None
+            )
             tenders[tender_id] = {
                 "party_id": party_id,
                 "lot_id": lot_id,
@@ -960,11 +962,9 @@ class ProcurementLifecycleAssembler:
         admission: ProcurementAdmissionRehearsalResult,
     ) -> ProcurementDossier:
         procedure_identifier = notices[0].identity.procedure_identifier
-        evidence_by_fingerprint = {
-            item.claim_fingerprint: item.evidence_key for item in evidence
-        }
-        status_by_fingerprint = {
-            item.candidate_fingerprint: item.outcome for item in admission.decisions
+        evidence_by_binding = {
+            (item.notice_reference, item.claim_fingerprint): item.evidence_key
+            for item in evidence
         }
         timeline_facts: list[dict[str, Any]] = []
         claim_fingerprints: list[str] = []
@@ -972,7 +972,11 @@ class ProcurementLifecycleAssembler:
         for notice in notices:
             for claim in notice.claims:
                 claim_fingerprints.append(claim.fingerprint)
-                evidence_keys.append(evidence_by_fingerprint[claim.fingerprint])
+                evidence_keys.append(
+                    evidence_by_binding[
+                        (notice.identity.notice_reference, claim.fingerprint)
+                    ]
+                )
             timeline_facts.append(
                 {
                     "notice_reference": notice.identity.notice_reference,
@@ -1071,7 +1075,9 @@ class ProcurementLifecycleAssembler:
                     for claim in notice.claims
                 ),
                 evidence_keys=tuple(
-                    evidence_by_fingerprint[claim.fingerprint]
+                    evidence_by_binding[
+                        (notice.identity.notice_reference, claim.fingerprint)
+                    ]
                     for notice in result_notices
                     for claim in notice.claims
                 ),
@@ -1081,16 +1087,16 @@ class ProcurementLifecycleAssembler:
             ProcurementDossierSection(
                 section_id="admission",
                 title="Deterministic sandbox admission",
-                claim_fingerprints=tuple(status_by_fingerprint),
+                claim_fingerprints=tuple(
+                    item.candidate_fingerprint for item in admission.decisions
+                ),
                 evidence_keys=tuple(evidence_keys),
                 facts=tuple(
                     {
-                        "candidate_fingerprint": fingerprint,
-                        "outcome": outcome,
+                        "candidate_fingerprint": item.candidate_fingerprint,
+                        "outcome": item.outcome,
                     }
-                    for fingerprint, outcome in sorted(
-                        status_by_fingerprint.items()
-                    )
+                    for item in admission.decisions
                 ),
                 status="SANDBOX_ONLY",
             ),
