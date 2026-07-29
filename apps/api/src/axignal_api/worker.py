@@ -249,7 +249,7 @@ def build_runtime(settings: Settings) -> tuple[OutboxPublisher, ResearchWorker]:
         fixture_path=settings.world_bank_fixture_path,
     )
     ted_connector = TEDSearchConnector(
-        live_enabled=settings.live_sources_enabled,
+        live_enabled=settings.ted_live_sources_enabled,
         fixture_path=settings.ted_fixture_path,
     )
     return OutboxPublisher(repository, queue), ResearchWorker(
