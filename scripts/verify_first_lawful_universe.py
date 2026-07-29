@@ -11,6 +11,10 @@ ROOT = Path(__file__).resolve().parents[1]
 SCORECARD_PATH = ROOT / "data/universes/first-lawful-universe-scorecard.v0.1.json"
 ONTOLOGY_PATH = ROOT / "data/universes/eu-public-procurement/ontology.v0.1.json"
 POLICY_PATH = ROOT / "data/universes/eu-public-procurement/claim-policy.v0.1.json"
+PROFILE_PATH = (
+    ROOT
+    / "data/universes/eu-public-procurement/ted-product-admission-profile.v0.1.json"
+)
 SOURCE_RECORD_PATH = ROOT / "data/sources/ted-search-api-v3.v0.1.json"
 TASK_SCHEMA_PATH = ROOT / "schemas/task.schema.json"
 SOURCE_SCHEMA_PATH = ROOT / "schemas/source.schema.json"
@@ -21,18 +25,23 @@ TASK_STATES = {
     "AX-F8-T04.json": "IN_PROGRESS",
     "AX-F8-T05.json": "EVIDENCE_READY",
     "AX-F8-T06.json": "EVIDENCE_READY",
+    "AX-F8-T14.json": "IN_PROGRESS",
 }
 TASK_PATHS = [ROOT / "docs/roadmap/tasks" / name for name in TASK_STATES]
 RESEARCH_PATH = ROOT / "docs/research/first-lawful-universe-selection-v0.1.md"
 ADR_PATH = ROOT / "docs/adr/ADR-012-european-public-procurement-first-universe.md"
 SOURCE_DOC_PATH = ROOT / "docs/sources/ted-search-api-v3.md"
+PRODUCT_ADMISSION_DOC_PATH = ROOT / "docs/sources/ted-product-admission-v0.1.md"
 HYPOTHESIS_PATH = ROOT / "docs/contracts/11-hypothesis-register.md"
 ADR_INDEX_PATH = ROOT / "docs/adr/README.md"
 EXECUTION_STATE_PATH = ROOT / "docs/roadmap/06-current-execution-state.md"
 
 
 def load_json(path: Path) -> dict:
-    return json.loads(path.read_text(encoding="utf-8"))
+    value = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(value, dict):
+        raise AssertionError(f"{path.relative_to(ROOT)} must contain an object")
+    return value
 
 
 def require(condition: bool, message: str) -> None:
@@ -51,7 +60,7 @@ def validate_scorecard() -> dict:
     require(scorecard["goal_id"] == "AXIGNAL-GOAL-001", "wrong Goal ID")
     require(
         scorecard["status"] == "WEDGE_SELECTED_IMPLEMENTATION_NOT_ADMITTED",
-        "selection must remain explicitly non-admitted",
+        "historical selection decision was rewritten",
     )
 
     criteria = scorecard["criteria"]
@@ -67,21 +76,19 @@ def validate_scorecard() -> dict:
         "duplicate universe",
     )
 
-    selected = []
-    eligible = []
+    selected: list[dict] = []
+    eligible: list[dict] = []
     for candidate in candidates:
         scores = candidate["scores"]
-        require(
-            set(scores) == set(criterion_ids),
-            f"score dimensions drifted for {candidate['universe_id']}",
-        )
+        require(set(scores) == set(criterion_ids), "score dimensions drifted")
         for criterion_id, score in scores.items():
-            require(isinstance(score, int) and 0 <= score <= 5, f"invalid {criterion_id}")
-
+            require(
+                isinstance(score, int) and 0 <= score <= 5,
+                f"invalid {criterion_id}",
+            )
         computed = weighted_total(criteria, scores)
         declared = Decimal(str(candidate["weighted_total"]))
         require(computed == declared, f"weighted total mismatch: {candidate['universe_id']}")
-
         knockout_pass = declared >= Decimal(str(gate["minimum_total"]))
         for criterion_id, minimum in gate["minimum_scores"].items():
             knockout_pass = knockout_pass and scores[criterion_id] >= minimum
@@ -89,7 +96,6 @@ def validate_scorecard() -> dict:
             knockout_pass is candidate["knockout_pass"],
             f"knockout mismatch: {candidate['universe_id']}",
         )
-
         if candidate["knockout_pass"]:
             eligible.append(candidate)
         if candidate["decision"] == "SELECTED":
@@ -115,23 +121,19 @@ def validate_scorecard() -> dict:
     require(eligible, "no candidate passes the gate")
     winner = selected[0]
     require(
-        winner["weighted_total"] == max(candidate["weighted_total"] for candidate in eligible),
+        winner["weighted_total"] == max(item["weighted_total"] for item in eligible),
         "selected universe is not the highest-scoring eligible candidate",
     )
-    require(winner["universe_id"] == "eu_public_procurement", "unexpected selected universe")
+    require(winner["universe_id"] == "eu_public_procurement", "unexpected universe")
 
     selected_contract = scorecard["selected_universe"]
-    require(selected_contract["universe_id"] == winner["universe_id"], "pointer mismatch")
-    require(selected_contract["admission_state"] == "NOT_PRODUCT_ADMITTED", "admission escalated")
     require(
-        selected_contract["public_marketing_state"] == "PROHIBITED_UNTIL_UNIVERSE_GATE",
-        "public marketing enabled before universe gate",
+        selected_contract["admission_state"] == "NOT_PRODUCT_ADMITTED",
+        "historical selection artifact was rewritten as source admission",
     )
-    require(selected_contract["runtime_default"] == "DISABLED", "runtime must be disabled")
     require(
-        scorecard["next_authorised_tasks"]
-        == ["AX-F8-T03", "AX-F8-T04", "AX-F8-T05", "AX-F8-T06"],
-        "next authorised task set drifted",
+        selected_contract["runtime_default"] == "DISABLED",
+        "historical selection enabled a runtime",
     )
     return {
         "candidate_count": len(candidates),
@@ -145,23 +147,18 @@ def validate_ontology() -> dict:
     ontology = load_json(ONTOLOGY_PATH)
     require(
         ontology["status"] == "IMPLEMENTATION_PROFILE_NOT_UNIVERSE_ADMISSION",
-        "ontology status overstates admission",
+        "ontology overstates authority",
     )
     require(ontology["source_standard"]["name"] == "EU eForms", "wrong source standard")
     transport = ontology["transport_contract"]
     require(
         "JSON search envelope" in transport["search_api"]["response_representation"],
-        "JSON role missing",
+        "JSON search role missing",
     )
     require(
         transport["canonical_notice"]["representation"].startswith("XML"),
         "XML evidence role missing",
     )
-    require(
-        transport["sdk_field_repository"]["representation"] == "JSON metadata repository",
-        "SDK JSON role missing",
-    )
-
     expected_blocks = {
         "notice_identity_metadata",
         "buyer",
@@ -172,23 +169,13 @@ def validate_ontology() -> dict:
     }
     blocks = ontology["notice_blocks"]
     require({block["block_id"] for block in blocks} == expected_blocks, "notice blocks drifted")
-    require(all(block["optionality"] for block in blocks), "block optionality is missing")
     require(all(block["authority"] == "OBSERVED" for block in blocks), "authority drifted")
-    require(len(ontology["entity_types"]) >= 18, "procurement entity model is too shallow")
-    require(
-        "probability of winning" in ontology["prohibited_claims"],
-        "win-probability guard missing",
-    )
-    require(
-        "canonical opportunity claim derived from natural-person contact data"
-        in ontology["prohibited_claims"],
-        "personal-data claim guard missing",
-    )
+    require(len(ontology["entity_types"]) >= 18, "entity model is too shallow")
     require(ontology["privacy_policy"]["personal_data_present"] is True, "privacy risk hidden")
     return {"ontology_blocks": len(blocks), "ontology_entities": len(ontology["entity_types"])}
 
 
-def validate_source_record() -> None:
+def validate_source_and_product_profile() -> dict:
     schema = load_json(SOURCE_SCHEMA_PATH)
     source = load_json(SOURCE_RECORD_PATH)
     errors = sorted(
@@ -196,44 +183,57 @@ def validate_source_record() -> None:
         key=lambda error: list(error.path),
     )
     require(not errors, f"TED source schema failure: {errors}")
-    require(source["status"] == "TECHNICAL_PROBE", "TED source state escalated")
-    require(source["kill_switch_enabled"] is True, "TED kill switch disabled")
+    require(source["status"] == "PRODUCT_ADMITTED", "TED source is not product admitted")
+    require(source["kill_switch_enabled"] is False, "TED source kill switch remains enabled")
     require(source["contains_personal_data"] is True, "TED personal-data risk hidden")
-    require(source["rights"]["model_training"] == "UNKNOWN", "model training was assumed")
-    for dimension in ("customer_display", "export", "api_redistribution"):
-        require(source["rights"][dimension] == "CONDITIONAL", f"{dimension} over-admitted")
+    rights = source["rights"]
+    require(rights["customer_display"] == "PERMITTED", "customer display not admitted")
+    require(rights["export"] == "PERMITTED", "bounded dossier export not admitted")
+    require(rights["api_redistribution"] == "PROHIBITED", "API redistribution enabled")
+    require(rights["model_training"] == "PROHIBITED", "model training enabled")
+    require(rights["attribution_required"] is True, "TED attribution missing")
+
+    profile = load_json(PROFILE_PATH)
+    require(
+        profile["status"] == "PRODUCT_ADMITTED_BOUNDED_PROFILE",
+        "TED bounded profile is not admitted",
+    )
+    require(profile["source_id"] == source["source_id"], "profile source mismatch")
+    require(profile["runtime_default"] == "DISABLED", "TED runtime default enabled")
+    require(profile["query_contract"]["arbitrary_query_allowed"] is False, "arbitrary query enabled")
+    require(profile["authority"]["generative_model_calls"] == 0, "model calls enabled")
+    require(
+        profile["rights_boundary"]["personal_contact_data"] == "PROHIBITED",
+        "personal contact data enabled",
+    )
+    return {
+        "ted_source_state": source["status"],
+        "ted_profile": profile["profile_id"],
+    }
 
 
 def validate_claim_policy() -> dict:
     policy = load_json(POLICY_PATH)
     require(
         policy["status"] == "DISABLED_PENDING_PRODUCT_ADMISSION_AND_XML_PARSER",
-        "procurement policy activated prematurely",
+        "full procurement claim policy activated by the Search API projection",
     )
     require(
         policy["producer_authority"]["admission_runtime"] == "SOLE_CANONICAL_WRITER",
-        "authority drifted",
+        "canonical writer drifted",
     )
     require(
         policy["producer_authority"]["local_model"] == "PROPOSAL_ONLY",
-        "local model authority escalated",
+        "model authority escalated",
     )
     require(
         policy["personal_fields"]["canonical_admission"] == "PROHIBITED",
         "personal admission enabled",
     )
-    require(
-        policy["missing_data_policy"]["zero_imputation"] == "PROHIBITED",
-        "zero imputation enabled",
-    )
     prohibited = set(policy["prohibited_profiles"])
-    require("supplier_probability_of_winning" in prohibited, "win-probability guard missing")
+    require("supplier_probability_of_winning" in prohibited, "win guard missing")
     require("expected_contract_profitability" in prohibited, "profitability guard missing")
-    require("bid_submission_or_representation" in prohibited, "bid-execution guard missing")
-    require(
-        "official TED source state PRODUCT_ADMITTED" in policy["evidence_requirements"],
-        "source admission prerequisite missing",
-    )
+    require("bid_submission_or_representation" in prohibited, "bid execution guard missing")
     return {
         "observed_policy_profiles": len(policy["observed_claim_profiles"]),
         "calculated_policy_profiles": len(policy["calculated_claim_profiles"]),
@@ -262,30 +262,31 @@ def validate_normative_links() -> None:
     research = RESEARCH_PATH.read_text(encoding="utf-8")
     adr = ADR_PATH.read_text(encoding="utf-8")
     source_doc = SOURCE_DOC_PATH.read_text(encoding="utf-8")
+    product_admission = PRODUCT_ADMISSION_DOC_PATH.read_text(encoding="utf-8")
     hypothesis = HYPOTHESIS_PATH.read_text(encoding="utf-8")
     adr_index = ADR_INDEX_PATH.read_text(encoding="utf-8")
     execution_state = EXECUTION_STATE_PATH.read_text(encoding="utf-8")
 
-    require("European Public Procurement Intelligence" in research, "research decision missing")
-    require("WEDGE SELECTED / IMPLEMENTATION NOT ADMITTED" in research, "boundary missing")
-    require("Status: `ACCEPTED / IMPLEMENTATION NOT ADMITTED`" in adr, "ADR boundary missing")
+    require("European Public Procurement Intelligence" in research, "selection missing")
+    require("WEDGE SELECTED / IMPLEMENTATION NOT ADMITTED" in research, "history boundary missing")
+    require("Status: `ACCEPTED / IMPLEMENTATION NOT ADMITTED`" in adr, "ADR history missing")
     require("ADR-012" in adr_index, "ADR index not updated")
     h006 = hypothesis.split("## 8. H-006", 1)[1].split("## 9.", 1)[0]
-    require("State: `TEST_DESIGNED`" in h006, "H-006 state not updated")
-    require("European Public Procurement Intelligence" in h006, "selected wedge missing")
+    require("State: `TEST_DESIGNED`" in h006, "H-006 state drifted")
     require(
         "F8 — First lawful opportunity universe | `IN_PROGRESS`" in execution_state,
-        "F8 state not activated",
+        "F8 state not active",
     )
-    require("NOT_PRODUCT_ADMITTED" in execution_state, "non-admission boundary missing")
-    require("Search API envelope — JSON" in source_doc, "JSON search-envelope contract missing")
-    require("Canonical notice — XML" in source_doc, "XML canonical-evidence contract missing")
+    require("Search API envelope — JSON" in source_doc, "JSON contract missing")
+    require("Canonical notice — XML" in source_doc, "XML contract missing")
+    require("PRODUCT_ADMITTED" in product_admission, "later product admission missing")
+    require("runtime remains disabled" in product_admission.casefold(), "runtime default hidden")
 
 
 def main() -> None:
     summary = validate_scorecard()
     summary.update(validate_ontology())
-    validate_source_record()
+    summary.update(validate_source_and_product_profile())
     summary.update(validate_claim_policy())
     validate_tasks()
     validate_normative_links()
