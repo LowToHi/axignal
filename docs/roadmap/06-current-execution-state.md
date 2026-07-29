@@ -1,9 +1,9 @@
 # 06 — AXIGNAL Current Execution State
 
-Version: `0.8.1`
-Status: `PUBLIC LANDING DEPLOYED / F8 WEDGE SELECTED / TED LIVE TECHNICAL PROBE PASSED`
+Version: `0.8.2`
+Status: `PUBLIC LANDING DEPLOYED / F8 WEDGE SELECTED / TED XML PARSER EVIDENCE READY`
 Goal ID: `AXIGNAL-GOAL-001`
-Canonical baseline: `main@2c51c340cd2a7a0e0dc1db0017452e723136d77b`
+Canonical baseline: `main@ecba05dd18f62be0d5aaf558e994df0d28aea454`
 
 ## Reading rule
 
@@ -15,15 +15,15 @@ A deployed public landing is not evidence that the authenticated product, privat
 
 | Phase | State | Evidence-backed interpretation |
 |---|---|---|
-| F0 — Goal and contracts | `GATE_REVIEW` | Goal Lock, contracts, ADRs, schemas and registries are integrated. ADR-012 now records the first-universe wedge. Final cross-contract review and map freeze remain. |
+| F0 — Goal and contracts | `GATE_REVIEW` | Goal Lock, contracts, ADRs, schemas and registries are integrated. ADR-012 records the first-universe wedge and AX-F8-T11 records its first XML parser profile. Final cross-contract review and map freeze remain. |
 | F1 — UX architecture and validation | `GATE_REVIEW` | Investigation Shell, Navigator, lens switch, Timeline and Claim/Evidence Rail are executable; the public Globe landing is deployed. Qualified-user thresholds, control comparison, multilingual equivalence and accessibility acceptance remain unproven. |
 | F2 — Reproducible repository spine | `GATE_REVIEW` | Runtime spine, CI, migration replay, restore evidence and the reproducible public landing release are integrated. Formal phase acceptance, restricted deploy identity, product SLOs and private-pilot acceptance remain separate gates. |
-| F3 — Epistemic kernel | `IN_PROGRESS` | A bounded macro profile reaches the append-only Claim Ledger through independent deterministic admission and bounded human review. Procurement claim policy is specified but disabled pending source and XML-parser admission. |
+| F3 — Epistemic kernel | `IN_PROGRESS` | A bounded macro profile reaches the append-only Claim Ledger through independent deterministic admission and bounded human review. Procurement XML now produces deterministic Candidate Claims, but the procurement admission policy remains disabled. |
 | F4 — Navigator and InvestigationContext | `IN_PROGRESS` | Authenticated ResearchRuns return evidence, proposals, admitted claims, human-review context and dossiers. Procurement commands and live procurement ResearchRuns are not implemented. |
 | F5 — Globe, Graph and Timeline parity | `IN_PROGRESS` | Product shell and canonical browser workflow exist; procurement data layers, full parity, accessibility alternatives, performance budgets and user validation remain. |
-| F6 — Multilingual semantic system | `LOCKED` | eForms preserves official source languages by design, but AXIGNAL's canonical multilingual data and QA system is not implemented. |
+| F6 — Multilingual semantic system | `LOCKED` | eForms source-language values are preserved by the parser, but AXIGNAL's canonical multilingual data and QA system is not implemented. |
 | F7 — Intent Intelligence and Knowledge Tides | `LOCKED` | Privacy-thresholded operational aggregation is not implemented. |
-| F8 — First lawful opportunity universe | `IN_PROGRESS` | `AX-F8-T01` and `T02` select European Public Procurement Intelligence at 96/100. `T03` defines the six-block eForms ontology. The bounded TED connector and official live Search API probe are `EVIDENCE_READY`; TED remains `TECHNICAL_PROBE`, `NOT_PRODUCT_ADMITTED`, and the claim policy remains disabled. |
+| F8 — First lawful opportunity universe | `IN_PROGRESS` | European Public Procurement Intelligence is selected at 96/100. The six-block ontology, bounded Search API connector and SDK 1.14 ContractNotice subtype 16 XML parser are evidence-ready. TED remains `TECHNICAL_PROBE`, `NOT_PRODUCT_ADMITTED`; policy, runtime and public support remain disabled. |
 | F9 — Paid design-partner product | `LOCKED` | Production organisations, entitlements, billing, onboarding and paying procurement design partners are absent. |
 | F10 — Scenarios, calibration and outcomes | `LOCKED` | Requires admitted historical universe data and commercial usage. |
 | F11 — Enterprise, API and private data | `LOCKED` | Tenant RLS is foundational evidence, not an accepted enterprise product. |
@@ -78,15 +78,17 @@ seven candidates scored
 → eForms six-block ontology defined
 → TED source registered as TECHNICAL_PROBE
 → fixed non-personal Search API connector implemented
-→ official live probe: PASS
-→ procurement claim policy defined but disabled
+→ official live Search API probe: PASS
+→ eForms SDK 1.14 ContractNotice subtype 16 parser implemented
+→ official pinned SDK XML example: PASS
+→ deterministic non-personal Candidate Claims produced
+→ procurement admission policy remains disabled
 ```
 
-Live technical-probe evidence from GitHub Actions run `30442505574`:
+Search API technical-probe evidence from GitHub Actions run `30442505574`:
 
 ```json
 {
-  "endpoint": "https://api.ted.europa.eu/v3/notices/search",
   "returned_notice_count": 3,
   "total_notice_count": 2023,
   "missing_requested_field_counts": 0,
@@ -95,8 +97,34 @@ Live technical-probe evidence from GitHub Actions run `30442505574`:
   "notice_values_persisted": false,
   "source_state": "TECHNICAL_PROBE",
   "product_admitted": false,
+  "runtime_enabled": false
+}
+```
+
+Pinned official eForms SDK example evidence from run `30444435253`:
+
+```json
+{
+  "source_release": "1.14.2",
+  "customization_id": "eforms-sdk-1.14",
+  "ubl_version": "2.3",
+  "document_type": "ContractNotice",
+  "notice_type": "cn-standard",
+  "notice_subtype": "16",
+  "organisation_count": 2,
+  "buyer_reference_count": 1,
+  "lot_count": 1,
+  "candidate_claim_count": 17,
+  "unique_candidate_fingerprint_count": 17,
+  "personal_field_elements_observed": 3,
+  "personal_values_emitted": false,
+  "raw_content_persisted": false,
+  "raw_values_persisted": false,
+  "model_calls": 0,
+  "canonical_claim_writes": 0,
+  "source_product_admitted": false,
   "runtime_enabled": false,
-  "public_marketing_authorised": false
+  "universe_supported": false
 }
 ```
 
@@ -109,9 +137,12 @@ Current exact boundaries:
   "ontology_state": "ACCEPTED",
   "source_state": "TECHNICAL_PROBE",
   "source_product_admitted": false,
-  "connector_evidence_state": "EVIDENCE_READY",
+  "search_connector_state": "EVIDENCE_READY",
+  "xml_parser_profile": "ted-eforms-cn16@0.1.0",
+  "xml_parser_state": "EVIDENCE_READY",
   "connector_runtime_enabled": false,
   "claim_policy_state": "DISABLED_PENDING_PRODUCT_ADMISSION_AND_XML_PARSER",
+  "canonical_procurement_claims": 0,
   "universe_supported": false,
   "public_marketing_authorised": false
 }
@@ -131,8 +162,12 @@ Current exact boundaries:
 - public landing deployment is exact-SHA, TLS-verified and rollback-protected;
 - procurement selection does not imply source or universe admission;
 - missing procurement fields remain unknown instead of becoming zero or negative evidence;
-- the TED connector requests no personal contact fields and remains disabled by default;
-- the live probe persists hashes and aggregate quality evidence, not notice values or raw payload.
+- the TED Search connector requests no personal contact fields and remains disabled by default;
+- the XML parser rejects unknown SDK, UBL, document, notice type and subtype profiles;
+- DTD, entity and oversized XML inputs fail closed;
+- official personal contact elements are counted but their values are not emitted;
+- Candidate Claim fingerprints are deterministic and unique;
+- XML parsing performs zero model calls and zero canonical writes.
 
 ## Integrated baselines
 
@@ -145,6 +180,7 @@ Current exact boundaries:
 | Public Globe landing implementation | #34 | `4e03c5fdef40c4d269fd5daf1005a29afb90a853` |
 | Public landing release system | #35 | `fbb421ba9e817c11576d87b36bd6b9b01fd2e2be` |
 | Release observability and hotfixes | #36–#39 | `2c51c340cd2a7a0e0dc1db0017452e723136d77b` |
+| First lawful universe selection and TED Search probe | #40 | `ecba05dd18f62be0d5aaf558e994df0d28aea454` |
 
 All subsequent development MUST branch from current `main`. Superseded branches are audit history, not execution bases.
 
@@ -167,13 +203,15 @@ All subsequent development MUST branch from current `main`. Superseded branches 
 
 ### F3–F5
 
-- additional deterministic claim profiles and contradiction lifecycle;
-- complete procurement XML rederivation and notice-version propagation;
+- run independent deterministic procurement admission over frozen parser outputs;
+- prove rollback and idempotent replay with zero model or reviewer canonical authority;
+- implement notice correction, cancellation, award and expiry propagation;
 - complete Globe/Graph/Timeline parity after real-user evidence.
 
 ### F8
 
-- map and hash a complete official XML notice under an explicit SDK version;
+- define XSD and applicable Schematron validation strategy;
+- validate a live TED notice XML retrieval path without persisting raw or personal values in CI;
 - measure field completeness by notice subtype, country and period;
 - prove notice correction, cancellation and award lineage;
 - complete source-specific privacy and attribution review;
@@ -183,6 +221,6 @@ All subsequent development MUST branch from current `main`. Superseded branches 
 
 ## Only authorised next priority
 
-> Implement the first complete official XML notice parser profile pinned to an explicit eForms SDK version. Then run deterministic procurement admission against frozen official notices before wiring European procurement into Navigator, ResearchRuns, Globe, Graph or public marketing.
+> Feed frozen, version-pinned XML parser outputs into the independent deterministic admission runtime. Prove policy decisions, idempotent replay, rollback after a forced post-insert failure, append-only lineage and zero model or reviewer canonical authority before any live procurement ResearchRun or UI integration.
 
 OCR, unrestricted browsing, national-portal scraping, simultaneous universe expansion, billing, new model authority and public procurement-support claims remain unauthorised until their dependencies pass.
