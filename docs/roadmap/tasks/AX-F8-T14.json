@@ -50,7 +50,7 @@
     {"evidence_type": "RESTORE_TEST", "description": "Migrations 070 and 071 replay idempotently, the pre-070 snapshot restores, and failpoints leave zero partial state.", "required": true, "location": "ted-persistent-source-evidence.json", "status": "MISSING"},
     {"evidence_type": "SECURITY_REVIEW", "description": "Real database roles prove worker canonical writes and admission Evidence mutations are denied; the worker may update only candidate_claims.updated_at for idempotent replay.", "required": true, "location": "ted-persistent-source-evidence.json", "status": "MISSING"},
     {"evidence_type": "DOCUMENT", "description": "Runbook defines operation, privacy, authority, kill switch, rollback and promotion limits.", "required": true, "location": "docs/runbooks/ted-persistent-source.md", "status": "PASS"},
-    {"evidence_type": "USER_RESEARCH", "description": "Qualified B2G user validation remains an external commercial gate and is not fabricated by this technical task.", "required": false, "location": "docs/roadmap/tasks/AX-F9-T15.json", "status": "DEFERRED"}
+    {"evidence_type": "USER_RESEARCH", "description": "Qualified B2G user validation remains an external commercial gate and is not fabricated by this technical task.", "required": false, "location": "docs/roadmap/tasks/AX-F9-T15.json", "status": "NOT_APPLICABLE"}
   ],
   "impacts": {"security": "CRITICAL", "privacy": "CRITICAL", "data_rights": "CRITICAL", "regulatory": "MATERIAL", "multilingual": "MATERIAL", "epistemic": "CRITICAL", "billing": "NONE"},
   "observability": {
@@ -79,5 +79,5 @@
   "owner": "source-admission",
   "reviewer": "gate-evaluator",
   "created_at": "2026-07-29T11:35:00Z",
-  "updated_at": "2026-07-29T15:30:00+02:00"
+  "updated_at": "2026-07-29T15:34:00+02:00"
 }
