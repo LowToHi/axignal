@@ -43,8 +43,8 @@
     {"evidence_type": "RIGHTS_RECORD", "description": "Official rights and privacy review admits only the non-personal derived profile.", "required": true, "location": "data/sources/ted-search-api-v3.v1.0.json", "status": "PASS"},
     {"evidence_type": "TEST", "description": "Unit tests prove URL pinning, profile filtering, job contracts and personal-value exclusion.", "required": true, "location": "apps/api/tests/test_ted_persistent_source.py", "status": "PRESENT"},
     {"evidence_type": "TRACE", "description": "Official SDK 1.14.2 provides complete correction and subtype-29 result samples without raw-value artifact persistence.", "required": true, "location": "ted-official-sdk-sample-evidence.json", "status": "MISSING"},
-    {"evidence_type": "RESTORE_TEST", "description": "Migration 070 replays idempotently, the pre-070 snapshot restores, and failpoints leave zero partial state.", "required": true, "location": "ted-persistent-source-evidence.json", "status": "MISSING"},
-    {"evidence_type": "SECURITY_REVIEW", "description": "Real database roles prove worker canonical writes and admission Evidence mutations are denied.", "required": true, "location": "ted-persistent-source-evidence.json", "status": "MISSING"},
+    {"evidence_type": "RESTORE_TEST", "description": "Migrations 070 and 071 replay idempotently, the pre-070 snapshot restores, and failpoints leave zero partial state.", "required": true, "location": "ted-persistent-source-evidence.json", "status": "MISSING"},
+    {"evidence_type": "SECURITY_REVIEW", "description": "Real database roles prove worker canonical writes and admission Evidence mutations are denied; the worker may update only candidate_claims.updated_at for idempotent replay.", "required": true, "location": "ted-persistent-source-evidence.json", "status": "MISSING"},
     {"evidence_type": "DOCUMENT", "description": "Runbook defines operation, privacy, authority, kill switch, rollback and promotion limits.", "required": true, "location": "docs/runbooks/ted-persistent-source.md", "status": "PASS"}
   ],
   "impacts": {"security": "CRITICAL", "privacy": "CRITICAL", "data_rights": "CRITICAL", "regulatory": "MATERIAL", "multilingual": "MATERIAL", "epistemic": "CRITICAL", "billing": "NONE"},
@@ -74,5 +74,5 @@
   "owner": "source-admission",
   "reviewer": "gate-evaluator",
   "created_at": "2026-07-29T11:35:00Z",
-  "updated_at": "2026-07-29T13:00:00Z"
+  "updated_at": "2026-07-29T15:22:00+02:00"
 }
