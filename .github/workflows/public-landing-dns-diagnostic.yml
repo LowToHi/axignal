@@ -1,0 +1,77 @@
+name: Public Landing DNS Diagnostic
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/public-landing-dns-diagnostic.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    name: Inspect public landing DNS without mutation
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Resolve admitted hostnames
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq dnsutils >/dev/null
+
+          apex_a="$(dig +short A axignal.com | sort -u | paste -sd, -)"
+          apex_aaaa="$(dig +short AAAA axignal.com | sort -u | paste -sd, -)"
+          www_a="$(dig +short A www.axignal.com | sort -u | paste -sd, -)"
+          www_aaaa="$(dig +short AAAA www.axignal.com | sort -u | paste -sd, -)"
+          www_cname="$(dig +short CNAME www.axignal.com | sed 's/\.$//' | sort -u | paste -sd, -)"
+          apex_ns="$(dig +short NS axignal.com | sed 's/\.$//' | sort -u | paste -sd, -)"
+
+          export APEX_A="${apex_a}"
+          export APEX_AAAA="${apex_aaaa}"
+          export WWW_A="${www_a}"
+          export WWW_AAAA="${www_aaaa}"
+          export WWW_CNAME="${www_cname}"
+          export APEX_NS="${apex_ns}"
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          split = lambda name: [item for item in os.environ.get(name, '').split(',') if item]
+          expected = '187.124.220.48'
+          evidence = {
+              'schema': 'axignal.public-landing-dns.v1',
+              'expected_ipv4': expected,
+              'apex': {
+                  'a': split('APEX_A'),
+                  'aaaa': split('APEX_AAAA'),
+              },
+              'www': {
+                  'a': split('WWW_A'),
+                  'aaaa': split('WWW_AAAA'),
+                  'cname': split('WWW_CNAME'),
+              },
+              'nameservers': split('APEX_NS'),
+              'apex_ready': expected in split('APEX_A') and not split('APEX_AAAA'),
+              'www_ready': (
+                  expected in split('WWW_A') or 'axignal.com' in split('WWW_CNAME')
+              ) and not split('WWW_AAAA'),
+              'mutation_performed': False,
+          }
+          evidence['release_dns_ready'] = evidence['apex_ready'] and evidence['www_ready']
+          Path('public-landing-dns.json').write_text(
+              json.dumps(evidence, indent=2, sort_keys=True) + '\n', encoding='utf-8'
+          )
+          print(json.dumps(evidence, indent=2, sort_keys=True))
+          PY
+
+      - name: Upload DNS evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: public-landing-dns
+          path: public-landing-dns.json
+          retention-days: 7
