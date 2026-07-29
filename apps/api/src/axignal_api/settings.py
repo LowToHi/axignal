@@ -42,9 +42,7 @@ class Settings:
     proposal_database_url: str | None
     persistent_research_enabled: bool
     live_sources_enabled: bool
-    ted_procurement_enabled: bool
     world_bank_fixture_path: Path | None
-    ted_fixture_path: Path | None
     queue_key: str
     proposal_queue_key: str
     document_fixture_path: Path | None
@@ -53,6 +51,8 @@ class Settings:
     local_model_name: str | None
     local_model_api_key: str | None
     identity_assertion_secret: str | None
+    ted_procurement_enabled: bool = False
+    ted_fixture_path: Path | None = None
     admission_database_url: str | None = None
     admission_queue_key: str = "axignal:admission:queue:v1"
     human_review_database_url: str | None = None
