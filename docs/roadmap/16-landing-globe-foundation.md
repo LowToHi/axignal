@@ -2,7 +2,7 @@
 
 ## Status
 
-`SKILLS PACKAGED / BRAND LOCKED / ASSET SOURCES ADMITTED / SYNTHETIC EUROPEAN DEMO FROZEN / PRODUCTION LANDING NOT IMPLEMENTED`
+`FOUNDATION COMPLETE / PRODUCTION IMPLEMENTATION TRACKED IN ROADMAP 17`
 
 ## Goal
 
@@ -31,6 +31,8 @@ Prepare the exact specialist workflows, visual direction, source provenance and 
 - external source assets are acquired and transformed, never hotlinked;
 - all demonstration metrics are synthetic and labelled.
 
-## Explicit exclusions
+## Foundation boundary
 
-This foundation does not install frontend dependencies, implement WebGL, activate live sources, claim real investment performance, deploy publicly or alter the existing private-pilot gate.
+The foundation commit did not install frontend dependencies, implement WebGL, activate live sources, claim real investment performance, deploy publicly or alter the private-pilot gate.
+
+The production implementation is now tracked separately in `docs/roadmap/17-landing-globe-production.md`. The foundation remains the canonical source for visual, provenance and synthetic-data constraints.

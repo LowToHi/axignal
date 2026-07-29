@@ -1,12 +1,20 @@
-name: Landing Globe Foundation
+name: Landing Globe
 
 on:
   pull_request:
     paths:
       - "skills/**/SKILL.md"
       - "docs/landing/**"
-      - "apps/web/public/brand/**"
+      - "docs/roadmap/16-landing-globe-foundation.md"
+      - "docs/roadmap/17-landing-globe-production.md"
+      - "apps/landing/**"
+      - "tests/landing/**"
+      - "playwright.landing.config.ts"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
       - "scripts/verify_landing_foundation.py"
+      - "scripts/verify_landing_implementation.py"
       - "scripts/acquire_globe_assets.py"
       - ".github/workflows/landing-foundation.yml"
   push:
@@ -15,27 +23,56 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: landing-globe-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  foundation:
+  landing:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22.14.0"
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.13"
-      - run: python -m pip install --upgrade pip ruff==0.12.12
-      - name: Lint asset tooling
-        run: ruff check scripts/verify_landing_foundation.py scripts/acquire_globe_assets.py
-      - name: Validate foundation contracts
-        run: python scripts/verify_landing_foundation.py | tee landing-foundation.json
+      - name: Enable pinned pnpm
+        run: corepack enable
+      - name: Install JavaScript dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Install Python validation tools
+        run: python -m pip install --upgrade pip ruff==0.12.12
+      - name: Lint landing validation tooling
+        run: ruff check scripts/verify_landing_foundation.py scripts/verify_landing_implementation.py scripts/acquire_globe_assets.py
+      - name: Validate landing contracts
+        shell: bash
+        run: |
+          set -o pipefail
+          python scripts/verify_landing_foundation.py | tee landing-foundation.json
+          python scripts/verify_landing_implementation.py | tee landing-implementation.json
       - name: Verify acquisition plan without network
         run: python scripts/acquire_globe_assets.py --output /tmp/axignal-globe-assets --dry-run | tee asset-acquisition-plan.json
-      - name: Upload evidence
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      - name: Typecheck landing
+        run: pnpm --filter @axignal/landing typecheck
+      - name: Build landing
+        run: pnpm --filter @axignal/landing build
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Run landing browser contract
+        run: pnpm exec playwright test -c playwright.landing.config.ts
+      - name: Upload landing evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: landing-globe-foundation-evidence
+          name: landing-globe-evidence
           path: |
             landing-foundation.json
+            landing-implementation.json
             asset-acquisition-plan.json
+            playwright-report
+            test-results
+          if-no-files-found: ignore
           retention-days: 14
