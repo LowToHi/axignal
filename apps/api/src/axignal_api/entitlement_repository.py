@@ -18,7 +18,7 @@ class EntitlementRepository(ResearchRepository):
         current = now or datetime.now(UTC)
         with self._cursor(role="axignal_app", tenant_id=tenant_id) as cursor:
             cursor.execute(
-                "SELECT (tenant_private.activate_controlled_trial(%s, %s)).*",
+                "SELECT * FROM tenant_private.activate_controlled_trial(%s, %s)",
                 (actor_subject, current),
             )
             row = cursor.fetchone()
@@ -58,7 +58,8 @@ class EntitlementRepository(ResearchRepository):
         with self._cursor(role="axignal_app", tenant_id=tenant_id) as cursor:
             cursor.execute(
                 """
-                SELECT (tenant_private.reserve_ai_tokens(%s, %s, %s, %s, %s)).*
+                SELECT *
+                FROM tenant_private.reserve_ai_tokens(%s, %s, %s, %s, %s)
                 """,
                 (
                     operation_id,
@@ -86,7 +87,8 @@ class EntitlementRepository(ResearchRepository):
         with self._cursor(role="axignal_app", tenant_id=tenant_id) as cursor:
             cursor.execute(
                 """
-                SELECT (tenant_private.reconcile_ai_tokens(%s, %s, %s, %s)).*
+                SELECT *
+                FROM tenant_private.reconcile_ai_tokens(%s, %s, %s, %s)
                 """,
                 (reservation_id, actual_tokens, actor_subject, current),
             )
@@ -107,9 +109,8 @@ class EntitlementRepository(ResearchRepository):
         with self._cursor(role="axignal_app", tenant_id=tenant_id) as cursor:
             cursor.execute(
                 """
-                SELECT (
-                  tenant_private.release_ai_token_reservation(%s, %s, %s)
-                ).*
+                SELECT *
+                FROM tenant_private.release_ai_token_reservation(%s, %s, %s)
                 """,
                 (reservation_id, actor_subject, current),
             )
@@ -128,7 +129,7 @@ class EntitlementRepository(ResearchRepository):
         current = now or datetime.now(UTC)
         with self._cursor(role="axignal_app", tenant_id=tenant_id) as cursor:
             cursor.execute(
-                "SELECT (tenant_private.expire_current_trial(%s, %s)).*",
+                "SELECT * FROM tenant_private.expire_current_trial(%s, %s)",
                 (actor_subject, current),
             )
             row = cursor.fetchone()
