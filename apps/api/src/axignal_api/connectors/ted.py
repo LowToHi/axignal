@@ -15,7 +15,7 @@ SOURCE_ID = "src_ted_search_api_v3"
 ENDPOINT = "https://api.ted.europa.eu/v3/notices/search"
 ALLOWED_HOST = "api.ted.europa.eu"
 ALLOWED_PATH = "/v3/notices/search"
-FIXED_QUERY = "place-of-performance IN (ESP FRA DEU)"
+FIXED_QUERY = "place-of-performance IN (LUX)"
 FIXED_FIELDS = (
     "publication-number",
     "notice-title",
