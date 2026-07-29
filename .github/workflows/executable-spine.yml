@@ -1,6 +1,8 @@
 name: Executable Spine
 
 on:
+  pull_request:
+    branches: [main]
   push:
     branches: [agent/f8-ted-persistent-source-v0.1]
 
