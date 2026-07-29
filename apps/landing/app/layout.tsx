@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "@axignal/design-tokens/tokens.css";
 import "./globals.css";
-import "./browser-contract.css";
+import "./responsive-polish.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://axignal.com"),

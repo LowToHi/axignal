@@ -60,6 +60,7 @@ test("submits a consented private-pilot request through the typed endpoint", asy
 
 test("captures visual-review evidence", async ({ page }, testInfo) => {
   await page.goto("/");
+  await page.addStyleTag({ content: "html{scroll-behavior:auto!important}" });
   await expect(page.getByRole("heading", { level: 1, name: /Discover what is changing/i })).toBeVisible();
 
   const capture = async (name: string) => {
@@ -68,14 +69,18 @@ test("captures visual-review evidence", async ({ page }, testInfo) => {
     await testInfo.attach(name, { path, contentType: "image/png" });
   };
 
+  await page.waitForTimeout(1_400);
   await capture("hero");
 
-  await page.locator("#investigation").scrollIntoViewIfNeeded();
-  await page.waitForTimeout(700);
+  const relationshipStep = page.locator('[data-story-step][data-step="3"]');
+  await relationshipStep.evaluate((element) => element.scrollIntoView({ block: "center" }));
+  await page.waitForTimeout(1_000);
   await capture("investigation");
 
-  await page.locator("#access").scrollIntoViewIfNeeded();
-  await page.waitForTimeout(700);
+  const access = page.locator("#access");
+  await access.evaluate((element) => element.scrollIntoView({ block: "start" }));
+  await page.waitForTimeout(1_000);
+  await expect(page.getByRole("heading", { name: /Bring one high-cost research question/i })).toBeVisible();
   await expect(page.getByLabel("Work email")).toBeVisible();
   await capture("access");
 });
