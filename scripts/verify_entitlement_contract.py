@@ -86,6 +86,8 @@ def main() -> int:
         "SET search_path TO pg_catalog",
         "REVOKE ALL ON FUNCTION",
         "REVOKE INSERT, UPDATE, DELETE, TRUNCATE",
+        "REVOKE UPDATE (state, token_budget_reserved, token_budget_consumed, updated_at)",
+        "REVOKE UPDATE (state, actual_tokens, reconciled_at)",
         "FROM PUBLIC",
         "FROM axignal_app",
         "Concurrent retries of the same operation",
@@ -126,6 +128,7 @@ def main() -> int:
         "paid_monthly_token_quota": None,
         "token_overage_billing": False,
         "direct_app_table_mutation": False,
+        "column_level_mutation_grants": False,
         "security_definer_search_path_fixed": True,
         "stripe_wired": False,
     }
