@@ -53,6 +53,17 @@ def _expect_permission_denied(function) -> str:
     raise AssertionError("Expected PostgreSQL permission denial")
 
 
+def _expect_runtime_failure(function, marker: str) -> str:
+    try:
+        function()
+    except RuntimeError as exc:
+        message = str(exc)
+        if marker not in message:
+            raise AssertionError(f"Expected {marker!r}, received {message!r}") from exc
+        return message
+    raise AssertionError(f"Expected runtime failure containing {marker!r}")
+
+
 def _assert_direct_table_mutation_blocked(dsn: str) -> None:
     _expect_permission_denied(
         lambda: _as_role(
@@ -152,6 +163,21 @@ def run(dsn: str) -> dict[str, object]:
     if usage is None or usage["token_budget_reserved"] != 0:
         raise AssertionError("Reservation release left authority-test residue")
 
+    _expect_runtime_failure(
+        lambda: repository.reserve(
+            tenant_id=TENANT_ID,
+            operation_id="op_after_persisted_expiry",
+            capability=CAPABILITY,
+            requested_tokens=1,
+            actor_subject="usr_authority_e2e",
+            now=START + timedelta(days=8),
+        ),
+        "trial_expired",
+    )
+    expired_usage = repository.usage(tenant_id=TENANT_ID)
+    if expired_usage is None or expired_usage["state"] != "READ_ONLY":
+        raise AssertionError("Expired trial did not persist READ_ONLY state")
+
     return {
         "schema": "axignal.entitlement-authority-e2e.v0.1",
         "status": "PASS",
@@ -164,6 +190,9 @@ def run(dsn: str) -> dict[str, object]:
         "concurrent_reservation_ids": 1,
         "tokens_reserved_once": reserved,
         "release_residue_tokens": 0,
+        "expired_authorization_decision": "trial_expired",
+        "expired_state": expired_usage["state"],
+        "expiry_transition_persisted": True,
         "stripe_calls": 0,
         "model_calls": 0,
     }
