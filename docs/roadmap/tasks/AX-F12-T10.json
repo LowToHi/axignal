@@ -1,0 +1,86 @@
+{
+  "task_id": "AX-F12-T10",
+  "goal_id": "AXIGNAL-GOAL-001",
+  "phase": "F12",
+  "state": "BLOCKED",
+  "objective": "Expand AXIGNAL from the admitted European procurement wedge through a federated programme of official jurisdiction-specific procurement sources, adapters, taxonomies and commercial entitlements.",
+  "outcome": "At least one non-TED official source progresses from catalogue to bounded technical probe, independent product admission, canonical lifecycle fidelity and jurisdiction-selective commercial availability without unsupported global claims or semantic flattening.",
+  "contracts": ["GOAL_LOCK", "00", "02", "03", "04", "06", "07", "08", "09", "10", "11", "16", "18", "19", "22", "24", "25", "27", "28", "ADR-004", "ADR-010", "ADR-012", "ADR-013"],
+  "skills": [
+    {"skill_id": "source-admission", "version": "0.1.0", "activation_reason": "Evaluate every official portal, API, feed or dataset independently across all rights dimensions."},
+    {"skill_id": "connector-engineer", "version": "0.1.0", "activation_reason": "Implement bounded source-specific adapters rather than a universal scraper."},
+    {"skill_id": "ontology-engineer", "version": "0.1.0", "activation_reason": "Extend the canonical procurement model while preserving jurisdiction and lifecycle semantics."},
+    {"skill_id": "data-quality-auditor", "version": "0.1.0", "activation_reason": "Measure completeness, identifier stability, lifecycle depth, drift, freshness and outages."},
+    {"skill_id": "multilingual-localiser", "version": "0.1.0", "activation_reason": "Preserve original language, terminology, transliteration and translation provenance."},
+    {"skill_id": "privacy-reviewer", "version": "0.1.0", "activation_reason": "Profile public-contact, supplier and other personal-data exposure by jurisdiction."},
+    {"skill_id": "security-reviewer", "version": "0.1.0", "activation_reason": "Review credentials, rate limits, hostile documents, revocation and connector isolation."},
+    {"skill_id": "gate-evaluator", "version": "0.1.0", "activation_reason": "Keep catalogue, technical probe, product admission and commercial availability as separate states."}
+  ],
+  "dependencies": {
+    "phases": ["F8", "F9"],
+    "tasks": ["AX-F8-T14", "AX-F9-T15"],
+    "external": ["Official source documentation and rights evidence", "Qualified customer demand for a non-European jurisdiction", "Approved jurisdiction-specific legal and privacy review"]
+  },
+  "allowed_scope": [
+    "Machine-readable official-source inventory",
+    "Versioned source-priority scorecards",
+    "Bounded technical probes with no public availability claim",
+    "Official API, OCDS, OData, bulk and feed adapters",
+    "Jurisdiction-specific source admission",
+    "Canonical procurement model extensions",
+    "Reversible CPV, NAICS, PSC, UNSPSC and native-taxonomy crosswalks",
+    "Lifecycle, award, contract and document fidelity tests",
+    "Multilingual source and terminology preservation",
+    "Jurisdiction-selective entitlements",
+    "Source and jurisdiction kill switches",
+    "Demand and unit-economic validation"
+  ],
+  "prohibited_scope": [
+    "Global ingestion before European E2E and paid-value gates",
+    "Portal scraping without admitted basis",
+    "One universal adapter that drops source semantics",
+    "Product support claim based only on catalogue listing",
+    "Country-wide support inferred from one federal or national source",
+    "API redistribution without explicit rights",
+    "Unversioned taxonomy mapping",
+    "Model-created authoritative crosswalks",
+    "Simultaneous launch of all regions"
+  ],
+  "acceptance_evidence": [
+    {"evidence_type": "SCHEMA", "description": "The v0.2 catalogue records 146 source families across 140 jurisdiction and government-level scopes, split into eight regional inventories and a versioned implementation queue.", "required": true, "location": "data/sources/global-public-procurement-catalogue.v0.2.json", "status": "PRESENT"},
+    {"evidence_type": "TEST", "description": "Deterministic validation proves catalogue counts, unique identities, HTTPS or explicit feasibility boundaries, TED-only P0, SAM.gov first post-TED priority, NOCOPO long-tail placement and zero source admission.", "required": true, "location": "scripts/verify_global_procurement_catalogue.py / .github/workflows/global-procurement-catalogue.yml", "status": "PRESENT"},
+    {"evidence_type": "RIGHTS_RECORD", "description": "The selected non-TED source has accepted collection, storage, model-input, transformation, display, export, redistribution, attribution and revocation records.", "required": true, "location": null, "status": "MISSING"},
+    {"evidence_type": "TEST", "description": "Bounded connector, parser, normaliser, taxonomy, lifecycle, outage, replay and rollback tests pass for the exact source profile.", "required": true, "location": null, "status": "MISSING"},
+    {"evidence_type": "BENCHMARK", "description": "Coverage, completeness, freshness, document availability, identifier stability, cost and crosswalk fidelity meet a predeclared source profile.", "required": true, "location": null, "status": "MISSING"},
+    {"evidence_type": "USER_RESEARCH", "description": "Qualified customers demonstrate recurring demand for the selected jurisdiction pack and understand its actual coverage boundary.", "required": true, "location": null, "status": "MISSING"},
+    {"evidence_type": "PAID_EVENT", "description": "A paying organisation or approved equivalent commercial commitment validates the jurisdiction expansion value and cost.", "required": true, "location": null, "status": "MISSING"}
+  ],
+  "impacts": {"security": "CRITICAL", "privacy": "CRITICAL", "data_rights": "CRITICAL", "regulatory": "CRITICAL", "multilingual": "CRITICAL", "epistemic": "CRITICAL", "billing": "MATERIAL"},
+  "observability": {
+    "metrics": ["procurement_source_count_by_state", "source_probe_success_rate", "source_admission_lead_time", "schema_drift_total", "lifecycle_completeness", "document_availability_rate", "taxonomy_crosswalk_review_rate", "source_cost_per_research_run", "paid_usage_by_jurisdiction"],
+    "logs": ["source and jurisdiction identity", "official endpoint and licence snapshot", "parser and normaliser versions", "quality and rights decisions", "entitlement and kill-switch state"],
+    "traces": ["catalogue to probe", "probe to source admission", "native object to canonical procurement model", "native taxonomy to reversible crosswalk", "source entitlement to ResearchRun"],
+    "alerts": ["rights or licence drift", "source schema drift", "unexpected personal-data emission", "crosswalk ambiguity promoted as fact", "public availability beyond entitlement", "source outage", "cost or rate-limit breach"]
+  },
+  "rollback": {
+    "strategy": "Disable the affected source and jurisdiction entitlement, quarantine dependent claims and dossiers, preserve source-native evidence and audit history, and leave other jurisdiction packs operational.",
+    "kill_switch": "Every source and jurisdiction pack must be independently revocable without a full deployment.",
+    "tested": false
+  },
+  "goal_lock_checks": [
+    {"check_id": 1, "answer": "YES", "evidence": "The programme advances global discovery through official public-procurement systems."},
+    {"check_id": 2, "answer": "YES", "evidence": "Every canonical object and claim remains linked to source-native evidence and admission."},
+    {"check_id": 3, "answer": "YES", "evidence": "Jurisdictions share the InvestigationContext while preserving distinct semantics."},
+    {"check_id": 4, "answer": "YES", "evidence": "Customer demand prioritises research but cannot create source truth."},
+    {"check_id": 5, "answer": "YES", "evidence": "Original language and native taxonomies remain recoverable and versioned."},
+    {"check_id": 6, "answer": "YES", "evidence": "A source-specific global lifecycle and evidence graph is a defensible product asset."},
+    {"check_id": 7, "answer": "YES", "evidence": "Jurisdiction packs remain research tools rather than bid execution or guaranteed-outcome systems."},
+    {"check_id": 8, "answer": "YES", "evidence": "Rights, privacy, security, regulation and epistemic fidelity are critical gates."},
+    {"check_id": 9, "answer": "YES", "evidence": "Independent source and pack kill switches enable bounded rollback."},
+    {"check_id": 10, "answer": "YES", "evidence": "The task is blocked until the European E2E and paid-value dependencies pass."}
+  ],
+  "owner": "source-admission",
+  "reviewer": "gate-evaluator",
+  "created_at": "2026-07-29T12:40:00Z",
+  "updated_at": "2026-07-29T12:55:00Z"
+}

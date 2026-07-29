@@ -1,0 +1,160 @@
+{
+  "catalogue_id": "AX-GPP-SOURCE-CATALOGUE-001",
+  "version": "0.2.0",
+  "status": "RESEARCH_CATALOGUE_NOT_PRODUCT_AVAILABILITY",
+  "goal_id": "AXIGNAL-GOAL-001",
+  "as_of": "2026-07-29",
+  "governing_contract": "28",
+  "governing_adr": "ADR-013",
+  "inventory_summary": {
+    "source_family_count": 146,
+    "jurisdiction_scope_count": 140,
+    "priority_counts": {"P0": 1, "P1": 24, "P2": 46, "P3": 63, "P4": 12},
+    "region_counts": {
+      "EUROPE": 38,
+      "ASIA": 17,
+      "EASTERN_EUROPE_CENTRAL_ASIA": 8,
+      "GLOBAL": 3,
+      "LATIN_AMERICA_CARIBBEAN": 22,
+      "MIDDLE_EAST": 6,
+      "NORTH_AMERICA": 16,
+      "OCEANIA": 8,
+      "AFRICA": 24,
+      "ASIA_PACIFIC": 1,
+      "EUROPE_ASIA": 1,
+      "EUROPE_CENTRAL_ASIA": 1,
+      "EUROPE_GLOBAL": 1
+    },
+    "ocp_registry_reference_count_as_of_research": 134
+  },
+  "principles": {
+    "listed_does_not_mean_admitted": true,
+    "source_specific_admission_required": true,
+    "portal_scraping_assumed_permitted": false,
+    "ocds_is_universal_adapter": false,
+    "preserve_source_native_semantics": true,
+    "public_global_coverage_authorised": false,
+    "discovery_index_is_not_product_evidence": true,
+    "subnational_sources_are_independent": true
+  },
+  "priority_model": {
+    "purpose": "Prioritise implementation by addressable public-procurement market and commercial capacity while retaining a worldwide discovery backlog.",
+    "weights": {
+      "addressable_market_capacity": 35,
+      "official_machine_access_and_stability": 20,
+      "cross_border_supplier_accessibility": 15,
+      "lifecycle_and_document_depth": 10,
+      "rights_and_attribution_clarity": 10,
+      "taxonomy_language_and_maintenance_fit": 10
+    },
+    "classes": {
+      "P0": "Current authorised implementation wedge only.",
+      "P1": "Largest or most commercially valuable markets with strong enough official access to justify early source-admission work.",
+      "P2": "High-value second-wave national, multilateral or subnational systems.",
+      "P3": "Strategic long-tail systems retained for global reach after higher-return gates.",
+      "P4": "Discovery-only or endpoint-identity-feasibility candidates; no implementation without new evidence."
+    },
+    "tie_breakers": [
+      "paid customer demand",
+      "official API or bulk access",
+      "rights clarity",
+      "lifecycle completeness",
+      "document availability",
+      "measured source cost",
+      "language and taxonomy reuse"
+    ]
+  },
+  "implementation_queue": [
+    {"rank": 1, "source_id": "US_SAM_OPPORTUNITIES", "reason": "Largest directly addressable federal B2G market with mature official API."},
+    {"rank": 2, "source_id": "UK_FIND_A_TENDER", "reason": "Real-time OCDS lifecycle platform and strong cross-border accessibility."},
+    {"rank": 3, "source_id": "WB_PROCUREMENT_NOTICES", "reason": "Global official API and bulk dataset with more than 400,000 notices."},
+    {"rank": 4, "source_id": "UN_UNGM", "reason": "Single global UN marketplace spanning dozens of organisations and countries."},
+    {"rank": 5, "source_id": "UK_CONTRACTS_FINDER", "reason": "Real-time below-threshold UK opportunities complementing Find a Tender."},
+    {"rank": 6, "source_id": "US_USASPENDING_AWARDS", "reason": "Official award history complements SAM opportunity discovery."},
+    {"rank": 7, "source_id": "CA_CANADABUYS", "reason": "Large accessible federal market and natural North American expansion."},
+    {"rank": 8, "source_id": "JP_KKJ_API", "reason": "Official XML REST API across Japanese government demand."},
+    {"rank": 9, "source_id": "AU_AUSTENDER", "reason": "Large English-language federal market with long historical coverage."},
+    {"rank": 10, "source_id": "FR_DECP", "reason": "Large EU national market with daily consolidated open procurement data."},
+    {"rank": 11, "source_id": "DE_BMI_PUBLICATION_SERVICE", "reason": "Large EU market with daily official OCDS publication service."},
+    {"rank": 12, "source_id": "BR_COMPRAS_GOV", "reason": "Largest Latin American market with daily official OCDS/open-data access."},
+    {"rank": 13, "source_id": "BR_PNCP", "reason": "National Brazilian contracting portal required for broader lifecycle coverage."},
+    {"rank": 14, "source_id": "JP_GEPS_DATA", "reason": "Official Japanese procurement and supplier data publication."},
+    {"rank": 15, "source_id": "KR_KONEPS", "reason": "Mature national e-procurement ecosystem with official data APIs."},
+    {"rank": 16, "source_id": "ES_PLACSP", "reason": "Home-market national coverage below TED thresholds and high commercial relevance."},
+    {"rank": 17, "source_id": "IT_ANAC_BDNCP", "reason": "Large EU market with national contract database and open-data services."},
+    {"rank": 18, "source_id": "NL_TENDERNED", "reason": "High-quality national source with structured data and strong B2G accessibility."},
+    {"rank": 19, "source_id": "CN_CCGP", "reason": "Very large market with an official national data-interface standard; rights and access remain critical gates."},
+    {"rank": 20, "source_id": "MX_COMPRANET", "reason": "Large Spanish-speaking North American market and strategic LATAM bridge."},
+    {"rank": 21, "source_id": "CL_MERCADO_PUBLICO", "reason": "Mature real-time API and strong supplier workflow."},
+    {"rank": 22, "source_id": "CO_SECOP", "reason": "Large transactional procurement system with OData/Socrata access."},
+    {"rank": 23, "source_id": "PE_OECE_OPEN_CONTRACTING", "reason": "Long historical national data and daily OCDS publication."},
+    {"rank": 24, "source_id": "IN_CPPP_EPROCURE", "reason": "Very large market; machine access and rights feasibility must be proven."},
+    {"rank": 25, "source_id": "IN_GEM", "reason": "Large government marketplace with distinct catalogue and transaction value."},
+    {"rank": 26, "source_id": "ADB_BUSINESS_OPPORTUNITIES", "reason": "Cross-border Asia-Pacific project opportunities."},
+    {"rank": 27, "source_id": "AFDB_PROCUREMENT", "reason": "Cross-border African project opportunities and regional reach."},
+    {"rank": 28, "source_id": "IDB_PROCUREMENT", "reason": "Cross-border Latin American and Caribbean project opportunities."},
+    {"rank": 29, "source_id": "EBRD_ECEPP", "reason": "Cross-border European and Central Asian project procurement."},
+    {"rank": 30, "source_id": "ID_INAPROC", "reason": "Large decentralised market with national aggregation architecture."},
+    {"rank": 31, "source_id": "SA_ETIMAD", "reason": "Large Gulf market with an official developer portal and API subscription model."},
+    {"rank": 32, "source_id": "ZA_ETENDERS_OCDS", "reason": "Largest mature African national OCDS source candidate."},
+    {"rank": 33, "source_id": "SG_GEBIZ", "reason": "High-value, supplier-accessible, English-language Asian market."},
+    {"rank": 34, "source_id": "TR_EKAP", "reason": "Large transcontinental procurement market."},
+    {"rank": 35, "source_id": "UA_PROZORRO", "reason": "Real-time full-cycle open procurement architecture."},
+    {"rank": 36, "source_id": "NZ_GETS", "reason": "Accessible national Oceania market complementing Australia."},
+    {"rank": 37, "source_id": "PT_BASE", "reason": "National contract lifecycle and award transparency."},
+    {"rank": 38, "source_id": "BE_EPROCUREMENT", "reason": "Dense EU procurement market and multilingual relevance."},
+    {"rank": 39, "source_id": "PL_EZAMOWIENIA", "reason": "Large Central European market."},
+    {"rank": 40, "source_id": "GH_GHANEPS", "reason": "Mature national African e-procurement source with OCDS evidence."}
+  ],
+  "discovery_indexes": [
+    {
+      "index_id": "OCP_DATA_REGISTRY",
+      "entry_point": "https://data.open-contracting.org/en/search/",
+      "role": "DISCOVERY_ONLY",
+      "observed_dataset_count": 134,
+      "notes": "Useful for discovering official and derived OCDS publishers, coverage and data-quality warnings. Registry data cannot replace source-specific official rights and admission evidence."
+    },
+    {
+      "index_id": "EU_TED_AND_NATIONAL_PORTALS",
+      "entry_point": "https://developer.ted.europa.eu/",
+      "role": "PRIMARY_EU_DISCOVERY",
+      "notes": "TED is the authoritative supranational source; national portals are separate sources for below-threshold and source-specific lifecycle coverage."
+    },
+    {
+      "index_id": "OFFICIAL_GOVERNMENT_OPEN_DATA_CATALOGUES",
+      "entry_point": null,
+      "role": "CONTINUOUS_DISCOVERY",
+      "notes": "Country and subnational open-data catalogues are searched for official procurement APIs, bulk files, OCDS, OData and feeds. No automated admission."
+    }
+  ],
+  "promotion_gates": [
+    "OFFICIAL_IDENTITY_AND_ACCESS_EVIDENCED",
+    "RIGHTS_DIMENSIONS_REVIEWED",
+    "PRIVACY_PROFILE_ACCEPTED",
+    "BOUNDED_TECHNICAL_PROBE_PASS",
+    "PARSER_AND_NORMALISER_VERSIONED",
+    "LIFECYCLE_AND_IDENTIFIER_FIDELITY_PASS",
+    "QUALITY_AND_OUTAGE_PROFILE_PASS",
+    "ATTRIBUTION_AND_REVOCATION_IMPLEMENTED",
+    "BUYER_DEMAND_EVIDENCED",
+    "UNIT_ECONOMICS_ACCEPTED",
+    "JURISDICTION_ENTITLEMENT_TESTED"
+  ],
+  "authority_boundary": {
+    "ted_product_admitted": false,
+    "new_sources_product_admitted": 0,
+    "global_coverage_marketing_authorised": false,
+    "billing_or_trial_activated": false,
+    "maximum_state": "CATALOGUED_AND_PRIORITISED_ONLY"
+  },
+  "inventory_files": [
+    "data/sources/global-public-procurement-candidates-multilateral.v0.2.csv",
+    "data/sources/global-public-procurement-candidates-europe.v0.2.csv",
+    "data/sources/global-public-procurement-candidates-eastern-europe-central-asia.v0.2.csv",
+    "data/sources/global-public-procurement-candidates-north-america.v0.2.csv",
+    "data/sources/global-public-procurement-candidates-latin-america-caribbean.v0.2.csv",
+    "data/sources/global-public-procurement-candidates-asia-middle-east.v0.2.csv",
+    "data/sources/global-public-procurement-candidates-africa.v0.2.csv",
+    "data/sources/global-public-procurement-candidates-oceania.v0.2.csv"
+  ]
+}

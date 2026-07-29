@@ -1,0 +1,37 @@
+name: Global Procurement Catalogue
+
+on:
+  pull_request:
+    paths:
+      - "data/sources/global-public-procurement-catalogue.v0.2.json"
+      - "data/sources/global-public-procurement-candidates-*.v0.2.csv"
+      - "scripts/verify_global_procurement_catalogue.py"
+      - ".github/workflows/global-procurement-catalogue.yml"
+      - "docs/contracts/28-b2g-procurement-commercial-and-global-source-program.md"
+      - "docs/roadmap/13-b2g-pricing-trial-and-global-procurement-source-program.md"
+  push:
+    branches: [main]
+    paths:
+      - "data/sources/global-public-procurement-catalogue.v0.2.json"
+      - "data/sources/global-public-procurement-candidates-*.v0.2.csv"
+      - "scripts/verify_global_procurement_catalogue.py"
+      - ".github/workflows/global-procurement-catalogue.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-global-catalogue:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.13"
+      - name: Validate catalogue breadth, priority and authority boundary
+        run: python scripts/verify_global_procurement_catalogue.py
