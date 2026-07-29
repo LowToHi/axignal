@@ -6,21 +6,35 @@ on:
     branches: [main]
     paths:
       - "apps/api/src/axignal_api/procurement_admission_rehearsal.py"
+      - "apps/api/src/axignal_api/procurement_lifecycle_rehearsal.py"
+      - "apps/api/tests/fixtures/ted_eforms_*.xml"
       - "apps/api/tests/test_procurement_admission_rehearsal.py"
+      - "apps/api/tests/test_procurement_lifecycle_rehearsal.py"
       - "data/universes/eu-public-procurement/admission-rehearsal-profile.v0.1.json"
+      - "data/universes/eu-public-procurement/lifecycle-rehearsal-profile.v0.1.json"
       - "docs/roadmap/tasks/AX-F8-T12.json"
+      - "docs/roadmap/tasks/AX-F8-T13.json"
       - "docs/sources/procurement-admission-rehearsal-v0.1.md"
+      - "docs/sources/procurement-lifecycle-rehearsal-v0.1.md"
       - "scripts/verify_procurement_admission_rehearsal.py"
+      - "scripts/verify_procurement_lifecycle_rehearsal.py"
       - ".github/workflows/procurement-admission-rehearsal.yml"
   push:
     branches: [main]
     paths:
       - "apps/api/src/axignal_api/procurement_admission_rehearsal.py"
+      - "apps/api/src/axignal_api/procurement_lifecycle_rehearsal.py"
+      - "apps/api/tests/fixtures/ted_eforms_*.xml"
       - "apps/api/tests/test_procurement_admission_rehearsal.py"
+      - "apps/api/tests/test_procurement_lifecycle_rehearsal.py"
       - "data/universes/eu-public-procurement/admission-rehearsal-profile.v0.1.json"
+      - "data/universes/eu-public-procurement/lifecycle-rehearsal-profile.v0.1.json"
       - "docs/roadmap/tasks/AX-F8-T12.json"
+      - "docs/roadmap/tasks/AX-F8-T13.json"
       - "docs/sources/procurement-admission-rehearsal-v0.1.md"
+      - "docs/sources/procurement-lifecycle-rehearsal-v0.1.md"
       - "scripts/verify_procurement_admission_rehearsal.py"
+      - "scripts/verify_procurement_lifecycle_rehearsal.py"
       - ".github/workflows/procurement-admission-rehearsal.yml"
 
 permissions:
@@ -54,19 +68,30 @@ jobs:
         run: |
           ruff check \
             apps/api/src/axignal_api/procurement_admission_rehearsal.py \
+            apps/api/src/axignal_api/procurement_lifecycle_rehearsal.py \
             apps/api/tests/test_procurement_admission_rehearsal.py \
-            scripts/verify_procurement_admission_rehearsal.py
+            apps/api/tests/test_procurement_lifecycle_rehearsal.py \
+            scripts/verify_procurement_admission_rehearsal.py \
+            scripts/verify_procurement_lifecycle_rehearsal.py
 
-      - name: Run focused policy, replay and rollback tests
-        run: pytest apps/api/tests/test_procurement_admission_rehearsal.py
+      - name: Run focused policy, lifecycle, replay and rollback tests
+        run: |
+          pytest \
+            apps/api/tests/test_procurement_admission_rehearsal.py \
+            apps/api/tests/test_procurement_lifecycle_rehearsal.py
 
       - name: Rehearse against pinned official OP-TED XML
         run: python scripts/verify_procurement_admission_rehearsal.py
+
+      - name: Rehearse lifecycle, Evidence Objects and dossier
+        run: python scripts/verify_procurement_lifecycle_rehearsal.py
 
       - name: Upload non-sensitive rehearsal evidence
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: procurement-admission-rehearsal-${{ github.sha }}
-          path: procurement-admission-rehearsal-evidence.json
+          path: |
+            procurement-admission-rehearsal-evidence.json
+            procurement-lifecycle-rehearsal-evidence.json
           if-no-files-found: error
           retention-days: 30
