@@ -41,11 +41,22 @@ def _clean(dsn: str, tenant_ids: tuple[UUID, ...]) -> None:
                 (tenant_id,),
             )
             cursor.execute(
-                "UPDATE tenant_private.research_runs SET admission_handoff_id = NULL, dossier_id = NULL WHERE tenant_id = %s",
+                """
+                UPDATE tenant_private.research_runs
+                SET admission_handoff_id = NULL, dossier_id = NULL
+                WHERE tenant_id = %s
+                """,
                 (tenant_id,),
             )
             cursor.execute(
-                "DELETE FROM axignal_global.admission_decisions WHERE admission_handoff_id IN (SELECT admission_handoff_id FROM axignal_global.admission_handoffs WHERE tenant_id = %s)",
+                """
+                DELETE FROM axignal_global.admission_decisions
+                WHERE admission_handoff_id IN (
+                  SELECT admission_handoff_id
+                  FROM axignal_global.admission_handoffs
+                  WHERE tenant_id = %s
+                )
+                """,
                 (tenant_id,),
             )
             cursor.execute(
@@ -203,7 +214,10 @@ def _attempt_new_run(dsn: str, tenant_id: UUID) -> None:
             INSERT INTO tenant_private.research_runs (
               tenant_id, context_id, opportunity_id, question, state,
               private_knowledge_authorised, source_plan, budgets
-            ) VALUES (%s, 'ctx_blocked', 'opp_blocked', 'blocked', 'QUEUED', false, '[]'::jsonb, '{}'::jsonb)
+            ) VALUES (
+              %s, 'ctx_blocked', 'opp_blocked', 'blocked', 'QUEUED',
+              false, '[]'::jsonb, '{}'::jsonb
+            )
             """,
             (tenant_id,),
         )
