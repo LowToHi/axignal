@@ -1,0 +1,232 @@
+name: Public Landing Deploy Gate Diagnostic
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/public-landing-deploy-gate-diagnostic.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    name: Inspect exact deploy gates without mutation
+    runs-on: ubuntu-24.04
+    environment: production-landing
+    timeout-minutes: 10
+    env:
+      VPS_HOST: ${{ vars.AXIGNAL_VPS_HOST }}
+      VPS_PORT: ${{ vars.AXIGNAL_VPS_SSH_PORT }}
+      VPS_USER: ${{ vars.AXIGNAL_VPS_USER }}
+    steps:
+      - name: Materialise key and admit known host
+        env:
+          DEPLOY_KEY: ${{ secrets.AXIGNAL_VPS_SSH_PRIVATE_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p /tmp/axignal-gate
+          DEPLOY_KEY_RAW="${DEPLOY_KEY}" python3 - <<'PY'
+          import os
+          from pathlib import Path
+
+          value = os.environ['DEPLOY_KEY_RAW']
+          value = value.lstrip('\ufeff').replace('\r\n', '\n').replace('\r', '\n').strip()
+          if '\\n' in value and '\n' not in value:
+              value = value.replace('\\n', '\n')
+          Path('/tmp/axignal-gate/deploy_key').write_text(value + '\n', encoding='utf-8')
+          PY
+          chmod 0600 /tmp/axignal-gate/deploy_key
+          ssh-keygen -y -P "" -f /tmp/axignal-gate/deploy_key </dev/null >/dev/null 2>&1
+
+          host="${VPS_HOST:-187.124.220.48}"
+          port="${VPS_PORT:-22}"
+          : > /tmp/axignal-gate/known_hosts
+          for key_type in ed25519 rsa; do
+            for _ in 1 2 3; do
+              if ssh-keyscan -T 8 -p "${port}" -t "${key_type}" "${host}" > /tmp/axignal-gate/scan 2>/dev/null && [[ -s /tmp/axignal-gate/scan ]]; then
+                cat /tmp/axignal-gate/scan >> /tmp/axignal-gate/known_hosts
+                break
+              fi
+            done
+          done
+          sort -u /tmp/axignal-gate/known_hosts -o /tmp/axignal-gate/known_hosts
+          test -s /tmp/axignal-gate/known_hosts
+
+          allowed="$(printf '%s\n' \
+            'SHA256:0VkIkIO1lCe8xEG0WUK+ty/ZFupJ4DW4IL+AedF8TBg' \
+            'SHA256:m7nw4JpSz97tsAAqV6PZQAddTn3iUjbeD5WD3eUa/2o' | sort -u)"
+          observed="$(ssh-keygen -lf /tmp/axignal-gate/known_hosts -E sha256 | awk '{print $2}' | sort -u)"
+          while IFS= read -r fingerprint; do
+            [[ -n "${fingerprint}" ]]
+            grep -Fxq "${fingerprint}" <<<"${allowed}"
+          done <<<"${observed}"
+
+      - name: Inspect remote deploy prerequisites
+        shell: bash
+        run: |
+          set -euo pipefail
+          host="${VPS_HOST:-187.124.220.48}"
+          port="${VPS_PORT:-22}"
+          user="${VPS_USER:-root}"
+          ssh_opts=(
+            -i /tmp/axignal-gate/deploy_key
+            -p "${port}"
+            -o BatchMode=yes
+            -o IdentitiesOnly=yes
+            -o PasswordAuthentication=no
+            -o KbdInteractiveAuthentication=no
+            -o PreferredAuthentications=publickey
+            -o StrictHostKeyChecking=yes
+            -o UserKnownHostsFile=/tmp/axignal-gate/known_hosts
+            -o ConnectTimeout=10
+            -o LogLevel=ERROR
+          )
+
+          ssh "${ssh_opts[@]}" "${user}@${host}" 'bash -s' > /tmp/axignal-gate/remote.env <<'REMOTE'
+          set -u
+          flag_command() { command -v "$1" >/dev/null 2>&1 && echo true || echo false; }
+          listener() { ss -H -ltn "sport = :$1" 2>/dev/null | grep -q . && echo true || echo false; }
+
+          docker_cli="$(flag_command docker)"
+          curl_cli="$(flag_command curl)"
+          python_cli="$(flag_command python3)"
+          getent_cli="$(flag_command getent)"
+          ss_cli="$(flag_command ss)"
+          docker_daemon=false
+          compose_available=false
+          traefik_count=0
+          traefik_host_network=false
+          dynamic_mount_present=false
+          dynamic_mount_writable=false
+          route_present=false
+          landing_container_present=false
+          current_release_present=false
+
+          if [[ "${docker_cli}" == true ]] && docker info >/dev/null 2>&1; then
+            docker_daemon=true
+            docker compose version >/dev/null 2>&1 && compose_available=true
+            mapfile -t traefik_containers < <(docker ps --format '{{.Names}} {{.Image}}' | awk 'tolower($0) ~ /traefik/ {print $1}')
+            traefik_count="${#traefik_containers[@]}"
+            if [[ "${traefik_count}" -eq 1 ]]; then
+              traefik_name="${traefik_containers[0]}"
+              [[ "$(docker inspect --format '{{.HostConfig.NetworkMode}}' "${traefik_name}" 2>/dev/null)" == host ]] && traefik_host_network=true
+              dynamic_mount="$(docker inspect --format '{{range .Mounts}}{{if eq .Destination "/etc/traefik/dynamic"}}{{.Source}}{{end}}{{end}}' "${traefik_name}" 2>/dev/null)"
+              if [[ -n "${dynamic_mount}" && -d "${dynamic_mount}" ]]; then
+                dynamic_mount_present=true
+                [[ -w "${dynamic_mount}" ]] && dynamic_mount_writable=true
+                [[ -f "${dynamic_mount}/axignal-landing.yml" ]] && route_present=true
+              fi
+            fi
+            docker inspect axignal-landing >/dev/null 2>&1 && landing_container_present=true
+          fi
+
+          [[ -L /opt/axignal/landing/current ]] && current_release_present=true
+          dns_contains_expected=false
+          dns_values=""
+          if [[ "${getent_cli}" == true ]]; then
+            dns_values="$(getent ahostsv4 axignal.com 2>/dev/null | awk '{print $1}' | sort -u | paste -sd, - || true)"
+            tr ',' '\n' <<<"${dns_values}" | grep -Fxq '187.124.220.48' && dns_contains_expected=true
+          fi
+
+          printf '%s\n' \
+            "effective_uid=$(id -u)" \
+            "docker_cli=${docker_cli}" \
+            "curl_cli=${curl_cli}" \
+            "python_cli=${python_cli}" \
+            "getent_cli=${getent_cli}" \
+            "ss_cli=${ss_cli}" \
+            "docker_daemon=${docker_daemon}" \
+            "compose_available=${compose_available}" \
+            "traefik_count=${traefik_count}" \
+            "traefik_host_network=${traefik_host_network}" \
+            "dynamic_mount_present=${dynamic_mount_present}" \
+            "dynamic_mount_writable=${dynamic_mount_writable}" \
+            "port_80_listening=$(listener 80)" \
+            "port_443_listening=$(listener 443)" \
+            "port_18180_listening=$(listener 18180)" \
+            "dns_contains_expected=${dns_contains_expected}" \
+            "dns_values=${dns_values}" \
+            "route_present=${route_present}" \
+            "landing_container_present=${landing_container_present}" \
+            "current_release_present=${current_release_present}"
+          REMOTE
+
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          values = {}
+          for line in Path('/tmp/axignal-gate/remote.env').read_text(encoding='utf-8').splitlines():
+              key, value = line.split('=', 1)
+              values[key] = value
+
+          def flag(name: str) -> bool:
+              return values.get(name) == 'true'
+
+          evidence = {
+              'schema': 'axignal.public-landing-deploy-gates.v1',
+              'effective_uid': int(values['effective_uid']),
+              'commands': {
+                  name: flag(name)
+                  for name in ('docker_cli', 'curl_cli', 'python_cli', 'getent_cli', 'ss_cli')
+              },
+              'docker_daemon': flag('docker_daemon'),
+              'compose_available': flag('compose_available'),
+              'traefik': {
+                  'count': int(values['traefik_count']),
+                  'host_network': flag('traefik_host_network'),
+                  'dynamic_mount_present': flag('dynamic_mount_present'),
+                  'dynamic_mount_writable': flag('dynamic_mount_writable'),
+              },
+              'ports': {
+                  '80_listening': flag('port_80_listening'),
+                  '443_listening': flag('port_443_listening'),
+                  '18180_listening': flag('port_18180_listening'),
+              },
+              'dns': {
+                  'contains_expected': flag('dns_contains_expected'),
+                  'values': [item for item in values.get('dns_values', '').split(',') if item],
+              },
+              'existing_release': {
+                  'route_present': flag('route_present'),
+                  'landing_container_present': flag('landing_container_present'),
+                  'current_release_present': flag('current_release_present'),
+              },
+              'mutation_performed': False,
+          }
+          required = [
+              evidence['effective_uid'] == 0,
+              all(evidence['commands'].values()),
+              evidence['docker_daemon'],
+              evidence['compose_available'],
+              evidence['traefik']['count'] == 1,
+              evidence['traefik']['host_network'],
+              evidence['traefik']['dynamic_mount_present'],
+              evidence['traefik']['dynamic_mount_writable'],
+              evidence['ports']['80_listening'],
+              evidence['ports']['443_listening'],
+              evidence['dns']['contains_expected'],
+          ]
+          evidence['all_pre_activation_gates_pass'] = all(required)
+          Path('public-landing-deploy-gates.json').write_text(
+              json.dumps(evidence, indent=2, sort_keys=True) + '\n', encoding='utf-8'
+          )
+          print(json.dumps(evidence, indent=2, sort_keys=True))
+          PY
+
+      - name: Remove temporary credential
+        if: always()
+        run: rm -rf /tmp/axignal-gate
+
+      - name: Upload redacted gate evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: public-landing-deploy-gates
+          path: public-landing-deploy-gates.json
+          if-no-files-found: ignore
+          retention-days: 7
