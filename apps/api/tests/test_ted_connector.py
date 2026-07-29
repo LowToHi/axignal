@@ -42,7 +42,7 @@ def test_ted_probe_request_is_fixed_bounded_and_non_personal() -> None:
     body = TEDSearchConnector._build_request_body()
 
     assert body == {
-        "query": "place-of-performance IN (ESP FRA DEU)",
+        "query": "place-of-performance IN (LUX)",
         "fields": [
             "publication-number",
             "notice-title",
@@ -108,7 +108,9 @@ def test_ted_live_connector_refuses_redirects() -> None:
 
 def test_ted_connector_rejects_duplicate_publication_numbers(tmp_path: Path) -> None:
     payload = json.loads(FIXTURE.read_text(encoding="utf-8"))
-    payload["notices"][1]["publication-number"] = payload["notices"][0]["publication-number"]
+    payload["notices"][1]["publication-number"] = payload["notices"][0][
+        "publication-number"
+    ]
     fixture = tmp_path / "duplicate.json"
     fixture.write_text(json.dumps(payload), encoding="utf-8")
 
