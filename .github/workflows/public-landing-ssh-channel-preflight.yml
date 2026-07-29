@@ -1,0 +1,226 @@
+name: Public Landing SSH Topology Preflight
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/public-landing-ssh-channel-preflight.yml"
+  push:
+    branches:
+      - agent/public-landing-release-v0.1
+    paths:
+      - ".github/workflows/public-landing-ssh-channel-preflight.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  topology:
+    name: Authenticate and inspect landing host read-only
+    runs-on: ubuntu-24.04
+    environment: production-landing
+    timeout-minutes: 10
+    env:
+      VPS_HOST: ${{ vars.AXIGNAL_VPS_HOST }}
+      VPS_PORT: ${{ vars.AXIGNAL_VPS_SSH_PORT }}
+      VPS_USER: ${{ vars.AXIGNAL_VPS_USER }}
+    steps:
+      - name: Materialise validated deploy key
+        shell: bash
+        env:
+          DEPLOY_KEY: ${{ secrets.AXIGNAL_VPS_SSH_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p /tmp/axignal-ssh
+          DEPLOY_KEY_RAW="${DEPLOY_KEY}" python - <<'PY'
+          import os
+          from pathlib import Path
+
+          value = os.environ["DEPLOY_KEY_RAW"]
+          value = value.lstrip("\ufeff").replace("\r\n", "\n").replace("\r", "\n").strip()
+          if "\\n" in value and "\n" not in value:
+              value = value.replace("\\n", "\n")
+          if len(value) >= 2 and value[0] == value[-1] and value[0] in {'"', "'"}:
+              value = value[1:-1].strip()
+          Path("/tmp/axignal-ssh/deploy_key").write_text(value + "\n", encoding="utf-8")
+          PY
+          chmod 600 /tmp/axignal-ssh/deploy_key
+          ssh-keygen -y -P "" -f /tmp/axignal-ssh/deploy_key </dev/null >/tmp/axignal-ssh/deploy_key.pub 2>/dev/null
+
+      - name: Pin and verify host identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          host="${VPS_HOST:-187.124.220.48}"
+          port="${VPS_PORT:-22}"
+          ssh-keyscan -T 8 -p "${port}" -t ed25519,rsa "${host}" > /tmp/axignal-ssh/known_hosts 2>/dev/null
+          test -s /tmp/axignal-ssh/known_hosts
+          observed="$(ssh-keygen -lf /tmp/axignal-ssh/known_hosts -E sha256 | awk '{print $2}' | sort -u)"
+          expected="$(printf '%s\n' \
+            'SHA256:0VkIkIO1lCe8xEG0WUK+ty/ZFupJ4DW4IL+AedF8TBg' \
+            'SHA256:m7nw4JpSz97tsAAqV6PZQAddTn3iUjbeD5WD3eUa/2o' | sort -u)"
+          test "${observed}" = "${expected}"
+
+      - name: Authenticate and inspect topology without mutation
+        shell: bash
+        run: |
+          set -euo pipefail
+          host="${VPS_HOST:-187.124.220.48}"
+          port="${VPS_PORT:-22}"
+          ssh_opts=(
+            -i /tmp/axignal-ssh/deploy_key
+            -p "${port}"
+            -o BatchMode=yes
+            -o IdentitiesOnly=yes
+            -o PasswordAuthentication=no
+            -o KbdInteractiveAuthentication=no
+            -o PreferredAuthentications=publickey
+            -o StrictHostKeyChecking=yes
+            -o UserKnownHostsFile=/tmp/axignal-ssh/known_hosts
+            -o ConnectTimeout=8
+            -o LogLevel=ERROR
+          )
+
+          candidates=()
+          if [[ -n "${VPS_USER:-}" ]]; then candidates+=("${VPS_USER}"); fi
+          candidates+=(axignal-deploy ubuntu root)
+          authenticated_user=""
+          declare -A seen=()
+          for candidate in "${candidates[@]}"; do
+            [[ -n "${seen[${candidate}]:-}" ]] && continue
+            seen["${candidate}"]=1
+            if ssh "${ssh_opts[@]}" "${candidate}@${host}" 'test "$(id -un)" = "'"${candidate}"'"' >/dev/null 2>&1; then
+              authenticated_user="${candidate}"
+              break
+            fi
+          done
+          test -n "${authenticated_user}"
+
+          ssh "${ssh_opts[@]}" "${authenticated_user}@${host}" 'bash -s' > /tmp/axignal-ssh/remote.env <<'REMOTE'
+          set -euo pipefail
+          bool_listener() {
+            local port="$1"
+            if ss -H -ltn "sport = :${port}" 2>/dev/null | grep -q .; then echo true; else echo false; fi
+          }
+
+          effective_user="$(id -un)"
+          effective_uid="$(id -u)"
+          host_name="$(hostname -s 2>/dev/null || hostname)"
+          docker_cli=false
+          docker_access=false
+          traefik_count=0
+          traefik_name=""
+          traefik_network_mode=""
+          dynamic_mount_present=false
+
+          if command -v docker >/dev/null 2>&1; then
+            docker_cli=true
+            if docker info >/dev/null 2>&1; then
+              docker_access=true
+              mapfile -t traefik_containers < <(docker ps --format '{{.Names}} {{.Image}}' | awk 'tolower($0) ~ /traefik/ {print $1}')
+              traefik_count="${#traefik_containers[@]}"
+              if [[ "${traefik_count}" -eq 1 ]]; then
+                traefik_name="${traefik_containers[0]}"
+                traefik_network_mode="$(docker inspect --format '{{.HostConfig.NetworkMode}}' "${traefik_name}")"
+                dynamic_mount="$(docker inspect --format '{{range .Mounts}}{{if eq .Destination "/etc/traefik/dynamic"}}{{.Source}}{{end}}{{end}}' "${traefik_name}")"
+                [[ -n "${dynamic_mount}" ]] && dynamic_mount_present=true
+              fi
+            fi
+          fi
+
+          port_80_listening="$(bool_listener 80)"
+          port_443_listening="$(bool_listener 443)"
+          if ss -H -ltn 'sport = :18180' 2>/dev/null | grep -q .; then
+            port_18180_available=false
+          else
+            port_18180_available=true
+          fi
+
+          printf '%s\n' \
+            "effective_user=${effective_user}" \
+            "effective_uid=${effective_uid}" \
+            "hostname=${host_name}" \
+            "docker_cli=${docker_cli}" \
+            "docker_access=${docker_access}" \
+            "traefik_count=${traefik_count}" \
+            "traefik_name=${traefik_name}" \
+            "traefik_network_mode=${traefik_network_mode}" \
+            "dynamic_mount_present=${dynamic_mount_present}" \
+            "port_80_listening=${port_80_listening}" \
+            "port_443_listening=${port_443_listening}" \
+            "port_18180_available=${port_18180_available}"
+          REMOTE
+
+          export AUTHENTICATED_USER="${authenticated_user}"
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          values = {}
+          for line in Path('/tmp/axignal-ssh/remote.env').read_text(encoding='utf-8').splitlines():
+              key, value = line.split('=', 1)
+              values[key] = value
+
+          def flag(name: str) -> bool:
+              return values.get(name) == 'true'
+
+          evidence = {
+              'schema': 'axignal.public-landing-ssh-topology-preflight.v1',
+              'goal_id': 'AXIGNAL-GOAL-001',
+              'revision': os.environ['GITHUB_SHA'],
+              'target': {'host': os.environ.get('VPS_HOST') or '187.124.220.48', 'port': int(os.environ.get('VPS_PORT') or '22')},
+              'authentication': {
+                  'attempted': True,
+                  'succeeded': True,
+                  'requested_user': os.environ['AUTHENTICATED_USER'],
+                  'effective_user': values['effective_user'],
+                  'effective_uid': int(values['effective_uid']),
+              },
+              'host': {'hostname': values['hostname']},
+              'docker': {'cli_present': flag('docker_cli'), 'daemon_access': flag('docker_access')},
+              'traefik': {
+                  'running_container_count': int(values['traefik_count']),
+                  'container': values.get('traefik_name') or None,
+                  'network_mode': values.get('traefik_network_mode') or None,
+                  'dynamic_mount_present': flag('dynamic_mount_present'),
+              },
+              'ports': {
+                  '80_listening': flag('port_80_listening'),
+                  '443_listening': flag('port_443_listening'),
+                  '18180_available': flag('port_18180_available'),
+              },
+              'mutation_performed': False,
+          }
+          evidence['release_boundary_ready'] = all([
+              evidence['docker']['cli_present'],
+              evidence['docker']['daemon_access'],
+              evidence['traefik']['running_container_count'] == 1,
+              evidence['traefik']['network_mode'] == 'host',
+              evidence['traefik']['dynamic_mount_present'],
+              evidence['ports']['80_listening'],
+              evidence['ports']['443_listening'],
+              evidence['ports']['18180_available'],
+          ])
+          Path('public-landing-ssh-topology-preflight.json').write_text(
+              json.dumps(evidence, indent=2, sort_keys=True) + '\n', encoding='utf-8'
+          )
+          print(json.dumps(evidence, indent=2, sort_keys=True))
+          if not evidence['release_boundary_ready']:
+              raise SystemExit('Production landing topology is not ready')
+          PY
+
+      - name: Remove temporary key material
+        if: always()
+        run: rm -rf /tmp/axignal-ssh
+
+      - name: Upload redacted topology evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: public-landing-ssh-topology-preflight
+          path: public-landing-ssh-topology-preflight.json
+          if-no-files-found: ignore
+          retention-days: 7

@@ -1,0 +1,36 @@
+name: axignal-landing
+
+services:
+  landing:
+    image: ${AXIGNAL_LANDING_IMAGE:?required}
+    container_name: axignal-landing
+    environment:
+      AXIGNAL_BUILD_SHA: ${AXIGNAL_BUILD_SHA:?required}
+      AXIGNAL_PILOT_INTAKE_FILE: /var/lib/axignal/intake/requests.jsonl
+      AXIGNAL_PILOT_CONTACT_EMAIL: ${AXIGNAL_PILOT_CONTACT_EMAIL:-}
+    ports:
+      - "127.0.0.1:${AXIGNAL_LANDING_PORT:-18180}:3000"
+    volumes:
+      - ${AXIGNAL_LANDING_INTAKE_DIR:-/var/lib/axignal/landing/intake}:/var/lib/axignal/intake
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/api/health').then(async r=>{if(!r.ok)process.exit(1);const j=await r.json();if(j.status!=='ok')process.exit(1)}).catch(()=>process.exit(1))"
+      interval: 5s
+      timeout: 4s
+      retries: 24
+      start_period: 10s
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+      - /app/apps/landing/.next/cache:size=64m,uid=1000,gid=1000,mode=0700
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 256
+    restart: unless-stopped
+    stop_grace_period: 20s
