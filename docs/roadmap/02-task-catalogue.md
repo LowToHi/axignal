@@ -1,6 +1,6 @@
 # 02 — AXIGNAL Task Catalogue
 
-Version: `0.4.0`
+Version: `0.5.0`
 Status: `NORMATIVE CANDIDATE`
 Goal ID: `AXIGNAL-GOAL-001`
 
@@ -184,6 +184,7 @@ A discovered task that changes scope MUST be registered before execution.
 | `AX-F8-T08` | Add multilingual terminology | 16 | multilingual-localiser |
 | `AX-F8-T09` | Reconstruct historical opportunities | 02, 08 | opportunity-modeler, timeline-engineer |
 | `AX-F8-T10` | Validate buyer workflow, cost and margin | 01, 08, 11 | ux-researcher, product-analyst |
+| `AX-F8-T11` | Parse one complete TED eForms XML profile and rederive deterministic non-personal Candidate Claims | 02–04, 06, 08–10, 18, 19, 27, ADR-010, ADR-012 | connector-engineer, ontology-engineer, epistemic-admission, privacy-reviewer, security-reviewer, test-engineer, gate-evaluator |
 
 ## F9 — Paid design partners
 
