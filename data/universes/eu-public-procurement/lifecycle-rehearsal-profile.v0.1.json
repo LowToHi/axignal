@@ -1,0 +1,61 @@
+{
+  "schema": "axignal.procurement-lifecycle-rehearsal.v1",
+  "profile_id": "ted-eforms-procurement-lifecycle@0.1.0",
+  "goal_id": "AXIGNAL-GOAL-001",
+  "status": "SANDBOX_REHEARSAL_ONLY",
+  "sdk_release": "1.14.2",
+  "customization_id": "eforms-sdk-1.14",
+  "ubl_version": "2.3",
+  "supported_notice_profiles": [
+    {"document_type": "ContractNotice", "notice_type": "cn-standard", "notice_subtype": "16"},
+    {"document_type": "ContractAwardNotice", "notice_type": "can-standard", "notice_subtype": "29"}
+  ],
+  "lifecycle_events": [
+    "COMPETITION_INITIAL",
+    "COMPETITION_CORRECTION",
+    "NOTICE_CANCELLATION",
+    "PROCEDURE_RESULT"
+  ],
+  "lineage_rules": {
+    "change_reference": "exact previous notice UUID-version",
+    "single_initial_notice": true,
+    "same_procedure_identifier": true,
+    "stable_lot_identity_across_changes": true,
+    "result_lots_must_exist_in_competition": true,
+    "change_after_notice_cancellation": "REJECT",
+    "notice_cancellation_implies_procedure_cancellation": false,
+    "procedure_cancellation_requires": "ContractAwardNotice lot result with clos-nw and a non-award reason"
+  },
+  "evidence_object": {
+    "immutable": true,
+    "key_material": [
+      "notice_reference",
+      "raw_content_hash",
+      "claim_fingerprint",
+      "source_path",
+      "value_hash",
+      "parser_profile"
+    ],
+    "rights_state": "SANDBOX_ONLY",
+    "personal_values_allowed": false
+  },
+  "admission": {
+    "actual_source_outcome": "BLOCKED_SOURCE_NOT_PRODUCT_ADMITTED",
+    "sandbox_positive_outcome": "SANDBOX_ADMISSIBLE_REDERIVED",
+    "canonical_claim_writes": 0,
+    "model_calls": 0,
+    "reviewer_canonical_writes": 0
+  },
+  "dossier": {
+    "status": "TRACEABLE_SANDBOX_REHEARSAL",
+    "sections": ["lifecycle", "result", "admission"],
+    "unknowns_are_explicit": true,
+    "product_support_claim_authorised": false
+  },
+  "kill_switches": [
+    "keep TED at TECHNICAL_PROBE",
+    "keep procurement policy disabled",
+    "remove CI-only lifecycle module",
+    "preserve hashes and task history for audit"
+  ]
+}
