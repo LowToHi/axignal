@@ -6,7 +6,11 @@
   "status": "PRODUCT_ADMITTED_BOUNDED_PROFILE",
   "source_id": "src_ted_search_api_v3",
   "runtime_default": "DISABLED",
+  "activation_state": "PRIVATE_PILOT_ENABLED",
+  "activation_scope": "AUTHENTICATED_VERIFIED_ORGANISATIONS",
   "activation_flag": "AXIGNAL_TED_PROCUREMENT_ENABLED",
+  "live_source_flag": "AXIGNAL_TED_LIVE_SOURCES_ENABLED",
+  "ui_flag": "AXIGNAL_TED_PROCUREMENT_UI_ENABLED",
   "query_contract": {
     "query": "place-of-performance IN (LUX)",
     "scope": "ACTIVE",
@@ -64,8 +68,10 @@
   "rollback": {
     "source_kill_switch": true,
     "workflow_kill_switch": "AXIGNAL_TED_PROCUREMENT_ENABLED=false",
+    "live_source_kill_switch": "AXIGNAL_TED_LIVE_SOURCES_ENABLED=false",
     "preserve_prior_evidence": true,
     "delete_canonical_history": false
   },
-  "admitted_at": "2026-07-29T14:49:00Z"
+  "admitted_at": "2026-07-29T14:49:00Z",
+  "private_pilot_activated_at": "2026-07-29T17:36:00Z"
 }
