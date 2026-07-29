@@ -1,6 +1,6 @@
-version: 1
+version: 2
 status: private-pilot-candidate
-purpose: investor-incubator-demo
+purpose: investor-incubator-demo-and-bounded-design-partner-runtime
 public_launch_authorised: false
 billing_enabled: false
 human_study_required_before_public_claims: true
@@ -51,6 +51,12 @@ services:
     profile: workers
     credential_env: AXIGNAL_DATABASE_URL
     restart_policy: on-failure
+    networks:
+      - backend
+      - ted-egress
+    egress_policy:
+      purpose: bounded-ted-search
+      application_allowlist: https://api.ted.europa.eu/v3/notices/search
   - id: proposal-worker
     profile: workers
     credential_env: AXIGNAL_PROPOSAL_DATABASE_URL
@@ -72,7 +78,10 @@ security:
   api_public_ports_allowed: 0
   database_public_ports_allowed: 0
   direct_participant_pii: false
-  live_sources_enabled: false
+  global_live_sources_enabled: false
+  ted_bounded_live_source_enabled: true
+  ted_egress_service_allowlist:
+    - research-worker
   validation_campaign_enabled: false
   required_secret_classes:
     - database-admin
@@ -99,10 +108,19 @@ canonical_demo:
   reset: browser-local-state-only
   canonical_mutation_allowed: false
 
+bounded_ted_runtime:
+  task_id: AX-F8-T14
+  task_state: ACCEPTED
+  profile_id: ted-search-non-personal-projection@0.1.0
+  activation_scope: authenticated-private-pilot
+  public_general_availability: false
+  billing_required: false
+  model_calls: 0
+
 operations:
   backup_required_before_upgrade: true
   restore_rehearsal_required: true
   deployment_manifest_sha_required: true
   deployment_state: DEPLOYED_AWAITING_ACCEPTANCE
   independent_acceptance_required: true
-  rollback: restore-database-and-redeploy-previous-sha
+  rollback: disable-ted-worker-flags-or-source-and-redeploy-previous-sha
