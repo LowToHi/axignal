@@ -47,7 +47,8 @@
     "Simultaneous launch of all regions"
   ],
   "acceptance_evidence": [
-    {"evidence_type": "SCHEMA", "description": "The global source catalogue and canonical procurement extensions validate and preserve source-native identity, lifecycle and taxonomy fields.", "required": true, "location": "data/sources/global-public-procurement-catalogue.v0.1.json", "status": "PRESENT"},
+    {"evidence_type": "SCHEMA", "description": "The v0.2 catalogue records 146 source families across 140 jurisdiction and government-level scopes, split into eight regional inventories and a versioned implementation queue.", "required": true, "location": "data/sources/global-public-procurement-catalogue.v0.2.json", "status": "PRESENT"},
+    {"evidence_type": "TEST", "description": "Deterministic validation proves catalogue counts, unique identities, HTTPS or explicit feasibility boundaries, TED-only P0, SAM.gov first post-TED priority, NOCOPO long-tail placement and zero source admission.", "required": true, "location": "scripts/verify_global_procurement_catalogue.py / .github/workflows/global-procurement-catalogue.yml", "status": "PRESENT"},
     {"evidence_type": "RIGHTS_RECORD", "description": "The selected non-TED source has accepted collection, storage, model-input, transformation, display, export, redistribution, attribution and revocation records.", "required": true, "location": null, "status": "MISSING"},
     {"evidence_type": "TEST", "description": "Bounded connector, parser, normaliser, taxonomy, lifecycle, outage, replay and rollback tests pass for the exact source profile.", "required": true, "location": null, "status": "MISSING"},
     {"evidence_type": "BENCHMARK", "description": "Coverage, completeness, freshness, document availability, identifier stability, cost and crosswalk fidelity meet a predeclared source profile.", "required": true, "location": null, "status": "MISSING"},
@@ -81,5 +82,5 @@
   "owner": "source-admission",
   "reviewer": "gate-evaluator",
   "created_at": "2026-07-29T12:40:00Z",
-  "updated_at": "2026-07-29T12:40:00Z"
+  "updated_at": "2026-07-29T12:55:00Z"
 }
