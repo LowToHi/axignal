@@ -12,6 +12,8 @@ from defusedxml.common import DefusedXmlException
 
 from axignal_api.connectors.ted_eforms import (
     NS as BASE_NS,
+)
+from axignal_api.connectors.ted_eforms import (
     ProcurementCandidateClaim,
     TEDEFormsCN16Parser,
     TEDEFormsParseError,
