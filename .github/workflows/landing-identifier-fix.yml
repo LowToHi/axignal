@@ -1,0 +1,32 @@
+name: Landing Identifier Fix
+
+on:
+  push:
+    branches:
+      - agent/landing-globe-production-v0.1
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: agent/landing-globe-production-v0.1
+      - name: Correct identifier globally and retire workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          sed -i 's/ScrollTriggger/ScrollTrigger/g' apps/landing/components/landing-experience.tsx
+          test "$(grep -c 'ScrollTriggger' apps/landing/components/landing-experience.tsx || true)" = "0"
+          test "$(grep -c 'ScrollTrigger.create' apps/landing/components/landing-experience.tsx)" = "3"
+          rm .github/workflows/landing-identifier-fix.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/landing/components/landing-experience.tsx .github/workflows/landing-identifier-fix.yml
+          git commit -m "Correct all ScrollTrigger references"
+          git push origin HEAD:agent/landing-globe-production-v0.1
