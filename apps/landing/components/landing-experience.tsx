@@ -60,7 +60,7 @@ export function LandingExperience() {
         });
 
         if (story.current && globeStage.current) {
-          ScrollTriggger.create({
+          ScrollTrigger.create({
             trigger: story.current,
             start: "top top",
             end: "bottom bottom",
