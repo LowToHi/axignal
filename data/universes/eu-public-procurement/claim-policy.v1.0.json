@@ -1,0 +1,97 @@
+{
+  "schema": "axignal.procurement-claim-policy.v1",
+  "policy_id": "ted-procurement-observed@1.0.0",
+  "goal_id": "AXIGNAL-GOAL-001",
+  "universe_id": "eu_public_procurement",
+  "source_id": "src_ted_search_api_v3",
+  "status": "ENABLED_FEATURE_FLAGGED_BOUNDED_PROFILE",
+  "product_profile": "ted-eforms-non-personal@1.0.0",
+  "source_contract": {
+    "sdk_release": "1.14.2",
+    "customization_id": "eforms-sdk-1.14",
+    "ubl_version": "2.3",
+    "notice_subtypes": ["16", "29"],
+    "maximum_notices_per_run": 4,
+    "maximum_xml_bytes_per_notice": 2097152,
+    "raw_xml_persistence": false,
+    "raw_xml_redistribution": false,
+    "model_training": false
+  },
+  "producer_authority": {
+    "ted_retrieval_worker": "MAY_PERSIST_SANITISED_EVIDENCE_AND_PROPOSALS_ONLY",
+    "local_model": "PROPOSAL_ONLY_AND_NOT_USED_BY_THIS_PROFILE",
+    "external_model": "PROPOSAL_ONLY_AND_NOT_USED_BY_THIS_PROFILE",
+    "human_reviewer": "CONTEXT_ONLY",
+    "ted_admission_runtime": "SOLE_CANONICAL_WRITER_FOR_THIS_PROFILE"
+  },
+  "automatic_predicates": [
+    "procurement_notice_type",
+    "procurement_procedure_type",
+    "procurement_contract_nature",
+    "procurement_cpv_code",
+    "procurement_place_of_performance_nuts",
+    "procurement_estimated_value",
+    "procurement_lot_identifier",
+    "procurement_submission_deadline",
+    "procurement_eu_funding_indicator",
+    "procurement_notice_lifecycle_kind",
+    "procurement_changed_notice_reference",
+    "procurement_change_reason_code",
+    "procurement_result_lot_identifier",
+    "procurement_winner_selection_status",
+    "procurement_tenders_received_count",
+    "procurement_awarded_value",
+    "procurement_award_date"
+  ],
+  "excluded_identity_predicates": [
+    "procurement_buyer_official_name",
+    "procurement_buyer_identifier",
+    "procurement_winner_official_name",
+    "procurement_winner_organisation_ref",
+    "procurement_contract_identifier"
+  ],
+  "personal_data_policy": {
+    "raw_detection": "COUNT_ONLY",
+    "persistent_values": "PROHIBITED",
+    "canonical_values": "PROHIBITED",
+    "model_input": "PROHIBITED",
+    "analytics": "PROHIBITED",
+    "public_api": "PROHIBITED",
+    "export": "PROHIBITED"
+  },
+  "admission_gates": [
+    "source state PRODUCT_ADMITTED and kill switch off",
+    "exact product, parser and SDK profile",
+    "official direct XML URL derived from publication number",
+    "independent redownload and double parse",
+    "exact raw XML hash match without XML persistence",
+    "complete procedure and notice-version lineage",
+    "predicate allowlist and value-shape validation",
+    "exact Candidate Claim and Evidence Object fingerprint rederivation",
+    "zero personal or excluded identity values",
+    "attribution and modification disclosure present"
+  ],
+  "missing_data_policy": {
+    "rule": "Missing, unpublished, excluded or unmapped fields remain UNKNOWN or UNCOVERED.",
+    "zero_imputation": "PROHIBITED",
+    "silent_inference": "PROHIBITED"
+  },
+  "prohibited_profiles": [
+    "supplier_probability_of_winning",
+    "supplier_legal_eligibility",
+    "supplier_personal_suitability",
+    "expected_contract_profitability",
+    "guaranteed_opportunity",
+    "bid_submission_or_representation",
+    "personalised_investment_recommendation",
+    "natural_person_contact_as_opportunity_signal"
+  ],
+  "kill_switches": [
+    "source rights or privacy statement change",
+    "raw XML or personal value persistence",
+    "unknown eForms or parser profile",
+    "lineage or hash mismatch",
+    "attribution failure",
+    "unexpected admission-rate change"
+  ]
+}

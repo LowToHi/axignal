@@ -1,0 +1,78 @@
+{
+  "task_id": "AX-F8-T14",
+  "goal_id": "AXIGNAL-GOAL-001",
+  "phase": "F8",
+  "state": "IN_PROGRESS",
+  "objective": "Admit and persist the bounded non-personal TED eForms source profile through isolated retrieval and admission credentials connected to authenticated ResearchRuns.",
+  "outcome": "An authenticated procurement ResearchRun retrieves up to four official XML notices, persists only sanitised non-personal evidence, creates a durable admission handoff, independently redownloads and rederives claims under a separate credential, and returns canonical claims and a traceable dossier without raw XML or personal values.",
+  "contracts": ["GOAL_LOCK", "02", "03", "04", "06", "08", "09", "10", "18", "19", "27", "ADR-004", "ADR-010", "ADR-012"],
+  "skills": [
+    {"skill_id": "source-admission", "version": "0.1.0", "activation_reason": "Own the bounded PRODUCT_ADMITTED source profile and revocation decision."},
+    {"skill_id": "privacy-reviewer", "version": "0.1.0", "activation_reason": "Prohibit personal and ambiguous organisation identity values from persistence."},
+    {"skill_id": "connector-engineer", "version": "0.1.0", "activation_reason": "Pin direct official XML retrieval to publication-number URLs and budgets."},
+    {"skill_id": "evidence-provenance-engineer", "version": "0.1.0", "activation_reason": "Persist hashes, notice lineage, Evidence Objects and rederivable claims without raw XML."},
+    {"skill_id": "epistemic-admission", "version": "0.1.0", "activation_reason": "Redownload and rederive claims before any canonical write."},
+    {"skill_id": "security-reviewer", "version": "0.1.0", "activation_reason": "Prove two-credential isolation, SSRF resistance, rollback and kill switches."},
+    {"skill_id": "test-engineer", "version": "0.1.0", "activation_reason": "Exercise migration replay, end-to-end persistence, tamper blocking and restore."},
+    {"skill_id": "gate-evaluator", "version": "0.1.0", "activation_reason": "Keep bounded source admission separate from public universe launch."}
+  ],
+  "dependencies": {
+    "phases": ["F2", "F3"],
+    "tasks": ["AX-F8-T04", "AX-F8-T11", "AX-F8-T12", "AX-F8-T13"],
+    "external": ["TED legal notice", "TED privacy statement", "Commission Decision 2011/833/EU", "OP-TED eForms SDK 1.14.2 official examples"]
+  },
+  "allowed_scope": [
+    "Feature-flagged authenticated ResearchRuns",
+    "One explicit lifecycle of one to four TED publication numbers",
+    "Official direct XML retrieval with strict host and path allowlist",
+    "Transient raw XML processing only",
+    "Sanitised non-personal Evidence Objects and observed claims",
+    "Separate retrieval and deterministic-admission credentials",
+    "PostgreSQL and Valkey persistence, replay and rollback evidence"
+  ],
+  "prohibited_scope": [
+    "Raw TED XML persistence or redistribution",
+    "Natural-person contact values",
+    "Buyer or winner identity auto-admission",
+    "Unrestricted search iteration or bulk ingestion",
+    "Model training or model canonical authority",
+    "National procurement portals",
+    "Public launch, marketing, billing or bid execution"
+  ],
+  "acceptance_evidence": [
+    {"evidence_type": "RIGHTS_RECORD", "description": "Official rights and privacy review admits only the non-personal derived profile.", "required": true, "location": "data/sources/ted-search-api-v3.v1.0.json", "status": "PASS"},
+    {"evidence_type": "TEST", "description": "Unit tests prove URL pinning, profile filtering, job contracts and personal-value exclusion.", "required": true, "location": "apps/api/tests/test_ted_persistent_source.py", "status": "PRESENT"},
+    {"evidence_type": "TRACE", "description": "Official SDK 1.14.2 provides complete correction and subtype-29 result samples without raw-value artifact persistence.", "required": true, "location": "ted-official-sdk-sample-evidence.json", "status": "MISSING"},
+    {"evidence_type": "RESTORE_TEST", "description": "Migration 070 replays idempotently, the pre-070 snapshot restores, and failpoints leave zero partial state.", "required": true, "location": "ted-persistent-source-evidence.json", "status": "MISSING"},
+    {"evidence_type": "SECURITY_REVIEW", "description": "Real database roles prove worker canonical writes and admission Evidence mutations are denied.", "required": true, "location": "ted-persistent-source-evidence.json", "status": "MISSING"},
+    {"evidence_type": "DOCUMENT", "description": "Runbook defines operation, privacy, authority, kill switch, rollback and promotion limits.", "required": true, "location": "docs/runbooks/ted-persistent-source.md", "status": "PASS"}
+  ],
+  "impacts": {"security": "CRITICAL", "privacy": "CRITICAL", "data_rights": "CRITICAL", "regulatory": "MATERIAL", "multilingual": "MATERIAL", "epistemic": "CRITICAL", "billing": "NONE"},
+  "observability": {
+    "metrics": ["ted_retrieval_success_rate", "ted_xml_bytes", "ted_personal_elements_observed", "ted_personal_values_persisted", "ted_evidence_count", "ted_admission_outcomes", "ted_rollback_residue", "ted_kill_switch_state"],
+    "logs": ["publication-number hashes", "raw XML hashes", "lineage hash", "policy and parser version", "aggregate outcomes only"],
+    "traces": ["ResearchRun to retrieval outbox", "XML to sanitised Evidence Object", "handoff to independent redownload", "rederived claim to ledger"],
+    "alerts": ["raw XML or personal value persisted", "unknown profile", "hash or lineage mismatch", "source rights change", "credential boundary violation", "rollback residue"]
+  },
+  "rollback": {
+    "strategy": "Enable the TED source kill switch, disable AXIGNAL_TED_RESEARCH_ENABLED, stop both TED workers, quarantine pending handoffs, preserve immutable evidence and restore the pre-070 database snapshot when schema rollback is required.",
+    "kill_switch": "src_ted_search_api_v3 remains independently revocable; disabling it blocks both retrieval and admission.",
+    "tested": true
+  },
+  "goal_lock_checks": [
+    {"check_id": 1, "answer": "YES", "evidence": "The source creates a real recurring European procurement investigation workflow."},
+    {"check_id": 2, "answer": "YES", "evidence": "Every persisted fact binds to publication number, notice version, source path and XML hash."},
+    {"check_id": 3, "answer": "YES", "evidence": "Procedure, lot, geography and lifecycle facts support Globe, Graph and Timeline."},
+    {"check_id": 4, "answer": "YES", "evidence": "User interest cannot alter source facts, policy gates or admission outcomes."},
+    {"check_id": 5, "answer": "YES", "evidence": "Source values remain exact; identity values are excluded rather than translated or guessed."},
+    {"check_id": 6, "answer": "YES", "evidence": "Independent redownload and immutable lineage differentiate AXIGNAL from generic summarisation."},
+    {"check_id": 7, "answer": "YES", "evidence": "No suitability, profitability, recommendation, bid submission or representation is enabled."},
+    {"check_id": 8, "answer": "YES", "evidence": "Rights, privacy, third-party content and attribution are encoded as fail-closed gates."},
+    {"check_id": 9, "answer": "YES", "evidence": "Kill switch, feature flag, credential separation and snapshot restore preserve reversibility."},
+    {"check_id": 10, "answer": "YES", "evidence": "This is the exact authorised gate following parser, lifecycle and sandbox admission evidence."}
+  ],
+  "owner": "source-admission",
+  "reviewer": "gate-evaluator",
+  "created_at": "2026-07-29T11:35:00Z",
+  "updated_at": "2026-07-29T11:35:00Z"
+}

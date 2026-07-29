@@ -1,0 +1,45 @@
+{
+  "source_id": "src_ted_search_api_v3",
+  "name": "TED Search API v3 and official eForms XML notices — bounded non-personal profile",
+  "owner": "Publications Office of the European Union",
+  "jurisdiction": "European Union",
+  "documentation_url": "https://docs.ted.europa.eu/api/latest/search.html",
+  "licence_url": "https://ted.europa.eu/en/legal-notice",
+  "access": {
+    "mechanism": "API",
+    "authentication": "NONE",
+    "rate_limit_description": "Only explicitly requested publication numbers are downloaded through the official direct XML route. A ResearchRun is capped at four notices and 2 MiB per notice. Search iteration and bulk ingestion are outside this profile.",
+    "base_url": "https://api.ted.europa.eu/v3/notices/search"
+  },
+  "rights": {
+    "collection": "PERMITTED",
+    "transient_processing": "PERMITTED",
+    "persistent_storage": "CONDITIONAL",
+    "derived_calculations": "PERMITTED",
+    "internal_display": "PERMITTED",
+    "customer_display": "CONDITIONAL",
+    "export": "CONDITIONAL",
+    "api_redistribution": "CONDITIONAL",
+    "model_training": "PROHIBITED",
+    "attribution_required": true,
+    "retention_days": null,
+    "notes": "PRODUCT_ADMITTED applies only to the versioned ted-eforms-non-personal@1.0.0 projection. Raw XML, logos, third-party protected material, natural-person contact data, buyer/winner identity values and unrestricted notice redistribution are excluded. Persisted customer-visible values are deterministic non-personal procedure, geography, code, date and monetary facts with source attribution and modification disclosure.",
+    "reviewed_at": "2026-07-29T11:35:00Z"
+  },
+  "freshness": {
+    "expected_cadence": "Weekday OJ S publication; direct official XML is retrieved only for explicitly selected publication numbers.",
+    "expected_delay_seconds": null,
+    "stale_after_seconds": 172800,
+    "expire_after_seconds": 604800
+  },
+  "reliability_tier": "PRIMARY_AUTHORITY",
+  "lineage_group_id": "eu-ted-published-notices",
+  "contains_personal_data": true,
+  "contains_market_data": false,
+  "parser_version": "ted-eforms-procurement-lifecycle@0.1.0",
+  "operational_owner": "source-admission",
+  "status": "PRODUCT_ADMITTED",
+  "kill_switch_enabled": false,
+  "created_at": "2026-07-29T09:24:00Z",
+  "updated_at": "2026-07-29T11:35:00Z"
+}
