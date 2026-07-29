@@ -67,7 +67,7 @@ resolvers: set[str] = set(dynamic_resolvers)
 
 for name, port in re.findall(r"--entrypoints\.([A-Za-z0-9_.-]+)\.address=[^\n]*?:(\d+)", args, re.I):
     entrypoints.setdefault(name, set()).add(int(port))
-for name in re.findall(r"--certificatesresolvers\.([A-Za-z0-9_.-]+)\.", args, re.I):
+for name in re.findall(r"--certificatesresolvers\.([A-Za-z0-9_-]+)\.", args, re.I):
     resolvers.add(name)
 
 lines = static.splitlines()
