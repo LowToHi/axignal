@@ -1,15 +1,14 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
-
+import pathlib
 
 REQUIRED_FILES = {
-    "migration": Path("infra/postgres/100-stripe-paid-lifecycle.sql"),
-    "config": Path("apps/api/src/axignal_api/billing_config.py"),
-    "routes": Path("apps/api/src/axignal_api/billing_routes.py"),
-    "gateway": Path("apps/api/src/axignal_api/stripe_gateway.py"),
-    "signature": Path("apps/api/src/axignal_api/stripe_signature.py"),
+    "migration": pathlib.Path("infra/postgres/100-stripe-paid-lifecycle.sql"),
+    "config": pathlib.Path("apps/api/src/axignal_api/billing_config.py"),
+    "routes": pathlib.Path("apps/api/src/axignal_api/billing_routes.py"),
+    "gateway": pathlib.Path("apps/api/src/axignal_api/stripe_gateway.py"),
+    "signature": pathlib.Path("apps/api/src/axignal_api/stripe_signature.py"),
 }
 
 
