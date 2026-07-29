@@ -1,0 +1,45 @@
+{
+  "source_id": "src_ted_search_api_v3",
+  "name": "TED Search API v3 and official notice downloads",
+  "owner": "Publications Office of the European Union",
+  "jurisdiction": "European Union",
+  "documentation_url": "https://docs.ted.europa.eu/api/latest/search.html",
+  "licence_url": "https://ted.europa.eu/en/legal-notice",
+  "access": {
+    "mechanism": "API",
+    "authentication": "NONE",
+    "rate_limit_description": "Search API pagination is bounded to 250 notices and 10000 fields per page; iteration mode supports complete result traversal. Direct visualisation/download fair-use limits are separate and must not be conflated with Search API limits.",
+    "base_url": "https://api.ted.europa.eu/v3/notices/search"
+  },
+  "rights": {
+    "collection": "PERMITTED",
+    "transient_processing": "PERMITTED",
+    "persistent_storage": "CONDITIONAL",
+    "derived_calculations": "CONDITIONAL",
+    "internal_display": "CONDITIONAL",
+    "customer_display": "CONDITIONAL",
+    "export": "CONDITIONAL",
+    "api_redistribution": "CONDITIONAL",
+    "model_training": "UNKNOWN",
+    "attribution_required": true,
+    "retention_days": null,
+    "notes": "TED states that procurement notices in the OJ S may generally be reused for commercial or non-commercial purposes. SIMAP metadata is CC0 and editorial website content is CC BY 4.0. Reuse remains conditional on attribution, indication of changes, non-distortion, personal-data minimisation, third-party rights and exclusion of protected logos or industrial-property content. This source record authorises only a transient technical probe and frozen non-personal fixtures; it does not admit customer display, export, API redistribution or model training.",
+    "reviewed_at": "2026-07-29T09:24:00Z"
+  },
+  "freshness": {
+    "expected_cadence": "Weekday OJ S publication; official TED daily XML package available by 09:30 on publication days according to the source help page.",
+    "expected_delay_seconds": null,
+    "stale_after_seconds": 172800,
+    "expire_after_seconds": 604800
+  },
+  "reliability_tier": "PRIMARY_AUTHORITY",
+  "lineage_group_id": "eu-ted-published-notices",
+  "contains_personal_data": true,
+  "contains_market_data": false,
+  "parser_version": "ted-search-envelope@0.1.0",
+  "operational_owner": "source-admission",
+  "status": "TECHNICAL_PROBE",
+  "kill_switch_enabled": true,
+  "created_at": "2026-07-29T09:24:00Z",
+  "updated_at": "2026-07-29T09:24:00Z"
+}
