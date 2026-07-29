@@ -12,9 +12,9 @@ from defusedxml import ElementTree as SafeElementTree
 from defusedxml.common import DefusedXmlException
 
 SDK_RELEASE = "1.14.2"
-ARCHIVE_URL = (
-    "https://github.com/OP-TED/eForms-SDK/archive/refs/tags/1.14.2.zip"
-)
+ARCHIVE_URL = "https://github.com/OP-TED/eForms-SDK/archive/refs/tags/1.14.2.zip"
+EXPECTED_ARCHIVE_ROOT = f"eForms-SDK-{SDK_RELEASE}/"
+ACCEPTED_VERSION_MARKERS = frozenset({SDK_RELEASE, "${project.version}"})
 MAX_ARCHIVE_BYTES = 120 * 1024 * 1024
 MAX_EXAMPLE_BYTES = 2_097_152
 OUTPUT = Path("ted-official-sdk-sample-evidence.json")
@@ -68,13 +68,16 @@ def main() -> int:
     result_hashes: list[str] = []
     valid_example_count = 0
     with zipfile.ZipFile(io.BytesIO(archive)) as bundle:
-        version_entries = [name for name in bundle.namelist() if name.endswith("/VERSION")]
+        names = bundle.namelist()
+        if not names or any(not name.startswith(EXPECTED_ARCHIVE_ROOT) for name in names):
+            raise OfficialSampleError("Official SDK archive root differs from pinned tag")
+        version_entries = [name for name in names if name.endswith("/VERSION")]
         if len(version_entries) != 1:
             raise OfficialSampleError("Official SDK archive has no unique VERSION file")
-        version = bundle.read(version_entries[0]).decode("utf-8").strip()
-        if version != SDK_RELEASE:
-            raise OfficialSampleError("Official SDK archive version differs")
-        for name in sorted(bundle.namelist()):
+        version_marker = bundle.read(version_entries[0]).decode("utf-8").strip()
+        if version_marker not in ACCEPTED_VERSION_MARKERS:
+            raise OfficialSampleError("Official SDK archive VERSION marker differs")
+        for name in sorted(names):
             if "/examples/notices/" not in name or not name.endswith(".xml"):
                 continue
             raw = bundle.read(name)
@@ -131,6 +134,8 @@ def main() -> int:
     evidence = {
         "sdk_release": SDK_RELEASE,
         "archive_url": ARCHIVE_URL,
+        "archive_root": EXPECTED_ARCHIVE_ROOT,
+        "archive_version_marker": version_marker,
         "archive_hash": f"sha256:{sha256(archive).hexdigest()}",
         "valid_xml_example_count": valid_example_count,
         "complete_change_example_count": len(correction_hashes),
