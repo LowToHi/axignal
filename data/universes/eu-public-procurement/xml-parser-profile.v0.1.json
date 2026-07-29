@@ -1,0 +1,114 @@
+{
+  "schema": "axignal.ted-eforms-xml-parser-profile.v1",
+  "profile_id": "ted-eforms-cn16@0.1.0",
+  "goal_id": "AXIGNAL-GOAL-001",
+  "universe_id": "eu_public_procurement",
+  "source_id": "src_ted_search_api_v3",
+  "status": "EVIDENCE_PROFILE_NOT_RUNTIME_ENABLED",
+  "sdk": {
+    "release": "1.14.2",
+    "customization_id": "eforms-sdk-1.14",
+    "ubl_version": "2.3",
+    "repository": "OP-TED/eForms-SDK",
+    "licence": "CC-BY-4.0",
+    "pinned_example": "https://raw.githubusercontent.com/OP-TED/eForms-SDK/1.14.2/examples/notices/cn_24_minimal.xml"
+  },
+  "notice_profile": {
+    "document_type": "ContractNotice",
+    "notice_type": "cn-standard",
+    "notice_subtype": "16",
+    "unsupported_result": "QUARANTINED_UNSUPPORTED_PROFILE"
+  },
+  "security": {
+    "parser": "defusedxml.ElementTree",
+    "maximum_xml_bytes": 2097152,
+    "dtd_allowed": false,
+    "entities_allowed": false,
+    "external_resource_resolution": false,
+    "unknown_namespace_allowed": false,
+    "unknown_sdk_allowed": false
+  },
+  "required_fields": [
+    "cbc:UBLVersionID",
+    "cbc:CustomizationID",
+    "cbc:ID[@schemeName='notice-id']",
+    "cbc:IssueDate",
+    "cbc:VersionID",
+    "cbc:NoticeTypeCode",
+    "efac:NoticeSubType/cbc:SubTypeCode",
+    "at least one efac:Organization/efac:Company",
+    "at least one resolved cac:ContractingParty organisation reference"
+  ],
+  "optional_fields_preserved_as_unknown": [
+    "cbc:IssueTime",
+    "cbc:ContractFolderID",
+    "cac:TenderingProcess/cbc:ProcedureCode",
+    "organisation national identifier",
+    "organisation NUTS and country",
+    "procedure project title and description",
+    "contract nature",
+    "CPV codes",
+    "place of performance",
+    "estimated values and currency",
+    "lots",
+    "submission deadlines",
+    "EU funding indicator"
+  ],
+  "personal_elements_counted_but_never_emitted": [
+    "Contact",
+    "Telephone",
+    "Telefax",
+    "ElectronicMail",
+    "Person",
+    "FirstName",
+    "FamilyName"
+  ],
+  "candidate_claim_predicates": [
+    "procurement_notice_type",
+    "procurement_notice_subtype",
+    "procurement_notice_issue_date",
+    "procurement_procedure_identifier",
+    "procurement_procedure_type",
+    "procurement_buyer_organisation_ref",
+    "procurement_buyer_official_name",
+    "procurement_buyer_identifier",
+    "procurement_contract_nature",
+    "procurement_cpv_code",
+    "procurement_place_of_performance_nuts",
+    "procurement_estimated_value",
+    "procurement_lot_identifier",
+    "procurement_submission_deadline",
+    "procurement_eu_funding_indicator"
+  ],
+  "authority": {
+    "parser_output": "CANDIDATE_CLAIMS_ONLY",
+    "model_calls": 0,
+    "canonical_writes": 0,
+    "admission_policy": "ted-procurement-observed@0.1.0 remains disabled",
+    "human_reviewer": "NO_DIRECT_CANONICAL_AUTHORITY"
+  },
+  "evidence_artifact": {
+    "raw_xml_persisted": false,
+    "notice_values_persisted": false,
+    "notice_id_persisted": false,
+    "allowed": [
+      "raw XML SHA-256",
+      "hashed notice identity",
+      "SDK and notice profile",
+      "entity and claim counts",
+      "personal element count",
+      "authority and activation state"
+    ]
+  },
+  "kill_switches": [
+    "unknown SDK or UBL version",
+    "unknown document, notice type or subtype",
+    "unsafe XML declaration",
+    "payload size breach",
+    "unresolved buyer organisation reference",
+    "duplicate organisation identifier",
+    "personal contact value emitted",
+    "candidate fingerprint collision",
+    "policy or runtime activation before independent gate"
+  ]
+}
