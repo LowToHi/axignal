@@ -32,14 +32,23 @@ def main() -> None:
     require(profile["sdk"]["release"] == "1.14.2", "SDK release drifted")
     require(profile["sdk"]["customization_id"] == "eforms-sdk-1.14", "SDK ID drifted")
     require(profile["sdk"]["ubl_version"] == "2.3", "UBL version drifted")
-    require(profile["notice_profile"]["document_type"] == "ContractNotice", "document drifted")
-    require(profile["notice_profile"]["notice_type"] == "cn-standard", "notice type drifted")
+    require(
+        profile["notice_profile"]["document_type"] == "ContractNotice",
+        "document drifted",
+    )
+    require(
+        profile["notice_profile"]["notice_type"] == "cn-standard",
+        "notice type drifted",
+    )
     require(profile["notice_profile"]["notice_subtype"] == "16", "notice subtype drifted")
     require(profile["security"]["dtd_allowed"] is False, "DTD enabled")
     require(profile["security"]["entities_allowed"] is False, "entities enabled")
     require(profile["authority"]["model_calls"] == 0, "model authority introduced")
     require(profile["authority"]["canonical_writes"] == 0, "canonical writes introduced")
-    require(profile["evidence_artifact"]["raw_xml_persisted"] is False, "raw XML persistence enabled")
+    require(
+        profile["evidence_artifact"]["raw_xml_persisted"] is False,
+        "raw XML persistence enabled",
+    )
     require(
         profile["evidence_artifact"]["notice_values_persisted"] is False,
         "official notice values persistence enabled",
@@ -62,19 +71,31 @@ def main() -> None:
             format_checker=FormatChecker(),
         ).iter_errors(task)
     )
-    require(not errors, f"AX-F8-T11 task schema failure: {[item.message for item in errors]}")
+    require(
+        not errors,
+        f"AX-F8-T11 task schema failure: {[item.message for item in errors]}",
+    )
     require(task["state"] in {"IN_PROGRESS", "EVIDENCE_READY"}, "unexpected task state")
-    require(all(item["answer"] == "YES" for item in task["goal_lock_checks"]), "Goal Lock blocker")
+    require(
+        all(item["answer"] == "YES" for item in task["goal_lock_checks"]),
+        "Goal Lock blocker",
+    )
 
     catalogue = CATALOGUE_PATH.read_text(encoding="utf-8")
     runbook = RUNBOOK_PATH.read_text(encoding="utf-8")
     parser_source = PARSER_PATH.read_text(encoding="utf-8")
     require("AX-F8-T11" in catalogue, "task not registered in catalogue")
     require("defusedxml.ElementTree" in runbook, "safe-parser documentation missing")
-    require("SUPPORTED_CUSTOMIZATION_ID = \"eforms-sdk-1.14\"" in parser_source, "SDK code pin missing")
+    require(
+        'SUPPORTED_CUSTOMIZATION_ID = "eforms-sdk-1.14"' in parser_source,
+        "SDK code pin missing",
+    )
     require("PERSONAL_LOCAL_NAMES" in parser_source, "personal-field exclusion missing")
     require("candidate_claims" in parser_source, "Candidate Claim derivation missing")
-    require("canonical" not in profile["status"].casefold(), "profile status implies canonical authority")
+    require(
+        "canonical" not in profile["status"].casefold(),
+        "profile status implies canonical authority",
+    )
 
     print(
         json.dumps(
