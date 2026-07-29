@@ -1,0 +1,340 @@
+{
+  "schema": "axignal.universe-selection.v1",
+  "decision_id": "AX-F8-UNIVERSE-001",
+  "goal_id": "AXIGNAL-GOAL-001",
+  "version": "0.1.0",
+  "evaluated_at": "2026-07-29T09:24:00Z",
+  "status": "WEDGE_SELECTED_IMPLEMENTATION_NOT_ADMITTED",
+  "score_scale": {
+    "minimum": 0,
+    "maximum": 5,
+    "meaning": {
+      "0": "No credible path",
+      "1": "Severe unresolved defects",
+      "2": "Weak or materially fragmented path",
+      "3": "Plausible with substantial validation",
+      "4": "Strong evidence-backed path",
+      "5": "Exceptional fit with official evidence"
+    }
+  },
+  "criteria": [
+    {
+      "id": "buyer_value",
+      "weight": 20,
+      "description": "Recurring high-cost professional decision problem with identifiable budget owners"
+    },
+    {
+      "id": "workflow_frequency",
+      "weight": 10,
+      "description": "Cadence supports recurrent monitoring rather than one-off content consumption"
+    },
+    {
+      "id": "rights_clarity",
+      "weight": 15,
+      "description": "Credible lawful commercial-reuse path with source-specific review still required"
+    },
+    {
+      "id": "official_machine_access",
+      "weight": 15,
+      "description": "Stable official API, bulk data or machine-readable access path"
+    },
+    {
+      "id": "epistemic_fit",
+      "weight": 10,
+      "description": "Material claims can be represented atomically and admitted deterministically"
+    },
+    {
+      "id": "globe_graph_timeline_fit",
+      "weight": 10,
+      "description": "Geographic, relational and temporal structure advances the canonical product"
+    },
+    {
+      "id": "differentiation",
+      "weight": 10,
+      "description": "Structured history and evidence provide defensibility beyond generic search or chat"
+    },
+    {
+      "id": "cost_margin_fit",
+      "weight": 5,
+      "description": "Initial operation is compatible with public data, deterministic transforms and premium margins"
+    },
+    {
+      "id": "regulatory_simplicity",
+      "weight": 5,
+      "description": "Value can be delivered as observation and research without advice, execution or custody"
+    }
+  ],
+  "selection_gate": {
+    "minimum_total": 80,
+    "minimum_scores": {
+      "buyer_value": 4,
+      "rights_clarity": 4,
+      "official_machine_access": 4,
+      "regulatory_simplicity": 3
+    },
+    "required": [
+      "No personalised investment recommendation is required for the core workflow",
+      "No unauthorised scraping or redistribution is required",
+      "At least one official source can support a bounded technical probe",
+      "The universe can be disabled independently",
+      "Selection does not imply PRODUCT_ADMITTED"
+    ]
+  },
+  "candidates": [
+    {
+      "universe_id": "eu_public_procurement",
+      "name": "European public procurement intelligence",
+      "scores": {
+        "buyer_value": 5,
+        "workflow_frequency": 5,
+        "rights_clarity": 5,
+        "official_machine_access": 5,
+        "epistemic_fit": 4,
+        "globe_graph_timeline_fit": 5,
+        "differentiation": 4,
+        "cost_margin_fit": 5,
+        "regulatory_simplicity": 5
+      },
+      "weighted_total": 96,
+      "knockout_pass": true,
+      "decision": "SELECTED",
+      "rationale": "TED provides open machine access to published notices, bulk-reuse paths and an official procurement ontology. The universe supports recurring discovery, buyer and award graphs, geographic demand, deadlines, values and historical patterns without requiring transaction execution or personalised investment advice.",
+      "official_evidence": [
+        {
+          "title": "TED Search API",
+          "url": "https://docs.ted.europa.eu/api/latest/search.html",
+          "checked_at": "2026-07-29"
+        },
+        {
+          "title": "TED Open Data Search API reuse",
+          "url": "https://docs.ted.europa.eu/ODS/latest/reuse/search-api.html",
+          "checked_at": "2026-07-29"
+        },
+        {
+          "title": "EU eProcurement Ontology",
+          "url": "https://docs.ted.europa.eu/EPO/latest/index.html",
+          "checked_at": "2026-07-29"
+        },
+        {
+          "title": "European Commission public procurement overview",
+          "url": "https://single-market-economy.ec.europa.eu/single-market/public-procurement_en",
+          "checked_at": "2026-07-29"
+        },
+        {
+          "title": "Commission Decision 2011/833/EU on reuse",
+          "url": "https://eur-lex.europa.eu/eli/dec/2011/833/oj",
+          "checked_at": "2026-07-29"
+        }
+      ]
+    },
+    {
+      "universe_id": "eu_grants_non_dilutive_capital",
+      "name": "European grants and non-dilutive capital",
+      "scores": {
+        "buyer_value": 5,
+        "workflow_frequency": 4,
+        "rights_clarity": 4,
+        "official_machine_access": 3,
+        "epistemic_fit": 4,
+        "globe_graph_timeline_fit": 4,
+        "differentiation": 4,
+        "cost_margin_fit": 4,
+        "regulatory_simplicity": 5
+      },
+      "weighted_total": 82,
+      "knockout_pass": false,
+      "decision": "DEFERRED_ACCESS_FRAGMENTATION",
+      "rationale": "Commercial value is strong, but call, programme, award and national-source access is more fragmented. It remains the first adjacent expansion after a source-by-source machine-access and rights review.",
+      "official_evidence": [
+        {
+          "title": "European Commission funding and tender eligibility",
+          "url": "https://commission.europa.eu/funding-tenders/how-apply/eligibility-who-can-get-funding_en",
+          "checked_at": "2026-07-29"
+        },
+        {
+          "title": "Commission Decision 2011/833/EU on reuse",
+          "url": "https://eur-lex.europa.eu/eli/dec/2011/833/oj",
+          "checked_at": "2026-07-29"
+        }
+      ]
+    },
+    {
+      "universe_id": "eu_regulation_created_demand",
+      "name": "EU regulation-created business demand",
+      "scores": {
+        "buyer_value": 4,
+        "workflow_frequency": 3,
+        "rights_clarity": 5,
+        "official_machine_access": 4,
+        "epistemic_fit": 3,
+        "globe_graph_timeline_fit": 4,
+        "differentiation": 5,
+        "cost_margin_fit": 4,
+        "regulatory_simplicity": 3
+      },
+      "weighted_total": 80,
+      "knockout_pass": true,
+      "decision": "DEFERRED_INFERENCE_POLICY",
+      "rationale": "Official legal data and strong differentiation exist, but translating a legal obligation into economic demand requires a bounded inference ontology, jurisdictional review and explicit non-authoritative proposal handling.",
+      "official_evidence": [
+        {
+          "title": "EUR-Lex webservice",
+          "url": "https://eur-lex.europa.eu/content/help/data-reuse/webservice.html?locale=en",
+          "checked_at": "2026-07-29"
+        },
+        {
+          "title": "EUR-Lex content reuse and Cellar access",
+          "url": "https://eur-lex.europa.eu/content/help/data-reuse/reuse-contents-eurlex-details.html?locale=en",
+          "checked_at": "2026-07-29"
+        }
+      ]
+    },
+    {
+      "universe_id": "public_company_disclosures",
+      "name": "Public-company strategic disclosures",
+      "scores": {
+        "buyer_value": 4,
+        "workflow_frequency": 4,
+        "rights_clarity": 5,
+        "official_machine_access": 5,
+        "epistemic_fit": 4,
+        "globe_graph_timeline_fit": 3,
+        "differentiation": 3,
+        "cost_margin_fit": 5,
+        "regulatory_simplicity": 3
+      },
+      "weighted_total": 82,
+      "knockout_pass": true,
+      "decision": "DEFERRED_REGULATORY_AND_DIFFERENTIATION",
+      "rationale": "EDGAR offers excellent official machine access and deterministic facts, but the initial workflow is closer to established financial-data products and carries a more sensitive investment-information boundary.",
+      "official_evidence": [
+        {
+          "title": "SEC EDGAR APIs",
+          "url": "https://www.sec.gov/search-filings/edgar-application-programming-interfaces",
+          "checked_at": "2026-07-29"
+        }
+      ]
+    },
+    {
+      "universe_id": "eu_trade_supply_chain",
+      "name": "European trade and supply-chain shifts",
+      "scores": {
+        "buyer_value": 4,
+        "workflow_frequency": 4,
+        "rights_clarity": 5,
+        "official_machine_access": 4,
+        "epistemic_fit": 4,
+        "globe_graph_timeline_fit": 5,
+        "differentiation": 4,
+        "cost_margin_fit": 3,
+        "regulatory_simplicity": 5
+      },
+      "weighted_total": 85,
+      "knockout_pass": true,
+      "decision": "RUNNER_UP_CONTEXT_LAYER",
+      "rationale": "Comext is a strong official source and the universe fits Globe, Graph and Timeline. It is retained as the first context layer for procurement, but opportunity interpretation requires more aggregation, entity mapping and costly high-volume processing.",
+      "official_evidence": [
+        {
+          "title": "Eurostat Comext API",
+          "url": "https://ec.europa.eu/eurostat/web/user-guides/data-browser/api-data-access/api-getting-started/comext-database",
+          "checked_at": "2026-07-29"
+        },
+        {
+          "title": "Eurostat international trade in goods information",
+          "url": "https://ec.europa.eu/eurostat/web/international-trade-in-goods/information-data",
+          "checked_at": "2026-07-29"
+        }
+      ]
+    },
+    {
+      "universe_id": "macro_sovereign_context",
+      "name": "Macroeconomic and sovereign opportunity context",
+      "scores": {
+        "buyer_value": 3,
+        "workflow_frequency": 3,
+        "rights_clarity": 5,
+        "official_machine_access": 5,
+        "epistemic_fit": 5,
+        "globe_graph_timeline_fit": 4,
+        "differentiation": 2,
+        "cost_margin_fit": 5,
+        "regulatory_simplicity": 5
+      },
+      "weighted_total": 80,
+      "knockout_pass": false,
+      "decision": "CONTEXT_ONLY",
+      "rationale": "Official APIs and claim quality are excellent, but macro data alone does not create a sufficiently differentiated recurring commercial workflow. It remains a mandatory context layer rather than the wedge.",
+      "official_evidence": [
+        {
+          "title": "Eurostat API introduction",
+          "url": "https://ec.europa.eu/eurostat/web/user-guides/data-browser/api-data-access/api-introduction",
+          "checked_at": "2026-07-29"
+        }
+      ]
+    },
+    {
+      "universe_id": "european_real_assets_property",
+      "name": "European real assets and property",
+      "scores": {
+        "buyer_value": 5,
+        "workflow_frequency": 4,
+        "rights_clarity": 2,
+        "official_machine_access": 2,
+        "epistemic_fit": 3,
+        "globe_graph_timeline_fit": 5,
+        "differentiation": 4,
+        "cost_margin_fit": 2,
+        "regulatory_simplicity": 3
+      },
+      "weighted_total": 69,
+      "knockout_pass": false,
+      "decision": "REJECTED_FOR_INITIAL_WEDGE",
+      "rationale": "Buyer value and visual fit are strong, but cross-border source rights, listing access, transaction comparability and official machine coverage are too fragmented for the first lawful universe.",
+      "official_evidence": []
+    }
+  ],
+  "selected_universe": {
+    "universe_id": "eu_public_procurement",
+    "commercial_name": "European Public Procurement Intelligence",
+    "implementation_scope": "TED notices and awards with official macro and trade context only after independent source admission",
+    "initial_buyer_scope": [
+      "European SMEs and growth operators evaluating public-sector demand",
+      "Bid, market-entry and business-development advisers",
+      "Holdings, venture studios and corporate-development teams mapping demand and competitors",
+      "Professional research users monitoring procurement-driven market change"
+    ],
+    "first_high_value_workflow": "Discover and investigate newly published European procurement demand by geography, CPV sector, buyer, value band and deadline; inspect evidence, changes, award history, contradictions and missing coverage; save a monitored investigation trail.",
+    "authoritative_claim_classes": [
+      "OBSERVED notice publication and modification",
+      "OBSERVED buyer, procedure, lot, CPV, place of performance, deadline and stated value",
+      "OBSERVED award, winner and stated award value when published",
+      "CALCULATED time remaining and currency-normalised value with reproducible inputs",
+      "CALCULATED recurrence and concentration measures from admitted historical notices"
+    ],
+    "non_authoritative_or_prohibited": [
+      "Supplier suitability or probability of winning",
+      "Automatic interpretation that a tender is profitable",
+      "Personalised investment recommendation",
+      "Bid submission, transaction execution or representation",
+      "Canonical claims derived from personal contact data",
+      "Any source or field without a source-specific rights record"
+    ],
+    "admission_state": "NOT_PRODUCT_ADMITTED",
+    "public_marketing_state": "PROHIBITED_UNTIL_UNIVERSE_GATE",
+    "runtime_default": "DISABLED"
+  },
+  "next_authorised_tasks": [
+    "AX-F8-T03",
+    "AX-F8-T04",
+    "AX-F8-T05",
+    "AX-F8-T06"
+  ],
+  "explicitly_not_authorised": [
+    "Publicly claim that European procurement is supported",
+    "Enable unrestricted crawling or scraping",
+    "Ingest national portals without separate source admission",
+    "Add grants, regulation, filings or property as simultaneous launch universes",
+    "Create model authority over canonical procurement claims",
+    "Activate billing or entitlements based on this selection alone"
+  ]
+}
