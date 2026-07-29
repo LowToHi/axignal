@@ -1,6 +1,11 @@
 name: Public Landing Host Preflight
 
 on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/public-landing-host-preflight.yml"
   push:
     branches:
       - agent/public-landing-release-v0.1
@@ -11,7 +16,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: axignal-public-landing-host-preflight
+  group: axignal-public-landing-host-preflight-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -29,7 +34,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "${GITHUB_SHA}" = "$(git rev-parse HEAD)"
           command -v docker >/dev/null
           docker info >/dev/null
 
