@@ -42,7 +42,9 @@ class Settings:
     proposal_database_url: str | None
     persistent_research_enabled: bool
     live_sources_enabled: bool
+    ted_procurement_enabled: bool
     world_bank_fixture_path: Path | None
+    ted_fixture_path: Path | None
     queue_key: str
     proposal_queue_key: str
     document_fixture_path: Path | None
@@ -76,6 +78,7 @@ class Settings:
     @classmethod
     def from_env(cls) -> "Settings":
         fixture = environ.get("AXIGNAL_WORLD_BANK_FIXTURE_PATH")
+        ted_fixture = environ.get("AXIGNAL_TED_FIXTURE_PATH")
         document_fixture = environ.get("AXIGNAL_DOCUMENT_FIXTURE_PATH")
         proposal_fixture = environ.get("AXIGNAL_DOCUMENT_PROPOSAL_FIXTURE_PATH")
         object_store_root = environ.get("AXIGNAL_OBJECT_STORE_ROOT", ".axignal/objects")
@@ -113,7 +116,9 @@ class Settings:
                 "AXIGNAL_PERSISTENT_RESEARCH_ENABLED"
             ),
             live_sources_enabled=_bool_env("AXIGNAL_LIVE_SOURCES_ENABLED"),
+            ted_procurement_enabled=_bool_env("AXIGNAL_TED_PROCUREMENT_ENABLED"),
             world_bank_fixture_path=Path(fixture).resolve() if fixture else None,
+            ted_fixture_path=Path(ted_fixture).resolve() if ted_fixture else None,
             queue_key=environ.get(
                 "AXIGNAL_RESEARCH_QUEUE_KEY",
                 "axignal:research:queue:v1",
@@ -167,6 +172,15 @@ class Settings:
             raise RuntimeError("AXIGNAL_DATABASE_URL is required")
         if not self.valkey_url:
             raise RuntimeError("AXIGNAL_VALKEY_URL is required")
+
+    def require_ted_procurement(self) -> None:
+        self.require_persistent_research()
+        if not self.ted_procurement_enabled:
+            raise RuntimeError("TED procurement runtime is disabled")
+        if not self.live_sources_enabled and not self.ted_fixture_path:
+            raise RuntimeError(
+                "AXIGNAL_TED_FIXTURE_PATH is required when live sources are disabled"
+            )
 
     def require_document_proposal_worker(self) -> None:
         if not self.persistent_research_enabled:
