@@ -1,6 +1,6 @@
 # TED Product Admission Record v0.1
 
-Status: `PRODUCT_ADMITTED / BOUNDED NON-PERSONAL PROFILE / RUNTIME DEFAULT DISABLED`
+Status: `PRODUCT_ADMITTED / BOUNDED NON-PERSONAL PROFILE / PRIVATE PILOT ENABLED / RUNTIME DEFAULT DISABLED`
 
 Task: `AX-F8-T14`
 
@@ -20,6 +20,20 @@ The admitted profile is limited to one fixed query, one page, at most three acti
 - `notice-type`.
 
 No contact, email, telephone or natural-person field may be requested, persisted, displayed, exported or used for a canonical Claim.
+
+## Activation decision
+
+The profile is enabled only in the authenticated private-pilot topology for verified organisations. It remains disabled by default in generic environments and is not public general availability.
+
+The private pilot activates TED with three independent flags and controls:
+
+```text
+AXIGNAL_TED_PROCUREMENT_ENABLED=true
+AXIGNAL_TED_LIVE_SOURCES_ENABLED=true
+AXIGNAL_TED_PROCUREMENT_UI_ENABLED=true
+```
+
+The global `AXIGNAL_LIVE_SOURCES_ENABLED` flag remains `false`. Only the research worker joins the dedicated `ted-egress` network; API, web, PostgreSQL and Valkey remain without direct source egress.
 
 ## Official rights basis
 
@@ -52,7 +66,8 @@ AXIGNAL must not:
 - display official EU or TED logos as reusable content;
 - admit supplier suitability, win probability, profitability, legal conclusions or bid recommendations;
 - submit a bid or represent the user;
-- claim worldwide procurement coverage.
+- claim worldwide procurement coverage;
+- treat private-pilot acceptance as proof of buyer demand, willingness to pay, billing readiness or public launch readiness.
 
 ## Attribution
 
@@ -67,6 +82,8 @@ The source and workflow have independent controls:
 ```text
 source registry admission and kill switch
 → AXIGNAL_TED_PROCUREMENT_ENABLED
+→ AXIGNAL_TED_LIVE_SOURCES_ENABLED
+→ worker-exclusive ted-egress network
 → authenticated identity
 → server-resolved tenant
 → fixed query and field allowlist
@@ -79,8 +96,12 @@ source registry admission and kill switch
 → InvestigationContext polling
 ```
 
-The runtime remains disabled unless `AXIGNAL_TED_PROCUREMENT_ENABLED=true`. Trial, billing, global-source expansion and general-purpose AI remain disabled.
+The runtime remains disabled unless `AXIGNAL_TED_PROCUREMENT_ENABLED=true` and `AXIGNAL_TED_LIVE_SOURCES_ENABLED=true`. Trial, billing, global-source expansion, public general availability and general-purpose AI remain disabled.
+
+## Separation from commercial validation
+
+Qualified B2G buyer comprehension, willingness to pay, paid Design Partner evidence, trial entitlements and billing are governed by `AX-F9-T15`. They are not claimed as evidence for the source/runtime admission completed by `AX-F8-T14`.
 
 ## Rollback
 
-Rollback disables the TED workflow flag and/or source kill switch, blocks new runs fail-closed and preserves prior evidence, decisions and audit history. Canonical history is not deleted or rewritten.
+Rollback may disable the TED workflow flag, the dedicated live-source flag and/or the source registry kill switch. Each path blocks new runs fail-closed and preserves prior evidence, decisions and audit history. The tested source kill switch produces zero new Evidence Objects, Candidate Claims, canonical Claims or dossiers. Canonical history is not deleted or rewritten.
