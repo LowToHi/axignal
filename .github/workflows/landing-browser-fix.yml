@@ -1,0 +1,58 @@
+name: Landing Browser Fix
+
+on:
+  push:
+    branches:
+      - agent/landing-globe-production-v0.1
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: agent/landing-globe-production-v0.1
+      - name: Preserve direct-access visibility and mobile disclosure
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          experience = Path('apps/landing/components/landing-experience.tsx')
+          source = experience.read_text(encoding='utf-8')
+          old = '''            duration: 0.9,
+            ease: "power3.out",
+            scrollTrigger: {'''
+          new = '''            duration: 0.9,
+            ease: "power3.out",
+            immediateRender: false,
+            scrollTrigger: {'''
+          if old not in source and 'immediateRender: false' not in source:
+              raise SystemExit('section reveal contract not found')
+          if old in source:
+              source = source.replace(old, new, 1)
+          experience.write_text(source, encoding='utf-8')
+
+          styles = Path('apps/landing/app/globals.css')
+          css = styles.read_text(encoding='utf-8')
+          old_css = '.globe-progress,.synthetic-label{display:none}'
+          new_css = '.globe-progress{display:none}.synthetic-label{right:12px;bottom:12px;max-width:48%;text-align:right;font-size:7px}'
+          if old_css not in css and new_css not in css:
+              raise SystemExit('mobile disclosure contract not found')
+          css = css.replace(old_css, new_css, 1)
+          styles.write_text(css, encoding='utf-8')
+          PY
+          grep -q 'immediateRender: false' apps/landing/components/landing-experience.tsx
+          grep -q 'max-width:48%;text-align:right;font-size:7px' apps/landing/app/globals.css
+          rm .github/workflows/landing-browser-fix.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/landing/components/landing-experience.tsx apps/landing/app/globals.css .github/workflows/landing-browser-fix.yml
+          git commit -m "Fix landing direct access and mobile disclosure"
+          git push origin HEAD:agent/landing-globe-production-v0.1
