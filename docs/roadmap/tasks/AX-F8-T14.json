@@ -2,10 +2,10 @@
   "task_id": "AX-F8-T14",
   "goal_id": "AXIGNAL-GOAL-001",
   "phase": "F8",
-  "state": "READY",
+  "state": "IN_PROGRESS",
   "objective": "Complete source-specific TED product admission and connect the authenticated tenant-scoped ResearchRun loop to governed procurement evidence, claims and dossiers in InvestigationContext.",
   "outcome": "A verified organisation can create a persistent ResearchRun from Navigator, observe bounded progress, receive a source-linked procurement dossier and admitted claim state in InvestigationContext, and replay or roll back the workflow without fixture authority, tenant leakage or model-written canonical truth.",
-  "contracts": ["GOAL_LOCK", "02", "03", "04", "06", "07", "08", "09", "10", "12", "14", "18", "19", "25", "26", "27", "28", "ADR-004", "ADR-010", "ADR-012", "ADR-013"],
+  "contracts": ["GOAL_LOCK", "02", "03", "04", "06", "07", "08", "09", "10", "12", "14", "18", "19", "25", "26", "27", "28", "29", "ADR-004", "ADR-010", "ADR-012", "ADR-013", "ADR-014"],
   "skills": [
     {"skill_id": "source-admission", "version": "0.1.0", "activation_reason": "Resolve the exact TED rights, attribution, retention, display and revocation boundary before product use."},
     {"skill_id": "connector-engineer", "version": "0.1.0", "activation_reason": "Promote only the admitted TED profiles into bounded persistent execution."},
@@ -19,7 +19,7 @@
   "dependencies": {
     "phases": ["F2", "F3", "F4"],
     "tasks": ["AX-F8-T04", "AX-F8-T11", "AX-F8-T12", "AX-F8-T13"],
-    "external": ["Final TED source-right and attribution record", "Production identity and tenant resolution", "Persistent ResearchRun worker topology"]
+    "external": []
   },
   "allowed_scope": [
     "Exact source-specific TED PRODUCT_ADMITTED evaluation",
@@ -45,9 +45,9 @@
     "Public worldwide procurement coverage claim"
   ],
   "acceptance_evidence": [
-    {"evidence_type": "RIGHTS_RECORD", "description": "Exact TED commercial-use, storage, transformation, display, export, attribution, personal-data and revocation dimensions are accepted for the promoted profile.", "required": true, "location": null, "status": "MISSING"},
-    {"evidence_type": "TEST", "description": "Authenticated tenant-scoped E2E tests prove ResearchRun creation, progress, completion, dossier return, retry, expiry and isolation.", "required": true, "location": null, "status": "MISSING"},
-    {"evidence_type": "TRACE", "description": "One complete live or approved frozen run links source object, Evidence Objects, admission decisions, dossier and InvestigationContext without fixture authority.", "required": true, "location": null, "status": "MISSING"},
+    {"evidence_type": "RIGHTS_RECORD", "description": "Exact TED commercial-use, storage, transformation, display, export, attribution, personal-data and revocation dimensions are accepted for the promoted profile.", "required": true, "location": "docs/sources/ted-product-admission-v0.1.md", "status": "PASS"},
+    {"evidence_type": "TEST", "description": "Authenticated tenant-scoped E2E tests prove ResearchRun creation, progress, completion, dossier return and isolation; retry and expiry remain part of final gate closure.", "required": true, "location": ".github/workflows/ted-product-runtime.yml", "status": "PRESENT"},
+    {"evidence_type": "TRACE", "description": "One approved frozen run links source object, Evidence Objects, admission decisions, dossier and InvestigationContext without synthetic fixture authority in the returned product state.", "required": true, "location": "scripts/verify_ted_persistent_e2e.py", "status": "PRESENT"},
     {"evidence_type": "SECURITY_REVIEW", "description": "Tenant, queue, credential, export and kill-switch boundaries pass independent review.", "required": true, "location": null, "status": "MISSING"},
     {"evidence_type": "METRIC", "description": "Measured latency, source completeness, processing cost, failure rate and rollback residue satisfy the F8 profile.", "required": true, "location": null, "status": "MISSING"},
     {"evidence_type": "USER_RESEARCH", "description": "A qualified B2G user completes the opportunity-to-evidence workflow and understands the authority boundary.", "required": true, "location": null, "status": "MISSING"}
@@ -61,8 +61,8 @@
   },
   "rollback": {
     "strategy": "Disable the TED product source and ResearchRun procurement route, return the UI to the last accepted bounded fixture or read-only evidence state, and preserve append-only audit history.",
-    "kill_switch": "Per-source and per-workflow kill switches must stop new execution without deleting prior evidence.",
-    "tested": false
+    "kill_switch": "Per-source and per-workflow kill switches stop new execution without deleting prior evidence; focused tests prove both gates fail closed.",
+    "tested": true
   },
   "goal_lock_checks": [
     {"check_id": 1, "answer": "YES", "evidence": "The task completes the selected global-discovery wedge through a real professional workflow."},
@@ -79,5 +79,5 @@
   "owner": "backend-architect",
   "reviewer": "gate-evaluator",
   "created_at": "2026-07-29T12:30:00Z",
-  "updated_at": "2026-07-29T12:30:00Z"
+  "updated_at": "2026-07-29T14:49:00Z"
 }
