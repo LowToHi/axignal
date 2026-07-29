@@ -18,6 +18,7 @@ on:
       - "infra/postgres/Dockerfile"
       - "scripts/verify_entitlement_contract.py"
       - "scripts/verify_entitlement_runtime_e2e.py"
+      - "scripts/verify_entitlement_authority_e2e.py"
       - ".github/workflows/entitlement-runtime.yml"
   push:
     branches: [main, "agent/**"]
@@ -35,6 +36,7 @@ on:
       - "infra/postgres/Dockerfile"
       - "scripts/verify_entitlement_contract.py"
       - "scripts/verify_entitlement_runtime_e2e.py"
+      - "scripts/verify_entitlement_authority_e2e.py"
       - ".github/workflows/entitlement-runtime.yml"
 
 permissions:
@@ -73,7 +75,8 @@ jobs:
             apps/api/src/axignal_api/application.py \
             apps/api/tests/test_entitlement_runtime.py \
             scripts/verify_entitlement_contract.py \
-            scripts/verify_entitlement_runtime_e2e.py
+            scripts/verify_entitlement_runtime_e2e.py \
+            scripts/verify_entitlement_authority_e2e.py
       - name: Run scope, identity and token boundary tests
         run: pytest apps/api/tests/test_entitlement_runtime.py
       - name: Verify normative contract
@@ -115,11 +118,15 @@ jobs:
           python -m pip install -e ".[dev]"
       - name: Execute transactional entitlement circuit
         run: python scripts/verify_entitlement_runtime_e2e.py
+      - name: Verify mutation authority and concurrent idempotency
+        run: python scripts/verify_entitlement_authority_e2e.py
       - name: Upload non-sensitive E2E evidence
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: entitlement-runtime-e2e-${{ github.sha }}
-          path: artifacts/entitlement-runtime-e2e.json
+          path: |
+            artifacts/entitlement-runtime-e2e.json
+            artifacts/entitlement-authority-e2e.json
           if-no-files-found: error
           retention-days: 30
       - name: Dump PostgreSQL diagnostics on failure
