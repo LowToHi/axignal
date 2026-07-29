@@ -57,7 +57,12 @@ jobs:
           docker build --pull --file infra/landing/Dockerfile --tag "${image}" .
           docker image inspect "${image}" >/dev/null
           docker save "${image}" | gzip -9 > /tmp/axignal-landing-image.tar.gz
-          sha256sum /tmp/axignal-landing-image.tar.gz > /tmp/axignal-landing-image.tar.gz.sha256
+          (
+            cd /tmp
+            sha256sum axignal-landing-image.tar.gz > axignal-landing-image.tar.gz.sha256
+            test "$(awk '{print $2}' axignal-landing-image.tar.gz.sha256)" = "axignal-landing-image.tar.gz"
+            sha256sum -c axignal-landing-image.tar.gz.sha256
+          )
 
       - name: Materialise deploy credential and pin host identity
         shell: bash
