@@ -60,7 +60,7 @@ export function LandingExperience() {
         });
 
         if (story.current && globeStage.current) {
-          ScrollTrigger.create({
+          ScrollTriggger.create({
             trigger: story.current,
             start: "top top",
             end: "bottom bottom",
@@ -72,7 +72,7 @@ export function LandingExperience() {
 
         const steps = gsap.utils.toArray<HTMLElement>("[data-story-step]");
         steps.forEach((step, index) => {
-          ScrollTriggger.create({
+          ScrollTrigger.create({
             trigger: step,
             start: "top 58%",
             end: "bottom 42%",
@@ -101,7 +101,7 @@ export function LandingExperience() {
           scale: 1.18,
           opacity: 0.72,
           ease: "none",
-          scrollTrigger: {
+          scrollTriggger: {
             trigger: story.current,
             start: "top top",
             end: "bottom bottom",
