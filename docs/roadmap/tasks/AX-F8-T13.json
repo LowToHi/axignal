@@ -1,0 +1,70 @@
+{
+  "task_id": "AX-F8-T13",
+  "goal_id": "AXIGNAL-GOAL-001",
+  "phase": "F8",
+  "state": "EVIDENCE_READY",
+  "objective": "Reconstruct a bounded TED eForms notice lifecycle from frozen XML and produce immutable Evidence Objects, deterministic sandbox admission decisions and a traceable procurement dossier without enabling product or canonical authority.",
+  "outcome": "A version-pinned lifecycle supports initial CN16, correction, notice cancellation and CAN29 result notices; validates procedure, lot and previous-notice lineage; emits hashed Evidence Objects and a deterministic dossier; and proves blocking, replay and rollback.",
+  "contracts": ["GOAL_LOCK", "02", "03", "04", "06", "08", "09", "10", "18", "19", "27", "ADR-004", "ADR-010", "ADR-012"],
+  "skills": [
+    {"skill_id": "evidence-provenance-engineer", "version": "0.1.0", "activation_reason": "Bind every observed claim to notice-version XML and immutable evidence."},
+    {"skill_id": "epistemic-admission", "version": "0.1.0", "activation_reason": "Apply deterministic sandbox admission after independent reparse and lineage validation."},
+    {"skill_id": "ontology-engineer", "version": "0.1.0", "activation_reason": "Model correction, notice cancellation, result, lot and contract lifecycle semantics."},
+    {"skill_id": "privacy-reviewer", "version": "0.1.0", "activation_reason": "Exclude personal contact values from claims, dossiers and CI evidence."},
+    {"skill_id": "test-engineer", "version": "0.1.0", "activation_reason": "Prove lineage rejection, deterministic replay, rollback and dossier stability."},
+    {"skill_id": "gate-evaluator", "version": "0.1.0", "activation_reason": "Keep TECHNICAL_PROBE, sandbox and PRODUCT_ADMITTED states distinct."}
+  ],
+  "dependencies": {
+    "phases": ["F2", "F3"],
+    "tasks": ["AX-F8-T04", "AX-F8-T11", "AX-F8-T12"],
+    "external": ["OP-TED eForms SDK 1.14.2 change and competition-result structures"]
+  },
+  "allowed_scope": [
+    "Frozen synthetic XML using official eForms structures",
+    "CN16 correction and notice-cancellation lineage",
+    "CAN29 competition results",
+    "Immutable provisional Evidence Objects",
+    "Deterministic sandbox admission",
+    "Traceable sandbox procurement dossier",
+    "CI-only replay and rollback"
+  ],
+  "prohibited_scope": [
+    "TED PRODUCT_ADMITTED state",
+    "Production database, queue or ResearchRun wiring",
+    "Canonical Claim Ledger writes",
+    "Personal contact values in claims or artifacts",
+    "Supplier suitability, win probability or profitability claims",
+    "Bid submission or representation",
+    "Public claim that procurement is a supported universe"
+  ],
+  "acceptance_evidence": [
+    {"evidence_type": "SCHEMA", "description": "Versioned lifecycle, evidence, admission and dossier profile.", "required": true, "location": "data/universes/eu-public-procurement/lifecycle-rehearsal-profile.v0.1.json", "status": "PASS"},
+    {"evidence_type": "TEST", "description": "Tests cover full lifecycle, cancellation semantics, dangling references, unknown lots, privacy, replay and rollback.", "required": true, "location": "apps/api/tests/test_procurement_lifecycle_rehearsal.py", "status": "PASS"},
+    {"evidence_type": "TRACE", "description": "Non-sensitive CI evidence reports hashes, counts, state and zero canonical writes.", "required": true, "location": "GitHub Actions run 30447607867 / procurement-lifecycle-rehearsal-evidence.json", "status": "PASS"},
+    {"evidence_type": "DOCUMENT", "description": "Runbook records lifecycle semantics, authority boundaries and promotion blockers.", "required": true, "location": "docs/sources/procurement-lifecycle-rehearsal-v0.1.md", "status": "PASS"}
+  ],
+  "impacts": {"security": "MATERIAL", "privacy": "MATERIAL", "data_rights": "MATERIAL", "regulatory": "LOW", "multilingual": "LOW", "epistemic": "CRITICAL", "billing": "NONE"},
+  "observability": {
+    "metrics": ["lifecycle_notice_count", "lineage_rejection_count", "evidence_object_count", "sandbox_admissible_count", "dossier_state_count", "rollback_residue_count", "canonical_claim_write_count"],
+    "logs": ["notice and event hashes", "aggregate admission outcomes", "dossier hash", "source and policy state"],
+    "traces": ["XML to notice lineage", "claim to Evidence Object", "Evidence Object to admission decision", "lifecycle to dossier"],
+    "alerts": ["dangling or cyclic lineage", "unknown result lot", "personal value emission", "positive actual-source admission", "rollback residue"]
+  },
+  "rollback": {"strategy": "Remove lifecycle rehearsal code and CI wiring while preserving the frozen parser, task record and aggregate hashes.", "kill_switch": "TED and its claim policy remain disabled outside the CI sandbox.", "tested": true},
+  "goal_lock_checks": [
+    {"check_id": 1, "answer": "YES", "evidence": "The lifecycle advances global discovery to official evidence and results."},
+    {"check_id": 2, "answer": "YES", "evidence": "Every claim is linked to a notice reference, XML hash, source path and Evidence Object."},
+    {"check_id": 3, "answer": "YES", "evidence": "Lot, procedure, award and timeline semantics remain usable by Globe, Graph and Timeline."},
+    {"check_id": 4, "answer": "YES", "evidence": "No user-interest signal participates in lifecycle truth."},
+    {"check_id": 5, "answer": "YES", "evidence": "Original source values and language-sensitive names remain hashed and traceable without lossy translation."},
+    {"check_id": 6, "answer": "YES", "evidence": "Versioned lineage and immutable evidence increase differentiation from generic summarisation."},
+    {"check_id": 7, "answer": "YES", "evidence": "The dossier explicitly excludes suitability, bidding, profitability and personalised advice."},
+    {"check_id": 8, "answer": "YES", "evidence": "The actual source gate blocks admission and personal values are excluded."},
+    {"check_id": 9, "answer": "YES", "evidence": "The sandbox is removable and forced failure proves zero residual state."},
+    {"check_id": 10, "answer": "YES", "evidence": "It directly advances the authorised procurement lineage and admission gate."}
+  ],
+  "owner": "evidence-provenance-engineer",
+  "reviewer": "gate-evaluator",
+  "created_at": "2026-07-29T10:54:00Z",
+  "updated_at": "2026-07-29T11:31:00Z"
+}
