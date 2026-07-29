@@ -86,7 +86,9 @@ def _assert_cross_tenant_hidden(dsn: str, reservation_id: UUID) -> None:
         psycopg.connect(dsn, row_factory=dict_row) as connection,
         connection.cursor() as cursor,
     ):
-        cursor.execute(sql.SQL("SET LOCAL ROLE {}" ).format(sql.Identifier("axignal_app")))
+        cursor.execute(
+            sql.SQL("SET LOCAL ROLE {}").format(sql.Identifier("axignal_app"))
+        )
         cursor.execute(
             "SELECT set_config('app.tenant_id', %s, true)",
             (str(TENANT_B),),
