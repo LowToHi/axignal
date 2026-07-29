@@ -1,0 +1,202 @@
+{
+  "task_id": "AX-F8-T02",
+  "goal_id": "AXIGNAL-GOAL-001",
+  "phase": "F8",
+  "state": "ACCEPTED",
+  "objective": "Select one first commercial wedge through the explicit universe gate without conflating selection, implementation, source admission or market support.",
+  "outcome": "European Public Procurement Intelligence is selected as the sole first implementation wedge, with TED as the first source family to enter legal and technical admission and with all runtime and public-support claims disabled by default.",
+  "contracts": [
+    "GOAL_LOCK",
+    "00",
+    "01",
+    "03",
+    "08",
+    "11",
+    "18",
+    "ADR-004",
+    "ADR-012"
+  ],
+  "skills": [
+    {
+      "skill_id": "universe-selector",
+      "version": "0.1.0",
+      "activation_reason": "Own the single-wedge decision and adjacent-universe deferrals."
+    },
+    {
+      "skill_id": "gate-evaluator",
+      "version": "0.1.0",
+      "activation_reason": "Verify that the selected candidate passes every score and knockout threshold."
+    },
+    {
+      "skill_id": "source-admission",
+      "version": "0.1.0",
+      "activation_reason": "Define the next source-admission boundary without prematurely approving TED."
+    },
+    {
+      "skill_id": "hypothesis-curator",
+      "version": "0.1.0",
+      "activation_reason": "Move H-006 into a test-designed state without claiming demand validation."
+    },
+    {
+      "skill_id": "goal-keeper",
+      "version": "0.1.0",
+      "activation_reason": "Prevent the wedge from becoming a bid-management tool or generic tender aggregator."
+    }
+  ],
+  "dependencies": {
+    "phases": [
+      "F0",
+      "F1",
+      "F2",
+      "F3",
+      "F4",
+      "F5"
+    ],
+    "tasks": [
+      "AX-F8-T01"
+    ],
+    "external": [
+      "TED Search API and ODS reuse documentation",
+      "EU eProcurement Ontology",
+      "Commission Decision 2011/833/EU",
+      "European Commission public procurement market evidence"
+    ]
+  },
+  "allowed_scope": [
+    "Durable universe-selection ADR",
+    "Hypothesis-register transition",
+    "Definition of the first high-value workflow",
+    "Definition of authoritative and prohibited claim classes",
+    "Authorisation of AX-F8-T03 through AX-F8-T06",
+    "Fail-closed implementation and public-marketing states"
+  ],
+  "prohibited_scope": [
+    "Source PRODUCT_ADMITTED state",
+    "Claim that AXIGNAL already covers European procurement",
+    "Live ingestion or publication of TED data",
+    "National procurement portal expansion",
+    "Automatic supplier suitability, profitability or win-probability claims",
+    "Bid submission or procurement representation",
+    "Billing activation",
+    "Simultaneous launch of additional universes"
+  ],
+  "acceptance_evidence": [
+    {
+      "evidence_type": "DOCUMENT",
+      "description": "ADR-012 records one selected wedge and all deferred alternatives.",
+      "required": true,
+      "location": "docs/adr/ADR-012-european-public-procurement-first-universe.md",
+      "status": "PASS"
+    },
+    {
+      "evidence_type": "BENCHMARK",
+      "description": "The selected wedge ranks first at 96/100 and passes every knockout threshold.",
+      "required": true,
+      "location": "data/universes/first-lawful-universe-scorecard.v0.1.json",
+      "status": "PASS"
+    },
+    {
+      "evidence_type": "TEST",
+      "description": "Deterministic verifier proves exactly one selected universe, recomputes totals and rejects admission-state escalation.",
+      "required": true,
+      "location": "scripts/verify_first_lawful_universe.py",
+      "status": "PASS"
+    },
+    {
+      "evidence_type": "DOCUMENT",
+      "description": "H-006 is converted to TEST_DESIGNED with explicit falsification and no user-demand claim.",
+      "required": true,
+      "location": "docs/contracts/11-hypothesis-register.md",
+      "status": "PASS"
+    }
+  ],
+  "impacts": {
+    "security": "LOW",
+    "privacy": "MATERIAL",
+    "data_rights": "MATERIAL",
+    "regulatory": "MATERIAL",
+    "multilingual": "MATERIAL",
+    "epistemic": "MATERIAL",
+    "billing": "LOW"
+  },
+  "observability": {
+    "metrics": [
+      "selected_universe_count",
+      "selected_universe_weighted_score",
+      "source_admission_state",
+      "public_marketing_state"
+    ],
+    "logs": [
+      "selected universe decision",
+      "deferred alternative reasons",
+      "next authorised task set"
+    ],
+    "traces": [],
+    "alerts": [
+      "selected universe count differs from one",
+      "source admission changes without AX-F8-T04 evidence",
+      "public support claim appears before universe gate"
+    ]
+  },
+  "rollback": {
+    "strategy": "Supersede ADR-012, set the wedge decision to REJECTED or SUPERSEDED, and leave all runtime/source switches disabled; no data migration is required at selection stage.",
+    "kill_switch": "eu_public_procurement remains NOT_PRODUCT_ADMITTED and disabled until independent source, ontology, policy and universe gates pass.",
+    "tested": true
+  },
+  "goal_lock_checks": [
+    {
+      "check_id": 1,
+      "answer": "YES",
+      "evidence": "The first workflow starts with geographic and sector discovery and drills into official notice evidence."
+    },
+    {
+      "check_id": 2,
+      "answer": "YES",
+      "evidence": "Only observed and reproducibly calculated notice claims are eligible for future deterministic admission."
+    },
+    {
+      "check_id": 3,
+      "answer": "YES",
+      "evidence": "Buyer, supplier, lot and award relations align with Graph; locations align with Globe; notices and awards align with Timeline."
+    },
+    {
+      "check_id": 4,
+      "answer": "YES",
+      "evidence": "Commercial demand selected the wedge but cannot prove any procurement opportunity claim."
+    },
+    {
+      "check_id": 5,
+      "answer": "YES",
+      "evidence": "TED notice language and canonical CPV/geography semantics can preserve original and localised renderings."
+    },
+    {
+      "check_id": 6,
+      "answer": "YES",
+      "evidence": "Versioned notice changes, awards, contradictions and persistent investigation trails create state beyond a generic answer."
+    },
+    {
+      "check_id": 7,
+      "answer": "YES",
+      "evidence": "The decision explicitly excludes suitability, win probability, bid execution and personal investment advice."
+    },
+    {
+      "check_id": 8,
+      "answer": "YES",
+      "evidence": "TED enters legal review and technical probe rather than automatic product admission; personal contact fields are excluded from canonical product claims."
+    },
+    {
+      "check_id": 9,
+      "answer": "YES",
+      "evidence": "The wedge remains disabled and the ADR can be superseded without runtime or data migration."
+    },
+    {
+      "check_id": 10,
+      "answer": "YES",
+      "evidence": "The task completes the explicitly authorised single-wedge selection gate and activates only bounded follow-up tasks."
+    }
+  ],
+  "owner": "universe-selector",
+  "reviewer": "goal-keeper",
+  "created_at": "2026-07-29T09:24:00Z",
+  "updated_at": "2026-07-29T09:24:00Z"
+}
