@@ -1,0 +1,206 @@
+{
+  "task_id": "AX-F8-T06",
+  "goal_id": "AXIGNAL-GOAL-001",
+  "phase": "F8",
+  "state": "EVIDENCE_READY",
+  "objective": "Define fail-closed procurement claim policies that admit only rederived observed or reproducibly calculated facts and prohibit supplier suitability, win probability, profitability and bid execution claims.",
+  "outcome": "A disabled versioned policy enumerates observed profiles, calculated profiles, proposal-only profiles, prohibited profiles, evidence prerequisites, personal-data exclusions, missing-data handling, notice-version propagation and kill switches.",
+  "contracts": [
+    "GOAL_LOCK",
+    "00",
+    "02",
+    "03",
+    "06",
+    "08",
+    "09",
+    "18",
+    "ADR-004",
+    "ADR-010",
+    "ADR-012"
+  ],
+  "skills": [
+    {
+      "skill_id": "epistemic-admission",
+      "version": "0.1.0",
+      "activation_reason": "Define the only procurement predicates eligible for deterministic canonical admission."
+    },
+    {
+      "skill_id": "source-admission",
+      "version": "0.1.0",
+      "activation_reason": "Require source state, rights snapshot and field-level lineage."
+    },
+    {
+      "skill_id": "privacy-reviewer",
+      "version": "0.1.0",
+      "activation_reason": "Prohibit natural-person contact data from canonical claims and default model input."
+    },
+    {
+      "skill_id": "test-engineer",
+      "version": "0.1.0",
+      "activation_reason": "Validate disabled activation, required evidence and forbidden predicates."
+    },
+    {
+      "skill_id": "gate-evaluator",
+      "version": "0.1.0",
+      "activation_reason": "Prevent a policy specification from being treated as an active admission runtime."
+    }
+  ],
+  "dependencies": {
+    "phases": [
+      "F3"
+    ],
+    "tasks": [
+      "AX-F8-T03",
+      "AX-F8-T04",
+      "AX-F8-T05"
+    ],
+    "external": [
+      "Complete XML parser and field mapping remain required before activation"
+    ]
+  },
+  "allowed_scope": [
+    "Versioned policy specification",
+    "Observed and calculated predicate definitions",
+    "Evidence prerequisites",
+    "Proposal-only and prohibited classifications",
+    "Missing-data and version-propagation rules",
+    "Personal-data exclusions",
+    "Kill switches"
+  ],
+  "prohibited_scope": [
+    "Policy activation",
+    "Canonical procurement claim writes",
+    "Automatic admission from Search API projection alone",
+    "Automatic admission of model output",
+    "Human bypass of deterministic gates",
+    "Supplier suitability, legal eligibility, win probability or profitability",
+    "Bid submission or personalised investment advice"
+  ],
+  "acceptance_evidence": [
+    {
+      "evidence_type": "SCHEMA",
+      "description": "Machine-readable policy defines observed, calculated, proposal-only and prohibited procurement predicates.",
+      "required": true,
+      "location": "data/universes/eu-public-procurement/claim-policy.v0.1.json",
+      "status": "PASS"
+    },
+    {
+      "evidence_type": "TEST",
+      "description": "Verifier proves the policy remains disabled, source admission and XML evidence are required, and missing values cannot become zero.",
+      "required": true,
+      "location": "scripts/verify_first_lawful_universe.py",
+      "status": "PRESENT"
+    },
+    {
+      "evidence_type": "TRACE",
+      "description": "A complete official XML notice is rederived under the policy and produces deterministic candidate decisions.",
+      "required": true,
+      "location": null,
+      "status": "MISSING"
+    },
+    {
+      "evidence_type": "TEST",
+      "description": "Independent admission-runtime implementation proves rollback, replay and zero model or reviewer canonical authority.",
+      "required": true,
+      "location": null,
+      "status": "MISSING"
+    }
+  ],
+  "impacts": {
+    "security": "MATERIAL",
+    "privacy": "MATERIAL",
+    "data_rights": "MATERIAL",
+    "regulatory": "MATERIAL",
+    "multilingual": "LOW",
+    "epistemic": "CRITICAL",
+    "billing": "NONE"
+  },
+  "observability": {
+    "metrics": [
+      "procurement_candidate_to_admitted_rate",
+      "procurement_rejection_reason_distribution",
+      "procurement_unknown_field_rate",
+      "procurement_policy_version_count",
+      "personal_field_admission_attempt_count"
+    ],
+    "logs": [
+      "policy version",
+      "source and rights snapshot",
+      "field path",
+      "decision reason",
+      "kill-switch state"
+    ],
+    "traces": [
+      "raw XML field to Candidate Claim",
+      "independent rederivation to admission decision"
+    ],
+    "alerts": [
+      "policy activated before source and parser admission",
+      "model or reviewer canonical write attempt",
+      "missing data converted to zero or false",
+      "personal field admission attempt",
+      "unexpected admission-rate change"
+    ]
+  },
+  "rollback": {
+    "strategy": "Disable the policy version, replay affected decisions under the previous version and retract or contest dependent claims through append-only transitions.",
+    "kill_switch": "Policy status is DISABLED_PENDING_PRODUCT_ADMISSION_AND_XML_PARSER.",
+    "tested": true
+  },
+  "goal_lock_checks": [
+    {
+      "check_id": 1,
+      "answer": "YES",
+      "evidence": "The policy converts official notice evidence into inspectable atomic claims."
+    },
+    {
+      "check_id": 2,
+      "answer": "YES",
+      "evidence": "Complete raw evidence, field paths, checksums and versions are mandatory."
+    },
+    {
+      "check_id": 3,
+      "answer": "YES",
+      "evidence": "Admitted predicates cover geography, relationships and lifecycle time."
+    },
+    {
+      "check_id": 4,
+      "answer": "YES",
+      "evidence": "No attention or demand signal appears in the evidence requirements."
+    },
+    {
+      "check_id": 5,
+      "answer": "YES",
+      "evidence": "Source-language fields remain evidence while translations remain renderings."
+    },
+    {
+      "check_id": 6,
+      "answer": "YES",
+      "evidence": "Deterministic admission and version replay create defensible product state."
+    },
+    {
+      "check_id": 7,
+      "answer": "YES",
+      "evidence": "Suitability, win probability, profitability, execution and personal advice are prohibited."
+    },
+    {
+      "check_id": 8,
+      "answer": "YES",
+      "evidence": "Source rights and personal-data exclusions are mandatory admission inputs."
+    },
+    {
+      "check_id": 9,
+      "answer": "YES",
+      "evidence": "The policy has independent source, parser, field, country and subtype kill switches."
+    },
+    {
+      "check_id": 10,
+      "answer": "YES",
+      "evidence": "The task advances the claim-policy dependency while remaining disabled."
+    }
+  ],
+  "owner": "epistemic-admission",
+  "reviewer": "gate-evaluator",
+  "created_at": "2026-07-29T09:24:00Z",
+  "updated_at": "2026-07-29T09:24:00Z"
+}
