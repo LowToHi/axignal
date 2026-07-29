@@ -76,6 +76,7 @@ compose exec -T "$service" pg_dump \
 
 for _ in 1 2; do
   admin_psql "$rehearsal_db" < infra/postgres/070-ted-persistent-source.sql
+  admin_psql "$rehearsal_db" < infra/postgres/071-ted-worker-idempotent-replay-grant.sql
 done
 
 test "$(query_scalar "$rehearsal_db" "SELECT count(*) FROM tenant_private.research_runs WHERE research_run_id='70000000-0000-4000-8000-000000000001';")" = "1"
@@ -89,6 +90,8 @@ test "$(query_scalar "$rehearsal_db" "SELECT rolcanlogin FROM pg_roles WHERE rol
 test "$(query_scalar "$rehearsal_db" "SELECT has_table_privilege('axignal_ted_worker','axignal_global.canonical_claims','INSERT');")" = "f"
 test "$(query_scalar "$rehearsal_db" "SELECT has_table_privilege('axignal_ted_admission_runtime','axignal_global.evidence_objects','UPDATE');")" = "f"
 test "$(query_scalar "$rehearsal_db" "SELECT has_table_privilege('axignal_ted_worker','axignal_global.evidence_objects','INSERT');")" = "t"
+test "$(query_scalar "$rehearsal_db" "SELECT has_column_privilege('axignal_ted_worker','axignal_global.candidate_claims','updated_at','UPDATE');")" = "t"
+test "$(query_scalar "$rehearsal_db" "SELECT has_column_privilege('axignal_ted_worker','axignal_global.candidate_claims','state','UPDATE');")" = "f"
 test "$(query_scalar "$rehearsal_db" "SELECT has_table_privilege('axignal_ted_admission_runtime','axignal_global.canonical_claims','INSERT');")" = "t"
 
 compose exec -T "$service" pg_restore \
@@ -103,8 +106,10 @@ cat <<'JSON'
 {
   "pre_070_snapshot_created": true,
   "migration_070_applied": true,
-  "migration_070_replay_idempotent": true,
+  "migration_071_applied": true,
+  "migration_070_071_replay_idempotent": true,
   "seeded_research_run_preserved": true,
+  "ted_worker_candidate_updated_at_only": true,
   "ted_worker_canonical_insert": false,
   "ted_admission_evidence_update": false,
   "pre_070_snapshot_restore_verified": true,
