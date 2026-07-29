@@ -104,7 +104,7 @@ def main() -> None:
 
     prohibited = set(policy.get("prohibited_capability_classes", []))
     _require(
-        REQUIRED_PROHIBITED <= prohibited,
+        prohibited >= REQUIRED_PROHIBITED,
         "one or more mandatory prohibited capability classes are missing",
     )
 
@@ -184,7 +184,7 @@ def main() -> None:
 
     contracts = set(task.get("contracts", []))
     _require(
-        {"29", "ADR-014"} <= contracts,
+        contracts >= {"29", "ADR-014"},
         "AX-F9-T15 must depend on Contract 29 and ADR-014",
     )
     allowed_scope = "\n".join(task.get("allowed_scope", []))
