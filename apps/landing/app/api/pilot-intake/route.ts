@@ -1,3 +1,7 @@
+import { randomUUID } from "node:crypto";
+import { appendFile, chmod, mkdir } from "node:fs/promises";
+import { dirname } from "node:path";
+
 import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
@@ -23,8 +27,32 @@ type IntakePayload = {
   website?: unknown;
 };
 
+type IntakeRecord = {
+  schema: "axignal.pilot-intake.v1";
+  submissionId: string;
+  submittedAt: string;
+  source: "landing_globe_v0_1";
+  email: string;
+  role: string;
+  company: string | null;
+  useCase: string;
+  consent: true;
+};
+
 function clean(value: unknown, maxLength: number) {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
+}
+
+async function persistLocally(filePath: string, record: IntakeRecord) {
+  const directory = dirname(filePath);
+  await mkdir(directory, { recursive: true, mode: 0o700 });
+  await chmod(directory, 0o700);
+  await appendFile(filePath, `${JSON.stringify(record)}\n`, {
+    encoding: "utf8",
+    flag: "a",
+    mode: 0o600
+  });
+  await chmod(filePath, 0o600);
 }
 
 export async function POST(request: Request) {
@@ -70,8 +98,44 @@ export async function POST(request: Request) {
     );
   }
 
-  const webhook = process.env.AXIGNAL_PILOT_INTAKE_WEBHOOK_URL;
+  const record: IntakeRecord = {
+    schema: "axignal.pilot-intake.v1",
+    submissionId: randomUUID(),
+    submittedAt: new Date().toISOString(),
+    source: "landing_globe_v0_1",
+    email,
+    role,
+    company: company || null,
+    useCase,
+    consent: true
+  };
+
   const contactEmail = process.env.AXIGNAL_PILOT_CONTACT_EMAIL;
+  const intakeFile = process.env.AXIGNAL_PILOT_INTAKE_FILE;
+  if (intakeFile) {
+    try {
+      await persistLocally(intakeFile, record);
+    } catch {
+      return NextResponse.json(
+        {
+          status: "unavailable",
+          message: "The private-pilot intake queue could not persist the request. No success was recorded.",
+          contactEmail
+        },
+        { status: 503, headers: { "cache-control": "no-store" } }
+      );
+    }
+
+    return NextResponse.json(
+      {
+        status: "received",
+        message: "Request received. AXIGNAL will review the fit for the private pilot."
+      },
+      { status: 202, headers: { "cache-control": "no-store" } }
+    );
+  }
+
+  const webhook = process.env.AXIGNAL_PILOT_INTAKE_WEBHOOK_URL;
   if (!webhook) {
     return NextResponse.json(
       {
@@ -83,17 +147,6 @@ export async function POST(request: Request) {
     );
   }
 
-  const outbound = {
-    schema: "axignal.pilot-intake.v1",
-    submittedAt: new Date().toISOString(),
-    source: "landing_globe_v0_1",
-    email,
-    role,
-    company: company || null,
-    useCase,
-    consent: true
-  };
-
   const headers: Record<string, string> = { "content-type": "application/json" };
   const token = process.env.AXIGNAL_PILOT_INTAKE_BEARER_TOKEN;
   if (token) headers.authorization = `Bearer ${token}`;
@@ -102,7 +155,7 @@ export async function POST(request: Request) {
     const response = await fetch(webhook, {
       method: "POST",
       headers,
-      body: JSON.stringify(outbound),
+      body: JSON.stringify(record),
       signal: AbortSignal.timeout(8_000),
       cache: "no-store"
     });
