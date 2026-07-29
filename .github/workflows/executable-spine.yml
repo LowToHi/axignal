@@ -23,7 +23,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cat .github/ted-payload/part-* | base64 --decode > /tmp/ted-candidate.tar.gz
+          for fragment in .github/ted-payload/part-*; do
+            printf '%s ' "${fragment##*/}"
+            git hash-object "$fragment"
+          done
+          cat .github/ted-payload/part-* > /tmp/ted-candidate.b64
+          base64 --decode /tmp/ted-candidate.b64 > /tmp/ted-candidate.tar.gz
+          sha256sum /tmp/ted-candidate.tar.gz
           echo "48474d8e04f957bb974796df997ec5489a81835170a6e4721021f6dc8d0b68cb  /tmp/ted-candidate.tar.gz" | sha256sum -c -
           tar -xzf /tmp/ted-candidate.tar.gz -C .
           git fetch origin main --depth=1
