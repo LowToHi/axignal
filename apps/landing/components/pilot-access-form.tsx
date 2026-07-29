@@ -52,7 +52,7 @@ export function PilotAccessForm() {
         setStatus({
           state: "error",
           message: body.message ?? "The access request could not be delivered.",
-          contactEmail: body.contactEmail
+          ...(body.contactEmail ? { contactEmail: body.contactEmail } : {})
         });
         return;
       }

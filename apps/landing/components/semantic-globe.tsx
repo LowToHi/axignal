@@ -109,8 +109,8 @@ function GlobeScene({ activeStep, reducedMotion }: SemanticGlobeProps) {
       if (!reducedMotion) group.current.rotation.y += delta * 0.018;
     }
     if (material.current) {
-      material.current.uniforms.uTime.value = state.clock.elapsedTime;
-      material.current.uniforms.uSignal.value = Math.min(1.4, 0.35 + activeStep * 0.16);
+      material.current.uniforms.uTime!.value = state.clock.elapsedTime;
+      material.current.uniforms.uSignal!.value = Math.min(1.4, 0.35 + activeStep * 0.16);
     }
   });
 

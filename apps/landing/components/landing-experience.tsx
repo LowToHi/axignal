@@ -36,9 +36,9 @@ export function LandingExperience() {
   const [activeStep, setActiveStep] = useState(0);
   const reducedMotion = useReducedMotion();
 
-  const activeStory = storySteps[activeStep] ?? storySteps[0];
+  const activeStory = storySteps[activeStep] ?? storySteps[0]!;
   const activeCity = useMemo(
-    () => citySignals[Math.max(0, Math.min(citySignals.length - 1, activeStep - 2))],
+    () => citySignals[Math.max(0, Math.min(citySignals.length - 1, activeStep - 2))] ?? citySignals[0]!,
     [activeStep]
   );
 
@@ -72,7 +72,7 @@ export function LandingExperience() {
 
         const steps = gsap.utils.toArray<HTMLElement>("[data-story-step]");
         steps.forEach((step, index) => {
-          ScrollTrigger.create({
+          ScrollTriggger.create({
             trigger: step,
             start: "top 58%",
             end: "bottom 42%",
