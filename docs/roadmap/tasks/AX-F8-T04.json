@@ -4,7 +4,7 @@
   "phase": "F8",
   "state": "IN_PROGRESS",
   "objective": "Admit the minimum lawful source set for the European procurement universe through independent rights, privacy, quality, attribution and revocation gates.",
-  "outcome": "TED Search API v3 is registered for a non-personal technical probe with documented commercial-reuse basis, conditional rights dimensions, privacy exclusions and an enabled kill switch; PRODUCT_ADMITTED remains blocked.",
+  "outcome": "TED Search API v3 is registered for a non-personal technical probe with documented commercial-reuse basis, conditional rights dimensions, privacy exclusions, successful live access and an enabled kill switch; PRODUCT_ADMITTED remains blocked.",
   "contracts": [
     "GOAL_LOCK",
     "02",
@@ -94,17 +94,17 @@
     },
     {
       "evidence_type": "TRACE",
-      "description": "Official endpoint returns a bounded, non-personal projection under the fixed technical-probe query.",
+      "description": "Official endpoint returned a bounded non-personal projection: three notices, totalNoticeCount 2023, zero missing requested fields and no persisted notice values.",
       "required": true,
-      "location": "ted-live-source-evidence.json",
-      "status": "MISSING"
+      "location": "GitHub Actions run 30442505574 / artifact ted-live-source-evidence-dbfedbe827e038c6a213280d2b1b2cf8c8ab4d70",
+      "status": "PASS"
     },
     {
       "evidence_type": "SECURITY_REVIEW",
       "description": "Endpoint allowlist, redirects, response-size limit and personal-field exclusion pass.",
       "required": true,
       "location": "apps/api/tests/test_ted_connector.py",
-      "status": "PRESENT"
+      "status": "PASS"
     },
     {
       "evidence_type": "METRIC",
@@ -210,5 +210,5 @@
   "owner": "source-admission",
   "reviewer": "privacy-reviewer",
   "created_at": "2026-07-29T09:24:00Z",
-  "updated_at": "2026-07-29T09:24:00Z"
+  "updated_at": "2026-07-29T10:09:34Z"
 }
