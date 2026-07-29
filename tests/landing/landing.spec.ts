@@ -57,3 +57,25 @@ test("submits a consented private-pilot request through the typed endpoint", asy
 
   await expect(page.getByText(/AXIGNAL will review the fit/i)).toBeVisible();
 });
+
+test("captures visual-review evidence", async ({ page }, testInfo) => {
+  await page.goto("/");
+  await expect(page.getByRole("heading", { level: 1, name: /Discover what is changing/i })).toBeVisible();
+
+  const capture = async (name: string) => {
+    const path = testInfo.outputPath(`${name}.png`);
+    await page.screenshot({ path, fullPage: false, animations: "disabled" });
+    await testInfo.attach(name, { path, contentType: "image/png" });
+  };
+
+  await capture("hero");
+
+  await page.locator("#investigation").scrollIntoViewIfNeeded();
+  await page.waitForTimeout(700);
+  await capture("investigation");
+
+  await page.locator("#access").scrollIntoViewIfNeeded();
+  await page.waitForTimeout(700);
+  await expect(page.getByLabel("Work email")).toBeVisible();
+  await capture("access");
+});
