@@ -30,7 +30,7 @@ class EntitlementSettings:
     capability_token_ttl_seconds: int
 
     @classmethod
-    def from_env(cls) -> "EntitlementSettings":
+    def from_env(cls) -> EntitlementSettings:
         return cls(
             database_url=(
                 environ.get("AXIGNAL_ENTITLEMENT_DATABASE_URL")
