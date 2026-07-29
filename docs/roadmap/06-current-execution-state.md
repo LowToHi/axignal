@@ -1,7 +1,7 @@
 # 06 — AXIGNAL Current Execution State
 
-Version: `0.8.0`
-Status: `PUBLIC LANDING DEPLOYED / F8 WEDGE SELECTED / TED TECHNICAL PROBE`
+Version: `0.8.1`
+Status: `PUBLIC LANDING DEPLOYED / F8 WEDGE SELECTED / TED LIVE TECHNICAL PROBE PASSED`
 Goal ID: `AXIGNAL-GOAL-001`
 Canonical baseline: `main@2c51c340cd2a7a0e0dc1db0017452e723136d77b`
 
@@ -23,7 +23,7 @@ A deployed public landing is not evidence that the authenticated product, privat
 | F5 — Globe, Graph and Timeline parity | `IN_PROGRESS` | Product shell and canonical browser workflow exist; procurement data layers, full parity, accessibility alternatives, performance budgets and user validation remain. |
 | F6 — Multilingual semantic system | `LOCKED` | eForms preserves official source languages by design, but AXIGNAL's canonical multilingual data and QA system is not implemented. |
 | F7 — Intent Intelligence and Knowledge Tides | `LOCKED` | Privacy-thresholded operational aggregation is not implemented. |
-| F8 — First lawful opportunity universe | `IN_PROGRESS` | `AX-F8-T01` and `T02` select European Public Procurement Intelligence at 96/100. `T03` defines the six-block eForms ontology. TED is `TECHNICAL_PROBE`, `NOT_PRODUCT_ADMITTED`; the connector and disabled claim policy are under validation. |
+| F8 — First lawful opportunity universe | `IN_PROGRESS` | `AX-F8-T01` and `T02` select European Public Procurement Intelligence at 96/100. `T03` defines the six-block eForms ontology. The bounded TED connector and official live Search API probe are `EVIDENCE_READY`; TED remains `TECHNICAL_PROBE`, `NOT_PRODUCT_ADMITTED`, and the claim policy remains disabled. |
 | F9 — Paid design-partner product | `LOCKED` | Production organisations, entitlements, billing, onboarding and paying procurement design partners are absent. |
 | F10 — Scenarios, calibration and outcomes | `LOCKED` | Requires admitted historical universe data and commercial usage. |
 | F11 — Enterprise, API and private data | `LOCKED` | Tenant RLS is foundational evidence, not an accepted enterprise product. |
@@ -78,7 +78,26 @@ seven candidates scored
 → eForms six-block ontology defined
 → TED source registered as TECHNICAL_PROBE
 → fixed non-personal Search API connector implemented
+→ official live probe: PASS
 → procurement claim policy defined but disabled
+```
+
+Live technical-probe evidence from GitHub Actions run `30442505574`:
+
+```json
+{
+  "endpoint": "https://api.ted.europa.eu/v3/notices/search",
+  "returned_notice_count": 3,
+  "total_notice_count": 2023,
+  "missing_requested_field_counts": 0,
+  "personal_contact_fields_requested": false,
+  "raw_payload_persisted": false,
+  "notice_values_persisted": false,
+  "source_state": "TECHNICAL_PROBE",
+  "product_admitted": false,
+  "runtime_enabled": false,
+  "public_marketing_authorised": false
+}
 ```
 
 Current exact boundaries:
@@ -90,6 +109,7 @@ Current exact boundaries:
   "ontology_state": "ACCEPTED",
   "source_state": "TECHNICAL_PROBE",
   "source_product_admitted": false,
+  "connector_evidence_state": "EVIDENCE_READY",
   "connector_runtime_enabled": false,
   "claim_policy_state": "DISABLED_PENDING_PRODUCT_ADMISSION_AND_XML_PARSER",
   "universe_supported": false,
@@ -111,7 +131,8 @@ Current exact boundaries:
 - public landing deployment is exact-SHA, TLS-verified and rollback-protected;
 - procurement selection does not imply source or universe admission;
 - missing procurement fields remain unknown instead of becoming zero or negative evidence;
-- the TED connector requests no personal contact fields and remains disabled by default.
+- the TED connector requests no personal contact fields and remains disabled by default;
+- the live probe persists hashes and aggregate quality evidence, not notice values or raw payload.
 
 ## Integrated baselines
 
@@ -152,7 +173,6 @@ All subsequent development MUST branch from current `main`. Superseded branches 
 
 ### F8
 
-- execute and capture the live non-personal TED Search API probe;
 - map and hash a complete official XML notice under an explicit SDK version;
 - measure field completeness by notice subtype, country and period;
 - prove notice correction, cancellation and award lineage;
@@ -163,6 +183,6 @@ All subsequent development MUST branch from current `main`. Superseded branches 
 
 ## Only authorised next priority
 
-> Complete the bounded TED technical probe and first complete-XML parser profile. Then run deterministic procurement admission against frozen official notices before wiring European procurement into Navigator, ResearchRuns, Globe, Graph or public marketing.
+> Implement the first complete official XML notice parser profile pinned to an explicit eForms SDK version. Then run deterministic procurement admission against frozen official notices before wiring European procurement into Navigator, ResearchRuns, Globe, Graph or public marketing.
 
 OCR, unrestricted browsing, national-portal scraping, simultaneous universe expansion, billing, new model authority and public procurement-support claims remain unauthorised until their dependencies pass.
