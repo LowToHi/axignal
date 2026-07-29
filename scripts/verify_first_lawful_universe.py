@@ -25,13 +25,14 @@ TASK_STATES = {
     "AX-F8-T04.json": "IN_PROGRESS",
     "AX-F8-T05.json": "EVIDENCE_READY",
     "AX-F8-T06.json": "EVIDENCE_READY",
-    "AX-F8-T14.json": "IN_PROGRESS",
+    "AX-F8-T14.json": "ACCEPTED",
 }
 TASK_PATHS = [ROOT / "docs/roadmap/tasks" / name for name in TASK_STATES]
 RESEARCH_PATH = ROOT / "docs/research/first-lawful-universe-selection-v0.1.md"
 ADR_PATH = ROOT / "docs/adr/ADR-012-european-public-procurement-first-universe.md"
 SOURCE_DOC_PATH = ROOT / "docs/sources/ted-search-api-v3.md"
 PRODUCT_ADMISSION_DOC_PATH = ROOT / "docs/sources/ted-product-admission-v0.1.md"
+SECURITY_REVIEW_PATH = ROOT / "docs/security/AX-F8-T14-ted-runtime-security-review.md"
 HYPOTHESIS_PATH = ROOT / "docs/contracts/11-hypothesis-register.md"
 ADR_INDEX_PATH = ROOT / "docs/adr/README.md"
 EXECUTION_STATE_PATH = ROOT / "docs/roadmap/06-current-execution-state.md"
@@ -50,8 +51,14 @@ def require(condition: bool, message: str) -> None:
 
 
 def weighted_total(criteria: list[dict], scores: dict[str, int]) -> Decimal:
-    weights = {criterion["id"]: Decimal(str(criterion["weight"])) for criterion in criteria}
-    return sum(weights[key] * Decimal(score) / Decimal(5) for key, score in scores.items())
+    weights = {
+        criterion["id"]: Decimal(str(criterion["weight"]))
+        for criterion in criteria
+    }
+    return sum(
+        weights[key] * Decimal(score) / Decimal(5)
+        for key, score in scores.items()
+    )
 
 
 def validate_scorecard() -> dict:
@@ -88,7 +95,10 @@ def validate_scorecard() -> dict:
             )
         computed = weighted_total(criteria, scores)
         declared = Decimal(str(candidate["weighted_total"]))
-        require(computed == declared, f"weighted total mismatch: {candidate['universe_id']}")
+        require(
+            computed == declared,
+            f"weighted total mismatch: {candidate['universe_id']}",
+        )
         knockout_pass = declared >= Decimal(str(gate["minimum_total"]))
         for criterion_id, minimum in gate["minimum_scores"].items():
             knockout_pass = knockout_pass and scores[criterion_id] >= minimum
@@ -103,7 +113,10 @@ def validate_scorecard() -> dict:
 
         evidence = candidate["official_evidence"]
         if candidate["knockout_pass"] or candidate["decision"] == "SELECTED":
-            require(evidence, f"eligible candidate lacks evidence: {candidate['universe_id']}")
+            require(
+                evidence,
+                f"eligible candidate lacks evidence: {candidate['universe_id']}",
+            )
         for item in evidence:
             parsed = urlparse(item["url"])
             require(parsed.scheme == "https", "official evidence must use HTTPS")
@@ -121,7 +134,8 @@ def validate_scorecard() -> dict:
     require(eligible, "no candidate passes the gate")
     winner = selected[0]
     require(
-        winner["weighted_total"] == max(item["weighted_total"] for item in eligible),
+        winner["weighted_total"]
+        == max(item["weighted_total"] for item in eligible),
         "selected universe is not the highest-scoring eligible candidate",
     )
     require(winner["universe_id"] == "eu_public_procurement", "unexpected universe")
@@ -168,18 +182,27 @@ def validate_ontology() -> dict:
         "result_award",
     }
     blocks = ontology["notice_blocks"]
-    require({block["block_id"] for block in blocks} == expected_blocks, "notice blocks drifted")
+    require(
+        {block["block_id"] for block in blocks} == expected_blocks,
+        "notice blocks drifted",
+    )
     require(all(block["authority"] == "OBSERVED" for block in blocks), "authority drifted")
     require(len(ontology["entity_types"]) >= 18, "entity model is too shallow")
     require(ontology["privacy_policy"]["personal_data_present"] is True, "privacy risk hidden")
-    return {"ontology_blocks": len(blocks), "ontology_entities": len(ontology["entity_types"])}
+    return {
+        "ontology_blocks": len(blocks),
+        "ontology_entities": len(ontology["entity_types"]),
+    }
 
 
 def validate_source_and_product_profile() -> dict:
     schema = load_json(SOURCE_SCHEMA_PATH)
     source = load_json(SOURCE_RECORD_PATH)
     errors = sorted(
-        Draft202012Validator(schema, format_checker=FormatChecker()).iter_errors(source),
+        Draft202012Validator(
+            schema,
+            format_checker=FormatChecker(),
+        ).iter_errors(source),
         key=lambda error: list(error.path),
     )
     require(not errors, f"TED source schema failure: {errors}")
@@ -201,6 +224,10 @@ def validate_source_and_product_profile() -> dict:
     require(profile["source_id"] == source["source_id"], "profile source mismatch")
     require(profile["runtime_default"] == "DISABLED", "TED runtime default enabled")
     require(
+        profile["activation_state"] == "PRIVATE_PILOT_ENABLED",
+        "TED private-pilot runtime is not active",
+    )
+    require(
         profile["query_contract"]["arbitrary_query_allowed"] is False,
         "arbitrary query enabled",
     )
@@ -212,6 +239,7 @@ def validate_source_and_product_profile() -> dict:
     return {
         "ted_source_state": source["status"],
         "ted_profile": profile["profile_id"],
+        "ted_activation": profile["activation_state"],
     }
 
 
@@ -259,6 +287,16 @@ def validate_tasks() -> None:
         )
         require(all(check["answer"] == "YES" for check in checks), "Goal Lock blocker")
         require(task["rollback"]["tested"] is True, "rollback declaration is not tested")
+        if task["state"] == "ACCEPTED":
+            required = [
+                item
+                for item in task["acceptance_evidence"]
+                if item["required"]
+            ]
+            require(
+                all(item["status"] == "PASS" for item in required),
+                f"accepted task has an unpassed gate: {path.name}",
+            )
 
 
 def validate_normative_links() -> None:
@@ -266,13 +304,20 @@ def validate_normative_links() -> None:
     adr = ADR_PATH.read_text(encoding="utf-8")
     source_doc = SOURCE_DOC_PATH.read_text(encoding="utf-8")
     product_admission = PRODUCT_ADMISSION_DOC_PATH.read_text(encoding="utf-8")
+    security_review = SECURITY_REVIEW_PATH.read_text(encoding="utf-8")
     hypothesis = HYPOTHESIS_PATH.read_text(encoding="utf-8")
     adr_index = ADR_INDEX_PATH.read_text(encoding="utf-8")
     execution_state = EXECUTION_STATE_PATH.read_text(encoding="utf-8")
 
     require("European Public Procurement Intelligence" in research, "selection missing")
-    require("WEDGE SELECTED / IMPLEMENTATION NOT ADMITTED" in research, "history boundary missing")
-    require("Status: `ACCEPTED / IMPLEMENTATION NOT ADMITTED`" in adr, "ADR history missing")
+    require(
+        "WEDGE SELECTED / IMPLEMENTATION NOT ADMITTED" in research,
+        "history boundary missing",
+    )
+    require(
+        "Status: `ACCEPTED / IMPLEMENTATION NOT ADMITTED`" in adr,
+        "ADR history missing",
+    )
     require("ADR-012" in adr_index, "ADR index not updated")
     h006 = hypothesis.split("## 8. H-006", 1)[1].split("## 9.", 1)[0]
     require("State: `TEST_DESIGNED`" in h006, "H-006 state drifted")
@@ -280,10 +325,18 @@ def validate_normative_links() -> None:
         "F8 — First lawful opportunity universe | `IN_PROGRESS`" in execution_state,
         "F8 state not active",
     )
+    require("AX-F8-T14" in execution_state and "`ACCEPTED`" in execution_state, "T14 acceptance absent")
     require("Search API envelope — JSON" in source_doc, "JSON contract missing")
     require("Canonical notice — XML" in source_doc, "XML contract missing")
     require("PRODUCT_ADMITTED" in product_admission, "later product admission missing")
-    require("runtime remains disabled" in product_admission.casefold(), "runtime default hidden")
+    require(
+        "runtime remains disabled" in product_admission.casefold(),
+        "runtime default hidden",
+    )
+    require(
+        "PASS / PRIVATE-PILOT PRODUCT RUNTIME" in security_review,
+        "security acceptance absent",
+    )
 
 
 def main() -> None:
