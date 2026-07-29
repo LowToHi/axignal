@@ -1,0 +1,37 @@
+name: Public Landing Resolver Contract
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "infra/landing/deploy.sh"
+      - "scripts/verify_traefik_resolver_parser.py"
+      - ".github/workflows/public-landing-resolver-contract.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "infra/landing/deploy.sh"
+      - "scripts/verify_traefik_resolver_parser.py"
+      - ".github/workflows/public-landing-resolver-contract.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate Traefik resolver root parsing
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Validate deploy shell and resolver contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash -n infra/landing/deploy.sh
+          python3 scripts/verify_traefik_resolver_parser.py
