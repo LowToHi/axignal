@@ -11,6 +11,10 @@
   transform: none !important;
 }
 
+.synthetic-label {
+  color: rgba(157, 177, 179, 0.74);
+}
+
 @media (min-width: 901px) {
   .story-steps {
     z-index: 4;
@@ -81,6 +85,44 @@
 
   .orbit-disc {
     width: min(38vw, 500px);
+  }
+
+  .pilot-section {
+    gap: clamp(48px, 6vw, 86px);
+    padding-top: 54px;
+    padding-bottom: 54px;
+  }
+
+  .pilot-copy h2 {
+    margin-top: 10px;
+    margin-bottom: 16px;
+    font-size: clamp(3.2rem, 4.8vw, 4.7rem);
+  }
+
+  .pilot-copy > p {
+    font-size: 16px;
+    line-height: 1.55;
+  }
+
+  .pilot-boundaries {
+    margin-top: 20px;
+  }
+
+  .access-form {
+    padding: 30px 38px;
+  }
+
+  .access-form input,
+  .access-form select {
+    min-height: 44px;
+  }
+
+  .access-form textarea {
+    min-height: 96px;
+  }
+
+  .form-actions {
+    margin-top: 24px;
   }
 }
 
