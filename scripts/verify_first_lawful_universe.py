@@ -149,8 +149,14 @@ def validate_ontology() -> dict:
     )
     require(ontology["source_standard"]["name"] == "EU eForms", "wrong source standard")
     transport = ontology["transport_contract"]
-    require("JSON search envelope" in transport["search_api"]["response_representation"], "JSON role missing")
-    require(transport["canonical_notice"]["representation"].startswith("XML"), "XML evidence role missing")
+    require(
+        "JSON search envelope" in transport["search_api"]["response_representation"],
+        "JSON role missing",
+    )
+    require(
+        transport["canonical_notice"]["representation"].startswith("XML"),
+        "XML evidence role missing",
+    )
     require(
         transport["sdk_field_repository"]["representation"] == "JSON metadata repository",
         "SDK JSON role missing",
@@ -169,7 +175,10 @@ def validate_ontology() -> dict:
     require(all(block["optionality"] for block in blocks), "block optionality is missing")
     require(all(block["authority"] == "OBSERVED" for block in blocks), "authority drifted")
     require(len(ontology["entity_types"]) >= 18, "procurement entity model is too shallow")
-    require("probability of winning" in ontology["prohibited_claims"], "win-probability guard missing")
+    require(
+        "probability of winning" in ontology["prohibited_claims"],
+        "win-probability guard missing",
+    )
     require(
         "canonical opportunity claim derived from natural-person contact data"
         in ontology["prohibited_claims"],
@@ -201,10 +210,22 @@ def validate_claim_policy() -> dict:
         policy["status"] == "DISABLED_PENDING_PRODUCT_ADMISSION_AND_XML_PARSER",
         "procurement policy activated prematurely",
     )
-    require(policy["producer_authority"]["admission_runtime"] == "SOLE_CANONICAL_WRITER", "authority drifted")
-    require(policy["producer_authority"]["local_model"] == "PROPOSAL_ONLY", "local model authority escalated")
-    require(policy["personal_fields"]["canonical_admission"] == "PROHIBITED", "personal admission enabled")
-    require(policy["missing_data_policy"]["zero_imputation"] == "PROHIBITED", "zero imputation enabled")
+    require(
+        policy["producer_authority"]["admission_runtime"] == "SOLE_CANONICAL_WRITER",
+        "authority drifted",
+    )
+    require(
+        policy["producer_authority"]["local_model"] == "PROPOSAL_ONLY",
+        "local model authority escalated",
+    )
+    require(
+        policy["personal_fields"]["canonical_admission"] == "PROHIBITED",
+        "personal admission enabled",
+    )
+    require(
+        policy["missing_data_policy"]["zero_imputation"] == "PROHIBITED",
+        "zero imputation enabled",
+    )
     prohibited = set(policy["prohibited_profiles"])
     require("supplier_probability_of_winning" in prohibited, "win-probability guard missing")
     require("expected_contract_profitability" in prohibited, "profitability guard missing")
