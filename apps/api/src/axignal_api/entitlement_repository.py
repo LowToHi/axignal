@@ -26,11 +26,33 @@ class EntitlementRepository(ResearchRepository):
                 raise RuntimeError("Trial activation returned no entitlement")
             return row
 
+    def expire_due_trial(
+        self,
+        *,
+        tenant_id: UUID,
+        actor_subject: str,
+        now: datetime | None = None,
+    ) -> bool:
+        current = now or datetime.now(UTC)
+        with self._cursor(role="axignal_app", tenant_id=tenant_id) as cursor:
+            cursor.execute(
+                "SELECT tenant_private.expire_due_trial(%s, %s) AS expired",
+                (actor_subject, current),
+            )
+            row = cursor.fetchone()
+            if row is None:
+                raise RuntimeError("Trial expiry sweep returned no result")
+            return bool(row["expired"])
+
     def current_entitlement(
         self,
         *,
         tenant_id: UUID,
     ) -> dict[str, Any] | None:
+        self.expire_due_trial(
+            tenant_id=tenant_id,
+            actor_subject="system-entitlement-read",
+        )
         with self._cursor(role="axignal_app", tenant_id=tenant_id) as cursor:
             cursor.execute(
                 """
@@ -55,6 +77,13 @@ class EntitlementRepository(ResearchRepository):
         now: datetime | None = None,
     ) -> dict[str, Any]:
         current = now or datetime.now(UTC)
+        expired = self.expire_due_trial(
+            tenant_id=tenant_id,
+            actor_subject=actor_subject,
+            now=current,
+        )
+        if expired:
+            raise RuntimeError("trial_expired")
         with self._cursor(role="axignal_app", tenant_id=tenant_id) as cursor:
             cursor.execute(
                 """
@@ -138,6 +167,10 @@ class EntitlementRepository(ResearchRepository):
             return row
 
     def usage(self, *, tenant_id: UUID) -> dict[str, Any] | None:
+        self.expire_due_trial(
+            tenant_id=tenant_id,
+            actor_subject="system-entitlement-usage",
+        )
         with self._cursor(role="axignal_app", tenant_id=tenant_id) as cursor:
             cursor.execute(
                 """
