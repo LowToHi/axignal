@@ -4,7 +4,7 @@ from typing import Annotated, Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from axignal_api.connectors.ted import SOURCE_ID
 from axignal_api.identity import AuthenticatedIdentity, require_identity
@@ -17,6 +17,8 @@ Authenticated = Annotated[AuthenticatedIdentity, Depends(require_identity)]
 
 
 class PersistentTEDResearchRunCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     context_id: str = Field(pattern=r"^ctx_[A-Za-z0-9_-]{8,}$")
     opportunity_id: str = Field(min_length=3, max_length=200)
     question: str = Field(min_length=3, max_length=8_000)
@@ -24,6 +26,8 @@ class PersistentTEDResearchRunCreate(BaseModel):
 
 
 class PersistentTEDResearchRunAccepted(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     research_run_id: UUID
     state: Literal["QUEUED"] = "QUEUED"
     queue_delivery: Literal["PUBLISHED", "OUTBOX_PENDING"]
