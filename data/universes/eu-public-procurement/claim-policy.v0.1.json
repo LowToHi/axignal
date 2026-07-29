@@ -1,0 +1,182 @@
+{
+  "schema": "axignal.procurement-claim-policy.v1",
+  "policy_id": "ted-procurement-observed@0.1.0",
+  "goal_id": "AXIGNAL-GOAL-001",
+  "universe_id": "eu_public_procurement",
+  "source_id": "src_ted_search_api_v3",
+  "status": "DISABLED_PENDING_PRODUCT_ADMISSION_AND_XML_PARSER",
+  "producer_authority": {
+    "deterministic_parser": "MAY_PROPOSE_AND_BE_REDERIVED",
+    "local_model": "PROPOSAL_ONLY",
+    "external_model": "PROPOSAL_ONLY",
+    "human_reviewer": "CONTEXT_ONLY",
+    "admission_runtime": "SOLE_CANONICAL_WRITER"
+  },
+  "evidence_requirements": [
+    "official TED source state PRODUCT_ADMITTED",
+    "complete official XML notice or an explicitly sufficient admitted projection",
+    "raw object checksum",
+    "retrieval timestamp",
+    "notice publication number",
+    "notice identifier and version when available",
+    "eForms SDK or legacy schema classification",
+    "parser version",
+    "rights snapshot",
+    "field-level source path",
+    "personal-data exclusion result"
+  ],
+  "observed_claim_profiles": [
+    {
+      "predicate": "procurement_notice_published_at",
+      "required_fields": ["publication_number", "publication_date"],
+      "admission_method": "exact datetime rederivation from official notice",
+      "missing_result": "REJECTED_INCOMPLETE"
+    },
+    {
+      "predicate": "procurement_notice_type",
+      "required_fields": ["publication_number", "notice_type"],
+      "admission_method": "exact code-list validation",
+      "missing_result": "REJECTED_INCOMPLETE"
+    },
+    {
+      "predicate": "procurement_buyer_organisation",
+      "required_fields": ["publication_number", "buyer_official_name"],
+      "admission_method": "exact source value with reversible organisation resolution",
+      "missing_result": "HUMAN_REVIEW_REQUIRED"
+    },
+    {
+      "predicate": "procurement_buyer_identifier",
+      "required_fields": ["publication_number", "buyer_identifier", "identifier_scheme"],
+      "admission_method": "scheme-specific structural validation",
+      "missing_result": "UNKNOWN"
+    },
+    {
+      "predicate": "procurement_procedure_type",
+      "required_fields": ["publication_number", "procedure_type"],
+      "admission_method": "exact code-list validation",
+      "missing_result": "UNKNOWN"
+    },
+    {
+      "predicate": "procurement_lot_cpv",
+      "required_fields": ["publication_number", "lot_identifier", "cpv_code"],
+      "admission_method": "CPV code-list validation and lot binding",
+      "missing_result": "REJECTED_INCOMPLETE"
+    },
+    {
+      "predicate": "procurement_place_of_performance_nuts",
+      "required_fields": ["publication_number", "lot_identifier", "nuts_code"],
+      "admission_method": "NUTS version and hierarchy validation",
+      "missing_result": "UNKNOWN"
+    },
+    {
+      "predicate": "procurement_submission_deadline",
+      "required_fields": ["publication_number", "lot_identifier", "deadline_datetime"],
+      "admission_method": "exact source datetime with source-entered timezone preserved",
+      "missing_result": "UNKNOWN"
+    },
+    {
+      "predicate": "procurement_estimated_value",
+      "required_fields": ["publication_number", "scope_identifier", "amount", "currency"],
+      "admission_method": "decimal, currency and procedure-or-lot scope validation",
+      "missing_result": "UNKNOWN"
+    },
+    {
+      "predicate": "procurement_eu_funding_indicator",
+      "required_fields": ["publication_number", "scope_identifier", "eu_funds_indicator"],
+      "admission_method": "exact code or boolean validation without programme inference",
+      "missing_result": "UNKNOWN"
+    },
+    {
+      "predicate": "procurement_award_winner",
+      "required_fields": ["publication_number", "lot_result_identifier", "winner_official_name"],
+      "admission_method": "result-state validation plus exact source value and reversible organisation resolution",
+      "missing_result": "UNKNOWN"
+    },
+    {
+      "predicate": "procurement_award_value",
+      "required_fields": ["publication_number", "lot_result_identifier", "amount", "currency"],
+      "admission_method": "result-state, decimal, currency and lot-result binding validation",
+      "missing_result": "UNKNOWN"
+    },
+    {
+      "predicate": "procurement_tenders_received_count",
+      "required_fields": ["publication_number", "lot_result_identifier", "tender_count"],
+      "admission_method": "non-negative integer validation bound to a result notice",
+      "missing_result": "UNKNOWN"
+    }
+  ],
+  "calculated_claim_profiles": [
+    {
+      "predicate": "procurement_days_until_deadline",
+      "activation_state": "DISABLED_UNTIL_OBSERVED_DEADLINE_ADMITTED",
+      "inputs": ["admitted submission deadline", "declared calculation clock", "timezone policy"],
+      "method": "calendar-duration@0.1.0"
+    },
+    {
+      "predicate": "procurement_value_in_eur",
+      "activation_state": "DISABLED_UNTIL_FX_SOURCE_ADMITTED",
+      "inputs": ["admitted amount", "admitted currency", "admitted FX observation", "FX timestamp"],
+      "method": "source-timestamped-fx@0.1.0"
+    },
+    {
+      "predicate": "procurement_buyer_notice_recurrence",
+      "activation_state": "DISABLED_UNTIL_ENTITY_AND_VERSION_REPLAY_PROVEN",
+      "inputs": ["admitted notices", "reversible buyer identity", "deduplicated lifecycle", "bounded period"],
+      "method": "buyer-recurrence@0.1.0"
+    },
+    {
+      "predicate": "procurement_award_concentration",
+      "activation_state": "DISABLED_UNTIL_AWARD_COVERAGE_MEASURED",
+      "inputs": ["admitted awards", "reversible winner identity", "explicit denominator", "bounded period"],
+      "method": "award-concentration@0.1.0"
+    }
+  ],
+  "proposal_only_profiles": [
+    "supplier_tender_semantic_fit",
+    "estimated_bid_complexity",
+    "suggested_adjacent_cpv_markets",
+    "procurement_theme_from_free_text",
+    "possible_regulation_created_demand"
+  ],
+  "prohibited_profiles": [
+    "supplier_probability_of_winning",
+    "supplier_legal_eligibility",
+    "supplier_personal_suitability",
+    "expected_contract_profitability",
+    "guaranteed_opportunity",
+    "bid_submission_or_representation",
+    "personalised_investment_recommendation",
+    "natural_person_contact_as_opportunity_signal"
+  ],
+  "personal_fields": {
+    "canonical_admission": "PROHIBITED",
+    "model_input": "PROHIBITED_BY_DEFAULT",
+    "analytics": "PROHIBITED",
+    "public_api": "PROHIBITED",
+    "export": "PROHIBITED_BY_DEFAULT"
+  },
+  "missing_data_policy": {
+    "rule": "Missing, unpublished, unlicensed or unmapped data is UNKNOWN or UNCOVERED, never zero, false, low opportunity or negative evidence.",
+    "zero_imputation": "PROHIBITED",
+    "silent_inference": "PROHIBITED"
+  },
+  "version_policy": {
+    "latest_only_canonicalisation": "PROHIBITED",
+    "requirements": [
+      "preserve every retrieved notice version",
+      "link correction, modification and replacement notices",
+      "re-evaluate dependent claims after change or cancellation",
+      "never erase the superseded observed state"
+    ]
+  },
+  "kill_switches": [
+    "source rights change",
+    "unknown XML or eForms SDK version",
+    "field mapping drift",
+    "personal-data leakage",
+    "notice-version lineage failure",
+    "unexpected admission-rate change",
+    "attribution failure",
+    "country or subtype quality threshold failure"
+  ]
+}
