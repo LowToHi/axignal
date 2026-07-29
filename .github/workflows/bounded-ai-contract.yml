@@ -8,6 +8,9 @@ on:
       - "config/ai-assistance-policy.v0.1.json"
       - "docs/contracts/29-bounded-ai-assistance-and-token-entitlements.md"
       - "docs/contracts/README.md"
+      - "docs/adr/ADR-014-bounded-ai-and-token-entitlements.md"
+      - "docs/adr/README.md"
+      - "docs/roadmap/tasks/AX-F9-T15.json"
       - "scripts/verify_bounded_ai_contract.py"
       - ".github/workflows/bounded-ai-contract.yml"
   push:
@@ -17,6 +20,9 @@ on:
       - "config/ai-assistance-policy.v0.1.json"
       - "docs/contracts/29-bounded-ai-assistance-and-token-entitlements.md"
       - "docs/contracts/README.md"
+      - "docs/adr/ADR-014-bounded-ai-and-token-entitlements.md"
+      - "docs/adr/README.md"
+      - "docs/roadmap/tasks/AX-F9-T15.json"
       - "scripts/verify_bounded_ai_contract.py"
       - ".github/workflows/bounded-ai-contract.yml"
   workflow_dispatch:
