@@ -11,6 +11,10 @@ from axignal_api.connectors.ted_eforms import (
 )
 
 FIXTURE = Path(__file__).parent / "fixtures" / "ted_eforms_cn16_synthetic.xml"
+ESTIMATED_VALUE_XML = (
+    b'<cbc:EstimatedOverallContractAmount currencyID="EUR">'
+    b"750000.00</cbc:EstimatedOverallContractAmount>"
+)
 
 
 def fixture_bytes() -> bytes:
@@ -74,10 +78,7 @@ def test_candidate_claims_are_deterministic_and_exclude_contact_values() -> None
 
 
 def test_missing_optional_fields_remain_absent_not_zero() -> None:
-    xml = fixture_bytes().replace(
-        b'<cbc:EstimatedOverallContractAmount currencyID="EUR">750000.00</cbc:EstimatedOverallContractAmount>',
-        b"",
-    ).replace(
+    xml = fixture_bytes().replace(ESTIMATED_VALUE_XML, b"").replace(
         b"<cbc:EndDate>2026-09-15+02:00</cbc:EndDate>",
         b"",
     )
@@ -95,10 +96,26 @@ def test_missing_optional_fields_remain_absent_not_zero() -> None:
 @pytest.mark.parametrize(
     ("old", "new", "message"),
     [
-        (b"eforms-sdk-1.14", b"eforms-sdk-1.15", "Unsupported eForms customization"),
-        (b">16</cbc:SubTypeCode>", b">17</cbc:SubTypeCode>", "Unsupported TED notice subtype"),
-        (b">cn-standard</cbc:NoticeTypeCode>", b">can-standard</cbc:NoticeTypeCode>", "Unsupported TED notice type"),
-        (b">2.3</cbc:UBLVersionID>", b">2.2</cbc:UBLVersionID>", "Unsupported UBL version"),
+        (
+            b"eforms-sdk-1.14",
+            b"eforms-sdk-1.15",
+            "Unsupported eForms customization",
+        ),
+        (
+            b">16</cbc:SubTypeCode>",
+            b">17</cbc:SubTypeCode>",
+            "Unsupported TED notice subtype",
+        ),
+        (
+            b">cn-standard</cbc:NoticeTypeCode>",
+            b">can-standard</cbc:NoticeTypeCode>",
+            "Unsupported TED notice type",
+        ),
+        (
+            b">2.3</cbc:UBLVersionID>",
+            b">2.2</cbc:UBLVersionID>",
+            "Unsupported UBL version",
+        ),
     ],
 )
 def test_parser_fails_closed_on_profile_drift(old: bytes, new: bytes, message: str) -> None:
@@ -117,7 +134,10 @@ def test_parser_rejects_unknown_document_type() -> None:
 
 
 def test_parser_rejects_dtd_and_entity_declarations() -> None:
-    malicious = b'<?xml version="1.0"?><!DOCTYPE x [<!ENTITY y SYSTEM "file:///etc/passwd">]><x>&y;</x>'
+    malicious = (
+        b'<?xml version="1.0"?><!DOCTYPE x ['
+        b'<!ENTITY y SYSTEM "file:///etc/passwd">]><x>&y;</x>'
+    )
     with pytest.raises(TEDEFormsParseError, match="DTD and entity"):
         TEDEFormsCN16Parser().parse(malicious)
 
@@ -140,10 +160,15 @@ def test_parser_rejects_duplicate_organisation_ids() -> None:
                 <cac:PartyIdentification>
                   <cbc:ID schemeName="organization">ORG-0001</cbc:ID>
                 </cac:PartyIdentification>
-                <cac:PartyName><cbc:Name languageID="ENG">Duplicate</cbc:Name></cac:PartyName>
+                <cac:PartyName>
+                  <cbc:Name languageID="ENG">Duplicate</cbc:Name>
+                </cac:PartyName>
               </efac:Company>
             </efac:Organization>
     """
-    xml = fixture_bytes().replace(b"</efac:Organizations>", company + b"</efac:Organizations>")
+    xml = fixture_bytes().replace(
+        b"</efac:Organizations>",
+        company + b"</efac:Organizations>",
+    )
     with pytest.raises(TEDEFormsParseError, match="Duplicate organisation ID"):
         TEDEFormsCN16Parser().parse(xml)
