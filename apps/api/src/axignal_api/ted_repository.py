@@ -72,7 +72,9 @@ class TEDResearchRepository(ResearchRepository):
                   source_plan,
                   budgets,
                   job_kind
-                ) VALUES (%s, %s, %s, %s, %s, 'QUEUED', false, %s, %s, 'TED_PROCUREMENT')
+                ) VALUES (
+                  %s, %s, %s, %s, %s, 'QUEUED', false, %s, %s, 'TED_PROCUREMENT'
+                )
                 """,
                 (
                     run_id,
@@ -108,7 +110,9 @@ class TEDResearchRepository(ResearchRepository):
         candidates: tuple[TEDCandidateArtifact, ...],
         decisions: tuple[TEDAdmissionDecision, ...],
     ) -> dict[str, Any]:
-        if not evidence or len(evidence) != len(candidates) or len(candidates) != len(decisions):
+        if not evidence:
+            raise ValueError("TED run produced no evidence")
+        if len(evidence) != len(candidates) or len(candidates) != len(decisions):
             raise ValueError("TED artifact and decision cardinality differs")
 
         with self._cursor(role="axignal_worker", tenant_id=tenant_id) as cursor:
@@ -129,7 +133,7 @@ class TEDResearchRepository(ResearchRepository):
             if run["state"] == "COMPLETED":
                 return {"idempotent_replay": True}
 
-            source_object_id = self._upsert_ted_source_object(
+            source_object_id = self._upsert_source_object(
                 cursor=cursor,
                 source=source,
                 page=page,
@@ -137,12 +141,12 @@ class TEDResearchRepository(ResearchRepository):
             evidence_ids: list[UUID] = []
             candidate_ids: list[UUID] = []
             for evidence_item, candidate in zip(evidence, candidates, strict=True):
-                evidence_id = self._upsert_ted_evidence(
+                evidence_id = self._upsert_evidence(
                     cursor=cursor,
                     source_object_id=source_object_id,
                     evidence=evidence_item,
                 )
-                candidate_id = self._upsert_ted_candidate(
+                candidate_id = self._upsert_candidate(
                     cursor=cursor,
                     candidate=candidate,
                     evidence_id=evidence_id,
@@ -160,11 +164,7 @@ class TEDResearchRepository(ResearchRepository):
                   candidate_claim_ids
                 ) VALUES (%s, %s, 'PENDING', %s)
                 """,
-                (
-                    admission_batch_id,
-                    decisions[0].policy_version,
-                    candidate_ids,
-                ),
+                (admission_batch_id, decisions[0].policy_version, candidate_ids),
             )
 
             canonical_ids: list[UUID] = []
@@ -180,7 +180,7 @@ class TEDResearchRepository(ResearchRepository):
                 canonical_id: UUID | None = None
                 created = False
                 if decision.admitted:
-                    canonical_id, created = self._admit_ted_candidate(
+                    canonical_id, created = self._admit_candidate(
                         cursor=cursor,
                         candidate_id=candidate_id,
                         evidence_id=evidence_id,
@@ -194,7 +194,9 @@ class TEDResearchRepository(ResearchRepository):
                     cursor.execute(
                         """
                         UPDATE axignal_global.candidate_claims
-                        SET state = 'REJECTED', rejection_reasons = %s, updated_at = now()
+                        SET state = 'REJECTED',
+                            rejection_reasons = %s,
+                            updated_at = now()
                         WHERE candidate_claim_id = %s
                         """,
                         (Jsonb(list(decision.reasons)), candidate_id),
@@ -211,7 +213,9 @@ class TEDResearchRepository(ResearchRepository):
             cursor.execute(
                 """
                 UPDATE axignal_global.admission_batches
-                SET state = 'DECIDED', decision_summary = %s, decided_at = now()
+                SET state = 'DECIDED',
+                    decision_summary = %s,
+                    decided_at = now()
                 WHERE admission_batch_id = %s
                 """,
                 (
@@ -251,9 +255,11 @@ class TEDResearchRepository(ResearchRepository):
                     dossier_id,
                     tenant_id,
                     run_id,
-                    "TRACEABLE_WITH_ADMITTED_FACTS"
-                    if admitted_count
-                    else "TRACEABLE_PROVISIONAL",
+                    (
+                        "TRACEABLE_WITH_ADMITTED_FACTS"
+                        if admitted_count
+                        else "TRACEABLE_PROVISIONAL"
+                    ),
                     "TED · European public procurement discovery",
                     (
                         f"AXIGNAL processed {len(page.notices)} bounded TED notices and "
@@ -270,7 +276,7 @@ class TEDResearchRepository(ResearchRepository):
                                 "AXIGNAL retained only allowlisted fields and generated "
                                 "deterministic evidence bindings."
                             ),
-                            "api_redistribution": false,
+                            "api_redistribution": False,
                         }
                     ),
                 ),
@@ -361,7 +367,7 @@ class TEDResearchRepository(ResearchRepository):
         }
 
     @staticmethod
-    def _upsert_ted_source_object(
+    def _upsert_source_object(
         *,
         cursor: Any,
         source: dict[str, Any],
@@ -383,7 +389,7 @@ class TEDResearchRepository(ResearchRepository):
             "terms_url": source["terms_url"],
             "dataset_url": source["dataset_url"],
             "profile_id": PROFILE_ID,
-            "api_redistribution": false,
+            "api_redistribution": False,
         }
         cursor.execute(
             """
@@ -399,7 +405,9 @@ class TEDResearchRepository(ResearchRepository):
               raw_payload,
               rights_snapshot,
               lineage
-            ) VALUES (%s, %s, %s, %s, NULL, 200, 'application/json', %s, %s, %s, %s)
+            ) VALUES (
+              %s, %s, %s, %s, NULL, 200, 'application/json', %s, %s, %s, %s
+            )
             ON CONFLICT (source_id, content_hash) DO NOTHING
             RETURNING source_object_id
             """,
@@ -416,7 +424,7 @@ class TEDResearchRepository(ResearchRepository):
                         "source_envelope_content_hash": page.content_hash,
                         "request_hash": page.request_hash,
                         "retrieval_mode": page.retrieval_mode,
-                        "sanitised_projection": true,
+                        "sanitised_projection": True,
                     }
                 ),
             ),
@@ -438,7 +446,7 @@ class TEDResearchRepository(ResearchRepository):
         return existing["source_object_id"]
 
     @staticmethod
-    def _upsert_ted_evidence(
+    def _upsert_evidence(
         *,
         cursor: Any,
         source_object_id: UUID,
@@ -461,7 +469,10 @@ class TEDResearchRepository(ResearchRepository):
               content_hash,
               rights_status,
               provisional
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, NULL, NULL, %s, %s, %s, true)
+            ) VALUES (
+              %s, %s, %s, %s, %s, %s, %s, %s,
+              NULL, NULL, %s, %s, %s, true
+            )
             ON CONFLICT (evidence_key) DO NOTHING
             RETURNING evidence_id
             """,
@@ -483,7 +494,11 @@ class TEDResearchRepository(ResearchRepository):
         if row is not None:
             return row["evidence_id"]
         cursor.execute(
-            "SELECT evidence_id FROM axignal_global.evidence_objects WHERE evidence_key = %s",
+            """
+            SELECT evidence_id
+            FROM axignal_global.evidence_objects
+            WHERE evidence_key = %s
+            """,
             (evidence.evidence_key,),
         )
         existing = cursor.fetchone()
@@ -492,7 +507,7 @@ class TEDResearchRepository(ResearchRepository):
         return existing["evidence_id"]
 
     @staticmethod
-    def _upsert_ted_candidate(
+    def _upsert_candidate(
         *,
         cursor: Any,
         candidate: TEDCandidateArtifact,
@@ -513,7 +528,10 @@ class TEDResearchRepository(ResearchRepository):
               producer_type,
               producer_id,
               method_version
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, 'ADMISSION_QUEUED', %s, %s, %s, %s)
+            ) VALUES (
+              %s, %s, %s, %s, %s, %s, %s,
+              'ADMISSION_QUEUED', %s, %s, %s, %s
+            )
             ON CONFLICT (fingerprint) DO NOTHING
             RETURNING candidate_claim_id
             """,
@@ -548,7 +566,7 @@ class TEDResearchRepository(ResearchRepository):
         return existing["candidate_claim_id"]
 
     @staticmethod
-    def _admit_ted_candidate(
+    def _admit_candidate(
         *,
         cursor: Any,
         candidate_id: UUID,
@@ -571,8 +589,10 @@ class TEDResearchRepository(ResearchRepository):
               state,
               admitted_by,
               admission_batch_id
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, 'OBSERVED_FACT', 'ADMITTED',
-                      'DETERMINISTIC_RUNTIME', %s)
+            ) VALUES (
+              %s, %s, %s, %s, %s, %s, %s,
+              'OBSERVED_FACT', 'ADMITTED', 'DETERMINISTIC_RUNTIME', %s
+            )
             ON CONFLICT (fingerprint) DO NOTHING
             RETURNING canonical_claim_id
             """,
@@ -605,8 +625,10 @@ class TEDResearchRepository(ResearchRepository):
         cursor.execute(
             """
             UPDATE axignal_global.candidate_claims
-            SET state = 'ADMITTED', canonical_claim_id = %s,
-                rejection_reasons = '[]'::jsonb, updated_at = now()
+            SET state = 'ADMITTED',
+                canonical_claim_id = %s,
+                rejection_reasons = '[]'::jsonb,
+                updated_at = now()
             WHERE candidate_claim_id = %s
             """,
             (canonical_id, candidate_id),
@@ -620,7 +642,9 @@ class TEDResearchRepository(ResearchRepository):
                   to_state,
                   reason,
                   admission_batch_id
-                ) VALUES (%s, NULL, 'ADMITTED', 'all_ted_projection_gates_passed', %s)
+                ) VALUES (
+                  %s, NULL, 'ADMITTED', 'all_ted_projection_gates_passed', %s
+                )
                 """,
                 (canonical_id, admission_batch_id),
             )
