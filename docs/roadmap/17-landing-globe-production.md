@@ -2,7 +2,7 @@
 
 ## Status
 
-`IMPLEMENTED CANDIDATE / CI EVIDENCE REQUIRED / VISUAL REVIEW REQUIRED / NOT DEPLOYED`
+`IMPLEMENTED CANDIDATE / LOCKFILE FROZEN / CI EVIDENCE REQUIRED / VISUAL REVIEW REQUIRED / NOT DEPLOYED`
 
 ## Goal
 
@@ -54,9 +54,12 @@ These values remain outside Git. Only the webhook URL and token are secret-beari
 - `pnpm exec playwright test -c playwright.landing.config.ts`;
 - human visual review of scroll pacing, Globe framing, mobile composition and final conversion surface.
 
+## Dependency evidence
+
+The production dependencies and their transitive graph are frozen in `pnpm-lock.yaml`. The temporary lockfile and identifier-correction workflows have retired themselves and are not part of the proposed tree.
+
 ## Remaining gates
 
-- generate and commit the deterministic `pnpm-lock.yaml` update;
 - obtain green GitHub Actions evidence;
 - complete human visual review from browser screenshots;
 - merge the exact reviewed SHA;
