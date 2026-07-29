@@ -1,0 +1,126 @@
+name: Stripe Paid Lifecycle
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - "apps/api/src/axignal_api/billing_*.py"
+      - "apps/api/src/axignal_api/stripe_*.py"
+      - "apps/api/src/axignal_api/application.py"
+      - "apps/api/tests/test_billing_runtime.py"
+      - "infra/postgres/100-stripe-paid-lifecycle.sql"
+      - "infra/postgres/Dockerfile"
+      - "scripts/verify_stripe_billing_contract.py"
+      - "scripts/verify_stripe_paid_lifecycle_e2e.py"
+      - "scripts/verify_stripe_billing_authority_e2e.py"
+      - ".github/workflows/stripe-paid-lifecycle.yml"
+      - "docs/security/AX-F9-T15-stripe-paid-lifecycle-boundary.md"
+      - "docs/roadmap/tasks/AX-F9-T15.json"
+  push:
+    branches: [main, "agent/**"]
+    paths:
+      - "apps/api/src/axignal_api/billing_*.py"
+      - "apps/api/src/axignal_api/stripe_*.py"
+      - "apps/api/src/axignal_api/application.py"
+      - "apps/api/tests/test_billing_runtime.py"
+      - "infra/postgres/100-stripe-paid-lifecycle.sql"
+      - "infra/postgres/Dockerfile"
+      - "scripts/verify_stripe_billing_contract.py"
+      - "scripts/verify_stripe_paid_lifecycle_e2e.py"
+      - "scripts/verify_stripe_billing_authority_e2e.py"
+      - ".github/workflows/stripe-paid-lifecycle.yml"
+      - "docs/security/AX-F9-T15-stripe-paid-lifecycle-boundary.md"
+      - "docs/roadmap/tasks/AX-F9-T15.json"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stripe-paid-lifecycle-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contract:
+    name: Explicit selection, signature and disabled-by-default contract
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.13"
+      - name: Install deterministic development dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+      - name: Enforce focused Python lint
+        run: |
+          ruff check \
+            apps/api/src/axignal_api/billing_config.py \
+            apps/api/src/axignal_api/billing_repository.py \
+            apps/api/src/axignal_api/billing_routes.py \
+            apps/api/src/axignal_api/stripe_gateway.py \
+            apps/api/src/axignal_api/stripe_signature.py \
+            apps/api/src/axignal_api/application.py \
+            apps/api/tests/test_billing_runtime.py \
+            scripts/verify_stripe_billing_contract.py \
+            scripts/verify_stripe_paid_lifecycle_e2e.py \
+            scripts/verify_stripe_billing_authority_e2e.py
+      - name: Run identity, configuration and signature tests
+        run: pytest apps/api/tests/test_billing_runtime.py
+      - name: Verify normative billing contract
+        run: python scripts/verify_stripe_billing_contract.py | tee stripe-billing-contract.json
+      - name: Upload contract evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: stripe-billing-contract-${{ github.sha }}
+          path: stripe-billing-contract.json
+          if-no-files-found: error
+          retention-days: 30
+
+  transactional-e2e:
+    name: Checkout, signed events, upgrade, cancellation and rollback E2E
+    needs: contract
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      AXIGNAL_DATABASE_URL: postgresql://axignal:axignal@127.0.0.1:5432/axignal
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.13"
+      - name: Start disposable PostgreSQL
+        run: docker compose up -d --build postgres
+      - name: Install runtime
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+      - name: Execute paid lifecycle circuit
+        run: python scripts/verify_stripe_paid_lifecycle_e2e.py
+      - name: Verify isolated mutation authority
+        run: python scripts/verify_stripe_billing_authority_e2e.py
+      - name: Upload non-sensitive E2E evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: stripe-paid-lifecycle-e2e-${{ github.sha }}
+          path: |
+            artifacts/stripe-paid-lifecycle-e2e.json
+            artifacts/stripe-billing-authority-e2e.json
+          if-no-files-found: error
+          retention-days: 30
+      - name: Dump PostgreSQL diagnostics on failure
+        if: failure()
+        run: docker compose logs --no-color postgres
+      - name: Stop disposable services
+        if: always()
+        run: docker compose down -v
