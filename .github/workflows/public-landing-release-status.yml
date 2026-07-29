@@ -1,0 +1,50 @@
+name: Public Landing Release Status
+
+on:
+  workflow_run:
+    workflows:
+      - Public Landing Release
+    types:
+      - completed
+
+permissions:
+  contents: read
+  statuses: write
+
+jobs:
+  publish:
+    name: Publish release result on exact commit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Create bounded commit status
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          RELEASE_SHA: ${{ github.event.workflow_run.head_sha }}
+          RELEASE_URL: ${{ github.event.workflow_run.html_url }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "${RELEASE_CONCLUSION}" in
+            success)
+              state=success
+              description="Public landing deployed and externally verified"
+              ;;
+            cancelled)
+              state=error
+              description="Public landing release was cancelled"
+              ;;
+            *)
+              state=failure
+              description="Public landing release failed; inspect workflow"
+              ;;
+          esac
+
+          gh api \
+            --method POST \
+            "repos/${GITHUB_REPOSITORY}/statuses/${RELEASE_SHA}" \
+            -f state="${state}" \
+            -f target_url="${RELEASE_URL}" \
+            -f description="${description}" \
+            -f context="axignal/public-landing-release" >/dev/null
