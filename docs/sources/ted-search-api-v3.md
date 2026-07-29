@@ -82,11 +82,11 @@ AXIGNAL must not silently treat a JSON search projection as equivalent to a comp
 
 ## 4. Initial bounded query
 
-Canonical technical-probe request:
+The technical probe pins the exact query demonstrated by the Publications Office in its official TED reusers workshop. It deliberately uses Luxembourg as a transport-contract probe; it is not the commercial geography configuration.
 
 ```json
 {
-  "query": "place-of-performance IN (ESP FRA DEU)",
+  "query": "place-of-performance IN (LUX)",
   "fields": [
     "publication-number",
     "notice-title",
@@ -101,7 +101,7 @@ Canonical technical-probe request:
 }
 ```
 
-The connector may execute only a fixed, reviewed query profile during the initial probe. User-provided arbitrary expert-query strings are not admitted.
+The connector may execute only this fixed, reviewed query profile during the initial probe. User-provided arbitrary expert-query strings and the later Spain/France/Germany commercial query are not admitted at this stage.
 
 ## 5. Rights decision
 
