@@ -2,7 +2,7 @@
   "task_id": "AX-F8-T13",
   "goal_id": "AXIGNAL-GOAL-001",
   "phase": "F8",
-  "state": "IN_PROGRESS",
+  "state": "EVIDENCE_READY",
   "objective": "Reconstruct a bounded TED eForms notice lifecycle from frozen XML and produce immutable Evidence Objects, deterministic sandbox admission decisions and a traceable procurement dossier without enabling product or canonical authority.",
   "outcome": "A version-pinned lifecycle supports initial CN16, correction, notice cancellation and CAN29 result notices; validates procedure, lot and previous-notice lineage; emits hashed Evidence Objects and a deterministic dossier; and proves blocking, replay and rollback.",
   "contracts": ["GOAL_LOCK", "02", "03", "04", "06", "08", "09", "10", "18", "19", "27", "ADR-004", "ADR-010", "ADR-012"],
@@ -39,9 +39,9 @@
   ],
   "acceptance_evidence": [
     {"evidence_type": "SCHEMA", "description": "Versioned lifecycle, evidence, admission and dossier profile.", "required": true, "location": "data/universes/eu-public-procurement/lifecycle-rehearsal-profile.v0.1.json", "status": "PASS"},
-    {"evidence_type": "TEST", "description": "Tests cover full lifecycle, cancellation semantics, dangling references, unknown lots, privacy, replay and rollback.", "required": true, "location": "apps/api/tests/test_procurement_lifecycle_rehearsal.py", "status": "PRESENT"},
-    {"evidence_type": "TRACE", "description": "Non-sensitive CI evidence reports hashes, counts, state and zero canonical writes.", "required": true, "location": "procurement-lifecycle-rehearsal-evidence.json", "status": "MISSING"},
-    {"evidence_type": "DOCUMENT", "description": "Runbook records lifecycle semantics, authority boundaries and promotion blockers.", "required": true, "location": "docs/sources/procurement-lifecycle-rehearsal-v0.1.md", "status": "MISSING"}
+    {"evidence_type": "TEST", "description": "Tests cover full lifecycle, cancellation semantics, dangling references, unknown lots, privacy, replay and rollback.", "required": true, "location": "apps/api/tests/test_procurement_lifecycle_rehearsal.py", "status": "PASS"},
+    {"evidence_type": "TRACE", "description": "Non-sensitive CI evidence reports hashes, counts, state and zero canonical writes.", "required": true, "location": "GitHub Actions run 30447607867 / procurement-lifecycle-rehearsal-evidence.json", "status": "PASS"},
+    {"evidence_type": "DOCUMENT", "description": "Runbook records lifecycle semantics, authority boundaries and promotion blockers.", "required": true, "location": "docs/sources/procurement-lifecycle-rehearsal-v0.1.md", "status": "PASS"}
   ],
   "impacts": {"security": "MATERIAL", "privacy": "MATERIAL", "data_rights": "MATERIAL", "regulatory": "LOW", "multilingual": "LOW", "epistemic": "CRITICAL", "billing": "NONE"},
   "observability": {
@@ -66,5 +66,5 @@
   "owner": "evidence-provenance-engineer",
   "reviewer": "gate-evaluator",
   "created_at": "2026-07-29T10:54:00Z",
-  "updated_at": "2026-07-29T11:27:00Z"
+  "updated_at": "2026-07-29T11:31:00Z"
 }
