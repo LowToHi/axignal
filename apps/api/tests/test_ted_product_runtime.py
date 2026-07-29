@@ -1,4 +1,5 @@
 from dataclasses import replace
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from uuid import UUID, uuid4
 
@@ -8,6 +9,7 @@ from axignal_api.application import app
 from axignal_api.connectors.ted import TEDSearchConnector
 from axignal_api.identity import build_identity_assertion
 from axignal_api.queue import ResearchJob
+from axignal_api.settings import Settings
 from axignal_api.ted_runtime import (
     PROFILE_ID,
     build_ted_search_artifacts,
@@ -199,6 +201,70 @@ def test_ted_endpoint_fails_closed_without_identity(
     assert response.json()["detail"] == "Authenticated identity is required"
 
 
+def test_ted_endpoint_rejects_forged_identity(monkeypatch) -> None:
+    monkeypatch.setenv("AXIGNAL_IDENTITY_ASSERTION_SECRET", IDENTITY_SECRET)
+    forged = build_identity_assertion(
+        secret="different-identity-assertion-secret-32-bytes",
+        subject="usr_attacker",
+        email="attacker@example.test",
+        tenant_id=TENANT_ID,
+    )
+    response = TestClient(app).post(
+        "/v1/research-runs/ted-procurement",
+        headers={"X-AXIGNAL-Identity-Assertion": forged},
+        json={
+            "context_id": "ctx_eu_procurement_v01",
+            "opportunity_id": "opp_eu_procurement",
+            "question": "Investiga la contratación pública europea activa.",
+        },
+    )
+
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Invalid or expired identity assertion"
+
+
+def test_ted_endpoint_rejects_expired_identity(monkeypatch) -> None:
+    monkeypatch.setenv("AXIGNAL_IDENTITY_ASSERTION_SECRET", IDENTITY_SECRET)
+    expired = build_identity_assertion(
+        secret=IDENTITY_SECRET,
+        subject="usr_expired",
+        email="expired@example.test",
+        tenant_id=TENANT_ID,
+        now=datetime.now(UTC) - timedelta(minutes=10),
+        ttl_seconds=60,
+    )
+    response = TestClient(app).post(
+        "/v1/research-runs/ted-procurement",
+        headers={"X-AXIGNAL-Identity-Assertion": expired},
+        json={
+            "context_id": "ctx_eu_procurement_v01",
+            "opportunity_id": "opp_eu_procurement",
+            "question": "Investiga la contratación pública europea activa.",
+        },
+    )
+
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Invalid or expired identity assertion"
+
+
+def test_ted_endpoint_rejects_client_tenant_injection(monkeypatch) -> None:
+    monkeypatch.setenv("AXIGNAL_IDENTITY_ASSERTION_SECRET", IDENTITY_SECRET)
+    response = TestClient(app).post(
+        "/v1/research-runs/ted-procurement",
+        headers=identity_headers(),
+        json={
+            "tenant_id": "22222222-2222-4222-8222-222222222222",
+            "context_id": "ctx_eu_procurement_v01",
+            "opportunity_id": "opp_eu_procurement",
+            "question": "Investiga la contratación pública europea activa.",
+        },
+    )
+
+    assert response.status_code == 422
+    error_locations = [tuple(item["loc"]) for item in response.json()["detail"]]
+    assert ("body", "tenant_id") in error_locations
+
+
 def test_ted_endpoint_fails_closed_when_runtime_disabled(
     monkeypatch,
 ) -> None:
@@ -237,3 +303,18 @@ def test_ted_endpoint_rejects_private_knowledge(
     )
 
     assert response.status_code == 422
+
+
+def test_ted_live_activation_is_source_specific(monkeypatch) -> None:
+    monkeypatch.setenv("AXIGNAL_PERSISTENT_RESEARCH_ENABLED", "true")
+    monkeypatch.setenv("AXIGNAL_TED_PROCUREMENT_ENABLED", "true")
+    monkeypatch.setenv("AXIGNAL_TED_LIVE_SOURCES_ENABLED", "true")
+    monkeypatch.setenv("AXIGNAL_LIVE_SOURCES_ENABLED", "false")
+    monkeypatch.setenv("AXIGNAL_DATABASE_URL", "postgresql://example.invalid/axignal")
+    monkeypatch.setenv("AXIGNAL_VALKEY_URL", "redis://example.invalid/0")
+    monkeypatch.delenv("AXIGNAL_TED_FIXTURE_PATH", raising=False)
+
+    settings = Settings.from_env()
+    settings.require_ted_procurement()
+    assert settings.ted_live_sources_enabled is True
+    assert settings.live_sources_enabled is False
