@@ -133,7 +133,7 @@ class TEDResearchRepository(ResearchRepository):
             if run["state"] == "COMPLETED":
                 return {"idempotent_replay": True}
 
-            source_object_id = self._upsert_source_object(
+            source_object_id = self._upsert_ted_source_object(
                 cursor=cursor,
                 source=source,
                 page=page,
@@ -141,12 +141,12 @@ class TEDResearchRepository(ResearchRepository):
             evidence_ids: list[UUID] = []
             candidate_ids: list[UUID] = []
             for evidence_item, candidate in zip(evidence, candidates, strict=True):
-                evidence_id = self._upsert_evidence(
+                evidence_id = self._upsert_ted_evidence(
                     cursor=cursor,
                     source_object_id=source_object_id,
                     evidence=evidence_item,
                 )
-                candidate_id = self._upsert_candidate(
+                candidate_id = self._upsert_ted_candidate(
                     cursor=cursor,
                     candidate=candidate,
                     evidence_id=evidence_id,
@@ -180,7 +180,7 @@ class TEDResearchRepository(ResearchRepository):
                 canonical_id: UUID | None = None
                 created = False
                 if decision.admitted:
-                    canonical_id, created = self._admit_candidate(
+                    canonical_id, created = self._admit_ted_candidate(
                         cursor=cursor,
                         candidate_id=candidate_id,
                         evidence_id=evidence_id,
@@ -367,7 +367,7 @@ class TEDResearchRepository(ResearchRepository):
         }
 
     @staticmethod
-    def _upsert_source_object(
+    def _upsert_ted_source_object(
         *,
         cursor: Any,
         source: dict[str, Any],
@@ -446,7 +446,7 @@ class TEDResearchRepository(ResearchRepository):
         return existing["source_object_id"]
 
     @staticmethod
-    def _upsert_evidence(
+    def _upsert_ted_evidence(
         *,
         cursor: Any,
         source_object_id: UUID,
@@ -507,7 +507,7 @@ class TEDResearchRepository(ResearchRepository):
         return existing["evidence_id"]
 
     @staticmethod
-    def _upsert_candidate(
+    def _upsert_ted_candidate(
         *,
         cursor: Any,
         candidate: TEDCandidateArtifact,
@@ -566,7 +566,7 @@ class TEDResearchRepository(ResearchRepository):
         return existing["candidate_claim_id"]
 
     @staticmethod
-    def _admit_candidate(
+    def _admit_ted_candidate(
         *,
         cursor: Any,
         candidate_id: UUID,
