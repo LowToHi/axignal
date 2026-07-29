@@ -1,0 +1,101 @@
+{
+  "schema": "axignal.ai-assistance-policy.v0.1",
+  "goal_id": "AXIGNAL-GOAL-001",
+  "policy_version": "0.1.0",
+  "status": "CANDIDATE_DISABLED",
+  "default_decision": "OUT_OF_SCOPE",
+  "scope_decisions": [
+    "IN_SCOPE_AXIGNAL",
+    "CLARIFICATION_REQUIRED",
+    "OUT_OF_SCOPE",
+    "BLOCKED_SAFETY_OR_AUTHORITY"
+  ],
+  "allowed_capabilities": [
+    "NAVIGATE_AXIGNAL",
+    "READ_INVESTIGATION_CONTEXT",
+    "UPDATE_INVESTIGATION_CONTEXT",
+    "SEARCH_ADMITTED_AXIGNAL_DATA",
+    "COMPARE_ADMITTED_AXIGNAL_DATA",
+    "EXPLAIN_CLAIMS_AND_EVIDENCE",
+    "SHOW_CONTRADICTIONS_AND_UNKNOWNS",
+    "REQUEST_BOUNDED_RESEARCH_RUN",
+    "READ_RESEARCH_RUN_PROGRESS",
+    "ASSEMBLE_EVIDENCE_LINKED_DOSSIER",
+    "GENERATE_GROUNDED_PDF_REPORT",
+    "EXPLAIN_AXIGNAL_PRODUCT_AND_METHOD"
+  ],
+  "prohibited_capability_classes": [
+    "PSYCHOLOGY_OR_THERAPY",
+    "EMOTIONAL_COMPANIONSHIP",
+    "MEDICAL_GUIDANCE",
+    "PERSONALISED_LEGAL_TAX_OR_FINANCIAL_ADVICE",
+    "CODE_GENERATION_REVIEW_DEBUG_OR_EXECUTION",
+    "GENERAL_KNOWLEDGE_ASSISTANCE",
+    "UNRELATED_CREATIVE_OR_PRODUCTIVITY_ASSISTANCE",
+    "UNRESTRICTED_WEB_BROWSING",
+    "ARBITRARY_HTTP",
+    "ARBITRARY_SQL",
+    "SHELL_OR_OS_EXECUTION",
+    "ARBITRARY_FILESYSTEM_ACCESS",
+    "EXTERNAL_COMMUNICATION",
+    "BID_APPLICATION_PURCHASE_OR_TRADE_SUBMISSION",
+    "USER_IMPERSONATION_OR_REPRESENTATION",
+    "USER_SELECTED_MCP_SKILL_OR_PLUGIN_EXECUTION",
+    "CANONICAL_CLAIM_OR_SOURCE_ADMISSION"
+  ],
+  "allowed_output_types": [
+    "AXIGNAL_UI_ANSWER",
+    "TYPED_NAVIGATION_PLAN",
+    "TYPED_INVESTIGATION_PLAN",
+    "EVIDENCE_LINKED_SUMMARY",
+    "CONTRADICTION_AND_UNKNOWN_REPORT",
+    "AXIGNAL_DOSSIER",
+    "GROUNDED_PDF_REPORT"
+  ],
+  "required_context_sources": [
+    "SERVER_RESOLVED_TENANT",
+    "AUTHORISED_INVESTIGATION_CONTEXT",
+    "ENTITLED_TENANT_PRIVATE_DATA",
+    "ADMITTED_AXIGNAL_SOURCES",
+    "AXIGNAL_CLAIMS_AND_EVIDENCE",
+    "AXIGNAL_PRODUCT_METADATA"
+  ],
+  "prohibited_tool_classes": [
+    "SHELL",
+    "CODE_INTERPRETER",
+    "PACKAGE_MANAGER",
+    "UNRESTRICTED_BROWSER",
+    "UNRESTRICTED_WEB_SEARCH",
+    "ARBITRARY_MCP",
+    "ARBITRARY_SQL",
+    "EXTERNAL_MESSAGING",
+    "FINANCIAL_TRANSACTION",
+    "BID_OR_APPLICATION_SUBMISSION"
+  ],
+  "trial": {
+    "duration_days": 7,
+    "token_budget_scope": "ORGANISATION",
+    "token_budget_total": 1000000,
+    "token_budget_period": "ENTIRE_TRIAL",
+    "daily_reset": false,
+    "overage_allowed": false,
+    "silent_conversion_allowed": false,
+    "exhaustion_decision": "BLOCK_NEW_AI_OPERATIONS",
+    "exhaustion_message_es": "Has utilizado el máximo de 1.000.000 de tokens incluido en la prueba gratuita de 7 días. En las suscripciones mensuales de pago, los tokens son ilimitados."
+  },
+  "paid_monthly": {
+    "monthly_token_quota": null,
+    "token_overage_billing": false,
+    "marketing_entitlement_es": "Tokens de IA ilimitados al mes, sujetos a los guardarraíles de seguridad, alcance AXIGNAL y uso legítimo del servicio.",
+    "safety_reliability_rights_controls_remain": true
+  },
+  "authority": {
+    "model_can_write_canonical_claims": false,
+    "model_can_admit_sources": false,
+    "model_can_admit_claims": false,
+    "model_can_execute_external_actions": false,
+    "frontend_is_enforcement_boundary": false,
+    "server_pre_model_scope_gate_required": true,
+    "server_post_model_output_gate_required": true
+  }
+}
