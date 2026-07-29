@@ -88,6 +88,7 @@ A discovered task that changes scope MUST be registered before execution.
 | `AX-F2-T12` | Add landing performance, accessibility, SEO and visual-regression CI | 08, 20, 21, 23 | performance-engineer, accessibility-auditor, test-engineer |
 | `AX-F2-T13` | Add CRM, scheduling and lead-routing interfaces without claim authority | 04, 06, 18, 23 | backend-architect, privacy-reviewer, security-reviewer |
 | `AX-F2-T16` | Add isolated shared-Traefik pilot edge and host-only credential lifecycle | 06, 08–10, 18, 19, ADR-011 | repository-architect, security-reviewer, test-engineer, operations-engineer, operations-writer |
+| `AX-F2-T17` | Release the public landing through incumbent Traefik with private consent-aware intake | 06, 08–10, 18, 19 | repository-architect, privacy-reviewer, security-reviewer, test-engineer, operations-engineer, operations-writer |
 
 ## F3 — Epistemic kernel
 
