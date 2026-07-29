@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import yaml
+
 from axignal_api.identity import MAX_ASSERTION_TTL_SECONDS
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -33,7 +35,9 @@ def main() -> None:
     grants_sql = GRANTS_SQL.read_text(encoding="utf-8")
     ted_sql = TED_SQL.read_text(encoding="utf-8")
     profile = json.loads(PROFILE.read_text(encoding="utf-8"))
-    pilot = PILOT.read_text(encoding="utf-8")
+    pilot = yaml.safe_load(PILOT.read_text(encoding="utf-8"))
+    require(isinstance(pilot, dict), "pilot topology is not a mapping")
+    services = pilot["services"]
 
     request_contract = api.split(
         "class PersistentTEDResearchRunAccepted", 1
@@ -80,8 +84,33 @@ def main() -> None:
     require('"api_redistribution": False' in ted_repository, "redistribution guard is absent")
     require('"model_calls": 0' in ted_repository, "model-free authority evidence is absent")
     require('source.get("kill_switch")' in worker, "source kill switch is not enforced")
-    require("AXIGNAL_TED_LIVE_SOURCES_ENABLED" in pilot, "pilot lacks source-specific activation")
-    require('AXIGNAL_LIVE_SOURCES_ENABLED: "false"' in pilot, "global live sources were enabled")
+
+    require(pilot["networks"]["backend"]["internal"] is True, "backend is not internal")
+    require(pilot["networks"]["ted-egress"]["internal"] is False, "TED egress is closed")
+    egress_services = {
+        service_id
+        for service_id, service in services.items()
+        if "ted-egress" in service.get("networks", [])
+    }
+    require(egress_services == {"research-worker"}, "TED egress is not worker-exclusive")
+    require(
+        services["api"]["environment"]["AXIGNAL_LIVE_SOURCES_ENABLED"] == "false",
+        "global live sources were enabled in API",
+    )
+    require(
+        services["research-worker"]["environment"]["AXIGNAL_LIVE_SOURCES_ENABLED"]
+        == "false",
+        "global live sources were enabled in worker",
+    )
+    require(
+        services["research-worker"]["environment"]["AXIGNAL_TED_LIVE_SOURCES_ENABLED"]
+        == "true",
+        "bounded TED live source is disabled",
+    )
+    require(
+        services["web"]["environment"]["AXIGNAL_TED_PROCUREMENT_UI_ENABLED"] == "true",
+        "TED Navigator route is disabled",
+    )
 
     require(profile["activation_state"] == "PRIVATE_PILOT_ENABLED", "pilot activation absent")
     require(profile["rights_boundary"]["personal_contact_data"] == "PROHIBITED", "PII enabled")
@@ -107,6 +136,7 @@ def main() -> None:
         "api_redistribution": "PROHIBITED",
         "global_live_sources": False,
         "source_specific_activation": True,
+        "egress_service_allowlist": ["research-worker"],
         "kill_switches": ["WORKFLOW", "LIVE_SOURCE", "SOURCE"],
         "residual_risk": {
             "identity_assertion_replay_window_seconds": MAX_ASSERTION_TTL_SECONDS,
