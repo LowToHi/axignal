@@ -68,6 +68,8 @@ services:
       AXIGNAL_ENV: pilot
       AXIGNAL_PILOT_MODE: "true"
       AXIGNAL_BUILD_SHA: ${AXIGNAL_BUILD_SHA:?required}
+      AXIGNAL_AUTH_SUBJECT: ${AXIGNAL_AUTH_SUBJECT:?required}
+      AXIGNAL_AUTH_TENANT_ID: ${AXIGNAL_AUTH_TENANT_ID:?required}
       AXIGNAL_DATABASE_URL: postgresql://${AXIGNAL_POSTGRES_USER:-axignal}:${AXIGNAL_POSTGRES_PASSWORD}@postgres:5432/${AXIGNAL_POSTGRES_DB:-axignal}
       AXIGNAL_PROPOSAL_DATABASE_URL: postgresql://axignal_proposal_worker:${AXIGNAL_PROPOSAL_DB_PASSWORD:?required}@postgres:5432/${AXIGNAL_POSTGRES_DB:-axignal}
       AXIGNAL_ADMISSION_DATABASE_URL: postgresql://axignal_admission_runtime_login:${AXIGNAL_ADMISSION_DB_PASSWORD:?required}@postgres:5432/${AXIGNAL_POSTGRES_DB:-axignal}
@@ -181,6 +183,7 @@ services:
     restart: on-failure:5
     networks:
       - backend
+      - ted-egress
 
   proposal-worker:
     profiles: ["workers"]
@@ -247,9 +250,9 @@ services:
   otel-collector:
     profiles: ["observability"]
     image: otel/opentelemetry-collector-contrib:0.130.0
-    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    command: ["--config=/etc/otelcol-contrib/collector-config.yaml"]
     volumes:
-      - ../otel/collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
+      - ../otel/collector-config.yaml:/etc/otelcol-contrib/collector-config.yaml:ro
     expose:
       - "4318"
     restart: unless-stopped
@@ -267,3 +270,5 @@ networks:
   edge:
   backend:
     internal: true
+  ted-egress:
+    internal: false
