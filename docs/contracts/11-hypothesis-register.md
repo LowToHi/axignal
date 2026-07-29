@@ -86,7 +86,8 @@ Candidate bands:
 
 **Claim:** The strongest first commercial wedge is **European Public Procurement Intelligence**, beginning with the official TED source family; macroeconomic and trade data may later act as context layers, while grants and regulation-created demand remain adjacent universes subject to independent admission.
 
-- State: `TEST_DESIGNED / TECHNICAL EVIDENCE ADVANCED`
+- State: `TEST_DESIGNED`
+- Technical evidence state: `ADVANCED / NOT PRODUCT ADMISSION`.
 - Selection evidence: versioned comparative scorecard `AX-F8-UNIVERSE-001`; European procurement ranked first at `96/100` and passed all declared selection knockouts.
 - Technical evidence: a bounded TED Search API probe, eForms SDK 1.14.2 parser, deterministic sandbox admission, correction/cancellation/result lineage, 50 provisional Evidence Objects and a traceable dossier exist on the canonical baseline.
 - Decision: ADR-012 selects the implementation wedge; ADR-013 selects the candidate B2G commercial expression. Neither admits TED as a product source nor establishes user demand.
