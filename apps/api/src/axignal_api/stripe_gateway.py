@@ -75,20 +75,20 @@ class StripeGateway:
         price_id = self.settings.price_for_plan(plan_code)
         assert self.settings.checkout_success_url is not None
         assert self.settings.checkout_cancel_url is not None
-        form = [
-            ("mode", "subscription"),
-            ("success_url", self.settings.checkout_success_url),
-            ("cancel_url", self.settings.checkout_cancel_url),
-            ("client_reference_id", str(selection_id)),
-            ("customer_email", customer_email),
-            ("line_items[0][price]", price_id),
-            ("line_items[0][quantity]", "1"),
-            ("allow_promotion_codes", "false"),
-            ("metadata[axignal_selection_id]", str(selection_id)),
-            ("metadata[axignal_plan_code]", plan_code),
-            ("subscription_data[metadata][axignal_selection_id]", str(selection_id)),
-            ("subscription_data[metadata][axignal_plan_code]", plan_code),
-        ]
+        form = {
+            "mode": "subscription",
+            "success_url": self.settings.checkout_success_url,
+            "cancel_url": self.settings.checkout_cancel_url,
+            "client_reference_id": str(selection_id),
+            "customer_email": customer_email,
+            "line_items[0][price]": price_id,
+            "line_items[0][quantity]": "1",
+            "allow_promotion_codes": "false",
+            "metadata[axignal_selection_id]": str(selection_id),
+            "metadata[axignal_plan_code]": plan_code,
+            "subscription_data[metadata][axignal_selection_id]": str(selection_id),
+            "subscription_data[metadata][axignal_plan_code]": plan_code,
+        }
         idempotency_key = f"axignal:checkout:{selection_id}:{operation_id}:v1"
         with self._client() as client:
             self.verify_account(client)
@@ -117,12 +117,12 @@ class StripeGateway:
     ) -> SubscriptionCommandResult:
         self.settings.require_lifecycle()
         price_id = self.settings.price_for_plan(target_plan_code)
-        form = [
-            ("items[0][id]", subscription_item_id),
-            ("items[0][price]", price_id),
-            ("proration_behavior", "none"),
-            ("metadata[axignal_pending_plan_code]", target_plan_code),
-        ]
+        form = {
+            "items[0][id]": subscription_item_id,
+            "items[0][price]": price_id,
+            "proration_behavior": "none",
+            "metadata[axignal_pending_plan_code]": target_plan_code,
+        }
         with self._client() as client:
             self.verify_account(client)
             response = client.post(
