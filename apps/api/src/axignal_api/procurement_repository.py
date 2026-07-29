@@ -16,10 +16,10 @@ from axignal_api.connectors.ted_xml import SOURCE_ID, TEDXMLConnector
 from axignal_api.document_proposals import canonical_hash
 from axignal_api.procurement_persistent_types import (
     LIFECYCLE_PROFILE,
+    PERSISTENT_AUTO_PREDICATES,
     PIPELINE_VERSION,
     POLICY_VERSION,
     PRODUCT_PROFILE,
-    PERSISTENT_AUTO_PREDICATES,
     SanitisedProcurementLifecycle,
     numeric_projection,
     observed_at,
@@ -428,7 +428,8 @@ class ProcurementRetrievalRepository:
                 evidence_row = cursor.fetchone()
                 if evidence_row is None:
                     cursor.execute(
-                        "SELECT evidence_id FROM axignal_global.evidence_objects WHERE evidence_key = %s",
+                        "SELECT evidence_id FROM axignal_global.evidence_objects "
+                        "WHERE evidence_key = %s",
                         (claim.evidence_key,),
                     )
                     evidence_row = cursor.fetchone()

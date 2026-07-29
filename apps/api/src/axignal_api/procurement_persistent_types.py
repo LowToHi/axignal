@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import re
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime, time, timedelta, timezone
 from decimal import Decimal, InvalidOperation
 from typing import Any
 
@@ -11,7 +11,6 @@ from axignal_api.connectors.ted_xml import SOURCE_ID, TEDXMLNotice
 from axignal_api.document_proposals import canonical_hash
 from axignal_api.procurement_lifecycle_rehearsal import (
     LIFECYCLE_PROFILE,
-    ParsedProcurementLifecycleNotice,
     ProcurementLifecycleAssembler,
     ProcurementLifecycleError,
     TEDEFormsLifecycleParser,
@@ -59,7 +58,10 @@ NOTICE_REFERENCE_PATTERN = re.compile(
     r"^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}-[0-9]{2}$",
     re.IGNORECASE,
 )
-DATE_PATTERN = re.compile(r"^[0-9]{4}-[0-9]{2}-[0-9]{2}(?:[T ][0-9:.+\-Z]+)?$")
+XSD_DATE_PATTERN = re.compile(
+    r"^(?P<date>[0-9]{4}-[0-9]{2}-[0-9]{2})"
+    r"(?P<timezone>Z|[+\-][0-9]{2}:[0-9]{2})?$"
+)
 CURRENCY_PATTERN = re.compile(r"^[A-Z]{3}$")
 
 
@@ -300,11 +302,26 @@ def _validate_and_normalise_value(predicate: str, value: Any) -> Any:
         if not isinstance(value, int) or isinstance(value, bool) or value < 0:
             raise ProcurementPersistencePolicyError("TED tender count is invalid")
         return value
-    if predicate in {"procurement_submission_deadline", "procurement_award_date"}:
-        text = str(value)
-        if not DATE_PATTERN.fullmatch(text):
-            raise ProcurementPersistencePolicyError("TED date or datetime is invalid")
-        return text
+    if predicate == "procurement_submission_deadline":
+        if not isinstance(value, dict) or set(value) != {"date", "time"}:
+            raise ProcurementPersistencePolicyError("TED submission deadline is malformed")
+        date_text = _normalise_xsd_date(
+            value["date"],
+            error_message="TED submission deadline date is invalid",
+        )
+        time_value = value["time"]
+        time_text: str | None = None
+        if time_value is not None:
+            time_text = str(time_value)
+            try:
+                time.fromisoformat(time_text.replace("Z", "+00:00"))
+            except ValueError as exc:
+                raise ProcurementPersistencePolicyError(
+                    "TED submission deadline time is invalid"
+                ) from exc
+        return {"date": date_text, "time": time_text}
+    if predicate == "procurement_award_date":
+        return _normalise_xsd_date(value, error_message="TED award date is invalid")
     if predicate == "procurement_changed_notice_reference":
         text = str(value)
         if not NOTICE_REFERENCE_PATTERN.fullmatch(text):
@@ -319,11 +336,43 @@ def _validate_and_normalise_value(predicate: str, value: Any) -> Any:
     )
 
 
-def observed_at(issue_date: str) -> datetime:
+def _normalise_xsd_date(value: Any, *, error_message: str) -> str:
+    text = str(value)
+    match = XSD_DATE_PATTERN.fullmatch(text)
+    if match is None:
+        raise ProcurementPersistencePolicyError(error_message)
     try:
-        return datetime.fromisoformat(issue_date).replace(tzinfo=UTC)
+        date.fromisoformat(match.group("date"))
     except ValueError as exc:
-        raise ProcurementPersistencePolicyError("TED issue date is invalid") from exc
+        raise ProcurementPersistencePolicyError(error_message) from exc
+    timezone_text = match.group("timezone")
+    if timezone_text not in {None, "Z"}:
+        hours = int(timezone_text[1:3])
+        minutes = int(timezone_text[4:6])
+        if hours > 14 or minutes > 59 or (hours == 14 and minutes != 0):
+            raise ProcurementPersistencePolicyError(error_message)
+    return text
+
+
+def observed_at(issue_date: str) -> datetime:
+    text = _normalise_xsd_date(issue_date, error_message="TED issue date is invalid")
+    match = XSD_DATE_PATTERN.fullmatch(text)
+    if match is None:  # pragma: no cover - guaranteed by _normalise_xsd_date
+        raise ProcurementPersistencePolicyError("TED issue date is invalid")
+    timezone_text = match.group("timezone")
+    zone = UTC
+    if timezone_text not in {None, "Z"}:
+        sign = 1 if timezone_text[0] == "+" else -1
+        offset = timedelta(
+            hours=int(timezone_text[1:3]),
+            minutes=int(timezone_text[4:6]),
+        )
+        zone = timezone(sign * offset)
+    return datetime.combine(
+        date.fromisoformat(match.group("date")),
+        time.min,
+        tzinfo=zone,
+    )
 
 
 def numeric_projection(claim: SanitisedClaim) -> tuple[str | None, str | None]:

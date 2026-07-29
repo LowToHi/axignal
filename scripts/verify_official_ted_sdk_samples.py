@@ -105,11 +105,13 @@ def main() -> int:
             if not profile_complete:
                 continue
             digest = f"sha256:{sha256(raw).hexdigest()}"
-            if document_type == "ContractNotice" and has_element(root, "Changes"):
-                if has_element(root, "ChangedNoticeIdentifier") and has_element(
-                    root, "ReasonCode"
-                ):
-                    correction_hashes.append(digest)
+            if (
+                document_type == "ContractNotice"
+                and has_element(root, "Changes")
+                and has_element(root, "ChangedNoticeIdentifier")
+                and has_element(root, "ReasonCode")
+            ):
+                correction_hashes.append(digest)
             if document_type == "ContractAwardNotice":
                 subtype = element_text(root, "SubTypeCode")
                 if (

@@ -232,7 +232,8 @@ def main() -> int:
         str(
             scalar(
                 app_dsn,
-                "SELECT admission_handoff_id FROM tenant_private.research_runs WHERE research_run_id = %s",
+                "SELECT admission_handoff_id FROM tenant_private.research_runs "
+                "WHERE research_run_id = %s",
                 (run_id,),
             )
         )
@@ -240,7 +241,8 @@ def main() -> int:
     primary_package_hash = str(
         scalar(
             app_dsn,
-            "SELECT package_hash FROM axignal_global.admission_handoffs WHERE admission_handoff_id = %s",
+            "SELECT package_hash FROM axignal_global.admission_handoffs "
+            "WHERE admission_handoff_id = %s",
             (primary_handoff_id,),
         )
     )
@@ -305,6 +307,7 @@ def main() -> int:
     assert admission_publisher.publish_pending(limit=100) >= 1
     admission_rollback_job = admission_queue.dequeue(timeout_seconds=1)
     assert admission_rollback_job is not None
+    assert admission_rollback_job.research_run_id == admission_rollback_run
     admission_before = counts(app_dsn)
     try:
         admission_repository.decide(
