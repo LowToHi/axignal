@@ -200,7 +200,10 @@ def validate_source_and_product_profile() -> dict:
     )
     require(profile["source_id"] == source["source_id"], "profile source mismatch")
     require(profile["runtime_default"] == "DISABLED", "TED runtime default enabled")
-    require(profile["query_contract"]["arbitrary_query_allowed"] is False, "arbitrary query enabled")
+    require(
+        profile["query_contract"]["arbitrary_query_allowed"] is False,
+        "arbitrary query enabled",
+    )
     require(profile["authority"]["generative_model_calls"] == 0, "model calls enabled")
     require(
         profile["rights_boundary"]["personal_contact_data"] == "PROHIBITED",
