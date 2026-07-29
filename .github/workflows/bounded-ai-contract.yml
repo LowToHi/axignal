@@ -1,0 +1,49 @@
+name: Bounded AI Contract
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "config/ai-assistance-policy.v0.1.json"
+      - "docs/contracts/29-bounded-ai-assistance-and-token-entitlements.md"
+      - "docs/contracts/README.md"
+      - "docs/adr/ADR-014-bounded-ai-and-token-entitlements.md"
+      - "docs/adr/README.md"
+      - "docs/roadmap/tasks/AX-F9-T15.json"
+      - "scripts/verify_bounded_ai_contract.py"
+      - ".github/workflows/bounded-ai-contract.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "config/ai-assistance-policy.v0.1.json"
+      - "docs/contracts/29-bounded-ai-assistance-and-token-entitlements.md"
+      - "docs/contracts/README.md"
+      - "docs/adr/ADR-014-bounded-ai-and-token-entitlements.md"
+      - "docs/adr/README.md"
+      - "docs/roadmap/tasks/AX-F9-T15.json"
+      - "scripts/verify_bounded_ai_contract.py"
+      - ".github/workflows/bounded-ai-contract.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify AXIGNAL-only AI boundary and token policy
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Validate policy and contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/verify_bounded_ai_contract.py
+          python3 scripts/verify_bounded_ai_contract.py

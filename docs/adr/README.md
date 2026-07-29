@@ -15,5 +15,6 @@
 | [ADR-011](ADR-011-shared-traefik-private-pilot-edge.md) | The private pilot reuses the incumbent Traefik edge while AXIGNAL binds only to loopback | PROPOSED / REVIEW REQUIRED |
 | [ADR-012](ADR-012-european-public-procurement-first-universe.md) | European Public Procurement Intelligence is the sole first commercial implementation wedge; TED remains under independent source admission | ACCEPTED / IMPLEMENTATION NOT ADMITTED |
 | [ADR-013](ADR-013-b2g-procurement-commercial-and-global-source-program.md) | B2G procurement narrative, premium price bands, controlled seven-day trial and federated global official-source expansion | PROPOSED / VALIDATION REQUIRED |
+| [ADR-014](ADR-014-bounded-ai-and-token-entitlements.md) | AXIGNAL-only AI scope, prohibited general assistance, one-million-token trial and unlimited paid monthly tokens | PROPOSED / IMPLEMENTATION AND ECONOMIC VALIDATION REQUIRED |
 
 ADRs record durable decisions and consequences. A later decision MUST supersede rather than erase an accepted ADR.
