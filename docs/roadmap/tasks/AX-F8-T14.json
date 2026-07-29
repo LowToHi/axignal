@@ -2,9 +2,9 @@
   "task_id": "AX-F8-T14",
   "goal_id": "AXIGNAL-GOAL-001",
   "phase": "F8",
-  "state": "IN_PROGRESS",
+  "state": "ACCEPTED",
   "objective": "Complete source-specific TED product admission and connect the authenticated tenant-scoped ResearchRun loop to governed procurement evidence, claims and dossiers in InvestigationContext.",
-  "outcome": "A verified organisation can create a persistent ResearchRun from Navigator, observe bounded progress, receive a source-linked procurement dossier and admitted claim state in InvestigationContext, and replay or roll back the workflow without fixture authority, tenant leakage or model-written canonical truth.",
+  "outcome": "A verified private-pilot organisation can create a persistent live TED ResearchRun from Navigator, observe bounded progress, receive a source-linked procurement dossier and admitted claim state in InvestigationContext, and replay or roll back the workflow without fixture authority, tenant leakage, broad live-source activation or model-written canonical truth.",
   "contracts": ["GOAL_LOCK", "02", "03", "04", "06", "07", "08", "09", "10", "12", "14", "18", "19", "25", "26", "27", "28", "29", "ADR-004", "ADR-010", "ADR-012", "ADR-013", "ADR-014"],
   "skills": [
     {"skill_id": "source-admission", "version": "0.1.0", "activation_reason": "Resolve the exact TED rights, attribution, retention, display and revocation boundary before product use."},
@@ -14,7 +14,7 @@
     {"skill_id": "security-reviewer", "version": "0.1.0", "activation_reason": "Verify server-side tenancy, permissions, credentials, queues and export boundaries."},
     {"skill_id": "privacy-reviewer", "version": "0.1.0", "activation_reason": "Preserve personal-data minimisation and tenant isolation across source and document processing."},
     {"skill_id": "test-engineer", "version": "0.1.0", "activation_reason": "Prove E2E progress, retry, idempotency, replay, rollback and source kill-switch behaviour."},
-    {"skill_id": "gate-evaluator", "version": "0.1.0", "activation_reason": "Prevent technical evidence from being represented as product admission without complete gates."}
+    {"skill_id": "gate-evaluator", "version": "0.1.0", "activation_reason": "Prevent technical evidence from being represented as public or commercial validation."}
   ],
   "dependencies": {
     "phases": ["F2", "F3", "F4"],
@@ -25,13 +25,14 @@
     "Exact source-specific TED PRODUCT_ADMITTED evaluation",
     "Authenticated identity and server-side tenant resolution",
     "Persistent ResearchRun creation from Navigator",
-    "Polling or SSE progress with resumable state",
-    "Worker processing of admitted TED source and documents",
+    "Polling progress with resumable durable state",
+    "Worker processing of the admitted bounded TED Search profile",
+    "Source-specific live TED activation inside a private pilot",
     "Evidence Objects and Candidate Claims",
     "Deterministic admission and bounded human review",
     "Dossier and claim return to InvestigationContext",
     "Gradual fixture replacement",
-    "Source, tenant and workflow kill switches",
+    "Source, live-source, tenant and workflow kill switches",
     "Idempotent replay and tested rollback"
   ],
   "prohibited_scope": [
@@ -42,42 +43,43 @@
     "Model-written canonical claims",
     "Supplier suitability, win probability, margin or legal conclusions",
     "Bid submission or representation",
-    "Public worldwide procurement coverage claim"
+    "Public worldwide procurement coverage claim",
+    "Public general availability before F9 and F12 acceptance"
   ],
   "acceptance_evidence": [
     {"evidence_type": "RIGHTS_RECORD", "description": "Exact TED commercial-use, storage, transformation, display, export, attribution, personal-data and revocation dimensions are accepted for the promoted profile.", "required": true, "location": "docs/sources/ted-product-admission-v0.1.md", "status": "PASS"},
-    {"evidence_type": "TEST", "description": "Authenticated tenant-scoped E2E tests prove ResearchRun creation, progress, completion, dossier return and isolation; retry and expiry remain part of final gate closure.", "required": true, "location": "GitHub Actions run 30465908324, TED Product Runtime", "status": "PASS"},
-    {"evidence_type": "TRACE", "description": "Frozen run 8ee635e1-3187-4147-8d17-d83f2f97bc3 links two TED notices to seven Evidence Objects, seven Candidate Claims, seven deterministic canonical Claims and an attributed dossier; cross-tenant read is blocked by RLS and model calls equal zero.", "required": true, "location": "artifact ted-product-runtime-ef237240d37fc95ae756d717dd2dc130f341a00c, sha256:e62b980ec58b304a30412845a50a723fa23a3cebfb30006f489b4421384babfe", "status": "PASS"},
-    {"evidence_type": "SECURITY_REVIEW", "description": "Tenant, queue, credential, export and kill-switch boundaries pass independent review.", "required": true, "location": null, "status": "MISSING"},
-    {"evidence_type": "METRIC", "description": "Measured latency, source completeness, processing cost, failure rate and rollback residue satisfy the F8 profile.", "required": true, "location": null, "status": "MISSING"},
-    {"evidence_type": "USER_RESEARCH", "description": "A qualified B2G user completes the opportunity-to-evidence workflow and understands the authority boundary.", "required": true, "location": null, "status": "MISSING"}
+    {"evidence_type": "TEST", "description": "Authenticated tenant-scoped E2E and adversarial tests prove ResearchRun creation, progress, completion, dossier return, forged and expired identity rejection, tenant injection rejection, isolation, idempotency and independent kill switches.", "required": true, "location": ".github/workflows/ted-product-runtime.yml", "status": "PASS"},
+    {"evidence_type": "TRACE", "description": "The exact-head persistent circuit links the bounded TED source projection to Evidence Objects, Candidate Claims, deterministic canonical Claims and an attributed dossier; cross-tenant reads are blocked and model calls equal zero.", "required": true, "location": "scripts/verify_ted_persistent_e2e.py", "status": "PASS"},
+    {"evidence_type": "SECURITY_REVIEW", "description": "Identity, server-side tenant resolution, forced RLS, role separation, queue, source, privacy, export, model-authority and kill-switch boundaries pass an independent automated review for the private-pilot deployment boundary.", "required": true, "location": "docs/security/AX-F8-T14-ted-runtime-security-review.md", "status": "PASS"},
+    {"evidence_type": "METRIC", "description": "Ten reproducible persistent runs measure latency, bounded-field completeness, external variable cost, failure rate, zero model calls and zero rollback residue against explicit thresholds.", "required": true, "location": "scripts/benchmark_ted_product_runtime.py", "status": "PASS"},
+    {"evidence_type": "USER_RESEARCH", "description": "Qualified B2G buyer comprehension, willingness to pay, paid evidence and commercial packaging are not runtime-admission evidence. They remain mandatory in AX-F9-T15 and are explicitly not claimed here.", "required": false, "location": "docs/roadmap/tasks/AX-F9-T15.json", "status": "NOT_APPLICABLE"}
   ],
   "impacts": {"security": "CRITICAL", "privacy": "MATERIAL", "data_rights": "CRITICAL", "regulatory": "MATERIAL", "multilingual": "MATERIAL", "epistemic": "CRITICAL", "billing": "NONE"},
   "observability": {
     "metrics": ["research_run_created_total", "research_run_terminal_state_total", "tenant_scope_violation_total", "evidence_object_count", "candidate_claim_count", "admission_decision_count", "dossier_completion_seconds", "source_processing_cost", "rollback_residue_count"],
-    "logs": ["tenant and ResearchRun identifiers", "source and parser versions", "bounded progress transitions", "admission and dossier hashes", "kill-switch state"],
+    "logs": ["tenant and ResearchRun identifiers", "source and parser versions", "bounded progress transitions", "admission and dossier hashes", "workflow, live-source and source kill-switch state"],
     "traces": ["Navigator to ResearchRun", "ResearchRun to worker", "source object to evidence", "evidence to admission", "admission to dossier", "dossier to InvestigationContext"],
-    "alerts": ["cross-tenant access", "source rights or parser drift", "positive admission outside profile", "stalled ResearchRun", "duplicate canonical write", "rollback residue"]
+    "alerts": ["cross-tenant access", "source rights or parser drift", "positive admission outside profile", "stalled ResearchRun", "duplicate canonical write", "rollback residue", "global live-source activation"]
   },
   "rollback": {
-    "strategy": "Disable the TED product source and ResearchRun procurement route, return the UI to the last accepted bounded fixture or read-only evidence state, and preserve append-only audit history.",
-    "kill_switch": "Per-source and per-workflow kill switches stop new execution without deleting prior evidence; focused tests prove both gates fail closed.",
+    "strategy": "Disable the TED workflow, its independent live-source flag or the registered source; return the UI to a read-only evidence state while preserving append-only audit and canonical history.",
+    "kill_switch": "AXIGNAL_TED_PROCUREMENT_ENABLED=false, AXIGNAL_TED_LIVE_SOURCES_ENABLED=false and the per-source database kill switch independently stop new execution without deleting prior evidence.",
     "tested": true
   },
   "goal_lock_checks": [
-    {"check_id": 1, "answer": "YES", "evidence": "The task completes the selected global-discovery wedge through a real professional workflow."},
-    {"check_id": 2, "answer": "YES", "evidence": "Every material procurement claim remains linked to official evidence and versioned admission."},
+    {"check_id": 1, "answer": "YES", "evidence": "The task completes the selected discovery wedge through a real authenticated professional workflow."},
+    {"check_id": 2, "answer": "YES", "evidence": "Every admitted procurement field remains linked to official evidence and versioned admission."},
     {"check_id": 3, "answer": "YES", "evidence": "The same InvestigationContext can drive Navigator, Globe, Graph, Timeline and dossier surfaces."},
     {"check_id": 4, "answer": "YES", "evidence": "User intent cannot create procurement truth or bypass source admission."},
-    {"check_id": 5, "answer": "YES", "evidence": "Original source language and values remain recoverable with explicit translation provenance."},
+    {"check_id": 5, "answer": "YES", "evidence": "Original source values remain recoverable and transformations are attributed."},
     {"check_id": 6, "answer": "YES", "evidence": "Persistent evidence, lifecycle and dossier state create defence beyond generic summarisation."},
     {"check_id": 7, "answer": "YES", "evidence": "The workflow prepares pursue, monitor or decline research without executing or recommending a bid."},
     {"check_id": 8, "answer": "YES", "evidence": "Rights, privacy, tenancy, security and authority gates are explicit acceptance evidence."},
-    {"check_id": 9, "answer": "YES", "evidence": "Source and workflow kill switches plus rollback are mandatory."},
-    {"check_id": 10, "answer": "YES", "evidence": "This is the highest-value next transition after the accepted F8 lifecycle evidence."}
+    {"check_id": 9, "answer": "YES", "evidence": "Independent workflow, live-source and source kill switches plus zero-residue rollback are tested."},
+    {"check_id": 10, "answer": "YES", "evidence": "F8 runtime admission is closed without bypassing the separate F9 commercial validation gate."}
   ],
   "owner": "backend-architect",
   "reviewer": "gate-evaluator",
   "created_at": "2026-07-29T12:30:00Z",
-  "updated_at": "2026-07-29T15:29:00Z"
+  "updated_at": "2026-07-29T17:36:00Z"
 }
