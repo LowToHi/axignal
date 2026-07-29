@@ -1,0 +1,82 @@
+{
+  "schema": "axignal.procurement-admission-rehearsal-profile.v1",
+  "profile_id": "ted-procurement-admission-rehearsal@0.1.0",
+  "goal_id": "AXIGNAL-GOAL-001",
+  "task_id": "AX-F8-T12",
+  "universe_id": "eu_public_procurement",
+  "source_id": "src_ted_search_api_v3",
+  "parser_profile": "ted-eforms-cn16@0.1.0",
+  "policy_version": "ted-procurement-observed@0.1.0",
+  "status": "SANDBOX_REHEARSAL_NOT_CANONICAL_RUNTIME",
+  "current_source_context": {
+    "source_state": "TECHNICAL_PROBE",
+    "policy_state": "DISABLED_PENDING_PRODUCT_ADMISSION_AND_XML_PARSER",
+    "rights_valid_for_product": false,
+    "kill_switch_enabled": true,
+    "expected_outcome": "BLOCKED_SOURCE_NOT_PRODUCT_ADMITTED",
+    "canonical_writes": 0
+  },
+  "sandbox_context": {
+    "source_state": "SANDBOX",
+    "policy_state": "SANDBOX_REHEARSAL",
+    "rights_valid_for_sandbox": true,
+    "kill_switch_enabled": false,
+    "sandbox_authorised": true,
+    "maximum_positive_outcome": "SANDBOX_ADMISSIBLE_REDERIVED",
+    "canonical_writes": 0
+  },
+  "auto_admissible_predicates": [
+    "procurement_notice_type",
+    "procurement_procedure_type",
+    "procurement_buyer_official_name",
+    "procurement_buyer_identifier",
+    "procurement_contract_nature",
+    "procurement_cpv_code",
+    "procurement_place_of_performance_nuts",
+    "procurement_estimated_value",
+    "procurement_lot_identifier",
+    "procurement_submission_deadline",
+    "procurement_eu_funding_indicator"
+  ],
+  "outside_profile_outcome": "HUMAN_REVIEW_REQUIRED_OUTSIDE_PROFILE",
+  "model_producer_outcome": "HUMAN_REVIEW_REQUIRED_PROPOSAL_ONLY",
+  "tamper_outcome": "REJECTED_REDERIVATION_MISMATCH",
+  "personal_or_prohibited_outcome": "REJECTED_PROHIBITED",
+  "parser_profile_mismatch_outcome": "QUARANTINED_UNSUPPORTED_PROFILE",
+  "transaction_contract": {
+    "store": "CI-only in-memory transactional rehearsal store",
+    "canonical_ledger": false,
+    "idempotency_material": [
+      "policy version",
+      "parser profile",
+      "raw XML content hash",
+      "sorted Candidate Claim fingerprints",
+      "source state",
+      "policy state",
+      "sandbox authorisation"
+    ],
+    "append_only_events": [
+      "PROCUREMENT_REHEARSAL_BATCH_STARTED",
+      "PROCUREMENT_REHEARSAL_DECISION_RECORDED",
+      "PROCUREMENT_REHEARSAL_BATCH_COMMITTED"
+    ],
+    "forced_failpoint": "TEST_FAILPOINT_AFTER_FIRST_PROCUREMENT_DECISION",
+    "rollback_requirement": "zero batches, decisions and events remain after the failpoint"
+  },
+  "authority_contract": {
+    "models": "PROPOSAL_ONLY",
+    "reviewers": "NO_CANONICAL_WRITES",
+    "xml_parser": "CANDIDATE_CLAIMS_ONLY",
+    "sandbox_store": "NO_CANONICAL_LEDGER_AUTHORITY",
+    "production_admission_runtime": "NOT_ACTIVATED_FOR_PROCUREMENT",
+    "canonical_claim_writes": 0
+  },
+  "promotion_requirements": [
+    "TED source reaches PRODUCT_ADMITTED through AX-F8-T04",
+    "procurement policy is independently enabled after source admission",
+    "PostgreSQL admission package and credential boundary are implemented",
+    "canonical ledger transaction and rollback pass under the admission credential",
+    "notice correction, cancellation and expiry propagation are proven",
+    "no personal data enters Candidate Claims, decisions, canonical claims or telemetry"
+  ]
+}
