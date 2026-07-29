@@ -2,7 +2,7 @@
   "task_id": "AX-F9-T15",
   "goal_id": "AXIGNAL-GOAL-001",
   "phase": "F9",
-  "state": "PROPOSED",
+  "state": "IN_PROGRESS",
   "objective": "Validate AXIGNAL's B2G procurement narrative, paid packaging and premium price bands, then implement a disabled-by-default seven-day controlled trial with server-side entitlements, a cumulative 1,000,000-token organisation budget, bounded AXIGNAL-only AI and explicit expiry; monthly paid subscriptions must have unlimited AI tokens without a monthly token quota or token overage billing.",
   "outcome": "Qualified B2G design partners can purchase a clearly bounded professional workflow with unlimited monthly AI tokens inside AXIGNAL's safety and product scope, while an approved private trial cohort can complete one evidence-linked value loop without silent billing, source-right bypass, tenant leakage, general-purpose AI, token-budget overspend or premium-positioning ambiguity.",
   "contracts": ["GOAL_LOCK", "01", "04", "06", "07", "08", "09", "10", "11", "14", "18", "19", "21", "22", "23", "24", "25", "26", "28", "29", "ADR-013", "ADR-014"],
@@ -54,9 +54,10 @@
   "acceptance_evidence": [
     {"evidence_type": "USER_RESEARCH", "description": "Qualified B2G buyers correctly understand the category, plan differences, unlimited paid-token entitlement and evidence boundary without perceiving the product as a commodity alert service or generic chatbot.", "required": true, "location": null, "status": "MISSING"},
     {"evidence_type": "PAID_EVENT", "description": "Independent paid Design Partner or equivalent annual-contract evidence tests at least two materially different offers.", "required": true, "location": null, "status": "MISSING"},
-    {"evidence_type": "SCHEMA", "description": "Versioned entitlement, AI capability, trial-state and token-ledger models map every marketed capability and limit to server-side enforcement.", "required": true, "location": null, "status": "MISSING"},
-    {"evidence_type": "TEST", "description": "E2E tests prove AXIGNAL-only scope decisions, exact trial token reservation and exhaustion, concurrent overspend prevention, paid no-quota semantics, activation, expiry, read-only transition, no auto-charge, upgrade, cancellation and deletion.", "required": true, "location": null, "status": "MISSING"},
-    {"evidence_type": "SECURITY_REVIEW", "description": "Trial tenancy, organisation verification, prompt injection, prohibited capability blocking, abuse controls, file processing, export and operator suspension pass review.", "required": true, "location": null, "status": "MISSING"},
+    {"evidence_type": "SCHEMA", "description": "Versioned entitlement, AI capability, trial-state and token-ledger models map the implemented seven-day trial and paid no-quota semantics to server-side PostgreSQL enforcement with forced RLS and append-only events.", "required": true, "location": "infra/postgres/080-entitlement-token-ledger.sql", "status": "PASS"},
+    {"evidence_type": "TEST", "description": "The technical entitlement cut proves AXIGNAL-only scope decisions, exact trial reservation and exhaustion, concurrent overspend prevention, idempotent replay, paid no-quota semantics, activation, expiry, read-only transition, release without residue, cross-tenant RLS and append-only events.", "required": true, "location": ".github/workflows/entitlement-runtime.yml", "status": "PASS"},
+    {"evidence_type": "TEST", "description": "The remaining commercial lifecycle must still prove payment-processor events, explicit paid selection, no auto-charge, upgrade, cancellation, retention and deletion end to end before AX-F9 acceptance.", "required": true, "location": null, "status": "MISSING"},
+    {"evidence_type": "SECURITY_REVIEW", "description": "Trial tenancy, organisation verification, prompt injection, prohibited capability blocking, abuse controls, file processing, export and operator suspension pass review.", "required": true, "location": "docs/security/AX-F9-T15-entitlement-runtime-boundary.md", "status": "MISSING"},
     {"evidence_type": "METRIC", "description": "Activation, value-loop completion, paid intent, high-usage paid cost, variable cost, support burden, abuse and gross-margin evidence are denominator-safe and reproducible.", "required": true, "location": null, "status": "MISSING"}
   ],
   "impacts": {"security": "CRITICAL", "privacy": "CRITICAL", "data_rights": "CRITICAL", "regulatory": "MATERIAL", "multilingual": "MATERIAL", "epistemic": "MATERIAL", "billing": "CRITICAL"},
@@ -86,5 +87,5 @@
   "owner": "pricing-and-packaging-analyst",
   "reviewer": "gate-evaluator",
   "created_at": "2026-07-29T12:35:00Z",
-  "updated_at": "2026-07-29T15:00:00Z"
+  "updated_at": "2026-07-29T19:07:00Z"
 }

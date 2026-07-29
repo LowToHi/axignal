@@ -19,3 +19,6 @@ COPY 061-f1-validation-answer-key-boundary.sql /docker-entrypoint-initdb.d/061-a
 COPY 062-f1-validation-pgcrypto-boundary.sql /docker-entrypoint-initdb.d/062-axignal-f1-pgcrypto-boundary.sql
 COPY 063-f1-controlled-study-export.sql /docker-entrypoint-initdb.d/063-axignal-f1-controlled-study-export.sql
 COPY 070-ted-product-runtime.sql /docker-entrypoint-initdb.d/070-axignal-ted-product-runtime.sql
+COPY 080-entitlement-token-ledger.sql /docker-entrypoint-initdb.d/080-axignal-entitlement-token-ledger.sql
+COPY 081-entitlement-ledger-hardening.sql /docker-entrypoint-initdb.d/081-axignal-entitlement-ledger-hardening.sql
+COPY 082-entitlement-expiry-sweep.sql /docker-entrypoint-initdb.d/082-axignal-entitlement-expiry-sweep.sql
