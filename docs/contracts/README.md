@@ -1,6 +1,6 @@
 # AXIGNAL Development Contracts
 
-Status: `v0.6-research-and-retrieval-candidate`
+Status: `v0.7-b2g-procurement-commercial-candidate`
 Goal ID: `AXIGNAL-GOAL-001`
 
 These documents are normative specifications for the product, architecture, commercial system and delivery of AXIGNAL. They define externally testable obligations between product surfaces, public surfaces, data pipelines, epistemic runtime, operators, agents and users. They are not a substitute for jurisdiction-specific legal advice or customer-facing legal terms.
@@ -37,8 +37,9 @@ These documents are normative specifications for the product, architecture, comm
 | [25 — Navigator Research and Retrieval](25-navigator-research-and-retrieval.md) | Research mode, hybrid retrieval, authorised Browser, ResearchRun lifecycle and dossiers |
 | [26 — Private Knowledge and Tenant Memory](26-private-knowledge-and-tenant-memory.md) | Tenant-private knowledge, memory controls, isolation, retention and cross-domain bridges |
 | [27 — Local Research Worker and Candidate Claim Pipeline](27-local-research-worker-candidate-claim-pipeline.md) | Continuous source processing, model routing, Candidate Claims and admission handoff |
+| [28 — B2G Procurement Commercial and Global Source Program](28-b2g-procurement-commercial-and-global-source-program.md) | B2G narrative, pricing bands, controlled seven-day trial, global official procurement-source programme and E2E gates |
 
-Contracts 12–27 remain normative candidates until their applicable usability, commercial, legal, privacy, security, performance and economic gates pass. ADR-007 selects the Investigation Shell composition for faithful prototyping while leaving exact production tokens unfrozen.
+Contracts 12–28 remain normative candidates until their applicable usability, commercial, legal, privacy, security, performance and economic gates pass. ADR-007 selects the Investigation Shell composition for faithful prototyping while leaving exact production tokens unfrozen. ADR-012 selects European procurement as the sole first implementation wedge. ADR-013 defines its candidate B2G commercial model and later federated global-source expansion without admitting billing, trial or new sources.
 
 ## Roadmap and execution
 
@@ -51,12 +52,14 @@ Contracts 12–27 remain normative candidates until their applicable usability, 
 - [`docs/roadmap/05-dependency-and-gates.md`](../roadmap/05-dependency-and-gates.md)
 - [`docs/roadmap/07-visual-system-validation.md`](../roadmap/07-visual-system-validation.md)
 - [`docs/roadmap/08-marketing-pricing-and-conversion-work-package.md`](../roadmap/08-marketing-pricing-and-conversion-work-package.md)
+- [`docs/roadmap/13-b2g-pricing-trial-and-global-procurement-source-program.md`](../roadmap/13-b2g-pricing-trial-and-global-procurement-source-program.md)
 
 ## UX research and prototype
 
 - [`docs/research/ux-competitive-benchmark.md`](../research/ux-competitive-benchmark.md)
 - [`docs/research/buyer-workflows.md`](../research/buyer-workflows.md)
 - [`docs/research/prototype-test-plan.md`](../research/prototype-test-plan.md)
+- [`docs/research/b2g-pricing-trial-and-global-procurement-source-strategy-v0.1.md`](../research/b2g-pricing-trial-and-global-procurement-source-strategy-v0.1.md)
 - [`docs/flows/global-discovery-flow.md`](../flows/global-discovery-flow.md)
 - [`docs/prototypes/globe-opportunity-claims-v0.1.html`](../prototypes/globe-opportunity-claims-v0.1.html)
 
@@ -78,6 +81,7 @@ Contracts 12–27 remain normative candidates until their applicable usability, 
 - [`schemas/tenant-knowledge-item.schema.json`](../../schemas/tenant-knowledge-item.schema.json)
 - [`openapi/axignal-v1.yaml`](../../openapi/axignal-v1.yaml)
 - [`skills/registry.yaml`](../../skills/registry.yaml)
+- [`data/sources/global-public-procurement-catalogue.v0.1.json`](../../data/sources/global-public-procurement-catalogue.v0.1.json)
 
 ## Canonical identity
 
@@ -104,4 +108,4 @@ A material change to scope, authority, data rights, claim semantics, packaging, 
 
 ## Foundation status
 
-The foundation freezes the desired architecture and product rules. Buyer, public copy, plan names, prices, acquisition channels, predictive models, initial universe, final production tokens and some implementation choices remain hypotheses until their commercial, empirical, usability, legal, privacy, accessibility and performance gates pass.
+The foundation freezes the desired architecture and product rules. European procurement is the selected first implementation wedge; the B2G narrative, plan names, candidate price bands, controlled seven-day trial and federated global-source programme remain hypotheses until their commercial, empirical, usability, legal, privacy, security, rights, performance and economic gates pass. No catalogue entry authorises ingestion or a public coverage claim.
