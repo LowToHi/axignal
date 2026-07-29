@@ -2,9 +2,9 @@
   "task_id": "AX-F8-T05",
   "goal_id": "AXIGNAL-GOAL-001",
   "phase": "F8",
-  "state": "IN_PROGRESS",
+  "state": "EVIDENCE_READY",
   "objective": "Implement a bounded TED Search API connector and source-quality probe without enabling production ingestion or canonical procurement claims.",
-  "outcome": "A fixed-profile connector performs one allowlisted, non-personal Search API POST, validates the response envelope, preserves optional fields, records hashes and fails closed on redirects, endpoint drift, duplicates, malformed publication numbers, oversized responses or empty results.",
+  "outcome": "A fixed-profile connector performs one allowlisted, non-personal Search API POST, validates the response envelope, preserves optional fields, records hashes and fails closed on redirects, endpoint drift, duplicates, malformed publication numbers, oversized responses or empty results; fixture, mock and live-probe evidence pass.",
   "contracts": [
     "GOAL_LOCK",
     "03",
@@ -83,21 +83,21 @@
       "description": "Fixture and mock tests prove exact request, optional-field preservation and fail-closed URL and response handling.",
       "required": true,
       "location": "apps/api/tests/test_ted_connector.py",
-      "status": "PRESENT"
+      "status": "PASS"
     },
     {
       "evidence_type": "TRACE",
-      "description": "Live endpoint returns a bounded page and produces a non-sensitive content hash and request hash.",
+      "description": "The official live endpoint returned three bounded notices from totalNoticeCount 2023, with zero missing requested fields, request/content hashes and no persisted notice values or personal fields.",
       "required": true,
-      "location": "ted-live-source-evidence.json",
-      "status": "MISSING"
+      "location": "GitHub Actions run 30442505574 / artifact ted-live-source-evidence-dbfedbe827e038c6a213280d2b1b2cf8c8ab4d70",
+      "status": "PASS"
     },
     {
       "evidence_type": "SECURITY_REVIEW",
       "description": "Connector refuses redirects, credentials in URLs, non-standard ports, unexpected hosts, paths, queries and fragments.",
       "required": true,
       "location": "apps/api/src/axignal_api/connectors/ted.py",
-      "status": "PRESENT"
+      "status": "PASS"
     },
     {
       "evidence_type": "DOCUMENT",
@@ -203,5 +203,5 @@
   "owner": "connector-engineer",
   "reviewer": "security-reviewer",
   "created_at": "2026-07-29T09:24:00Z",
-  "updated_at": "2026-07-29T09:24:00Z"
+  "updated_at": "2026-07-29T10:09:34Z"
 }
