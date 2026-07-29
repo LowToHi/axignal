@@ -22,6 +22,7 @@ FIXED_FIELDS = (
     "buyer-name",
     "notice-type",
 )
+PROHIBITED_FIELD_TOKENS = ("email", "phone", "contact", "person")
 LIMIT = 3
 MAX_RESPONSE_BYTES = 1_048_576
 TIMEOUT_SECONDS = 15.0
@@ -36,6 +37,7 @@ class TEDSourceRetrievalError(RuntimeError):
 class TEDNoticeProjection:
     publication_number: str
     fields: dict[str, Any]
+    missing_requested_fields: tuple[str, ...]
 
 
 @dataclass(frozen=True)
@@ -139,6 +141,10 @@ class TEDSearchConnector:
 
     @staticmethod
     def _build_request_body() -> dict[str, Any]:
+        for field in FIXED_FIELDS:
+            lowered = field.casefold()
+            if any(token in lowered for token in PROHIBITED_FIELD_TOKENS):
+                raise TEDSourceRetrievalError("TED probe field list includes personal contact data")
         return {
             "query": FIXED_QUERY,
             "fields": list(FIXED_FIELDS),
@@ -201,15 +207,14 @@ class TEDSearchConnector:
             if publication_number in seen_publication_numbers:
                 raise TEDSourceRetrievalError("TED response contains duplicate publication numbers")
             seen_publication_numbers.add(publication_number)
-            for field in FIXED_FIELDS:
-                if field not in item:
-                    raise TEDSourceRetrievalError(
-                        f"TED notice projection omitted requested field {field}"
-                    )
+            missing_requested_fields = tuple(
+                field for field in FIXED_FIELDS if field not in item or item[field] is None
+            )
             projections.append(
                 TEDNoticeProjection(
                     publication_number=publication_number,
-                    fields={field: item[field] for field in FIXED_FIELDS},
+                    fields={field: item.get(field) for field in FIXED_FIELDS},
+                    missing_requested_fields=missing_requested_fields,
                 )
             )
 
