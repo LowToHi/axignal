@@ -1,0 +1,198 @@
+{
+  "task_id": "AX-F8-T01",
+  "goal_id": "AXIGNAL-GOAL-001",
+  "phase": "F8",
+  "state": "ACCEPTED",
+  "objective": "Score candidate opportunity universes through an explicit, reproducible and rights-aware commercial selection gate.",
+  "outcome": "Seven candidate universes are scored against weighted buyer, rights, access, epistemic, product, cost and regulatory criteria with documented official evidence and fail-closed knockout rules.",
+  "contracts": [
+    "GOAL_LOCK",
+    "00",
+    "01",
+    "03",
+    "08",
+    "11",
+    "18",
+    "ADR-004"
+  ],
+  "skills": [
+    {
+      "skill_id": "universe-selector",
+      "version": "0.1.0",
+      "activation_reason": "Own the comparative universe gate and prevent breadth-first selection."
+    },
+    {
+      "skill_id": "hypothesis-curator",
+      "version": "0.1.0",
+      "activation_reason": "Keep commercial assumptions testable and bounded."
+    },
+    {
+      "skill_id": "source-admission",
+      "version": "0.1.0",
+      "activation_reason": "Assess credible source-rights and machine-access paths without admitting sources."
+    },
+    {
+      "skill_id": "gate-evaluator",
+      "version": "0.1.0",
+      "activation_reason": "Recompute weighted scores and enforce knockout thresholds."
+    },
+    {
+      "skill_id": "goal-keeper",
+      "version": "0.1.0",
+      "activation_reason": "Preserve Global Opportunity Intelligence and observation-not-advice boundaries."
+    }
+  ],
+  "dependencies": {
+    "phases": [
+      "F0",
+      "F1",
+      "F2",
+      "F3",
+      "F4",
+      "F5"
+    ],
+    "tasks": [
+      "AX-F2-T17"
+    ],
+    "external": [
+      "Official source documentation checked on 2026-07-29",
+      "No source-specific legal approval inferred from general EU reuse policy"
+    ]
+  },
+  "allowed_scope": [
+    "Public official-source research",
+    "Weighted candidate scoring",
+    "Commercial workflow comparison",
+    "Rights and regulatory path assessment",
+    "Repository decision and evidence artifacts",
+    "Deterministic validation tooling"
+  ],
+  "prohibited_scope": [
+    "Live source ingestion",
+    "Source PRODUCT_ADMITTED state",
+    "Unauthorised scraping",
+    "Public marketing of an unsupported universe",
+    "Billing activation",
+    "New model authority",
+    "Personalised recommendation or transaction execution"
+  ],
+  "acceptance_evidence": [
+    {
+      "evidence_type": "DOCUMENT",
+      "description": "Machine-readable candidate scorecard with seven candidates and weighted criteria.",
+      "required": true,
+      "location": "data/universes/first-lawful-universe-scorecard.v0.1.json",
+      "status": "PASS"
+    },
+    {
+      "evidence_type": "RIGHTS_RECORD",
+      "description": "Official source and reuse references are attached to candidates without claiming source admission.",
+      "required": true,
+      "location": "docs/research/first-lawful-universe-selection-v0.1.md",
+      "status": "PASS"
+    },
+    {
+      "evidence_type": "TEST",
+      "description": "Verifier recomputes scores, validates knockout rules and checks task instances against the task schema.",
+      "required": true,
+      "location": "scripts/verify_first_lawful_universe.py",
+      "status": "PASS"
+    },
+    {
+      "evidence_type": "DOCUMENT",
+      "description": "ADR-012 records the durable wedge decision and its non-admission boundary.",
+      "required": true,
+      "location": "docs/adr/ADR-012-european-public-procurement-first-universe.md",
+      "status": "PASS"
+    }
+  ],
+  "impacts": {
+    "security": "LOW",
+    "privacy": "LOW",
+    "data_rights": "MATERIAL",
+    "regulatory": "MATERIAL",
+    "multilingual": "MATERIAL",
+    "epistemic": "MATERIAL",
+    "billing": "LOW"
+  },
+  "observability": {
+    "metrics": [
+      "candidate_universe_count",
+      "knockout_pass_count",
+      "rights_knockout_failure_count",
+      "selected_universe_count"
+    ],
+    "logs": [
+      "scorecard validation result",
+      "selection gate result",
+      "official evidence URL validation"
+    ],
+    "traces": [],
+    "alerts": [
+      "more than one selected universe",
+      "selected universe below gate",
+      "PRODUCT_ADMITTED state introduced by selection package"
+    ]
+  },
+  "rollback": {
+    "strategy": "Revert the scorecard decision commit and mark the decision REJECTED or SUPERSEDED while preserving its audit history.",
+    "kill_switch": "All selected-universe runtime and public-marketing states remain disabled until independent source and universe admission gates pass.",
+    "tested": true
+  },
+  "goal_lock_checks": [
+    {
+      "check_id": 1,
+      "answer": "YES",
+      "evidence": "The scoring favours a workflow that moves from discovery to official notice evidence."
+    },
+    {
+      "check_id": 2,
+      "answer": "YES",
+      "evidence": "No candidate score creates canonical claims; provenance requirements remain mandatory."
+    },
+    {
+      "check_id": 3,
+      "answer": "YES",
+      "evidence": "Geography, buyer relationships, awards and notice history are explicit selection criteria."
+    },
+    {
+      "check_id": 4,
+      "answer": "YES",
+      "evidence": "Buyer demand scores guide product selection but are not economic evidence."
+    },
+    {
+      "check_id": 5,
+      "answer": "YES",
+      "evidence": "The selected official EU source family is multilingual by architecture and preserves source-language fields."
+    },
+    {
+      "check_id": 6,
+      "answer": "YES",
+      "evidence": "Structured notice history, changes, buyer graphs and evidence lineage differentiate the workflow from generic AI search."
+    },
+    {
+      "check_id": 7,
+      "answer": "YES",
+      "evidence": "The selected workflow is observation and research; bid execution and personalised advice are prohibited."
+    },
+    {
+      "check_id": 8,
+      "answer": "YES",
+      "evidence": "Rights clarity and official machine access are knockout criteria."
+    },
+    {
+      "check_id": 9,
+      "answer": "YES",
+      "evidence": "The decision and every future source can be disabled independently and superseded audibly."
+    },
+    {
+      "check_id": 10,
+      "answer": "YES",
+      "evidence": "The task advances the explicitly authorised F8 universe-selection gate."
+    }
+  ],
+  "owner": "universe-selector",
+  "reviewer": "gate-evaluator",
+  "created_at": "2026-07-29T09:24:00Z",
+  "updated_at": "2026-07-29T09:24:00Z"
+}
