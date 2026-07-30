@@ -1,0 +1,63 @@
+{
+  "gate_id": "AX-GE2E-P01-GATE-001",
+  "version": "1.4.0",
+  "task_id": "AX-GE2E-P01-T01",
+  "phase": "P01",
+  "state": "IN_PROGRESS",
+  "decision": "NOT_READY_FOR_HUMAN_ACCEPTANCE",
+  "evaluated_at": "2026-07-30",
+  "automated_evidence": {
+    "desk_evidence_register": "PRESENT",
+    "buyer_workflow_hypotheses": "PRESENT",
+    "primary_research_protocol": "PRESENT",
+    "session_schema": "PRESENT",
+    "primary_research_manifest": "PRESENT",
+    "deterministic_verifier": "PENDING_CI"
+  },
+  "primary_evidence": {
+    "qualified_unique_participants": {
+      "current": 0,
+      "required": 45,
+      "status": "MISSING"
+    },
+    "library_coverage": {
+      "current": 0,
+      "required": 9,
+      "status": "MISSING"
+    },
+    "budget_authority_participants": {
+      "current": 0,
+      "required": 24,
+      "status": "MISSING"
+    },
+    "direct_operators": {
+      "current": 0,
+      "required": 18,
+      "status": "MISSING"
+    },
+    "recent_failure_incidents": {
+      "current": 0,
+      "required_minimum": 27,
+      "status": "MISSING"
+    },
+    "negative_evidence_cases": {
+      "current": 0,
+      "required": 10,
+      "status": "MISSING"
+    }
+  },
+  "truth_boundary": {
+    "desk_research_complete": true,
+    "primary_research_complete": false,
+    "buyer_personas_validated": false,
+    "budget_bands_validated": false,
+    "pricing_validated": false,
+    "p02_authorised": false,
+    "public_launch_authorised": false
+  },
+  "next_action": "Recruit and interview qualified participants under the sanitised P01 protocol.",
+  "rollback": {
+    "strategy": "Supersede hypotheses or protocol while preserving secondary evidence and negative findings.",
+    "tested": false
+  }
+}
