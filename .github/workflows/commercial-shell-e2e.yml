@@ -156,7 +156,21 @@ jobs:
         run: pnpm exec playwright test tests/e2e/commercial-shell.spec.ts --project=chromium-desktop
 
       - name: Verify persisted isolation and zero-residue rollback
-        run: python scripts/verify_commercial_shell_e2e.py
+        shell: bash
+        run: |
+          rm -rf artifacts
+          mkdir -p artifacts
+          docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" \
+            -f "$AXIGNAL_PILOT_COMPOSE_FILE" \
+            -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE" \
+            -f "$AXIGNAL_BILLING_TEST_COMPOSE_FILE" \
+            exec -T api python - --output-dir /tmp/axignal-commercial-artifacts \
+            < scripts/verify_commercial_shell_e2e.py
+          docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" \
+            -f "$AXIGNAL_PILOT_COMPOSE_FILE" \
+            -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE" \
+            -f "$AXIGNAL_BILLING_TEST_COMPOSE_FILE" \
+            cp api:/tmp/axignal-commercial-artifacts/. artifacts/
 
       - name: Verify artifact sanitation and external-call boundary
         shell: bash
