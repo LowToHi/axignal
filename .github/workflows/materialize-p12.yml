@@ -1,6 +1,7 @@
 name: Materialize P12 Candidate
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - agent/ax-ge2e-p12-corporate-ownership-account-workspace-v1.4
