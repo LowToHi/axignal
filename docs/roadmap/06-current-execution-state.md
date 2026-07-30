@@ -55,6 +55,8 @@ The following are not accepted:
 | P01 | `IN_PROGRESS` |
 | P02–P24 | `BLOCKED` |
 
+`AX-GE2E-P00-T01` remains `ACCEPTED`; its gate and rollback evidence are retained. `AX-GE2E-P01-T01` is the only active programme task.
+
 ## P01 evidence baseline
 
 The following secondary evidence is present on the P01 review branch:
