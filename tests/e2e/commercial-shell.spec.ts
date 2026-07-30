@@ -86,9 +86,13 @@ test("executes the authenticated commercial shell without external Stripe", asyn
   await expect(page.getByText("PAID_LIFECYCLE_ROLLED_BACK", { exact: true })).toBeVisible();
   await expect(page.getByText(/Stripe sandbox externo verificado: no/)).toBeVisible();
 
+  const persistedSummary = page.waitForResponse(
+    (response) => response.url().includes("/api/billing/summary") && response.status() === 200
+  );
   await page.reload();
+  await persistedSummary;
   await page.getByRole("button", { name: /PLAN ·/ }).click();
-  await page.getByRole("button", { name: "Actualizar" }).click();
+  await expect(page.getByRole("complementary", { name: "Plan y facturación" })).toBeVisible();
   await expect(page.getByText("ROLLED_BACK", { exact: true })).toBeVisible();
   await expect(page.getByText(/acceso CANCELLED/)).toBeVisible();
 });
