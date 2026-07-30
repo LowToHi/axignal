@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from decimal import Decimal
 from pathlib import Path
 
@@ -220,8 +220,8 @@ assert call_current("OPEN", False, True, True) is True
 assert call_current("OPEN", False, False, True) is False
 assert call_current("CLOSED", False, True, True) is False
 
-now = datetime(2026, 7, 30, 12, tzinfo=timezone.utc)
-deadline = datetime(2026, 7, 31, 12, tzinfo=timezone.utc)
+now = datetime(2026, 7, 30, 12, tzinfo=UTC)
+deadline = datetime(2026, 7, 31, 12, tzinfo=UTC)
 assert deadline_open(now, deadline, True, True) is True
 assert deadline_open(now, deadline, False, True) is False
 
