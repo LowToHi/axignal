@@ -8,7 +8,7 @@ on:
       - "apps/api/src/axignal_api/billing_*.py"
       - "apps/api/src/axignal_api/stripe_*.py"
       - "apps/api/src/axignal_api/application.py"
-      - "apps/api/tests/test_billing_runtime.py"
+      - "apps/api/tests/test_billing_*.py"
       - "infra/postgres/100-stripe-paid-lifecycle.sql"
       - "infra/postgres/Dockerfile"
       - "scripts/verify_stripe_billing_contract.py"
@@ -23,7 +23,7 @@ on:
       - "apps/api/src/axignal_api/billing_*.py"
       - "apps/api/src/axignal_api/stripe_*.py"
       - "apps/api/src/axignal_api/application.py"
-      - "apps/api/tests/test_billing_runtime.py"
+      - "apps/api/tests/test_billing_*.py"
       - "infra/postgres/100-stripe-paid-lifecycle.sql"
       - "infra/postgres/Dockerfile"
       - "scripts/verify_stripe_billing_contract.py"
@@ -62,17 +62,19 @@ jobs:
         run: |
           ruff check \
             apps/api/src/axignal_api/billing_config.py \
+            apps/api/src/axignal_api/billing_provider.py \
             apps/api/src/axignal_api/billing_repository.py \
             apps/api/src/axignal_api/billing_routes.py \
             apps/api/src/axignal_api/stripe_gateway.py \
             apps/api/src/axignal_api/stripe_signature.py \
             apps/api/src/axignal_api/application.py \
+            apps/api/tests/test_billing_provider.py \
             apps/api/tests/test_billing_runtime.py \
             scripts/verify_stripe_billing_contract.py \
             scripts/verify_stripe_paid_lifecycle_e2e.py \
             scripts/verify_stripe_billing_authority_e2e.py
-      - name: Run identity, configuration and signature tests
-        run: pytest apps/api/tests/test_billing_runtime.py
+      - name: Run identity, provider, configuration and signature tests
+        run: pytest apps/api/tests/test_billing_provider.py apps/api/tests/test_billing_runtime.py
       - name: Verify normative billing contract
         run: python scripts/verify_stripe_billing_contract.py | tee stripe-billing-contract.json
       - name: Upload contract evidence

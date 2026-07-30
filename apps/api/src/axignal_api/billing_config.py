@@ -5,6 +5,7 @@ from os import environ
 from urllib.parse import urlparse
 
 EXPECTED_AXIGNAL_STRIPE_ACCOUNT_ID = "acct_1TybkH8feyjV8Pem"
+SUPPORTED_BILLING_PROVIDERS = {"stripe", "test"}
 
 
 def _bool_env(name: str, default: bool = False) -> bool:
@@ -26,6 +27,10 @@ def _required_url(name: str, value: str | None) -> str:
 @dataclass(frozen=True)
 class BillingSettings:
     database_url: str | None
+    billing_provider: str
+    environment: str
+    test_runtime_enabled: bool
+    test_checkout_base_url: str | None
     billing_runtime_enabled: bool
     stripe_checkout_enabled: bool
     stripe_webhooks_enabled: bool
@@ -51,11 +56,18 @@ class BillingSettings:
             raise RuntimeError(
                 "AXIGNAL_STRIPE_WEBHOOK_TOLERANCE_SECONDS must be an integer"
             ) from exc
+        provider = environ.get("AXIGNAL_BILLING_PROVIDER", "stripe").strip().casefold()
         return cls(
             database_url=(
                 environ.get("AXIGNAL_BILLING_DATABASE_URL")
                 or environ.get("AXIGNAL_DATABASE_URL")
             ),
+            billing_provider=provider,
+            environment=environ.get("AXIGNAL_ENVIRONMENT", "production")
+            .strip()
+            .casefold(),
+            test_runtime_enabled=_bool_env("AXIGNAL_TEST_RUNTIME_ENABLED"),
+            test_checkout_base_url=environ.get("AXIGNAL_TEST_CHECKOUT_BASE_URL"),
             billing_runtime_enabled=_bool_env("AXIGNAL_BILLING_RUNTIME_ENABLED"),
             stripe_checkout_enabled=_bool_env("AXIGNAL_STRIPE_CHECKOUT_ENABLED"),
             stripe_webhooks_enabled=_bool_env("AXIGNAL_STRIPE_WEBHOOKS_ENABLED"),
@@ -85,6 +97,8 @@ class BillingSettings:
         self.require_store()
         if not self.billing_runtime_enabled:
             raise RuntimeError("AXIGNAL billing runtime is disabled")
+        if self.billing_provider not in SUPPORTED_BILLING_PROVIDERS:
+            raise RuntimeError("Unsupported AXIGNAL billing provider")
 
     def _require_expected_account(self) -> None:
         if self.stripe_account_id != EXPECTED_AXIGNAL_STRIPE_ACCOUNT_ID:
@@ -103,20 +117,38 @@ class BillingSettings:
         ):
             raise RuntimeError("A Stripe test or sandbox secret is required")
 
-    def require_checkout(self) -> None:
+    def require_test_provider(self) -> None:
         self.require_runtime()
-        if not self.stripe_checkout_enabled:
-            raise RuntimeError("Stripe Checkout is disabled")
+        if self.billing_provider != "test":
+            raise RuntimeError("Deterministic billing provider is not selected")
+        if not self.test_runtime_enabled or self.environment != "test":
+            raise RuntimeError(
+                "Deterministic billing provider requires the isolated test runtime"
+            )
         self._require_expected_account()
-        self._require_sandbox_secret()
-        if not self.stripe_api_version:
-            raise RuntimeError("AXIGNAL_STRIPE_API_VERSION is required")
+        _required_url("AXIGNAL_TEST_CHECKOUT_BASE_URL", self.test_checkout_base_url)
+
+    def _require_price_mappings(self) -> None:
         for name, price in (
             ("AXIGNAL_STRIPE_PRICE_PROFESSIONAL_MONTHLY", self.professional_price_id),
             ("AXIGNAL_STRIPE_PRICE_TEAM_MONTHLY", self.team_price_id),
         ):
             if not price or not price.startswith("price_"):
                 raise RuntimeError(f"{name} must be a Stripe Price id")
+
+    def require_checkout(self) -> None:
+        self.require_runtime()
+        if not self.stripe_checkout_enabled:
+            raise RuntimeError("Stripe Checkout is disabled")
+        self._require_expected_account()
+        if self.billing_provider == "test":
+            self.require_test_provider()
+            self._require_price_mappings()
+            return
+        self._require_sandbox_secret()
+        if not self.stripe_api_version:
+            raise RuntimeError("AXIGNAL_STRIPE_API_VERSION is required")
+        self._require_price_mappings()
         _required_url(
             "AXIGNAL_STRIPE_CHECKOUT_SUCCESS_URL", self.checkout_success_url
         )
@@ -127,6 +159,8 @@ class BillingSettings:
         if not self.stripe_webhooks_enabled:
             raise RuntimeError("Stripe webhooks are disabled")
         self._require_expected_account()
+        if self.billing_provider == "test":
+            self.require_test_provider()
         if not self.stripe_webhook_secret or not self.stripe_webhook_secret.startswith(
             "whsec_"
         ):

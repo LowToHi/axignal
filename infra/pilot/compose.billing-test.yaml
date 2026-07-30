@@ -1,0 +1,26 @@
+services:
+  postgres:
+    ports:
+      - "127.0.0.1:15432:5432"
+
+  api:
+    environment:
+      AXIGNAL_ENVIRONMENT: test
+      AXIGNAL_TEST_RUNTIME_ENABLED: "true"
+      AXIGNAL_BILLING_PROVIDER: test
+      AXIGNAL_BILLING_DATABASE_URL: postgresql://${AXIGNAL_POSTGRES_USER:-axignal}:${AXIGNAL_POSTGRES_PASSWORD}@postgres:5432/${AXIGNAL_POSTGRES_DB:-axignal}
+      AXIGNAL_BILLING_RUNTIME_ENABLED: "true"
+      AXIGNAL_STRIPE_CHECKOUT_ENABLED: "true"
+      AXIGNAL_STRIPE_WEBHOOKS_ENABLED: "true"
+      AXIGNAL_STRIPE_LIFECYCLE_ENABLED: "true"
+      AXIGNAL_STRIPE_SANDBOX_ONLY: "true"
+      AXIGNAL_STRIPE_ACCOUNT_ID: acct_1TybkH8feyjV8Pem
+      AXIGNAL_STRIPE_WEBHOOK_SECRET: whsec_axignal_deterministic_test_only
+      AXIGNAL_STRIPE_PRICE_PROFESSIONAL_MONTHLY: price_test_axignal_professional
+      AXIGNAL_STRIPE_PRICE_TEAM_MONTHLY: price_test_axignal_team
+      AXIGNAL_TEST_CHECKOUT_BASE_URL: http://127.0.0.1:18080/billing/test-checkout
+
+  web:
+    environment:
+      AXIGNAL_ENVIRONMENT: test
+      AXIGNAL_TEST_RUNTIME_ENABLED: "true"
