@@ -46,9 +46,17 @@ for index, task in enumerate(tasks):
     assert task["phase"] == phase
     assert task["task_id"] == f"AX-GE2E-{phase}-T01"
 
-assert tasks[0]["state"] == "IN_PROGRESS"
+assert tasks[0]["state"] == "EVIDENCE_READY"
 assert all(task["state"] == "BLOCKED" for task in tasks[1:])
 assert len({task["task_id"] for task in tasks}) == 25
+p00_required = [
+    item for item in tasks[0]["acceptance_evidence"] if item["required"]
+]
+assert all(item["status"] in {"PRESENT", "PASS"} for item in p00_required)
+assert any(
+    item["evidence_type"] == "TEST" and item["status"] == "PASS"
+    for item in p00_required
+)
 
 registry = json.loads(
     (ROOT / "data/libraries/global-opportunity-library-registry.v1.4.json").read_text(
@@ -92,6 +100,7 @@ current = (ROOT / "docs/roadmap/06-current-execution-state.md").read_text(encodi
 assert '"public_launch_authorised": false' in current
 assert '"partial_launch_allowed": false' in current
 assert "AX-GE2E-P00-T01" in current
+assert "P00 EVIDENCE_READY" in current
 
 routing = yaml.safe_load(
     (ROOT / "skills/global-e2e-routing.yaml").read_text(encoding="utf-8")
@@ -106,6 +115,7 @@ print(
     json.dumps(
         {
             "status": "PASS",
+            "p00_state": "EVIDENCE_READY",
             "tasks": len(tasks),
             "foundational_libraries": len(registry["foundational_libraries"]),
             "opportunity_libraries": len(registry["opportunity_libraries"]),
