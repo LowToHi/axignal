@@ -225,6 +225,12 @@ jobs:
       - name: Rehearse byte-exact P11 rollback
         run: python scripts/verify_p11_rollback.py
 
+      - name: Validate P12 Corporate and Ownership Library and Account Workspace
+        run: python scripts/verify_p12_corporate_ownership_account_workspace.py
+
+      - name: Rehearse byte-exact P12 rollback
+        run: python scripts/verify_p12_rollback.py
+
       - name: Validate modular skill registries
         run: |
           python - <<'PY'
