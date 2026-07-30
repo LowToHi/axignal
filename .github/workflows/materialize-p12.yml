@@ -5,19 +5,26 @@ on:
   push:
     branches:
       - agent/ax-ge2e-p12-corporate-ownership-account-workspace-v1.4
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - agent/ax-ge2e-p11-infrastructure-project-pursuit-workspace-v1.4
 
 permissions:
   contents: write
 
 jobs:
   materialize:
-    if: ${{ github.actor != 'github-actions[bot]' }}
+    if: ${{ github.actor != 'github-actions[bot]' && (github.event_name != 'pull_request' || github.head_ref == 'agent/ax-ge2e-p12-corporate-ownership-account-workspace-v1.4') }}
     runs-on: ubuntu-latest
+    env:
+      TARGET_BRANCH: ${{ github.head_ref || github.ref_name }}
     steps:
       - name: Checkout candidate branch
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
+          ref: ${{ github.head_ref || github.ref_name }}
 
       - name: Materialize reviewed P12 tree
         shell: bash
@@ -52,4 +59,4 @@ jobs:
             exit 1
           }
           git commit -m "Implement P12 corporate ownership account workspace"
-          git push origin "HEAD:${GITHUB_REF_NAME}"
+          git push origin "HEAD:${TARGET_BRANCH}"
