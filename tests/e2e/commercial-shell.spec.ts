@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+test.describe.configure({ mode: "serial", retries: 0 });
+
 async function login(page: import("@playwright/test").Page) {
   await page.goto("/");
   const email = page.getByLabel("Email");
@@ -15,10 +17,15 @@ async function emitProviderEvent(
   page: import("@playwright/test").Page,
   action: "CONFIRM_UPGRADE" | "CONFIRM_CANCELLATION" | "ROLLBACK"
 ) {
-  const response = await page.request.post("/api/billing/test/provider-event", {
-    data: { action }
-  });
-  expect(response.ok(), await response.text()).toBeTruthy();
+  const result = await page.evaluate(async (requestedAction) => {
+    const response = await fetch("/api/billing/test/provider-event", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ action: requestedAction })
+    });
+    return { ok: response.ok, status: response.status, text: await response.text() };
+  }, action);
+  expect(result.ok, `${result.status}: ${result.text}`).toBeTruthy();
 }
 
 test("executes the authenticated commercial shell without external Stripe", async ({ page }) => {
