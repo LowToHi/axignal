@@ -222,8 +222,22 @@ jobs:
       - name: Validate P11 Infrastructure Library and Project Pursuit Workspace
         run: python scripts/verify_p11_infrastructure_project_pursuit_workspace.py
 
-      - name: Rehearse byte-exact P11 rollback
-        run: python scripts/verify_p11_rollback.py
+      - name: Rehearse byte-exact P11 rollback at frozen P11 head
+        env:
+          P11_ENGINEERING_HEAD: 315d88731939c1904fcca7be4e5b58d4615ab423
+        run: |
+          set -euo pipefail
+          verification_dir="${RUNNER_TEMP}/axignal-p11-rollback"
+          rm -rf "${verification_dir}"
+          git worktree add --detach "${verification_dir}" "${P11_ENGINEERING_HEAD}"
+          trap 'git worktree remove --force "${verification_dir}" >/dev/null 2>&1 || true' EXIT
+          python "${verification_dir}/scripts/verify_p11_rollback.py"
+
+      - name: Validate P12 Corporate and Ownership Library and Account Workspace
+        run: python scripts/verify_p12_corporate_ownership_account_workspace.py
+
+      - name: Rehearse byte-exact P12 rollback
+        run: python scripts/verify_p12_rollback.py
 
       - name: Validate modular skill registries
         run: |

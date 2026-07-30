@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://axignal.com/schemas/corporate-ownership-account-workspace-cases.schema.json",
+  "title": "P12 Corporate Ownership Account Workspace Adversarial Matrix",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "task_id",
+    "scopes",
+    "threats",
+    "expected_by_threat"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "axignal.corporate-ownership-account-workspace-cases/v0.1"
+    },
+    "task_id": {
+      "const": "AX-GE2E-P12-T01"
+    },
+    "scopes": {
+      "type": "array",
+      "minItems": 9,
+      "maxItems": 9,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "ENTITY_REGISTRY",
+          "FILING_DISCLOSURE",
+          "OWNERSHIP_CONTROL",
+          "GOVERNANCE_OFFICER",
+          "CAPITAL_CORPORATE_ACTION",
+          "ACCOUNT_OPPORTUNITY_WORKSPACE",
+          "MONITORING_RELATIONSHIP_RISK",
+          "EXTERNAL_ACTION_OUTCOME",
+          "CROSS_MODULE"
+        ]
+      }
+    },
+    "threats": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "ENTITY_SILENT_MERGE",
+          "FILING_VERSION_OR_STATUS_CONFUSION",
+          "OWNERSHIP_AS_CONTROL_OR_BENEFICIAL_OWNER",
+          "PERSONAL_DATA_EXPANSION",
+          "ANNOUNCED_ACTION_AS_COMPLETED",
+          "RIGHTS_REVOKED",
+          "CROSS_TENANT_REFERENCE",
+          "AUTHORITY_ESCALATION"
+        ]
+      }
+    },
+    "expected_by_threat": {
+      "type": "object",
+      "minProperties": 8,
+      "maxProperties": 8,
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "decision",
+          "canonical_delta",
+          "external_action_delta",
+          "reason_code"
+        ],
+        "properties": {
+          "decision": {
+            "enum": [
+              "DENY",
+              "REVIEW_REQUIRED",
+              "BLOCK",
+              "QUARANTINE"
+            ]
+          },
+          "canonical_delta": {
+            "const": 0
+          },
+          "external_action_delta": {
+            "const": 0
+          },
+          "reason_code": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
