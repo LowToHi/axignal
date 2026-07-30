@@ -88,6 +88,9 @@ jobs:
       - name: Validate P01 research programme
         run: python scripts/verify_p01_research_program.py
 
+      - name: Validate P02 ontology foundation
+        run: python scripts/verify_p02_ontology_foundation.py
+
       - name: Validate modular skill registries
         run: |
           python - <<'PY'
