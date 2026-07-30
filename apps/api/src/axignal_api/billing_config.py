@@ -128,23 +128,27 @@ class BillingSettings:
         self._require_expected_account()
         _required_url("AXIGNAL_TEST_CHECKOUT_BASE_URL", self.test_checkout_base_url)
 
-    def require_checkout(self) -> None:
-        self.require_runtime()
-        if not self.stripe_checkout_enabled:
-            raise RuntimeError("Stripe Checkout is disabled")
-        self._require_expected_account()
+    def _require_price_mappings(self) -> None:
         for name, price in (
             ("AXIGNAL_STRIPE_PRICE_PROFESSIONAL_MONTHLY", self.professional_price_id),
             ("AXIGNAL_STRIPE_PRICE_TEAM_MONTHLY", self.team_price_id),
         ):
             if not price or not price.startswith("price_"):
                 raise RuntimeError(f"{name} must be a Stripe Price id")
+
+    def require_checkout(self) -> None:
+        self.require_runtime()
+        if not self.stripe_checkout_enabled:
+            raise RuntimeError("Stripe Checkout is disabled")
+        self._require_expected_account()
         if self.billing_provider == "test":
             self.require_test_provider()
+            self._require_price_mappings()
             return
         self._require_sandbox_secret()
         if not self.stripe_api_version:
             raise RuntimeError("AXIGNAL_STRIPE_API_VERSION is required")
+        self._require_price_mappings()
         _required_url(
             "AXIGNAL_STRIPE_CHECKOUT_SUCCESS_URL", self.checkout_success_url
         )
