@@ -1,0 +1,39 @@
+{
+  "version": "0.1.0",
+  "task_id": "AX-GE2E-P01-T01",
+  "status": "RECRUITMENT_NOT_STARTED",
+  "public_launch_authorised": false,
+  "primary_research_complete": false,
+  "unique_participants": 0,
+  "required_unique_participants": 45,
+  "budget_authority_participants": 0,
+  "required_budget_authority_participants": 24,
+  "direct_operators": 0,
+  "required_direct_operators": 18,
+  "library_quotas": {
+    "AX-LIB-O01": {"complete": 0, "required": 5},
+    "AX-LIB-O02": {"complete": 0, "required": 5},
+    "AX-LIB-O03": {"complete": 0, "required": 5},
+    "AX-LIB-O04": {"complete": 0, "required": 5},
+    "AX-LIB-O05": {"complete": 0, "required": 5},
+    "AX-LIB-O06": {"complete": 0, "required": 5},
+    "AX-LIB-O07": {"complete": 0, "required": 5},
+    "AX-LIB-O08": {"complete": 0, "required": 5},
+    "AX-LIB-O09": {"complete": 0, "required": 5}
+  },
+  "region_quotas": {
+    "EUROPE": {"complete": 0, "required": 10},
+    "NORTH_AMERICA": {"complete": 0, "required": 8},
+    "LATIN_AMERICA": {"complete": 0, "required": 5},
+    "ASIA": {"complete": 0, "required": 7},
+    "OCEANIA": {"complete": 0, "required": 5},
+    "AFRICA_MIDDLE_EAST": {"complete": 0, "required": 5}
+  },
+  "sessions": [],
+  "truth_boundary": [
+    "Desk research is not primary buyer validation.",
+    "No buyer, budget, price or willingness-to-pay claim is validated.",
+    "No source or opportunity library is admitted.",
+    "P02 remains blocked until the P01 human-evidence gate passes."
+  ]
+}

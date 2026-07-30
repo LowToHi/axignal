@@ -1,0 +1,354 @@
+{
+  "version": "0.1.1",
+  "task_id": "AX-GE2E-P01-T01",
+  "status": "SECONDARY_EVIDENCE_ONLY_PRIMARY_RESEARCH_MISSING",
+  "observed_at": "2026-07-30",
+  "evidence_policy": {
+    "official_statistics": "Can establish market scale or activity, not willingness to pay.",
+    "official_vendor": "Can establish category features and published prices, not AXIGNAL demand.",
+    "primary_interview": "Required to validate buyer workflow, budget, failure cost and purchase criteria.",
+    "paid_event": "Required later; not produced in P01."
+  },
+  "sources": [
+    {
+      "source_id": "P01-S001",
+      "library_id": "AX-LIB-O01",
+      "evidence_class": "OFFICIAL_STATISTICS",
+      "publisher": "OECD",
+      "title": "Public Procurement, Trade and Industrial Policies",
+      "url": "https://www.oecd.org/en/publications/2026/06/public-procurement-trade-and-industrial-policies_e9b7ed1d.html",
+      "observed_at": "2026-07-30",
+      "supports": [
+        "Public procurement averages about 13% of GDP across OECD countries.",
+        "Procurement is strategically linked to industrial policy and supply-chain resilience."
+      ]
+    },
+    {
+      "source_id": "P01-S002",
+      "library_id": "AX-LIB-O01",
+      "evidence_class": "OFFICIAL_VENDOR",
+      "publisher": "Stotles",
+      "title": "Stotles pricing",
+      "url": "https://www.stotles.com/pricing",
+      "observed_at": "2026-07-30",
+      "supports": [
+        "Public-sector sales and bid workflows are sold as connected products.",
+        "Published starting prices include Growth sales at £475/month, Growth bid at £495/month, and combined Growth at £873/month.",
+        "Bid workflow includes qualification, projects, content library and AI-assisted responses."
+      ]
+    },
+    {
+      "source_id": "P01-S003",
+      "library_id": "AX-LIB-O01",
+      "evidence_class": "OFFICIAL_VENDOR",
+      "publisher": "Tenderlake",
+      "title": "Tenderlake pricing",
+      "url": "https://www.tenderlake.com/pricing/index",
+      "observed_at": "2026-07-30",
+      "supports": [
+        "European plan is advertised at £546/month or £396/month paid annually.",
+        "Workflow includes stage tracking, qualifying-out reasons, bid-interest coordination, alerts, API and team distribution."
+      ]
+    },
+    {
+      "source_id": "P01-S004",
+      "library_id": "AX-LIB-O01",
+      "evidence_class": "OFFICIAL_VENDOR",
+      "publisher": "Mercell",
+      "title": "Mercell supplier platform",
+      "url": "https://info.mercell.com/en/for-suppliers/",
+      "observed_at": "2026-07-30",
+      "supports": [
+        "Supplier proposition combines discovery, market intelligence and structured bid delivery.",
+        "Free portals are positioned as producing noise and fragmented work."
+      ]
+    },
+    {
+      "source_id": "P01-S005",
+      "library_id": "AX-LIB-O02",
+      "evidence_class": "OFFICIAL_PROGRAMME",
+      "publisher": "European Commission",
+      "title": "Horizon Europe",
+      "url": "https://research-and-innovation.ec.europa.eu/funding/funding-opportunities/funding-programmes-and-open-calls/horizon-europe_en",
+      "observed_at": "2026-07-30",
+      "supports": [
+        "Horizon Europe is a major multi-year research and innovation funding programme with an indicative 2021–2027 budget around €93.5 billion after the mid-term review."
+      ]
+    },
+    {
+      "source_id": "P01-S006",
+      "library_id": "AX-LIB-O02",
+      "evidence_class": "OFFICIAL_VENDOR",
+      "publisher": "Instrumentl",
+      "title": "Instrumentl product overview",
+      "url": "https://www.instrumentl.com/product-overview",
+      "observed_at": "2026-07-30",
+      "supports": [
+        "Grant products compete as full-lifecycle operating systems, not only search databases.",
+        "The workflow spans finding, writing, management, collaboration, deadlines, tasks, spend and performance reporting."
+      ]
+    },
+    {
+      "source_id": "P01-S007",
+      "library_id": "AX-LIB-O02",
+      "evidence_class": "OFFICIAL_VENDOR",
+      "publisher": "Candid",
+      "title": "Candid pricing",
+      "url": "https://candid.org/pricing/",
+      "observed_at": "2026-07-30",
+      "supports": [
+        "Published entry pricing starts at $1,199 billed annually for funder/nonprofit research products.",
+        "Buyer value includes prospect research, organisation data and contact context."
+      ]
+    },
+    {
+      "source_id": "P01-S008",
+      "library_id": "AX-LIB-O02",
+      "evidence_class": "OFFICIAL_VENDOR",
+      "publisher": "Clarivate",
+      "title": "Pivot-RP",
+      "url": "https://clarivate.com/academia-government/lp/pivot-rp/",
+      "observed_at": "2026-07-30",
+      "supports": [
+        "Research institutions buy global funding discovery with workflow and intelligence tools.",
+        "Vendor states use by more than 700 research institutions."
+      ]
+    },
+    {
+      "source_id": "P01-S009",
+      "library_id": "AX-LIB-O03",
+      "evidence_class": "OFFICIAL_VENDOR",
+      "publisher": "Regology",
+      "title": "Regology pricing",
+      "url": "https://regology.com/pricing",
+      "observed_at": "2026-07-30",
+      "supports": [
+        "Professional regulatory-change access is advertised at $1,700 per user per month on a three-year contract.",
+        "Enterprise includes global jurisdictions, workflows, compliance management, dashboards and GRC integrations.",
+        "Regulatory intelligence buyers pay for operational impact assessment and implementation workflows, not alerts alone."
+      ]
+    },
+    {
+      "source_id": "P01-S010",
+      "library_id": "AX-LIB-O03",
+      "evidence_class": "OFFICIAL_VENDOR",
+      "publisher": "Regology",
+      "title": "Regology platform",
+      "url": "https://regology.com/platform",
+      "observed_at": "2026-07-30",
+      "supports": [
+        "The product maps regulatory content to requirements, risks, controls, policies, tasks and reporting.",
+        "Buyer workflow starts with applicable content and continues through operational compliance."
+      ]
+    },
+    {
+      "source_id": "P01-S011",
+      "library_id": "AX-LIB-O04",
+      "evidence_class": "OFFICIAL_MULTILATERAL",
+      "publisher": "World Bank / Global Infrastructure Hub",
+      "title": "Forecasting infrastructure investment needs through 2040",
+      "url": "https://blogs.worldbank.org/en/ppps/forecasting-infrastructure-investment-needs-50-countries-7-sectors-through-2040",
+      "observed_at": "2026-07-30",
+      "supports": [
+        "The referenced outlook estimated global infrastructure investment needs of $94 trillion through 2040, or $97 trillion including selected SDG needs.",
+        "Infrastructure opportunity discovery is geographically and lifecycle intensive."
+      ]
+    },
+    {
+      "source_id": "P01-S012",
+      "library_id": "AX-LIB-O04",
+      "evidence_class": "OFFICIAL_VENDOR",
+      "publisher": "GlobalData",
+      "title": "Construction Projects intelligence",
+      "url": "https://www.globaldata.com/marketplace/dataset/construction-projects/",
+      "observed_at": "2026-07-30",
+      "supports": [
+        "GlobalData advertises end-to-end construction-project lifecycle tracking from announcement to completion.",
+        "Project stage, participants, contacts and key dates are central sales-development outputs."
+      ]
+    },
+    {
+      "source_id": "P01-S013",
+      "library_id": "AX-LIB-O05",
+      "evidence_class": "OFFICIAL_VENDOR",
+      "publisher": "AlphaSense",
+      "title": "AlphaSense pricing",
+      "url": "https://www.alpha-sense.com/pricing/",
+      "observed_at": "2026-07-30",
+      "supports": [
+        "Market-intelligence pricing is sales-led rather than self-serve.",
+        "Product combines external and internal content, monitoring, research, work products and enterprise controls.",
+        "Vendor reports more than 7,000 enterprise customers and more than 500 million documents."
+      ]
+    },
+    {
+      "source_id": "P01-S014",
+      "library_id": "AX-LIB-O05",
+      "evidence_class": "OFFICIAL_VENDOR",
+      "publisher": "AlphaSense",
+      "title": "AlphaSense platform",
+      "url": "https://www.alpha-sense.com/platform/",
+      "observed_at": "2026-07-30",
+      "supports": [
+        "Corporate intelligence workflows include deep research, monitoring, internal-content integration, work products and scheduled agents.",
+        "Persistent work products and internal knowledge are important switching-cost drivers."
+      ]
+    },
+    {
+      "source_id": "P01-S015",
+      "library_id": "AX-LIB-O06",
+      "evidence_class": "OFFICIAL_VENDOR",
+      "publisher": "Macrobond",
+      "title": "Macrobond data",
+      "url": "https://www.macrobond.com/platform/data",
+      "observed_at": "2026-07-30",
+      "supports": [
+        "Macroeconomic research buyers require governed structured data, metadata, discovery and human quality processes.",
+        "Vendor states more than 300 million time series."
+      ]
+    },
+    {
+      "source_id": "P01-S016",
+      "library_id": "AX-LIB-O06",
+      "evidence_class": "OFFICIAL_VENDOR",
+      "publisher": "Macrobond",
+      "title": "Macrobond workflow",
+      "url": "https://www.macrobond.com/platform/workflow",
+      "observed_at": "2026-07-30",
+      "supports": [
+        "Macroeconomic products compete on an end-to-end research workflow from question to chart and distribution.",
+        "Vendor advertises a searchable library of more than 2,400 global sources."
+      ]
+    },
+    {
+      "source_id": "P01-S017",
+      "library_id": "AX-LIB-O07",
+      "evidence_class": "OFFICIAL_STATISTICS",
+      "publisher": "World Trade Organization",
+      "title": "World Trade Statistics 2025",
+      "url": "https://www.wto.org/english/res_e/statis_e/world_trade_statistics_e.htm",
+      "observed_at": "2026-07-30",
+      "supports": [
+        "World trade in goods and commercial services reached $34.89 trillion in 2025.",
+        "Trade intelligence operates across large, changing bilateral and sectoral flows."
+      ]
+    },
+    {
+      "source_id": "P01-S018",
+      "library_id": "AX-LIB-O07",
+      "evidence_class": "OFFICIAL_VENDOR",
+      "publisher": "S&P Global Market Intelligence",
+      "title": "Panjiva Supply Chain Intelligence",
+      "url": "https://www.spglobal.com/market-intelligence/en/solutions/products/panjiva-supply-chain-intelligence",
+      "observed_at": "2026-07-30",
+      "supports": [
+        "Supply-chain buyers use trade data to identify partners, monitor competitors and detect investment or sourcing signals.",
+        "The platform combines entity resolution, machine learning, visual analytics, alerts and exportable results."
+      ]
+    },
+    {
+      "source_id": "P01-S019",
+      "library_id": "AX-LIB-O08",
+      "evidence_class": "OFFICIAL_INTERGOVERNMENTAL",
+      "publisher": "International Energy Agency",
+      "title": "World Energy Investment 2026",
+      "url": "https://www.iea.org/reports/world-energy-investment-2026/regional-dashboards",
+      "observed_at": "2026-07-30",
+      "supports": [
+        "Global energy investment is expected to reach about $3.4 trillion in 2026, including about $2.2 trillion in clean energy.",
+        "Energy opportunity intelligence must connect projects, policy, capital, technology and geography."
+      ]
+    },
+    {
+      "source_id": "P01-S020",
+      "library_id": "AX-LIB-O08",
+      "evidence_class": "OFFICIAL_VENDOR",
+      "publisher": "Wood Mackenzie",
+      "title": "Lens",
+      "url": "https://www.woodmac.com/lens/",
+      "observed_at": "2026-07-30",
+      "supports": [
+        "Energy intelligence platforms combine global asset, market, company, cost, scenario and geospatial data.",
+        "Buyer tasks include screening, benchmarking, valuation, risk assessment and opportunity identification."
+      ]
+    },
+    {
+      "source_id": "P01-S021",
+      "library_id": "AX-LIB-O08",
+      "evidence_class": "OFFICIAL_VENDOR",
+      "publisher": "Rystad Energy",
+      "title": "How Rystad Energy delivers value",
+      "url": "https://www.rystadenergy.com/how-we-deliver",
+      "observed_at": "2026-07-30",
+      "supports": [
+        "Rystad Energy positions its offer around data, analytics, research and decision support.",
+        "Trusted analytical products and workflow access are category expectations for professional energy intelligence."
+      ]
+    },
+    {
+      "source_id": "P01-S022",
+      "library_id": "AX-LIB-O09",
+      "evidence_class": "OFFICIAL_STATISTICS",
+      "publisher": "WIPO",
+      "title": "World Intellectual Property Indicators 2025 — patents",
+      "url": "https://www.wipo.int/web-publications/world-intellectual-property-indicators-2025-highlights/en/patents-highlights.html",
+      "observed_at": "2026-07-30",
+      "supports": [
+        "About 3.7 million patent applications were filed worldwide in 2024.",
+        "Global innovation intelligence requires deduplication, family lineage, legal status and multilingual search."
+      ]
+    },
+    {
+      "source_id": "P01-S023",
+      "library_id": "AX-LIB-O09",
+      "evidence_class": "OFFICIAL_STATISTICS",
+      "publisher": "OECD",
+      "title": "OECD R&D statistical release 2026",
+      "url": "https://www.oecd.org/en/data/insights/statistical-releases/2026/03/oecd-overall-rd-growth-stable-government-rd-budgets-decline-and-reorient-towards-defence.html",
+      "observed_at": "2026-07-30",
+      "supports": [
+        "OECD estimated global R&D expenditure may have reached $3.8 trillion in 2024.",
+        "Innovation buyers operate in a very large and fast-changing evidence environment."
+      ]
+    },
+    {
+      "source_id": "P01-S024",
+      "library_id": "AX-LIB-O09",
+      "evidence_class": "OFFICIAL_VENDOR",
+      "publisher": "Patsnap",
+      "title": "Patsnap Eureka platform and pricing",
+      "url": "https://eureka.patsnap.com/",
+      "observed_at": "2026-07-30",
+      "supports": [
+        "Patsnap Eureka advertises a self-serve Pro plan at $200/month and an enterprise plan with shared workspaces, team projects, administration and role-based permissions.",
+        "The platform provides domain-specific agents and workflows for IP, R&D, life sciences and materials."
+      ]
+    },
+    {
+      "source_id": "P01-S025",
+      "library_id": "AX-LIB-O09",
+      "evidence_class": "OFFICIAL_VENDOR",
+      "publisher": "Patsnap",
+      "title": "Patsnap Analytics",
+      "url": "https://www.patsnap.com/products/analytics/",
+      "observed_at": "2026-07-30",
+      "supports": [
+        "Patent analytics includes search, analysis, monitoring and a cross-team workspace.",
+        "Users can index patents, vote on relevance and assign tasks in a central collaboration surface."
+      ]
+    },
+    {
+      "source_id": "P01-S026",
+      "library_id": "AX-LIB-O09",
+      "evidence_class": "OFFICIAL_VENDOR",
+      "publisher": "Patsnap",
+      "title": "Patsnap Open Platform pricing",
+      "url": "https://open.patsnap.com/pricing",
+      "observed_at": "2026-07-30",
+      "supports": [
+        "The Open Platform uses usage-based credits and advertises Pro from $100.",
+        "Enterprise offers custom throughput, SSO and sub-organisation controls."
+      ]
+    }
+  ]
+}
