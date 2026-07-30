@@ -1,7 +1,7 @@
 # AXIGNAL End-to-End Development Map
 
 Version: `1.4.0`
-Status: `CANDIDATE / P00 CANONICAL INTEGRATION IN PROGRESS / NO PUBLIC LAUNCH`
+Status: `CANDIDATE / P00 EVIDENCE READY / HUMAN GATE PENDING / NO PUBLIC LAUNCH`
 Goal ID: `AXIGNAL-GOAL-001`
 Canonical implementation baseline: `main@9ee3e12620f137208c1943a05501f2671a1f4817`
 Active programme: [`14-global-e2e-development-program-v1.4.md`](14-global-e2e-development-program-v1.4.md)
@@ -49,11 +49,12 @@ Documents 07–13 remain capability work packages and historical evidence. Where
 
 The repository contains a governed alpha vertical slice and bounded Procurement, trial, retention and internal commercial-shell evidence. It does not contain the complete global libraries, operational workspaces or public-launch evidence required by v1.4.
 
-## Current authorised priority
+## Current gate
 
 ```text
 AX-GE2E-P00-T01
-Canonical v1.4 integration and synchronisation
+EVIDENCE_READY
+Human review and merge decision pending
 ```
 
-Public launch, unsupported global claims and unrestricted live charging remain blocked.
+P01–P24 remain blocked. Public launch, unsupported global claims and unrestricted live charging remain blocked.
