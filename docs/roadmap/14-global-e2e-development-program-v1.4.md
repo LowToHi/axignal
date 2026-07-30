@@ -1,17 +1,17 @@
 # 14 — AXIGNAL Global E2E Development Programme v1.4
 
 Version: `1.4.0`
-Status: `CANDIDATE / P00 EVIDENCE READY / HUMAN GATE PENDING / NO PUBLIC LAUNCH`
+Status: `CANDIDATE / P00 ACCEPTED / P01 IN PROGRESS / NO PUBLIC LAUNCH`
 Goal ID: `AXIGNAL-GOAL-001`
 Contract: `30`
 Decision: `ADR-015`
-Baseline: `main@9ee3e12620f137208c1943a05501f2671a1f4817`
+Pre-P00 baseline: `main@9ee3e12620f137208c1943a05501f2671a1f4817`
 
 ## Active execution chain
 
 ```text
-P00 Canonical integration
-→ P01 Buyer/workflow evidence
+P00 Canonical integration — ACCEPTED
+→ P01 Buyer/workflow evidence — IN_PROGRESS
 → P02 Global ontology and library contracts
 → P03 Security, identity and rights
 → P04 Source Admission Factory
@@ -44,7 +44,9 @@ P08–P16 are parallelisable only after P07 and retain independent gates.
 
 These values change only through P24 evidence and an explicit accepted gate record.
 
-## P00 deliverables
+## P00 closure
+
+P00 integrated:
 
 - Contract 30;
 - ADR-015;
@@ -61,7 +63,13 @@ These values change only through P24 evidence and an explicit accepted gate reco
 - Contract Validation update;
 - deterministic P00 verifier.
 
-All P00 deliverables are present and automated checks pass. P00 remains unaccepted until human gate review and merge.
+The human product authority approved closure. Contract Validation, Bounded AI Contract, First Lawful Universe, TED eForms XML Parser and Executable Spine passed. A disposable-reference rollback returned the P00 tree to the exact pre-P00 baseline with zero residual files.
+
+Gate record: `docs/gates/AX-GE2E-P00-gate-v1.4.json`
+
+## P01 authority
+
+P01 is authorised to validate buyer personas, jobs, budgets, workflows, alternatives and failure costs across the nine opportunity libraries. P01 remains research and evidence work: it cannot admit sources, activate commercial libraries, enable live billing, claim global coverage or authorise public launch.
 
 ## Historical programme
 
