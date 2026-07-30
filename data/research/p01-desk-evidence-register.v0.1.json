@@ -1,5 +1,5 @@
 {
-  "version": "0.1.0",
+  "version": "0.1.1",
   "task_id": "AX-GE2E-P01-T01",
   "status": "SECONDARY_EVIDENCE_ONLY_PRIMARY_RESEARCH_MISSING",
   "observed_at": "2026-07-30",
@@ -159,12 +159,12 @@
       "library_id": "AX-LIB-O04",
       "evidence_class": "OFFICIAL_VENDOR",
       "publisher": "GlobalData",
-      "title": "Construction intelligence",
-      "url": "https://www.globaldata.com/industries/construction/",
+      "title": "Construction Projects intelligence",
+      "url": "https://www.globaldata.com/marketplace/dataset/construction-projects/",
       "observed_at": "2026-07-30",
       "supports": [
-        "Infrastructure intelligence buyers track projects from announcement to completion, contacts, market size, companies and risks.",
-        "Project-contact and stage intelligence are central sales-development outputs."
+        "GlobalData advertises end-to-end construction-project lifecycle tracking from announcement to completion.",
+        "Project stage, participants, contacts and key dates are central sales-development outputs."
       ]
     },
     {
@@ -176,7 +176,7 @@
       "url": "https://www.alpha-sense.com/pricing/",
       "observed_at": "2026-07-30",
       "supports": [
-        "Market-intelligence pricing is annual and sales-led rather than self-serve.",
+        "Market-intelligence pricing is sales-led rather than self-serve.",
         "Product combines external and internal content, monitoring, research, work products and enterprise controls.",
         "Vendor reports more than 7,000 enterprise customers and more than 500 million documents."
       ]
@@ -237,13 +237,13 @@
       "source_id": "P01-S018",
       "library_id": "AX-LIB-O07",
       "evidence_class": "OFFICIAL_VENDOR",
-      "publisher": "Panjiva",
-      "title": "Panjiva supply-chain intelligence",
-      "url": "https://panjiva.com/",
+      "publisher": "S&P Global Market Intelligence",
+      "title": "Panjiva Supply Chain Intelligence",
+      "url": "https://www.spglobal.com/market-intelligence/en/solutions/products/panjiva-supply-chain-intelligence",
       "observed_at": "2026-07-30",
       "supports": [
         "Supply-chain buyers use trade data to identify partners, monitor competitors and detect investment or sourcing signals.",
-        "Machine learning and visual analytics are standard category expectations."
+        "The platform combines entity resolution, machine learning, visual analytics, alerts and exportable results."
       ]
     },
     {
@@ -277,12 +277,12 @@
       "library_id": "AX-LIB-O08",
       "evidence_class": "OFFICIAL_VENDOR",
       "publisher": "Rystad Energy",
-      "title": "Data and analytics",
-      "url": "https://www.rystadenergy.com/data-and-analytics",
+      "title": "How Rystad Energy delivers value",
+      "url": "https://www.rystadenergy.com/how-we-deliver",
       "observed_at": "2026-07-30",
       "supports": [
-        "Energy buyers compare scenarios, benchmark performance and monitor markets using analyst-accountable datasets.",
-        "Enterprise integration into existing systems and AI tools is a category expectation."
+        "Rystad Energy positions its offer around data, analytics, research and decision support.",
+        "Trusted analytical products and workflow access are category expectations for professional energy intelligence."
       ]
     },
     {
@@ -316,12 +316,38 @@
       "library_id": "AX-LIB-O09",
       "evidence_class": "OFFICIAL_VENDOR",
       "publisher": "Patsnap",
-      "title": "Patsnap pricing",
-      "url": "https://www.patsnap.com/pricing",
+      "title": "Patsnap Eureka platform and pricing",
+      "url": "https://eureka.patsnap.com/",
       "observed_at": "2026-07-30",
       "supports": [
-        "Published self-serve AI research tiers span approximately $100–$400/month depending product, with enterprise plans custom.",
-        "Patent products include search, analysis, alerts, workspaces, comments, task assignment and team administration."
+        "Patsnap Eureka advertises a self-serve Pro plan at $200/month and an enterprise plan with shared workspaces, team projects, administration and role-based permissions.",
+        "The platform provides domain-specific agents and workflows for IP, R&D, life sciences and materials."
+      ]
+    },
+    {
+      "source_id": "P01-S025",
+      "library_id": "AX-LIB-O09",
+      "evidence_class": "OFFICIAL_VENDOR",
+      "publisher": "Patsnap",
+      "title": "Patsnap Analytics",
+      "url": "https://www.patsnap.com/products/analytics/",
+      "observed_at": "2026-07-30",
+      "supports": [
+        "Patent analytics includes search, analysis, monitoring and a cross-team workspace.",
+        "Users can index patents, vote on relevance and assign tasks in a central collaboration surface."
+      ]
+    },
+    {
+      "source_id": "P01-S026",
+      "library_id": "AX-LIB-O09",
+      "evidence_class": "OFFICIAL_VENDOR",
+      "publisher": "Patsnap",
+      "title": "Patsnap Open Platform pricing",
+      "url": "https://open.patsnap.com/pricing",
+      "observed_at": "2026-07-30",
+      "supports": [
+        "The Open Platform uses usage-based credits and advertises Pro from $100.",
+        "Enterprise offers custom throughput, SSO and sub-organisation controls."
       ]
     }
   ]
