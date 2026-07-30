@@ -92,6 +92,7 @@ test("executes the authenticated commercial shell without external Stripe", asyn
   await page.reload();
   await persistedSummary;
   const persistedPanel = page.getByRole("complementary", { name: "Plan y facturación" });
+  // The billing=success query can auto-open the panel after hydration; do not toggle it closed.
   if (!(await persistedPanel.isVisible().catch(() => false))) {
     await page.getByRole("button", { name: /PLAN ·/ }).click();
   }
