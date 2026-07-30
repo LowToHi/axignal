@@ -5,6 +5,8 @@ import { InvestigationShell } from "@/components/investigation-shell";
 import { ResearchProgressBridge } from "@/components/research-progress-bridge";
 import { getAuthenticatedIdentity, isAuthenticationRequired } from "@/lib/server-auth";
 
+export const dynamic = "force-dynamic";
+
 function authenticatedShell() {
   return (
     <>
