@@ -1,4 +1,5 @@
 import { AuthGate } from "@/components/auth-gate";
+import { BillingBridge } from "@/components/billing-bridge";
 import { HumanReviewBridge } from "@/components/human-review-bridge";
 import { InvestigationShell } from "@/components/investigation-shell";
 import { ResearchProgressBridge } from "@/components/research-progress-bridge";
@@ -9,6 +10,7 @@ function authenticatedShell() {
     <>
       <ResearchProgressBridge />
       <HumanReviewBridge />
+      <BillingBridge />
       <InvestigationShell />
     </>
   );
