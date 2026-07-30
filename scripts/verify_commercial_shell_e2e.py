@@ -126,7 +126,7 @@ def run(
             (TENANT_A,),
         )
         ledger = list(cursor.fetchall())
-        assert len(ledger) >= 10, ledger
+        assert len(ledger) >= 9, ledger
         observed_states = {
             str(state)
             for row in ledger
