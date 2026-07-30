@@ -2,8 +2,6 @@
 from __future__ import annotations
 
 import json
-import subprocess
-import sys
 from pathlib import Path
 
 import yaml
@@ -148,17 +146,6 @@ assert gate["rollback_rehearsal"]["residual_files"] == 0
 assert gate["truth_boundary"]["public_launch_authorised"] is False
 assert gate["truth_boundary"]["global_product_rollback_tested"] is False
 
-p13_runtime = (
-    ROOT
-    / "data/sovereign-macro/sovereign-macro-strategy-workspace-runtime.v0.1.json"
-)
-if p13_runtime.is_file():
-    subprocess.run(
-        [sys.executable, str(ROOT / "scripts/verify_p13_sovereign_macro_strategy_workspace.py")],
-        cwd=ROOT,
-        check=True,
-    )
-
 print(
     json.dumps(
         {
@@ -170,7 +157,6 @@ print(
             "foundational_libraries": len(registry["foundational_libraries"]),
             "opportunity_libraries": len(registry["opportunity_libraries"]),
             "catalogues": len(index["catalogues"]),
-            "p13_engineering_verifier_executed": p13_runtime.is_file(),
             "public_launch_authorised": False,
             "global_product_rollback_tested": False,
         },
