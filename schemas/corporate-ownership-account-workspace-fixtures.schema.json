@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://axignal.com/schemas/corporate-ownership-account-workspace-fixtures.schema.json",
+  "title": "P12 Corporate Ownership Account Workspace Fixture Matrix",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "task_id",
+    "modules",
+    "classes",
+    "expected_by_class"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "axignal.corporate-ownership-account-workspace-fixtures/v0.1"
+    },
+    "task_id": {
+      "const": "AX-GE2E-P12-T01"
+    },
+    "modules": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "ENTITY_REGISTRY",
+          "FILING_DISCLOSURE",
+          "OWNERSHIP_CONTROL",
+          "GOVERNANCE_OFFICER",
+          "CAPITAL_CORPORATE_ACTION",
+          "ACCOUNT_OPPORTUNITY_WORKSPACE",
+          "MONITORING_RELATIONSHIP_RISK",
+          "EXTERNAL_ACTION_OUTCOME"
+        ]
+      }
+    },
+    "classes": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "HAPPY_PATH",
+          "INCOMPLETE_CONTEXT",
+          "REVOKED_DEPENDENCY",
+          "CROSS_TENANT",
+          "AUTHORITY_ESCALATION"
+        ]
+      }
+    },
+    "expected_by_class": {
+      "type": "object",
+      "minProperties": 5,
+      "maxProperties": 5,
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "decision",
+          "canonical_write",
+          "external_action",
+          "reason_code"
+        ],
+        "properties": {
+          "decision": {
+            "enum": [
+              "CANDIDATE",
+              "REVIEW_REQUIRED",
+              "DENY",
+              "BLOCK"
+            ]
+          },
+          "canonical_write": {
+            "const": false
+          },
+          "external_action": {
+            "const": false
+          },
+          "reason_code": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
