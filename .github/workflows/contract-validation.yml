@@ -264,8 +264,22 @@ jobs:
       - name: Validate P14 Trade and Supply Chain Library and Workspace
         run: python scripts/verify_p14_trade_supply_chain_workspace.py
 
-      - name: Rehearse byte-exact P14 rollback
-        run: python scripts/verify_p14_rollback.py
+      - name: Rehearse byte-exact P14 rollback at frozen P14 head
+        env:
+          P14_ENGINEERING_HEAD: f0ae67f8d38afbdb36e1b2e3d56e955b173fbe8d
+        run: |
+          set -euo pipefail
+          verification_dir="${RUNNER_TEMP}/axignal-p14-rollback"
+          rm -rf "${verification_dir}"
+          git worktree add --detach "${verification_dir}" "${P14_ENGINEERING_HEAD}"
+          trap 'git worktree remove --force "${verification_dir}" >/dev/null 2>&1 || true' EXIT
+          python "${verification_dir}/scripts/verify_p14_rollback.py"
+
+      - name: Validate P15 Energy and Climate Transition Workspace
+        run: python scripts/verify_p15_energy_climate_transition_workspace.py
+
+      - name: Rehearse byte-exact P15 rollback
+        run: python scripts/verify_p15_rollback.py
 
       - name: Validate modular skill registries
         run: |
