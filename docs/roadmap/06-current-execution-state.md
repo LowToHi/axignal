@@ -61,7 +61,7 @@ The following are not accepted:
 
 The following secondary evidence is present on the P01 review branch:
 
-- 24 official-statistics, official-programme, intergovernmental and official-vendor references;
+- 26 official-statistics, official-programme, intergovernmental and official-vendor references;
 - evidence coverage for O01–O09;
 - five cross-library buyer cohorts;
 - nine buyer/workflow hypotheses;
