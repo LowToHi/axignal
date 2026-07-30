@@ -9,6 +9,7 @@ AXIGNAL is a global platform for discovering, investigating and operating profes
 - Repository: `LowToHi/axignal`
 - Goal ID: `AXIGNAL-GOAL-001`
 - Active programme: P00–P24 under Contract 30 and ADR-015
+- Current phase: **P01 — buyer and workflow evidence**
 - Public launch: **not authorised**
 
 ## Product chain
@@ -47,9 +48,9 @@ Each library has independent source, rights, quality, lifecycle, privacy, entitl
 
 ## Current maturity
 
-The repository contains a governed alpha vertical slice, a bounded Procurement runtime and internal trial/billing evidence. It is not the finished global product required by Contract 30.
+The repository contains a governed alpha vertical slice, a bounded Procurement runtime and internal trial/billing evidence. P00 canonical integration is accepted. It is not the finished global product required by Contract 30.
 
-The active next task is `AX-GE2E-P00-T01`. Public launch, unsupported global claims and unrestricted live charging remain blocked.
+The active task is `AX-GE2E-P01-T01`. P01 validates global buyer personas, jobs, budgets, workflows, alternatives and failure costs. Public launch, unsupported global claims, new source admission and unrestricted live charging remain blocked.
 
 ## Contracts and roadmap
 
