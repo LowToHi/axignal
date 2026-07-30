@@ -1,3 +1,4 @@
+from axignal_api.billing_read_routes import router as billing_read_router
 from axignal_api.billing_routes import router as billing_router
 from axignal_api.billing_test_routes import router as billing_test_router
 from axignal_api.entitlements import router as entitlement_router
@@ -18,6 +19,7 @@ app.include_router(persistent_research_router)
 app.include_router(ted_research_router)
 app.include_router(entitlement_router)
 app.include_router(billing_router)
+app.include_router(billing_read_router)
 app.include_router(billing_test_router)
 app.include_router(retention_router)
 app.include_router(human_review_router)
