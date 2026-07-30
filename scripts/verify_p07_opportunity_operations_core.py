@@ -30,7 +30,10 @@ CASES = ROOT / "data/opportunity-operations/p07-adversarial-cases.v0.1.json"
 PROGRAMME = ROOT / "data/programmes/global-e2e-tasks-p05-p09.v1.4.json"
 P02_LIBRARIES = ROOT / "data/ontology/library-contracts.v0.1.json"
 P05_FOUNDATIONS = ROOT / "data/foundations/foundational-library-runtime.v0.1.json"
-P06_DOCUMENTS = ROOT / "data/document-intelligence/multilingual-document-intelligence-runtime.v0.1.json"
+P06_DOCUMENTS = (
+    ROOT
+    / "data/document-intelligence/multilingual-document-intelligence-runtime.v0.1.json"
+)
 
 paths = (
     RUNTIME_SCHEMA,
