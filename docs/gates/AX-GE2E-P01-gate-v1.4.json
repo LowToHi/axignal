@@ -6,13 +6,17 @@
   "state": "IN_PROGRESS",
   "decision": "NOT_READY_FOR_HUMAN_ACCEPTANCE",
   "evaluated_at": "2026-07-30",
+  "verified_head": "e242eb4929a568034de19db110fe4733f6d85b18",
   "automated_evidence": {
     "desk_evidence_register": "PRESENT",
     "buyer_workflow_hypotheses": "PRESENT",
     "primary_research_protocol": "PRESENT",
     "session_schema": "PRESENT",
     "primary_research_manifest": "PRESENT",
-    "deterministic_verifier": "PENDING_CI"
+    "deterministic_verifier": "PASS",
+    "contract_validation": "PASS",
+    "first_lawful_universe": "PASS",
+    "executable_spine": "PASS"
   },
   "primary_evidence": {
     "qualified_unique_participants": {
