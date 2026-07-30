@@ -250,8 +250,22 @@ jobs:
       - name: Validate P13 Sovereign Macro Library and Strategy Workspace
         run: python scripts/verify_p13_sovereign_macro_strategy_workspace.py
 
-      - name: Rehearse byte-exact P13 rollback
-        run: python scripts/verify_p13_rollback.py
+      - name: Rehearse byte-exact P13 rollback at frozen P13 head
+        env:
+          P13_ENGINEERING_HEAD: 0089864b1a3f3d88a0980ecaf4e6dd129299e021
+        run: |
+          set -euo pipefail
+          verification_dir="${RUNNER_TEMP}/axignal-p13-rollback"
+          rm -rf "${verification_dir}"
+          git worktree add --detach "${verification_dir}" "${P13_ENGINEERING_HEAD}"
+          trap 'git worktree remove --force "${verification_dir}" >/dev/null 2>&1 || true' EXIT
+          python "${verification_dir}/scripts/verify_p13_rollback.py"
+
+      - name: Validate P14 Trade and Supply Chain Library and Workspace
+        run: python scripts/verify_p14_trade_supply_chain_workspace.py
+
+      - name: Rehearse byte-exact P14 rollback
+        run: python scripts/verify_p14_rollback.py
 
       - name: Validate modular skill registries
         run: |
