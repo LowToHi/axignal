@@ -3,9 +3,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Iterable, Mapping
 from datetime import datetime
 from decimal import Decimal
-from typing import Iterable, Mapping
 
 
 def canonical_digest(payload: object) -> str:
