@@ -117,7 +117,7 @@ assert {"OBSERVED", "INFERRED", "HUMAN_ASSERTED"} == set(
 assert "MERGE" not in entity["resolution_states"]
 assert "SPLIT" in entity["resolution_states"]
 
- taxonomy = registry["taxonomy_contract"]
+taxonomy = registry["taxonomy_contract"]
 assert {"CPV", "NUTS", "NAICS", "PSC", "NACE", "ISIC", "HS", "SITC", "CPC"} == set(
     taxonomy["required_taxonomies"]
 )
