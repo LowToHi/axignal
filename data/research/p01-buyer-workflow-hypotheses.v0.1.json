@@ -1,0 +1,179 @@
+{
+  "version": "0.1.0",
+  "task_id": "AX-GE2E-P01-T01",
+  "status": "HYPOTHESES_NOT_VALIDATED",
+  "global_product_hypothesis": "Buyers value a connected system that moves from evidence-governed discovery into an operational workspace and retained organisational learning.",
+  "cross_library_cohorts": [
+    {
+      "cohort_id": "C1",
+      "name": "Public-sector growth and pursuit teams",
+      "libraries": ["AX-LIB-O01", "AX-LIB-O03", "AX-LIB-O04"]
+    },
+    {
+      "cohort_id": "C2",
+      "name": "Funding, research and innovation teams",
+      "libraries": ["AX-LIB-O02", "AX-LIB-O09", "AX-LIB-O03"]
+    },
+    {
+      "cohort_id": "C3",
+      "name": "Infrastructure and energy development teams",
+      "libraries": ["AX-LIB-O04", "AX-LIB-O08", "AX-LIB-O01", "AX-LIB-O03"]
+    },
+    {
+      "cohort_id": "C4",
+      "name": "Corporate strategy and market-intelligence teams",
+      "libraries": ["AX-LIB-O05", "AX-LIB-O06", "AX-LIB-O07", "AX-LIB-O08", "AX-LIB-O09"]
+    },
+    {
+      "cohort_id": "C5",
+      "name": "Trade, sourcing and supply-risk teams",
+      "libraries": ["AX-LIB-O07", "AX-LIB-O05", "AX-LIB-O03", "AX-LIB-O06"]
+    }
+  ],
+  "library_hypotheses": [
+    {
+      "library_id": "AX-LIB-O01",
+      "library": "Global Public Procurement",
+      "primary_operator_roles": ["Bid Manager", "Tender Manager", "Public Sector Sales Manager", "Business Development Manager"],
+      "economic_buyers": ["Commercial Director", "Head of Public Sector", "CEO/COO", "Consultancy Partner"],
+      "core_job": "Find, qualify and operate public-sector pursuits from early signal through bid outcome.",
+      "current_stack": ["official portals", "email alerts", "spreadsheets", "CRM", "SharePoint/Teams", "bid-writing tools"],
+      "high_cost_failures": ["missed or late opportunity", "pursuing an ineligible or low-fit tender", "missed amendment or deadline", "fragmented bid ownership", "lost reusable content"],
+      "workflow_required": ["discover", "qualify", "bid/no-bid", "requirements", "tasks", "documents", "approvals", "submission", "award", "win/loss learning"],
+      "budget_hypothesis_eur_month": {"professional": [349, 600], "team": [900, 1800], "enterprise_annual": [18000, 60000]},
+      "confidence": "MEDIUM",
+      "primary_research_needed": ["frequency and cost of bid/no-bid errors", "workspace replacement threshold", "annual versus monthly preference", "required country coverage"]
+    },
+    {
+      "library_id": "AX-LIB-O02",
+      "library": "Grants and Non-Dilutive Funding",
+      "primary_operator_roles": ["Grant Manager", "Research Development Officer", "Innovation Manager", "Grant Consultant"],
+      "economic_buyers": ["Development Director", "Research Vice-President", "CFO", "Consultancy Partner"],
+      "core_job": "Discover eligible funding, coordinate an application, manage award obligations and reuse organisational knowledge.",
+      "current_stack": ["funding portals", "grant databases", "spreadsheets", "calendar", "document drives", "finance systems"],
+      "high_cost_failures": ["missed eligible call", "ineligible application", "late consortium or document", "budget inconsistency", "missed post-award obligation"],
+      "workflow_required": ["discover", "eligibility", "partnering", "work packages", "budget", "tasks", "approvals", "submission", "award management", "reporting"],
+      "budget_hypothesis_eur_month": {"professional": [250, 600], "team": [700, 1500], "enterprise_annual": [12000, 50000]},
+      "confidence": "MEDIUM",
+      "primary_research_needed": ["difference between nonprofit and R&D buyers", "post-award workflow value", "consultant multi-client isolation", "willingness to pay by grant volume"]
+    },
+    {
+      "library_id": "AX-LIB-O03",
+      "library": "Regulatory and Policy Demand",
+      "primary_operator_roles": ["Regulatory Change Manager", "Compliance Officer", "Legal Operations Manager", "Public Policy Analyst"],
+      "economic_buyers": ["Chief Compliance Officer", "General Counsel", "Chief Risk Officer", "Business Unit Executive"],
+      "core_job": "Identify applicable change, assess impact, assign implementation and prove that the organisation responded.",
+      "current_stack": ["legal databases", "regulatory feeds", "spreadsheets", "GRC", "policy repositories", "ticketing"],
+      "high_cost_failures": ["missed applicable rule", "late implementation", "unmapped obligation", "duplicate review", "weak audit trail"],
+      "workflow_required": ["monitor", "applicability", "impact assessment", "requirements", "owners", "controls/policies", "tasks", "evidence", "approval", "audit"],
+      "budget_hypothesis_eur_month": {"professional": [1000, 2500], "team": [3000, 10000], "enterprise_annual": [50000, 250000]},
+      "confidence": "MEDIUM",
+      "primary_research_needed": ["opportunity-versus-compliance framing", "legal review boundary", "integration requirements", "sector-specific budgets"]
+    },
+    {
+      "library_id": "AX-LIB-O04",
+      "library": "Infrastructure and Capital Projects",
+      "primary_operator_roles": ["Project Business Development Manager", "Capture Manager", "Project Finance Analyst", "Infrastructure Consultant"],
+      "economic_buyers": ["Regional Director", "Head of Origination", "Investment Director", "Commercial Director"],
+      "core_job": "Detect project formation early, map stakeholders and financing, choose pursuits and coordinate a long-cycle capture plan.",
+      "current_stack": ["project databases", "CRM", "spreadsheets", "GIS", "news", "procurement portals", "deal rooms"],
+      "high_cost_failures": ["late entry", "wrong stakeholder map", "missed financing or procurement milestone", "duplicated pursuit", "stale project status"],
+      "workflow_required": ["detect", "screen", "stakeholders", "financing", "partners", "milestones", "capture plan", "procurement packages", "outcome", "learning"],
+      "budget_hypothesis_eur_month": {"professional": [500, 1500], "team": [2000, 8000], "enterprise_annual": [30000, 150000]},
+      "confidence": "LOW_MEDIUM",
+      "primary_research_needed": ["project threshold and sectors", "value of contacts versus evidence", "regional coverage", "integration with CRM and GIS"]
+    },
+    {
+      "library_id": "AX-LIB-O05",
+      "library": "Corporate, Filings and Ownership Signals",
+      "primary_operator_roles": ["Market Intelligence Analyst", "Corporate Development Analyst", "Competitive Intelligence Manager", "Account Strategist"],
+      "economic_buyers": ["Chief Strategy Officer", "Corporate Development Director", "Investment Director", "Consulting Partner"],
+      "core_job": "Connect official corporate signals and internal knowledge into a monitored thesis, account or deal opportunity.",
+      "current_stack": ["financial terminals", "market-intelligence platforms", "news", "filing portals", "CRM", "internal drives"],
+      "high_cost_failures": ["missed strategic change", "stale ownership view", "duplicated research", "unsupported thesis", "lost internal knowledge"],
+      "workflow_required": ["monitor", "research", "entity/ownership map", "thesis", "stakeholders", "tasks", "work product", "decision", "outcome", "learning"],
+      "budget_hypothesis_eur_month": {"professional": [500, 2000], "team": [2500, 10000], "enterprise_annual": [30000, 200000]},
+      "confidence": "MEDIUM",
+      "primary_research_needed": ["need for official versus premium content", "internal-content integration", "workflow ownership", "tolerance for source gaps"]
+    },
+    {
+      "library_id": "AX-LIB-O06",
+      "library": "Sovereign, Macro and Public Investment",
+      "primary_operator_roles": ["Economist", "Country Risk Analyst", "Strategy Analyst", "Public Policy Analyst"],
+      "economic_buyers": ["Chief Economist", "Investment Director", "Chief Strategy Officer", "Research Director"],
+      "core_job": "Build and maintain a versioned country or market thesis from governed data, revisions and scenarios.",
+      "current_stack": ["macro terminals", "spreadsheets", "Python/R", "presentation tools", "research portals", "internal models"],
+      "high_cost_failures": ["wrong vintage", "unnoticed revision", "manual chart rebuild", "forecast presented as observation", "inconsistent assumptions"],
+      "workflow_required": ["discover series", "validate vintage", "transform", "compare", "scenario", "publish", "monitor", "review", "decision", "outcome"],
+      "budget_hypothesis_eur_month": {"professional": [500, 1500], "team": [2000, 7000], "enterprise_annual": [25000, 150000]},
+      "confidence": "LOW_MEDIUM",
+      "primary_research_needed": ["whether AXIGNAL replaces or complements terminals", "scenario collaboration needs", "source licensing expectations", "decision outputs"]
+    },
+    {
+      "library_id": "AX-LIB-O07",
+      "library": "Trade, Supply Chain and Market Flows",
+      "primary_operator_roles": ["Supply Chain Analyst", "Trade Compliance Analyst", "Sourcing Manager", "Market Development Manager"],
+      "economic_buyers": ["Chief Supply Chain Officer", "Procurement Director", "Trade Compliance Director", "Commercial Director"],
+      "core_job": "Detect changing flows and dependencies, identify counterparties or risks and operate a sourcing or market pursuit.",
+      "current_stack": ["customs databases", "ERP", "supplier-risk tools", "spreadsheets", "trade portals", "BI"],
+      "high_cost_failures": ["hidden dependency", "incorrect supplier identity", "late tariff response", "sourcing concentration", "missed market shift"],
+      "workflow_required": ["monitor flows", "map entities", "classify product", "assess dependency", "shortlist alternatives", "tasks", "approval", "transition", "outcome"],
+      "budget_hypothesis_eur_month": {"professional": [400, 1500], "team": [2000, 8000], "enterprise_annual": [30000, 200000]},
+      "confidence": "LOW_MEDIUM",
+      "primary_research_needed": ["customs-data rights", "ERP integration", "trade-versus-risk buyer", "value of predictive versus observed signals"]
+    },
+    {
+      "library_id": "AX-LIB-O08",
+      "library": "Energy and Climate Transition",
+      "primary_operator_roles": ["Energy Market Analyst", "Project Developer", "Origination Manager", "Transition Strategy Analyst"],
+      "economic_buyers": ["Head of Development", "Investment Director", "Strategy Director", "Energy Trading/Market Executive"],
+      "core_job": "Screen markets and projects, connect policy, capital, assets and grid constraints, and operate a transition pursuit.",
+      "current_stack": ["energy intelligence platforms", "GIS", "project databases", "models", "spreadsheets", "regulatory feeds"],
+      "high_cost_failures": ["wrong project status", "missed policy or grid constraint", "late partner engagement", "bad scenario assumptions", "fragmented asset view"],
+      "workflow_required": ["screen", "map", "benchmark", "scenario", "partners", "milestones", "tasks", "investment/pursuit decision", "outcome", "learning"],
+      "budget_hypothesis_eur_month": {"professional": [800, 2500], "team": [3000, 12000], "enterprise_annual": [50000, 300000]},
+      "confidence": "LOW_MEDIUM",
+      "primary_research_needed": ["segment by developer/investor/advisor", "data precision requirements", "model provenance", "workflow after screening"]
+    },
+    {
+      "library_id": "AX-LIB-O09",
+      "library": "Innovation, Research and Intellectual Property",
+      "primary_operator_roles": ["Patent Analyst", "R&D Intelligence Manager", "Technology Scout", "Research Development Manager"],
+      "economic_buyers": ["Chief Technology Officer", "Head of IP", "R&D Director", "Innovation Director"],
+      "core_job": "Discover technologies and partners, assess evidence and lineage, coordinate an innovation or IP pursuit and preserve learning.",
+      "current_stack": ["patent databases", "scientific literature", "project databases", "spreadsheets", "IP management", "document drives"],
+      "high_cost_failures": ["missed prior art or competitor move", "duplicate research", "wrong assignee/family", "stale legal status", "lost scouting rationale"],
+      "workflow_required": ["search", "family/entity resolution", "landscape", "thesis", "partner shortlist", "tasks", "review", "decision", "outcome", "learning"],
+      "budget_hypothesis_eur_month": {"professional": [200, 800], "team": [1000, 5000], "enterprise_annual": [20000, 150000]},
+      "confidence": "MEDIUM",
+      "primary_research_needed": ["IP versus R&D buyer split", "legal boundary", "human review requirements", "integration with IP-management systems"]
+    }
+  ],
+  "cross_library_hypotheses": [
+    {
+      "id": "H-P01-01",
+      "statement": "A consultative intelligence layer without an operational workspace produces weak retention because users move active work into other systems.",
+      "status": "TO_TEST"
+    },
+    {
+      "id": "H-P01-02",
+      "statement": "Evidence traceability is a purchase criterion only when the decision has material financial, legal, operational or reputational cost.",
+      "status": "TO_TEST"
+    },
+    {
+      "id": "H-P01-03",
+      "statement": "The strongest expansion path is additional libraries sold into an existing workspace and tenant, not separate standalone products.",
+      "status": "TO_TEST"
+    },
+    {
+      "id": "H-P01-04",
+      "statement": "Professional self-serve plans fit individual analysts; Team and Enterprise plans are required wherever approvals, internal documents or integrations matter.",
+      "status": "TO_TEST"
+    },
+    {
+      "id": "H-P01-05",
+      "statement": "Buyers will reject broad global claims unless coverage, freshness and source limitations are visible by library and jurisdiction.",
+      "status": "TO_TEST"
+    }
+  ]
+}
