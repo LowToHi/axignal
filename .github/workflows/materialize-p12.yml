@@ -33,7 +33,12 @@ jobs:
           cat .p12-materialization.part-* | base64 --decode > "${RUNNER_TEMP}/p12-materialization.tar.gz"
           tar -xzf "${RUNNER_TEMP}/p12-materialization.tar.gz" -C .
           rm -f .p12-materialization.part-*
-          rm -f .github/workflows/materialize-p12.yml
+
+          # The Actions token cannot modify workflow files. Keep both workflow
+          # files byte-identical in this commit; the connector will perform the
+          # reviewed workflow update and remove this temporary materializer.
+          git checkout HEAD -- .github/workflows/contract-validation.yml
+          git checkout HEAD -- .github/workflows/materialize-p12.yml
 
           python - <<'PY'
           import json
