@@ -1,6 +1,10 @@
 import { expect, test } from "@playwright/test";
 
 test.describe.configure({ mode: "serial", retries: 0 });
+test.skip(
+  process.env.AXIGNAL_COMMERCIAL_SHELL_E2E !== "true",
+  "Commercial billing E2E requires the isolated deterministic-provider topology."
+);
 
 async function login(page: import("@playwright/test").Page) {
   await page.goto("/");
