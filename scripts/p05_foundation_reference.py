@@ -35,9 +35,7 @@ def resolve_interval(
         return None
     if valid_from is not None and at < valid_from:
         return False
-    if valid_to is not None and at >= valid_to:
-        return False
-    return True
+    return not (valid_to is not None and at >= valid_to)
 
 
 def convert_money(
