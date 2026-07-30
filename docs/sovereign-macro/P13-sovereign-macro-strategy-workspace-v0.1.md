@@ -31,3 +31,9 @@ Models remain proposal-only. Workers remain bounded. Publication,
 representation, budget allocation and capital commitment require typed human
 authority. All seven macro catalogue sources remain unreviewed and
 not product-admitted.
+
+## Validation workflow
+
+GitHub Actions executes `P13 Sovereign Macro Validation` on every P13 branch
+push and on pull-request changes affecting the P13 contract. The workflow runs
+the deterministic verifier and the byte-exact rollback rehearsal.
