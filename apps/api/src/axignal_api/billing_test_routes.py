@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import time
 from datetime import UTC, datetime, timedelta
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
@@ -43,6 +43,14 @@ def _test_runtime() -> tuple[BillingSettings, BillingRepository]:
         ) from exc
     assert settings.database_url is not None
     return settings, BillingRepository(settings.database_url)
+
+
+def _next_event_time(current: dict[str, Any], now: datetime) -> datetime:
+    previous = current.get("last_provider_event_created_at")
+    if not isinstance(previous, datetime):
+        return now
+    previous = previous.astimezone(UTC)
+    return max(now, previous + timedelta(seconds=1))
 
 
 def _subscription_object(
@@ -147,6 +155,7 @@ async def deterministic_provider_event(
         or f"si_test_axignal_{selection_id.hex}"
     )
     now = datetime.now(UTC)
+    event_time = _next_event_time(current, now)
     assert settings.stripe_webhook_secret is not None
 
     if command.action == "ROLLBACK":
@@ -171,7 +180,7 @@ async def deterministic_provider_event(
         checkout_payload = _event(
             event_id=f"evt_test_checkout_{selection_id.hex}",
             event_type="checkout.session.completed",
-            created_at=now,
+            created_at=event_time,
             obj={
                 "id": checkout_id,
                 "object": "checkout.session",
@@ -187,17 +196,18 @@ async def deterministic_provider_event(
                 secret=settings.stripe_webhook_secret,
             )
         )
+        subscription_time = event_time + timedelta(seconds=1)
         subscription_payload = _event(
             event_id=f"evt_test_subscription_created_{selection_id.hex}",
             event_type="customer.subscription.created",
-            created_at=now + timedelta(seconds=1),
+            created_at=subscription_time,
             obj=_subscription_object(
                 selection_id=selection_id,
                 subscription_id=subscription_id,
                 item_id=item_id,
                 price_id=settings.price_for_plan(str(current["plan_code"])),
                 cancel_at_period_end=False,
-                event_time=now,
+                event_time=subscription_time,
             ),
         )
         events.append(
@@ -213,14 +223,14 @@ async def deterministic_provider_event(
         payload = _event(
             event_id=f"evt_test_upgrade_{selection_id.hex}",
             event_type="customer.subscription.updated",
-            created_at=now,
+            created_at=event_time,
             obj=_subscription_object(
                 selection_id=selection_id,
                 subscription_id=subscription_id,
                 item_id=item_id,
                 price_id=settings.price_for_plan(target),
                 cancel_at_period_end=False,
-                event_time=now,
+                event_time=event_time,
             ),
         )
         events.append(
@@ -246,14 +256,14 @@ async def deterministic_provider_event(
                 else f"evt_test_cancel_terminal_{selection_id.hex}"
             ),
             event_type=event_type,
-            created_at=now,
+            created_at=event_time,
             obj=_subscription_object(
                 selection_id=selection_id,
                 subscription_id=subscription_id,
                 item_id=item_id,
                 price_id=settings.price_for_plan(str(current["plan_code"])),
                 cancel_at_period_end=cancel_at_period_end,
-                event_time=now,
+                event_time=event_time,
                 status_value=status_value,
             ),
         )
