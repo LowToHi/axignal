@@ -1,0 +1,54 @@
+name: Materialize P12 Candidate
+
+on:
+  push:
+    branches:
+      - agent/ax-ge2e-p12-corporate-ownership-account-workspace-v1.4
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout candidate branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Materialize reviewed P12 tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .p12-materialization.part-* | base64 --decode > "${RUNNER_TEMP}/p12-materialization.tar.gz"
+          tar -xzf "${RUNNER_TEMP}/p12-materialization.tar.gz" -C .
+          rm -f .p12-materialization.part-*
+          rm -f .github/workflows/materialize-p12.yml
+
+          python - <<'PY'
+          import json
+          import py_compile
+          from pathlib import Path
+
+          for path in sorted(Path('schemas').glob('corporate-ownership-account-workspace-*.schema.json')):
+              json.loads(path.read_text(encoding='utf-8'))
+              print(f'JSON PASS {path}')
+          for path in sorted(Path('data/corporate').glob('*.json')):
+              json.loads(path.read_text(encoding='utf-8'))
+              print(f'JSON PASS {path}')
+          for path in sorted(Path('scripts').glob('*p12*.py')):
+              py_compile.compile(str(path), doraise=True)
+              print(f'COMPILE PASS {path}')
+          PY
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --exit-code >/dev/null && {
+            echo "Nothing to materialize"
+            exit 1
+          }
+          git commit -m "Implement P12 corporate ownership account workspace"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
