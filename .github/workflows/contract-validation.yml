@@ -152,8 +152,22 @@ jobs:
       - name: Validate P06 multilingual and document intelligence
         run: python scripts/verify_p06_multilingual_document_intelligence.py
 
-      - name: Rehearse byte-exact P06 rollback
-        run: python scripts/verify_p06_rollback.py
+      - name: Rehearse byte-exact P06 rollback at frozen P06 head
+        env:
+          P06_ENGINEERING_HEAD: d6317f32caad4f916f1871c23753bacd36b4d9d6
+        run: |
+          set -euo pipefail
+          verification_dir="${RUNNER_TEMP}/axignal-p06-rollback"
+          rm -rf "${verification_dir}"
+          git worktree add --detach "${verification_dir}" "${P06_ENGINEERING_HEAD}"
+          trap 'git worktree remove --force "${verification_dir}" >/dev/null 2>&1 || true' EXIT
+          python "${verification_dir}/scripts/verify_p06_rollback.py"
+
+      - name: Validate P07 Opportunity Operations Core
+        run: python scripts/verify_p07_opportunity_operations_core.py
+
+      - name: Rehearse byte-exact P07 rollback
+        run: python scripts/verify_p07_rollback.py
 
       - name: Validate modular skill registries
         run: |
