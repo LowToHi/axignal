@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Protocol
+from typing import Any, Protocol
 from urllib.parse import urlencode
 from uuid import UUID
 
+import httpx
+
 from axignal_api.billing_config import BillingSettings
-from axignal_api.stripe_gateway import StripeGateway
 
 
 @dataclass(frozen=True)
@@ -53,7 +54,43 @@ class BillingProvider(Protocol):
 
 class StripeBillingProvider:
     def __init__(self, settings: BillingSettings) -> None:
-        self.gateway = StripeGateway(settings)
+        self.settings = settings
+
+    def _headers(self, *, idempotency_key: str | None = None) -> dict[str, str]:
+        assert self.settings.stripe_secret_key is not None
+        assert self.settings.stripe_api_version is not None
+        headers = {
+            "Authorization": f"Bearer {self.settings.stripe_secret_key}",
+            "Stripe-Version": self.settings.stripe_api_version,
+            "User-Agent": "AXIGNAL-Billing/0.1",
+        }
+        if idempotency_key:
+            headers["Idempotency-Key"] = idempotency_key
+        return headers
+
+    def _client(self) -> httpx.Client:
+        return httpx.Client(
+            base_url=self.settings.stripe_api_base,
+            timeout=httpx.Timeout(15.0, connect=5.0),
+            follow_redirects=False,
+        )
+
+    @staticmethod
+    def _json(response: httpx.Response) -> dict[str, Any]:
+        try:
+            payload = response.json()
+        except ValueError as exc:
+            raise RuntimeError("Stripe returned a non-JSON response") from exc
+        if not isinstance(payload, dict):
+            raise RuntimeError("Stripe returned an invalid object")
+        return payload
+
+    def verify_account(self, client: httpx.Client) -> None:
+        response = client.get("/v1/account", headers=self._headers())
+        response.raise_for_status()
+        payload = self._json(response)
+        if payload.get("id") != self.settings.stripe_account_id:
+            raise RuntimeError("Stripe API key is bound to the wrong account")
 
     def create_checkout_session(
         self,
@@ -63,17 +100,41 @@ class StripeBillingProvider:
         customer_email: str,
         operation_id: str,
     ) -> CheckoutSessionResult:
-        result = self.gateway.create_checkout_session(
-            selection_id=selection_id,
-            plan_code=plan_code,
-            customer_email=customer_email,
-            operation_id=operation_id,
-        )
-        return CheckoutSessionResult(
-            session_id=result.session_id,
-            url=result.url,
-            price_id=result.price_id,
-        )
+        self.settings.require_checkout()
+        price_id = self.settings.price_for_plan(plan_code)
+        assert self.settings.checkout_success_url is not None
+        assert self.settings.checkout_cancel_url is not None
+        form = {
+            "mode": "subscription",
+            "success_url": self.settings.checkout_success_url,
+            "cancel_url": self.settings.checkout_cancel_url,
+            "client_reference_id": str(selection_id),
+            "customer_email": customer_email,
+            "line_items[0][price]": price_id,
+            "line_items[0][quantity]": "1",
+            "allow_promotion_codes": "false",
+            "metadata[axignal_selection_id]": str(selection_id),
+            "metadata[axignal_plan_code]": plan_code,
+            "subscription_data[metadata][axignal_selection_id]": str(selection_id),
+            "subscription_data[metadata][axignal_plan_code]": plan_code,
+        }
+        idempotency_key = f"axignal:checkout:{selection_id}:{operation_id}:v1"
+        with self._client() as client:
+            self.verify_account(client)
+            response = client.post(
+                "/v1/checkout/sessions",
+                headers=self._headers(idempotency_key=idempotency_key),
+                data=form,
+            )
+            response.raise_for_status()
+            payload = self._json(response)
+        session_id = payload.get("id")
+        url = payload.get("url")
+        if not isinstance(session_id, str) or not session_id.startswith("cs_"):
+            raise RuntimeError("Stripe Checkout Session id is missing")
+        if not isinstance(url, str) or not url.startswith("https://"):
+            raise RuntimeError("Stripe Checkout URL is missing")
+        return CheckoutSessionResult(session_id=session_id, url=url, price_id=price_id)
 
     def upgrade_subscription(
         self,
@@ -83,16 +144,31 @@ class StripeBillingProvider:
         target_plan_code: str,
         operation_id: str,
     ) -> SubscriptionCommandResult:
-        result = self.gateway.upgrade_subscription(
-            subscription_id=subscription_id,
-            subscription_item_id=subscription_item_id,
-            target_plan_code=target_plan_code,
-            operation_id=operation_id,
-        )
+        self.settings.require_lifecycle()
+        price_id = self.settings.price_for_plan(target_plan_code)
+        form = {
+            "items[0][id]": subscription_item_id,
+            "items[0][price]": price_id,
+            "proration_behavior": "none",
+            "metadata[axignal_pending_plan_code]": target_plan_code,
+        }
+        with self._client() as client:
+            self.verify_account(client)
+            response = client.post(
+                f"/v1/subscriptions/{subscription_id}",
+                headers=self._headers(
+                    idempotency_key=(
+                        f"axignal:upgrade:{subscription_id}:{operation_id}:v1"
+                    )
+                ),
+                data=form,
+            )
+            response.raise_for_status()
+            payload = self._json(response)
         return SubscriptionCommandResult(
-            subscription_id=result.subscription_id,
-            status=result.status,
-            cancel_at_period_end=result.cancel_at_period_end,
+            subscription_id=str(payload.get("id") or subscription_id),
+            status=str(payload.get("status") or "unknown"),
+            cancel_at_period_end=bool(payload.get("cancel_at_period_end", False)),
         )
 
     def cancel_subscription(
@@ -102,15 +178,36 @@ class StripeBillingProvider:
         cancel_at_period_end: bool,
         operation_id: str,
     ) -> SubscriptionCommandResult:
-        result = self.gateway.cancel_subscription(
-            subscription_id=subscription_id,
-            cancel_at_period_end=cancel_at_period_end,
-            operation_id=operation_id,
-        )
+        self.settings.require_lifecycle()
+        with self._client() as client:
+            self.verify_account(client)
+            if cancel_at_period_end:
+                response = client.post(
+                    f"/v1/subscriptions/{subscription_id}",
+                    headers=self._headers(
+                        idempotency_key=(
+                            f"axignal:cancel-period-end:{subscription_id}:{operation_id}:v1"
+                        )
+                    ),
+                    data={"cancel_at_period_end": "true"},
+                )
+            else:
+                response = client.delete(
+                    f"/v1/subscriptions/{subscription_id}",
+                    headers=self._headers(
+                        idempotency_key=(
+                            f"axignal:cancel-now:{subscription_id}:{operation_id}:v1"
+                        )
+                    ),
+                )
+            response.raise_for_status()
+            payload = self._json(response)
         return SubscriptionCommandResult(
-            subscription_id=result.subscription_id,
-            status=result.status,
-            cancel_at_period_end=result.cancel_at_period_end,
+            subscription_id=str(payload.get("id") or subscription_id),
+            status=str(payload.get("status") or "unknown"),
+            cancel_at_period_end=bool(
+                payload.get("cancel_at_period_end", cancel_at_period_end)
+            ),
         )
 
 
