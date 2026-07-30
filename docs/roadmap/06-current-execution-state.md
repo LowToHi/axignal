@@ -1,7 +1,7 @@
 # 06 — AXIGNAL Current Execution State
 
 Version: `1.4.0`
-Status: `P00 IN_PROGRESS / GLOBAL PROGRAMME NOT IMPLEMENTED / NO PUBLIC LAUNCH`
+Status: `P00 EVIDENCE_READY / HUMAN GATE PENDING / GLOBAL PROGRAMME NOT IMPLEMENTED / NO PUBLIC LAUNCH`
 Goal ID: `AXIGNAL-GOAL-001`
 Canonical implementation baseline: `main@9ee3e12620f137208c1943a05501f2671a1f4817`
 Active branch: `agent/ax-ge2e-p00-canonical-v1.4`
@@ -48,7 +48,7 @@ The following are not accepted:
 | Programme | State |
 |---|---|
 | Legacy F0–F12 implementation history | retained as evidence; ordering superseded |
-| P00 | `IN_PROGRESS` |
+| P00 | `EVIDENCE_READY` |
 | P01–P24 | `BLOCKED` |
 
 ## Public-truth state
@@ -65,9 +65,9 @@ The following are not accepted:
 }
 ```
 
-## Active task
+## Active gate
 
-`AX-GE2E-P00-T01` — integrate Contract 30, ADR-015, P00–P24 tasks, registries, catalogues and deterministic validation.
+`AX-GE2E-P00-T01` is evidence-ready. Contract 30, ADR-015, the P00–P24 registries, seven foundational libraries, nine opportunity libraries, source catalogues, schema extension and deterministic verification are integrated on the review branch. Human review and merge remain pending.
 
 ## Rollback truth
 
