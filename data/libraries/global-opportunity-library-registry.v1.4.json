@@ -1,0 +1,45 @@
+{
+  "registry_id": "AX-GLOBAL-LIBRARY-REGISTRY-001",
+  "version": "1.4.0",
+  "status": "CONTRACT_DEFINED_NOT_PRODUCT_AVAILABILITY",
+  "goal_id": "AXIGNAL-GOAL-001",
+  "contract": "30",
+  "decision": "ADR-015",
+  "public_launch_authorised": false,
+  "partial_launch_allowed": false,
+  "global_coverage_claim_authorised": false,
+  "library_states": [
+    "DEFINED",
+    "RESEARCH_CATALOGUED",
+    "LEGAL_REVIEW",
+    "TECHNICAL_PROBE",
+    "EVIDENCE_READY",
+    "PRODUCT_ADMITTED",
+    "PRIVATE_ACCEPTANCE",
+    "COMMERCIAL",
+    "RESTRICTED",
+    "SUSPENDED",
+    "REVOKED",
+    "REJECTED"
+  ],
+  "foundational_libraries": [
+    {"library_id":"AX-LIB-F01","name":"Jurisdiction and Geography","phase":"P05","state":"DEFINED","accepted":false},
+    {"library_id":"AX-LIB-F02","name":"Entities, Organisations and Ownership","phase":"P05","state":"DEFINED","accepted":false},
+    {"library_id":"AX-LIB-F03","name":"Taxonomies and Classifications","phase":"P05","state":"DEFINED","accepted":false},
+    {"library_id":"AX-LIB-F04","name":"Time, Currency, Value and Units","phase":"P05","state":"DEFINED","accepted":false},
+    {"library_id":"AX-LIB-F05","name":"Languages, Terminology and Translation","phase":"P05","state":"DEFINED","accepted":false},
+    {"library_id":"AX-LIB-F06","name":"Source Rights and Provenance","phase":"P05","state":"DEFINED","accepted":false},
+    {"library_id":"AX-LIB-F07","name":"Documents and Content","phase":"P05","state":"DEFINED","accepted":false}
+  ],
+  "opportunity_libraries": [
+    {"library_id":"AX-LIB-O01","name":"Global Public Procurement","workspace":"Bid Workspace","phase":"P08","catalogue":"data/sources/global-public-procurement-catalogue.v0.2.json","state":"RESEARCH_CATALOGUED","commercial":false},
+    {"library_id":"AX-LIB-O02","name":"Grants and Non-Dilutive Funding","workspace":"Application Workspace","phase":"P09","catalogue":"data/sources/grants-and-non-dilutive-funding-catalogue.v0.1.json","state":"RESEARCH_CATALOGUED","commercial":false},
+    {"library_id":"AX-LIB-O03","name":"Regulatory and Policy Demand","workspace":"Market Entry and Compliance Opportunity Workspace","phase":"P10","catalogue":"data/sources/regulatory-and-policy-demand-catalogue.v0.1.json","state":"RESEARCH_CATALOGUED","commercial":false},
+    {"library_id":"AX-LIB-O04","name":"Infrastructure and Capital Projects","workspace":"Project Pursuit Workspace","phase":"P11","catalogue":"data/sources/infrastructure-and-capital-projects-catalogue.v0.1.json","state":"RESEARCH_CATALOGUED","commercial":false},
+    {"library_id":"AX-LIB-O05","name":"Corporate, Filings and Ownership Signals","workspace":"Account Opportunity Workspace","phase":"P12","catalogue":"data/sources/corporate-filings-and-ownership-catalogue.v0.1.json","state":"RESEARCH_CATALOGUED","commercial":false},
+    {"library_id":"AX-LIB-O06","name":"Sovereign, Macro and Public Investment","workspace":"Country and Market Strategy Workspace","phase":"P13","catalogue":"data/sources/sovereign-macro-public-investment-catalogue.v0.1.json","state":"RESEARCH_CATALOGUED","commercial":false},
+    {"library_id":"AX-LIB-O07","name":"Trade, Supply Chain and Market Flows","workspace":"Supply Opportunity Workspace","phase":"P14","catalogue":"data/sources/trade-supply-chain-market-flows-catalogue.v0.1.json","state":"RESEARCH_CATALOGUED","commercial":false},
+    {"library_id":"AX-LIB-O08","name":"Energy and Climate Transition","workspace":"Transition Opportunity Workspace","phase":"P15","catalogue":"data/sources/energy-climate-transition-catalogue.v0.1.json","state":"RESEARCH_CATALOGUED","commercial":false},
+    {"library_id":"AX-LIB-O09","name":"Innovation, Research and Intellectual Property","workspace":"Innovation Opportunity Workspace","phase":"P16","catalogue":"data/sources/innovation-research-ip-catalogue.v0.1.json","state":"RESEARCH_CATALOGUED","commercial":false}
+  ]
+}
