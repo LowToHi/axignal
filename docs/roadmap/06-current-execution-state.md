@@ -71,7 +71,7 @@ The following secondary evidence is present on the P01 review branch:
 
 This secondary evidence demonstrates category structure and competitor workflow expectations. It does not validate AXIGNAL buyers, budgets, willingness to pay or pricing.
 
-Primary research remains missing:
+primary research remains missing:
 
 ```text
 qualified unique participants          0 / 45
