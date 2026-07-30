@@ -26,6 +26,8 @@ async function emitProviderEvent(
     return { ok: response.ok, status: response.status, text: await response.text() };
   }, action);
   expect(result.ok, `${result.status}: ${result.text}`).toBeTruthy();
+  const refresh = page.getByRole("button", { name: "Actualizar" });
+  if (await refresh.isVisible().catch(() => false)) await refresh.click();
 }
 
 test("executes the authenticated commercial shell without external Stripe", async ({ page }) => {
