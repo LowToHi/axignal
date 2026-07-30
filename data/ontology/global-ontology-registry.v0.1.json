@@ -1,0 +1,112 @@
+{
+  "schema_version": "axignal.global-ontology-registry/v0.1",
+  "task_id": "AX-GE2E-P02-T01",
+  "programme_version": "1.4.0",
+  "status": "DRAFT_IMPLEMENTATION_FOUNDATION",
+  "canonical_activation_authorised": false,
+  "human_authorised_branch_start": true,
+  "dependency_status": {
+    "p01_task": "AX-GE2E-P01-T01",
+    "p01_canonical_state": "IN_PROGRESS",
+    "p01_dependency_satisfied": false,
+    "merge_to_main_allowed": false
+  },
+  "namespace": {
+    "canonical": "https://axignal.com/ontology/",
+    "identifier_policy": "stable-opaque-or-source-qualified",
+    "schema_compatibility": "backward-compatible-with-explicit-versioned-migrations"
+  },
+  "contract_families": [
+    {"contract_id": "AX-ONT-U01", "name": "UniverseContract", "purpose": "Declare a bounded domain of admissible subjects, sources, jurisdictions, time ranges and exclusions without implying product availability."},
+    {"contract_id": "AX-ONT-L01", "name": "LibraryContract", "purpose": "Declare a versioned foundational or opportunity library, dependencies, entities, predicates, events, lifecycle and workspace surface."},
+    {"contract_id": "AX-ONT-S01", "name": "SourceContract", "purpose": "Bind technical access, rights, lineage, quality, parser and kill-switch state independently for each source."},
+    {"contract_id": "AX-ONT-EV01", "name": "EvidenceContract", "purpose": "Preserve immutable raw references, hashes, extraction payloads, rights snapshots, language and temporal coordinates."},
+    {"contract_id": "AX-ONT-C01", "name": "ClaimContract", "purpose": "Represent atomic scoped assertions with typed subject, predicate, object, evidence, producer, method and epistemic lifecycle."},
+    {"contract_id": "AX-ONT-OP01", "name": "OpportunityContract", "purpose": "Represent an opportunity as a versioned evidence-backed subgraph connected to an operational pursuit workspace."},
+    {"contract_id": "AX-ONT-EN01", "name": "EntityContract", "purpose": "Preserve entities, identifiers, aliases and time-bounded observed or inferred relationships with reversible resolution."},
+    {"contract_id": "AX-ONT-TX01", "name": "TaxonomyContract", "purpose": "Preserve source-native versioned taxonomies and reversible many-to-many crosswalk proposals."},
+    {"contract_id": "AX-ONT-TM01", "name": "TemporalContract", "purpose": "Separate publication, retrieval, observation, event, validity, effective, revision and vintage time."}
+  ],
+  "foundational_libraries": [
+    {"library_id": "AX-LIB-F01", "kind": "FOUNDATIONAL", "canonical_name": "Jurisdiction and geography", "contract_version": "0.1.0", "state": "DRAFT", "shared_across_all_opportunity_libraries": true, "dependencies": [], "public_product_availability": false},
+    {"library_id": "AX-LIB-F02", "kind": "FOUNDATIONAL", "canonical_name": "Entities, organisations and ownership", "contract_version": "0.1.0", "state": "DRAFT", "shared_across_all_opportunity_libraries": true, "dependencies": [], "public_product_availability": false},
+    {"library_id": "AX-LIB-F03", "kind": "FOUNDATIONAL", "canonical_name": "Taxonomies and classifications", "contract_version": "0.1.0", "state": "DRAFT", "shared_across_all_opportunity_libraries": true, "dependencies": [], "public_product_availability": false},
+    {"library_id": "AX-LIB-F04", "kind": "FOUNDATIONAL", "canonical_name": "Time, currency, value and units", "contract_version": "0.1.0", "state": "DRAFT", "shared_across_all_opportunity_libraries": true, "dependencies": [], "public_product_availability": false},
+    {"library_id": "AX-LIB-F05", "kind": "FOUNDATIONAL", "canonical_name": "Languages, terminology and translation", "contract_version": "0.1.0", "state": "DRAFT", "shared_across_all_opportunity_libraries": true, "dependencies": [], "public_product_availability": false},
+    {"library_id": "AX-LIB-F06", "kind": "FOUNDATIONAL", "canonical_name": "Source rights and provenance", "contract_version": "0.1.0", "state": "DRAFT", "shared_across_all_opportunity_libraries": true, "dependencies": [], "public_product_availability": false},
+    {"library_id": "AX-LIB-F07", "kind": "FOUNDATIONAL", "canonical_name": "Documents and content", "contract_version": "0.1.0", "state": "DRAFT", "shared_across_all_opportunity_libraries": true, "dependencies": [], "public_product_availability": false}
+  ],
+  "opportunity_libraries": [
+    {"library_id": "AX-LIB-O01", "kind": "OPPORTUNITY", "canonical_name": "Global Public Procurement", "workspace_type": "Bid Workspace", "contract_version": "0.1.0", "state": "DRAFT", "dependencies": ["AX-LIB-F01", "AX-LIB-F02", "AX-LIB-F03", "AX-LIB-F04", "AX-LIB-F05", "AX-LIB-F06", "AX-LIB-F07"], "public_product_availability": false},
+    {"library_id": "AX-LIB-O02", "kind": "OPPORTUNITY", "canonical_name": "Grants and Non-Dilutive Funding", "workspace_type": "Application Workspace", "contract_version": "0.1.0", "state": "DRAFT", "dependencies": ["AX-LIB-F01", "AX-LIB-F02", "AX-LIB-F03", "AX-LIB-F04", "AX-LIB-F05", "AX-LIB-F06", "AX-LIB-F07"], "public_product_availability": false},
+    {"library_id": "AX-LIB-O03", "kind": "OPPORTUNITY", "canonical_name": "Regulatory and Policy Demand", "workspace_type": "Market Entry and Compliance Opportunity Workspace", "contract_version": "0.1.0", "state": "DRAFT", "dependencies": ["AX-LIB-F01", "AX-LIB-F02", "AX-LIB-F03", "AX-LIB-F04", "AX-LIB-F05", "AX-LIB-F06", "AX-LIB-F07"], "public_product_availability": false},
+    {"library_id": "AX-LIB-O04", "kind": "OPPORTUNITY", "canonical_name": "Infrastructure and Capital Projects", "workspace_type": "Project Pursuit Workspace", "contract_version": "0.1.0", "state": "DRAFT", "dependencies": ["AX-LIB-F01", "AX-LIB-F02", "AX-LIB-F03", "AX-LIB-F04", "AX-LIB-F05", "AX-LIB-F06", "AX-LIB-F07"], "public_product_availability": false},
+    {"library_id": "AX-LIB-O05", "kind": "OPPORTUNITY", "canonical_name": "Corporate, Filings and Ownership Signals", "workspace_type": "Account Opportunity Workspace", "contract_version": "0.1.0", "state": "DRAFT", "dependencies": ["AX-LIB-F01", "AX-LIB-F02", "AX-LIB-F03", "AX-LIB-F04", "AX-LIB-F05", "AX-LIB-F06", "AX-LIB-F07"], "public_product_availability": false},
+    {"library_id": "AX-LIB-O06", "kind": "OPPORTUNITY", "canonical_name": "Sovereign, Macro and Public Investment", "workspace_type": "Country and Market Strategy Workspace", "contract_version": "0.1.0", "state": "DRAFT", "dependencies": ["AX-LIB-F01", "AX-LIB-F02", "AX-LIB-F03", "AX-LIB-F04", "AX-LIB-F05", "AX-LIB-F06", "AX-LIB-F07"], "public_product_availability": false},
+    {"library_id": "AX-LIB-O07", "kind": "OPPORTUNITY", "canonical_name": "Trade, Supply Chain and Market Flows", "workspace_type": "Supply Opportunity Workspace", "contract_version": "0.1.0", "state": "DRAFT", "dependencies": ["AX-LIB-F01", "AX-LIB-F02", "AX-LIB-F03", "AX-LIB-F04", "AX-LIB-F05", "AX-LIB-F06", "AX-LIB-F07"], "public_product_availability": false},
+    {"library_id": "AX-LIB-O08", "kind": "OPPORTUNITY", "canonical_name": "Energy and Climate Transition", "workspace_type": "Transition Opportunity Workspace", "contract_version": "0.1.0", "state": "DRAFT", "dependencies": ["AX-LIB-F01", "AX-LIB-F02", "AX-LIB-F03", "AX-LIB-F04", "AX-LIB-F05", "AX-LIB-F06", "AX-LIB-F07"], "public_product_availability": false},
+    {"library_id": "AX-LIB-O09", "kind": "OPPORTUNITY", "canonical_name": "Innovation, Research and Intellectual Property", "workspace_type": "Innovation Opportunity Workspace", "contract_version": "0.1.0", "state": "DRAFT", "dependencies": ["AX-LIB-F01", "AX-LIB-F02", "AX-LIB-F03", "AX-LIB-F04", "AX-LIB-F05", "AX-LIB-F06", "AX-LIB-F07"], "public_product_availability": false}
+  ],
+  "universe_contract": {
+    "required_fields": ["universe_id", "version", "canonical_name", "included_subject_types", "included_jurisdictions", "included_time_scope", "admissible_source_ids", "explicit_exclusions", "rights_policy_version", "claim_policy_version", "coverage_disclosure"],
+    "rules": ["A universe is a bounded semantic and rights scope, not a product-availability claim.", "Unavailable, suspended, revoked or unadmitted sources contribute no claims.", "Unknown scope remains unknown and is never coerced into empty, zero or global.", "Every universe version preserves its predecessor and migration record."]
+  },
+  "source_contract": {
+    "states": ["DISCOVERED", "LEGAL_REVIEW", "TECHNICAL_PROBE", "EVIDENCE_READY", "PRODUCT_ADMITTED", "PRIVATE_ACCEPTANCE", "COMMERCIAL", "RESTRICTED", "SUSPENDED", "REVOKED", "REJECTED"],
+    "rights_dimensions": ["collection", "transient_processing", "persistent_storage", "model_input", "derived_calculations", "internal_display", "customer_display", "export", "api_redistribution", "model_training_or_evaluation"],
+    "required_fields": ["source_id", "version", "canonical_name", "owner", "owner_jurisdiction", "access_mechanism", "authentication_method", "official_documentation", "rights_snapshot", "commercial_use", "storage_permission", "transformation_permission", "display_permission", "redistribution_permission", "derived_claim_permission", "attribution_requirements", "retention_restrictions", "personal_data_classification", "update_expectation", "rate_limits", "reliability_tier", "source_lineage_group_id", "parser_version", "legal_reviewed_at", "state", "kill_switch"],
+    "default_when_rights_ambiguous": "RESTRICTED"
+  },
+  "evidence_contract": {
+    "required_fields": ["evidence_id", "source_id", "source_object_id", "retrieved_at", "content_hash", "raw_object_reference", "extract_or_payload", "source_published_at", "parser_or_extractor_version", "rights_snapshot_id", "language", "extraction_confidence", "retention_rule"],
+    "immutable_fields": ["evidence_id", "source_id", "source_object_id", "retrieved_at", "content_hash", "raw_object_reference", "rights_snapshot_id"],
+    "relationships": ["SUPPORTS", "CONTRADICTS", "CORRECTS", "SUPERSEDES", "CONTEXTUALISES"],
+    "rules": ["Evidence is immutable and correction creates a new version and linkage.", "Original source-native values and canonical values are both preserved.", "Evidence without a rights snapshot is not admissible.", "Evidence Objects remain distinct from Candidate Claims and Canonical Claims."]
+  },
+  "claim_contract": {
+    "claim_types": ["OBSERVED_QUALITATIVE", "OBSERVED_QUANTITATIVE", "CALCULATED", "RELATIONAL", "TREND", "CAUSAL_HYPOTHESIS", "PREDICTIVE", "COMMERCIAL_HYPOTHESIS", "EXPERIMENTAL_RESULT", "OUTCOME", "RISK", "LEGAL_OR_REGULATORY"],
+    "epistemic_states": ["PROPOSED", "PARSED", "SOURCE_BOUND", "STRUCTURALLY_VALID", "RIGHTS_VALID", "ADMISSIBLE", "CORROBORATED", "ACTIONABLE", "CONTESTED", "SUPERSEDED", "FALSIFIED", "EXPIRED", "RETRACTED", "REJECTED", "QUARANTINED"],
+    "required_fields": ["claim_id", "subject_ref", "predicate", "object", "claim_type", "epistemic_status", "observed_at", "valid_time", "jurisdiction_ref", "evidence_refs", "source_refs", "method_version", "producer", "lineage", "rights_classification", "freshness_policy", "confidence_dimensions", "contradiction_refs", "version", "replacement_ref"],
+    "confidence_dimensions": ["evidence_strength", "source_authority", "source_independence", "extraction_confidence", "method_reproducibility", "freshness", "scope_completeness", "contradiction_pressure", "forecast_uncertainty", "rights_confidence"]
+  },
+  "entity_contract": {
+    "core_types": ["Organisation", "PublicBody", "Company", "Person", "Project", "Programme", "Asset", "Place", "Jurisdiction", "Document", "Notice", "Award", "Contract", "FundingCall", "RegulatoryInstrument", "Dataset", "Indicator", "ProductClassification", "Patent", "ResearchProject"],
+    "required_fields": ["entity_id", "entity_type", "canonical_name", "identifiers", "aliases", "jurisdiction_refs", "valid_time", "source_refs", "resolution_state", "version"],
+    "relationship_modes": ["OBSERVED", "INFERRED", "HUMAN_ASSERTED"],
+    "resolution_states": ["UNRESOLVED", "CANDIDATE_MATCH", "RESOLVED", "CONTESTED", "SPLIT", "SUPERSEDED"],
+    "rules": ["Observed and inferred relationships are never collapsed.", "Low-confidence matches cannot merge entities silently.", "Merges, splits, aliases, renamings and identifier changes are time-bounded and reversible."]
+  },
+  "taxonomy_contract": {
+    "required_taxonomies": ["CPV", "NUTS", "NAICS", "PSC", "NACE", "ISIC", "HS", "SITC", "CPC"],
+    "required_fields": ["taxonomy_id", "version", "publisher", "jurisdiction_scope", "language", "valid_from", "valid_to", "concepts", "source_reference", "status"],
+    "crosswalk_states": ["PROPOSED", "REVIEWED", "ADMITTED", "REJECTED", "SUPERSEDED"],
+    "rules": ["Source-native codes and labels are preserved.", "Crosswalks are reversible many-to-many mappings.", "A crosswalk proposal cannot mutate a source-native classification."]
+  },
+  "temporal_contract": {
+    "time_axes": ["published_at", "retrieved_at", "observed_at", "event_at", "valid_from", "valid_to", "effective_from", "effective_to", "revised_at", "vintage_at", "recorded_at"],
+    "interval_semantics": ["INSTANT", "CLOSED", "OPEN", "LEFT_CLOSED", "RIGHT_CLOSED", "UNKNOWN_BOUND"],
+    "rules": ["Publication, retrieval, observation, event, validity and effective time are independent.", "Missing time remains null with an explicit reason and is never inferred as current.", "Revisions and vintages are versioned and queryable.", "Time-zone and calendar assumptions are explicit."]
+  },
+  "opportunity_contract": {
+    "shared_entities": ["Opportunity", "Pursuit", "Decision", "Requirement", "WorkItem", "Milestone", "Document", "Comment", "Approval", "Submission", "Outcome", "Learning", "ActivityEvent", "Template"],
+    "lifecycle": ["DETECTED", "QUALIFYING", "QUALIFIED", "REJECTED", "PURSUIT_OPEN", "DECISION_PENDING", "APPROVED", "DECLINED", "IN_EXECUTION", "SUBMITTED_OR_ACTIVATED", "WON_OR_REALIZED", "LOST_OR_CLOSED", "LEARNING_CAPTURED"],
+    "required_graph_roles": ["problem_or_anomaly", "affected_entity_or_payer", "scale_or_frequency", "market_access", "competition", "operational_feasibility", "legal_or_regulatory_risk", "ai_absorption_risk", "contradictions", "unknowns", "invalidation_conditions"],
+    "rules": ["An opportunity is a versioned subgraph and not generated prose.", "Operational tenant-private state cannot mutate the canonical Claim Ledger.", "No opportunity becomes ACTIONABLE solely from trend claims.", "Every opportunity links to its library, universe, evidence, claims and coverage gaps."]
+  },
+  "cross_library_invariants": [
+    {"invariant_id": "AX-INV-001", "rule": "All canonical IDs are immutable and replacements create explicit version links."},
+    {"invariant_id": "AX-INV-002", "rule": "Original values are preserved beside canonicalised values."},
+    {"invariant_id": "AX-INV-003", "rule": "Source rights and kill-switch state are evaluated independently of technical accessibility."},
+    {"invariant_id": "AX-INV-004", "rule": "Generative output cannot directly enter the canonical Claim Ledger."},
+    {"invariant_id": "AX-INV-005", "rule": "Observed, calculated, inferred and forecast semantics remain distinct."},
+    {"invariant_id": "AX-INV-006", "rule": "Unknown, unavailable and zero are distinct states."},
+    {"invariant_id": "AX-INV-007", "rule": "Cross-library joins preserve source, method, rights, temporal and jurisdiction lineage."},
+    {"invariant_id": "AX-INV-008", "rule": "Tenant-private operational state cannot mutate shared canonical evidence or claims."},
+    {"invariant_id": "AX-INV-009", "rule": "Taxonomy crosswalks and entity resolution are reversible and confidence-bearing."},
+    {"invariant_id": "AX-INV-010", "rule": "No draft library or source may be represented as commercial or globally available."}
+  ],
+  "acceptance_gate": {
+    "required_before_canonical_activation": ["P01 dependency accepted or explicitly superseded by a normative ADR", "schema validation PASS", "registry validation PASS", "all seven foundational library contracts present", "all nine opportunity library contracts present", "temporal ambiguity tests PASS", "entity-resolution reversibility tests PASS", "taxonomy-crosswalk reversibility tests PASS", "AI admission bypass tests PASS", "rollback rehearsal PASS", "human product authority APPROVED"],
+    "current_decision": "NOT_READY_FOR_CANONICAL_ACTIVATION"
+  }
+}
