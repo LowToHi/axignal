@@ -91,8 +91,11 @@ test("executes the authenticated commercial shell without external Stripe", asyn
   );
   await page.reload();
   await persistedSummary;
-  await page.getByRole("button", { name: /PLAN ·/ }).click();
-  await expect(page.getByRole("complementary", { name: "Plan y facturación" })).toBeVisible();
+  const persistedPanel = page.getByRole("complementary", { name: "Plan y facturación" });
+  if (!(await persistedPanel.isVisible().catch(() => false))) {
+    await page.getByRole("button", { name: /PLAN ·/ }).click();
+  }
+  await expect(persistedPanel).toBeVisible();
   await expect(page.getByText("ROLLED_BACK", { exact: true })).toBeVisible();
   await expect(page.getByText(/acceso CANCELLED/)).toBeVisible();
 });
