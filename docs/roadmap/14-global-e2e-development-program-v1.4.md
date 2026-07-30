@@ -1,7 +1,7 @@
 # 14 — AXIGNAL Global E2E Development Programme v1.4
 
 Version: `1.4.0`
-Status: `CANDIDATE / P00 IN PROGRESS / NO PUBLIC LAUNCH`
+Status: `CANDIDATE / P00 EVIDENCE READY / HUMAN GATE PENDING / NO PUBLIC LAUNCH`
 Goal ID: `AXIGNAL-GOAL-001`
 Contract: `30`
 Decision: `ADR-015`
@@ -60,6 +60,8 @@ These values change only through P24 evidence and an explicit accepted gate reco
 - candidate catalogues O02–O09;
 - Contract Validation update;
 - deterministic P00 verifier.
+
+All P00 deliverables are present and automated checks pass. P00 remains unaccepted until human gate review and merge.
 
 ## Historical programme
 
