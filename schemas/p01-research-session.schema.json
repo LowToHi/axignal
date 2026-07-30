@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://axignal.com/schemas/p01-research-session.schema.json",
+  "title": "AXIGNAL P01 Sanitised Research Session",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "session_id",
+    "interviewed_at",
+    "region",
+    "organisation_band",
+    "participant_role",
+    "libraries",
+    "qualification",
+    "recent_workflow",
+    "workflow_steps",
+    "current_tools",
+    "failure_incident",
+    "budget_signal",
+    "purchase_process",
+    "evidence_quality",
+    "consent_record_ref"
+  ],
+  "properties": {
+    "session_id": {"type": "string", "pattern": "^P01-INT-[0-9]{3}$"},
+    "interviewed_at": {"type": "string", "format": "date"},
+    "region": {
+      "enum": ["EUROPE", "NORTH_AMERICA", "LATIN_AMERICA", "ASIA", "OCEANIA", "AFRICA_MIDDLE_EAST"]
+    },
+    "organisation_band": {
+      "enum": ["SOLO", "2_9", "10_49", "50_249", "250_999", "1000_PLUS", "PUBLIC_OR_RESEARCH_INSTITUTION"]
+    },
+    "participant_role": {"type": "string", "minLength": 3},
+    "libraries": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "enum": ["AX-LIB-O01", "AX-LIB-O02", "AX-LIB-O03", "AX-LIB-O04", "AX-LIB-O05", "AX-LIB-O06", "AX-LIB-O07", "AX-LIB-O08", "AX-LIB-O09"]
+      }
+    },
+    "qualification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["operates_workflow", "budget_authority", "recent_case_within_12_months", "non_affiliated"],
+      "properties": {
+        "operates_workflow": {"type": "boolean"},
+        "budget_authority": {"type": "boolean"},
+        "recent_case_within_12_months": {"type": "boolean"},
+        "non_affiliated": {"type": "boolean"}
+      }
+    },
+    "recent_workflow": {"type": "string", "minLength": 20},
+    "workflow_steps": {"type": "array", "minItems": 3, "items": {"type": "string", "minLength": 2}},
+    "current_tools": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 2}},
+    "failure_incident": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["occurred", "description", "cost_type", "cost_range_eur", "confidence"],
+      "properties": {
+        "occurred": {"type": "boolean"},
+        "description": {"type": "string"},
+        "cost_type": {"enum": ["TIME", "DIRECT_COST", "MISSED_REVENUE", "COMPLIANCE_RISK", "DELAY", "REWORK", "REPUTATION", "UNKNOWN"]},
+        "cost_range_eur": {"enum": ["ZERO", "UNDER_1K", "1K_10K", "10K_100K", "100K_1M", "OVER_1M", "UNKNOWN"]},
+        "confidence": {"enum": ["OBSERVED", "ESTIMATED", "UNKNOWN"]}
+      }
+    },
+    "budget_signal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["current_annual_spend_eur_band", "authority", "candidate_price_reaction", "evidence_type"],
+      "properties": {
+        "current_annual_spend_eur_band": {"enum": ["ZERO", "UNDER_1K", "1K_5K", "5K_20K", "20K_100K", "OVER_100K", "UNKNOWN"]},
+        "authority": {"type": "boolean"},
+        "candidate_price_reaction": {"enum": ["TOO_LOW", "ACCEPTABLE", "TOO_HIGH", "NEEDS_ROI_PROOF", "NOT_TESTED"]},
+        "evidence_type": {"enum": ["OBSERVED_CURRENT_SPEND", "APPROVED_BUDGET", "RECENT_PURCHASE", "HYPOTHETICAL_ONLY", "UNKNOWN"]}
+      }
+    },
+    "purchase_process": {"type": "string", "minLength": 10},
+    "evidence_quality": {"enum": ["A_RECENT_OBSERVED", "B_RECENT_RECALLED", "C_GENERAL_OPINION", "D_HYPOTHETICAL"]},
+    "consent_record_ref": {"type": "string", "minLength": 5},
+    "sanitised_notes": {"type": "array", "items": {"type": "string"}},
+    "negative_evidence": {"type": "array", "items": {"type": "string"}}
+  }
+}
