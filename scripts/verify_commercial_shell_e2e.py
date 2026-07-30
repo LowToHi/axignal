@@ -36,6 +36,8 @@ def _scalar(cursor: psycopg.Cursor, query: str, params: tuple[object, ...]) -> i
     cursor.execute(query, params)
     row = cursor.fetchone()
     assert row is not None
+    if isinstance(row, dict):
+        return int(next(iter(row.values())))
     return int(row[0])
 
 
@@ -49,8 +51,18 @@ def _tenant_visible_count(dsn: str, tenant_id: UUID) -> int:
         return int(row[0])
 
 
-def run(dsn: str) -> tuple[dict[str, object], dict[str, object], dict[str, object], dict[str, object]]:
-    with psycopg.connect(dsn, row_factory=dict_row) as connection, connection.cursor() as cursor:
+def run(
+    dsn: str,
+) -> tuple[
+    dict[str, object],
+    dict[str, object],
+    dict[str, object],
+    dict[str, object],
+]:
+    with (
+        psycopg.connect(dsn, row_factory=dict_row) as connection,
+        connection.cursor() as cursor,
+    ):
         cursor.execute(
             """
             SELECT * FROM tenant_private.billing_plan_selections
@@ -135,7 +147,10 @@ def run(dsn: str) -> tuple[dict[str, object], dict[str, object], dict[str, objec
         )
         receipts = list(cursor.fetchall())
         assert len(receipts) >= 5, receipts
-        assert all(row["disposition"] in {"APPLIED", "DUPLICATE", "STALE"} for row in receipts)
+        assert all(
+            row["disposition"] in {"APPLIED", "DUPLICATE", "STALE"}
+            for row in receipts
+        )
         assert all(len(str(row["payload_digest"])) == 64 for row in receipts)
 
     tenant_a_visible = _tenant_visible_count(dsn, TENANT_A)
