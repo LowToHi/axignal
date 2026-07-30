@@ -91,6 +91,8 @@ Mandatory activation combinations:
 | `ux-researcher` | workflow, onboarding or validation work | evidence-backed findings and test plan |
 | `interaction-architect` | navigation, context or direct manipulation | interaction state model and recovery rules |
 | `visualisation-designer` | charts, maps, graph or timeline | semantic encodings and perceptual QA |
+| `axignal-gsap-ui-ux` | GSAP, motion, animation or cinematic interaction | semantic choreography, implementation, reduced-motion fallback and validation evidence |
+| `axignal-cinematic-webgl-scroll` | Globe texture, Canvas, GPU, LOD or sharpness work | capability tiers, regional blending, rights, fallback and measurable R3F quality gates |
 | `globe-engineer` | geographic surfaces | layer, tile, projection and semantic zoom contract |
 | `graph-engineer` | relational surfaces | typed graph, bounded traversal and layout contract |
 | `timeline-engineer` | historical state | as-of reconstruction and temporal integrity |

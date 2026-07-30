@@ -1,0 +1,167 @@
+{
+  "version": "1.1.0",
+  "status": "LOCAL_DERIVATIVES_PREPARED",
+  "sources": [
+    {
+      "id": "earth-albedo-february",
+      "file": "C:\\tmp\\axignal-globe-source\\world.200402.3x5400x2700.jpg",
+      "sha256": "252444b224c7dc10289616fb5e3cd85c3738fca9ddbdc267775cd22a748bbfbe",
+      "source_page": "https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/base-map/",
+      "rights": "NASA imagery used factually without endorsement; NASA credited."
+    },
+    {
+      "id": "earth-clouds-2002",
+      "file": "C:\\tmp\\axignal-globe-source\\cloud_combined_2048.jpg",
+      "sha256": "daddaad84d7a33bbbc86cdda3f591099f57cee8607b7bcf3b67eb7e4f7a1c793",
+      "source_page": "https://visibleearth.nasa.gov/images/57747/blue-marble-clouds/77558l",
+      "rights": "NASA imagery used factually without endorsement; NASA credited."
+    },
+    {
+      "id": "countries-110m",
+      "file": "C:\\tmp\\axignal-globe-source\\ne_110m_admin_0_countries.geojson",
+      "sha256": "6866c877d39cba9c357620878839b336d569f8c662d3cfab4cb1dbe2d39c977f",
+      "source_page": "https://www.naturalearthdata.com/downloads/110m-cultural-vectors/110m-admin-0-countries/",
+      "rights": "Natural Earth public domain."
+    },
+    {
+      "id": "boundaries-50m",
+      "file": "C:\\tmp\\axignal-globe-source\\ne_50m_admin_0_boundary_lines_land.zip",
+      "sha256": "02f369ae10578c4ce33fc4a08f8cdd69ea11eb39b44d7923e88eb7199aaff8ea",
+      "source_page": "https://www.naturalearthdata.com/downloads/50m-cultural-vectors/50m-admin-0-boundary-lines-2/",
+      "rights": "Natural Earth public domain; version 5.1.0; de facto boundary policy."
+    },
+    {
+      "id": "coastline-50m",
+      "file": "C:\\tmp\\axignal-globe-source\\ne_50m_coastline.zip",
+      "sha256": "640f805509b822f57f4840a2e18d9ff2412cf1cf6976124701c2789436166fde",
+      "source_page": "https://www.naturalearthdata.com/downloads/50m-physical-vectors/50m-coastline/",
+      "rights": "Natural Earth public domain; version 5.1.0."
+    }
+  ],
+  "assets": [
+    {
+      "file": "apps/landing/public/brand/axignal-aura.svg",
+      "bytes": 677,
+      "sha256": "3a5adda5b1a8b6a3ccea0c339581d6850420f4c0783fcb9e2d8a704028b63694"
+    },
+    {
+      "file": "apps/landing/public/brand/axignal-isotipo.svg",
+      "bytes": 1524,
+      "sha256": "3f314e4d2fcb02951a36619264118ba4ab931f8da5d26dc74519b8bc48cef556"
+    },
+    {
+      "file": "apps/landing/public/brand/axignal-logo-dark.svg",
+      "bytes": 2431,
+      "sha256": "81391db9079c9d335eb8eebd604fcdc1ebde6c9bc435156cd4c256c1d99c59bf"
+    },
+    {
+      "file": "apps/landing/public/brand/axignal-logo.svg",
+      "bytes": 2431,
+      "sha256": "94b5d0272a72cee3e4187f815ca69f21e9146e23c1b9a978164551aae42c8619"
+    },
+    {
+      "file": "apps/landing/public/globe/countries-110m.simplified.geojson",
+      "bytes": 838726,
+      "sha256": "6866c877d39cba9c357620878839b336d569f8c662d3cfab4cb1dbe2d39c977f"
+    },
+    {
+      "file": "apps/landing/public/globe/earth-albedo-high.webp",
+      "bytes": 1894422,
+      "sha256": "f40d9c37ae93a03efb7fabacd0ed6a7163bc796c688963b0a6c0864f25e323a9"
+    },
+    {
+      "file": "apps/landing/public/globe/earth-albedo-mobile.webp",
+      "bytes": 172036,
+      "sha256": "86a4e2f1e9dd460c0bf83af8e5df5513a7ac392e0561fa328480e49914f219fd"
+    },
+    {
+      "file": "apps/landing/public/globe/earth-albedo.webp",
+      "bytes": 904536,
+      "sha256": "07a42518d93d1577f5db4d809a2201a3d9a3367dfe9e8138536cc937fe24cdd7"
+    },
+    {
+      "file": "apps/landing/public/globe/earth-clouds-mobile.webp",
+      "bytes": 363264,
+      "sha256": "0b6fbf0e61ffe00347655461d04db2f791bed9d274f753a811d903936c3fd2e0"
+    },
+    {
+      "file": "apps/landing/public/globe/earth-clouds.webp",
+      "bytes": 1327542,
+      "sha256": "2a7be3081b38f18be29636b703e9810d727b3c032b5eada7d7cfcd4011b68c7c"
+    },
+    {
+      "file": "apps/landing/public/globe/earth-europe-high.webp",
+      "bytes": 781268,
+      "sha256": "470035a2c9bd20fbed885ef4fe14d600313dc42c10cd374cbc78af0ad512ecb4"
+    },
+    {
+      "file": "apps/landing/public/globe/earth-europe-mobile.webp",
+      "bytes": 139454,
+      "sha256": "b1b2f5bc5ca8c7c797d6a2fd8d33cb4f6ad78b87576366045d79af95c71bada2"
+    },
+    {
+      "file": "apps/landing/public/globe/earth-europe.webp",
+      "bytes": 437686,
+      "sha256": "e6957c6129e1f8debdd91730447fe6f52c49c4840a75205fdfc6db9096d33ce1"
+    },
+    {
+      "file": "apps/landing/public/globe/europe-boundaries-50m.geojson",
+      "bytes": 251321,
+      "sha256": "941fb190a40cf6e04c14ccdd8b291c000a759066c1aeb959bf9388431f2d80e2"
+    },
+    {
+      "file": "apps/landing/public/globe/globe-poster.webp",
+      "bytes": 62120,
+      "sha256": "1d2443a5bb0f6e3b651fcc9d180045063a7b239f0027c06bdc2f89fb3ab616da"
+    },
+    {
+      "file": "apps/landing/public/opengraph-image.jpg",
+      "bytes": 78490,
+      "sha256": "9ca2006c2de2bff7beb534ec82cc7db77fc445b2ab7c4fe2d494b0312641b4e3"
+    },
+    {
+      "file": "apps/landing/public/seo-hero.webp",
+      "bytes": 99928,
+      "sha256": "5d4abeebc835c6d4609fe82dc3cc21fb6bbe89ad551a122ec6401ae2c14e7a2a"
+    },
+    {
+      "file": "apps/landing/public/twitter-image.jpg",
+      "bytes": 78490,
+      "sha256": "9ca2006c2de2bff7beb534ec82cc7db77fc445b2ab7c4fe2d494b0312641b4e3"
+    }
+  ],
+  "generation": {
+    "script": "scripts/prepare_landing_assets.py",
+    "texture_tiers": {
+      "mobile": "2048px WebP",
+      "desktop-standard": "4096px high-quality WebP",
+      "desktop-high": "5400px native-resolution high-quality WebP"
+    },
+    "regional_lod": {
+      "bounds": {
+        "west": -26,
+        "north": 72,
+        "east": 45,
+        "south": 28
+      },
+      "mobile": "1024px WebP",
+      "desktop-standard": "2048px WebP",
+      "desktop-high": "3072px WebP",
+      "transition": "runtime shader crossfade"
+    },
+    "boundaries": {
+      "global": "Natural Earth 110m countries retained as the initial independent runtime layer",
+      "europe_lod": "Natural Earth 50m land boundaries and coastline clipped to Europe and lazy-loaded on capable desktop tiers",
+      "bounds": {
+        "west": -26.0,
+        "south": 28.0,
+        "east": 45.0,
+        "north": 72.0
+      },
+      "fallback": "Global 110m geometry remains active if the regional derivative fails"
+    },
+    "cloud_texture": "1024px mobile and 2048px desktop transparent WebP",
+    "poster": "1280px darkened WebP crop",
+    "ktx2": "BLOCKED_NO_PINNED_ENCODER"
+  }
+}

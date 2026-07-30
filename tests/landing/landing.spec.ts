@@ -1,86 +1,161 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
-test("renders the production Globe narrative and synthetic-data boundary", async ({ page }) => {
-  await page.goto("/");
+test.describe.configure({ timeout: 15_000 });
 
+async function scrollCinematic(page: Page, progress: number) {
+  await page.evaluate((normalisedProgress) => {
+    const stage = document.querySelector(".cinematic-stage");
+    const spacer = stage?.closest(".pin-spacer");
+    if (!spacer) throw new Error("CINEMATIC_PIN_SPACER_MISSING");
+    const bounds = spacer.getBoundingClientRect();
+    const start = window.scrollY + bounds.top;
+    const distance = Math.max(window.innerHeight, bounds.height - window.innerHeight);
+    window.scrollTo(0, start + normalisedProgress * distance);
+  }, progress);
+}
+
+test("keeps one real Globe mounted through the six-scene desktop narrative", async ({
+  page
+}, testInfo) => {
+  const consoleErrors: string[] = [];
+  const pageErrors: string[] = [];
+  page.on("console", (message) => {
+    if (message.type() === "error") consoleErrors.push(message.text());
+  });
+  page.on("pageerror", (error) => pageErrors.push(error.message));
+
+  const response = await page.goto("/", { waitUntil: "domcontentloaded" });
+  expect(response?.status()).toBe(200);
   await expect(
-    page.getByRole("heading", { level: 1, name: /Discover what is changing/i })
+    page.getByRole("heading", {
+      level: 1,
+      name: /Win the right public opportunities.*Defend every conclusion/i
+    })
   ).toBeVisible();
-  await expect(page.getByText(/Synthetic demonstration · not investment performance/i)).toBeVisible();
-  await expect(page.getByTestId("semantic-globe")).toBeAttached();
-  await expect(page.getByRole("link", { name: "Request private access" }).first()).toBeVisible();
 
-  const bodyWidth = await page.locator("body").evaluate((element) => element.scrollWidth);
-  const viewportWidth = await page.evaluate(() => window.innerWidth);
-  expect(bodyWidth).toBeLessThanOrEqual(viewportWidth + 1);
+  const globe = page.getByTestId("semantic-globe");
+  const canvas = globe.locator("canvas");
+  const header = page.locator(".site-header");
+  const brand = header.getByRole("link", { name: "AXIGNAL home" });
+  await expect(globe).toHaveCount(1);
+  await expect(canvas).toHaveCount(1);
+  await expect(header).toBeVisible();
+  await expect(brand).toBeVisible();
+  await page.waitForFunction(
+    () => document.querySelector(".cinematic-stage")?.parentElement?.classList.contains("pin-spacer")
+  );
+  await canvas.evaluate((element) => element.setAttribute("data-continuity-id", "primary-globe"));
+
+  await scrollCinematic(page, 0.43);
+  await expect(page.locator(".cinematic-running-head")).toContainText(/03|04/);
+  await expect(page.locator(".trace-object").nth(4)).toBeVisible();
+  await expect(globe).toHaveAttribute("data-boundary-lod-requested", "true");
+  await expect(globe).toHaveAttribute("data-boundary-lod-loaded", "true");
+  await expect(globe).toHaveAttribute("data-boundary-lod-active", "true");
+  await expect(header).toHaveCSS("opacity", "1");
+  await expect(brand).toBeVisible();
+
+  await scrollCinematic(page, 0.87);
+  await expect(page.locator(".cinematic-running-head")).toContainText("06 / 06");
+  await expect(page.locator(".cinematic-dossier")).toBeVisible();
+  await expect(page.locator('canvas[data-continuity-id="primary-globe"]')).toHaveCount(1);
+  await expect(header).toHaveCSS("opacity", "1");
+  await expect(brand).toBeVisible();
+
+  await page.screenshot({
+    path: testInfo.outputPath("desktop-dossier.png"),
+    fullPage: false
+  });
+
+  await scrollCinematic(page, 0);
+  await expect(globe).toHaveAttribute("data-boundary-lod-active", "false");
+  expect(page.url()).toBe("http://localhost:3001/");
+  expect(pageErrors).toEqual([]);
+  expect(consoleErrors).toEqual([]);
 });
 
-test("supports reduced motion without hiding the investigation", async ({ browser }) => {
-  const context = await browser.newContext({ reducedMotion: "reduce" });
+test("makes the controlled trial and operating boundaries explicit", async ({ page }) => {
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.waitForFunction(
+    () => document.querySelector(".cinematic-stage")?.parentElement?.classList.contains("pin-spacer")
+  );
+  await page.getByRole("link", { name: "Pricing", exact: true }).click();
+  await expect(page.locator("#pricing")).toBeInViewport();
+  await expect(page.getByRole("heading", { name: /Choose the operating boundary/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Design Partner" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Controlled Free Trial" })).toBeVisible();
+  await expect(page.getByText("1,000,000 cumulative tokens per organisation")).toBeVisible();
+  await expect(page.getByText("No card", { exact: true })).toBeVisible();
+  await expect(page.getByText("No automatic renewal", { exact: true })).toBeVisible();
+  await expect(page.getByText("No overage", { exact: true })).toBeVisible();
+  await expect(page.getByText("Read-only at expiry", { exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Apply for controlled trial" })).toBeVisible();
+  await expect(page.getByText(/PUBLIC TRIAL DISABLED · APPLICATION ONLY/)).toBeVisible();
+  await expect(page.getByText(/Indicative candidate pricing/).first()).toBeVisible();
+});
+
+test("retains Globe continuity and contained pricing on mobile", async ({ browser }, testInfo) => {
+  const context = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+    deviceScaleFactor: 1
+  });
   const page = await context.newPage();
-  await page.goto("/");
+  page.setDefaultTimeout(10_000);
+  await page.goto("/", { waitUntil: "domcontentloaded" });
 
-  await expect(page.getByRole("heading", { name: /The world produces more information/i })).toBeVisible();
-  await page.getByRole("link", { name: "Explore the investigation" }).click();
-  await expect(page.locator("#investigation")).toBeInViewport();
+  await expect(page.getByTestId("semantic-globe").locator("canvas")).toHaveCount(1);
+  await page.waitForFunction(
+    () => document.querySelector(".cinematic-stage")?.parentElement?.classList.contains("pin-spacer")
+  );
+  await scrollCinematic(page, 0.43);
+  await expect(page.locator(".cinematic-running-head")).toContainText(/03|04/);
+  await expect(page.locator(".trace-object").nth(4)).toBeVisible();
+  await expect(page.getByTestId("semantic-globe").locator("canvas")).toHaveCount(1);
+  await expect(page.getByTestId("semantic-globe")).toHaveAttribute(
+    "data-boundary-lod-requested",
+    "false"
+  );
+  await expect(page.getByTestId("semantic-globe")).toHaveAttribute(
+    "data-boundary-lod-loaded",
+    "false"
+  );
 
+  const dimensions = await page.evaluate(() => ({
+    body: document.body.scrollWidth,
+    viewport: window.innerWidth,
+    regionalBoundaryDownloaded: performance
+      .getEntriesByType("resource")
+      .some((entry) => entry.name.includes("europe-boundaries-50m.geojson")),
+    comparisonContained:
+      document.querySelector(".pricing-comparison-scroll")?.scrollWidth !== undefined &&
+      getComputedStyle(document.querySelector(".pricing-comparison-scroll")!).overflowX === "auto"
+  }));
+  expect(dimensions.body).toBeLessThanOrEqual(dimensions.viewport + 1);
+  expect(dimensions.regionalBoundaryDownloaded).toBe(false);
+  expect(dimensions.comparisonContained).toBe(true);
+
+  await page.screenshot({
+    path: testInfo.outputPath("mobile-evidence.png"),
+    fullPage: false
+  });
   await context.close();
 });
 
-test("submits a consented private-pilot request through the typed endpoint", async ({ page }) => {
-  await page.route("**/api/pilot-intake", async (route) => {
-    const request = route.request();
-    const body = request.postDataJSON() as { email: string; consent: boolean; useCase: string };
-    expect(body.email).toBe("analyst@example.com");
-    expect(body.consent).toBe(true);
-    expect(body.useCase.length).toBeGreaterThanOrEqual(20);
-
-    await route.fulfill({
-      status: 202,
-      contentType: "application/json",
-      body: JSON.stringify({
-        status: "received",
-        message: "Request received. AXIGNAL will review the fit for the private pilot."
-      })
-    });
+test("preserves all six states without pinned scrub for reduced motion", async ({ browser }) => {
+  const context = await browser.newContext({
+    viewport: { width: 1280, height: 800 },
+    reducedMotion: "reduce"
   });
+  const page = await context.newPage();
+  page.setDefaultTimeout(10_000);
+  await page.goto("/", { waitUntil: "domcontentloaded" });
 
-  await page.goto("/#access");
-  await page.getByLabel("Work email").fill("analyst@example.com");
-  await page.getByLabel("Role").selectOption("Analyst");
-  await page.getByLabel("Organisation").fill("Example Research");
-  await page
-    .getByLabel("What decision would AXIGNAL support?")
-    .fill("Compare infrastructure and policy transmission across four European markets.");
-  await page.getByRole("checkbox").check();
-  await page.getByRole("button", { name: "Request private access" }).click();
+  await expect(page.getByTestId("semantic-globe").locator("canvas")).toHaveCount(1);
+  await expect(page.locator(".reduced-story article")).toHaveCount(6);
+  await expect(page.locator(".reduced-story")).toBeVisible();
+  await expect(page.locator(".reduced-story")).toContainText("GLOBAL");
+  await expect(page.locator(".reduced-story")).toContainText("DOSSIER");
+  await expect(page.locator(".cinematic-stage")).not.toHaveCSS("position", "fixed");
 
-  await expect(page.getByText(/AXIGNAL will review the fit/i)).toBeVisible();
-});
-
-test("captures visual-review evidence", async ({ page }, testInfo) => {
-  await page.goto("/");
-  await page.addStyleTag({ content: "html{scroll-behavior:auto!important}" });
-  await expect(page.getByRole("heading", { level: 1, name: /Discover what is changing/i })).toBeVisible();
-
-  const capture = async (name: string) => {
-    const path = testInfo.outputPath(`${name}.png`);
-    await page.screenshot({ path, fullPage: false, animations: "disabled" });
-    await testInfo.attach(name, { path, contentType: "image/png" });
-  };
-
-  await page.waitForTimeout(1_400);
-  await capture("hero");
-
-  const relationshipStep = page.locator('[data-story-step][data-step="3"]');
-  await relationshipStep.evaluate((element) => element.scrollIntoView({ block: "center" }));
-  await page.waitForTimeout(1_000);
-  await capture("investigation");
-
-  const access = page.locator("#access");
-  await access.evaluate((element) => element.scrollIntoView({ block: "start" }));
-  await page.waitForTimeout(1_000);
-  await expect(page.getByRole("heading", { name: /Bring one high-cost research question/i })).toBeVisible();
-  await expect(page.getByLabel("Work email")).toBeVisible();
-  await capture("access");
+  await context.close();
 });

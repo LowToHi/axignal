@@ -89,6 +89,7 @@ A discovered task that changes scope MUST be registered before execution.
 | `AX-F2-T13` | Add CRM, scheduling and lead-routing interfaces without claim authority | 04, 06, 18, 23 | backend-architect, privacy-reviewer, security-reviewer |
 | `AX-F2-T16` | Add isolated shared-Traefik pilot edge and host-only credential lifecycle | 06, 08–10, 18, 19, ADR-011 | repository-architect, security-reviewer, test-engineer, operations-engineer, operations-writer |
 | `AX-F2-T17` | Release the public landing through incumbent Traefik with private consent-aware intake | 06, 08–10, 18, 19 | repository-architect, privacy-reviewer, security-reviewer, test-engineer, operations-engineer, operations-writer |
+| `AX-F2-T18` | Rebuild the public landing for the B2G procurement wedge with six-locale parity, evidence-state truth and qualified Design Partner intake | 01–06, 08, 12–13, 16, 18, 20–21, 23, 28, ADR-013, ADR-014 | frontend-architect, axignal-gsap-ui-ux, axignal-cinematic-webgl-scroll, globe-engineer, multilingual-localiser, analytics-engineer, accessibility-auditor, performance-engineer, test-engineer |
 
 ## F3 — Epistemic kernel
 

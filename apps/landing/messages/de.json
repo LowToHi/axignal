@@ -1,0 +1,62 @@
+{
+  "meta":{"title":"AXIGNAL — Intelligence für öffentliche Ausschreibungen","description":"Evidenzgestützte Intelligence für Organisationen, die an den Staat verkaufen. Öffentliche Chancen finden, qualifizieren und untersuchen – mit jeder wesentlichen Schlussfolgerung an ihre Evidenz gebunden."},
+  "nav":{"product":"Produkt","method":"Methode","pricing":"Preise","faq":"FAQ","language":"Sprache","cta":"Design-Partner-Zugang"},
+  "hero":{
+    "eyebrow":"GLOBAL OPPORTUNITY INTELLIGENCE · ERSTE KOMMERZIELLE AUSPRÄGUNG","title":"Gewinnen Sie die richtigen öffentlichen Chancen.","accent":"Belegen Sie jede Schlussfolgerung.",
+    "descriptor":"Evidenzgestützte Intelligence für Organisationen, die an den Staat verkaufen.","summary":"Öffentliche Chancen finden, qualifizieren und untersuchen – mit jeder wesentlichen Schlussfolgerung an ihre Evidenz gebunden.",
+    "primary":"Design-Partner-Zugang beantragen","secondary":"Produktdemo erkunden","proof":["Quellengebundene Evidenz","Widersprüche sichtbar","Menschliche Autorität gewahrt"],"status":"Synthetische Produktdemonstration · Live-Beschaffungsquellen deaktiviert"
+  },
+  "problem":{
+    "eyebrow":"DAS FRAGMENTIERUNGSPROBLEM","title":"Öffentliche Nachfrage ist sichtbar. Entscheidungsreifer Kontext nicht.",
+    "body":"Chancen verteilen sich auf Portale, Sprachen, Änderungen, Dokumente und Fristen. Teams bauen denselben Kontext manuell neu auf und entscheiden, bevor jede Annahme geprüft ist.",
+    "items":[["Fragmentierte Suche","Unterschiedliche Portale, Formate, Taxonomien und Aktualisierungszyklen."],["Teure Qualifizierung","Eignung, Passung, Zeitplan und Evidenz werden wiederholt geprüft."],["Kontextverlust","Änderungen und Widersprüche verschwinden zwischen Tabs und Tabellen."]]
+  },
+  "storyIntro":{"eyebrow":"EINE DAUERHAFTE UNTERSUCHUNG","title":"Von der Beschaffungsfrage zum evidenzgebundenen Dossier.","body":"Erleben Sie eine synthetische Demonstration. Quellenzustände entsprechen dem Repository-Katalog, nicht vermarkteter Abdeckung."},
+  "acts":[
+    {"eyebrow":"01 · FRAGMENTIERUNG","title":"Beginnen Sie mit dem verstreuten öffentlichen Datensatz.","body":"AXIGNAL hält Portale, Bekanntmachungen, Dokumente und Änderungen getrennt, bis Herkunft und Lebenszyklus geprüft sind.","signal":"146","metric":"katalogisierte Quellenfamilien","detail":"Inventar, keine Produktverfügbarkeit"},
+    {"eyebrow":"02 · NAVIGATOR","title":"Stellen Sie eine Geschäftsfrage, keine Stichwortsuche.","body":"Beschreiben Sie Fähigkeiten, Länder, Käuferprofil und Grenzen. Navigator erstellt einen typisierten, dauerhaften und reversiblen Kontext.","signal":"1","metric":"persistenter ResearchRun","detail":"Synthetisches Passungsprofil"},
+    {"eyebrow":"03 · GLOBE","title":"Sehen Sie, wo Nachfrage, Passung und Evidenz zusammentreffen.","body":"Der Globe trennt das für den Piloten zugelassene TED-Profil von entdeckten Systemen und nicht verfügbarer Abdeckung. Visuelle Intensität ändert nie den Zulassungsstatus.","signal":"1","metric":"begrenzte zugelassene Quelle","detail":"TED-Profil · privater authentifizierter Pilot"},
+    {"eyebrow":"04 · DOSSIER","title":"Qualifizieren Sie, bevor Angebotsressourcen gebunden werden.","body":"Das Dossier hält Umfang, Käufer, Fristen, Eignung, Dokumente, Änderungen und Unbekanntes in einem prüfbaren Objekt.","signal":"7","metric":"wesentliche Entscheidungsfelder","detail":"Synthetisches Dossier"},
+    {"eyebrow":"05 · CLAIMS","title":"Trennen Sie Beobachtung und Schlussfolgerung.","body":"Jede wesentliche Aussage trägt Typ, Quellenreferenz, Aktualität, Transformation und Gegenevidenz.","signal":"5","metric":"epistemische Zustände","detail":"Beobachtet ≠ berechnet ≠ abgeleitet"},
+    {"eyebrow":"06 · ZULASSUNG","title":"KI schlägt vor. Die Runtime entscheidet über das Ledger.","body":"Deterministische Validatoren verwerfen fehlerhafte oder unbelegte Kandidaten. Widersprüche und Unbekanntes bleiben sichtbar.","signal":"FAIL CLOSED","metric":"Zulassungsrichtlinie","detail":"Vorschlag ist keine Zulassung"},
+    {"eyebrow":"07 · BETRIEB","title":"Von Suchaufwand zu gesteuerten Bid-Entscheidungen.","body":"Nutzen Sie Untersuchungen wieder, weisen Sie Prüfungen zu, überwachen Sie Änderungen und bewahren Sie die Entscheidungsbegründung.","signal":"NACHVOLLZIEHBAR","metric":"Entscheidungsverlauf","detail":"Keine automatisierte Einreichung"},
+    {"eyebrow":"08 · DESIGN PARTNER","title":"Validieren Sie den Ablauf an einem teuren Beschaffungsproblem.","body":"Zugang wird für Organisationen geprüft, die einen begrenzten Ablauf testen und strukturierte Evidenz liefern.","signal":"CANDIDATE","metric":"kommerzielles Angebot","detail":"Nur Anträge · keine Abrechnung oder Abonnement"}
+  ],
+  "navigator":{"label":"NAVIGATOR · SYNTHETISCHE DEMO","prompt":"Finde öffentliche Infrastrukturmöglichkeiten in Westeuropa, die zu unserer Lieferfähigkeit passen und evidenzgestützte Qualifizierung erfordern.","response":"Ich habe eine begrenzte Untersuchung angelegt. Das TED-Profil ist für den privaten authentifizierten Piloten zugelassen; die anderen sichtbaren Systeme bleiben in der Entdeckung.","context":["Westeuropa","Infrastrukturdienstleistungen","12–24 Monate","Evidenz erforderlich"]},
+  "globe":{
+    "label":"QUELLENPROGRAMM","title":"Katalogstatus nach Rechtsraum","legend":{"ADMITTED":"Zugelassen","TECHNICAL_PROBE":"Technische Prüfung","DISCOVERED":"Entdeckt","CANDIDATE":"Kandidat","BLOCKED":"Blockiert","RIGHTS_REVIEW":"Rechteprüfung","UNAVAILABLE":"Nicht verfügbar"},
+    "layers":"Ebenen","recenter":"Zentrieren","instructions":"Zum Drehen ziehen, per Pinch oder Mausrad zoomen. Marker wählen, um den Zustand zu sehen.","fallback":"Der interaktive Globe ist nicht verfügbar. Die Tabelle enthält dieselben Informationen.","activeRule":"Nur ADMITTED-Quellen sind aktive Produktabdeckung. Begrenzter Pilotumfang: 1.","tableCaption":"Tabellarische Alternative zum Globe","source":"Quelle","jurisdiction":"Rechtsraum","state":"Zustand"
+  },
+  "dossier":{
+    "eyebrow":"SYNTHETISCHES DOSSIER","title":"Regionaler Rahmenvertrag für Energieeffizienz","buyer":"Regionale Behörde für öffentliche Arbeiten","location":"Südeuropa","deadline":"42 Tage · synthetisch",
+    "fields":[["Passung","Hohe Überlappung · aus Demo-Eingaben berechnet"],["Eignung","Konsortialregel ungeklärt"],["Wert","Synthetische Spanne 8–12 Mio. €"],["Dokumente","14 Demo-Datensätze · 2 Änderungen"],["Widerspruch","Lieferfenster weicht in einem Anhang ab"],["Nächster Schritt","Menschliche Prüfung der Eignungsevidenz"]],
+    "disclaimer":"Alle Entitäten, Werte und Dokumente sind synthetisch und beschreiben keine reale Ausschreibung."
+  },
+  "evidence":{
+    "eyebrow":"CLAIMS, EVIDENZ UND ZULASSUNG","title":"Vertrauen ist ein sichtbarer Systemzustand.","body":"Der Vektor entdeckt; der Graph kontextualisiert; die Runtime lässt zu. Darstellung macht das Modell nie autoritativ.",
+    "claims":[["OBSERVED","Die Bekanntmachung nennt ein zweistufiges Verfahren.","Synthetischer Auszug · T−2T"],["CALCULATED","Die Frist endet in 42 Tagen.","Versionierte Datumstransformation"],["INFERRED","Ein Konsortium könnte die Passung verbessern.","Explizite Demo-Inferenz"],["CONTRADICTED","Das Lieferfenster weicht zwischen Anhängen ab.","Wesentliche Gegenevidenz"],["UNKNOWN","Unterauftragsgrenze nicht gefunden.","Lücke bleibt offen"]],
+    "pipeline":["Kandidat","Strukturvalidierung","Zulässigkeitsrichtlinie","Kanonisches Ledger"]
+  },
+  "outcomes":{
+    "eyebrow":"OPERATIVER WERT","title":"Schätzen Sie gesparten Aufwand, ohne ROI zu erfinden.","body":"Der Rechner nutzt nur Ihre Eingaben. Er ist eine Planungshilfe, keine Leistungsbehauptung.",
+    "inputs":{"opportunities":"Geprüfte Chancen pro Monat","hours":"Aktuelle Stunden pro Chance","reduction":"Angenommene Reduktion der Recherchezeit","rate":"Vollkosten pro Stunde"},
+    "result":{"hours":"Potenziell umgelenkte Stunden","value":"Illustrativer monatlicher Kapazitätswert"},
+    "note":"Schätzung = Chancen × Stunden × angenommene Reduktion × Stundensatz. Win Rate, Umsatz, Einführung und Qualität sind ausgeschlossen."
+  },
+  "pricing":{
+    "eyebrow":"KANDIDATEN-PAKETIERUNG","title":"Professionelle Preise, vor dem Festlegen getestet.","body":"Design Partner ist ein besonderes Validierungsprogramm. Anträge für den kontrollierten Test und Pläne sind sichtbar; öffentliche Aktivierung, Checkout und automatische Umwandlung bleiben deaktiviert.","candidate":"Indikative Kandidaten-Paketierung","current":"Aktueller Validierungsweg","cta":"Auswählen und beantragen",
+    "plans":[["Design Partner","300–600 €","Organisation / Monat","Begrenzte Validierung, direktes Feedback und bevorzugte Kandidatenkonditionen."],["Professional","349–499 €","Monat","Individuelle Untersuchung, Dossiers, Monitoring und Evidenzexport."],["Team / Growth","899–1.499 €","Monat","Geteilte Untersuchungen, Prüfung, Governance und erweiterte Nutzung."],["Enterprise","18k–45k €","Jahr","Sicherheit, Integration, Support, Daten und API vertraglich festgelegt."]]
+  },
+  "faq":{
+    "eyebrow":"FRAGEN VOR DEM ZUGANG","title":"Was die aktuelle Landingpage verspricht – und was nicht.",
+    "items":[["Deckt AXIGNAL heute globale Beschaffung ab?","Nein. Es gibt einen weltweiten Forschungskatalog, aber keine autorisierte Behauptung globaler Abdeckung."],["Ist TED im Produkt verfügbar?","Das begrenzte TED-Search-API-Profil ist für den privaten authentifizierten Piloten zugelassen. Öffentlicher Zugang und uneingeschränkte Quellennutzung bleiben deaktiviert."],["Schreibt oder übermittelt AXIGNAL Angebote?","Nein. AXIGNAL unterstützt Recherche und Qualifizierung; es übermittelt keine Antworten und trifft keine endgültigen Entscheidungen."],["Sind die Preise endgültig?","Nein. Die Spannen sind kommerzielle Kandidatenhypothesen, die bezahlte Evidenz erfordern."],["Gibt es einen kostenlosen Test?","Der kontrollierte 7-Tage-Test ist nur auf Antrag verfügbar, solange der öffentliche Zugang deaktiviert ist. Er umfasst 1.000.000 kumulative Token pro Organisation, ohne Karte, Verlängerung oder Overage, danach nur Lesezugriff."]]
+  },
+  "form":{
+    "eyebrow":"DESIGN-PARTNER-ANFRAGE","title":"Bringen Sie einen teuren Beschaffungsablauf mit.","body":"Zwei kurze Schritte helfen bei der Passungsprüfung. Die Übermittlung erzeugt weder Abo, Test noch Zugangsgarantie.",
+    "step":"Schritt","of":"von","identity":"Ihre Organisation","fit":"Workflow-Passung","email":"Geschäftliche E-Mail","organisation":"Organisation","role":"Rolle","rolePlaceholder":"Rolle auswählen",
+    "roles":["Bid-/Proposal-Leitung","Business Development","Public-Sector-Sales","Beschaffungsintelligence","Geschäftsführung / Gründer","Beratung","Andere"],
+    "countries":"Priorisierte Länder oder Rechtsräume","volume":"Geprüfte Chancen pro Monat","process":"Aktueller Prozess oder Tools","useCase":"Primärer Anwendungsfall","problem":"Teuerstes Problem im Ablauf","timeframe":"Bewertungszeitraum","timeframes":["Jetzt","Innerhalb 30 Tagen","Dieses Quartal","Erkundung"],
+    "consent":"Ich stimme zu, dass AXIGNAL diese Angaben nur zur Prüfung und Beantwortung dieser Anfrage nutzt. Lead-Daten gehen nicht an Analytics.","next":"Weiter","back":"Zurück","submit":"Design-Partner-Zugang beantragen","sending":"Wird gesendet…","success":"Anfrage eingegangen. AXIGNAL prüft die Passung.","error":"Der Kanal ist nicht verfügbar. Kein Erfolg wurde erfasst.","required":"Bitte alle Pflichtfelder ausfüllen.","privacy":"Zweckgebundene Prüfung · kein Abo · keine PII in Analytics"
+  },
+  "footer":{"descriptor":"Evidenzgestützte Intelligence für Organisationen, die an den Staat verkaufen.","methodology":"Methodik","trust":"Trust Center","privacy":"Datenschutz","terms":"Bedingungen","accessibility":"Barrierefreiheit","rights":"Erdabbildung: NASA Blue Marble. Grenzen: Natural Earth. Produktdaten: synthetische Demonstration."}
+}

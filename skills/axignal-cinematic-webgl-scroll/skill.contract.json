@@ -1,0 +1,90 @@
+{
+  "skill_id": "axignal-cinematic-webgl-scroll",
+  "version": "0.1.0",
+  "state": "CONTRACTED",
+  "purpose": "Audit and upgrade AXIGNAL cinematic Globe rendering quality, regional LOD, adaptive Canvas resolution, asset rights and R3F performance without duplicating GSAP choreography.",
+  "triggers": {
+    "task_types": [
+      "frontend-implementation",
+      "rendering-audit",
+      "performance-audit",
+      "visual-quality-audit"
+    ],
+    "impact_levels": ["UX", "DATA_RIGHTS", "OPERATIONS"],
+    "keywords": [
+      "anisotropy",
+      "canvas",
+      "drawing-buffer",
+      "dpr",
+      "globe",
+      "gpu",
+      "ktx2",
+      "lod",
+      "react-three-fiber",
+      "sharpness",
+      "texture",
+      "webgl"
+    ],
+    "always_on": false
+  },
+  "contracts": ["GOAL_LOCK", "03", "05", "08", "12", "13", "18", "20", "21"],
+  "inputs": [
+    "The active AXIGNAL task, Goal Lock, governing contracts and current working tree.",
+    "The existing Globe Canvas, R3F scene, GSAP progress source and responsive behavior.",
+    "Texture sources, derivatives, dimensions, checksums, rights basis and encoder state.",
+    "Measured WebGL capabilities, Canvas dimensions, performance and visual references."
+  ],
+  "outputs": [
+    "A capability-selected texture tier and measurable Canvas rendering contract.",
+    "A reversible regional LOD pipeline with runtime state and fallback telemetry.",
+    "Independent geographic boundaries and a resource-safe R3F implementation.",
+    "Deterministic technical gates plus comparable visual evidence for human review."
+  ],
+  "prohibited_actions": [
+    "Duplicate, supersede or weaken axignal-gsap-ui-ux.",
+    "Replace the investigationCinematic timeline, its canonical labels, pin, scrub, responsive or reduced-motion behavior.",
+    "Add an unpinned texture encoder, private registry, secret or runtime dependency.",
+    "Download, hotlink or ship an asset without explicit provenance and rights basis.",
+    "Use a poster, giant PNG or prerecorded animation as the healthy WebGL experience.",
+    "Claim physical-GPU performance or human visual acceptance without measured evidence."
+  ],
+  "tests": [
+    {
+      "test_id": "AX-WEBGL-SKILL-STRUCTURE",
+      "description": "The Skill passes the Codex Skill structure and frontmatter validator.",
+      "required": true,
+      "fixture": "skills/axignal-cinematic-webgl-scroll"
+    },
+    {
+      "test_id": "AX-WEBGL-AUDITOR-SELF-TEST",
+      "description": "The deterministic WebGL auditor accepts the required pipeline and rejects missing LOD or fallback isolation.",
+      "required": true,
+      "fixture": "skills/axignal-cinematic-webgl-scroll/scripts/audit-webgl-globe.mjs --self-test"
+    },
+    {
+      "test_id": "AX-WEBGL-CONTRACT-SCHEMA",
+      "description": "The typed Skill contract validates against schemas/skill.schema.json.",
+      "required": true,
+      "fixture": "skills/axignal-cinematic-webgl-scroll/skill.contract.json"
+    },
+    {
+      "test_id": "AX-WEBGL-LANDING-GATE",
+      "description": "The landing passes deterministic texture, LOD, DPR, vector-boundary, poster and telemetry checks.",
+      "required": true,
+      "fixture": "skills/axignal-cinematic-webgl-scroll/scripts/audit-webgl-globe.mjs"
+    }
+  ],
+  "telemetry": {
+    "record_activation": true,
+    "record_version": true,
+    "record_outputs": true,
+    "record_failures": true
+  },
+  "owner": "AXIGNAL Platform and Product Engineering",
+  "conflict_precedence": 510,
+  "supersedes": null,
+  "deactivation": {
+    "kill_switch": "Set the registry state to REVOKED and route Globe rendering tasks to globe-engineer while preserving axignal-gsap-ui-ux.",
+    "rollback": "Revert this Skill directory and registry entries; do not revert the independent GSAP Skill."
+  }
+}
