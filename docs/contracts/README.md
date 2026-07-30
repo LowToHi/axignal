@@ -41,6 +41,10 @@ These documents are normative specifications for AXIGNAL. Contract 30 governs th
 | [29 — Bounded AI Assistance and Token Entitlements](29-bounded-ai-assistance-and-token-entitlements.md) | AI scope and token semantics |
 | [30 — Global E2E Development Contract v1.4](30-global-e2e-development-contract-v1.4.md) | Finished global product, libraries, Opportunity Operations, P00–P24 and launch gate |
 
+## Machine-readable policy
+
+- [`config/ai-assistance-policy.v0.1.json`](../../config/ai-assistance-policy.v0.1.json) — disabled-by-default AXIGNAL-only AI policy governed by Contract 29 and ADR-014.
+
 ## Active programme
 
 - [`docs/roadmap/14-global-e2e-development-program-v1.4.md`](../roadmap/14-global-e2e-development-program-v1.4.md)
