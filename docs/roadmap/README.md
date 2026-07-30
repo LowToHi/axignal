@@ -1,9 +1,9 @@
 # AXIGNAL End-to-End Development Map
 
 Version: `1.4.0`
-Status: `CANDIDATE / P00 EVIDENCE READY / HUMAN GATE PENDING / NO PUBLIC LAUNCH`
+Status: `CANDIDATE / P00 ACCEPTED / P01 IN PROGRESS / NO PUBLIC LAUNCH`
 Goal ID: `AXIGNAL-GOAL-001`
-Canonical implementation baseline: `main@9ee3e12620f137208c1943a05501f2671a1f4817`
+Pre-P00 implementation baseline: `main@9ee3e12620f137208c1943a05501f2671a1f4817`
 Active programme: [`14-global-e2e-development-program-v1.4.md`](14-global-e2e-development-program-v1.4.md)
 
 ## Execution authority
@@ -47,14 +47,14 @@ Documents 07–13 remain capability work packages and historical evidence. Where
 
 ## Current position
 
-The repository contains a governed alpha vertical slice and bounded Procurement, trial, retention and internal commercial-shell evidence. It does not contain the complete global libraries, operational workspaces or public-launch evidence required by v1.4.
+The repository contains a governed alpha vertical slice and bounded Procurement, trial, retention and internal commercial-shell evidence. P00 canonical integration is accepted. It does not contain the complete global libraries, operational workspaces or public-launch evidence required by v1.4.
 
-## Current gate
+## Active task
 
 ```text
-AX-GE2E-P00-T01
-EVIDENCE_READY
-Human review and merge decision pending
+AX-GE2E-P01-T01
+IN_PROGRESS
+Validate global buyers, jobs, budgets and workflows
 ```
 
-P01–P24 remain blocked. Public launch, unsupported global claims and unrestricted live charging remain blocked.
+P02–P24 remain blocked. P01 is evidence gathering and validation only; it does not authorise source admission, commercial activation, unsupported global claims, unrestricted live charging or public launch.
