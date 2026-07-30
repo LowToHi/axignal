@@ -96,8 +96,22 @@ jobs:
       - name: Validate P02 individual library contracts
         run: python scripts/verify_p02_library_contracts.py
 
-      - name: Rehearse byte-exact P02 rollback
-        run: python scripts/verify_p02_rollback.py
+      - name: Rehearse byte-exact P02 rollback at frozen P02 head
+        env:
+          P02_ENGINEERING_HEAD: 1800d5e7944e49cb85f52abeb9c1ce51af666d08
+        run: |
+          set -euo pipefail
+          verification_dir="${RUNNER_TEMP}/axignal-p02-rollback"
+          rm -rf "${verification_dir}"
+          git worktree add --detach "${verification_dir}" "${P02_ENGINEERING_HEAD}"
+          trap 'git worktree remove --force "${verification_dir}" >/dev/null 2>&1 || true' EXIT
+          python "${verification_dir}/scripts/verify_p02_rollback.py"
+
+      - name: Validate P03 security, identity and rights
+        run: python scripts/verify_p03_security_identity_rights.py
+
+      - name: Rehearse byte-exact P03 rollback
+        run: python scripts/verify_p03_rollback.py
 
       - name: Validate modular skill registries
         run: |
