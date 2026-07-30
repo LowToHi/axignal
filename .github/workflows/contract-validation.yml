@@ -138,8 +138,22 @@ jobs:
       - name: Validate P05 foundational libraries
         run: python scripts/verify_p05_foundational_libraries.py
 
-      - name: Rehearse byte-exact P05 rollback
-        run: python scripts/verify_p05_rollback.py
+      - name: Rehearse byte-exact P05 rollback at frozen P05 head
+        env:
+          P05_ENGINEERING_HEAD: 07de87e4ff79b19110394c8901db6a98e0be87b2
+        run: |
+          set -euo pipefail
+          verification_dir="${RUNNER_TEMP}/axignal-p05-rollback"
+          rm -rf "${verification_dir}"
+          git worktree add --detach "${verification_dir}" "${P05_ENGINEERING_HEAD}"
+          trap 'git worktree remove --force "${verification_dir}" >/dev/null 2>&1 || true' EXIT
+          python "${verification_dir}/scripts/verify_p05_rollback.py"
+
+      - name: Validate P06 multilingual and document intelligence
+        run: python scripts/verify_p06_multilingual_document_intelligence.py
+
+      - name: Rehearse byte-exact P06 rollback
+        run: python scripts/verify_p06_rollback.py
 
       - name: Validate modular skill registries
         run: |
