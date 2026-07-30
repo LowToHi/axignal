@@ -1,22 +1,23 @@
-# P01 — Global Buyer, Workflow and Market Evidence v0.1
+# P01 — Global Buyer, Workflow and Market Evidence v0.2
 
 **Task:** `AX-GE2E-P01-T01`  
 **Status:** `IN_PROGRESS / SECONDARY EVIDENCE COMPLETE / PRIMARY RESEARCH MISSING`  
 **Observed:** 30 July 2026  
 **Authority:** Contract 30, Contract 01 and ADR-015  
+**Evidence register:** `data/research/p01-desk-evidence-register.v0.1.json`  
 **Public launch:** not authorised
 
-## 1. Purpose
+## 1. Purpose and evidence boundary
 
-P01 must establish who buys AXIGNAL, which recurring work they perform, what fails today, what they already pay for, and where a connected intelligence-plus-operations product can create durable value.
+P01 must determine who buys AXIGNAL, which recurring work they perform, what fails today, what they already pay for, how they purchase, and where a connected intelligence-plus-operations product can create durable value.
 
-This document is **desk research**, not buyer validation. Official statistics establish market activity. Vendor pages establish category expectations and public pricing where available. Neither proves that a buyer will pay AXIGNAL.
+This document is **secondary research**, not buyer validation. Official statistics establish market activity. Official vendor material establishes category capabilities, positioning and public prices where available. Neither proves that a buyer will purchase AXIGNAL.
 
-P01 cannot reach `EVIDENCE_READY` until qualified primary research is complete.
+P01 cannot reach `EVIDENCE_READY` until qualified primary research passes the protocol in `P01-primary-research-protocol-v1.0.md`.
 
 ## 2. Core finding
 
-Across all nine opportunity libraries, the mature competitors do not sell a search box alone. They combine some subset of:
+Across all nine opportunity libraries, mature category products do not sell a search box alone. They combine some subset of:
 
 ```text
 discovery
@@ -31,7 +32,7 @@ discovery
 → retained organisational knowledge
 ```
 
-This supports the product decision already made in Contract 30:
+This supports, but does not validate, the Contract 30 product architecture:
 
 ```text
 Global Opportunity Intelligence
@@ -39,46 +40,35 @@ Global Opportunity Intelligence
 + Opportunity Operations
 ```
 
-The most important commercial hypothesis for P01 is therefore:
+The principal P01 hypothesis is:
 
-> A consultative intelligence layer without a workspace has weak retention because the user must move the active opportunity into another system. A workspace without governed evidence becomes another generic project-management surface. AXIGNAL must connect both.
+> A consultative intelligence layer without a workspace creates a handoff gap and weak retention. A workspace without governed evidence becomes generic project management. AXIGNAL must connect evidence, decision, operations, outcome and learning.
 
 ## 3. Market-scale signals
 
-These figures describe the economic activity surrounding the libraries. They are not software TAM calculations.
+These signals describe the economic activity surrounding each library. They are not software TAM estimates.
 
-| Library | Public signal |
+| Library | Secondary signal |
 |---|---|
 | Procurement | OECD reports public procurement at roughly 13% of GDP across OECD countries. |
-| Grants | Horizon Europe alone has an indicative 2021–2027 budget around €93.5 billion after its mid-term review. |
-| Regulation | Regology advertises global regulatory coverage and operational change-management workflows. |
-| Infrastructure | The Global Infrastructure Outlook cited by the World Bank estimated $94 trillion of infrastructure investment need through 2040. |
+| Grants | Horizon Europe has an indicative 2021–2027 budget of about €93.5 billion after its mid-term review. |
+| Regulation | Category vendors sell global monitoring connected to impact, controls, tasks and audit workflows. |
+| Infrastructure | The World Bank-referenced Global Infrastructure Outlook estimated $94 trillion of investment need through 2040. |
 | Corporate | AlphaSense reports more than 7,000 enterprise customers and more than 500 million documents. |
 | Macro | Macrobond reports more than 300 million time series and more than 2,400 global sources. |
 | Trade | WTO reports $34.89 trillion in world trade in goods and commercial services in 2025. |
-| Energy | IEA expects global energy investment of about $3.4 trillion in 2026, including about $2.2 trillion in clean energy. |
-| Innovation/IP | WIPO reports about 3.7 million patent applications worldwide in 2024; OECD estimates global R&D expenditure may have reached $3.8 trillion in 2024. |
+| Energy | IEA expects about $3.4 trillion of global energy investment in 2026, including about $2.2 trillion in clean energy. |
+| Innovation/IP | WIPO reports about 3.7 million patent applications in 2024; OECD estimates global R&D expenditure may have reached $3.8 trillion. |
 
-The market is not constrained by the amount of underlying economic activity. The constraints are buyer specificity, rights, coverage, workflow fit, trust and acquisition.
+The limiting factors are not the size of the underlying economies. They are buyer specificity, source rights, coverage, workflow fit, trust, product depth and acquisition.
 
-## 4. Horizontal buyer architecture
-
-AXIGNAL should not assume one universal persona. The initial research programme uses five overlapping buyer cohorts.
+## 4. Horizontal buyer cohorts
 
 ### C1 — Public-sector growth and pursuit teams
 
-Libraries: Procurement, Regulation, Infrastructure.
+Libraries: O01 Procurement, O03 Regulation and O04 Infrastructure.
 
-Typical roles:
-
-- Bid Manager;
-- Tender Manager;
-- Head of Public Sector;
-- public-sector sales manager;
-- capture manager;
-- tender consultancy partner.
-
-Recurring work:
+Roles include Bid Manager, Tender Manager, Head of Public Sector, capture manager, public-sector sales manager and tender consultancy partner.
 
 ```text
 discover
@@ -92,18 +82,9 @@ discover
 
 ### C2 — Funding, research and innovation teams
 
-Libraries: Grants, Innovation/IP, Regulation.
+Libraries: O02 Grants, O09 Innovation/IP and O03 Regulation.
 
-Typical roles:
-
-- Grant Manager;
-- Research Development Officer;
-- Innovation Manager;
-- R&D Intelligence Manager;
-- grant consultant;
-- Head of Research or Innovation.
-
-Recurring work:
+Roles include Grant Manager, Research Development Officer, Innovation Manager, R&D Intelligence Manager and grant consultancy partner.
 
 ```text
 discover call
@@ -117,18 +98,9 @@ discover call
 
 ### C3 — Infrastructure and energy development teams
 
-Libraries: Infrastructure, Energy/Climate, Procurement, Regulation.
+Libraries: O04 Infrastructure, O08 Energy/Climate, O01 Procurement and O03 Regulation.
 
-Typical roles:
-
-- Project Development Manager;
-- origination lead;
-- project finance analyst;
-- infrastructure business-development director;
-- energy-market analyst;
-- engineering capture manager.
-
-Recurring work:
+Roles include project developer, origination lead, project-finance analyst, infrastructure business-development director and energy-market analyst.
 
 ```text
 detect project formation
@@ -141,18 +113,9 @@ detect project formation
 
 ### C4 — Corporate strategy and market-intelligence teams
 
-Libraries: Corporate, Macro, Trade, Energy and Innovation.
+Libraries: O05 Corporate, O06 Macro, O07 Trade, O08 Energy and O09 Innovation.
 
-Typical roles:
-
-- Chief Strategy Officer;
-- market-intelligence analyst;
-- corporate-development director;
-- competitive-intelligence manager;
-- investment analyst;
-- consulting partner.
-
-Recurring work:
+Roles include Chief Strategy Officer, market-intelligence analyst, corporate-development director, competitive-intelligence manager, investment analyst and consulting partner.
 
 ```text
 monitor
@@ -166,286 +129,182 @@ monitor
 
 ### C5 — Trade, sourcing and supply-risk teams
 
-Libraries: Trade, Corporate, Regulation and Macro.
+Libraries: O07 Trade, O05 Corporate, O03 Regulation and O06 Macro.
 
-Typical roles:
-
-- Supply-chain analyst;
-- sourcing manager;
-- trade-compliance manager;
-- category manager;
-- chief supply-chain officer;
-- market-development manager.
-
-Recurring work:
+Roles include supply-chain analyst, sourcing manager, trade-compliance manager, category manager and chief supply-chain officer.
 
 ```text
 map flow and dependency
 → identify counterparties
-→ assess tariff/regulatory risk
+→ assess tariff and regulatory risk
 → shortlist alternatives
 → approve transition
 → monitor outcome
 ```
 
-## 5. Library evidence and workflow hypotheses
+## 5. Library hypotheses
+
+All budgets below are hypotheses to test with authorised buyers. They are not approved AXIGNAL prices.
 
 ### O01 — Global Public Procurement
 
-Category evidence:
+Secondary evidence:
 
-- Stotles sells connected Sales Studio and Bid Studio workflows.
-- Published starting prices include approximately £475/month for Growth sales, £495/month for Growth bid, and £873/month for the combined Growth product.
-- Tenderlake advertises European coverage at £546/month or £396/month paid annually and includes workflow, stage tracking, qualifying-out reasons, alerts, collaboration and API.
-- Mercell positions supplier value as discovery plus structured bid delivery.
+- Stotles sells connected Sales Studio and Bid Studio workflows; published Growth starting prices include £475/month for sales, £495/month for bids and £873/month combined.
+- Tenderlake publishes European pricing of £546/month or £396/month paid annually and includes workflow, stage tracking, qualify-out reasons, alerts, collaboration and API.
+- Mercell connects discovery, market intelligence and structured bid delivery.
 
 Buyer job:
 
 > Find, qualify and operate public-sector pursuits from early signal through bid outcome.
 
-Failure costs to validate:
+Failures to validate: missed opportunity or amendment, low-fit pursuit, deadline failure, fragmented ownership and lost reusable content.
 
-- missed or late opportunity;
-- pursuing an ineligible or low-fit tender;
-- missed amendment;
-- bid coordination failure;
-- lost reusable content.
-
-Budget hypothesis, not validated:
-
-- Professional: €349–€600/month;
-- Team: €900–€1,800/month;
-- Enterprise: €18,000–€60,000/year.
+Budget hypothesis: Professional €349–€600/month; Team €900–€1,800/month; Enterprise €18,000–€60,000/year.
 
 ### O02 — Grants and Non-Dilutive Funding
 
-Category evidence:
+Secondary evidence:
 
-- Instrumentl presents itself as a full-lifecycle grant operating system, spanning discovery, writing, tasks, deadlines, spend and reporting.
-- Candid publishes an annual entry price starting at $1,199 for research products.
+- Instrumentl presents a full-lifecycle operating system spanning discovery, writing, tasks, deadlines, spend and reporting.
+- Candid publishes an annual research-product entry price starting at $1,199.
 - Clarivate states that Pivot-RP is used by more than 700 research institutions.
 
 Buyer job:
 
-> Discover eligible funding, coordinate the application, manage award obligations and retain reusable organisational knowledge.
+> Discover eligible funding, coordinate an application, manage award obligations and retain reusable organisational knowledge.
 
-Failure costs to validate:
+Failures to validate: missed call, ineligible application, late consortium or document, budget inconsistency and missed reporting obligation.
 
-- missed eligible call;
-- ineligible application;
-- late consortium or document;
-- budget inconsistency;
-- missed reporting obligation.
-
-Budget hypothesis:
-
-- Professional: €250–€600/month;
-- Team: €700–€1,500/month;
-- Enterprise: €12,000–€50,000/year.
+Budget hypothesis: Professional €250–€600/month; Team €700–€1,500/month; Enterprise €12,000–€50,000/year.
 
 ### O03 — Regulatory and Policy Demand
 
-Category evidence:
+Secondary evidence:
 
 - Regology publishes a Professional price of $1,700 per user per month on a three-year contract.
-- Its platform connects regulatory content with impact assessment, requirements, risks, controls, policies, tasks and reporting.
+- Its platform links regulatory content to impact assessment, requirements, risks, controls, policies, tasks and reporting.
 
 Buyer job:
 
 > Identify applicable change, assess impact, assign implementation and prove that the organisation responded.
 
-Failure costs to validate:
+Failures to validate: missed rule, late implementation, unmapped obligation, duplicate review and incomplete audit trail.
 
-- missed applicable rule;
-- late implementation;
-- unmapped obligation;
-- duplicate review;
-- incomplete audit trail.
+Budget hypothesis: Professional €1,000–€2,500/month; Team €3,000–€10,000/month; Enterprise €50,000–€250,000/year.
 
-Budget hypothesis:
-
-- Professional: €1,000–€2,500/month;
-- Team: €3,000–€10,000/month;
-- Enterprise: €50,000–€250,000/year.
-
-This library must remain clearly outside legal advice.
+AXIGNAL must not provide legal advice or declare compliance.
 
 ### O04 — Infrastructure and Capital Projects
 
-Category evidence:
+Secondary evidence:
 
-- GlobalData sells project, contact, market, company and risk intelligence for projects over defined value thresholds.
-- The World Bank-referenced Global Infrastructure Outlook estimated $94 trillion of global infrastructure investment need through 2040.
+- GlobalData advertises end-to-end tracking from project announcement to completion, including stage, participants, contacts and dates.
+- The World Bank-referenced outlook estimated $94 trillion of infrastructure investment need through 2040.
 
 Buyer job:
 
 > Detect projects early, map stakeholders and financing, select pursuits and coordinate long-cycle capture.
 
-Failure costs to validate:
+Failures to validate: late entry, wrong stakeholder map, missed financing or procurement milestone, stale status and duplicated pursuit.
 
-- late market entry;
-- wrong stakeholder map;
-- missed financing or procurement milestone;
-- stale project status;
-- duplicated pursuit.
-
-Budget hypothesis:
-
-- Professional: €500–€1,500/month;
-- Team: €2,000–€8,000/month;
-- Enterprise: €30,000–€150,000/year.
+Budget hypothesis: Professional €500–€1,500/month; Team €2,000–€8,000/month; Enterprise €30,000–€150,000/year.
 
 ### O05 — Corporate, Filings and Ownership Signals
 
-Category evidence:
+Secondary evidence:
 
 - AlphaSense combines external and internal content, research, monitoring, work products and enterprise controls.
-- Pricing is annual and sales-led.
+- Pricing is sales-led rather than self-serve.
 - Vendor-reported scale exceeds 7,000 enterprise customers and 500 million documents.
 
 Buyer job:
 
 > Connect official corporate signals and internal knowledge into a monitored thesis, account or deal opportunity.
 
-Failure costs to validate:
+Failures to validate: missed strategic change, stale ownership, duplicated research, unsupported thesis and lost internal knowledge.
 
-- missed strategic change;
-- stale ownership view;
-- duplicated research;
-- unsupported thesis;
-- loss of internal knowledge.
-
-Budget hypothesis:
-
-- Professional: €500–€2,000/month;
-- Team: €2,500–€10,000/month;
-- Enterprise: €30,000–€200,000/year.
+Budget hypothesis: Professional €500–€2,000/month; Team €2,500–€10,000/month; Enterprise €30,000–€200,000/year.
 
 ### O06 — Sovereign, Macro and Public Investment
 
-Category evidence:
+Secondary evidence:
 
-- Macrobond sells a structured research workflow across discovery, analysis, charts, collaboration and distribution.
+- Macrobond sells a workflow spanning data discovery, analysis, charts, collaboration and distribution.
 - Vendor-reported scale exceeds 300 million time series and 2,400 global sources.
 
 Buyer job:
 
 > Build and maintain a versioned country or market thesis from governed data, revisions and scenarios.
 
-Failure costs to validate:
+Failures to validate: wrong vintage, unnoticed revision, manual rebuild, forecast shown as observation and inconsistent assumptions.
 
-- wrong vintage;
-- unnoticed revision;
-- manual chart rebuild;
-- forecast represented as observation;
-- inconsistent assumptions.
-
-Budget hypothesis:
-
-- Professional: €500–€1,500/month;
-- Team: €2,000–€7,000/month;
-- Enterprise: €25,000–€150,000/year.
+Budget hypothesis: Professional €500–€1,500/month; Team €2,000–€7,000/month; Enterprise €25,000–€150,000/year.
 
 ### O07 — Trade, Supply Chain and Market Flows
 
-Category evidence:
+Secondary evidence:
 
-- Panjiva positions trade data around partner discovery, competitor monitoring, sourcing and investment signals.
-- WTO reports world trade of $34.89 trillion in 2025.
+- S&P Global's Panjiva combines global trade records, entity resolution, machine learning, visual analytics, alerts and exportable results.
+- Panjiva is positioned for partner discovery, competitor monitoring, sourcing and investment signals.
+- WTO reports $34.89 trillion in world trade in 2025.
 
 Buyer job:
 
 > Detect changing flows and dependencies, identify counterparties or risks, and operate a sourcing or market pursuit.
 
-Failure costs to validate:
+Failures to validate: hidden dependency, incorrect supplier identity, late tariff response, concentration and missed market shift.
 
-- hidden dependency;
-- wrong supplier identity;
-- late tariff response;
-- concentration risk;
-- missed market shift.
-
-Budget hypothesis:
-
-- Professional: €400–€1,500/month;
-- Team: €2,000–€8,000/month;
-- Enterprise: €30,000–€200,000/year.
+Budget hypothesis: Professional €400–€1,500/month; Team €2,000–€8,000/month; Enterprise €30,000–€200,000/year.
 
 ### O08 — Energy and Climate Transition
 
-Category evidence:
+Secondary evidence:
 
-- Wood Mackenzie Lens and Rystad Energy combine asset, market, company, scenario, project and geospatial intelligence.
-- IEA expects $3.4 trillion in global energy investment in 2026.
+- Wood Mackenzie Lens combines global asset, market, company, cost, scenario and geospatial intelligence.
+- Rystad Energy positions its offer around data, analytics, research and decision support.
+- IEA expects about $3.4 trillion in global energy investment in 2026.
 
 Buyer job:
 
 > Screen markets and projects, connect policy, capital, assets and constraints, and operate a transition pursuit.
 
-Failure costs to validate:
+Failures to validate: wrong project status, missed policy or grid constraint, late partner engagement, bad assumptions and fragmented asset view.
 
-- wrong project status;
-- missed policy or grid constraint;
-- late partner engagement;
-- bad scenario assumptions;
-- fragmented asset view.
-
-Budget hypothesis:
-
-- Professional: €800–€2,500/month;
-- Team: €3,000–€12,000/month;
-- Enterprise: €50,000–€300,000/year.
+Budget hypothesis: Professional €800–€2,500/month; Team €3,000–€12,000/month; Enterprise €50,000–€300,000/year.
 
 ### O09 — Innovation, Research and Intellectual Property
 
-Category evidence:
+Secondary evidence:
 
-- Patsnap publishes self-serve AI research tiers from roughly $100 to $400/month depending product, plus enterprise plans.
-- The category includes search, analysis, alerts, workspaces, comments, task assignment and administration.
+- Patsnap Eureka advertises a self-serve Pro plan at $200/month and enterprise collaboration, administration and role-based permissions.
+- Patsnap Analytics includes search, analysis, monitoring, shared workspaces, relevance voting and task assignment.
+- Patsnap Open Platform advertises usage-based Pro access from $100.
 - WIPO reports 3.7 million patent applications in 2024.
 
 Buyer job:
 
 > Discover technologies and partners, assess lineage and evidence, coordinate a pursuit and retain innovation learning.
 
-Failure costs to validate:
+Failures to validate: missed prior art or competitor movement, duplicate R&D, wrong assignee or family, stale legal status and lost scouting rationale.
 
-- missed prior art or competitor move;
-- duplicate R&D;
-- wrong assignee or family;
-- stale legal status;
-- lost scouting rationale.
+Budget hypothesis: Professional €200–€800/month; Team €1,000–€5,000/month; Enterprise €20,000–€150,000/year.
 
-Budget hypothesis:
+AXIGNAL must not provide patentability or freedom-to-operate legal conclusions.
 
-- Professional: €200–€800/month;
-- Team: €1,000–€5,000/month;
-- Enterprise: €20,000–€150,000/year.
+## 6. Cross-library hypotheses
 
-This library must not provide patentability or freedom-to-operate legal conclusions.
-
-## 6. Cross-library product hypotheses
-
-1. **Workspace retention hypothesis**  
-   Intelligence without operations creates a handoff gap and weak retention.
-
-2. **Evidence threshold hypothesis**  
-   Evidence governance matters most where the decision has material financial, legal, operational or reputational cost.
-
-3. **Expansion hypothesis**  
-   The strongest expansion mechanism is adding libraries to an existing tenant and workspace.
-
-4. **Plan architecture hypothesis**  
-   Professional plans fit individual analysts; Team and Enterprise become necessary when approvals, documents, integrations and institutional memory matter.
-
-5. **Truthful-global hypothesis**  
-   Buyers will reject broad global claims unless coverage, freshness and limitations are visible by library and jurisdiction.
+1. **Workspace retention** — intelligence without operations creates a handoff gap and weak retention.
+2. **Evidence threshold** — traceability matters most when decisions carry material financial, legal, operational or reputational cost.
+3. **Expansion** — the strongest expansion mechanism may be adding libraries to an existing tenant and workspace.
+4. **Plan architecture** — Professional may fit individual analysts; Team and Enterprise become necessary with approvals, private documents, integrations and institutional memory.
+5. **Truthful global coverage** — buyers may reject broad global claims unless coverage, freshness and limitations are visible by library and jurisdiction.
 
 ## 7. Competitive implication
 
-AXIGNAL should not position itself as the cheapest database in any library.
+AXIGNAL should not compete as the cheapest database in any library.
 
-The defensible position is:
+The defensible hypothesis is:
 
 ```text
 cross-library opportunity detection
@@ -455,7 +314,7 @@ cross-library opportunity detection
 + visible uncertainty and coverage
 ```
 
-Competitors are strongest within individual domains. AXIGNAL's opportunity is the continuity between domains and between intelligence and operations. That advantage remains hypothetical until buyers confirm the need.
+Competitors are strongest inside individual domains. AXIGNAL's proposed advantage is continuity between domains and between intelligence and operations. Buyer research must still establish whether that advantage is sufficiently valuable and purchasable.
 
 ## 8. Primary research still required
 
@@ -465,27 +324,30 @@ P01 requires at least:
 - at least 5 qualified sessions per opportunity library;
 - at least 24 participants with budget authority;
 - at least 18 direct operators;
-- geographic participation across Europe, North America, Latin America, Asia, Oceania and Africa/Middle East;
+- participation across Europe, North America, Latin America, Asia, Oceania and Africa/Middle East;
 - at least 3 recent material failure incidents per library;
 - direct evidence of current tools, spend, purchase process and switching criteria;
-- negative evidence and explicit non-buy reasons.
+- at least 10 explicit non-buy or rejection cases;
+- saturation within each cohort.
 
-A participant may count for more than one library only when they have a recent workflow in each.
+A participant may count for more than one library only when a recent workflow is documented for each. The programme still requires 45 unique people.
 
 ## 9. Current decision
 
 ```text
-desk research                    PRESENT
+desk evidence sources             26
+opportunity libraries covered      9
 category workflow evidence       PRESENT
 public competitor pricing        PARTIAL
 buyer personas                   HYPOTHESES
 budget bands                     HYPOTHESES
-qualified interviews             MISSING
-recent failure incidents         MISSING
-budget-authority evidence         MISSING
-purchase-process evidence         MISSING
-P01 state                         IN_PROGRESS
-P02 authorisation                 BLOCKED
+qualified interviews              0 / 45
+budget-authority evidence          0 / 24
+direct operators                  0 / 18
+recent failure incidents           0 / 27 minimum
+negative evidence                  0 / 10
+P01 state                        IN_PROGRESS
+P02 authorisation                BLOCKED
 ```
 
-No new source, library, price or public claim is authorised by this document.
+No new source, library, price, buyer claim, global coverage claim or public launch is authorised by this document.
