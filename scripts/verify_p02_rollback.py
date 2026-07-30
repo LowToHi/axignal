@@ -19,8 +19,7 @@ def run_git(*args: str, capture_bytes: bool = False) -> bytes | str:
         ["git", *args],
         cwd=ROOT,
         check=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        capture_output=True,
         text=not capture_bytes,
     )
     return result.stdout
