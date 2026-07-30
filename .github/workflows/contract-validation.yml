@@ -208,8 +208,22 @@ jobs:
       - name: Validate P10 Regulatory Library and Market Entry Workspace
         run: python scripts/verify_p10_regulatory_market_entry_workspace.py
 
-      - name: Rehearse byte-exact P10 rollback
-        run: python scripts/verify_p10_rollback.py
+      - name: Rehearse byte-exact P10 rollback at frozen P10 head
+        env:
+          P10_ENGINEERING_HEAD: 563acd353ba3a90d253d582b7c19f1554fd011b1
+        run: |
+          set -euo pipefail
+          verification_dir="${RUNNER_TEMP}/axignal-p10-rollback"
+          rm -rf "${verification_dir}"
+          git worktree add --detach "${verification_dir}" "${P10_ENGINEERING_HEAD}"
+          trap 'git worktree remove --force "${verification_dir}" >/dev/null 2>&1 || true' EXIT
+          python "${verification_dir}/scripts/verify_p10_rollback.py"
+
+      - name: Validate P11 Infrastructure Library and Project Pursuit Workspace
+        run: python scripts/verify_p11_infrastructure_project_pursuit_workspace.py
+
+      - name: Rehearse byte-exact P11 rollback
+        run: python scripts/verify_p11_rollback.py
 
       - name: Validate modular skill registries
         run: |
