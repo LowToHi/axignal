@@ -17,14 +17,13 @@ export async function proxyBillingRequest(
   if (!apiUrl) {
     return NextResponse.json({ error: "AXIGNAL_API_URL is required." }, { status: 503 });
   }
+  const headers = new Headers(init.headers);
+  headers.set("content-type", "application/json");
+  headers.set("X-AXIGNAL-Identity-Assertion", buildApiIdentityAssertion(identity));
   try {
     const response = await fetch(`${apiUrl}${path}`, {
       ...init,
-      headers: {
-        "content-type": "application/json",
-        "X-AXIGNAL-Identity-Assertion": buildApiIdentityAssertion(identity),
-        ...(init.headers ?? {})
-      },
+      headers,
       cache: "no-store",
       signal: AbortSignal.timeout(8_000)
     });
