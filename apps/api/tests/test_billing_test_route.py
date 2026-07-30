@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
 from fastapi.testclient import TestClient
 
 from axignal_api.application import app
 from axignal_api.billing_config import EXPECTED_AXIGNAL_STRIPE_ACCOUNT_ID
+from axignal_api.billing_test_routes import _next_event_time
 from axignal_api.identity import build_identity_assertion
 
 TENANT_ID = UUID("44444444-4444-4444-8444-444444444444")
@@ -63,3 +65,13 @@ def test_deterministic_provider_route_rejects_unknown_action(monkeypatch) -> Non
         json={"action": "ACTIVATE_ENTITLEMENT_DIRECTLY"},
     )
     assert response.status_code == 422
+
+
+def test_deterministic_provider_event_time_is_monotonic() -> None:
+    now = datetime(2026, 7, 30, 7, 0, tzinfo=UTC)
+    future_previous = now + timedelta(seconds=1)
+    assert _next_event_time(
+        {"last_provider_event_created_at": future_previous},
+        now,
+    ) == future_previous + timedelta(seconds=1)
+    assert _next_event_time({}, now) == now
