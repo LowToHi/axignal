@@ -1,1 +1,46 @@
-{"schema_version":"axignal.p13-rollback-plan/v0.1","task_id":"AX-GE2E-P13-T01","baseline_sha":"96b89d8e7bdd7712dae476eeb97e1240c7846f22","expected_changed_paths":[".github/workflows/p13-sovereign-macro-validation.yml","data/sovereign-macro/sovereign-macro-strategy-workspace-runtime.v0.1.json","data/sovereign-macro/p13-adversarial-cases.v0.1.json","data/sovereign-macro/p13-conformance-fixtures.v0.1.json","data/sovereign-macro/p13-rollback-plan.v0.1.json","docs/sovereign-macro/P13-sovereign-macro-strategy-workspace-v0.1.md","schemas/sovereign-macro-strategy-workspace-cases.schema.json","schemas/sovereign-macro-strategy-workspace-fixtures.schema.json","schemas/sovereign-macro-strategy-workspace-runtime.schema.json","scripts/p13_sovereign_macro_reference.py","scripts/verify_global_e2e_contract.py","scripts/verify_p13_sovereign_macro_strategy_workspace.py","scripts/verify_p13_rollback.py"],"p13_only_artifacts":[".github/workflows/p13-sovereign-macro-validation.yml","data/sovereign-macro/sovereign-macro-strategy-workspace-runtime.v0.1.json","data/sovereign-macro/p13-adversarial-cases.v0.1.json","data/sovereign-macro/p13-conformance-fixtures.v0.1.json","data/sovereign-macro/p13-rollback-plan.v0.1.json","docs/sovereign-macro/P13-sovereign-macro-strategy-workspace-v0.1.md","schemas/sovereign-macro-strategy-workspace-cases.schema.json","schemas/sovereign-macro-strategy-workspace-fixtures.schema.json","schemas/sovereign-macro-strategy-workspace-runtime.schema.json","scripts/p13_sovereign_macro_reference.py","scripts/verify_p13_sovereign_macro_strategy_workspace.py","scripts/verify_p13_rollback.py"],"restored_baseline_files":["scripts/verify_global_e2e_contract.py"],"preserved_p12_authority_files":["data/corporate/corporate-ownership-account-workspace-runtime.v0.1.json","data/corporate/p12-adversarial-cases.v0.1.json","data/corporate/p12-conformance-fixtures.v0.1.json","schemas/corporate-ownership-account-workspace-runtime.schema.json","scripts/p12_corporate_reference.py","scripts/verify_p12_corporate_ownership_account_workspace.py","scripts/verify_p12_rollback.py"]}
+{
+  "schema_version": "axignal.p13-rollback-plan/v0.1",
+  "task_id": "AX-GE2E-P13-T01",
+  "baseline_sha": "96b89d8e7bdd7712dae476eeb97e1240c7846f22",
+  "expected_changed_paths": [
+    ".github/workflows/contract-validation.yml",
+    ".github/workflows/p13-sovereign-macro-validation.yml",
+    "data/sovereign-macro/p13-adversarial-cases.v0.1.json",
+    "data/sovereign-macro/p13-conformance-fixtures.v0.1.json",
+    "data/sovereign-macro/p13-rollback-plan.v0.1.json",
+    "data/sovereign-macro/sovereign-macro-strategy-workspace-runtime.v0.1.json",
+    "docs/sovereign-macro/P13-sovereign-macro-strategy-workspace-v0.1.md",
+    "schemas/sovereign-macro-strategy-workspace-cases.schema.json",
+    "schemas/sovereign-macro-strategy-workspace-fixtures.schema.json",
+    "schemas/sovereign-macro-strategy-workspace-runtime.schema.json",
+    "scripts/p13_sovereign_macro_reference.py",
+    "scripts/verify_p13_rollback.py",
+    "scripts/verify_p13_sovereign_macro_strategy_workspace.py"
+  ],
+  "p13_only_artifacts": [
+    ".github/workflows/p13-sovereign-macro-validation.yml",
+    "data/sovereign-macro/p13-adversarial-cases.v0.1.json",
+    "data/sovereign-macro/p13-conformance-fixtures.v0.1.json",
+    "data/sovereign-macro/p13-rollback-plan.v0.1.json",
+    "data/sovereign-macro/sovereign-macro-strategy-workspace-runtime.v0.1.json",
+    "docs/sovereign-macro/P13-sovereign-macro-strategy-workspace-v0.1.md",
+    "schemas/sovereign-macro-strategy-workspace-cases.schema.json",
+    "schemas/sovereign-macro-strategy-workspace-fixtures.schema.json",
+    "schemas/sovereign-macro-strategy-workspace-runtime.schema.json",
+    "scripts/p13_sovereign_macro_reference.py",
+    "scripts/verify_p13_rollback.py",
+    "scripts/verify_p13_sovereign_macro_strategy_workspace.py"
+  ],
+  "restored_baseline_files": [
+    ".github/workflows/contract-validation.yml"
+  ],
+  "preserved_p12_authority_files": [
+    "data/corporate/corporate-ownership-account-workspace-runtime.v0.1.json",
+    "data/corporate/p12-adversarial-cases.v0.1.json",
+    "data/corporate/p12-conformance-fixtures.v0.1.json",
+    "schemas/corporate-ownership-account-workspace-runtime.schema.json",
+    "scripts/p12_corporate_reference.py",
+    "scripts/verify_p12_corporate_ownership_account_workspace.py",
+    "scripts/verify_p12_rollback.py"
+  ]
+}
