@@ -55,6 +55,8 @@ The following are not accepted:
 
 ## P00 gate
 
+`AX-GE2E-P00-T01` is `ACCEPTED`.
+
 `AX-GE2E-P00-GATE-001` records human product-authority approval, five passing automated workflows and a zero-residue rollback rehearsal on a disposable reference. The P00-specific rollback is tested; global product rollback remains untested.
 
 Gate record: `docs/gates/AX-GE2E-P00-gate-v1.4.json`
