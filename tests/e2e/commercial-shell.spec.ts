@@ -86,17 +86,17 @@ test("executes the authenticated commercial shell without external Stripe", asyn
   await expect(page.getByText("PAID_LIFECYCLE_ROLLED_BACK", { exact: true })).toBeVisible();
   await expect(page.getByText(/Stripe sandbox externo verificado: no/)).toBeVisible();
 
-  const persistedSummary = page.waitForResponse(
+  const persistedSummaryPromise = page.waitForResponse(
     (response) => response.url().includes("/api/billing/summary") && response.status() === 200
   );
   await page.reload();
-  await persistedSummary;
-  const persistedPanel = page.getByRole("complementary", { name: "Plan y facturación" });
-  // The billing=success query can auto-open the panel after hydration; do not toggle it closed.
-  if (!(await persistedPanel.isVisible().catch(() => false))) {
-    await page.getByRole("button", { name: /PLAN ·/ }).click();
-  }
-  await expect(persistedPanel).toBeVisible();
-  await expect(page.getByText("ROLLED_BACK", { exact: true })).toBeVisible();
-  await expect(page.getByText(/acceso CANCELLED/)).toBeVisible();
+  const persistedSummaryResponse = await persistedSummaryPromise;
+  const persistedSummary = (await persistedSummaryResponse.json()) as {
+    selection?: { state?: string } | null;
+    entitlement?: { state?: string; plan_code?: string } | null;
+  };
+  expect(persistedSummary.selection?.state).toBe("ROLLED_BACK");
+  expect(persistedSummary.entitlement?.state).toBe("CANCELLED");
+  expect(persistedSummary.entitlement?.plan_code).toBe("TEAM_MONTHLY");
+  await expect(page.getByRole("button", { name: "PLAN · Team" })).toBeVisible();
 });
