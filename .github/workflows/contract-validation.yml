@@ -124,8 +124,22 @@ jobs:
       - name: Validate P04 Source Admission Factory and Connector SDK
         run: python scripts/verify_p04_source_admission_factory.py
 
-      - name: Rehearse byte-exact P04 rollback
-        run: python scripts/verify_p04_rollback.py
+      - name: Rehearse byte-exact P04 rollback at frozen P04 head
+        env:
+          P04_ENGINEERING_HEAD: 2977a6cd4056969313cf7356070eedf6f7d85ed0
+        run: |
+          set -euo pipefail
+          verification_dir="${RUNNER_TEMP}/axignal-p04-rollback"
+          rm -rf "${verification_dir}"
+          git worktree add --detach "${verification_dir}" "${P04_ENGINEERING_HEAD}"
+          trap 'git worktree remove --force "${verification_dir}" >/dev/null 2>&1 || true' EXIT
+          python "${verification_dir}/scripts/verify_p04_rollback.py"
+
+      - name: Validate P05 foundational libraries
+        run: python scripts/verify_p05_foundational_libraries.py
+
+      - name: Rehearse byte-exact P05 rollback
+        run: python scripts/verify_p05_rollback.py
 
       - name: Validate modular skill registries
         run: |
