@@ -2,7 +2,8 @@ import { expect, test } from "@playwright/test";
 
 test.describe.configure({ mode: "serial", retries: 0 });
 test.skip(
-  process.env.AXIGNAL_COMMERCIAL_SHELL_E2E !== "true",
+  process.env.AXIGNAL_PLAYWRIGHT_EXTERNAL_SERVER !== "true" ||
+    process.env.AXIGNAL_PLAYWRIGHT_BASE_URL !== "http://127.0.0.1:18080",
   "Commercial billing E2E requires the isolated deterministic-provider topology."
 );
 
