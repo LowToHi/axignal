@@ -1,0 +1,18 @@
+{
+  "index_id": "AX-GLOBAL-OPPORTUNITY-SOURCE-CATALOGUE-INDEX-001",
+  "version": "1.4.0",
+  "status": "RESEARCH_INDEX_NOT_PRODUCT_AVAILABILITY",
+  "goal_id": "AXIGNAL-GOAL-001",
+  "public_global_coverage_authorised": false,
+  "catalogues": [
+    {"library_id":"AX-LIB-O01","catalogue":"data/sources/global-public-procurement-catalogue.v0.2.json","status":"RESEARCH_CATALOGUE_NOT_PRODUCT_AVAILABILITY","source_family_count":146},
+    {"library_id":"AX-LIB-O02","catalogue":"data/sources/grants-and-non-dilutive-funding-catalogue.v0.1.json","source_count":6,"status":"RESEARCH_CATALOGUE_NOT_PRODUCT_AVAILABILITY"},
+    {"library_id":"AX-LIB-O03","catalogue":"data/sources/regulatory-and-policy-demand-catalogue.v0.1.json","source_count":6,"status":"RESEARCH_CATALOGUE_NOT_PRODUCT_AVAILABILITY"},
+    {"library_id":"AX-LIB-O04","catalogue":"data/sources/infrastructure-and-capital-projects-catalogue.v0.1.json","source_count":6,"status":"RESEARCH_CATALOGUE_NOT_PRODUCT_AVAILABILITY"},
+    {"library_id":"AX-LIB-O05","catalogue":"data/sources/corporate-filings-and-ownership-catalogue.v0.1.json","source_count":5,"status":"RESEARCH_CATALOGUE_NOT_PRODUCT_AVAILABILITY"},
+    {"library_id":"AX-LIB-O06","catalogue":"data/sources/sovereign-macro-public-investment-catalogue.v0.1.json","source_count":7,"status":"RESEARCH_CATALOGUE_NOT_PRODUCT_AVAILABILITY"},
+    {"library_id":"AX-LIB-O07","catalogue":"data/sources/trade-supply-chain-market-flows-catalogue.v0.1.json","source_count":4,"status":"RESEARCH_CATALOGUE_NOT_PRODUCT_AVAILABILITY"},
+    {"library_id":"AX-LIB-O08","catalogue":"data/sources/energy-climate-transition-catalogue.v0.1.json","source_count":5,"status":"RESEARCH_CATALOGUE_NOT_PRODUCT_AVAILABILITY"},
+    {"library_id":"AX-LIB-O09","catalogue":"data/sources/innovation-research-ip-catalogue.v0.1.json","source_count":5,"status":"RESEARCH_CATALOGUE_NOT_PRODUCT_AVAILABILITY"}
+  ]
+}
