@@ -109,7 +109,7 @@ for implementation, contract in zip(runtime["libraries"], p02_foundations, stric
 
 rights = runtime["rights_dimensions"]
 assert rights == p03["source_rights_enforcement_contract"]["required_rights_dimensions"]
-assert rights == p04["source_profile_contract"]["required_rights_dimensions"]
+assert rights == p04["source_profile_contract"]["rights_dimensions"]
 assert len(rights) == 10
 
 case_counts = Counter(item["library_id"] for item in cases["cases"])
