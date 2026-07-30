@@ -1,0 +1,48 @@
+{
+  "gate_id": "AX-GE2E-P00-GATE-001",
+  "goal_id": "AXIGNAL-GOAL-001",
+  "phase": "P00",
+  "task_id": "AX-GE2E-P00-T01",
+  "decision_at": "2026-07-30T13:52:00+02:00",
+  "evaluated_commit": "acb72ca54132981bc31756d413c262f27dd20e48",
+  "baseline_commit": "9ee3e12620f137208c1943a05501f2671a1f4817",
+  "contracts": [
+    "30@1.4.0",
+    "18",
+    "ADR-015"
+  ],
+  "review_authority": {
+    "type": "HUMAN_PRODUCT_AUTHORITY",
+    "decision": "APPROVED",
+    "scope": "Merge PR #56, close P00 and authorise P01"
+  },
+  "automated_evidence": {
+    "contract_validation": "PASS",
+    "bounded_ai_contract": "PASS",
+    "first_lawful_universe": "PASS",
+    "ted_eforms_xml_parser": "PASS",
+    "executable_spine": "PASS"
+  },
+  "rollback_rehearsal": {
+    "reference": "evidence/p00-rollback-rehearsal-v1.4",
+    "operation": "Move disposable reference from the P00 head to the exact pre-P00 baseline",
+    "result": "PASS",
+    "comparison_status": "identical",
+    "residual_files": 0,
+    "affects_main": false,
+    "affects_product_runtime": false,
+    "global_product_rollback_tested": false
+  },
+  "unresolved_conditions": [],
+  "disposition": "PASS",
+  "task_state": "ACCEPTED",
+  "next_authorised_phase": "P01",
+  "next_authorised_task": "AX-GE2E-P01-T01",
+  "truth_boundary": {
+    "public_launch_authorised": false,
+    "partial_launch_allowed": false,
+    "global_coverage_claim_authorised": false,
+    "live_self_service_billing_authorised": false,
+    "global_product_rollback_tested": false
+  }
+}

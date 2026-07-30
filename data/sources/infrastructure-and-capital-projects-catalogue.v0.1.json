@@ -1,0 +1,18 @@
+{
+  "catalogue_id":"AX-INFRA-SOURCE-CATALOGUE-001",
+  "version":"0.1.0",
+  "status":"RESEARCH_CATALOGUE_NOT_PRODUCT_AVAILABILITY",
+  "goal_id":"AXIGNAL-GOAL-001",
+  "library_id":"AX-LIB-O04",
+  "governing_contract":"30",
+  "governing_adr":"ADR-015",
+  "principles":{"listed_does_not_mean_admitted":true,"source_specific_admission_required":true,"scraping_assumed_permitted":false,"public_coverage_authorised":false},
+  "sources":[
+    {"source_id":"WORLD_BANK_PROJECTS","jurisdiction":"Global","system_name":"World Bank Projects & Operations","official_entry_point":"https://projects.worldbank.org/","initial_state":"DISCOVERED","product_admitted":false,"rights_status":"UNREVIEWED"},
+    {"source_id":"EIB_PROJECTS","jurisdiction":"Europe and Global","system_name":"European Investment Bank Projects","official_entry_point":"https://www.eib.org/en/projects/","initial_state":"DISCOVERED","product_admitted":false,"rights_status":"UNREVIEWED"},
+    {"source_id":"EBRD_PROJECTS","jurisdiction":"EBRD regions","system_name":"EBRD Projects","official_entry_point":"https://www.ebrd.com/home/what-we-do/projects.html","initial_state":"DISCOVERED","product_admitted":false,"rights_status":"UNREVIEWED"},
+    {"source_id":"ADB_PROJECTS","jurisdiction":"Asia and Pacific","system_name":"Asian Development Bank Projects","official_entry_point":"https://www.adb.org/what-we-do/data/corporate","initial_state":"DISCOVERED","product_admitted":false,"rights_status":"UNREVIEWED"},
+    {"source_id":"AFDB_PROJECTS","jurisdiction":"Africa","system_name":"African Development Bank Projects","official_entry_point":"https://www.afdb.org/en/projects-and-operations","initial_state":"DISCOVERED","product_admitted":false,"rights_status":"UNREVIEWED"},
+    {"source_id":"IDB_PROJECTS","jurisdiction":"Latin America and Caribbean","system_name":"Inter-American Development Bank Projects","official_entry_point":"https://www.iadb.org/en/project-search","initial_state":"DISCOVERED","product_admitted":false,"rights_status":"UNREVIEWED"}
+  ]
+}

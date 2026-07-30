@@ -1,0 +1,17 @@
+{
+  "catalogue_id":"AX-ENERGY-SOURCE-CATALOGUE-001",
+  "version":"0.1.0",
+  "status":"RESEARCH_CATALOGUE_NOT_PRODUCT_AVAILABILITY",
+  "goal_id":"AXIGNAL-GOAL-001",
+  "library_id":"AX-LIB-O08",
+  "governing_contract":"30",
+  "governing_adr":"ADR-015",
+  "principles":{"listed_does_not_mean_admitted":true,"source_specific_admission_required":true,"scraping_assumed_permitted":false,"public_coverage_authorised":false},
+  "sources":[
+    {"source_id":"US_EIA","jurisdiction":"United States and Global","system_name":"U.S. EIA Open Data","official_entry_point":"https://www.eia.gov/opendata/","initial_state":"DISCOVERED","product_admitted":false,"rights_status":"UNREVIEWED"},
+    {"source_id":"EUROSTAT_ENERGY","jurisdiction":"European Union","system_name":"Eurostat Energy","official_entry_point":"https://ec.europa.eu/eurostat/web/energy/database","initial_state":"DISCOVERED","product_admitted":false,"rights_status":"UNREVIEWED"},
+    {"source_id":"ENTSOE_TRANSPARENCY","jurisdiction":"Europe","system_name":"ENTSO-E Transparency Platform","official_entry_point":"https://transparency.entsoe.eu/","initial_state":"DISCOVERED","product_admitted":false,"rights_status":"UNREVIEWED"},
+    {"source_id":"IRENA_STATS","jurisdiction":"Global","system_name":"IRENA Statistics","official_entry_point":"https://www.irena.org/Data","initial_state":"DISCOVERED","product_admitted":false,"rights_status":"UNREVIEWED"},
+    {"source_id":"COPERNICUS_CDS","jurisdiction":"Global","system_name":"Copernicus Climate Data Store","official_entry_point":"https://cds.climate.copernicus.eu/","initial_state":"DISCOVERED","product_admitted":false,"rights_status":"UNREVIEWED"}
+  ]
+}

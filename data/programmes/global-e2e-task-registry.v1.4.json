@@ -1,0 +1,14 @@
+{
+  "registry_id": "AX-GE2E-TASK-REGISTRY-001",
+  "version": "1.4.0",
+  "status": "NORMATIVE_CANDIDATE",
+  "goal_id": "AXIGNAL-GOAL-001",
+  "programme": "P00-P24",
+  "shards": [
+    {"range":"P00-P04","path":"data/programmes/global-e2e-tasks-p00-p04.v1.4.json","task_count":5},
+    {"range":"P05-P09","path":"data/programmes/global-e2e-tasks-p05-p09.v1.4.json","task_count":5},
+    {"range":"P10-P14","path":"data/programmes/global-e2e-tasks-p10-p14.v1.4.json","task_count":5},
+    {"range":"P15-P19","path":"data/programmes/global-e2e-tasks-p15-p19.v1.4.json","task_count":5},
+    {"range":"P20-P24","path":"data/programmes/global-e2e-tasks-p20-p24.v1.4.json","task_count":5}
+  ]
+}
