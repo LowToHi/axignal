@@ -1,0 +1,107 @@
+version: 1.4.0
+goal_id: AXIGNAL-GOAL-001
+canonical_brand: AXIGNAL
+canonical_domain: axignal.com
+programme: P00-P24
+status: CANDIDATE
+phase_routes:
+- phase: P00
+  task_id: AX-GE2E-P00-T01
+  required_skills: [goal-keeper, contract-router, task-orchestrator, gate-evaluator]
+  gate_reviewer: gate-evaluator
+- phase: P01
+  task_id: AX-GE2E-P01-T01
+  required_skills: [ux-researcher, hypothesis-curator, product-analyst]
+  gate_reviewer: gate-evaluator
+- phase: P02
+  task_id: AX-GE2E-P02-T01
+  required_skills: [ontology-engineer, data-architect, opportunity-modeler]
+  gate_reviewer: gate-evaluator
+- phase: P03
+  task_id: AX-GE2E-P03-T01
+  required_skills: [security-reviewer, privacy-reviewer, identity-engineer]
+  gate_reviewer: gate-evaluator
+- phase: P04
+  task_id: AX-GE2E-P04-T01
+  required_skills: [connector-engineer, source-admission, data-quality-auditor]
+  gate_reviewer: gate-evaluator
+- phase: P05
+  task_id: AX-GE2E-P05-T01
+  required_skills: [data-architect, entity-resolution-engineer, ontology-engineer]
+  gate_reviewer: gate-evaluator
+- phase: P06
+  task_id: AX-GE2E-P06-T01
+  required_skills: [multilingual-localiser, evidence-provenance-engineer, search-engineer]
+  gate_reviewer: gate-evaluator
+- phase: P07
+  task_id: AX-GE2E-P07-T01
+  required_skills: [opportunity-modeler, interaction-architect, data-architect]
+  gate_reviewer: gate-evaluator
+- phase: P08
+  task_id: AX-GE2E-P08-T01
+  required_skills: [connector-engineer, source-admission, opportunity-modeler]
+  gate_reviewer: gate-evaluator
+- phase: P09
+  task_id: AX-GE2E-P09-T01
+  required_skills: [connector-engineer, source-admission, opportunity-modeler]
+  gate_reviewer: gate-evaluator
+- phase: P10
+  task_id: AX-GE2E-P10-T01
+  required_skills: [connector-engineer, regulatory-scope-reviewer, opportunity-modeler]
+  gate_reviewer: gate-evaluator
+- phase: P11
+  task_id: AX-GE2E-P11-T01
+  required_skills: [connector-engineer, source-admission, opportunity-modeler]
+  gate_reviewer: gate-evaluator
+- phase: P12
+  task_id: AX-GE2E-P12-T01
+  required_skills: [entity-resolution-engineer, connector-engineer, opportunity-modeler]
+  gate_reviewer: gate-evaluator
+- phase: P13
+  task_id: AX-GE2E-P13-T01
+  required_skills: [data-quality-auditor, connector-engineer, opportunity-modeler]
+  gate_reviewer: gate-evaluator
+- phase: P14
+  task_id: AX-GE2E-P14-T01
+  required_skills: [ontology-engineer, connector-engineer, opportunity-modeler]
+  gate_reviewer: gate-evaluator
+- phase: P15
+  task_id: AX-GE2E-P15-T01
+  required_skills: [data-quality-auditor, connector-engineer, opportunity-modeler]
+  gate_reviewer: gate-evaluator
+- phase: P16
+  task_id: AX-GE2E-P16-T01
+  required_skills: [entity-resolution-engineer, connector-engineer, opportunity-modeler]
+  gate_reviewer: gate-evaluator
+- phase: P17
+  task_id: AX-GE2E-P17-T01
+  required_skills: [graph-engineer, globe-engineer, timeline-engineer, epistemic-admission]
+  gate_reviewer: gate-evaluator
+- phase: P18
+  task_id: AX-GE2E-P18-T01
+  required_skills: [intent-intelligence-engineer, privacy-reviewer, analytics-engineer]
+  gate_reviewer: gate-evaluator
+- phase: P19
+  task_id: AX-GE2E-P19-T01
+  required_skills: [scenario-calibration-engineer, data-quality-auditor, gate-evaluator]
+  gate_reviewer: gate-evaluator
+- phase: P20
+  task_id: AX-GE2E-P20-T01
+  required_skills: [api-engineer, identity-engineer, security-reviewer]
+  gate_reviewer: gate-evaluator
+- phase: P21
+  task_id: AX-GE2E-P21-T01
+  required_skills: [billing-engineer, finance-operator, product-analyst]
+  gate_reviewer: gate-evaluator
+- phase: P22
+  task_id: AX-GE2E-P22-T01
+  required_skills: [operations-engineer, security-reviewer, legal-doc-coordinator]
+  gate_reviewer: gate-evaluator
+- phase: P23
+  task_id: AX-GE2E-P23-T01
+  required_skills: [frontend-architect, ux-researcher, growth-analyst, multilingual-localiser]
+  gate_reviewer: gate-evaluator
+- phase: P24
+  task_id: AX-GE2E-P24-T01
+  required_skills: [gate-evaluator, product-analyst, security-reviewer, finance-operator]
+  gate_reviewer: gate-evaluator
