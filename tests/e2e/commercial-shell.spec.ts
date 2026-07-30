@@ -88,6 +88,7 @@ test("executes the authenticated commercial shell without external Stripe", asyn
 
   await page.reload();
   await page.getByRole("button", { name: /PLAN ·/ }).click();
+  await page.getByRole("button", { name: "Actualizar" }).click();
   await expect(page.getByText("ROLLED_BACK", { exact: true })).toBeVisible();
   await expect(page.getByText(/acceso CANCELLED/)).toBeVisible();
 });
