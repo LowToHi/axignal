@@ -110,8 +110,22 @@ jobs:
       - name: Validate P03 security, identity and rights
         run: python scripts/verify_p03_security_identity_rights.py
 
-      - name: Rehearse byte-exact P03 rollback
-        run: python scripts/verify_p03_rollback.py
+      - name: Rehearse byte-exact P03 rollback at frozen P03 head
+        env:
+          P03_ENGINEERING_HEAD: 3b950b1b111a0eb6e3b9b330cc15887db8699f3c
+        run: |
+          set -euo pipefail
+          verification_dir="${RUNNER_TEMP}/axignal-p03-rollback"
+          rm -rf "${verification_dir}"
+          git worktree add --detach "${verification_dir}" "${P03_ENGINEERING_HEAD}"
+          trap 'git worktree remove --force "${verification_dir}" >/dev/null 2>&1 || true' EXIT
+          python "${verification_dir}/scripts/verify_p03_rollback.py"
+
+      - name: Validate P04 Source Admission Factory and Connector SDK
+        run: python scripts/verify_p04_source_admission_factory.py
+
+      - name: Rehearse byte-exact P04 rollback
+        run: python scripts/verify_p04_rollback.py
 
       - name: Validate modular skill registries
         run: |
