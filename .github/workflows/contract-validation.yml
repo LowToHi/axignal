@@ -236,8 +236,22 @@ jobs:
       - name: Validate P12 Corporate and Ownership Library and Account Workspace
         run: python scripts/verify_p12_corporate_ownership_account_workspace.py
 
-      - name: Rehearse byte-exact P12 rollback
-        run: python scripts/verify_p12_rollback.py
+      - name: Rehearse byte-exact P12 rollback at frozen P12 head
+        env:
+          P12_ENGINEERING_HEAD: 96b89d8e7bdd7712dae476eeb97e1240c7846f22
+        run: |
+          set -euo pipefail
+          verification_dir="${RUNNER_TEMP}/axignal-p12-rollback"
+          rm -rf "${verification_dir}"
+          git worktree add --detach "${verification_dir}" "${P12_ENGINEERING_HEAD}"
+          trap 'git worktree remove --force "${verification_dir}" >/dev/null 2>&1 || true' EXIT
+          python "${verification_dir}/scripts/verify_p12_rollback.py"
+
+      - name: Validate P13 Sovereign Macro Library and Strategy Workspace
+        run: python scripts/verify_p13_sovereign_macro_strategy_workspace.py
+
+      - name: Rehearse byte-exact P13 rollback
+        run: python scripts/verify_p13_rollback.py
 
       - name: Validate modular skill registries
         run: |
