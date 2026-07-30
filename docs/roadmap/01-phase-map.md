@@ -10,7 +10,7 @@ Decision: `ADR-015`
 
 | Phase | State | Objective | Exit gate |
 |---|---|---|---|
-| `P00` | `IN_PROGRESS` | Integrate v1.4 and synchronise canonical governance | Contract, ADR, tasks, registries and verifier pass |
+| `P00` | `EVIDENCE_READY` | Integrate v1.4 and synchronise canonical governance | Human gate review remains before acceptance |
 | `P01` | `BLOCKED` | Validate global buyers, jobs and workflows | Qualified evidence by library and workflow |
 | `P02` | `BLOCKED` | Freeze global ontology and library contracts | New library can be added without rewriting the core |
 | `P03` | `BLOCKED` | Security, identity and rights by design | Tenant, role, source-right and data-class boundaries pass |
