@@ -7,9 +7,9 @@ Governing contract: `30`
 
 Every active task is instantiated in `data/programmes/global-e2e-task-registry.v1.4.json` and each task object is validated by `schemas/task.schema.json`.
 
-| Task | Phase outcome | Initial state |
+| Task | Phase outcome | State |
 |---|---|---|
-| `AX-GE2E-P00-T01` | Canonical integration: Integrate Contract 30, ADR-015, P00–P24 tasks, registries, catalogues and deterministic governance validation. | `IN_PROGRESS` |
+| `AX-GE2E-P00-T01` | Canonical integration: Integrate Contract 30, ADR-015, P00–P24 tasks, registries, catalogues and deterministic governance validation. | `EVIDENCE_READY` |
 | `AX-GE2E-P01-T01` | Buyer and workflow evidence: Validate global buyer personas, jobs, budgets, workflows, alternatives and failure costs across all opportunity libraries. | `BLOCKED` |
 | `AX-GE2E-P02-T01` | Global ontology and library contracts: Freeze reusable universe, library, source, evidence, opportunity, entity, taxonomy and temporal contracts. | `BLOCKED` |
 | `AX-GE2E-P03-T01` | Security, identity and rights: Design multiuser identity, organisations, roles, RLS, source rights, data classes, exports and threat controls. | `BLOCKED` |
