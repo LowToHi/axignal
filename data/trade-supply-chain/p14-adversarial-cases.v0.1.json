@@ -1,0 +1,35 @@
+{
+  "schema_version": "axignal.trade-supply-chain-workspace-cases/v0.1",
+  "task_id": "AX-GE2E-P14-T01",
+  "scopes": [
+    "TRADE_FLOW_REGISTRY",
+    "PRODUCT_CLASSIFICATION",
+    "ORIGIN_DESTINATION_PARTNER",
+    "TARIFF_CUSTOMS_MEASURE",
+    "ROUTE_LOGISTICS_DISRUPTION",
+    "SUPPLY_OPPORTUNITY_WORKSPACE",
+    "DEPENDENCY_SCENARIO_RISK",
+    "EXTERNAL_ACTION_OUTCOME",
+    "CROSS_MODULE"
+  ],
+  "threats": [
+    "AGGREGATE_TO_SHIPMENT_INFERENCE",
+    "MISSING_AS_ZERO",
+    "CLASSIFICATION_VERSION_COLLAPSE",
+    "TARIFF_AS_DUTY_OWED",
+    "SANCTIONS_ADVICE_OR_APPLICABILITY",
+    "ROUTE_EVENT_AS_CLOSURE",
+    "RIGHTS_REVOKED",
+    "CROSS_TENANT_OR_AUTHORITY_ESCALATION"
+  ],
+  "expected_by_threat": {
+    "AGGREGATE_TO_SHIPMENT_INFERENCE": {"decision": "QUARANTINE", "canonical_delta": 0, "external_action_delta": 0, "reason_code": "NO_SHIPMENT_INFERENCE_FROM_AGGREGATE"},
+    "MISSING_AS_ZERO": {"decision": "DENY", "canonical_delta": 0, "external_action_delta": 0, "reason_code": "MISSING_REMAINS_UNKNOWN"},
+    "CLASSIFICATION_VERSION_COLLAPSE": {"decision": "REVIEW_REQUIRED", "canonical_delta": 0, "external_action_delta": 0, "reason_code": "CLASSIFICATION_VERSION_REQUIRED"},
+    "TARIFF_AS_DUTY_OWED": {"decision": "DENY", "canonical_delta": 0, "external_action_delta": 0, "reason_code": "NO_DUTY_OWED_WITHOUT_APPLICABILITY"},
+    "SANCTIONS_ADVICE_OR_APPLICABILITY": {"decision": "DENY", "canonical_delta": 0, "external_action_delta": 0, "reason_code": "LEGAL_AUTHORITY_REQUIRED"},
+    "ROUTE_EVENT_AS_CLOSURE": {"decision": "REVIEW_REQUIRED", "canonical_delta": 0, "external_action_delta": 0, "reason_code": "EVENT_STATUS_NOT_CLOSURE"},
+    "RIGHTS_REVOKED": {"decision": "DENY", "canonical_delta": 0, "external_action_delta": 0, "reason_code": "SOURCE_RIGHTS_INACTIVE"},
+    "CROSS_TENANT_OR_AUTHORITY_ESCALATION": {"decision": "BLOCK", "canonical_delta": 0, "external_action_delta": 0, "reason_code": "TENANT_OR_AUTHORITY_BOUNDARY"}
+  }
+}
