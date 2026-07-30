@@ -180,8 +180,22 @@ jobs:
       - name: Validate P08 Global Procurement Library and Bid Workspace
         run: python scripts/verify_p08_global_procurement_bid_workspace.py
 
-      - name: Rehearse byte-exact P08 rollback
-        run: python scripts/verify_p08_rollback.py
+      - name: Rehearse byte-exact P08 rollback at frozen P08 head
+        env:
+          P08_ENGINEERING_HEAD: 3e28e08a12d02701d4ab312edfbedc56fcd8bb59
+        run: |
+          set -euo pipefail
+          verification_dir="${RUNNER_TEMP}/axignal-p08-rollback"
+          rm -rf "${verification_dir}"
+          git worktree add --detach "${verification_dir}" "${P08_ENGINEERING_HEAD}"
+          trap 'git worktree remove --force "${verification_dir}" >/dev/null 2>&1 || true' EXIT
+          python "${verification_dir}/scripts/verify_p08_rollback.py"
+
+      - name: Validate P09 Grants Library and Application Workspace
+        run: python scripts/verify_p09_grants_application_workspace.py
+
+      - name: Rehearse byte-exact P09 rollback
+        run: python scripts/verify_p09_rollback.py
 
       - name: Validate modular skill registries
         run: |
