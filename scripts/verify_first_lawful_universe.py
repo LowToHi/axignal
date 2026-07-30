@@ -36,6 +36,7 @@ SECURITY_REVIEW_PATH = DOCS / "security/AX-F8-T14-ted-runtime-security-review.md
 HYPOTHESIS_PATH = DOCS / "contracts/11-hypothesis-register.md"
 ADR_INDEX_PATH = DOCS / "adr/README.md"
 EXECUTION_STATE_PATH = DOCS / "roadmap/06-current-execution-state.md"
+ACTIVE_CATALOGUE_PATH = DOCS / "roadmap/02-task-catalogue.md"
 
 
 def load_json(path: Path) -> dict:
@@ -51,14 +52,8 @@ def require(condition: bool, message: str) -> None:
 
 
 def weighted_total(criteria: list[dict], scores: dict[str, int]) -> Decimal:
-    weights = {
-        item["id"]: Decimal(str(item["weight"]))
-        for item in criteria
-    }
-    return sum(
-        weights[key] * Decimal(value) / Decimal(5)
-        for key, value in scores.items()
-    )
+    weights = {item["id"]: Decimal(str(item["weight"])) for item in criteria}
+    return sum(weights[key] * Decimal(value) / Decimal(5) for key, value in scores.items())
 
 
 def validate_scorecard() -> dict:
@@ -97,8 +92,7 @@ def validate_scorecard() -> dict:
         )
         passed = declared >= Decimal(str(gate["minimum_total"]))
         passed = passed and all(
-            scores[key] >= minimum
-            for key, minimum in gate["minimum_scores"].items()
+            scores[key] >= minimum for key, minimum in gate["minimum_scores"].items()
         )
         require(passed is candidate["knockout_pass"], "knockout mismatch")
         if passed:
@@ -123,8 +117,7 @@ def validate_scorecard() -> dict:
     winner = selected[0]
     require(winner["universe_id"] == "eu_public_procurement", "wrong universe")
     require(
-        winner["weighted_total"]
-        == max(item["weighted_total"] for item in eligible),
+        winner["weighted_total"] == max(item["weighted_total"] for item in eligible),
         "selected universe is not the highest-scoring eligible candidate",
     )
     historical = scorecard["selected_universe"]
@@ -256,11 +249,7 @@ def validate_tasks() -> None:
         require(all(item["answer"] == "YES" for item in checks), "Goal Lock blocker")
         require(task["rollback"]["tested"] is True, "rollback is not tested")
         if task["state"] == "ACCEPTED":
-            required = [
-                item
-                for item in task["acceptance_evidence"]
-                if item["required"]
-            ]
+            required = [item for item in task["acceptance_evidence"] if item["required"]]
             require(
                 all(item["status"] == "PASS" for item in required),
                 f"accepted task has an unpassed gate: {path.name}",
@@ -276,6 +265,7 @@ def validate_normative_links() -> None:
     hypothesis = HYPOTHESIS_PATH.read_text(encoding="utf-8")
     adr_index = ADR_INDEX_PATH.read_text(encoding="utf-8")
     execution = EXECUTION_STATE_PATH.read_text(encoding="utf-8")
+    active_catalogue = ACTIVE_CATALOGUE_PATH.read_text(encoding="utf-8")
 
     require("European Public Procurement Intelligence" in research, "selection missing")
     require("WEDGE SELECTED / IMPLEMENTATION NOT ADMITTED" in research, "history missing")
@@ -283,12 +273,19 @@ def validate_normative_links() -> None:
     require("ADR-012" in adr_index, "ADR index missing")
     h006 = hypothesis.split("## 8. H-006", 1)[1].split("## 9.", 1)[0]
     require("State: `TEST_DESIGNED`" in h006, "H-006 drifted")
+
+    # F0–F12 is now implementation history under Contract 30. The accepted F8
+    # evidence is validated from its immutable typed tasks above, while the active
+    # execution state must truthfully expose P00 and the bounded TED capability.
     require(
-        "F8 — First lawful opportunity universe | `IN_PROGRESS`" in execution,
-        "F8 state not active",
+        "Legacy F0–F12 implementation history" in execution,
+        "legacy programme history is not preserved",
     )
-    require("AX-F8-T14" in execution, "T14 missing from execution state")
-    require("`ACCEPTED`" in execution, "T14 acceptance missing")
+    require("bounded admitted TED Search profile" in execution, "bounded TED evidence missing")
+    require("AX-GE2E-P00-T01" in execution, "active P00 task missing")
+    require('"public_launch_authorised": false' in execution, "launch boundary missing")
+    require("AX-GE2E-P08-T01" in active_catalogue, "active Procurement phase missing")
+
     require("Search API envelope — JSON" in source_doc, "JSON contract missing")
     require("Canonical notice — XML" in source_doc, "XML contract missing")
     require("PRODUCT_ADMITTED" in admission, "source admission missing")
