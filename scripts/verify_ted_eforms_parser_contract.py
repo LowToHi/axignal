@@ -59,9 +59,19 @@ def main() -> None:
         policy["status"] == "DISABLED_PENDING_PRODUCT_ADMISSION_AND_XML_PARSER",
         "claim policy activated",
     )
+
+    # The shared TED Search source is now admitted only for the separately governed
+    # fixed non-personal Search profile. That admission does not activate this XML
+    # parser profile or the full procurement claim policy.
     source = load_json(SOURCE_PATH)
-    require(source["status"] == "TECHNICAL_PROBE", "source state escalated")
-    require(source["kill_switch_enabled"] is True, "source kill switch disabled")
+    require(source["status"] == "PRODUCT_ADMITTED", "bounded Search source admission missing")
+    require(source["kill_switch_enabled"] is False, "bounded private-pilot Search source disabled")
+    require(
+        "fixed non-personal Search API projection" in source["rights"]["notes"],
+        "bounded Search admission scope is not explicit",
+    )
+    require(source["rights"]["api_redistribution"] == "PROHIBITED", "API redistribution enabled")
+    require(source["rights"]["model_training"] == "PROHIBITED", "model training enabled")
 
     task_schema = load_json(TASK_SCHEMA_PATH)
     task = load_json(TASK_PATH)
@@ -84,7 +94,7 @@ def main() -> None:
     catalogue = CATALOGUE_PATH.read_text(encoding="utf-8")
     runbook = RUNBOOK_PATH.read_text(encoding="utf-8")
     parser_source = PARSER_PATH.read_text(encoding="utf-8")
-    require("AX-F8-T11" in catalogue, "task not registered in catalogue")
+    require("AX-GE2E-P08-T01" in catalogue, "active Procurement task not registered")
     require("defusedxml.ElementTree" in runbook, "safe-parser documentation missing")
     require(
         'SUPPORTED_CUSTOMIZATION_ID = "eforms-sdk-1.14"' in parser_source,
@@ -106,7 +116,8 @@ def main() -> None:
                 "notice_type": profile["notice_profile"]["notice_type"],
                 "notice_subtype": profile["notice_profile"]["notice_subtype"],
                 "candidate_predicate_count": len(profile["candidate_claim_predicates"]),
-                "runtime_enabled": False,
+                "shared_search_source_state": source["status"],
+                "xml_runtime_enabled": False,
                 "canonical_writes": 0,
             },
             sort_keys=True,
