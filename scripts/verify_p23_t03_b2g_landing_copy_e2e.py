@@ -103,9 +103,15 @@ assert plans["TEAM_MONTHLY"]["amount_minor"] == 39900
 assert plans["PROFESSIONAL_MONTHLY"]["commercial_activation_authorised"] is False
 assert plans["TEAM_MONTHLY"]["commercial_activation_authorised"] is False
 
-application_copy = public_copy.lower()
+# Prohibited phrases must not appear as affirmative marketing claims. The FAQ may
+# name those phrases only to deny them explicitly and establish a truth boundary.
+affirmative_copy = "\n".join((landing, form, layout)).lower()
 for phrase in runtime["prohibited_claims"]:
-    assert phrase.lower() not in application_copy, phrase
+    assert phrase.lower() not in affirmative_copy, phrase
+
+assert "does not claim a guaranteed win rate or guaranteed truth" in data.lower()
+assert "no. it does not claim a guaranteed win rate or guaranteed truth" in data.lower()
+assert "coverage is declared source by source" in data.lower()
 
 required_sections = (
     'id="workflow"',
