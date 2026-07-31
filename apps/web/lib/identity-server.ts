@@ -84,15 +84,24 @@ export async function proxyIdentityRequest(
   path: string
 ): Promise<NextResponse> {
   if (!identityRuntimeEnabled()) {
-    return NextResponse.json({ error: "Passwordless identity is disabled." }, { status: 503 });
+    return NextResponse.json(
+      { error: "Passwordless identity is disabled." },
+      { status: 503 }
+    );
   }
   const method = request.method.toUpperCase();
   if (!ALLOWED[method]?.has(path)) {
-    return NextResponse.json({ error: "Identity route is not allowed." }, { status: 404 });
+    return NextResponse.json(
+      { error: "Identity route is not allowed." },
+      { status: 404 }
+    );
   }
   const apiUrl = process.env.AXIGNAL_API_URL?.replace(/\/$/, "");
   if (!apiUrl) {
-    return NextResponse.json({ error: "AXIGNAL_API_URL is required." }, { status: 503 });
+    return NextResponse.json(
+      { error: "AXIGNAL_API_URL is required." },
+      { status: 503 }
+    );
   }
   const store = await cookies();
   const installation = await installationId();
@@ -104,16 +113,22 @@ export async function proxyIdentityRequest(
   const body = method === "GET" ? undefined : await request.text();
 
   try {
-    const upstream = await fetch(`${apiUrl}/v1/identity/${path}`, {
+    const init: RequestInit = {
       method,
       headers,
-      body,
       cache: "no-store",
-      signal: AbortSignal.timeout(10_000)
-    });
-    const payload = (await upstream.json().catch(() => ({ error: "Invalid API response." }))) as
-      Record<string, unknown>;
-    const issuedSession = typeof payload.session_token === "string" ? payload.session_token : null;
+      signal: AbortSignal.timeout(10_000),
+      ...(body !== undefined ? { body } : {})
+    };
+    const upstream = await fetch(`${apiUrl}/v1/identity/${path}`, init);
+    const payload = (await upstream
+      .json()
+      .catch(() => ({ error: "Invalid API response." }))) as Record<
+      string,
+      unknown
+    >;
+    const issuedSession =
+      typeof payload.session_token === "string" ? payload.session_token : null;
     if (issuedSession) delete payload.session_token;
     const response = NextResponse.json(payload, {
       status: upstream.status,
@@ -128,13 +143,23 @@ export async function proxyIdentityRequest(
       });
     }
     if (issuedSession && upstream.ok) {
-      response.cookies.set({ ...identitySessionCookieOptions(), value: issuedSession });
+      response.cookies.set({
+        ...identitySessionCookieOptions(),
+        value: issuedSession
+      });
     }
     if (path === "sessions/logout" && upstream.ok) {
-      response.cookies.set({ ...identitySessionCookieOptions(), value: "", maxAge: 0 });
+      response.cookies.set({
+        ...identitySessionCookieOptions(),
+        value: "",
+        maxAge: 0
+      });
     }
     return response;
   } catch {
-    return NextResponse.json({ error: "Identity API unavailable." }, { status: 503 });
+    return NextResponse.json(
+      { error: "Identity API unavailable." },
+      { status: 503 }
+    );
   }
 }
