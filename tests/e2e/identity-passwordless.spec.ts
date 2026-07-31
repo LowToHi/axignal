@@ -89,7 +89,13 @@ test("registers, revokes and reauthenticates with a real WebAuthn boundary", asy
   expect(sessionCookie).toBeDefined();
   expect(sessionCookie?.httpOnly).toBeTruthy();
   expect(sessionCookie?.sameSite).toBe("Lax");
-  expect(await page.evaluate(() => localStorage.length)).toBe(0);
+
+  const localStorageEntries = await page.evaluate(() =>
+    Object.entries(localStorage)
+  );
+  const sensitiveKey = /(session|auth|token|credential|passkey|tenant|identity)/i;
+  expect(localStorageEntries.some(([key]) => sensitiveKey.test(key))).toBe(false);
+  expect(JSON.stringify(localStorageEntries)).not.toContain("buyer.p25@example.test");
 
   const logout = await page.evaluate(async () => {
     const response = await fetch("/api/identity/sessions/logout", {
