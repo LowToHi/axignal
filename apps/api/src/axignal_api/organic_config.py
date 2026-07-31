@@ -17,6 +17,8 @@ def _subjects(value: str | None) -> tuple[str, ...]:
 @dataclass(frozen=True)
 class OrganicDiscoverySettings:
     enabled: bool
+    public_indexing_enabled: bool
+    public_alerts_enabled: bool
     database_url: str | None
     founder_subjects: tuple[str, ...]
     hmac_pepper: str | None
@@ -28,6 +30,10 @@ class OrganicDiscoverySettings:
     def from_env(cls) -> "OrganicDiscoverySettings":
         return cls(
             enabled=_bool_env("AXIGNAL_ORGANIC_DISCOVERY_ENABLED"),
+            public_indexing_enabled=_bool_env(
+                "AXIGNAL_ORGANIC_PUBLIC_INDEXING_ENABLED"
+            ),
+            public_alerts_enabled=_bool_env("AXIGNAL_TENDER_ALERTS_ENABLED"),
             database_url=(
                 os.getenv("AXIGNAL_ORGANIC_DATABASE_URL")
                 or os.getenv("AXIGNAL_DATABASE_URL")
@@ -47,7 +53,19 @@ class OrganicDiscoverySettings:
         if not self.database_url:
             raise RuntimeError("AXIGNAL_ORGANIC_DATABASE_URL is required")
         if not self.hmac_pepper or len(self.hmac_pepper) < 32:
-            raise RuntimeError("AXIGNAL_ORGANIC_HMAC_PEPPER must contain at least 32 characters")
+            raise RuntimeError(
+                "AXIGNAL_ORGANIC_HMAC_PEPPER must contain at least 32 characters"
+            )
+
+    def require_public_indexing(self) -> None:
+        self.require_runtime()
+        if not self.public_indexing_enabled:
+            raise RuntimeError("Public organic indexing is not authorised")
+
+    def require_public_alerts(self) -> None:
+        self.require_runtime()
+        if not self.public_alerts_enabled:
+            raise RuntimeError("Public tender alerts are not authorised")
 
     def require_founder_subject(self, subject: str) -> None:
         self.require_runtime()
