@@ -18,21 +18,37 @@ BASE = datetime(2026, 7, 31, 18, 0, tzinfo=UTC)
 
 
 def digest(value: str) -> str:
-    return hashlib.sha256(value.encode("utf-8")).hexdigest()
+    return hashlib.sha256(value.encode()).hexdigest()
 
 
 def hmac_like(label: str) -> str:
     return digest(f"p25:{label}")
 
 
-def app_call(query: str, params: tuple[object, ...] = ()) -> dict | None:
+def call(
+    query: str,
+    params: tuple[object, ...] = (),
+    *,
+    role: str | None = None,
+    tenant_id: UUID | None = None,
+) -> dict | None:
     with (
         psycopg.connect(DSN, row_factory=dict_row) as connection,
         connection.cursor() as cursor,
     ):
-        cursor.execute("SET LOCAL ROLE axignal_app")
+        if role:
+            cursor.execute(f"SET LOCAL ROLE {role}")
+        if tenant_id:
+            cursor.execute(
+                "SELECT set_config('app.tenant_id', %s, true)",
+                (str(tenant_id),),
+            )
         cursor.execute(query, params)
         return cursor.fetchone()
+
+
+def app_call(query: str, params: tuple[object, ...] = ()) -> dict | None:
+    return call(query, params, role="axignal_app")
 
 
 def tenant_call(
@@ -40,26 +56,20 @@ def tenant_call(
     query: str,
     params: tuple[object, ...] = (),
 ) -> dict | None:
-    with (
-        psycopg.connect(DSN, row_factory=dict_row) as connection,
-        connection.cursor() as cursor,
-    ):
-        cursor.execute("SET LOCAL ROLE axignal_app")
-        cursor.execute(
-            "SELECT set_config('app.tenant_id', %s, true)",
-            (str(tenant_id),),
-        )
-        cursor.execute(query, params)
-        return cursor.fetchone()
+    return call(query, params, role="axignal_app", tenant_id=tenant_id)
 
 
 def admin_one(query: str, params: tuple[object, ...] = ()) -> dict | None:
-    with (
-        psycopg.connect(DSN, row_factory=dict_row) as connection,
-        connection.cursor() as cursor,
-    ):
-        cursor.execute(query, params)
-        return cursor.fetchone()
+    return call(query, params)
+
+
+def expect_failure(marker: str, operation) -> str:
+    try:
+        operation()
+    except Exception as exc:
+        assert marker in str(exc), f"Expected {marker!r}, got {exc!r}"
+        return marker
+    raise AssertionError(f"Expected failure {marker}")
 
 
 def begin_signup(
@@ -76,8 +86,7 @@ def begin_signup(
     row = app_call(
         """
         SELECT * FROM identity_private.begin_email_challenge(
-          'SIGNUP', %s, %s, %s, %s, %s, %s, %s, %s,
-          %s, %s
+          'SIGNUP', %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
         )
         """,
         (
@@ -123,27 +132,36 @@ def bind_test_passkey(
     session_token: str,
     now: datetime,
 ) -> dict:
+    ticket_row = app_call(
+        """
+        SELECT identity_private.resolve_bootstrap_ticket(
+          %s, 'PASSKEY_REGISTRATION', %s
+        ) AS result
+        """,
+        (digest(ticket), now),
+    )
+    assert ticket_row is not None and isinstance(ticket_row["result"], dict)
+    bootstrap_ticket_id = UUID(str(ticket_row["result"]["bootstrap_ticket_id"]))
+
     challenge = f"challenge_{uuid4().hex}"
     challenge_row = app_call(
         """
         SELECT * FROM identity_private.create_webauthn_challenge(
-          %s, %s, 'REGISTRATION', %s, (
-            SELECT bootstrap_ticket_id
-            FROM identity_private.bootstrap_tickets
-            WHERE token_digest = %s
-          ), '127.0.0.1', 'http://127.0.0.1:18080', %s, %s
+          %s, %s, 'REGISTRATION', %s, %s,
+          '127.0.0.1', 'http://127.0.0.1:18080', %s, %s
         )
         """,
         (
             challenge,
             digest(challenge),
             user_id,
-            digest(ticket),
+            bootstrap_ticket_id,
             now + timedelta(minutes=5),
             now,
         ),
     )
     assert challenge_row is not None
+
     recovery = [hmac_like(f"recovery:{index}:{user_id}") for index in range(8)]
     row = app_call(
         """
@@ -171,31 +189,44 @@ def bind_test_passkey(
     return row["result"]
 
 
-def expect_failure(marker: str, operation) -> str:
-    try:
-        operation()
-    except Exception as exc:
-        assert marker in str(exc), f"Expected {marker!r}, got {exc!r}"
-        return marker
-    raise AssertionError(f"Expected failure {marker}")
+def create_signup(
+    *,
+    email: str,
+    canonical_identity: str,
+    installation: str,
+    network: str,
+    domain: str,
+    offset_minutes: int,
+) -> tuple[str, str, dict]:
+    token = f"verify_{uuid4().hex}"
+    ticket = f"register_{uuid4().hex}"
+    started = BASE + timedelta(minutes=offset_minutes)
+    begin_signup(
+        token=token,
+        email=email,
+        email_identity=canonical_identity,
+        installation=installation,
+        network=network,
+        domain=domain,
+        now=started,
+    )
+    result = consume_signup(
+        token=token,
+        ticket=ticket,
+        operation=f"op_signup_{uuid4().hex}",
+        now=started + timedelta(seconds=1),
+    )
+    return token, ticket, result
 
 
 def main() -> None:
-    first_token = f"verify_{uuid4().hex}"
-    first_ticket = f"register_{uuid4().hex}"
-    canonical_email_identity = "firstlast@gmail.com"
-    begin_signup(
-        token=first_token,
+    _, first_ticket, first = create_signup(
         email="first.last+trial@gmail.com",
-        email_identity=canonical_email_identity,
+        canonical_identity="firstlast@gmail.com",
         installation="device-a",
         network="203.0.113.0/24",
         domain="gmail.com",
-    )
-    first = consume_signup(
-        token=first_token,
-        ticket=first_ticket,
-        operation=f"op_signup_{uuid4().hex}",
+        offset_minutes=0,
     )
     assert first["decision"] == "ALLOW"
     first_tenant = UUID(str(first["tenant_id"]))
@@ -225,50 +256,30 @@ def main() -> None:
         "SELECT identity_private.resolve_identity_session(%s, 300, %s) AS result",
         (digest(session_token), BASE + timedelta(seconds=4)),
     )
-    assert session is not None
+    assert session is not None and isinstance(session["result"], dict)
     assert session["result"]["assurance_level"] == "AAL2"
     assert session["result"]["membership_id"] is None
 
-    duplicate_token = f"verify_{uuid4().hex}"
-    duplicate_ticket = f"register_{uuid4().hex}"
-    begin_signup(
-        token=duplicate_token,
+    _, _, duplicate = create_signup(
         email="firstlast@googlemail.com",
-        email_identity=canonical_email_identity,
+        canonical_identity="firstlast@gmail.com",
         installation="device-b",
         network="198.51.100.0/24",
         domain="gmail.com",
-        now=BASE + timedelta(minutes=1),
-    )
-    duplicate = consume_signup(
-        token=duplicate_token,
-        ticket=duplicate_ticket,
-        operation=f"op_signup_{uuid4().hex}",
-        now=BASE + timedelta(minutes=1, seconds=1),
+        offset_minutes=1,
     )
     assert duplicate["decision"] == "REUSE_EXISTING_TRIAL"
     assert UUID(str(duplicate["tenant_id"])) == first_tenant
-    grants = admin_one(
-        "SELECT count(*) AS count FROM identity_private.trial_grants"
-    )
+    grants = admin_one("SELECT count(*) AS count FROM identity_private.trial_grants")
     assert grants is not None and grants["count"] == 1
 
-    risky_token = f"verify_{uuid4().hex}"
-    risky_ticket = f"register_{uuid4().hex}"
-    begin_signup(
-        token=risky_token,
+    _, _, risky = create_signup(
         email="second@example.test",
-        email_identity="second@example.test",
+        canonical_identity="second@example.test",
         installation="device-a",
         network="203.0.113.0/24",
         domain="example.test",
-        now=BASE + timedelta(minutes=2),
-    )
-    risky = consume_signup(
-        token=risky_token,
-        ticket=risky_ticket,
-        operation=f"op_signup_{uuid4().hex}",
-        now=BASE + timedelta(minutes=2, seconds=1),
+        offset_minutes=2,
     )
     assert risky["decision"] == "STEP_UP_REQUIRED"
     risky_tenant = UUID(str(risky["tenant_id"]))
@@ -288,7 +299,7 @@ def main() -> None:
             BASE + timedelta(minutes=3),
         ),
     )
-    assert step_up is not None
+    assert step_up is not None and isinstance(step_up["result"], dict)
     assert step_up["result"]["state"] == "READY"
     assert step_up["result"]["decision"] == "ALLOW"
 
@@ -337,7 +348,11 @@ def main() -> None:
         """,
         (first_tenant,),
     )
-    assert seats == {"seat_capacity": 2, "plan_code": "TRIAL_7D", "state": "ACTIVE"}
+    assert seats == {
+        "seat_capacity": 2,
+        "plan_code": "TRIAL_7D",
+        "state": "ACTIVE",
+    }
 
     reservation = tenant_call(
         first_tenant,
@@ -354,10 +369,7 @@ def main() -> None:
     )
     assert reservation is not None
     usage = admin_one(
-        """
-        SELECT * FROM identity_private.trial_usage_accounts
-        WHERE tenant_id = %s
-        """,
+        "SELECT * FROM identity_private.trial_usage_accounts WHERE tenant_id = %s",
         (first_tenant,),
     )
     assert usage is not None
@@ -377,10 +389,7 @@ def main() -> None:
     )
     assert reconciled is not None and reconciled["state"] == "RECONCILED"
     usage = admin_one(
-        """
-        SELECT * FROM identity_private.trial_usage_accounts
-        WHERE tenant_id = %s
-        """,
+        "SELECT * FROM identity_private.trial_usage_accounts WHERE tenant_id = %s",
         (first_tenant,),
     )
     assert usage is not None
@@ -414,9 +423,6 @@ def main() -> None:
         ),
     )
 
-    first_run = uuid4()
-    second_run = uuid4()
-
     def insert_run(run_id: UUID, state: str) -> dict | None:
         return tenant_call(
             first_tenant,
@@ -425,7 +431,9 @@ def main() -> None:
               research_run_id, tenant_id, context_id, opportunity_id,
               question, state, private_knowledge_authorised,
               source_plan, budgets
-            ) VALUES (%s, %s, %s, %s, %s, %s, false, '[]'::jsonb, '{}'::jsonb)
+            ) VALUES (
+              %s, %s, %s, %s, %s, %s, false, '[]'::jsonb, '{}'::jsonb
+            )
             RETURNING research_run_id, state
             """,
             (
@@ -438,6 +446,8 @@ def main() -> None:
             ),
         )
 
+    first_run = uuid4()
+    second_run = uuid4()
     assert insert_run(first_run, "QUEUED") is not None
     expect_failure(
         "trial_concurrency_exhausted",
@@ -473,14 +483,20 @@ def main() -> None:
         cross_schema = "BLOCKED"
 
     revoked = app_call(
-        "SELECT identity_private.revoke_identity_session(%s, 'E2E_LOGOUT', %s) AS revoked",
+        """
+        SELECT identity_private.revoke_identity_session(
+          %s, 'E2E_LOGOUT', %s
+        ) AS revoked
+        """,
         (digest(session_token), activation_time + timedelta(minutes=6)),
     )
     assert revoked is not None and revoked["revoked"] is True
     expect_failure(
         "identity_session_expired",
         lambda: app_call(
-            "SELECT identity_private.resolve_identity_session(%s, 300, %s) AS result",
+            """
+            SELECT identity_private.resolve_identity_session(%s, 300, %s) AS result
+            """,
             (digest(session_token), activation_time + timedelta(minutes=7)),
         ),
     )
