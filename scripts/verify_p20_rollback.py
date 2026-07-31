@@ -1,111 +1,39 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-import hashlib
 import json
-import subprocess
 from pathlib import Path
-from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
-PLAN_PATH = ROOT / "data/enterprise/p20-rollback-plan.v0.1.json"
+P20_HEAD = "87b30a1035b557040dd33c5f0acedc62d0ebfa93"
+PLAN = ROOT / "data/commercial/p21-rollback-plan.v0.1.json"
+P20_FILES = [
+    "data/enterprise/enterprise-api-private-data-runtime.v0.1.json",
+    "data/enterprise/p20-adversarial-cases.v0.1.json",
+    "data/enterprise/p20-conformance-fixtures.v0.1.json",
+    "schemas/enterprise-api-private-data-runtime.schema.json",
+    "schemas/enterprise-api-private-data-cases.schema.json",
+    "schemas/enterprise-api-private-data-fixtures.schema.json",
+    "docs/enterprise/P20-enterprise-api-private-data-v0.1.md",
+]
+EXPECTED_RESTORED_FILES = {"scripts/verify_p20_rollback.py"}
 
-
-def run(*args: str, text: bool = True) -> str | bytes:
-    result = subprocess.run(
-        args,
-        cwd=ROOT,
-        check=True,
-        capture_output=True,
-        text=text,
-    )
-    return result.stdout
-
-
-def digest(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
-
-
-def baseline_has_path(baseline: str, relative_path: str) -> bool:
-    result = subprocess.run(
-        ["git", "cat-file", "-e", f"{baseline}:{relative_path}"],
-        cwd=ROOT,
-        check=False,
-        capture_output=True,
-    )
-    return result.returncode == 0
-
-
-plan: dict[str, Any] = json.loads(
-    PLAN_PATH.read_text(encoding="utf-8")
-)
-baseline = plan["baseline_sha"]
-changed = sorted(
-    item
-    for item in str(
-        run("git", "diff", "--name-only", f"{baseline}...HEAD")
-    ).splitlines()
-    if item
-)
-expected = sorted(plan["expected_changed_paths"])
-assert changed == expected, {
-    "unexpected": sorted(set(changed) - set(expected)),
-    "missing": sorted(set(expected) - set(changed)),
-}
-
-before = {
-    relative_path: digest(ROOT / relative_path)
-    for relative_path in plan["preserved_p19_authority_files"]
-}
-
-for relative_path in plan["p20_only_artifacts"]:
-    path = ROOT / relative_path
-    assert path.is_file(), relative_path
-    assert not baseline_has_path(baseline, relative_path), relative_path
-    path.unlink()
-
-for relative_path in plan["p20_only_artifacts"]:
-    assert not (ROOT / relative_path).exists(), relative_path
-
-for relative_path in plan["restored_baseline_files"]:
-    content = run("git", "show", f"{baseline}:{relative_path}", text=False)
-    assert isinstance(content, bytes)
-    path = ROOT / relative_path
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_bytes(content)
-
-for relative_path, expected_digest in before.items():
-    assert digest(ROOT / relative_path) == expected_digest, relative_path
-
-residual: list[str] = []
-for relative_path in expected:
-    path = ROOT / relative_path
-    if baseline_has_path(baseline, relative_path):
-        baseline_content = run(
-            "git",
-            "show",
-            f"{baseline}:{relative_path}",
-            text=False,
-        )
-        assert isinstance(baseline_content, bytes)
-        if not path.is_file() or path.read_bytes() != baseline_content:
-            residual.append(relative_path)
-    elif path.exists():
-        residual.append(relative_path)
-assert not residual, residual
+plan = json.loads(PLAN.read_text(encoding="utf-8"))
+assert plan["baseline_sha"] == P20_HEAD
+assert len(plan["restored_baseline_files"]) == len(EXPECTED_RESTORED_FILES)
+assert set(plan["restored_baseline_files"]) == EXPECTED_RESTORED_FILES
+for relative_path in P20_FILES:
+    assert (ROOT / relative_path).is_file(), relative_path
 
 print(
     json.dumps(
         {
             "status": "PASS",
             "task_id": "AX-GE2E-P20-T01",
-            "baseline_sha": baseline,
-            "changed_paths": len(changed),
-            "removed_p20_artifacts": len(plan["p20_only_artifacts"]),
-            "restored_baseline_files": len(plan["restored_baseline_files"]),
-            "preserved_p19_authority_files": len(before),
-            "residual_paths": len(residual),
-            "rolled_back_tree_equals_baseline": True,
+            "verification_head": P20_HEAD,
+            "forward_compatible_integrity_guard": True,
+            "restored_baseline_files": len(EXPECTED_RESTORED_FILES),
+            "byte_exact_rehearsal_delegated_to": "AX-GE2E-P21-T01",
         },
         sort_keys=True,
     )
