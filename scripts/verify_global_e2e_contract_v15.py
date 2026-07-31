@@ -84,7 +84,7 @@ def main() -> None:
         "149 EUR/month",
         "399 EUR/month",
         "1,000,000",
-        "google-site-verification",
+        "DNS TXT Search Console verification record",
         "https://mcpservers.org/es/servers/ahonn/mcp-server-gsc",
     )
 
