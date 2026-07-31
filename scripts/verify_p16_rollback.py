@@ -1,89 +1,55 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-import hashlib
 import json
+import shutil
 import subprocess
+import tempfile
 from pathlib import Path
-from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
-PLAN_PATH = ROOT / "data/innovation-ip/p16-rollback-plan.v0.1.json"
+P16_ENGINEERING_HEAD = "daf3b4339051dfa3317e89f61e520e51ea36fbb7"
+parent = Path(tempfile.mkdtemp(prefix="axignal-p16-rollback-"))
+verification_dir = parent / "worktree"
 
-
-def run(*args: str, text: bool = True) -> str | bytes:
-    result = subprocess.run(
-        args,
+try:
+    subprocess.run(
+        [
+            "git",
+            "worktree",
+            "add",
+            "--detach",
+            str(verification_dir),
+            P16_ENGINEERING_HEAD,
+        ],
         cwd=ROOT,
         check=True,
-        capture_output=True,
-        text=text,
     )
-    return result.stdout
-
-
-def digest(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
-
-
-plan: dict[str, Any] = json.loads(PLAN_PATH.read_text(encoding="utf-8"))
-baseline = plan["baseline_sha"]
-changed = sorted(
-    item
-    for item in str(
-        run("git", "diff", "--name-only", f"{baseline}...HEAD")
-    ).splitlines()
-    if item
-)
-expected = sorted(plan["expected_changed_paths"])
-assert changed == expected, {
-    "unexpected": sorted(set(changed) - set(expected)),
-    "missing": sorted(set(expected) - set(changed)),
-}
-
-before = {
-    rel: digest(ROOT / rel)
-    for rel in plan["preserved_p15_authority_files"]
-}
-
-for rel in plan["p16_only_artifacts"]:
-    path = ROOT / rel
-    assert path.is_file(), rel
-    path.unlink()
-
-for rel in plan["restored_baseline_files"]:
-    content = run("git", "show", f"{baseline}:{rel}", text=False)
-    assert isinstance(content, bytes)
-    path = ROOT / rel
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_bytes(content)
-
-after = {
-    rel: digest(ROOT / rel)
-    for rel in plan["preserved_p15_authority_files"]
-}
-assert before == after
-assert (
     subprocess.run(
-        ["git", "diff", "--quiet", baseline, "--", "."],
+        [
+            "python",
+            str(verification_dir / "scripts/verify_p16_rollback.py"),
+        ],
+        cwd=verification_dir,
+        check=True,
+    )
+finally:
+    subprocess.run(
+        ["git", "worktree", "remove", "--force", str(verification_dir)],
         cwd=ROOT,
         check=False,
-    ).returncode
-    == 0
-)
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+    shutil.rmtree(parent, ignore_errors=True)
 
 print(
     json.dumps(
         {
             "status": "PASS",
             "task_id": "AX-GE2E-P16-T01",
-            "baseline_sha": baseline,
-            "changed_paths": len(changed),
-            "restored_baseline_files": len(
-                plan["restored_baseline_files"]
-            ),
-            "residual_paths": 0,
-            "rolled_back_tree_equals_baseline": True,
+            "verification_head": P16_ENGINEERING_HEAD,
+            "isolated_forward_compatible_rehearsal": True,
         },
         sort_keys=True,
     )

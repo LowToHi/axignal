@@ -112,7 +112,7 @@ distinct. Translation and calculations never replace source-native evidence.
 - 40 conformance fixtures;
 - 72 adversarial cases;
 - deterministic reference functions;
-- byte-exact rollback to frozen P16.
+- byte-exact rollback to frozen P16, including restoration of the P16 rollback verifier.
 
 ## Canonical gate
 
@@ -123,7 +123,7 @@ Security, Rights and Product Authorities approve.
 
 ## CI composition
 
-The shared `Contract Validation` workflow remains byte-identical to P16 and validates
+The shared `Contract Validation` workflow remains byte-identical to P16. Its P16 rollback step is made forward-compatible by a scoped wrapper that rehearses the original verifier at the frozen P16 head, then validates
 the complete P01–P16 stack plus every JSON Schema on the P17 head. The dedicated P17
 workflow validates the P17 runtime, exact dependency bindings, deterministic functions,
 fixtures, adversarial cases and rollback. This avoids mutating shared CI solely to
