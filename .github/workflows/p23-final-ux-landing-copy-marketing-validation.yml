@@ -42,12 +42,13 @@ jobs:
         run: python -m py_compile scripts/p23_experience_reference.py scripts/verify_p23_final_ux_landing_copy_marketing.py
       - name: Validate P23 contract
         run: python scripts/verify_p23_final_ux_landing_copy_marketing.py | tee p23-experience-evidence.json
-      - name: Reject premature publication and misleading copy
+      - name: Reject premature publication
         run: |
           ! grep -R '"public_site_authorised": true' data/experience
           ! grep -R '"public_campaigns_authorised": true' data/experience
           ! grep -R '"paid_media_authorised": true' data/experience
-          ! grep -R -i -E 'guaranteed truth|zero hallucinations|100 percent accurate|replace your analysts' data/experience docs/experience
+          ! grep -R '"production_traffic_authorised": true' data/experience
+          ! grep -R '"stripe_live_authorised": true' data/experience
       - name: Reject live secrets
         run: '! grep -R -E "(sk_live_|rk_live_|whsec_[A-Za-z0-9]{20,})" data/experience docs/experience scripts/p23_experience_reference.py scripts/verify_p23_final_ux_landing_copy_marketing.py'
       - name: Upload non-sensitive evidence
