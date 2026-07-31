@@ -27,7 +27,7 @@ class OrganicDiscoverySettings:
     test_runtime_enabled: bool
 
     @classmethod
-    def from_env(cls) -> "OrganicDiscoverySettings":
+    def from_env(cls) -> OrganicDiscoverySettings:
         return cls(
             enabled=_bool_env("AXIGNAL_ORGANIC_DISCOVERY_ENABLED"),
             public_indexing_enabled=_bool_env(
