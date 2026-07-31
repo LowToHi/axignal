@@ -269,7 +269,7 @@ def main() -> None:
             "Founder Operations",
         ),
         "docs/contracts/28-b2g-procurement-commercial-and-global-source-program.md": (
-            "B2G Opportunity Intelligence",
+            "Business-to-Government (B2G) Opportunity Intelligence",
             "0 / 149 / 399 / QUOTE",
             "P27",
         ),
