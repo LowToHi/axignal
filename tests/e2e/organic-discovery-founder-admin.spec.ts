@@ -150,7 +150,11 @@ test("publishes only admitted intelligence and exposes a governed founder OS", a
 
   await page.getByRole("button", { name: "Tender Alerts" }).click();
   await expect(
-    page.getByRole("heading", { name: "Tender alerts" })
+    page.getByRole("heading", {
+      name: "Tender alerts",
+      level: 3,
+      exact: true
+    })
   ).toBeVisible();
   await expect(page.getByText("ACTIVE").first()).toBeVisible();
 
