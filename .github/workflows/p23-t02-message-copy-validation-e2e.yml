@@ -6,9 +6,12 @@ on:
     paths:
       - "apps/landing/**"
       - "data/experience/message-copy-validation-e2e-runtime.v0.1.json"
+      - "data/experience/b2g-landing-copy-e2e-runtime.v0.1.json"
       - "data/commercial/commercial-runtime-pricing-stripe-runtime.v0.1.json"
       - "docs/experience/P23-T02-message-copy-validation-e2e-v0.1.md"
+      - "docs/experience/P23-T03-b2g-landing-copy-e2e-v0.1.md"
       - "scripts/verify_p23_t02_message_copy_validation_e2e.py"
+      - "scripts/verify_p23_t03_b2g_landing_copy_e2e.py"
       - "tests/landing/**"
       - "playwright.landing.config.ts"
       - ".github/workflows/p23-t02-message-copy-validation-e2e.yml"
@@ -17,9 +20,12 @@ on:
     paths:
       - "apps/landing/**"
       - "data/experience/message-copy-validation-e2e-runtime.v0.1.json"
+      - "data/experience/b2g-landing-copy-e2e-runtime.v0.1.json"
       - "data/commercial/commercial-runtime-pricing-stripe-runtime.v0.1.json"
       - "docs/experience/P23-T02-message-copy-validation-e2e-v0.1.md"
+      - "docs/experience/P23-T03-b2g-landing-copy-e2e-v0.1.md"
       - "scripts/verify_p23_t02_message_copy_validation_e2e.py"
+      - "scripts/verify_p23_t03_b2g_landing_copy_e2e.py"
       - "tests/landing/**"
       - "playwright.landing.config.ts"
       - ".github/workflows/p23-t02-message-copy-validation-e2e.yml"
@@ -33,7 +39,7 @@ concurrency:
 
 jobs:
   validate:
-    name: Real landing, copy, pricing and intake
+    name: Historical message contract and active landing
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
@@ -53,9 +59,10 @@ jobs:
         run: corepack enable
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - name: Verify structured message contract
+      - name: Verify historical contract and B2G supersession
         run: |
           python -m json.tool data/experience/message-copy-validation-e2e-runtime.v0.1.json >/dev/null
+          python -m json.tool data/experience/b2g-landing-copy-e2e-runtime.v0.1.json >/dev/null
           python -m py_compile scripts/verify_p23_t02_message_copy_validation_e2e.py
           python scripts/verify_p23_t02_message_copy_validation_e2e.py \
             | tee p23-t02-message-copy-evidence.json
