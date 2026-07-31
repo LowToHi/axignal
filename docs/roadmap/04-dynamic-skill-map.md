@@ -1,16 +1,30 @@
 # 04 — AXIGNAL Dynamic Skill Map
 
-Version: `0.4.0`
-Status: `NORMATIVE CANDIDATE`
+Version: `0.5.0`
+Status: `NORMATIVE CANDIDATE / CONTRACT 31 ALIGNMENT`
 Goal ID: `AXIGNAL-GOAL-001`
+Governing programme: `Contract 31 / ADR-016`
 
 ## 1. Purpose
 
-Dynamic skills are bounded capability contracts loaded by the development agent according to the active task. They reduce goal loss by ensuring each task receives the specialist rules, evidence requirements and prohibited shortcuts it needs.
+Dynamic skills are bounded capability contracts loaded according to the active task. They ensure each task receives specialist rules, evidence requirements and prohibited shortcuts.
 
-A skill is not an autonomous product authority. It operates under the Goal Lock, `AGENTS.md`, contract `18` and the task specification.
+A skill is not autonomous product authority. It operates under the Goal Lock, `AGENTS.md`, Contract 18, Contract 31 and the typed task.
 
-## 2. Skill lifecycle
+## 2. State boundary
+
+Skills must distinguish:
+
+```text
+engineering output
+≠ canonical acceptance
+≠ product admission
+≠ public launch
+```
+
+No skill may approve its own work, widen its task, admit a source, grant authority or return a P27 launch disposition.
+
+## 3. Skill lifecycle
 
 ```text
 DISCOVERED
@@ -24,138 +38,244 @@ DISCOVERED
 
 No skill may be activated before its contract and tests exist.
 
-## 3. Skill activation algorithm
+## 4. Activation algorithm
 
-For every task, the orchestrator MUST:
+For every material task, the orchestrator must:
 
-1. read `goal_id` and phase;
-2. load the Goal Lock;
-3. resolve governing contracts;
-4. load mandatory skills from `skills/registry.yaml`;
-5. add conditional skills triggered by data, privacy, security, language, UI, research or financial scope;
+1. read `goal_id`, phase and engineering/canonical state;
+2. load Goal Lock, AGENTS, Contract 18 and Contract 31;
+3. resolve applicable capability contracts and ADRs;
+4. load mandatory skills from the registries;
+5. add conditional skills triggered by sources, privacy, security, identity, billing, SEO, MCP, language, UI, research or operational scope;
 6. resolve conflicts by contract precedence;
-7. record activated skill versions in task evidence;
-8. refuse execution if a required skill is unavailable or revoked.
+7. record skill versions and evidence;
+8. refuse execution when a required skill is unavailable or revoked.
 
-## 4. Always-on governance skills
+## 5. Always-on governance skills
 
 | Skill | Responsibility |
 |---|---|
 | `goal-keeper` | Detect goal drift and anti-goal violations |
-| `contract-router` | Resolve applicable contracts and precedence |
-| `task-orchestrator` | Validate task completeness and dependencies |
-| `gate-evaluator` | Evaluate evidence and authorise transitions |
-| `naming-guardian` | Enforce AXIGNAL, axignal.com and canonical identifiers |
-| `security-reviewer` | Detect security impact and required controls |
-| `privacy-reviewer` | Detect personal-data, profiling and retention impact |
+| `contract-router` | Resolve contracts, supersession and precedence |
+| `task-orchestrator` | Validate scope, dependencies and dual state |
+| `gate-evaluator` | Evaluate evidence without self-acceptance |
+| `naming-guardian` | Enforce AXIGNAL identifiers |
+| `security-reviewer` | Require security controls and threat review |
+| `privacy-reviewer` | Require personal-data, consent and retention controls |
 | `observability-engineer` | Require metrics, logs, traces and alerts |
 
-These skills MUST run for every material task.
+## 6. Product and epistemic skills
 
-## 5. Product and epistemic skills
-
-| Skill | Trigger | Output |
+| Skill | Trigger | Required output |
 |---|---|---|
-| `epistemic-admission` | claim, evidence, opportunity, scenario or outcome work | admission rules, tests and state-transition evidence |
-| `source-admission` | new source, connector, licence or export | source rights record and admission decision |
-| `evidence-provenance-engineer` | evidence extraction or transformation | lineage, hashes, method versions and replay path |
-| `entity-resolution-engineer` | aliases, entity merge or identifiers | reversible resolution evidence |
-| `opportunity-modeler` | opportunity assembly or maturity | typed subgraph and invalidation conditions |
-| `scenario-calibration-engineer` | forecasts or probabilities | baseline, holdout, calibration and demotion rules |
-| `data-quality-auditor` | ingestion or derived metrics | quality profile, threshold and quarantine behaviour |
+| `epistemic-admission` | claims, evidence, opportunity, scenario or outcome | admission rules, state transitions and tests |
+| `source-admission` | source, connector, licence or export | rights record, admission state and kill switch |
+| `evidence-provenance-engineer` | evidence transformation | lineage, hashes, method and replay |
+| `entity-resolution-engineer` | aliases, merge or identifiers | reversible resolution evidence |
+| `opportunity-modeler` | Opportunity or Pursuit assembly | typed state and invalidation conditions |
+| `scenario-calibration-engineer` | forecast or probability | baseline, holdout, calibration and demotion |
+| `data-quality-auditor` | ingestion or derived metrics | quality profile and quarantine |
+| `opportunity-operations-engineer` | workspace, task, approval or outcome | tenant-scoped operating model and audit |
 
-## 6. Research, retrieval and memory skills
+## 7. Research and AI skills
 
-| Skill | Trigger | Output |
+| Skill | Trigger | Required output |
 |---|---|---|
-| `research-run-orchestrator` | active investigation, dossier, monitoring or ResearchRun | typed plan, lifecycle, budget, progress and cancellation evidence |
-| `retrieval-policy-engineer` | RAG, vector, lexical, graph, API or Browser retrieval | domain-scoped retrieval plan, ranking evidence and source precedence |
-| `authorised-browser-researcher` | external web or document discovery | bounded browser plan, provenance, injection controls and stopping evidence |
-| `tenant-memory-engineer` | private documents, memory, preferences or tenant search | RLS model, purpose controls, deletion propagation and cross-tenant tests |
-| `local-model-operator` | local model, continuous worker, model routing or GPU | model policy, sandbox, resource budget, evaluation and kill switch |
-| `candidate-claim-pipeline-engineer` | model extraction, Candidate Claim or admission handoff | schema-valid proposals, lineage, quarantine and proof of no canonical-write authority |
-| `research-queue-orchestrator` | coverage gaps and candidate studies | prioritisation, lifecycle and evidence routing |
+| `research-run-orchestrator` | ResearchRun or dossier | plan, lifecycle, budget and cancellation |
+| `retrieval-policy-engineer` | lexical, vector, graph, API or browser retrieval | bounded retrieval and source precedence |
+| `authorised-browser-researcher` | external web or documents | provenance, injection controls and stopping evidence |
+| `tenant-memory-engineer` | private data or memory | RLS, purpose and deletion propagation |
+| `local-model-operator` | local model or routing | sandbox, evaluation, resources and kill switch |
+| `candidate-claim-pipeline-engineer` | extraction or Claim proposal | schema, lineage and no-canonical-write proof |
+| `research-queue-orchestrator` | research gaps | prioritisation and evidence routing |
+| `prompt-injection-reviewer` | documents, web, connectors or MCP output | isolation, tool and output-validation controls |
 
-Mandatory activation combinations:
+## 8. Identity, trial and abuse skills
 
-- Browser retrieval MUST activate `source-admission`, `authorised-browser-researcher`, `security-reviewer` and `evidence-provenance-engineer`.
-- Tenant-private retrieval MUST activate `tenant-memory-engineer`, `privacy-reviewer`, `security-reviewer` and `data-architect`.
-- Candidate Claim generation MUST activate `candidate-claim-pipeline-engineer`, `epistemic-admission`, `evidence-provenance-engineer` and `source-admission`.
-- Local model execution MUST activate `local-model-operator`, `security-reviewer`, `finance-operator`, `test-engineer` and `observability-engineer`.
-- ResearchRun UI work MUST activate `research-run-orchestrator`, `conversational-navigator`, `interaction-architect` and `accessibility-auditor`.
-
-## 7. Experience skills
-
-| Skill | Trigger | Output |
+| Skill | Trigger | Required output |
 |---|---|---|
-| `ux-researcher` | workflow, onboarding or validation work | evidence-backed findings and test plan |
-| `interaction-architect` | navigation, context or direct manipulation | interaction state model and recovery rules |
-| `visualisation-designer` | charts, maps, graph or timeline | semantic encodings and perceptual QA |
-| `globe-engineer` | geographic surfaces | layer, tile, projection and semantic zoom contract |
-| `graph-engineer` | relational surfaces | typed graph, bounded traversal and layout contract |
-| `timeline-engineer` | historical state | as-of reconstruction and temporal integrity |
-| `lens-router-engineer` | AUTO, Globe, Graph or Dual selection | deterministic routing and explanation rules |
-| `conversational-navigator` | chat commands or explanations | typed intent plan and grounded response |
-| `accessibility-auditor` | any user-facing surface | WCAG evidence and non-visual equivalent |
-| `consent-ux-reviewer` | permission, memory or data-use controls | explicit, reversible consent/authority UX |
+| `identity-engineer` | identity, roles, sessions, SSO or SCIM | server-authoritative identity model |
+| `webauthn-engineer` | passkeys or recovery | RP/origin, challenge, credential and recovery evidence |
+| `session-security-engineer` | cookies, sessions or assertions | revocation, rotation and timeout controls |
+| `trial-governance-engineer` | free trial or onboarding | tenant-level grant, delayed clock and budgets |
+| `fraud-risk-engineer` | abuse or multi-account risk | strong/weak signals, step-up and false-positive controls |
+| `seat-governance-engineer` | membership, invitation or capacity | transactional allocation, role and downgrade evidence |
+| `consent-ux-reviewer` | verification, consent or step-up | explicit, reversible and low-friction UX |
 
-## 8. Multilingual skills
+Mandatory P25 combination:
 
-| Skill | Trigger | Output |
+```text
+identity-engineer
++ webauthn-engineer
++ session-security-engineer
++ trial-governance-engineer
++ fraud-risk-engineer
++ seat-governance-engineer
++ security-reviewer
++ privacy-reviewer
++ test-engineer
+```
+
+## 9. Experience and accessibility skills
+
+| Skill | Trigger | Required output |
 |---|---|---|
-| `multilingual-localiser` | text, search, command or evidence rendering | locale, terminology, translation provenance and parity tests |
-| `ontology-engineer` | predicates, universes or multilingual concepts | canonical vocabulary and mappings |
-| `search-engineer` | lexical, semantic or entity search | ranking contract, language parity and match explanation |
+| `ux-researcher` | workflow or validation | evidence-backed findings |
+| `interaction-architect` | navigation or direct manipulation | state and recovery model |
+| `visualisation-designer` | chart, map, graph or timeline | semantic encodings and QA |
+| `globe-engineer` | geographic surfaces | projection, layer and semantic zoom contract |
+| `graph-engineer` | relational surfaces | typed traversal and layout |
+| `timeline-engineer` | historical state | as-of and revision integrity |
+| `lens-router-engineer` | AUTO, Globe, Graph or Dual | routing and explanation |
+| `conversational-navigator` | commands or explanations | typed intent and grounded response |
+| `accessibility-auditor` | user-facing surface | WCAG and non-visual evidence |
+| `consent-ux-reviewer` | permissions or communication | consent and authority UX |
 
-## 9. Intent Intelligence skills
+## 10. Multilingual skills
 
-| Skill | Trigger | Output |
+| Skill | Trigger | Required output |
 |---|---|---|
-| `intent-intelligence-designer` | prototype or UX of user-interest features | transparent user and aggregate interaction design |
-| `intent-intelligence-engineer` | intent events, preferences or tides | typed pipeline and separation from economic truth |
-| `analytics-engineer` | cohort, trend or conversion metrics | denominator, uniqueness and time-window definitions |
-| `fraud-risk-engineer` | collective behaviour or rankings | coordination, manipulation and abuse controls |
-| `research-queue-orchestrator` | coverage gaps and candidate studies | prioritisation, lifecycle and evidence routing |
+| `multilingual-localiser` | text, search or evidence rendering | locale, terminology and parity tests |
+| `ontology-engineer` | predicates, libraries or concepts | canonical vocabulary and mappings |
+| `search-engineer` | lexical, semantic or entity search | ranking, language parity and explanation |
 
-## 10. Platform and operations skills
+## 11. Organic discovery and growth skills
 
-| Skill | Trigger | Output |
+| Skill | Trigger | Required output |
 |---|---|---|
-| `repository-architect` | monorepo, packages or CI | reproducible structure and boundaries |
-| `backend-architect` | API, jobs or services | typed service and failure contracts |
-| `frontend-architect` | application state and UI implementation | state, rendering and entitlement boundaries |
-| `data-architect` | databases, migrations or retention | canonical schemas and migration plans |
-| `connector-engineer` | source integration | idempotent connector and kill switch |
-| `api-engineer` | public or enterprise API | OpenAPI, auth, quotas and compatibility |
-| `identity-engineer` | users, roles or SSO | tenant-safe identity and access model |
-| `billing-engineer` | pricing and Stripe | idempotent billing and entitlement evidence |
-| `performance-engineer` | latency or rendering budgets | measured performance and degradation plan |
-| `test-engineer` | any implementation | automated evidence and failure cases |
-| `operations-engineer` | deployment or incidents | runbooks, rollback, recovery and ownership |
-| `operations-writer` | operating documentation | executable runbooks and verification |
+| `programmatic-seo-engineer` | generated public page or sitemap | IndexabilityGate, URL and lifecycle contract |
+| `content-quality-gate` | indexability or publication | uniqueness, depth, source and freshness evidence |
+| `structured-data-engineer` | JSON-LD or semantic publication | visible-content parity and validation |
+| `crawler-policy-engineer` | robots, sitemap or agent access | crawler-specific allow/deny policy |
+| `search-console-operator` | GSC property or analytics | official API, least privilege and read-only evidence |
+| `ai-citation-analyst` | answer-engine citation | observation ledger and attribution limits |
+| `tender-alert-operator` | alert capture and delivery | double opt-in, compensation and unsubscribe |
+| `crm-governance-engineer` | contacts, lead score or lifecycle | CRM/identity/entitlement separation |
+| `growth-analyst` | acquisition and attribution | funnel, payback and causal limitations |
 
-## 11. Commercial and validation skills
+Mandatory P26-T01 combination:
 
-| Skill | Trigger | Output |
+```text
+programmatic-seo-engineer
++ content-quality-gate
++ structured-data-engineer
++ crawler-policy-engineer
++ tender-alert-operator
++ crm-governance-engineer
++ ai-citation-analyst
++ consent-ux-reviewer
++ accessibility-auditor
+```
+
+## 12. MCP and connector skills
+
+| Skill | Trigger | Required output |
 |---|---|---|
-| `hypothesis-curator` | buyer, pricing, wedge or defence claims | falsifiable hypothesis and evidence state |
-| `product-analyst` | usage, retention or decision impact | validated metric interpretation |
-| `finance-operator` | costs, margin or revenue | unit economics and budget control |
-| `universe-selector` | new opportunity universe | rights/value/cost/regulation scorecard |
-| `design-partner-operator` | paid validation | recruitment, evidence and feedback loop |
-| `growth-analyst` | acquisition channels | attribution, payback and repeatability evidence |
-| `regulatory-scope-reviewer` | financial, crypto or jurisdiction expansion | scope decision and blocked capabilities |
-| `legal-doc-coordinator` | customer terms or notices | legal-review checklist and publication package |
+| `connector-engineer` | external API or data integration | idempotence, rights and kill switch |
+| `mcp-security-reviewer` | MCP server or tool | exact implementation, scopes and threat review |
+| `tool-permission-engineer` | tool allowlist or destructive action | deny-by-default permission matrix |
+| `supply-chain-security-reviewer` | package, release or dependency | provenance, vulnerabilities and release identity |
+| `secret-boundary-reviewer` | OAuth, service account or API credential | reference-only secret flow |
+| `egress-policy-engineer` | connector network access | destination and method allowlist |
 
-## 12. Skill creation contract
+MCP activation requires all six skills plus `source-admission`, `security-reviewer`, `privacy-reviewer` and `test-engineer`.
 
-A new skill MUST define:
+Catalogue presence must never trigger installation.
 
-- stable ID;
-- version;
-- purpose;
-- trigger conditions;
-- required inputs;
+## 13. Platform and Founder Operations skills
+
+| Skill | Trigger | Required output |
+|---|---|---|
+| `repository-architect` | monorepo or CI | reproducible structure |
+| `backend-architect` | API, jobs or services | typed failure contracts |
+| `frontend-architect` | UI and state | rendering and authority boundaries |
+| `data-architect` | schema, migration or retention | canonical schemas and migration plan |
+| `api-engineer` | API or webhook | OpenAPI, auth, quotas and compatibility |
+| `billing-engineer` | Stripe or entitlements | provider reconciliation and ledger evidence |
+| `performance-engineer` | latency or rendering | measured budget and degradation plan |
+| `test-engineer` | implementation | automated and adversarial evidence |
+| `operations-engineer` | deployment or incidents | runbooks, rollback and recovery |
+| `operations-writer` | operational documentation | executable runbooks |
+| `founder-control-plane-engineer` | `/admin` or global mutations | founder authority and typed operations |
+| `incident-commander` | incident workflows | severity, ownership and append-only timeline |
+| `disaster-recovery-engineer` | backup or restore | isolated restore, RPO and RTO evidence |
+| `feature-flag-governor` | flags or kill switches | server-side state and audit |
+| `audit-ledger-engineer` | privileged events | immutable, scoped audit evidence |
+
+## 14. Commercial and validation skills
+
+| Skill | Trigger | Required output |
+|---|---|---|
+| `hypothesis-curator` | buyer, pricing or wedge | falsifiable hypothesis and state |
+| `product-analyst` | usage, retention or outcomes | validated interpretation |
+| `finance-operator` | cost, margin or revenue | unit economics and budget control |
+| `universe-selector` | new opportunity universe | rights, value and cost scorecard |
+| `design-partner-operator` | private paid acceptance | recruitment and evidence loop |
+| `regulatory-scope-reviewer` | legal or regulated expansion | scope and blocked capabilities |
+| `legal-doc-coordinator` | customer terms or notices | review checklist and package |
+| `launch-manifest-auditor` | P27 | exact-head evidence and approval digest |
+
+## 15. Task-specific mandatory combinations
+
+### P26-T02
+
+```text
+founder-control-plane-engineer
++ billing-engineer
++ identity-engineer
++ seat-governance-engineer
++ finance-operator
++ audit-ledger-engineer
++ security-reviewer
+```
+
+### P26-T03
+
+```text
+fraud-risk-engineer
++ source-admission
++ connector-engineer
++ mcp-security-reviewer
++ tool-permission-engineer
++ supply-chain-security-reviewer
++ secret-boundary-reviewer
++ egress-policy-engineer
+```
+
+### P26-T04
+
+```text
+founder-control-plane-engineer
++ operations-engineer
++ incident-commander
++ disaster-recovery-engineer
++ feature-flag-governor
++ audit-ledger-engineer
++ secret-boundary-reviewer
+```
+
+### P27
+
+```text
+launch-manifest-auditor
++ gate-evaluator
++ security-reviewer
++ privacy-reviewer
++ accessibility-auditor
++ finance-operator
++ legal-doc-coordinator
++ disaster-recovery-engineer
++ data-quality-auditor
++ product-analyst
+```
+
+## 16. Skill creation contract
+
+A new skill must define:
+
+- stable ID and version;
+- purpose and triggers;
+- inputs;
 - governing contracts;
 - allowed outputs;
 - prohibited actions;
@@ -165,60 +285,49 @@ A new skill MUST define:
 - deactivation and rollback;
 - conflict rules.
 
-It MUST be registered in `skills/registry.yaml` and validate against `schemas/skill.schema.json`.
+It must be registered and validated before use.
 
-## 13. Dynamic adaptation
+## 17. Prohibited skill behaviour
 
-Skills MAY evolve from observed failure, but they MUST NOT self-modify silently.
+A skill must not:
 
-A revision requires:
-
-1. recorded failure or improvement hypothesis;
-2. updated skill contract;
-3. version increment;
-4. regression tests;
-5. evidence comparison;
-6. gate approval;
-7. preserved prior version.
-
-## 14. Prohibited skill behaviour
-
-A skill MUST NOT:
-
-- override the Goal Lock;
-- treat generated text as accepted evidence;
+- override Goal Lock or Contract 31;
+- treat generated text or tool output as accepted evidence;
 - broaden source rights;
-- create tasks outside the roadmap without registering them;
+- create unregistered tasks;
 - mark its own work accepted;
-- hide uncertainty or test failures;
+- hide uncertainty or failures;
 - access unrelated tenant data;
-- introduce a new provider or architecture silently;
-- rename AXIGNAL or the domain;
-- optimise engagement at the expense of epistemic integrity;
-- allow Browser content to instruct tools or change permissions;
-- allow a local or external model to admit canonical claims;
-- query global, tenant-private and intent vector domains as one unrestricted corpus.
+- add a provider, connector or MCP silently;
+- widen tool permissions;
+- treat DNS verification as API access;
+- treat Search Console metrics as publication authority;
+- treat a sidebar as durable administration;
+- authorise public launch;
+- rename AXIGNAL or axignal.com.
 
-## 15. Skill evidence ledger
+## 18. Skill evidence ledger
 
-Each task run MUST record:
+Each task run records:
 
+- task, engineering state and canonical state;
 - skill IDs and versions;
 - activation reason;
-- inputs and relevant hashes;
+- inputs and hashes;
 - outputs;
 - warnings and conflicts;
-- tests run;
+- tests;
 - disposition;
 - reviewer or gate decision.
 
-## 16. Skill gate
+## 19. Skill gate
 
-The dynamic skill system is accepted when:
+The system is accepted when:
 
 - every task resolves mandatory skills deterministically;
-- missing required skills fail closed;
-- conflicting skills resolve by contract precedence;
-- skill versions are visible in PR evidence;
-- revoked skills cannot run;
-- regression tests demonstrate that a specialist skill prevents at least one known failure mode.
+- missing skills fail closed;
+- revoked skills cannot execute;
+- skill output cannot grant product authority;
+- P25, P26 and P27 combinations are enforced;
+- MCP and Search Console operations require the declared security skills;
+- evidence remains reproducible and auditable.

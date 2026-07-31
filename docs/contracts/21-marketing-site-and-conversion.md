@@ -1,430 +1,545 @@
-# 21 — Marketing Site and Conversion Contract
+# 21 — Marketing Site, Organic Discovery and Conversion Contract
 
-Version: `0.1.0-candidate`
-Status: `NORMATIVE CANDIDATE / COMMERCIAL VALIDATION REQUIRED`
+Version: `0.2.0`
+Status: `NORMATIVE CANDIDATE / PUBLIC ACTIVATION BLOCKED`
 Goal ID: `AXIGNAL-GOAL-001`
+Governing programme: `Contract 31 / ADR-016`
+Primary implementation phases: `P23`, `P26`, `P27`
 
 ## 1. Purpose
 
-The AXIGNAL public website is a product acquisition and conversion system. It MUST convert qualified attention into product understanding, trust, access requests, trials, design-partner conversations, paid customers and successful first investigations.
-
-The marketing site MUST share the product's identity and visual quality while serving a different primary job:
+The AXIGNAL public web system is a governed product-acquisition surface. It must convert qualified B2G demand into understanding, trust, Tender Alerts, passwordless signup, a controlled trial, completed product value and explicit paid conversion.
 
 ```text
-Product application → deliver research value and retention
-Marketing site      → communicate value, reduce risk and convert
+Product application
+→ deliver investigation, pursuit and retention value
+
+Public website and intelligence pages
+→ capture demand, prove method, obtain consent and convert
 ```
 
-A visually impressive application without an effective acquisition and conversion surface is an incomplete product system.
+A visually impressive landing without qualified acquisition is incomplete. A large public SEO inventory without product value, rights or indexability governance is also incomplete.
 
-## 2. Core conversion contract
+## 2. Product and market positioning
 
-The site MUST support the following complete path:
+Parent product:
+
+> **AXIGNAL — Global Opportunity Intelligence & Operations**
+
+First commercial shell:
+
+> **Business-to-Government (B2G) Opportunity Intelligence**
+
+First acquisition universe:
+
+> **Public contracts and global tenders**
+
+The site must explain that AXIGNAL helps Business-to-Government teams:
+
+- discover admitted public opportunities;
+- qualify them against declared capabilities and constraints;
+- investigate buyer, award, supplier and ownership context;
+- preserve evidence, contradictions and uncertainty;
+- make human bid/no-bid decisions;
+- coordinate a pursuit through outcome and learning.
+
+It must not position AXIGNAL as:
+
+- a generic research chatbot;
+- a TED search interface;
+- a commodity tender database;
+- an autonomous bid agent;
+- a legal eligibility service;
+- a source of guaranteed wins;
+- a publicly launched product before P27.
+
+## 3. Priority audiences
+
+Initial candidate audiences:
+
+- B2G business-development leaders;
+- bid, tender and capture managers;
+- public-sector sales teams;
+- tender and market-entry consultancies;
+- technology, engineering, defence, energy, health and infrastructure suppliers;
+- companies expanding public-sector sales across countries;
+- governed procurement-intelligence teams.
+
+Investor, general-strategy and non-procurement audiences remain subordinate to separately admitted product shells. They must not dilute the first B2G landing.
+
+## 4. Core conversion contract
 
 ```text
-qualified traffic
-→ clear value proposition
-→ faithful product proof
+qualified search, referral or outreach
+→ explicit B2G value proposition
+→ admitted public intelligence or faithful product proof
 → use-case recognition
-→ methodology and trust
-→ pricing and plan comparison
-→ objection resolution
-→ request access / demo / trial
-→ qualification
-→ onboarding
-→ first completed investigation
-→ paid conversion and retention
+→ evidence and methodology
+→ Tender Alert, sample investigation or trial CTA
+→ consent or passwordless identity
+→ trial eligibility and risk decision
+→ first admitted AI operation starts trial
+→ relevant opportunity shortlist
+→ evidence-linked investigation
+→ bid/no-bid or pursuit value
+→ explicit paid-plan decision
+→ retention and expansion
 ```
 
-Every major section MUST justify its place in this path. Decorative sections without a measurable user or commercial purpose SHOULD be removed.
+Every major section must justify its role in this sequence.
 
-## 3. Audience and positioning
+## 5. Landing hero
 
-The initial candidate audiences include:
+The first viewport must state:
 
-- professional investors;
-- family offices and holding-company operators;
-- analysts and advisers;
-- corporate strategy and market-intelligence teams;
-- real-asset and cross-market researchers;
-- sophisticated entrepreneurs evaluating opportunities.
+1. Business-to-Government and B2G;
+2. public contracts or global tenders;
+3. the buyer outcome;
+4. the differentiated evidence and context mechanism;
+5. the intended professional audience;
+6. one primary action;
+7. one lower-commitment action.
 
-The site MUST present AXIGNAL as **Global Opportunity Intelligence**, not as:
-
-- a generic AI chatbot;
-- a retail trading terminal;
-- a signal-selling service;
-- a static financial screener;
-- an untraceable news or data aggregator;
-- a personalised investment-advice service.
-
-## 4. Global navigation
-
-Candidate primary navigation:
-
-- Product;
-- Use Cases;
-- Methodology;
-- Pricing;
-- Resources;
-- Company.
-
-Account and conversion actions:
-
-- Sign in;
-- Request access, Book a demo or the currently approved primary CTA.
-
-The primary CTA SHOULD remain visible during qualified browsing without using obstructive sticky treatments.
-
-## 5. Hero contract
-
-The hero MUST communicate within the initial viewport:
-
-1. what AXIGNAL is;
-2. the user problem it solves;
-3. the differentiated product mechanism;
-4. the intended professional audience;
-5. one primary action;
-6. one optional lower-commitment action.
-
-The hero SHOULD use a faithful representation of the selected AXIGNAL Investigation Shell. It MUST NOT present capabilities, data or visual states that the application cannot reproduce.
-
-Candidate message territory MAY include discovering global opportunities before they become obvious, but final copy remains subject to comprehension and conversion testing.
-
-## 6. Product proof
-
-The site MUST demonstrate the canonical workflow:
+Current candidate message contract:
 
 ```text
-Ask
-→ Navigate
-→ Discover
-→ Verify
-→ Compare
-→ Track
+BUSINESS-TO-GOVERNMENT (B2G) OPPORTUNITY INTELLIGENCE
+
+Find the public contracts your business is built to pursue.
+
+Turn global procurement into a qualified B2G pipeline.
 ```
 
-A candidate demonstration MAY use:
+Primary candidate CTA:
 
-> “Show me real-estate opportunities in Moscow.”
+```text
+Request your 7-day B2G trial
+```
 
-The demonstration SHOULD visibly show:
+Secondary candidate CTA:
 
-- Navigator interpreting the request;
-- `AUTO / GLOBE / GRAPH / DUAL` routing;
-- navigation to the relevant geography or relationship context;
-- opportunity discovery;
-- supporting, contradicting and unknown claims;
-- evidence and source inspection;
-- Timeline use;
-- preservation of InvestigationContext;
-- an Investigation Trail;
-- transparent optional contribution to Knowledge Tides.
+```text
+See a public-contract investigation
+```
 
-The site MAY provide an interactive sandbox or sample investigation. Synthetic or illustrative data MUST be labelled clearly.
+The copy must not claim instant self-service while activation remains controlled.
 
-## 7. Product-system explanation
+## 6. Narrative architecture
 
-The site MUST explain AXIGNAL as one coherent instrument comprising:
+The B2G landing should explain:
 
-- Navigator;
-- Globe;
-- Graph;
-- Timeline;
-- Claim and Evidence Rail;
-- Investigation Trails;
-- Knowledge Tides;
-- multilingual semantic access.
+1. fragmented global procurement;
+2. declared company capabilities and target markets;
+3. discovery across admitted sources;
+4. normalisation and lifecycle reconstruction;
+5. capability-based qualification;
+6. contracting-authority and award history;
+7. supplier, ownership and partner context;
+8. requirements, deadlines, amendments and risk;
+9. traceable evidence and visible uncertainty;
+10. human bid/no-bid authority;
+11. pursuit workspace and team operation;
+12. controlled trial and candidate plans.
 
-Feature sections MUST explain user outcomes and workflow relationships. They MUST NOT become an inventory of disconnected cards.
+## 7. Product proof
 
-## 8. Use cases and contextual acquisition
+A faithful proof must demonstrate:
 
-The main site SHOULD route qualified visitors to use-case surfaces tailored to their job, evidence requirements and buying context.
+```text
+company scope
+→ public opportunity discovery
+→ qualification
+→ source and document inspection
+→ buyer and award context
+→ contradiction and unknown review
+→ human decision
+→ pursuit workspace
+```
 
-Candidate use cases include:
+Illustrative or synthetic data must be explicitly labelled. Public proof cannot show a capability, source, geography or status unavailable in the tested product.
 
-- discover and compare geographic markets;
-- investigate an opportunity and its contradictions;
-- trace ownership, transmission or supply-chain relationships;
-- reconstruct what was known at a historical point;
-- monitor watched claims and invalidation conditions;
-- produce traceable research for a client or investment committee.
+## 8. Public organic-discovery architecture
 
-Contextual landing pages MAY support campaigns and organic acquisition, but MUST preserve the same product truth and entitlement rules.
+The public system may expose:
 
-## 9. Differentiation
+- `TENDER_HUB` pages;
+- `MARKET_INTELLIGENCE` pages;
+- selectively admitted `TENDER_DETAIL` pages;
+- methodology and source pages;
+- evidence-linked reports;
+- glossary and documentation;
+- Tender Alert landing surfaces.
 
-The site MUST explain the material difference between AXIGNAL and common alternatives using verifiable capabilities.
+Arbitrary facets, saved searches, account data and workspaces remain `noindex`.
 
-Candidate contrasts:
+## 9. IndexabilityGate
 
-| Conventional approach | AXIGNAL |
-|---|---|
-| isolated answers | persistent InvestigationContext |
-| generated prose without structure | typed claims with evidence and contradiction |
-| decorative maps | operational Globe navigation |
-| implicit relationships | typed Graph and transmission paths |
-| current snapshot only | Timeline and historical knowledge state |
-| hidden uncertainty | visible unknowns, coverage and freshness |
+Programmatic page generation is not publication authority.
 
-Comparisons MUST NOT make unsupported superiority claims about named competitors.
+```text
+dataset
+→ page candidate
+→ deterministic IndexabilityGate
+→ founder review
+→ versioned expiring snapshot
+→ public page and sitemap
+```
 
-## 10. Trust and methodology
+Indexability must consider:
 
-Methodology MUST be a primary conversion surface, not a legal-footer afterthought.
+- active inventory;
+- buyer diversity;
+- search demand;
+- data quality;
+- uniqueness;
+- source coverage;
+- content depth;
+- freshness;
+- synthetic-data exclusion;
+- rights and attribution.
 
-The site MUST make it easy to inspect:
+```text
+dataset ≠ page
+page generated ≠ page indexable
+page indexable ≠ page published
+crawlable ≠ indexed
+indexed ≠ ranked
+```
 
-- claim semantics;
-- evidence and source provenance;
-- contradiction handling;
-- observed, calculated, inferred and predicted states;
-- freshness and coverage;
+Mass creation of country × sector × keyword combinations without material public value is prohibited.
+
+## 10. Transactional page contract
+
+An admitted procurement hub or Market Intelligence page should expose:
+
+- geography and sector;
+- current opportunity count under a declared definition;
+- buyer diversity;
+- known and undeclared value separately;
+- procedures and classifications;
+- upcoming deadlines;
+- buyer activity;
+- source and coverage limitations;
+- exact as-of time;
+- methodology version;
+- source links;
+- relevant opportunities;
+- contextual CTA.
+
+Metrics must come from the same versioned snapshot used for visible content and structured data.
+
+## 11. Tender detail pages
+
+A tender notice should become an indexable page only when AXIGNAL adds material value such as:
+
+- normalised lifecycle;
+- lots;
+- buyer resolution;
+- classifications and geography;
+- value and currency semantics;
+- requirements and deadlines;
+- amendment and correction history;
+- official documents;
+- related awards or contracts;
+- source provenance;
+- explicit limitations.
+
+Republishing a title and source description is insufficient.
+
+## 12. Structured data and AI-readable surface
+
+Public structured data may include valid:
+
+- `CollectionPage`;
+- `Dataset`;
+- `Organization`;
+- source `isBasedOn` references;
+- `dateModified`;
+- spatial and temporal coverage;
+- methodology.
+
+Structured data must match visible content.
+
+`llms.txt` may explain the public information contract. It cannot override robots, create a second hidden corpus or grant crawler access.
+
+## 13. Crawler policy
+
+When public indexing is independently authorised, admitted public pages may be discoverable by approved search crawlers.
+
+Private routes remain excluded:
+
+- `/admin/`;
+- `/api/`;
+- `/workspace/`;
+- `/account/`;
+- invitation and verification routes;
+- alert-confirmation tokens;
+- private search and saved state.
+
+Crawler policy must distinguish search discovery from model-training access where technically supported.
+
+## 14. GEO, AEO and AI citations
+
+AXIGNAL should optimise for source-grounded usability by humans and answer engines through:
+
+- original data and analysis;
+- stable entities;
+- clear questions and answers;
+- visible methods;
+- freshness;
+- source links;
+- structured semantics;
+- honest limitations.
+
+It must not claim that schema, `llms.txt` or keyword repetition guarantees citation.
+
+Observed citation events are evidence only:
+
+```text
+AI citation ≠ endorsement
+AI citation ≠ ranking
+AI citation ≠ qualified acquisition
+AI citation ≠ canonical claim
+```
+
+## 15. Tender Alerts
+
+Tender Alerts are an independent consent and acquisition product.
+
+```text
+email and scope
+→ server-side bot verification
+→ PENDING_CONFIRMATION
+→ email delivery
+→ explicit POST confirmation
+→ ACTIVE
+```
+
+Opening a link must not confirm consent.
+
+A Tender Alert must not create:
+
+- an identity;
+- a tenant;
+- a seat;
+- a trial;
+- a paid package.
+
+The email must provide real value and a clear unsubscribe path.
+
+## 16. Passwordless signup and trial conversion
+
+Public signup, when authorised, should use:
+
+- email verification for address control;
+- passkey-first WebAuthn;
+- opaque revocable sessions;
+- server-resolved tenant;
+- risk and abuse decision;
+- one trial per tenant or economic identity.
+
+The seven-day clock starts on first admitted AI use, not account creation.
+
+The initial candidate trial:
+
+- no card;
+- two seats;
+- 1,000,000-token ceiling;
+- internal cost ceiling;
+- one concurrent ResearchRun;
+- no silent conversion.
+
+## 17. Candidate pricing presentation
+
+Current technical candidate price book:
+
+| Plan | Candidate amount | Seats |
+|---|---:|---:|
+| Controlled trial | `0 EUR` | 2 |
+| Professional | `149 EUR/month` | 3 |
+| Team | `399 EUR/month` | 15 |
+| Enterprise | Quote only | Contracted |
+
+Every displayed amount remains `CANDIDATE_ONLY` until P27.
+
+The pricing surface must disclose:
+
+- price status;
+- flat-tier seats;
+- source and library scope;
+- operational limits;
+- taxes;
+- upgrade and downgrade;
+- cancellation;
+- retention;
+- no silent conversion.
+
+## 18. CRM boundary
+
+The acquisition CRM may store:
+
+- contact and organisation data voluntarily supplied;
+- source;
+- consent;
+- acquisition lifecycle;
+- lead score;
+- owner;
+- activity;
+- next action.
+
+```text
+CRM contact ≠ user
+CRM stage ≠ risk decision
+lead score ≠ entitlement
+trial stage ≠ active trial
+customer stage ≠ paid provider state
+```
+
+## 19. Google Search Console
+
+A DNS TXT verification record has been provided for `axignal.com` and is recorded as user-attested evidence.
+
+```text
+DNS verification ≠ API access
+API access ≠ public indexing authority
+Search impressions ≠ qualified demand
+clicks ≠ customer value
+```
+
+Search Console data may be imported only after official API, least-privilege, secret, audit, retention and revocation gates pass.
+
+It may inform diagnostics but cannot publish pages or override the IndexabilityGate.
+
+## 20. GSC MCP candidate
+
+The user-provided MCP catalogue URL is a discovery record only.
+
+A Google Search Console MCP must pass connector and tool admission before use. It starts deny-by-default and read-only if probed.
+
+Destructive operations are prohibited by default:
+
+- add or delete sites;
+- submit or delete sitemaps;
+- change users or permissions;
+- change DNS;
+- expose credentials;
+- execute arbitrary shell or browser automation.
+
+## 21. Trust and methodology
+
+Trust content must explain:
+
+- claim classes;
+- evidence and provenance;
+- contradiction and uncertainty;
+- source rights;
+- coverage and freshness;
+- AI and deterministic authority;
 - translation provenance;
-- corrections and retractions;
-- product limitations;
-- Knowledge Tides boundaries;
-- rights and export restrictions.
+- identity and tenant isolation;
+- trial and abuse controls;
+- public-page methodology;
+- citation limitations;
+- correction and retraction.
 
-Contract 24 governs the public Trust Center and methodology surface.
+## 22. Social proof
 
-## 11. Pricing and plan comparison
-
-The site MUST contain a pricing surface or an explicit early-access pricing state appropriate to the current commercial maturity.
-
-It MUST include:
-
-- candidate plan positioning;
-- monthly and annual presentation when applicable;
-- exact included capabilities and limits;
-- clear usage and overage rules;
-- cancellation and plan-change rules;
-- tax disclosure appropriate to locale;
-- a detailed plan comparison;
-- one unambiguous CTA per plan.
-
-If prices are not validated, the site MUST use truthful states such as `Request pricing`, `Early access` or `Become a design partner` rather than invented public prices.
-
-Contract 22 governs packaging, pricing and entitlements.
-
-## 12. Social proof and public evidence
-
-The site MUST NOT invent:
+The site must not invent:
 
 - customer logos;
 - testimonials;
-- analyst endorsements;
+- endorsements;
 - usage figures;
 - source counts;
 - market coverage;
 - performance outcomes;
-- waitlist size.
+- waitlist size;
+- AI-citation claims.
 
-Until real social proof exists, the site SHOULD rely on:
+Until proof exists, rely on faithful product evidence and transparent methodology.
 
-- faithful product demonstration;
-- transparent methodology;
-- public research examples;
-- measurable product evidence;
-- named design partners only with permission.
+## 23. Accessibility and performance
 
-## 13. Security, privacy and data rights
+Public surfaces target WCAG 2.2 AA and require:
 
-The site MUST provide clear paths to:
-
-- Trust Center;
-- Privacy Policy;
-- security overview;
-- source and licensing methodology;
-- user-intent and Knowledge Tides controls;
-- data retention and deletion information;
-- enterprise isolation and audit information when available.
-
-Public copy MUST distinguish private investigation history, optional personalisation and privacy-protected aggregate intent signals.
-
-## 14. Integrations and API
-
-Integration and API claims MUST use explicit maturity states:
-
-- `AVAILABLE`;
-- `PRIVATE_BETA`;
-- `PLANNED`.
-
-The site MUST NOT advertise planned integrations as currently usable.
-
-## 15. FAQ contract
-
-The site MUST provide a conversion-oriented FAQ covering at minimum:
-
-### Product
-
-- What is AXIGNAL?
-- Is AXIGNAL a financial chatbot?
-- Does AXIGNAL recommend investments?
-- What is a claim and what is evidence?
-- Where does the data come from?
-
-### Functionality
-
-- Can users switch between Globe and Graph without losing context?
-- Which languages are supported?
-- Can investigations be saved, shared and exported?
-- Is an API available?
-
-### Privacy and intent intelligence
-
-- Are user queries stored?
-- What is private memory?
-- What are Knowledge Tides?
-- Are individual searches visible to other users?
-- Can users opt out or delete data?
-
-### Commercial
-
-- Is there a trial, sandbox or demo?
-- How do cancellation and plan changes work?
-- What determines Enterprise pricing?
-- Are taxes included?
-
-Answers MUST be accurate for the currently deployed product and entitlement state.
-
-## 16. Resources and organic acquisition
-
-The marketing system SHOULD support:
-
-- public investigations;
-- methodology articles;
-- market briefs;
-- Knowledge Tide reports;
-- documentation;
-- API documentation;
-- changelog;
-- glossary;
-- webinars and cases when real.
-
-Content MUST be traceable to the same product methodology and MUST NOT bypass claim-admission rules when presenting economic assertions.
-
-## 17. Multilingual site
-
-The public site MUST be architected for:
-
-- English `en` as default;
-- Spanish `es`;
-- French `fr`;
-- German `de`;
-- Brazilian Portuguese `pt-BR`;
-- Simplified Chinese `zh-Hans`.
-
-Pricing, taxes, number formats, legal text, FAQs, metadata and structured data MUST be locale-aware. Translation MUST preserve approved terminology and MUST NOT alter product or legal meaning.
-
-## 18. SEO and discoverability
-
-The site MUST provide:
-
-- semantic HTML;
-- canonical URLs and locale alternates;
-- accurate titles and descriptions;
-- structured data where valid;
-- crawlable product, pricing, methodology and FAQ content;
-- shareable use-case and research pages;
-- sitemap and robots policy;
-- performance-safe media and motion.
-
-Programmatic or templated pages MUST contain material user value and MUST NOT be generated solely to manipulate search ranking.
-
-## 19. Accessibility and performance
-
-Public surfaces MUST satisfy WCAG 2.2 AA and SHOULD target stronger readability for high-value commercial content.
-
-Required:
-
-- keyboard navigation;
+- keyboard operation;
 - visible focus;
-- reduced motion;
 - semantic headings and landmarks;
-- accessible product demonstrations;
-- text alternatives for video and complex visual content;
-- responsive behaviour;
-- no blocking fonts;
-- no critical content dependent on animation;
-- performance budgets for hero media, scripts and conversion forms.
+- reduced motion;
+- responsive layouts;
+- accessible charts and tables;
+- text alternatives;
+- content useful before heavy visuals load;
+- performance budgets;
+- no critical conversion dependent on animation.
 
-The landing MUST remain useful before heavy product visuals load.
+## 24. Analytics and attribution
 
-## 20. Conversion forms and qualification
-
-Forms MUST request only data necessary for the declared purpose.
-
-Candidate access flow:
+Acquisition instrumentation must connect:
 
 ```text
-CTA
-→ concise form
-→ purpose and privacy disclosure
-→ qualification where justified
-→ confirmation
-→ scheduling, trial or onboarding
+landing or intelligence page
+→ Tender Alert or signup
+→ trial readiness
+→ first admitted AI use
+→ completed B2G value workflow
+→ paid conversion
+→ retention
 ```
 
-Fields, enrichment and routing MUST comply with Contract 06. Sensitive financial information SHOULD NOT be requested in the initial public form unless demonstrably necessary and legally reviewed.
+Attribution remains an estimate. Search Console, UTMs, referrers and AI citations cannot establish causal revenue without further evidence.
 
-## 21. CTA hierarchy
+## 25. Prohibited practices
 
-Each page MUST have one primary conversion objective. Secondary actions MAY reduce commitment, such as exploring a sample investigation or reading methodology.
-
-The site MUST NOT present multiple visually equivalent CTAs that obscure the intended next step.
-
-## 22. Footer
-
-The footer MUST include current links for:
-
-- Product;
-- Pricing;
-- Methodology;
-- Trust Center;
-- API and documentation;
-- Resources;
-- Company and contact;
-- Service status;
-- Terms;
-- Privacy;
-- Cookies;
-- data rights;
-- accessibility;
-- locale selection.
-
-## 23. Prohibited conversion practices
-
-The marketing site MUST NOT use:
+The public web system must not use:
 
 - fake urgency or scarcity;
 - fabricated countdowns;
-- preselected paid upgrades;
+- invented social proof;
 - hidden plan limits;
 - undisclosed overages;
-- fake discounts or crossed-out reference prices;
-- inaccessible cancellation paths;
-- misleading consent bundling;
-- invented social proof;
-- animations implying financial certainty;
-- product visuals that cannot be reproduced.
+- fake discounts;
+- preselected paid conversion;
+- inaccessible cancellation;
+- bundled consent;
+- thin mass-generated SEO pages;
+- misleading coverage;
+- unadmitted source data;
+- hidden or inconsistent structured data;
+- visuals or claims the product cannot reproduce.
 
-## 24. Acceptance gate
+## 26. Activation gate
 
-The contract advances from candidate only when evidence demonstrates:
+Public indexing, signup, Tender Alerts and pricing remain independently blocked until their production evidence and P27 authority pass.
 
-1. target users understand what AXIGNAL is;
-2. target users distinguish it from a chatbot and trading service;
-3. the faithful product demonstration communicates the core workflow;
-4. Pricing and plan differences are understood;
-5. methodology and Trust Center reduce material objections;
-6. FAQ resolves common product, privacy and commercial questions;
-7. primary CTA intent is clear;
-8. six-language layouts remain usable;
-9. accessibility and performance budgets pass;
-10. conversion analytics are complete and privacy-compliant;
-11. no unsupported public claim or fabricated proof exists;
-12. first-investigation activation is connected to the acquisition funnel.
+The marketing contract advances only when:
 
-Exact copy, section ordering, media, CTAs and page variants remain candidates until controlled validation supports them.
+1. B2G buyers understand category, outcome and limits;
+2. product proof is faithful;
+3. IndexabilityGate and snapshot authority pass;
+4. consent and email delivery pass;
+5. signup, trial and abuse governance pass;
+6. candidate pricing is understood and truthful;
+7. Search Console is admitted or excluded from launch scope;
+8. every connected MCP is admitted;
+9. accessibility and performance pass;
+10. acquisition is connected to completed customer value;
+11. no unsupported public claim exists;
+12. P27 accepts the final exact head.
+
+## 27. Current authority
+
+```text
+B2G LANDING ENGINEERING           PASS
+ORGANIC DISCOVERY ENGINEERING     PASS
+TENDER ALERT ENGINEERING          PASS
+CRM FOUNDATION ENGINEERING        PASS
+SEARCH CONSOLE DNS EVIDENCE       USER-ATTESTED
+SEARCH CONSOLE API                NOT PROVEN
+GSC MCP                           NOT ADMITTED
+PUBLIC INDEXING                   BLOCKED
+PUBLIC TENDER ALERTS              BLOCKED
+PUBLIC SIGNUP                     BLOCKED
+PUBLIC PRICING                    NOT VALIDATED
+PUBLIC LAUNCH                     NO_GO
+```
