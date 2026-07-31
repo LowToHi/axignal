@@ -35,6 +35,8 @@ def call(
         if application_role:
             cursor.execute("SET LOCAL ROLE axignal_app")
         cursor.execute(query, params)
+        if cursor.description is None:
+            return None
         return cursor.fetchone()
 
 
