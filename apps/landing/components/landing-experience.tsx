@@ -52,11 +52,21 @@ function emitMessageEvent(event: string, location: string) {
 }
 
 function formatPrice(plan: CandidatePlan) {
+  if (plan.amountMinor === 0) return "Free";
+
   return new Intl.NumberFormat("en", {
     style: "currency",
     currency: plan.currency,
     maximumFractionDigits: 0
   }).format(plan.amountMinor / 100);
+}
+
+function offerDetail(plan: CandidatePlan) {
+  if (plan.billingPeriod === "trial") {
+    return `${plan.aiTokenBudget?.toLocaleString("en")} AI tokens · no card · activation reviewed`;
+  }
+
+  return `${plan.seatFloor}–${plan.seatCeiling} seats · bounded usage and technical quotas`;
 }
 
 type LandingExperienceProps = {
@@ -196,17 +206,17 @@ export function LandingExperience({ plans }: LandingExperienceProps) {
           <span>AXIGNAL</span>
         </a>
         <nav aria-label="Primary navigation">
-          <a href="#workflow">Workflow</a>
+          <a href="#workflow">B2G workflow</a>
           <a href="#evidence">Evidence</a>
-          <a href="#pricing">Plans</a>
-          <a href="#access">Controlled access</a>
+          <a href="#pricing">Trial & plans</a>
+          <a href="#access">Request trial</a>
         </nav>
         <a
           className="header-cta"
           href="#access"
-          onClick={() => emitMessageEvent("cta_click", "header")}
+          onClick={() => emitMessageEvent("trial_request_click", "header")}
         >
-          Request a workspace
+          Request 7-day trial
         </a>
       </header>
 
@@ -215,37 +225,38 @@ export function LandingExperience({ plans }: LandingExperienceProps) {
           <div className="hero-noise" aria-hidden="true" />
           <div className="hero-copy">
             <p className="hero-kicker" data-reveal>
-              EVIDENCE-BACKED RESEARCH FOR HIGH-STAKES DECISIONS
+              BUSINESS-TO-GOVERNMENT (B2G) OPPORTUNITY INTELLIGENCE
             </p>
             <h1 className="hero-title" id="hero-title" data-reveal>
-              Turn scattered sources into a decision your team can verify.
-              <span>Keep the evidence trail intact.</span>
+              Find the public contracts your business is built to pursue.
+              <span>Turn global procurement into a qualified B2G pipeline.</span>
             </h1>
             <p className="hero-summary" data-reveal>
-              AXIGNAL brings research questions, sources, claims, uncertainty and review into one governed
-              workspace. Strategy, investment and intelligence teams can move faster without rebuilding the
-              trail in slides, chats and spreadsheets.
+              AXIGNAL connects public tenders, contracting authorities, awards, suppliers and ownership
+              signals so Business-to-Government teams can discover, qualify and investigate the opportunities
+              worth pursuing—without losing the evidence behind the decision.
             </p>
             <div className="hero-actions" data-reveal>
               <a
                 className="primary-button"
                 href="#access"
-                onClick={() => emitMessageEvent("cta_click", "hero_primary")}
+                onClick={() => emitMessageEvent("trial_request_click", "hero_primary")}
               >
-                Request a research workspace
+                Request your 7-day B2G trial
               </a>
               <a
                 className="secondary-button"
                 href="#workflow"
                 onClick={() => emitMessageEvent("workflow_view", "hero_secondary")}
               >
-                See the research workflow
+                See a public-contract investigation
               </a>
             </div>
-            <div className="hero-proof" data-reveal aria-label="Product boundaries">
-              <span>Sources stay attached</span>
-              <span>Uncertainty stays visible</span>
-              <span>Review stays human</span>
+            <div className="hero-proof" data-reveal aria-label="B2G product boundaries">
+              <span>Public contracts and tenders</span>
+              <span>Buyer and award context</span>
+              <span>Traceable evidence</span>
+              <span>Human bid / no-bid authority</span>
             </div>
           </div>
 
@@ -256,33 +267,32 @@ export function LandingExperience({ plans }: LandingExperienceProps) {
               <span />
             </div>
             <div className="orbit-caption">
-              <b>SYNTHETIC DEMONSTRATION</b>
-              <span>Europe · live sources disabled</span>
+              <b>SYNTHETIC B2G DEMONSTRATION</b>
+              <span>Multiple markets · live sources disabled</span>
             </div>
           </div>
 
           <div className="scroll-cue" aria-hidden="true">
-            <span>SCROLL THROUGH THE WORKFLOW</span>
+            <span>SCROLL THROUGH THE B2G WORKFLOW</span>
             <i />
           </div>
         </section>
 
         <section className="trust-strip" aria-label="Product principles">
-          <span>Evidence before confidence</span>
-          <span>Unknown stays unknown</span>
+          <span>Official-source lineage</span>
+          <span>Unknown coverage stays unknown</span>
           <span>Proposal is not admission</span>
-          <span>No autonomous decision authority</span>
+          <span>No autonomous bid authority</span>
         </section>
 
         <section className="problem-section" aria-labelledby="problem-title" data-section-reveal>
           <div className="section-heading">
-            <p className="eyebrow">THE REAL RESEARCH COST</p>
-            <h2 id="problem-title">
-              The bottleneck is not access to information. It is proving why a decision deserves confidence.
-            </h2>
+            <p className="eyebrow">THE B2G PIPELINE PROBLEM</p>
+            <h2 id="problem-title">Government demand is public. The opportunity is still fragmented.</h2>
             <p>
-              Teams already have search, documents and AI summaries. What they often lose is the relationship
-              between the question, the evidence, the disagreement and the final decision.
+              Business-to-Government teams search across procurement portals, jurisdictions, languages,
+              classifications, amendments and award records. By the time a tender reaches the pipeline, the
+              deadline is close and the context needed for a disciplined bid / no-bid decision is scattered.
             </p>
           </div>
           <div className="problem-grid">
@@ -296,7 +306,7 @@ export function LandingExperience({ plans }: LandingExperienceProps) {
           </div>
         </section>
 
-        <section className="story-shell" id="workflow" ref={story} aria-label="Research workflow">
+        <section className="story-shell" id="workflow" ref={story} aria-label="B2G opportunity workflow">
           <div className="globe-stage" ref={globeStage}>
             <div className="globe-aura" aria-hidden="true" />
             <SemanticGlobe activeStep={activeStep} reducedMotion={reducedMotion} />
@@ -304,8 +314,8 @@ export function LandingExperience({ plans }: LandingExperienceProps) {
 
             <div className="globe-topbar">
               <span className="live-dot" />
-              <b>INVESTIGATION CONTEXT</b>
-              <span>DEMO_EUROPE_01</span>
+              <b>B2G OPPORTUNITY CONTEXT</b>
+              <span>DEMO_PROCUREMENT_01</span>
               <span>AUTO</span>
               <span className="active-mode">GLOBE</span>
               <span>GRAPH</span>
@@ -313,7 +323,7 @@ export function LandingExperience({ plans }: LandingExperienceProps) {
 
             <div className="globe-hud globe-hud-left">
               <span className="hud-label">NAVIGATOR</span>
-              <p>Where are infrastructure, policy and capital signals converging?</p>
+              <p>Which public contracts fit our capabilities, target markets and delivery constraints?</p>
               <div className="navigator-response">
                 <span>AXIGNAL</span>
                 <p>{activeStory.detail}</p>
@@ -321,7 +331,7 @@ export function LandingExperience({ plans }: LandingExperienceProps) {
             </div>
 
             <div className="globe-hud globe-hud-right">
-              <span className="hud-label">EVIDENCE STATE</span>
+              <span className="hud-label">QUALIFICATION STATE</span>
               <strong>{activeStory.signal}</strong>
               <p>{activeStory.metric}</p>
               <div className="state-chip" data-state={activeStory.claimState}>
@@ -333,7 +343,7 @@ export function LandingExperience({ plans }: LandingExperienceProps) {
               <span>{activeCity.country}</span>
               <strong>{activeCity.city}</strong>
               <p>{activeCity.label}</p>
-              <b>{activeCity.score}/100 synthetic score</b>
+              <b>{activeCity.score}/100 synthetic fit score</b>
             </div>
 
             <div className="globe-progress" aria-hidden="true">
@@ -342,7 +352,7 @@ export function LandingExperience({ plans }: LandingExperienceProps) {
               ))}
             </div>
 
-            <p className="synthetic-label">Synthetic demonstration · not investment performance</p>
+            <p className="synthetic-label">Synthetic demonstration · not procurement or win-rate evidence</p>
           </div>
 
           <div className="story-steps">
@@ -369,11 +379,12 @@ export function LandingExperience({ plans }: LandingExperienceProps) {
 
         <section className="evidence-section" id="evidence" data-section-reveal>
           <div className="section-heading">
-            <p className="eyebrow">A REVIEWABLE EVIDENCE TRAIL</p>
-            <h2>A conclusion is useful only when the team can inspect its support and failure conditions.</h2>
+            <p className="eyebrow">FROM TENDER NOTICE TO INVESTIGATED OPPORTUNITY</p>
+            <h2>Do not add a contract to the pipeline until the team can inspect why it belongs there.</h2>
             <p>
-              AXIGNAL separates observation, calculation, inference and contradiction. The summary does not
-              erase the states that produced it.
+              AXIGNAL separates official observations, calculated fit, inferred relationships, contradictions
+              and unknown conditions. The qualification summary does not erase the evidence states that
+              produced it.
             </p>
           </div>
 
@@ -396,22 +407,22 @@ export function LandingExperience({ plans }: LandingExperienceProps) {
 
             <div className="admission-panel">
               <div className="admission-core" aria-hidden="true">
-                <span>CANDIDATE</span>
+                <span>DISCOVERED</span>
                 <i />
-                <strong>REVIEW</strong>
+                <strong>QUALIFY</strong>
                 <i />
-                <span>ADMITTED</span>
+                <span>PURSUE</span>
               </div>
-              <h3>AI can propose. It cannot silently admit a claim as truth.</h3>
+              <h3>AI can propose a match. It cannot commit the company to a pursuit.</h3>
               <p>
-                Candidate claims pass deterministic checks. Human and policy gates determine what may be
-                relied upon, shared or promoted.
+                Candidate opportunities pass deterministic and human review. Business owners retain authority
+                over qualification, partnerships, pricing, submissions and commercial commitments.
               </p>
               <ul>
-                <li>Provenance required</li>
-                <li>Coverage explicit</li>
-                <li>Contradictions preserved</li>
-                <li>Human acceptance bounded</li>
+                <li>Source and amendment lineage required</li>
+                <li>Coverage limitations explicit</li>
+                <li>Eligibility conflicts preserved</li>
+                <li>Human bid / no-bid authority retained</li>
               </ul>
             </div>
           </div>
@@ -419,8 +430,8 @@ export function LandingExperience({ plans }: LandingExperienceProps) {
 
         <section className="outcomes-section" id="outcomes">
           <div className="section-heading" data-section-reveal>
-            <p className="eyebrow">FROM RESEARCH TO REVIEW</p>
-            <h2>Move faster without leaving the next reviewer a black box.</h2>
+            <p className="eyebrow">FROM PROCUREMENT VOLUME TO B2G PRIORITY</p>
+            <h2>Spend pursuit effort on the public contracts your team can justify pursuing.</h2>
           </div>
           <div className="outcome-grid">
             {outcomeCards.map(([title, body], index) => (
@@ -435,14 +446,15 @@ export function LandingExperience({ plans }: LandingExperienceProps) {
 
         <section className="pricing-section" id="pricing" data-section-reveal aria-labelledby="pricing-title">
           <div className="section-heading">
-            <p className="eyebrow">CONTROLLED-ACCESS PACKAGES</p>
-            <h2 id="pricing-title">Start with the team that owns the research decision.</h2>
+            <p className="eyebrow">TRIAL AND CONTROLLED-ACCESS PACKAGES</p>
+            <h2 id="pricing-title">Prove the workflow on one real B2G market.</h2>
             <p>
-              These candidate packages are read from AXIGNAL&apos;s versioned server-side price book. They are
-              shown for controlled-access evaluation only; public Stripe live checkout is not enabled.
+              Request a controlled seven-day trial with a bounded 1,000,000-token AI budget and no card. If
+              the workflow fits, continue with Professional or Team. Trial and paid activation remain reviewed;
+              public Stripe live checkout is not enabled.
             </p>
           </div>
-          <div className="pricing-grid">
+          <div className="pricing-grid pricing-grid-three">
             {plans.map((plan) => (
               <article key={plan.planCode} data-testid={`plan-${plan.planCode.toLowerCase()}`}>
                 <p className="eyebrow">{plan.activationState.replaceAll("_", " ")}</p>
@@ -450,47 +462,48 @@ export function LandingExperience({ plans }: LandingExperienceProps) {
                 <p>{plan.description}</p>
                 <div className="plan-price">
                   <strong>{formatPrice(plan)}</strong>
-                  <span>/ {plan.billingPeriod}</span>
+                  <span>{plan.billingPeriod === "trial" ? `for ${plan.durationDays} days` : "/ month"}</span>
                 </div>
-                <p>
-                  {plan.seatFloor}–{plan.seatCeiling} seats · bounded usage and technical quotas
-                </p>
+                <p>{offerDetail(plan)}</p>
                 <a
-                  className="secondary-button"
+                  className={plan.billingPeriod === "trial" ? "primary-button" : "secondary-button"}
                   href="#access"
-                  onClick={() => emitMessageEvent("plan_interest", plan.planCode)}
+                  onClick={() => emitMessageEvent("offer_interest", plan.planCode)}
                 >
-                  Discuss {plan.name}
+                  {plan.ctaLabel}
                 </a>
               </article>
             ))}
           </div>
           <p className="pricing-boundary">
-            Candidate pricing is not a public offer. Taxes, commercial activation and live billing remain
-            separate approval gates.
+            Candidate pricing is not a public offer. Trial eligibility, taxes, commercial activation and live
+            billing remain separate approval gates.
           </p>
         </section>
 
         <section className="assurance-section" data-section-reveal aria-labelledby="assurance-title">
           <div>
-            <p className="eyebrow">BUILT FOR GOVERNED RESEARCH</p>
-            <h2 id="assurance-title">Keep access, evidence and decision authority separate.</h2>
+            <p className="eyebrow">B2G INTELLIGENCE WITH A TRACEABLE BASIS</p>
+            <h2 id="assurance-title">
+              Know what came from the source, what AXIGNAL inferred and what your team decided.
+            </h2>
           </div>
           <ul>
-            <li>Tenant and workspace authority resolved on the server</li>
-            <li>Private evidence governed by classification, rights and retention</li>
-            <li>Append-only records for material evidence and decisions</li>
-            <li>Production, security and recovery objectives remain explicit gates</li>
+            <li>Official procurement records retain source and amendment lineage</li>
+            <li>Missing, stale or contradictory coverage remains visible</li>
+            <li>Tenant-private company capabilities remain separately governed</li>
+            <li>AI proposes; humans retain bid, submission and commercial authority</li>
           </ul>
           <p>
-            These are implemented engineering controls and objectives. Public availability, production
-            acceptance and Stripe live activation remain blocked until their independent evidence gates pass.
+            These are implemented engineering controls and objectives. Universal source coverage, public
+            availability, production acceptance and Stripe live activation remain blocked until their
+            independent evidence gates pass.
           </p>
         </section>
 
         <section className="faq-section" data-section-reveal aria-labelledby="faq-title">
           <div className="section-heading">
-            <p className="eyebrow">QUESTIONS BEFORE ACCESS</p>
+            <p className="eyebrow">B2G QUESTIONS BEFORE ACCESS</p>
             <h2 id="faq-title">What AXIGNAL does—and what it does not claim.</h2>
           </div>
           <div className="faq-list">
@@ -505,16 +518,17 @@ export function LandingExperience({ plans }: LandingExperienceProps) {
 
         <section className="pilot-section" id="access" data-section-reveal>
           <div className="pilot-copy">
-            <p className="eyebrow">CONTROLLED ACCESS</p>
-            <h2>Bring one research decision that is expensive to get wrong.</h2>
+            <p className="eyebrow">7-DAY CONTROLLED B2G TRIAL</p>
+            <h2>Bring one public-procurement market your company wants to enter or qualify.</h2>
             <p>
-              Tell us what your team must decide, which sources it relies on and where the current workflow
-              breaks. AXIGNAL will review whether the controlled programme can support that use case.
+              Tell us what your company sells to government, the countries or public buyers you target, the
+              typical contract size and where the current tender workflow breaks. AXIGNAL will review whether
+              the controlled trial can support that B2G use case.
             </p>
             <div className="pilot-boundaries">
-              <span>Access reviewed individually</span>
-              <span>Live sources remain gated</span>
-              <span>No subscription created by this form</span>
+              <span>7 days · 1,000,000 AI tokens</span>
+              <span>No card or subscription</span>
+              <span>Coverage confirmed before activation</span>
             </div>
           </div>
           <PilotAccessForm messageVersion={MESSAGE_VERSION} />
@@ -529,9 +543,9 @@ export function LandingExperience({ plans }: LandingExperienceProps) {
           <span>AXIGNAL</span>
         </a>
         <div>
-          <a href="#workflow">Workflow</a>
+          <a href="#workflow">B2G workflow</a>
           <a href="#evidence">Evidence</a>
-          <a href="#pricing">Plans</a>
+          <a href="#pricing">Trial & plans</a>
           <a href="/privacy">Privacy</a>
           <a href="/terms">Terms</a>
           <a href="/accessibility">Accessibility</a>
