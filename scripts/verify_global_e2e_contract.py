@@ -113,12 +113,24 @@ task_catalogue = (ROOT / "docs/roadmap/02-task-catalogue.md").read_text(
 )
 assert '"public_launch_authorised": false' in current
 assert '"partial_launch_allowed": false' in current
-assert "| P00 | `ACCEPTED` |" in current
-assert "| P01 | `IN_PROGRESS` |" in current
-assert "| `P00` | `ACCEPTED` |" in phase_map
-assert "| `P01` | `IN_PROGRESS` |" in phase_map
-assert "`AX-GE2E-P00-T01`" in task_catalogue and "`ACCEPTED`" in task_catalogue
-assert "`AX-GE2E-P01-T01`" in task_catalogue and "`IN_PROGRESS`" in task_catalogue
+
+v15_contract = ROOT / "docs/contracts/31-global-e2e-development-contract-v1.5.md"
+if v15_contract.is_file():
+    assert "| P00 | `ENGINEERING_E2E_PASS` | `CANONICALLY_ACCEPTED` |" in phase_map
+    assert "| P01 | `ENGINEERING_IN_PROGRESS` | `IN_PROGRESS` |" in phase_map
+    assert "`AX-GE2E-P00-T01`" in task_catalogue
+    assert "`AX-GE2E-P01-T01`" in task_catalogue
+    assert "P00 accepted" in current
+    assert "P01 in progress" in current
+    assert "P27" in phase_map
+    assert "P24 is not final" in current
+else:
+    assert "| P00 | `ACCEPTED` |" in current
+    assert "| P01 | `IN_PROGRESS` |" in current
+    assert "| `P00` | `ACCEPTED` |" in phase_map
+    assert "| `P01` | `IN_PROGRESS` |" in phase_map
+    assert "`AX-GE2E-P00-T01`" in task_catalogue and "`ACCEPTED`" in task_catalogue
+    assert "`AX-GE2E-P01-T01`" in task_catalogue and "`IN_PROGRESS`" in task_catalogue
 
 routing = yaml.safe_load(
     (ROOT / "skills/global-e2e-routing.yaml").read_text(encoding="utf-8")
@@ -128,6 +140,19 @@ assert [item["phase"] for item in routing["phase_routes"]] == [
     f"P{i:02d}" for i in range(25)
 ]
 assert all(item["gate_reviewer"] == "gate-evaluator" for item in routing["phase_routes"])
+
+# The frozen v1.4 routing remains historical programme evidence. Contract 31 adds
+# P25-P27 through a separate v1.5 registry and must not rewrite this artifact.
+if v15_contract.is_file():
+    v15_registry = json.loads(
+        (ROOT / "data/programmes/global-e2e-task-registry.v1.5.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert v15_registry["programme"] == "P00-P27"
+    assert v15_registry["state_model"]["only_final_launch_task"] == (
+        "AX-GE2E-P27-T01"
+    )
 
 gate = json.loads(
     (ROOT / "docs/gates/AX-GE2E-P00-gate-v1.4.json").read_text(encoding="utf-8")
@@ -159,6 +184,7 @@ print(
             "catalogues": len(index["catalogues"]),
             "public_launch_authorised": False,
             "global_product_rollback_tested": False,
+            "v15_extension_present": v15_contract.is_file(),
         },
         sort_keys=True,
     )
