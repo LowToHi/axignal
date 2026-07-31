@@ -17,7 +17,10 @@ export default defineConfig({
   },
   projects: [
     { name: "chromium-desktop", use: { ...devices["Desktop Chrome"] } },
-    { name: "chromium-tablet", use: { ...devices["iPad Pro 11"] } }
+    {
+      name: "chromium-tablet",
+      use: { ...devices["iPad Pro 11"], browserName: "chromium" }
+    }
   ],
   webServer: useExternalServer
     ? undefined
