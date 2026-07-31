@@ -7,15 +7,15 @@ import "./message-copy.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://axignal.com"),
-  title: "AXIGNAL — Evidence-backed research for high-stakes decisions",
+  title: "AXIGNAL — Business-to-Government (B2G) Opportunity Intelligence",
   description:
-    "Turn scattered sources into a decision your team can verify. AXIGNAL keeps questions, evidence, uncertainty and review in one governed research workspace.",
+    "Find and qualify public contracts and global tenders. AXIGNAL connects procurement notices, government buyers, awards, companies and evidence for disciplined B2G decisions.",
   applicationName: "AXIGNAL",
   alternates: { canonical: "/" },
   openGraph: {
-    title: "AXIGNAL — Turn scattered sources into a decision your team can verify",
+    title: "AXIGNAL — Find the public contracts your business is built to pursue",
     description:
-      "Evidence-backed research for strategy, investment and intelligence teams, with the evidence trail kept intact.",
+      "Business-to-Government opportunity intelligence for discovering, qualifying and investigating public contracts with a traceable evidence trail.",
     type: "website",
     siteName: "AXIGNAL"
   },
