@@ -14,15 +14,35 @@ export async function generateMetadata({
   const { country, sector } = await params;
   const page = await fetchPublicDiscoveryPage("TENDER_HUB", country, sector);
   if (!page) {
-    return { title: "Not found — AXIGNAL", robots: { index: false, follow: false } };
+    return {
+      title: "Not found — AXIGNAL",
+      robots: { index: false, follow: false }
+    };
   }
-  const siteUrl = (process.env.AXIGNAL_PUBLIC_SITE_URL ?? "https://axignal.com").replace(/\/$/, "");
+  const siteUrl = (
+    process.env.AXIGNAL_PUBLIC_SITE_URL ?? "https://axignal.com"
+  ).replace(/\/$/, "");
   return {
     title: page.title,
     description: page.description,
     alternates: { canonical: `${siteUrl}${page.canonical_path}` },
-    robots: { index: true, follow: true, googleBot: { index: true, follow: true, maxSnippet: -1, maxImagePreview: "large" } },
-    openGraph: { type: "website", title: page.title, description: page.description, url: `${siteUrl}${page.canonical_path}`, siteName: "AXIGNAL" }
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-snippet": -1,
+        "max-image-preview": "large"
+      }
+    },
+    openGraph: {
+      type: "website",
+      title: page.title,
+      description: page.description,
+      url: `${siteUrl}${page.canonical_path}`,
+      siteName: "AXIGNAL"
+    }
   };
 }
 
