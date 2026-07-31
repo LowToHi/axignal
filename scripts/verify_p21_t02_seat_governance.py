@@ -85,11 +85,18 @@ def main() -> None:
         ),
     )
     require_text(
+        ROOT / "apps/api/src/axignal_api/seat_config.py",
+        (
+            "Test invitation provider is restricted",
+            "AXIGNAL_SEAT_INVITATION_PROVIDER",
+            "AXIGNAL_TEST_RUNTIME_ENABLED",
+        ),
+    )
+    require_text(
         ROOT / "apps/api/src/axignal_api/seat_delivery.py",
         (
             "token_urlsafe",
             "sha256",
-            "Test invitation provider is restricted",
             "smtplib.SMTP",
         ),
     )
