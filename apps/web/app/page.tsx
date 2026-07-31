@@ -7,10 +7,17 @@ import { SeatGovernanceBridge } from "@/components/seat-governance-bridge";
 import {
   getAuthenticatedIdentity,
   isAuthenticationRequired,
+  isPasswordlessIdentityEnabled,
   isSeatGovernanceUiEnabled
 } from "@/lib/server-auth";
 
 export const dynamic = "force-dynamic";
+
+function boolEnv(name: string): boolean {
+  return ["1", "true", "yes", "on"].includes(
+    (process.env[name] ?? "").trim().toLowerCase()
+  );
+}
 
 function authenticatedShell() {
   return (
@@ -27,6 +34,14 @@ function authenticatedShell() {
 export default async function HomePage() {
   if (!isAuthenticationRequired()) return authenticatedShell();
   const identity = await getAuthenticatedIdentity();
-  if (!identity) return <AuthGate />;
+  if (!identity) {
+    return (
+      <AuthGate
+        passwordless={isPasswordlessIdentityEnabled()}
+        turnstileSiteKey={process.env.NEXT_PUBLIC_AXIGNAL_TURNSTILE_SITE_KEY}
+        testRuntime={boolEnv("AXIGNAL_TEST_RUNTIME_ENABLED")}
+      />
+    );
+  }
   return authenticatedShell();
 }
