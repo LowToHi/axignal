@@ -120,8 +120,8 @@ if v15_contract.is_file():
     assert "| `P01` | `ENGINEERING_IN_PROGRESS` | `IN_PROGRESS` |" in phase_map
     assert "`AX-GE2E-P00-T01`" in task_catalogue
     assert "`AX-GE2E-P01-T01`" in task_catalogue
-    assert "P00 accepted" in current
-    assert "P01 in progress" in current
+    assert "P00 ACCEPTED" in current
+    assert "P01 IN PROGRESS" in current
     assert "P27" in phase_map
     assert "P24 is not final" in current
 else:
