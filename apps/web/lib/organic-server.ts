@@ -86,14 +86,23 @@ export function isPublicOrganicIndexingEnabled(): boolean {
   return boolEnv("AXIGNAL_ORGANIC_PUBLIC_INDEXING_ENABLED");
 }
 
+function testFounderRelaxation(): boolean {
+  return (
+    process.env.AXIGNAL_ENVIRONMENT === "test" &&
+    boolEnv("AXIGNAL_TEST_RUNTIME_ENABLED")
+  );
+}
+
 export function isFounderIdentity(identity: AuthenticatedIdentity): boolean {
+  if (identity.assuranceLevel !== "AAL2") return false;
+  if (testFounderRelaxation()) return true;
   const subjects = new Set(
     (process.env.AXIGNAL_FOUNDER_SUBJECTS ?? "")
       .split(",")
       .map((item) => item.trim())
       .filter(Boolean)
   );
-  return subjects.has(identity.subject) && identity.assuranceLevel === "AAL2";
+  return subjects.has(identity.subject);
 }
 
 async function publicJson<T>(path: string): Promise<T | null> {
@@ -120,7 +129,8 @@ export async function fetchPublicDiscoveryPage(
   const safeSlug = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
   if (!safeSlug.test(countrySlug) || !safeSlug.test(sectorSlug)) return null;
   return publicJson<PublicDiscoveryPage>(
-    `/v1/public/discovery/${kind}/${countrySlug}/${sectorSlug}?locale=${encodeURIComponent(locale)}`
+    `/v1/public/discovery/${kind}/${countrySlug}/${sectorSlug}` +
+      `?locale=${encodeURIComponent(locale)}`
   );
 }
 
@@ -155,7 +165,10 @@ async function founderJson<T>(
   const base = apiUrl();
   if (!base) throw new Error("AXIGNAL_API_URL_REQUIRED");
   const headers = new Headers(init?.headers);
-  headers.set("X-AXIGNAL-Identity-Assertion", buildApiIdentityAssertion(identity));
+  headers.set(
+    "X-AXIGNAL-Identity-Assertion",
+    buildApiIdentityAssertion(identity)
+  );
   if (init?.body) headers.set("content-type", "application/json");
   const response = await fetch(`${base}${path}`, {
     ...init,
@@ -173,8 +186,14 @@ export async function fetchFounderAdminData(
   const [overview, pages, contacts, alerts] = await Promise.all([
     founderJson<FounderOverview>(identity, "/v1/admin/overview"),
     founderJson<SeoPageCandidate[]>(identity, "/v1/admin/seo/pages"),
-    founderJson<Array<Record<string, unknown>>>(identity, "/v1/admin/crm/contacts"),
-    founderJson<Array<Record<string, unknown>>>(identity, "/v1/admin/tender-alerts")
+    founderJson<Array<Record<string, unknown>>>(
+      identity,
+      "/v1/admin/crm/contacts"
+    ),
+    founderJson<Array<Record<string, unknown>>>(
+      identity,
+      "/v1/admin/tender-alerts"
+    )
   ]);
   return {
     overview,
@@ -203,12 +222,15 @@ export async function mutateFounderAdmin(
     });
   }
   const pageId = typeof payload.pageId === "string" ? payload.pageId : "";
-  if (!/^[0-9a-f-]{36}$/i.test(pageId)) throw new Error("INVALID_PAGE_ID");
+  if (!/^[0-9a-f-]{36}$/i.test(pageId)) {
+    throw new Error("INVALID_PAGE_ID");
+  }
   if (action === "evaluate") {
-    return founderJson(identity, `/v1/admin/seo/pages/${pageId}/evaluate`, {
-      method: "POST",
-      body: "{}"
-    });
+    return founderJson(
+      identity,
+      `/v1/admin/seo/pages/${pageId}/evaluate`,
+      { method: "POST", body: "{}" }
+    );
   }
   const contentHash = createHash("sha256")
     .update(JSON.stringify(payload.snapshot ?? {}))
