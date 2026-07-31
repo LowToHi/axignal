@@ -5,6 +5,9 @@ import {
   isPublicOrganicIndexingEnabled
 } from "@/lib/organic-server";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   if (!isPublicOrganicIndexingEnabled()) return [];
   const siteUrl = (
