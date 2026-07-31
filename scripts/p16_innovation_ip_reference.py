@@ -6,7 +6,6 @@ import json
 from collections.abc import Mapping, Sequence
 from typing import Any
 
-
 CURRENT_PATENT_STATES = {
     "APPLICATION_FILED",
     "APPLICATION_PUBLISHED",
