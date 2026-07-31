@@ -66,7 +66,6 @@ jobs:
       AXIGNAL_PILOT_COMPOSE_EDGE_FILE: infra/pilot/remote/compose.shared-traefik.yaml
       AXIGNAL_BILLING_TEST_COMPOSE_FILE: infra/pilot/compose.billing-test.yaml
       AXIGNAL_SEAT_TEST_COMPOSE_FILE: infra/pilot/compose.seat-test.yaml
-      AXIGNAL_DATABASE_URL: postgresql://axignal:ci-admin-password-not-for-deployment@127.0.0.1:15432/axignal
       AXIGNAL_PLAYWRIGHT_EXTERNAL_SERVER: "true"
       AXIGNAL_PLAYWRIGHT_BASE_URL: http://127.0.0.1:18080
 
@@ -169,13 +168,29 @@ jobs:
         run: |
           rm -rf artifacts
           mkdir -p artifacts
+          compose=(
+            docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE"
+            -f "$AXIGNAL_PILOT_COMPOSE_FILE"
+            -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE"
+            -f "$AXIGNAL_BILLING_TEST_COMPOSE_FILE"
+            -f "$AXIGNAL_SEAT_TEST_COMPOSE_FILE"
+          )
           set +e
-          AXIGNAL_SEAT_EVIDENCE_DIR=artifacts \
-            python scripts/verify_seat_governance_e2e.py \
-            > >(tee artifacts/seat-governance-e2e.log) \
-            2> >(tee -a artifacts/seat-governance-e2e.log >&2)
-          status=$?
+          "${compose[@]}" exec -T api sh -c '
+            rm -rf /tmp/seat-evidence
+            mkdir -p /tmp/seat-evidence
+            cat > /tmp/verify-seat-governance-e2e.py
+            AXIGNAL_SEAT_EVIDENCE_DIR=/tmp/seat-evidence \
+              python /tmp/verify-seat-governance-e2e.py
+          ' < scripts/verify_seat_governance_e2e.py \
+            2>&1 | tee artifacts/seat-governance-e2e.log
+          status=${PIPESTATUS[0]}
           set -e
+          if [ "$status" -eq 0 ]; then
+            "${compose[@]}" cp \
+              api:/tmp/seat-evidence/seat-governance-e2e.json \
+              artifacts/seat-governance-e2e.json
+          fi
           exit "$status"
 
       - name: Execute browser seat lifecycle
