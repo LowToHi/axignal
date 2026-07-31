@@ -1,0 +1,159 @@
+{
+  "schema_version": "axignal.message-copy-validation-e2e/v0.1",
+  "task_id": "AX-GE2E-P23-T02",
+  "baseline_sha": "ce9900dc7372db4499205a87ccb1cad4f2b08527",
+  "state": "DESK_RESEARCH_VALIDATED_IMPLEMENTED",
+  "message_version": "buyer-outcome-v1.0",
+  "engineering_evidence_ready": true,
+  "implemented_in_real_landing": true,
+  "browser_evidence_required": true,
+  "buyer_interview_validation_complete": false,
+  "conversion_validation_complete": false,
+  "public_publication_authorised": false,
+  "paid_media_authorised": false,
+  "stripe_live_authorised": false,
+  "market_validated_claim_authorised": false,
+  "research_method": {
+    "as_of": "2026-07-31",
+    "methods": [
+      "official_competitor_message_review",
+      "verified_review_theme_analysis",
+      "current_product_truth_mapping",
+      "claim_risk_review",
+      "real_landing_implementation",
+      "browser_and_intake_acceptance"
+    ],
+    "source_classes": [
+      "official_product_pages",
+      "verified_customer_review_aggregates",
+      "axignal_engineering_contracts"
+    ],
+    "limitations": [
+      "no_direct_buyer_interviews_yet",
+      "no_live_conversion_sample_yet",
+      "no_customer_testimonials_or_logos",
+      "desk_research_does_not_prove_product_market_fit"
+    ]
+  },
+  "market_patterns": [
+    {
+      "pattern": "competitors_lead_with_speed_access_and_workflow_outcomes",
+      "implication": "lead_with_the_buyer_result_before_architecture"
+    },
+    {
+      "pattern": "buyers_value_unified_sources_search_and_cited_synthesis",
+      "implication": "make_scattered_research_and_reviewable_support_explicit"
+    },
+    {
+      "pattern": "buyers_report_information_overload_learning_curve_and_relevance_risk",
+      "implication": "use_plain_language_and_show_visible_states_and_limits"
+    },
+    {
+      "pattern": "serious_work_products_use_transparency_security_and_permissions_as_proof",
+      "implication": "position_governance_as_a_differentiator_below_the_primary_outcome"
+    }
+  ],
+  "priority_buyers": [
+    "corporate_strategy_and_development",
+    "investment_research",
+    "competitive_and_market_intelligence",
+    "knowledge_and_research_operations"
+  ],
+  "buyer_jobs": [
+    "combine_public_and_private_research_without_losing_context",
+    "trace_why_a_claim_is_in_the_decision_record",
+    "surface_conflicting_evidence_before_commitment",
+    "resume_and_review_work_without_reconstructing_assumptions",
+    "preserve_human_authority_for_high_stakes_decisions"
+  ],
+  "buyer_pains": [
+    "scattered_sources_and_notes",
+    "slow_manual_synthesis",
+    "information_overload",
+    "hidden_contradictions",
+    "lost_research_context",
+    "weak_auditability",
+    "complex_or_opaque_ai_workflows"
+  ],
+  "message_decision": {
+    "category": "evidence_backed_research_workspace",
+    "eyebrow": "EVIDENCE-BACKED RESEARCH FOR HIGH-STAKES DECISIONS",
+    "headline": "Turn scattered sources into a decision your team can verify.",
+    "supporting_headline": "Keep the evidence trail intact.",
+    "subheadline": "AXIGNAL brings research questions, sources, claims, uncertainty and review into one governed workspace. Strategy, investment and intelligence teams can move faster without rebuilding the trail in slides, chats and spreadsheets.",
+    "primary_cta": "Request a research workspace",
+    "secondary_cta": "See the research workflow",
+    "proof_points": [
+      "Sources stay attached",
+      "Uncertainty stays visible",
+      "Review stays human"
+    ],
+    "primary_differentiator": "reviewable_evidence_trail_with_bounded_authority",
+    "rejected_primary_positioning": [
+      "global_opportunity_intelligence",
+      "research_intelligence_with_an_evidence_trail",
+      "evidence_infrastructure_for_high_stakes_decisions"
+    ],
+    "rejection_reason": "technically_accurate_but_too_abstract_for_first_screen_comprehension"
+  },
+  "objection_map": [
+    {
+      "objection": "is_this_another_ai_search_or_summary_tool",
+      "response": "the_workflow_keeps_question_sources_claims_uncertainty_and_review_together"
+    },
+    {
+      "objection": "can_the_output_be_trusted",
+      "response": "no_truth_guarantee_sources_states_limits_and_contradictions_remain_inspectable"
+    },
+    {
+      "objection": "does_ai_make_the_decision",
+      "response": "models_propose_human_and_policy_gates_retain_authority"
+    },
+    {
+      "objection": "can_it_use_private_information",
+      "response": "tenant_private_use_is_subject_to_rights_retention_and_security_controls"
+    },
+    {
+      "objection": "can_we_buy_it_now",
+      "response": "candidate_packages_are_visible_but_self_service_and_stripe_live_remain_disabled"
+    }
+  ],
+  "implementation_paths": [
+    "apps/landing/app/page.tsx",
+    "apps/landing/app/layout.tsx",
+    "apps/landing/app/message-copy.css",
+    "apps/landing/components/landing-experience.tsx",
+    "apps/landing/components/pilot-access-form.tsx",
+    "apps/landing/app/api/pilot-intake/route.ts",
+    "apps/landing/lib/landing-data.ts",
+    "apps/landing/lib/candidate-pricing.ts"
+  ],
+  "e2e_gates": [
+    "REAL_LANDING_USES_WINNING_MESSAGE",
+    "MESSAGE_VERSION_IS_PERSISTED_WITH_INTAKE",
+    "BUYER_ROLES_AND_DECISION_JOB_ARE_CAPTURED",
+    "CANDIDATE_PRICES_RESOLVE_FROM_VERSIONED_SERVER_PRICE_BOOK",
+    "PUBLICATION_REMAINS_NOINDEX",
+    "PROHIBITED_CLAIMS_ARE_ABSENT",
+    "CONTROLLED_ACCESS_ENDPOINT_FAILS_CLOSED_WHEN_UNCONFIGURED",
+    "KEYBOARD_AND_SEMANTIC_COMPLETION_PASS",
+    "DESKTOP_AND_TABLET_BROWSER_PASS",
+    "TYPECHECK_AND_PRODUCTION_BUILD_PASS"
+  ],
+  "prohibited_claims": [
+    "guaranteed truth",
+    "zero hallucinations",
+    "100 percent accurate",
+    "fully autonomous decisions",
+    "replace your analysts",
+    "market validated",
+    "publicly available now"
+  ],
+  "next_real_evidence": [
+    "five_or_more_problem_interviews_with_priority_buyers",
+    "recorded_first_screen_comprehension_test",
+    "controlled_access_conversion_sample",
+    "qualified_request_to_accepted_pilot_rate",
+    "activation_and_completed_value_workflow_evidence"
+  ]
+}

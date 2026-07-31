@@ -1,0 +1,227 @@
+:target {
+  scroll-margin-top: calc(var(--header) + 24px);
+}
+
+section:target {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: none !important;
+}
+
+.problem-section,
+.pricing-section,
+.assurance-section,
+.faq-section {
+  padding: clamp(90px, 12vw, 180px) clamp(22px, 6vw, 104px);
+}
+
+.problem-section {
+  border-bottom: 1px solid var(--line);
+  background:
+    radial-gradient(circle at 12% 18%, rgba(67, 200, 200, 0.08), transparent 24rem),
+    var(--panel);
+}
+
+.problem-grid,
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--line);
+}
+
+.problem-grid article,
+.pricing-grid article {
+  min-height: 280px;
+  padding: clamp(28px, 4vw, 48px);
+  background: var(--bg);
+}
+
+.problem-grid article > span {
+  color: var(--signal2);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+}
+
+.problem-grid h3,
+.pricing-grid h3 {
+  margin: 26px 0 14px;
+  font-size: clamp(1.7rem, 2.6vw, 2.7rem);
+  line-height: 1.05;
+  letter-spacing: -0.045em;
+}
+
+.problem-grid p,
+.pricing-grid p,
+.assurance-section p,
+.faq-list p {
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.pricing-section {
+  border-block: 1px solid var(--line);
+  background:
+    radial-gradient(circle at 88% 18%, rgba(67, 200, 200, 0.09), transparent 28rem),
+    var(--panel);
+}
+
+.pricing-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  max-width: 1120px;
+}
+
+.pricing-grid article {
+  min-height: 430px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.pricing-grid article > p:first-child {
+  color: var(--signal2);
+}
+
+.plan-price {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 34px 0 8px;
+}
+
+.plan-price strong {
+  font-size: clamp(3.2rem, 6vw, 6.5rem);
+  line-height: 0.9;
+  letter-spacing: -0.065em;
+}
+
+.plan-price span,
+.pricing-boundary {
+  color: var(--subtle);
+}
+
+.pricing-grid .secondary-button {
+  margin-top: auto;
+}
+
+.pricing-boundary {
+  max-width: 900px;
+  margin: 24px 0 0;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.assurance-section {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(340px, 1fr);
+  gap: clamp(40px, 8vw, 120px);
+  align-items: start;
+  background: var(--raised);
+}
+
+.assurance-section h2,
+.faq-section h2,
+.problem-section h2,
+.pricing-section h2 {
+  margin: 12px 0 20px;
+  font-size: clamp(2.8rem, 5vw, 6rem);
+  line-height: 0.98;
+  letter-spacing: -0.055em;
+  text-wrap: balance;
+}
+
+.assurance-section ul {
+  display: grid;
+  gap: 1px;
+  margin: 0;
+  padding: 1px;
+  list-style: none;
+  background: var(--line);
+}
+
+.assurance-section li {
+  padding: 22px 24px;
+  background: var(--panel);
+  color: var(--copy);
+  line-height: 1.5;
+}
+
+.assurance-section > p {
+  grid-column: 2;
+  max-width: 760px;
+  margin: -72px 0 0;
+  padding-top: 96px;
+  border-top: 1px solid var(--line);
+  font-size: 13px;
+}
+
+.faq-section {
+  background: var(--bg);
+}
+
+.faq-list {
+  max-width: 1100px;
+  border-top: 1px solid var(--line);
+}
+
+.faq-list details {
+  border-bottom: 1px solid var(--line);
+}
+
+.faq-list summary {
+  cursor: pointer;
+  padding: 26px 46px 26px 0;
+  color: var(--copy);
+  font-size: clamp(1.15rem, 2vw, 1.55rem);
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.faq-list summary::marker {
+  color: var(--signal2);
+}
+
+.faq-list p {
+  max-width: 820px;
+  margin: 0;
+  padding: 0 0 28px;
+}
+
+@media (max-width: 900px) {
+  .problem-grid,
+  .pricing-grid,
+  .assurance-section {
+    grid-template-columns: 1fr;
+  }
+
+  .problem-grid article,
+  .pricing-grid article {
+    min-height: auto;
+  }
+
+  .pricing-grid article {
+    min-height: 360px;
+  }
+
+  .assurance-section > p {
+    grid-column: auto;
+    margin: 0;
+    padding-top: 24px;
+  }
+}
+
+@media (max-width: 620px) {
+  .problem-section,
+  .pricing-section,
+  .assurance-section,
+  .faq-section {
+    padding-block: 78px;
+  }
+
+  .plan-price strong {
+    font-size: 3.7rem;
+  }
+}
