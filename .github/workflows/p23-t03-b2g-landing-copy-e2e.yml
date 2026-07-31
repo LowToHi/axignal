@@ -1,0 +1,88 @@
+name: P23-T03 B2G Landing Copy E2E
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "apps/landing/**"
+      - "data/experience/b2g-landing-copy-e2e-runtime.v0.1.json"
+      - "data/experience/message-copy-validation-e2e-runtime.v0.1.json"
+      - "data/commercial/commercial-runtime-pricing-stripe-runtime.v0.1.json"
+      - "docs/experience/P23-T03-b2g-landing-copy-e2e-v0.1.md"
+      - "scripts/verify_p23_t03_b2g_landing_copy_e2e.py"
+      - "scripts/verify_p23_t02_message_copy_validation_e2e.py"
+      - "scripts/verify_landing_implementation.py"
+      - "tests/landing/**"
+      - "playwright.landing.config.ts"
+      - ".github/workflows/p23-t03-b2g-landing-copy-e2e.yml"
+  push:
+    branches: ["agent/**"]
+    paths:
+      - "apps/landing/**"
+      - "data/experience/b2g-landing-copy-e2e-runtime.v0.1.json"
+      - "data/experience/message-copy-validation-e2e-runtime.v0.1.json"
+      - "data/commercial/commercial-runtime-pricing-stripe-runtime.v0.1.json"
+      - "docs/experience/P23-T03-b2g-landing-copy-e2e-v0.1.md"
+      - "scripts/verify_p23_t03_b2g_landing_copy_e2e.py"
+      - "scripts/verify_p23_t02_message_copy_validation_e2e.py"
+      - "scripts/verify_landing_implementation.py"
+      - "tests/landing/**"
+      - "playwright.landing.config.ts"
+      - ".github/workflows/p23-t03-b2g-landing-copy-e2e.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: p23-t03-b2g-landing-copy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: B2G landing, trial, pricing and intake
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "22.14.0"
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.13"
+      - name: Enable pinned pnpm
+        run: corepack enable
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Verify B2G message, trial and pricing contract
+        run: |
+          python -m json.tool data/experience/b2g-landing-copy-e2e-runtime.v0.1.json >/dev/null
+          python -m py_compile scripts/verify_p23_t03_b2g_landing_copy_e2e.py
+          python scripts/verify_p23_t03_b2g_landing_copy_e2e.py \
+            | tee p23-t03-b2g-landing-evidence.json
+      - name: Verify superseded P23-T02 contract
+        run: python scripts/verify_p23_t02_message_copy_validation_e2e.py
+      - name: Typecheck real landing
+        run: pnpm --filter @axignal/landing typecheck
+      - name: Build real landing
+        run: pnpm --filter @axignal/landing build
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Execute desktop and mobile B2G landing E2E
+        run: pnpm exec playwright test --config=playwright.landing.config.ts
+      - name: Upload non-sensitive evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p23-t03-b2g-landing-e2e-${{ github.sha }}
+          path: |
+            p23-t03-b2g-landing-evidence.json
+            playwright-report
+            test-results
+          if-no-files-found: error
+          retention-days: 30
