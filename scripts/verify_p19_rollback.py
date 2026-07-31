@@ -16,10 +16,15 @@ P19_FILES = [
     "schemas/scenarios-calibration-outcomes-fixtures.schema.json",
     "docs/scenarios/P19-scenarios-calibration-outcomes-v0.1.md",
 ]
+EXPECTED_RESTORED_FILES = {
+    ".github/workflows/executable-spine.yml",
+    "scripts/verify_p19_rollback.py",
+}
 
 plan = json.loads(PLAN.read_text(encoding="utf-8"))
 assert plan["baseline_sha"] == P19_HEAD
-assert plan["restored_baseline_files"] == ["scripts/verify_p19_rollback.py"]
+assert len(plan["restored_baseline_files"]) == len(EXPECTED_RESTORED_FILES)
+assert set(plan["restored_baseline_files"]) == EXPECTED_RESTORED_FILES
 for relative_path in P19_FILES:
     assert (ROOT / relative_path).is_file(), relative_path
 
@@ -30,6 +35,7 @@ print(
             "task_id": "AX-GE2E-P19-T01",
             "verification_head": P19_HEAD,
             "forward_compatible_integrity_guard": True,
+            "restored_baseline_files": len(EXPECTED_RESTORED_FILES),
             "byte_exact_rehearsal_delegated_to": "AX-GE2E-P20-T01",
         },
         sort_keys=True,
