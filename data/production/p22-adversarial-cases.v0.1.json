@@ -1,0 +1,30 @@
+{
+  "task_id": "AX-GE2E-P22-T01",
+  "required_zero_deltas": {
+    "production_deployment_delta": 0,
+    "public_traffic_delta": 0,
+    "stripe_live_delta": 0,
+    "external_action_delta": 0,
+    "canonical_delta": 0,
+    "tenant_disclosure_delta": 0,
+    "evidence_loss_delta": 0
+  },
+  "cases": [
+    {"case_id":"P22-ADV-001","attack":"unsigned_artifact","expected_decision":"DENY_OR_QUARANTINE"},
+    {"case_id":"P22-ADV-002","attack":"revision_mismatch","expected_decision":"DENY_OR_QUARANTINE"},
+    {"case_id":"P22-ADV-003","attack":"plaintext_secret","expected_decision":"DENY_OR_QUARANTINE"},
+    {"case_id":"P22-ADV-004","attack":"smoke_failure","expected_decision":"DENY_OR_QUARANTINE"},
+    {"case_id":"P22-ADV-005","attack":"rollback_missing","expected_decision":"DENY_OR_QUARANTINE"},
+    {"case_id":"P22-ADV-006","attack":"slo_missing","expected_decision":"DENY_OR_QUARANTINE"},
+    {"case_id":"P22-ADV-007","attack":"alert_route_missing","expected_decision":"DENY_OR_QUARANTINE"},
+    {"case_id":"P22-ADV-008","attack":"backup_stale","expected_decision":"DENY_OR_QUARANTINE"},
+    {"case_id":"P22-ADV-009","attack":"backup_digest_mismatch","expected_decision":"DENY_OR_QUARANTINE"},
+    {"case_id":"P22-ADV-010","attack":"restore_not_isolated","expected_decision":"DENY_OR_QUARANTINE"},
+    {"case_id":"P22-ADV-011","attack":"rpo_breach","expected_decision":"DENY_OR_QUARANTINE"},
+    {"case_id":"P22-ADV-012","attack":"rto_breach","expected_decision":"DENY_OR_QUARANTINE"},
+    {"case_id":"P22-ADV-013","attack":"critical_finding","expected_decision":"DENY_OR_QUARANTINE"},
+    {"case_id":"P22-ADV-014","attack":"expired_risk_acceptance","expected_decision":"DENY_OR_QUARANTINE"},
+    {"case_id":"P22-ADV-015","attack":"model_release_approval","expected_decision":"DENY_OR_QUARANTINE"},
+    {"case_id":"P22-ADV-016","attack":"premature_stripe_live_activation","expected_decision":"DENY_OR_QUARANTINE"}
+  ]
+}
