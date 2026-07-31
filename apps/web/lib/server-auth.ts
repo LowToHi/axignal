@@ -12,15 +12,15 @@ export type AuthenticatedIdentity = {
   subject: string;
   email: string;
   tenantId: string;
-  userId?: string;
-  sessionId?: string;
-  membershipId?: string | null;
-  roles?: string[];
-  authMethod?: string;
-  assuranceLevel?: string;
-  authenticatedAt?: string;
-  stepUpValidUntil?: string | null;
-  absoluteExpiresAt?: string;
+  userId?: string | undefined;
+  sessionId?: string | undefined;
+  membershipId?: string | null | undefined;
+  roles?: string[] | undefined;
+  authMethod?: string | undefined;
+  assuranceLevel?: string | undefined;
+  authenticatedAt?: string | undefined;
+  stepUpValidUntil?: string | null | undefined;
+  absoluteExpiresAt?: string | undefined;
 };
 
 type SessionClaims = {
