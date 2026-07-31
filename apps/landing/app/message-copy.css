@@ -70,15 +70,20 @@ section:target {
 }
 
 .pricing-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  max-width: 1120px;
+  max-width: 1380px;
 }
 
 .pricing-grid article {
-  min-height: 430px;
+  min-height: 470px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+}
+
+.pricing-grid article:first-child {
+  background:
+    radial-gradient(circle at 20% 0, rgba(67, 200, 200, 0.15), transparent 18rem),
+    var(--raised);
 }
 
 .pricing-grid article > p:first-child {
@@ -87,13 +92,14 @@ section:target {
 
 .plan-price {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   gap: 10px;
   margin: 34px 0 8px;
 }
 
 .plan-price strong {
-  font-size: clamp(3.2rem, 6vw, 6.5rem);
+  font-size: clamp(3.2rem, 5.4vw, 6.1rem);
   line-height: 0.9;
   letter-spacing: -0.065em;
 }
@@ -103,6 +109,7 @@ section:target {
   color: var(--subtle);
 }
 
+.pricing-grid .primary-button,
 .pricing-grid .secondary-button {
   margin-top: auto;
 }
@@ -190,11 +197,26 @@ section:target {
   padding: 0 0 28px;
 }
 
+@media (max-width: 1100px) {
+  .pricing-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .pricing-grid article:first-child {
+    grid-column: 1 / -1;
+    min-height: 360px;
+  }
+}
+
 @media (max-width: 900px) {
   .problem-grid,
   .pricing-grid,
   .assurance-section {
     grid-template-columns: 1fr;
+  }
+
+  .pricing-grid article:first-child {
+    grid-column: auto;
   }
 
   .problem-grid article,
