@@ -47,7 +47,7 @@ class SeatSettings:
     smtp_starttls: bool
 
     @classmethod
-    def from_env(cls) -> "SeatSettings":
+    def from_env(cls) -> SeatSettings:
         return cls(
             enabled=_bool_env("AXIGNAL_SEAT_GOVERNANCE_ENABLED"),
             database_url=(

@@ -28,35 +28,37 @@ def app_call(
     query: str,
     params: tuple[object, ...],
 ) -> dict | None:
-    with psycopg.connect(DSN, row_factory=dict_row) as connection:
-        with connection.cursor() as cursor:
-            cursor.execute("SET LOCAL ROLE axignal_app")
-            cursor.execute(
-                "SELECT set_config('app.tenant_id', %s, true)",
-                (str(tenant_id),),
-            )
-            cursor.execute(query, params)
-            return cursor.fetchone()
+    with psycopg.connect(
+        DSN, row_factory=dict_row
+    ) as connection, connection.cursor() as cursor:
+        cursor.execute("SET LOCAL ROLE axignal_app")
+        cursor.execute(
+            "SELECT set_config('app.tenant_id', %s, true)",
+            (str(tenant_id),),
+        )
+        cursor.execute(query, params)
+        return cursor.fetchone()
 
 
 def seed_paid(tenant_id: UUID, plan_code: str) -> UUID:
     entitlement_id = uuid4()
-    with psycopg.connect(DSN, row_factory=dict_row) as connection:
-        with connection.cursor() as cursor:
-            cursor.execute(
-                """
-                INSERT INTO tenant_private.organisation_entitlements (
-                  entitlement_id, tenant_id, entitlement_kind, plan_code, state,
-                  policy_version, starts_at, expires_at, unlimited_ai_tokens,
-                  token_budget_total, activated_by
-                ) VALUES (
-                  %s, %s, 'PAID_MONTHLY', %s, 'ACTIVE',
-                  'ai-assistance-policy@0.1.0', now(), NULL, true, NULL,
-                  'seat-governance-e2e'
-                )
-                """,
-                (entitlement_id, tenant_id, plan_code),
+    with psycopg.connect(
+        DSN, row_factory=dict_row
+    ) as connection, connection.cursor() as cursor:
+        cursor.execute(
+            """
+            INSERT INTO tenant_private.organisation_entitlements (
+              entitlement_id, tenant_id, entitlement_kind, plan_code, state,
+              policy_version, starts_at, expires_at, unlimited_ai_tokens,
+              token_budget_total, activated_by
+            ) VALUES (
+              %s, %s, 'PAID_MONTHLY', %s, 'ACTIVE',
+              'ai-assistance-policy@0.1.0', now(), NULL, true, NULL,
+              'seat-governance-e2e'
             )
+            """,
+            (entitlement_id, tenant_id, plan_code),
+        )
     return entitlement_id
 
 
@@ -75,16 +77,15 @@ def update_entitlement(
         assignments.append("state = %s")
         values.append(state)
     values.append(entitlement_id)
-    with psycopg.connect(DSN) as connection:
-        with connection.cursor() as cursor:
-            cursor.execute(
-                f"""
-                UPDATE tenant_private.organisation_entitlements
-                SET {", ".join(assignments)}, updated_at = now()
-                WHERE entitlement_id = %s
-                """,
-                tuple(values),
-            )
+    with psycopg.connect(DSN) as connection, connection.cursor() as cursor:
+        cursor.execute(
+            f"""
+            UPDATE tenant_private.organisation_entitlements
+            SET {", ".join(assignments)}, updated_at = now()
+            WHERE entitlement_id = %s
+            """,
+            tuple(values),
+        )
 
 
 def bootstrap_owner(tenant_id: UUID) -> dict:
@@ -167,32 +168,33 @@ def revoke_member(tenant_id: UUID, membership_id: UUID) -> dict:
 
 
 def seat_counts(tenant_id: UUID) -> dict:
-    with psycopg.connect(DSN, row_factory=dict_row) as connection:
-        with connection.cursor() as cursor:
-            cursor.execute("SET LOCAL ROLE axignal_app")
-            cursor.execute(
-                "SELECT set_config('app.tenant_id', %s, true)",
-                (str(tenant_id),),
-            )
-            cursor.execute(
-                """
-                SELECT
-                  e.plan_code,
-                  e.seat_capacity,
-                  e.state,
-                  count(a.*) FILTER (WHERE a.state = 'ACTIVE') AS active,
-                  count(a.*) FILTER (WHERE a.state = 'RESERVED') AS reserved
-                FROM tenant_private.organisation_seat_entitlements e
-                LEFT JOIN tenant_private.organisation_seat_allocations a
-                  ON a.tenant_id = e.tenant_id
-                WHERE e.tenant_id = %s
-                GROUP BY e.plan_code, e.seat_capacity, e.state
-                """,
-                (tenant_id,),
-            )
-            row = cursor.fetchone()
-            assert row is not None
-            return row
+    with psycopg.connect(
+        DSN, row_factory=dict_row
+    ) as connection, connection.cursor() as cursor:
+        cursor.execute("SET LOCAL ROLE axignal_app")
+        cursor.execute(
+            "SELECT set_config('app.tenant_id', %s, true)",
+            (str(tenant_id),),
+        )
+        cursor.execute(
+            """
+            SELECT
+              e.plan_code,
+              e.seat_capacity,
+              e.state,
+              count(a.*) FILTER (WHERE a.state = 'ACTIVE') AS active,
+              count(a.*) FILTER (WHERE a.state = 'RESERVED') AS reserved
+            FROM tenant_private.organisation_seat_entitlements e
+            LEFT JOIN tenant_private.organisation_seat_allocations a
+              ON a.tenant_id = e.tenant_id
+            WHERE e.tenant_id = %s
+            GROUP BY e.plan_code, e.seat_capacity, e.state
+            """,
+            (tenant_id,),
+        )
+        row = cursor.fetchone()
+        assert row is not None
+        return row
 
 
 def expect_error(marker: str, operation) -> None:
@@ -320,17 +322,18 @@ def main() -> None:
         lambda: revoke_member(TENANT_A, owner["membership_id"]),
     )
 
-    with psycopg.connect(DSN, row_factory=dict_row) as connection:
-        with connection.cursor() as cursor:
-            cursor.execute(
-                """
-                SELECT invitation_id
-                FROM tenant_private.organisation_invitations
-                WHERE tenant_id = %s AND status = 'PENDING'
-                """,
-                (TENANT_A,),
-            )
-            pending = cursor.fetchall()
+    with psycopg.connect(
+        DSN, row_factory=dict_row
+    ) as connection, connection.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT invitation_id
+            FROM tenant_private.organisation_invitations
+            WHERE tenant_id = %s AND status = 'PENDING'
+            """,
+            (TENANT_A,),
+        )
+        pending = cursor.fetchall()
     for row in pending:
         app_call(
             TENANT_A,
@@ -370,22 +373,23 @@ def main() -> None:
     )
     assert seat_counts(TENANT_A)["reserved"] == 0
 
-    with psycopg.connect(DSN, row_factory=dict_row) as connection:
-        with connection.cursor() as cursor:
-            cursor.execute("SET LOCAL ROLE axignal_app")
-            cursor.execute(
-                "SELECT set_config('app.tenant_id', %s, true)",
-                (str(TENANT_B),),
-            )
-            cursor.execute(
-                """
-                SELECT membership_id
-                FROM tenant_private.organisation_memberships
-                WHERE membership_id = %s
-                """,
-                (owner["membership_id"],),
-            )
-            assert cursor.fetchone() is None
+    with psycopg.connect(
+        DSN, row_factory=dict_row
+    ) as connection, connection.cursor() as cursor:
+        cursor.execute("SET LOCAL ROLE axignal_app")
+        cursor.execute(
+            "SELECT set_config('app.tenant_id', %s, true)",
+            (str(TENANT_B),),
+        )
+        cursor.execute(
+            """
+            SELECT membership_id
+            FROM tenant_private.organisation_memberships
+            WHERE membership_id = %s
+            """,
+            (owner["membership_id"],),
+        )
+        assert cursor.fetchone() is None
 
     active_read = app_call(
         TENANT_A,
@@ -423,32 +427,32 @@ def main() -> None:
     assert suspended["d"]["decision"] == "DENY"
     assert suspended["d"]["reason"] == "seat_entitlement_inactive"
 
-    with psycopg.connect(DSN) as connection:
-        with connection.cursor() as cursor:
-            expect_error(
-                "membership_audit_events_are_append_only",
-                lambda: cursor.execute(
-                    """
-                    UPDATE tenant_private.membership_audit_events
-                    SET event_type = 'TAMPERED'
-                    WHERE tenant_id = %s
-                    """,
-                    (TENANT_A,),
-                ),
-            )
-            connection.rollback()
-
-    with psycopg.connect(DSN, row_factory=dict_row) as connection:
-        with connection.cursor() as cursor:
-            cursor.execute(
+    with psycopg.connect(DSN) as connection, connection.cursor() as cursor:
+        expect_error(
+            "membership_audit_events_are_append_only",
+            lambda: cursor.execute(
                 """
-                SELECT count(*) AS count
-                FROM tenant_private.membership_audit_events
+                UPDATE tenant_private.membership_audit_events
+                SET event_type = 'TAMPERED'
                 WHERE tenant_id = %s
                 """,
                 (TENANT_A,),
-            )
-            audit_count = int(cursor.fetchone()["count"])
+            ),
+        )
+        connection.rollback()
+
+    with psycopg.connect(
+        DSN, row_factory=dict_row
+    ) as connection, connection.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT count(*) AS count
+            FROM tenant_private.membership_audit_events
+            WHERE tenant_id = %s
+            """,
+            (TENANT_A,),
+        )
+        audit_count = int(cursor.fetchone()["count"])
 
     evidence = {
         "status": "PASS",
