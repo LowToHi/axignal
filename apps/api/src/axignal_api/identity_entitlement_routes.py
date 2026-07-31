@@ -9,7 +9,9 @@ from axignal_api.entitlements import (
     AIRequestAuthorizationCommand,
     EntitlementView,
     TrialActivationCommand,
-    activate_trial as legacy_activate_trial,
+)
+from axignal_api.entitlements import activate_trial as legacy_activate_trial
+from axignal_api.entitlements import (
     authorize_ai_request as legacy_authorize_ai_request,
 )
 from axignal_api.identity import AuthenticatedIdentity, require_identity
