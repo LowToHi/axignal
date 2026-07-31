@@ -1,24 +1,33 @@
 import type { Metadata, Viewport } from "next";
+
 import "@axignal/design-tokens/tokens.css";
 import "./globals.css";
 import "./responsive-polish.css";
+import "./message-copy.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://axignal.com"),
-  title: "AXIGNAL — Global Opportunity Intelligence",
+  title: "AXIGNAL — Evidence-backed research for high-stakes decisions",
   description:
-    "Discover global opportunities through persistent investigations, verifiable evidence, visible contradictions and bounded human authority.",
+    "Turn scattered sources into a decision your team can verify. AXIGNAL keeps questions, evidence, uncertainty and review in one governed research workspace.",
   applicationName: "AXIGNAL",
   alternates: { canonical: "/" },
   openGraph: {
-    title: "AXIGNAL — Global Opportunity Intelligence",
-    description: "See what is changing before it becomes obvious.",
+    title: "AXIGNAL — Turn scattered sources into a decision your team can verify",
+    description:
+      "Evidence-backed research for strategy, investment and intelligence teams, with the evidence trail kept intact.",
     type: "website",
     siteName: "AXIGNAL"
   },
   robots: {
-    index: true,
-    follow: true
+    index: false,
+    follow: false,
+    nocache: true,
+    googleBot: {
+      index: false,
+      follow: false,
+      noimageindex: true
+    }
   }
 };
 
