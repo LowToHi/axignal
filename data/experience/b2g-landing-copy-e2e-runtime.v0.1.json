@@ -1,0 +1,229 @@
+{
+  "schema_version": "axignal.b2g-landing-copy-e2e/v0.1",
+  "task_id": "AX-GE2E-P23-T03",
+  "baseline_sha": "4301d02880b65a59fb5aa9fed01abad963a23ffd",
+  "supersedes_task": "AX-GE2E-P23-T02",
+  "state": "B2G_VERTICAL_MESSAGE_IMPLEMENTED",
+  "message_version": "b2g-opportunity-v1.0",
+  "market_category": "BUSINESS_TO_GOVERNMENT_OPPORTUNITY_INTELLIGENCE",
+  "market_wedge": "GLOBAL_PUBLIC_CONTRACTS_AND_TENDERS",
+  "source_identity_policy": "INDIVIDUAL_PORTALS_ARE_LIBRARIES_NOT_PRODUCT_IDENTITY",
+  "ted_narrative_status": "REMOVED_FROM_PUBLIC_NARRATIVE",
+  "engineering_evidence_ready": true,
+  "implemented_in_real_landing": true,
+  "controlled_trial_visible": true,
+  "browser_evidence_required": true,
+  "direct_buyer_interview_validation_complete": false,
+  "conversion_validation_complete": false,
+  "public_publication_authorised": false,
+  "paid_media_authorised": false,
+  "stripe_live_authorised": false,
+  "market_validated_claim_authorised": false,
+  "research_method": {
+    "as_of": "2026-07-31",
+    "methods": [
+      "official_public_procurement_platform_message_review",
+      "b2g_buyer_job_and_pipeline_analysis",
+      "axignal_product_truth_mapping",
+      "commercial_trial_contract_reconciliation",
+      "claim_risk_review",
+      "real_landing_implementation",
+      "desktop_and_mobile_browser_acceptance"
+    ],
+    "official_message_sources_reviewed": [
+      "Deltek_GovWin_IQ",
+      "Mercell",
+      "GlobalGov",
+      "Deepbloo",
+      "PIVI",
+      "drin"
+    ],
+    "limitations": [
+      "no_direct_b2g_buyer_interviews_yet",
+      "no_live_b2g_conversion_sample_yet",
+      "no_customer_testimonials_or_logos",
+      "no_verified_win_rate_or_bid_savings_claims",
+      "desk_research_does_not_prove_product_market_fit"
+    ]
+  },
+  "market_patterns": [
+    {
+      "pattern": "procurement_platforms_lead_with_contract_discovery_pipeline_and_pursuit_outcomes",
+      "implication": "name_public_contracts_and_tenders_in_the_first_screen"
+    },
+    {
+      "pattern": "serious_b2g_products_frame_more_notices_as_insufficient_without_qualification_context",
+      "implication": "position_bid_no_bid_quality_above_alert_volume"
+    },
+    {
+      "pattern": "global_products_emphasise_multi_market_sources_languages_buyers_and_awards",
+      "implication": "present_global_procurement_as_the_market_without_claiming_universal_coverage"
+    },
+    {
+      "pattern": "buyer_and_award_context_differentiates_intelligence_from_tender_search",
+      "implication": "connect_notice_buyer_awards_companies_ownership_and_requirements"
+    },
+    {
+      "pattern": "trustworthy_positioning_uses_source_lineage_explicit_limits_and_human_authority",
+      "implication": "retain_evidence_as_the_reason_to_believe_not_the_market_category"
+    },
+    {
+      "pattern": "free_trials_reduce_entry_friction_but_axignal_trial_is_not_self_service",
+      "implication": "show_the_seven_day_trial_with_reviewed_activation_and_no_card"
+    }
+  ],
+  "priority_buyers": [
+    "heads_of_b2g_and_public_sector_sales",
+    "business_development_leaders",
+    "bid_and_proposal_managers",
+    "tender_and_procurement_intelligence_teams",
+    "international_market_expansion_teams",
+    "founders_and_executives_of_public_sector_suppliers",
+    "public_procurement_advisers_and_consultancies"
+  ],
+  "buyer_jobs": [
+    "discover_public_contracts_relevant_to_company_capabilities",
+    "qualify_tenders_before_committing_bid_budget",
+    "understand_contracting_authorities_and_prior_awards",
+    "inspect_incumbents_suppliers_ownership_and_partner_options",
+    "track_requirements_amendments_deadlines_and_open_conditions",
+    "preserve_the_evidence_behind_bid_no_bid_decisions",
+    "expand_into_new_government_markets_without_relying_on_one_portal"
+  ],
+  "buyer_pains": [
+    "fragmented_procurement_portals",
+    "multiple_languages_and_classifications",
+    "high_volume_low_relevance_alerts",
+    "late_discovery_and_compressed_deadlines",
+    "disconnected_buyer_and_award_history",
+    "hidden_eligibility_and_delivery_risk",
+    "repeated_manual_qualification",
+    "weak_pursuit_rationale_and_auditability"
+  ],
+  "message_decision": {
+    "category": "business_to_government_b2g_opportunity_intelligence",
+    "eyebrow": "BUSINESS-TO-GOVERNMENT (B2G) OPPORTUNITY INTELLIGENCE",
+    "headline": "Find the public contracts your business is built to pursue.",
+    "supporting_headline": "Turn global procurement into a qualified B2G pipeline.",
+    "subheadline": "AXIGNAL connects public tenders, contracting authorities, awards, suppliers and ownership signals so Business-to-Government teams can discover, qualify and investigate the opportunities worth pursuing—without losing the evidence behind the decision.",
+    "primary_cta": "Request your 7-day B2G trial",
+    "secondary_cta": "See a public-contract investigation",
+    "proof_points": [
+      "Public contracts and tenders",
+      "Buyer and award context",
+      "Traceable evidence",
+      "Human bid / no-bid authority"
+    ],
+    "primary_differentiator": "investigated_b2g_opportunity_with_traceable_evidence_and_bounded_authority",
+    "rejected_primary_positioning": [
+      "generic_high_stakes_research",
+      "single_portal_tender_search",
+      "ted_based_product_identity",
+      "ai_win_probability_promise",
+      "generic_evidence_infrastructure"
+    ],
+    "rejection_reason": "the_market_wedge_must_be_immediately_understood_without_tying_axignal_to_one_library_or_making_unsupported_outcome_claims"
+  },
+  "narrative_architecture": [
+    "explicit_b2g_category_and_public_contract_outcome",
+    "fragmented_global_procurement_problem",
+    "company_capability_to_opportunity_workflow",
+    "buyer_award_supplier_and_ownership_context",
+    "requirements_risk_and_evidence_differentiation",
+    "b2g_pipeline_benefits",
+    "source_lineage_security_and_human_authority",
+    "controlled_seven_day_trial",
+    "professional_and_team_pricing",
+    "b2g_objections_and_trial_request"
+  ],
+  "trial_contract": {
+    "plan_code": "CONTROLLED_TRIAL_7D",
+    "display_name": "7-day B2G trial",
+    "amount_minor": 0,
+    "currency": "EUR",
+    "duration_days": 7,
+    "ai_token_budget": 1000000,
+    "card_required": false,
+    "stripe_checkout_invoked": false,
+    "self_service_activation": false,
+    "one_time_eligibility": true,
+    "activation_mode": "HUMAN_REVIEWED_CONTROLLED_TRIAL"
+  },
+  "objection_map": [
+    {
+      "objection": "is_this_only_a_tender_alert_service",
+      "response": "discovery_is_connected_to_buyer_awards_requirements_companies_ownership_and_evidence"
+    },
+    {
+      "objection": "does_b2g_only_mean_us_government_contracting",
+      "response": "business_to_government_is_defined_broadly_and_the_product_is_structured_for_multiple_public_procurement_markets"
+    },
+    {
+      "objection": "does_axignal_depend_on_ted_or_one_portal",
+      "response": "portals_are_versioned_libraries_and_coverage_is_declared_source_by_source"
+    },
+    {
+      "objection": "does_axignal_predict_or_guarantee_contract_wins",
+      "response": "no_win_guarantee_fit_and_risk_are_review_aids_with_human_pursuit_authority"
+    },
+    {
+      "objection": "can_the_opportunity_record_be_verified",
+      "response": "sources_transformations_freshness_contradictions_and_unknowns_remain_inspectable"
+    },
+    {
+      "objection": "is_the_trial_really_free",
+      "response": "zero_price_no_card_no_stripe_checkout_but_activation_is_reviewed_and_bounded"
+    },
+    {
+      "objection": "can_we_buy_or_activate_immediately",
+      "response": "candidate_packages_are_visible_but_public_checkout_and_commercial_activation_remain_disabled"
+    }
+  ],
+  "implementation_paths": [
+    "apps/landing/app/page.tsx",
+    "apps/landing/app/layout.tsx",
+    "apps/landing/app/message-copy.css",
+    "apps/landing/components/landing-experience.tsx",
+    "apps/landing/components/pilot-access-form.tsx",
+    "apps/landing/app/api/pilot-intake/route.ts",
+    "apps/landing/lib/landing-data.ts",
+    "apps/landing/lib/candidate-pricing.ts",
+    "tests/landing/landing.spec.ts"
+  ],
+  "e2e_gates": [
+    "HERO_NAMES_BUSINESS_TO_GOVERNMENT_AND_B2G",
+    "HERO_NAMES_PUBLIC_CONTRACTS_AND_GLOBAL_PROCUREMENT",
+    "TED_IS_ABSENT_FROM_PUBLIC_NARRATIVE",
+    "B2G_WORKFLOW_REPLACES_GENERIC_RESEARCH_WORKFLOW",
+    "CONTROLLED_TRIAL_IS_VISIBLE_FROM_SERVER_PRICE_BOOK",
+    "TRIAL_TERMS_MATCH_P21_COMMERCIAL_CONTRACT",
+    "PROFESSIONAL_AND_TEAM_PRICES_MATCH_SERVER_PRICE_BOOK",
+    "B2G_MESSAGE_VERSION_IS_PERSISTED_WITH_INTAKE",
+    "B2G_BUYER_ROLES_AND_MARKET_JOB_ARE_CAPTURED",
+    "PUBLICATION_REMAINS_NOINDEX",
+    "PROHIBITED_CLAIMS_ARE_ABSENT",
+    "TRIAL_ENDPOINT_FAILS_CLOSED_WHEN_UNCONFIGURED",
+    "KEYBOARD_REDUCED_MOTION_AND_SEMANTIC_COMPLETION_PASS",
+    "DESKTOP_AND_MOBILE_BROWSER_PASS",
+    "TYPECHECK_AND_PRODUCTION_BUILD_PASS"
+  ],
+  "prohibited_claims": [
+    "guaranteed truth",
+    "guaranteed win",
+    "zero hallucinations",
+    "100 percent accurate",
+    "fully autonomous decisions",
+    "replace your analysts",
+    "market validated",
+    "complete global coverage",
+    "publicly available now"
+  ],
+  "next_real_evidence": [
+    "five_or_more_problem_interviews_with_b2g_buyers",
+    "recorded_first_screen_b2g_comprehension_test",
+    "controlled_trial_request_conversion_sample",
+    "qualified_request_to_activated_trial_rate",
+    "trial_activation_to_completed_b2g_value_workflow",
+    "independent_paid_customer_and_reconciliation_evidence"
+  ]
+}
