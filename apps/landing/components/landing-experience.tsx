@@ -4,7 +4,17 @@ import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { citySignals, evidenceRail, outcomeCards, storySteps } from "@/lib/landing-data";
+
+import {
+  buyerProblems,
+  citySignals,
+  evidenceRail,
+  frequentlyAskedQuestions,
+  MESSAGE_VERSION,
+  outcomeCards,
+  storySteps,
+  type CandidatePlan
+} from "@/lib/landing-data";
 import { PilotAccessForm } from "./pilot-access-form";
 
 const SemanticGlobe = dynamic(
@@ -29,7 +39,31 @@ function useReducedMotion() {
   return reduced;
 }
 
-export function LandingExperience() {
+function emitMessageEvent(event: string, location: string) {
+  window.dispatchEvent(
+    new CustomEvent("axignal:message-interaction", {
+      detail: {
+        event,
+        location,
+        messageVersion: MESSAGE_VERSION
+      }
+    })
+  );
+}
+
+function formatPrice(plan: CandidatePlan) {
+  return new Intl.NumberFormat("en", {
+    style: "currency",
+    currency: plan.currency,
+    maximumFractionDigits: 0
+  }).format(plan.amountMinor / 100);
+}
+
+type LandingExperienceProps = {
+  plans: readonly CandidatePlan[];
+};
+
+export function LandingExperience({ plans }: LandingExperienceProps) {
   const root = useRef<HTMLDivElement>(null);
   const story = useRef<HTMLElement>(null);
   const globeStage = useRef<HTMLDivElement>(null);
@@ -101,7 +135,7 @@ export function LandingExperience() {
           scale: 1.18,
           opacity: 0.72,
           ease: "none",
-          scrollTriggger: {
+          scrollTrigger: {
             trigger: story.current,
             start: "top top",
             end: "bottom bottom",
@@ -144,7 +178,12 @@ export function LandingExperience() {
   }, []);
 
   return (
-    <div ref={root} className="landing-root">
+    <div
+      ref={root}
+      className="landing-root"
+      data-message-version={MESSAGE_VERSION}
+      data-testid="landing-experience"
+    >
       <a className="skip-link" href="#main-content">
         Skip to content
       </a>
@@ -157,43 +196,56 @@ export function LandingExperience() {
           <span>AXIGNAL</span>
         </a>
         <nav aria-label="Primary navigation">
-          <a href="#investigation">Product</a>
-          <a href="#method">Method</a>
-          <a href="#outcomes">Outcomes</a>
-          <a href="#access">Private pilot</a>
+          <a href="#workflow">Workflow</a>
+          <a href="#evidence">Evidence</a>
+          <a href="#pricing">Plans</a>
+          <a href="#access">Controlled access</a>
         </nav>
-        <a className="header-cta" href="#access">
-          Request access
+        <a
+          className="header-cta"
+          href="#access"
+          onClick={() => emitMessageEvent("cta_click", "header")}
+        >
+          Request a workspace
         </a>
       </header>
 
       <main id="main-content">
-        <section className="hero" id="top">
+        <section className="hero" id="top" aria-labelledby="hero-title">
           <div className="hero-noise" aria-hidden="true" />
           <div className="hero-copy">
             <p className="hero-kicker" data-reveal>
-              GLOBAL OPPORTUNITY INTELLIGENCE
+              EVIDENCE-BACKED RESEARCH FOR HIGH-STAKES DECISIONS
             </p>
-            <h1 className="hero-title" data-reveal>
-              Discover what is changing
-              <span>before it becomes obvious.</span>
+            <h1 className="hero-title" id="hero-title" data-reveal>
+              Turn scattered sources into a decision your team can verify.
+              <span>Keep the evidence trail intact.</span>
             </h1>
             <p className="hero-summary" data-reveal>
-              AXIGNAL turns fragmented global signals into persistent, evidence-backed investigations across
-              geography, relationships, time, claims and sources.
+              AXIGNAL brings research questions, sources, claims, uncertainty and review into one governed
+              workspace. Strategy, investment and intelligence teams can move faster without rebuilding the
+              trail in slides, chats and spreadsheets.
             </p>
             <div className="hero-actions" data-reveal>
-              <a className="primary-button" href="#access">
-                Request private access
+              <a
+                className="primary-button"
+                href="#access"
+                onClick={() => emitMessageEvent("cta_click", "hero_primary")}
+              >
+                Request a research workspace
               </a>
-              <a className="secondary-button" href="#investigation">
-                Explore the investigation
+              <a
+                className="secondary-button"
+                href="#workflow"
+                onClick={() => emitMessageEvent("workflow_view", "hero_secondary")}
+              >
+                See the research workflow
               </a>
             </div>
-            <div className="hero-proof" data-reveal>
-              <span>Traceable claims</span>
-              <span>Contradictions visible</span>
-              <span>Human authority preserved</span>
+            <div className="hero-proof" data-reveal aria-label="Product boundaries">
+              <span>Sources stay attached</span>
+              <span>Uncertainty stays visible</span>
+              <span>Review stays human</span>
             </div>
           </div>
 
@@ -210,7 +262,7 @@ export function LandingExperience() {
           </div>
 
           <div className="scroll-cue" aria-hidden="true">
-            <span>SCROLL TO INVESTIGATE</span>
+            <span>SCROLL THROUGH THE WORKFLOW</span>
             <i />
           </div>
         </section>
@@ -219,10 +271,32 @@ export function LandingExperience() {
           <span>Evidence before confidence</span>
           <span>Unknown stays unknown</span>
           <span>Proposal is not admission</span>
-          <span>No execution or custody</span>
+          <span>No autonomous decision authority</span>
         </section>
 
-        <section className="story-shell" id="investigation" ref={story}>
+        <section className="problem-section" aria-labelledby="problem-title" data-section-reveal>
+          <div className="section-heading">
+            <p className="eyebrow">THE REAL RESEARCH COST</p>
+            <h2 id="problem-title">
+              The bottleneck is not access to information. It is proving why a decision deserves confidence.
+            </h2>
+            <p>
+              Teams already have search, documents and AI summaries. What they often lose is the relationship
+              between the question, the evidence, the disagreement and the final decision.
+            </p>
+          </div>
+          <div className="problem-grid">
+            {buyerProblems.map(([title, body], index) => (
+              <article key={title}>
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <h3>{title}</h3>
+                <p>{body}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="story-shell" id="workflow" ref={story} aria-label="Research workflow">
           <div className="globe-stage" ref={globeStage}>
             <div className="globe-aura" aria-hidden="true" />
             <SemanticGlobe activeStep={activeStep} reducedMotion={reducedMotion} />
@@ -247,7 +321,7 @@ export function LandingExperience() {
             </div>
 
             <div className="globe-hud globe-hud-right">
-              <span className="hud-label">SIGNAL STATE</span>
+              <span className="hud-label">EVIDENCE STATE</span>
               <strong>{activeStory.signal}</strong>
               <p>{activeStory.metric}</p>
               <div className="state-chip" data-state={activeStory.claimState}>
@@ -293,13 +367,13 @@ export function LandingExperience() {
           </div>
         </section>
 
-        <section className="evidence-section" id="method" data-section-reveal>
+        <section className="evidence-section" id="evidence" data-section-reveal>
           <div className="section-heading">
-            <p className="eyebrow">TRUST BY CONSTRUCTION</p>
-            <h2>A conclusion is only useful when its evidence and failure conditions are visible.</h2>
+            <p className="eyebrow">A REVIEWABLE EVIDENCE TRAIL</p>
+            <h2>A conclusion is useful only when the team can inspect its support and failure conditions.</h2>
             <p>
-              AXIGNAL separates observation, calculation, inference and contradiction. Every state remains
-              inspectable inside the investigation.
+              AXIGNAL separates observation, calculation, inference and contradiction. The summary does not
+              erase the states that produced it.
             </p>
           </div>
 
@@ -324,14 +398,14 @@ export function LandingExperience() {
               <div className="admission-core" aria-hidden="true">
                 <span>CANDIDATE</span>
                 <i />
-                <strong>ADMISSION</strong>
+                <strong>REVIEW</strong>
                 <i />
-                <span>CANONICAL</span>
+                <span>ADMITTED</span>
               </div>
-              <h3>Deterministic admission boundary</h3>
+              <h3>AI can propose. It cannot silently admit a claim as truth.</h3>
               <p>
-                Models may propose evidence and Candidate Claims. They cannot silently convert a proposal into
-                canonical truth.
+                Candidate claims pass deterministic checks. Human and policy gates determine what may be
+                relied upon, shared or promoted.
               </p>
               <ul>
                 <li>Provenance required</li>
@@ -345,8 +419,8 @@ export function LandingExperience() {
 
         <section className="outcomes-section" id="outcomes">
           <div className="section-heading" data-section-reveal>
-            <p className="eyebrow">ONE PERSISTENT INSTRUMENT</p>
-            <h2>Move from discovery to defensible understanding without losing context.</h2>
+            <p className="eyebrow">FROM RESEARCH TO REVIEW</p>
+            <h2>Move faster without leaving the next reviewer a black box.</h2>
           </div>
           <div className="outcome-grid">
             {outcomeCards.map(([title, body], index) => (
@@ -359,21 +433,91 @@ export function LandingExperience() {
           </div>
         </section>
 
+        <section className="pricing-section" id="pricing" data-section-reveal aria-labelledby="pricing-title">
+          <div className="section-heading">
+            <p className="eyebrow">CONTROLLED-ACCESS PACKAGES</p>
+            <h2 id="pricing-title">Start with the team that owns the research decision.</h2>
+            <p>
+              These candidate packages are read from AXIGNAL&apos;s versioned server-side price book. They are
+              shown for controlled-access evaluation only; public Stripe live checkout is not enabled.
+            </p>
+          </div>
+          <div className="pricing-grid">
+            {plans.map((plan) => (
+              <article key={plan.planCode} data-testid={`plan-${plan.planCode.toLowerCase()}`}>
+                <p className="eyebrow">{plan.activationState.replaceAll("_", " ")}</p>
+                <h3>{plan.name}</h3>
+                <p>{plan.description}</p>
+                <div className="plan-price">
+                  <strong>{formatPrice(plan)}</strong>
+                  <span>/ {plan.billingPeriod}</span>
+                </div>
+                <p>
+                  {plan.seatFloor}–{plan.seatCeiling} seats · bounded usage and technical quotas
+                </p>
+                <a
+                  className="secondary-button"
+                  href="#access"
+                  onClick={() => emitMessageEvent("plan_interest", plan.planCode)}
+                >
+                  Discuss {plan.name}
+                </a>
+              </article>
+            ))}
+          </div>
+          <p className="pricing-boundary">
+            Candidate pricing is not a public offer. Taxes, commercial activation and live billing remain
+            separate approval gates.
+          </p>
+        </section>
+
+        <section className="assurance-section" data-section-reveal aria-labelledby="assurance-title">
+          <div>
+            <p className="eyebrow">BUILT FOR GOVERNED RESEARCH</p>
+            <h2 id="assurance-title">Keep access, evidence and decision authority separate.</h2>
+          </div>
+          <ul>
+            <li>Tenant and workspace authority resolved on the server</li>
+            <li>Private evidence governed by classification, rights and retention</li>
+            <li>Append-only records for material evidence and decisions</li>
+            <li>Production, security and recovery objectives remain explicit gates</li>
+          </ul>
+          <p>
+            These are implemented engineering controls and objectives. Public availability, production
+            acceptance and Stripe live activation remain blocked until their independent evidence gates pass.
+          </p>
+        </section>
+
+        <section className="faq-section" data-section-reveal aria-labelledby="faq-title">
+          <div className="section-heading">
+            <p className="eyebrow">QUESTIONS BEFORE ACCESS</p>
+            <h2 id="faq-title">What AXIGNAL does—and what it does not claim.</h2>
+          </div>
+          <div className="faq-list">
+            {frequentlyAskedQuestions.map(([question, answer]) => (
+              <details key={question}>
+                <summary>{question}</summary>
+                <p>{answer}</p>
+              </details>
+            ))}
+          </div>
+        </section>
+
         <section className="pilot-section" id="access" data-section-reveal>
           <div className="pilot-copy">
-            <p className="eyebrow">PRIVATE PILOT</p>
-            <h2>Bring one high-cost research question.</h2>
+            <p className="eyebrow">CONTROLLED ACCESS</p>
+            <h2>Bring one research decision that is expensive to get wrong.</h2>
             <p>
-              AXIGNAL is preparing a bounded private pilot for qualified professionals. Access is reviewed
-              individually; deployment status and commercial terms are not represented as complete.
+              Tell us what your team must decide, which sources it relies on and where the current workflow
+              breaks. AXIGNAL will review whether the controlled programme can support that use case.
             </p>
             <div className="pilot-boundaries">
-              <span>Private access only</span>
-              <span>Live sources gated</span>
-              <span>No public performance claims</span>
+              <span>Access reviewed individually</span>
+              <span>Live sources remain gated</span>
+              <span>No subscription created by this form</span>
             </div>
           </div>
-          <PilotAccessForm />
+          <PilotAccessForm messageVersion={MESSAGE_VERSION} />
         </section>
       </main>
 
@@ -385,8 +529,9 @@ export function LandingExperience() {
           <span>AXIGNAL</span>
         </a>
         <div>
-          <a href="#investigation">Product</a>
-          <a href="#method">Methodology</a>
+          <a href="#workflow">Workflow</a>
+          <a href="#evidence">Evidence</a>
+          <a href="#pricing">Plans</a>
           <a href="/privacy">Privacy</a>
           <a href="/terms">Terms</a>
           <a href="/accessibility">Accessibility</a>
