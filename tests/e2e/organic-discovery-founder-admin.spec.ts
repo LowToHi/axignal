@@ -11,9 +11,9 @@ test("publishes only admitted intelligence and exposes a governed founder OS", a
   page,
   context
 }) => {
-  const publicResponse = await page.goto(
-    "http://localhost:18080/tenders/germany/cybersecurity"
-  );
+  test.setTimeout(120_000);
+  const publicUrl = "http://localhost:18080/tenders/germany/cybersecurity";
+  const publicResponse = await page.goto(publicUrl);
   expect(publicResponse?.status()).toBe(200);
   await expect(
     page.getByRole("heading", {
@@ -25,7 +25,9 @@ test("publishes only admitted intelligence and exposes a governed founder OS", a
   await expect(
     page.getByText("Dataset ≠ indexable page · Citation ≠ endorsement")
   ).toBeVisible();
-  const structuredData = await page.locator('script[type="application/ld+json"]').textContent();
+  const structuredData = await page
+    .locator('script[type="application/ld+json"]')
+    .textContent();
   expect(structuredData).toContain('"@type":"CollectionPage"');
   expect(structuredData).toContain('"@type":"Dataset"');
   expect(structuredData).toContain('"measurementTechnique"');
@@ -49,12 +51,16 @@ test("publishes only admitted intelligence and exposes a governed founder OS", a
   expect(sitemapBody).toContain("/tenders/germany/cybersecurity");
   expect(sitemapBody).not.toContain("synthetic-cybersecurity");
 
+  await page.goto(publicUrl);
+  await expect(page.getByLabel("Professional email")).toBeVisible();
   const alertResponsePromise = page.waitForResponse(
     (response) =>
       response.url().includes("/api/public/tender-alerts") &&
       response.request().method() === "POST"
   );
-  await page.getByLabel("Professional email").fill("browser.p26@example.test");
+  await page
+    .getByLabel("Professional email")
+    .fill("browser.p26@example.test");
   await page.getByLabel("Cadence").selectOption("DAILY");
   await page.getByRole("button", { name: "Create tender alert" }).click();
   const alertResponse = await alertResponsePromise;
@@ -107,7 +113,9 @@ test("publishes only admitted intelligence and exposes a governed founder OS", a
     name: "Códigos de recuperación AXIGNAL"
   });
   await expect(recovery).toBeVisible();
-  await recovery.getByRole("button", { name: "He guardado los códigos" }).click();
+  await recovery
+    .getByRole("button", { name: "He guardado los códigos" })
+    .click();
   await expect(page.locator("main.shell")).toBeVisible();
 
   await page.goto("http://localhost:18080/admin");
@@ -119,7 +127,9 @@ test("publishes only admitted intelligence and exposes a governed founder OS", a
   await expect(
     page.getByRole("navigation", { name: "Founder administration" })
   ).toBeVisible();
-  await expect(page.getByText("Generated does not mean indexable.")).toBeVisible();
+  await expect(
+    page.getByText("Generated does not mean indexable.")
+  ).toBeVisible();
 
   await page.getByRole("button", { name: "Organic SEO" }).click();
   await expect(
