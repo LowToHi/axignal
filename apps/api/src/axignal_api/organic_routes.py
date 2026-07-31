@@ -7,14 +7,11 @@ from datetime import datetime
 from typing import Annotated, Literal
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Path, Request, status
 from pydantic import BaseModel, ConfigDict, Field
 
-from axignal_api.identity import (
-    AuthenticatedIdentity,
-    require_identity,
-    require_recent_aal2,
-)
+from axignal_api.founder_identity import require_founder_identity
+from axignal_api.identity import AuthenticatedIdentity, require_recent_aal2
 from axignal_api.identity_config import IdentityRuntimeSettings
 from axignal_api.identity_delivery import verify_bot_token
 from axignal_api.organic_config import OrganicDiscoverySettings
@@ -22,8 +19,9 @@ from axignal_api.organic_delivery import TenderAlertDelivery
 from axignal_api.organic_repository import OrganicDiscoveryRepository
 
 router = APIRouter(tags=["organic-discovery"])
-Authenticated = Annotated[AuthenticatedIdentity, Depends(require_identity)]
+Authenticated = Annotated[AuthenticatedIdentity, Depends(require_founder_identity)]
 PageKind = Literal["TENDER_HUB", "MARKET_INTELLIGENCE", "TENDER_DETAIL"]
+SlugPath = Annotated[str, Path(pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$")]
 
 
 class PublishPageCommand(BaseModel):
@@ -39,7 +37,10 @@ class TenderAlertCommand(BaseModel):
 
     email: str = Field(pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$", max_length=320)
     country_code: str = Field(pattern=r"^[A-Z]{2}$")
-    sector_slug: str = Field(pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$", max_length=120)
+    sector_slug: str = Field(
+        pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$",
+        max_length=120,
+    )
     locale: str = Field(default="en", pattern=r"^[a-z]{2}(-[A-Z]{2})?$")
     cadence: Literal["IMMEDIATE", "DAILY", "WEEKLY"] = "DAILY"
     source_path: str = Field(pattern=r"^/[A-Za-z0-9_/?=&.-]{1,500}$")
@@ -54,11 +55,14 @@ class CitationCommand(BaseModel):
     cited_url: str = Field(pattern=r"^https://", max_length=2048)
     query: str = Field(min_length=1, max_length=2000)
     source: Literal["BING_WEBMASTER", "ANALYTICS", "MANUAL", "API"]
-    metadata: dict = Field(default_factory=dict)
+    metadata: dict[str, object] = Field(default_factory=dict)
     observed_at: datetime
 
 
-def _settings_repository() -> tuple[OrganicDiscoverySettings, OrganicDiscoveryRepository]:
+def _settings_repository() -> tuple[
+    OrganicDiscoverySettings,
+    OrganicDiscoveryRepository,
+]:
     settings = OrganicDiscoverySettings.from_env()
     try:
         settings.require_runtime()
@@ -86,7 +90,10 @@ def _founder(
     except (RuntimeError, HTTPException) as exc:
         if isinstance(exc, HTTPException):
             raise
-        raise HTTPException(status_code=403, detail="Founder admin authority required") from exc
+        raise HTTPException(
+            status_code=403,
+            detail="Founder admin authority required",
+        ) from exc
     if not repository.founder_authorized(subject=identity.subject):
         raise HTTPException(status_code=403, detail="Founder admin authority required")
     return settings, repository
@@ -97,26 +104,35 @@ def _store_error(exc: Exception) -> None:
     if "seo_page_not_found" in message:
         raise HTTPException(status_code=404, detail="SEO page candidate not found") from exc
     if "seo_page_not_indexable" in message:
-        raise HTTPException(status_code=409, detail="Page has not passed the IndexabilityGate") from exc
+        raise HTTPException(
+            status_code=409,
+            detail="Page has not passed the IndexabilityGate",
+        ) from exc
     if "founder_admin_required" in message:
         raise HTTPException(status_code=403, detail="Founder admin authority required") from exc
     if "content_hash_invalid" in message or "snapshot_expiry_invalid" in message:
         raise HTTPException(status_code=422, detail="Invalid publication contract") from exc
-    raise HTTPException(status_code=503, detail="Organic discovery authority unavailable") from exc
+    raise HTTPException(
+        status_code=503,
+        detail="Organic discovery authority unavailable",
+    ) from exc
 
 
 @router.get("/v1/public/discovery/{page_kind}/{country_slug}/{sector_slug}")
 def public_discovery_page(
     page_kind: PageKind,
-    country_slug: str = Field(pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$"),
-    sector_slug: str = Field(pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$"),
+    country_slug: SlugPath,
+    sector_slug: SlugPath,
     locale: str = "en",
-) -> dict:
+) -> dict[str, object]:
     settings, repository = _settings_repository()
     try:
         settings.require_public_indexing()
     except RuntimeError as exc:
-        raise HTTPException(status_code=404, detail="Published discovery page not found") from exc
+        raise HTTPException(
+            status_code=404,
+            detail="Published discovery page not found",
+        ) from exc
     result = repository.public_page(
         country_slug=country_slug,
         sector_slug=sector_slug,
@@ -129,7 +145,7 @@ def public_discovery_page(
 
 
 @router.get("/v1/public/discovery-sitemap")
-def public_discovery_sitemap() -> list[dict]:
+def public_discovery_sitemap() -> list[dict[str, object]]:
     settings, repository = _settings_repository()
     try:
         settings.require_public_indexing()
@@ -139,7 +155,10 @@ def public_discovery_sitemap() -> list[dict]:
 
 
 @router.post("/v1/public/tender-alerts", status_code=status.HTTP_202_ACCEPTED)
-def subscribe_tender_alert(command: TenderAlertCommand, request: Request) -> dict:
+def subscribe_tender_alert(
+    command: TenderAlertCommand,
+    request: Request,
+) -> dict[str, object]:
     settings, repository = _settings_repository()
     try:
         settings.require_public_alerts()
@@ -176,9 +195,12 @@ def subscribe_tender_alert(command: TenderAlertCommand, request: Request) -> dic
             sector_slug=command.sector_slug,
         )
     except Exception as exc:
-        raise HTTPException(status_code=503, detail="Tender alert could not be prepared") from exc
+        raise HTTPException(
+            status_code=503,
+            detail="Tender alert could not be prepared",
+        ) from exc
 
-    response = {
+    response: dict[str, object] = {
         "accepted": True,
         "state": result.get("state", "PENDING_CONFIRMATION"),
         "message": "Check your email to confirm the alert.",
@@ -191,7 +213,7 @@ def subscribe_tender_alert(command: TenderAlertCommand, request: Request) -> dic
 
 
 @router.get("/v1/admin/overview")
-def founder_overview(identity: Authenticated) -> dict:
+def founder_overview(identity: Authenticated) -> dict[str, object]:
     _, repository = _founder(identity)
     try:
         return repository.overview(actor_subject=identity.subject)
@@ -201,7 +223,7 @@ def founder_overview(identity: Authenticated) -> dict:
 
 
 @router.get("/v1/admin/seo/pages")
-def founder_pages(identity: Authenticated) -> list[dict]:
+def founder_pages(identity: Authenticated) -> list[dict[str, object]]:
     _, repository = _founder(identity)
     try:
         return repository.pages(actor_subject=identity.subject)
@@ -211,7 +233,7 @@ def founder_pages(identity: Authenticated) -> list[dict]:
 
 
 @router.post("/v1/admin/seo/pages/{page_id}/evaluate")
-def evaluate_page(page_id: UUID, identity: Authenticated) -> dict:
+def evaluate_page(page_id: UUID, identity: Authenticated) -> dict[str, object]:
     _, repository = _founder(identity)
     try:
         return repository.evaluate(page_id=page_id, actor_subject=identity.subject)
@@ -225,8 +247,7 @@ def publish_page(
     page_id: UUID,
     command: PublishPageCommand,
     identity: Authenticated,
-) -> dict:
-    del command.confirm_publication
+) -> dict[str, object]:
     _, repository = _founder(identity)
     try:
         return repository.publish(
@@ -241,7 +262,7 @@ def publish_page(
 
 
 @router.get("/v1/admin/crm/contacts")
-def founder_contacts(identity: Authenticated) -> list[dict]:
+def founder_contacts(identity: Authenticated) -> list[dict[str, object]]:
     _, repository = _founder(identity)
     try:
         return repository.contacts(actor_subject=identity.subject)
@@ -251,7 +272,7 @@ def founder_contacts(identity: Authenticated) -> list[dict]:
 
 
 @router.get("/v1/admin/tender-alerts")
-def founder_alerts(identity: Authenticated) -> list[dict]:
+def founder_alerts(identity: Authenticated) -> list[dict[str, object]]:
     _, repository = _founder(identity)
     try:
         return repository.alerts(actor_subject=identity.subject)
@@ -261,7 +282,10 @@ def founder_alerts(identity: Authenticated) -> list[dict]:
 
 
 @router.post("/v1/admin/ai-citations", status_code=status.HTTP_201_CREATED)
-def record_ai_citation(command: CitationCommand, identity: Authenticated) -> dict:
+def record_ai_citation(
+    command: CitationCommand,
+    identity: Authenticated,
+) -> dict[str, object]:
     settings, repository = _founder(identity)
     assert settings.hmac_pepper is not None
     try:
@@ -277,11 +301,12 @@ def record_ai_citation(command: CitationCommand, identity: Authenticated) -> dic
         )
     except Exception as exc:
         _store_error(exc)
+        raise AssertionError("Unreachable") from exc
     return {"citation_event_id": citation_id, "recorded": True}
 
 
 @router.post("/v1/admin/test/bootstrap-founder")
-def test_bootstrap_founder(identity: Authenticated) -> dict:
+def test_bootstrap_founder(identity: Authenticated) -> dict[str, object]:
     settings, repository = _settings_repository()
     try:
         settings.require_test_runtime()
