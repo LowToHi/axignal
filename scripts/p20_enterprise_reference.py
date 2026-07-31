@@ -103,7 +103,7 @@ def api_authorisation_decision(
     required_capability: str,
     resource_filter_match: bool,
     tenant_resolved_server_side: bool,
-    rights_pasp: bool,
+    rights_pass: bool,
 ) -> dict[str, str]:
     if not credential_active or not principal_active:
         return {"decision": "DENY", "reason": "INACTIVE_CREDENTIAL_OR_PRINCIPAL"}
@@ -237,7 +237,7 @@ def support_access_decision(
     return {"decision": "ALLOW_TIME_BOUNDED", "reason": "SUPPORT_ACCESS_PASS"}
 
 
-def max_promote_private_data_to_global_canonical(
+def may_promote_private_data_to_global_canonical(
     *,
     p20_authority: str,
     independent_admission_passed: bool,
