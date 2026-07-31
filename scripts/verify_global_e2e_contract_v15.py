@@ -32,8 +32,11 @@ def main() -> None:
     task_schema_path = "schemas/global-e2e-v1.5-task.schema.json"
     gsc_path = "data/growth/google-search-console-integration.v0.1.json"
     gsc_doc_path = "docs/growth/google-search-console-and-mcp-governance-v0.1.md"
+    supersession_path = (
+        "docs/contracts/31-v1.5-document-supersession-and-status-map.md"
+    )
 
-    for relative_path in (
+    required_files = (
         contract_path,
         adr_path,
         programme_path,
@@ -43,15 +46,35 @@ def main() -> None:
         task_schema_path,
         gsc_path,
         gsc_doc_path,
+        supersession_path,
         "docs/contracts/30-global-e2e-development-contract-v1.4.md",
         "docs/adr/ADR-015-finished-global-product-before-public-launch.md",
-    ):
+        "docs/roadmap/14-global-e2e-development-program-v1.4.md",
+        "docs/contracts/00-product-constitution.md",
+        "docs/contracts/01-business-model-and-pricing.md",
+        "docs/contracts/21-marketing-site-and-conversion.md",
+        "docs/contracts/22-packaging-pricing-and-entitlements.md",
+        "docs/contracts/23-acquisition-analytics-and-experimentation.md",
+        "docs/contracts/24-trust-center-and-public-methodology.md",
+        "docs/contracts/28-b2g-procurement-commercial-and-global-source-program.md",
+        "docs/contracts/29-bounded-ai-assistance-and-token-entitlements.md",
+        "docs/roadmap/00-goal-lock.md",
+        "docs/roadmap/01-phase-map.md",
+        "docs/roadmap/02-task-catalogue.md",
+        "docs/roadmap/03-contract-map.md",
+        "docs/roadmap/04-dynamic-skill-map.md",
+        "docs/roadmap/05-dependency-and-gates.md",
+        "docs/roadmap/06-current-execution-state.md",
+        "AGENTS.md",
+        "README.md",
+    )
+    for relative_path in required_files:
         assert (ROOT / relative_path).is_file(), relative_path
 
     contract = load_text(contract_path)
     assert_contains(
         contract,
-        "Contract `31`",
+        "Contract 31",
         "P00–P27",
         "P24 MUST NOT itself authorise public launch",
         "P27 is the only phase permitted to return",
@@ -83,6 +106,16 @@ def main() -> None:
         "AX-GE2E-P26-T02",
         "AX-GE2E-P26-T03",
         "AX-GE2E-P26-T04",
+    )
+
+    supersession = load_text(supersession_path)
+    assert_contains(
+        supersession,
+        "PRESERVED_HISTORY",
+        "ENGINEERING_EVIDENCE",
+        "ACTIVE_WITH_SUPERSEDED_SECTIONS",
+        "P24 launch modes ≠ Contract 31 launch authority",
+        "P26-T01 pass ≠ P26 complete",
     )
 
     state = load_json(state_path)
@@ -204,6 +237,51 @@ def main() -> None:
         "destructive tools        DISABLED",
     )
 
+    subordinate_expectations = {
+        "docs/contracts/00-product-constitution.md": (
+            "Global Opportunity Intelligence & Operations",
+            "Business-to-Government (B2G) Opportunity Intelligence",
+            "P27",
+        ),
+        "docs/contracts/01-business-model-and-pricing.md": (
+            "149 EUR/month",
+            "399 EUR/month",
+            "CANDIDATE_ONLY",
+        ),
+        "docs/contracts/21-marketing-site-and-conversion.md": (
+            "IndexabilityGate",
+            "Tender Alerts",
+            "Search Console",
+        ),
+        "docs/contracts/22-packaging-pricing-and-entitlements.md": (
+            "Flat-tier seat governance",
+            "1,000,000-token ceiling",
+            "P27",
+        ),
+        "docs/contracts/23-acquisition-analytics-and-experimentation.md": (
+            "Search Console",
+            "AI citation",
+            "completed B2G value",
+        ),
+        "docs/contracts/24-trust-center-and-public-methodology.md": (
+            "Google Search Console",
+            "MCP",
+            "Founder Operations",
+        ),
+        "docs/contracts/28-b2g-procurement-commercial-and-global-source-program.md": (
+            "B2G Opportunity Intelligence",
+            "0 / 149 / 399 / QUOTE",
+            "P27",
+        ),
+        "docs/contracts/29-bounded-ai-assistance-and-token-entitlements.md": (
+            "1,000,000",
+            "Paid-package usage governance",
+            "P27",
+        ),
+    }
+    for path, literals in subordinate_expectations.items():
+        assert_contains(load_text(path), *literals)
+
     print(
         json.dumps(
             {
@@ -215,6 +293,7 @@ def main() -> None:
                 "launch": "NO_GO",
                 "search_console_api": "NOT_YET_PROVEN",
                 "mcp": "DISCOVERED_NOT_PRODUCT_ADMITTED",
+                "synchronised_contracts": len(subordinate_expectations),
             },
             indent=2,
             sort_keys=True,
