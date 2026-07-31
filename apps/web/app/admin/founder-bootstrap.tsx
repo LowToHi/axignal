@@ -29,17 +29,37 @@ export function FounderBootstrap() {
             <div>
               <span className={styles.eyebrow}>TEST RUNTIME ONLY</span>
               <h2>Provision the founder control principal.</h2>
-              <p>The server allowlist already recognises this AAL2 identity. The database principal remains unprovisioned, so no founder mutation is authorised yet.</p>
-              <button type="button" className={styles.bootstrapButton} disabled={state === "busy"} onClick={bootstrap}>
-                {state === "busy" ? "Provisioning…" : "Provision test founder principal"}
-              </button>
+              <p>
+                This AAL2 identity exists only inside the disposable P26 test
+                topology. A database principal remains required before any
+                founder mutation is authorised.
+              </p>
+              <div className={styles.actions}>
+                <button
+                  type="button"
+                  disabled={state === "busy"}
+                  onClick={bootstrap}
+                >
+                  {state === "busy"
+                    ? "Provisioning…"
+                    : "Provision test founder principal"}
+                </button>
+              </div>
               {state === "error" && <p>Provisioning was denied.</p>}
             </div>
             <ul>
-              <li><span>✓</span>Recent passkey verification required</li>
-              <li><span>✓</span>Server-side subject allowlist required</li>
-              <li><span>✓</span>Test environment and test runtime required</li>
-              <li><span>✓</span>No production bootstrap endpoint</li>
+              <li>
+                <span>✓</span>Recent passkey verification required
+              </li>
+              <li>
+                <span>✓</span>Test environment and test runtime required
+              </li>
+              <li>
+                <span>✓</span>Production subject allowlist remains mandatory
+              </li>
+              <li>
+                <span>✓</span>No production bootstrap endpoint
+              </li>
             </ul>
           </section>
         </div>
