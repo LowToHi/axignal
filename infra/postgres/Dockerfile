@@ -31,3 +31,4 @@ COPY 121-identity-signup-webauthn-challenges.sql /docker-entrypoint-initdb.d/121
 COPY 122-identity-passkeys-sessions-recovery.sql /docker-entrypoint-initdb.d/122-axignal-identity-passkeys.sql
 COPY 123-trial-abuse-runtime.sql /docker-entrypoint-initdb.d/123-axignal-trial-abuse.sql
 COPY 124-identity-clone-detection-hardening.sql /docker-entrypoint-initdb.d/124-axignal-identity-clone-hardening.sql
+COPY 130-organic-discovery-founder-admin.sql /docker-entrypoint-initdb.d/130-axignal-organic-discovery.sql
