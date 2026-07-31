@@ -6,7 +6,6 @@ import json
 from collections.abc import Mapping, Sequence
 from typing import Any
 
-
 AUTHORITY_RANK = {
     "RESTRICTED": 0,
     "REQUEST_ONLY": 1,
