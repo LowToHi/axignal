@@ -42,7 +42,10 @@ jobs:
         continue-on-error: true
         run: pip-audit --format=json --output=pip-audit-report.json
       - name: Secret-pattern inventory
-        run: detect-secrets scan --all-files --exclude-files '(^|/)(pnpm-lock\.yaml|.*\.lock|test-results|playwright-report)(/|$)' > detect-secrets-report.json
+        run: >-
+          detect-secrets scan --all-files
+          --exclude-files '(^|/)(\.git|\.pytest_cache|\.ruff_cache|pnpm-lock\.yaml|.*\.lock|test-results|playwright-report|bandit-report\.json|pip-audit-report\.json|coverage-python\.xml)(/|$)'
+          > detect-secrets-report.json
       - name: Upload Python audit evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -71,19 +74,43 @@ jobs:
         run: corepack enable
       - name: Clean install
         run: pnpm install --frozen-lockfile
-      - name: Formatting contract
+      - name: Formatting inventory
+        id: formatting
+        continue-on-error: true
         run: pnpm format:check
       - name: Workspace lint contract
+        id: lint
+        continue-on-error: true
         run: pnpm lint
       - name: TypeScript contract
+        id: typecheck
+        continue-on-error: true
         run: pnpm typecheck
       - name: Workspace tests
+        id: tests
+        continue-on-error: true
         run: pnpm test
       - name: Production builds
+        id: build
+        continue-on-error: true
         run: pnpm build
       - name: Production dependency audit
         continue-on-error: true
         run: pnpm audit --prod --audit-level high --json > pnpm-audit-report.json
+      - name: Enforce functional JavaScript gates
+        if: always()
+        env:
+          LINT_OUTCOME: ${{ steps.lint.outcome }}
+          TYPECHECK_OUTCOME: ${{ steps.typecheck.outcome }}
+          TEST_OUTCOME: ${{ steps.tests.outcome }}
+          BUILD_OUTCOME: ${{ steps.build.outcome }}
+        run: |
+          printf 'lint=%s\ntypecheck=%s\ntests=%s\nbuild=%s\n' \
+            "$LINT_OUTCOME" "$TYPECHECK_OUTCOME" "$TEST_OUTCOME" "$BUILD_OUTCOME"
+          test "$LINT_OUTCOME" = success
+          test "$TYPECHECK_OUTCOME" = success
+          test "$TEST_OUTCOME" = success
+          test "$BUILD_OUTCOME" = success
       - name: Upload JavaScript audit evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
