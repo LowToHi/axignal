@@ -7,13 +7,13 @@ import { NextResponse } from "next/server";
 export const runtime = "nodejs";
 
 const roles = new Set([
-  "Investment research",
-  "Corporate strategy",
-  "Corporate development",
-  "Competitive intelligence",
-  "Market intelligence",
+  "Head of B2G or public-sector sales",
+  "Business development",
+  "Bid or proposal management",
+  "Tender or procurement intelligence",
+  "Market expansion or internationalisation",
+  "Founder or executive",
   "Advisory or consulting",
-  "Knowledge or research operations",
   "Other"
 ]);
 
@@ -31,10 +31,10 @@ type IntakePayload = {
 };
 
 type IntakeRecord = {
-  schema: "axignal.controlled-access-intake.v2";
+  schema: "axignal.b2g-trial-intake.v1";
   submissionId: string;
   submittedAt: string;
-  source: "landing_buyer_outcome_v1_0";
+  source: "landing_b2g_opportunity_v1_0";
   messageVersion: string;
   email: string;
   role: string;
@@ -92,9 +92,9 @@ export async function POST(request: Request) {
 
   const errors: string[] = [];
   if (!emailPattern.test(email)) errors.push("A valid work email is required.");
-  if (!roles.has(role)) errors.push("Select a supported role.");
+  if (!roles.has(role)) errors.push("Select a supported B2G role.");
   if (useCase.length < 20) {
-    errors.push("Describe the research decision in at least 20 characters.");
+    errors.push("Describe the B2G market and tender workflow in at least 20 characters.");
   }
   if (!messageVersionPattern.test(messageVersion)) {
     errors.push("A valid message version is required.");
@@ -109,10 +109,10 @@ export async function POST(request: Request) {
   }
 
   const record: IntakeRecord = {
-    schema: "axignal.controlled-access-intake.v2",
+    schema: "axignal.b2g-trial-intake.v1",
     submissionId: randomUUID(),
     submittedAt: new Date().toISOString(),
-    source: "landing_buyer_outcome_v1_0",
+    source: "landing_b2g_opportunity_v1_0",
     messageVersion,
     email,
     role,
@@ -130,8 +130,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           status: "unavailable",
-          message:
-            "The controlled-access intake queue could not persist the request. No success was recorded.",
+          message: "The controlled B2G trial queue could not persist the request. No success was recorded.",
           contactEmail
         },
         { status: 503, headers: { "cache-control": "no-store" } }
@@ -142,7 +141,7 @@ export async function POST(request: Request) {
       {
         status: "received",
         message:
-          "Request received. AXIGNAL will review the research decision and controlled-access fit."
+          "Request received. AXIGNAL will review the B2G market, source coverage and controlled-trial fit."
       },
       { status: 202, headers: { "cache-control": "no-store" } }
     );
@@ -153,7 +152,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         status: "unavailable",
-        message: "The controlled-access intake channel is not configured. No request was stored.",
+        message: "The controlled B2G trial channel is not configured. No request was stored.",
         contactEmail
       },
       { status: 503, headers: { "cache-control": "no-store" } }
@@ -177,7 +176,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           status: "unavailable",
-          message: "The controlled-access intake channel rejected the request. No success was recorded.",
+          message: "The controlled B2G trial channel rejected the request. No success was recorded.",
           contactEmail
         },
         { status: 502, headers: { "cache-control": "no-store" } }
@@ -187,7 +186,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         status: "unavailable",
-        message: "The controlled-access intake channel could not be reached. No success was recorded.",
+        message: "The controlled B2G trial channel could not be reached. No success was recorded.",
         contactEmail
       },
       { status: 502, headers: { "cache-control": "no-store" } }
@@ -197,7 +196,7 @@ export async function POST(request: Request) {
   return NextResponse.json(
     {
       status: "received",
-      message: "Request received. AXIGNAL will review the research decision and controlled-access fit."
+      message: "Request received. AXIGNAL will review the B2G market, source coverage and controlled-trial fit."
     },
     { status: 202, headers: { "cache-control": "no-store" } }
   );

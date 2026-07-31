@@ -37,14 +37,15 @@ def main() -> None:
             "ScrollTrigger",
             "pin: globeStage.current",
             "prefers-reduced-motion",
-            "Synthetic demonstration · not investment performance",
+            "Synthetic demonstration · not procurement or win-rate evidence",
             "Proposal is not admission",
-            "Request a research workspace",
-            "Turn scattered sources into a decision your team can verify.",
+            "Request your 7-day B2G trial",
+            "BUSINESS-TO-GOVERNMENT (B2G) OPPORTUNITY INTELLIGENCE",
+            "Find the public contracts your business is built to pursue.",
             "data-message-version={MESSAGE_VERSION}",
             'id="pricing"',
         ],
-        "landing experience",
+        "B2G landing experience",
     )
     require(
         globe,
@@ -64,9 +65,10 @@ def main() -> None:
             'name="consent"',
             'name="website"',
             "messageVersion",
+            "Request 7-day B2G trial",
             "aria-live",
         ],
-        "controlled-access form",
+        "B2G controlled-trial form",
     )
     require(
         endpoint,
@@ -74,11 +76,12 @@ def main() -> None:
             "AXIGNAL_PILOT_INTAKE_WEBHOOK_URL",
             "AXIGNAL_PILOT_INTAKE_BEARER_TOKEN",
             "AXIGNAL_PILOT_CONTACT_EMAIL",
+            "axignal.b2g-trial-intake.v1",
             "messageVersion",
             "AbortSignal.timeout",
             '"cache-control": "no-store"',
         ],
-        "controlled-access intake endpoint",
+        "B2G controlled-trial endpoint",
     )
     require(
         css,
@@ -97,17 +100,20 @@ def main() -> None:
             ".pricing-section",
             ".assurance-section",
             ".faq-section",
+            ".pricing-grid article:first-child",
         ],
-        "buyer-message styles",
+        "B2G message styles",
     )
     require(
         pricing,
         [
             "commercial-runtime-pricing-stripe-runtime.v0.1.json",
             'pricing?.status !== "CANDIDATE_ONLY"',
+            'plan.plan_code === "CONTROLLED_TRIAL_7D"',
+            "plan.self_service_activation !== false",
             "plan.commercial_activation_authorised !== false",
         ],
-        "server-resolved candidate pricing",
+        "server-resolved B2G trial and candidate pricing",
     )
     require(
         tests,
@@ -116,7 +122,9 @@ def main() -> None:
             "semantic-globe",
             "pilot-intake",
             "messageVersion",
+            "controlled_trial_7d",
             "professional_monthly",
+            "Business-to-Government",
             "scrollWidth",
         ],
         "landing browser tests",
@@ -126,8 +134,9 @@ def main() -> None:
         "pilot.axignal.com",
         "REMOTE_PILOT_ACCEPTED",
         "guaranteed return",
-        "live investment performance",
+        "guaranteed win",
         "zero hallucinations",
+        "complete global coverage",
         "market validated",
     ]
     joined = "\n".join((experience, form, endpoint))
@@ -136,8 +145,10 @@ def main() -> None:
 
     evidence = {
         "status": "PASS",
-        "message_version": "buyer-outcome-v1.0",
+        "message_version": "b2g-opportunity-v1.0",
+        "market_category": "BUSINESS_TO_GOVERNMENT_OPPORTUNITY_INTELLIGENCE",
         "real_landing_copy_implemented": True,
+        "controlled_trial_visible": True,
         "server_price_book_bound": True,
         "gsap_scrolltrigger": True,
         "react_three_fiber": True,

@@ -9,13 +9,13 @@ type FormStatus =
   | { state: "error"; message: string; contactEmail?: string };
 
 const roles = [
-  "Investment research",
-  "Corporate strategy",
-  "Corporate development",
-  "Competitive intelligence",
-  "Market intelligence",
+  "Head of B2G or public-sector sales",
+  "Business development",
+  "Bid or proposal management",
+  "Tender or procurement intelligence",
+  "Market expansion or internationalisation",
+  "Founder or executive",
   "Advisory or consulting",
-  "Knowledge or research operations",
   "Other"
 ] as const;
 
@@ -57,7 +57,7 @@ export function PilotAccessForm({ messageVersion }: PilotAccessFormProps) {
       if (!response.ok) {
         setStatus({
           state: "error",
-          message: body.message ?? "The controlled-access request could not be delivered.",
+          message: body.message ?? "The controlled B2G trial request could not be delivered.",
           ...(body.contactEmail ? { contactEmail: body.contactEmail } : {})
         });
         return;
@@ -67,8 +67,8 @@ export function PilotAccessForm({ messageVersion }: PilotAccessFormProps) {
       window.dispatchEvent(
         new CustomEvent("axignal:conversion", {
           detail: {
-            event: "controlled_access_requested",
-            source: "landing_buyer_outcome_v1_0",
+            event: "b2g_trial_requested",
+            source: "landing_b2g_opportunity_v1_0",
             messageVersion
           }
         })
@@ -77,12 +77,12 @@ export function PilotAccessForm({ messageVersion }: PilotAccessFormProps) {
         state: "success",
         message:
           body.message ??
-          "Request received. AXIGNAL will review the research decision and controlled-access fit."
+          "Request received. AXIGNAL will review the B2G market, source coverage and controlled-trial fit."
       });
     } catch {
       setStatus({
         state: "error",
-        message: "The controlled-access endpoint is temporarily unavailable. No request was stored."
+        message: "The controlled-trial endpoint is temporarily unavailable. No request was stored."
       });
     }
   }
@@ -95,7 +95,7 @@ export function PilotAccessForm({ messageVersion }: PilotAccessFormProps) {
           <input name="email" type="email" autoComplete="email" required maxLength={254} />
         </label>
         <label>
-          <span>Your role in the decision</span>
+          <span>Your role in the B2G decision</span>
           <select name="role" required defaultValue="">
             <option value="" disabled>
               Select the closest role
@@ -106,18 +106,18 @@ export function PilotAccessForm({ messageVersion }: PilotAccessFormProps) {
           </select>
         </label>
         <label>
-          <span>Organisation</span>
+          <span>Company</span>
           <input name="company" type="text" autoComplete="organization" maxLength={120} />
         </label>
         <label className="form-wide">
-          <span>What must your team decide, and where does the current research workflow break?</span>
+          <span>What does your company sell to government, and which markets or tenders must you qualify?</span>
           <textarea
             name="useCase"
             rows={5}
             required
             minLength={20}
             maxLength={1200}
-            placeholder="Describe the decision, the sources involved and the cost of missing or weak evidence."
+            placeholder="Describe your offer, target countries or public buyers, typical contract size and the current tender-workflow bottleneck."
           />
         </label>
       </div>
@@ -125,8 +125,8 @@ export function PilotAccessForm({ messageVersion }: PilotAccessFormProps) {
       <label className="consent-row">
         <input name="consent" type="checkbox" required />
         <span>
-          I agree that AXIGNAL may use this information only to evaluate and respond to this
-          controlled-access request. See the Privacy notice.
+          I agree that AXIGNAL may use this information only to evaluate and respond to this controlled B2G
+          trial request. See the Privacy notice.
         </span>
       </label>
 
@@ -137,9 +137,9 @@ export function PilotAccessForm({ messageVersion }: PilotAccessFormProps) {
 
       <div className="form-actions">
         <button className="primary-button" type="submit" disabled={status.state === "submitting"}>
-          {status.state === "submitting" ? "Sending…" : "Request a research workspace"}
+          {status.state === "submitting" ? "Sending…" : "Request 7-day B2G trial"}
         </button>
-        <span className="form-note">No payment or subscription is created by this request.</span>
+        <span className="form-note">No card, payment or subscription is created by this request.</span>
       </div>
 
       <div className="form-status" aria-live="polite" role="status">
