@@ -1,0 +1,31 @@
+{
+  "task_id":"AX-GE2E-P23-T01",
+  "fixtures":[
+    {"fixture_id":"P23-FX-001","category":"journey","expected_decision":"PASS_ENGINEERING_EVIDENCE"},
+    {"fixture_id":"P23-FX-002","category":"landing","expected_decision":"PASS_ENGINEERING_EVIDENCE"},
+    {"fixture_id":"P23-FX-003","category":"copy","expected_decision":"PASS_ENGINEERING_EVIDENCE"},
+    {"fixture_id":"P23-FX-004","category":"claims","expected_decision":"PASS_ENGINEERING_EVIDENCE"},
+    {"fixture_id":"P23-FX-005","category":"accessibility","expected_decision":"PASS_ENGINEERING_EVIDENCE"},
+    {"fixture_id":"P23-FX-006","category":"performance","expected_decision":"PASS_ENGINEERING_EVIDENCE"},
+    {"fixture_id":"P23-FX-007","category":"seo","expected_decision":"PASS_ENGINEERING_EVIDENCE"},
+    {"fixture_id":"P23-FX-008","category":"analytics","expected_decision":"PASS_ENGINEERING_EVIDENCE"},
+    {"fixture_id":"P23-FX-009","category":"consent","expected_decision":"PASS_ENGINEERING_EVIDENCE"},
+    {"fixture_id":"P23-FX-010","category":"experiment","expected_decision":"PASS_ENGINEERING_EVIDENCE"},
+    {"fixture_id":"P23-FX-011","category":"marketing","expected_decision":"PASS_ENGINEERING_EVIDENCE"},
+    {"fixture_id":"P23-FX-012","category":"authority","expected_decision":"PASS_ENGINEERING_EVIDENCE"},
+    {"fixture_id":"P23-FX-013","category":"journey","expected_decision":"PASS_ENGINEERING_EVIDENCE"},
+    {"fixture_id":"P23-FX-014","category":"landing","expected_decision":"PASS_ENGINEERING_EVIDENCE"},
+    {"fixture_id":"P23-FX-015","category":"copy","expected_decision":"PASS_ENGINEERING_EVIDENCE"},
+    {"fixture_id":"P23-FX-016","category":"claims","expected_decision":"PASS_ENGINEERING_EVIDENCE"},
+    {"fixture_id":"P23-FX-017","category":"accessibility","expected_decision":"PASS_ENGINEERING_EVIDENCE"},
+    {"fixture_id":"P23-FX-018","category":"performance","expected_decision":"PASS_ENGINEERING_EVIDENCE"},
+    {"fixture_id":"P23-FX-019","category":"seo","expected_decision":"PASS_ENGINEERING_EVIDENCE"},
+    {"fixture_id":"P23-FX-020","category":"analytics","expected_decision":"PASS_ENGINEERING_EVIDENCE"},
+    {"fixture_id":"P23-FX-021","category":"consent","expected_decision":"PASS_ENGINEERING_EVIDENCE"},
+    {"fixture_id":"P23-FX-022","category":"experiment","expected_decision":"PASS_ENGINEERING_EVIDENCE"},
+    {"fixture_id":"P23-FX-023","category":"marketing","expected_decision":"PASS_ENGINEERING_EVIDENCE"},
+    {"fixture_id":"P23-FX-024","category":"authority","expected_decision":"PASS_ENGINEERING_EVIDENCE"}
+  ],
+  "required_false":["public_site","public_campaign","paid_media","production_traffic","stripe_live","external_publication"],
+  "evidence_preserved":true
+}
