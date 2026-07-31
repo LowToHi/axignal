@@ -53,6 +53,7 @@ class FakeSeatRepository:
             "operation_id": kwargs["operation_id"],
             "email_normalized": kwargs["email"],
             "requested_role_id": kwargs["role_id"],
+            "token_digest": kwargs["token_digest"],
             "status": "PENDING",
             "delivery_provider": kwargs["delivery_provider"],
             "invited_at": now,
