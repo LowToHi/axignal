@@ -9,16 +9,21 @@ type FormStatus =
   | { state: "error"; message: string; contactEmail?: string };
 
 const roles = [
-  "Investor",
-  "Analyst",
-  "Family office",
+  "Investment research",
   "Corporate strategy",
-  "Adviser",
-  "Intelligence operator",
+  "Corporate development",
+  "Competitive intelligence",
+  "Market intelligence",
+  "Advisory or consulting",
+  "Knowledge or research operations",
   "Other"
 ] as const;
 
-export function PilotAccessForm() {
+type PilotAccessFormProps = {
+  messageVersion: string;
+};
+
+export function PilotAccessForm({ messageVersion }: PilotAccessFormProps) {
   const [status, setStatus] = useState<FormStatus>({ state: "idle" });
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -33,7 +38,8 @@ export function PilotAccessForm() {
       company: String(formData.get("company") ?? ""),
       useCase: String(formData.get("useCase") ?? ""),
       consent: formData.get("consent") === "on",
-      website: String(formData.get("website") ?? "")
+      website: String(formData.get("website") ?? ""),
+      messageVersion
     };
 
     try {
@@ -51,7 +57,7 @@ export function PilotAccessForm() {
       if (!response.ok) {
         setStatus({
           state: "error",
-          message: body.message ?? "The access request could not be delivered.",
+          message: body.message ?? "The controlled-access request could not be delivered.",
           ...(body.contactEmail ? { contactEmail: body.contactEmail } : {})
         });
         return;
@@ -60,33 +66,39 @@ export function PilotAccessForm() {
       form.reset();
       window.dispatchEvent(
         new CustomEvent("axignal:conversion", {
-          detail: { event: "pilot_access_requested", source: "landing_globe_v0_1" }
+          detail: {
+            event: "controlled_access_requested",
+            source: "landing_buyer_outcome_v1_0",
+            messageVersion
+          }
         })
       );
       setStatus({
         state: "success",
-        message: body.message ?? "Request received. AXIGNAL will review the fit for the private pilot."
+        message:
+          body.message ??
+          "Request received. AXIGNAL will review the research decision and controlled-access fit."
       });
     } catch {
       setStatus({
         state: "error",
-        message: "The access endpoint is temporarily unavailable. No request was stored."
+        message: "The controlled-access endpoint is temporarily unavailable. No request was stored."
       });
     }
   }
 
   return (
-    <form className="access-form" onSubmit={submit} noValidate>
+    <form className="access-form" onSubmit={submit} noValidate data-testid="controlled-access-form">
       <div className="form-grid">
         <label>
           <span>Work email</span>
           <input name="email" type="email" autoComplete="email" required maxLength={254} />
         </label>
         <label>
-          <span>Role</span>
+          <span>Your role in the decision</span>
           <select name="role" required defaultValue="">
             <option value="" disabled>
-              Select your role
+              Select the closest role
             </option>
             {roles.map((role) => (
               <option key={role}>{role}</option>
@@ -98,16 +110,23 @@ export function PilotAccessForm() {
           <input name="company" type="text" autoComplete="organization" maxLength={120} />
         </label>
         <label className="form-wide">
-          <span>What decision would AXIGNAL support?</span>
-          <textarea name="useCase" rows={4} required minLength={20} maxLength={1200} />
+          <span>What must your team decide, and where does the current research workflow break?</span>
+          <textarea
+            name="useCase"
+            rows={5}
+            required
+            minLength={20}
+            maxLength={1200}
+            placeholder="Describe the decision, the sources involved and the cost of missing or weak evidence."
+          />
         </label>
       </div>
 
       <label className="consent-row">
         <input name="consent" type="checkbox" required />
         <span>
-          I agree that AXIGNAL may use this information solely to evaluate and respond to my private-pilot
-          request.
+          I agree that AXIGNAL may use this information only to evaluate and respond to this
+          controlled-access request. See the Privacy notice.
         </span>
       </label>
 
@@ -118,9 +137,9 @@ export function PilotAccessForm() {
 
       <div className="form-actions">
         <button className="primary-button" type="submit" disabled={status.state === "submitting"}>
-          {status.state === "submitting" ? "Sending…" : "Request private access"}
+          {status.state === "submitting" ? "Sending…" : "Request a research workspace"}
         </button>
-        <span className="form-note">No paid subscription is created by this form.</span>
+        <span className="form-note">No payment or subscription is created by this request.</span>
       </div>
 
       <div className="form-status" aria-live="polite" role="status">
