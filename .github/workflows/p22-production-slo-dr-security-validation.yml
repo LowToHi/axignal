@@ -1,0 +1,56 @@
+name: P22 Production SLO DR and Security Validation
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "data/production/**"
+      - "docs/production/**"
+      - "scripts/p22_production_reference.py"
+      - "scripts/verify_p22_production_slo_dr_security.py"
+      - ".github/workflows/p22-production-slo-dr-security-validation.yml"
+  push:
+    branches: ["agent/**"]
+    paths:
+      - "data/production/**"
+      - "docs/production/**"
+      - "scripts/p22_production_reference.py"
+      - "scripts/verify_p22_production_slo_dr_security.py"
+      - ".github/workflows/p22-production-slo-dr-security-validation.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: p22-production-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.13"
+      - name: Compile bounded reference and verifier
+        run: python -m py_compile scripts/p22_production_reference.py scripts/verify_p22_production_slo_dr_security.py
+      - name: Validate P22 contract
+        run: python scripts/verify_p22_production_slo_dr_security.py | tee p22-production-evidence.json
+      - name: Reject production secrets and live activation literals
+        run: |
+          ! grep -R -E '(sk_live_|rk_live_|whsec_[A-Za-z0-9]{20,})' data/production docs/production scripts/p22_production_reference.py scripts/verify_p22_production_slo_dr_security.py
+          ! grep -R '"stripe_live_authorised": true' data/production
+          ! grep -R '"production_deployment_authorised": true' data/production
+      - name: Upload evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p22-production-slo-dr-security-${{ github.sha }}
+          path: p22-production-evidence.json
+          if-no-files-found: error
+          retention-days: 30
