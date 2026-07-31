@@ -5,27 +5,7 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 
 type AlertState = "idle" | "submitting" | "accepted" | "error";
 
-type TurnstileApi = {
-  render: (
-    container: HTMLElement,
-    options: {
-      sitekey: string;
-      action: string;
-      theme: "dark" | "light";
-      callback: (token: string) => void;
-      "error-callback": () => void;
-      "expired-callback": () => void;
-    }
-  ) => string;
-  reset: (widgetId?: string) => void;
-  remove: (widgetId: string) => void;
-};
-
-declare global {
-  interface Window {
-    turnstile?: TurnstileApi;
-  }
-}
+const TURNSTILE_ACTION = "tender_alert_signup";
 
 export function TenderAlertForm({
   countryCode,
@@ -60,8 +40,7 @@ export function TenderAlertForm({
     }
     widgetId.current = window.turnstile.render(widgetContainer.current, {
       sitekey: turnstileSiteKey,
-      action: "tender_alert_signup",
-      theme: "dark",
+      appearance: "interaction-only",
       callback: (token) => {
         setBotToken(token);
         setMessage("");
@@ -74,9 +53,6 @@ export function TenderAlertForm({
       "expired-callback": () => setBotToken("")
     });
     return () => {
-      if (widgetId.current && window.turnstile) {
-        window.turnstile.remove(widgetId.current);
-      }
       widgetId.current = null;
     };
   }, [scriptReady, testRuntime, turnstileSiteKey]);
@@ -151,6 +127,7 @@ export function TenderAlertForm({
         className="tender-alert-form"
         onSubmit={submit}
         aria-label="Tender alert subscription"
+        data-turnstile-action={TURNSTILE_ACTION}
       >
         <div>
           <span>TENDER ALERT</span>
