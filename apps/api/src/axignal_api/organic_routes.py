@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import hmac
 import secrets
+from contextlib import suppress
 from datetime import datetime
 from typing import Annotated, Literal
 from uuid import UUID
@@ -240,13 +241,11 @@ def subscribe_tender_alert(
         )
     except Exception as exc:
         if result and result.get("subscription_id"):
-            try:
+            with suppress(Exception):
                 repository.fail_alert_delivery(
                     subscription_id=UUID(str(result["subscription_id"])),
                     reason=exc.__class__.__name__,
                 )
-            except Exception:
-                pass
         raise HTTPException(
             status_code=503,
             detail="Tender alert could not be prepared",
