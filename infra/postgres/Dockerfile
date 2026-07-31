@@ -26,3 +26,8 @@ COPY 090-trial-retention-lifecycle.sql /docker-entrypoint-initdb.d/090-axignal-t
 COPY 091-retention-pgcrypto-boundary.sql /docker-entrypoint-initdb.d/091-axignal-retention-pgcrypto-boundary.sql
 COPY 100-stripe-paid-lifecycle.sql /docker-entrypoint-initdb.d/100-axignal-stripe-paid-lifecycle.sql
 COPY 110-seat-governance.sql /docker-entrypoint-initdb.d/110-axignal-seat-governance.sql
+COPY 120-identity-passwordless-core.sql /docker-entrypoint-initdb.d/120-axignal-identity-core.sql
+COPY 121-identity-signup-webauthn-challenges.sql /docker-entrypoint-initdb.d/121-axignal-identity-signup.sql
+COPY 122-identity-passkeys-sessions-recovery.sql /docker-entrypoint-initdb.d/122-axignal-identity-passkeys.sql
+COPY 123-trial-abuse-runtime.sql /docker-entrypoint-initdb.d/123-axignal-trial-abuse.sql
+COPY 124-identity-clone-detection-hardening.sql /docker-entrypoint-initdb.d/124-axignal-identity-clone-hardening.sql
