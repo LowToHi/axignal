@@ -1,3 +1,13 @@
+:target {
+  scroll-margin-top: calc(var(--header) + 24px);
+}
+
+section:target {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: none !important;
+}
+
 .problem-section,
 .pricing-section,
 .assurance-section,
