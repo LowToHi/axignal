@@ -107,7 +107,7 @@ NOT PRODUCT-ADMITTED
 NOT CONNECTED TO PRODUCTION
 ```
 
-A registry page is discovery evidence only. AXIGNAL must identify the exact code repository and release before execution.
+A registry page is discovery evidence only. MCP catalogue presence does not equal connector admission. AXIGNAL must identify the exact code repository and release before execution.
 
 ## 7. MCP threat boundary
 
@@ -246,6 +246,7 @@ public indexing changed by import  0
 ```text
 DNS token != API access
 API access != MCP admission
+MCP catalogue presence does not equal connector admission
 MCP admission != unrestricted tools
 Search Console data != canonical truth
 impression != qualified visitor
