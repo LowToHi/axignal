@@ -79,11 +79,16 @@ export function isValidationUiEnabled(): boolean {
   return boolEnv("AXIGNAL_VALIDATION_UI_ENABLED");
 }
 
+export function isSeatGovernanceUiEnabled(): boolean {
+  return boolEnv("AXIGNAL_SEAT_GOVERNANCE_UI_ENABLED");
+}
+
 export function isAuthenticationRequired(): boolean {
   return (
     boolEnv("AXIGNAL_AUTH_REQUIRED") ||
     isPersistentResearchUiEnabled() ||
-    isValidationUiEnabled()
+    isValidationUiEnabled() ||
+    isSeatGovernanceUiEnabled()
   );
 }
 

@@ -25,3 +25,4 @@ COPY 082-entitlement-expiry-sweep.sql /docker-entrypoint-initdb.d/082-axignal-en
 COPY 090-trial-retention-lifecycle.sql /docker-entrypoint-initdb.d/090-axignal-trial-retention-lifecycle.sql
 COPY 091-retention-pgcrypto-boundary.sql /docker-entrypoint-initdb.d/091-axignal-retention-pgcrypto-boundary.sql
 COPY 100-stripe-paid-lifecycle.sql /docker-entrypoint-initdb.d/100-axignal-stripe-paid-lifecycle.sql
+COPY 110-seat-governance.sql /docker-entrypoint-initdb.d/110-axignal-seat-governance.sql

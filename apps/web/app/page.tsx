@@ -3,7 +3,12 @@ import { BillingBridge } from "@/components/billing-bridge";
 import { HumanReviewBridge } from "@/components/human-review-bridge";
 import { InvestigationShell } from "@/components/investigation-shell";
 import { ResearchProgressBridge } from "@/components/research-progress-bridge";
-import { getAuthenticatedIdentity, isAuthenticationRequired } from "@/lib/server-auth";
+import { SeatGovernanceBridge } from "@/components/seat-governance-bridge";
+import {
+  getAuthenticatedIdentity,
+  isAuthenticationRequired,
+  isSeatGovernanceUiEnabled
+} from "@/lib/server-auth";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +18,7 @@ function authenticatedShell() {
       <ResearchProgressBridge />
       <HumanReviewBridge />
       <BillingBridge />
+      {isSeatGovernanceUiEnabled() && <SeatGovernanceBridge />}
       <InvestigationShell />
     </>
   );
