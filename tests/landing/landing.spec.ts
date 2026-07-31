@@ -111,7 +111,7 @@ test("submits message-qualified B2G trial evidence", async ({ page }) => {
   await page.goto("/#access");
   await page.getByLabel("Work email").fill("b2g@example.com");
   await page.getByLabel("Your role in the B2G decision").selectOption("Bid or proposal management");
-  await page.getByLabel("Company").fill("Example Public Sector Supplier");
+  await page.getByLabel("Company", { exact: true }).fill("Example Public Sector Supplier");
   await page
     .getByLabel(/What does your company sell to government/i)
     .fill("We sell transport analytics to European public authorities and need to qualify framework tenders.");
@@ -125,7 +125,7 @@ test("fails closed when the B2G trial channel is not configured", async ({ page 
   await page.goto("/#access");
   await page.getByLabel("Work email").fill("sales@example.com");
   await page.getByLabel("Your role in the B2G decision").selectOption("Business development");
-  await page.getByLabel("Company").fill("Example Supplier");
+  await page.getByLabel("Company", { exact: true }).fill("Example Supplier");
   await page
     .getByLabel(/What does your company sell to government/i)
     .fill("We provide energy-efficiency services and need to qualify municipal tenders in Spain and France.");
