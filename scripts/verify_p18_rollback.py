@@ -67,6 +67,13 @@ for relative_path in plan["p18_only_artifacts"]:
 for relative_path in plan["p18_only_artifacts"]:
     assert not (ROOT / relative_path).exists(), relative_path
 
+for relative_path in plan["restored_baseline_files"]:
+    content = run("git", "show", f"{baseline}:{relative_path}", text=False)
+    assert isinstance(content, bytes)
+    path = ROOT / relative_path
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(content)
+
 for relative_path, expected_digest in before.items():
     assert digest(ROOT / relative_path) == expected_digest, relative_path
 
