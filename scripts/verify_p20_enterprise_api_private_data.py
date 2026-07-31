@@ -245,7 +245,7 @@ assert ref.webhook_delivery_decision(
     subscription_active=True,
     tenant_match=True,
     event_allowed=True,
-   idempotency_key_present=True,
+    idempotency_key_present=True,
 )["decision"] == "DELIVER_AT_LEAST_ONCE"
 assert ref.webhook_delivery_decision(
     signature_valid=True,
@@ -278,7 +278,7 @@ assert ref.support_access_decision(
     continuous_audit=True,
 )["decision"] == "ALLOW_TIME_BOUNDED"
 
-assert ref.max_promote_private_data_to_global_canonical(
+assert ref.may_promote_private_data_to_global_canonical(
     p20_authority="TYPED_HUMAN_APPROVAL",
     independent_admission_passed=True,
 )["decision"] == "DENY"
