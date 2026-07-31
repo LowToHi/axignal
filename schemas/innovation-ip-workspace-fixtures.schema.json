@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://axignal.com/schemas/innovation-ip-workspace-fixtures.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "task_id", "modules", "classes", "expected_by_class"],
+  "properties": {
+    "schema_version": {"const": "axignal.innovation-ip-workspace-fixtures/v0.1"},
+    "task_id": {"const": "AX-GE2E-P16-T01"},
+    "modules": {"type": "array", "minItems": 8, "maxItems": 8, "uniqueItems": true, "items": {"type": "string"}},
+    "classes": {"type": "array", "minItems": 5, "maxItems": 5, "uniqueItems": true, "items": {"type": "string"}},
+    "expected_by_class": {
+      "type": "object",
+      "minProperties": 5,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["decision", "canonical_write", "external_action", "reason_code"],
+        "properties": {
+          "decision": {"type": "string"},
+          "canonical_write": {"const": false},
+          "external_action": {"const": false},
+          "reason_code": {"type": "string"}
+        }
+      }
+    }
+  }
+}
