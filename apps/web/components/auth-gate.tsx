@@ -59,7 +59,7 @@ function registrationPublicKey(
       ...item,
       id: decode(item.id)
     }))
-  } as PublicKeyCredentialCreationOptions;
+  } as unknown as PublicKeyCredentialCreationOptions;
 }
 
 function authenticationPublicKey(
@@ -72,7 +72,7 @@ function authenticationPublicKey(
       ...item,
       id: decode(item.id)
     }))
-  } as PublicKeyCredentialRequestOptions;
+  } as unknown as PublicKeyCredentialRequestOptions;
 }
 
 function registrationCredential(value: PublicKeyCredential) {
