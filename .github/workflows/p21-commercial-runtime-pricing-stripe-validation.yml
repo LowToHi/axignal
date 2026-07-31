@@ -49,5 +49,14 @@ jobs:
             scripts/verify_p20_rollback.py
       - name: Validate P21 commercial runtime
         run: python scripts/verify_p21_commercial_runtime.py
-      - name: Rehearse byte-exact P21 rollback
-        run: python scripts/verify_p21_rollback.py
+      - name: Rehearse byte-exact P21 rollback at frozen P21 head
+        shell: bash
+        run: |
+          frozen_head=ee196e3cd8d7027adf92eb40e04868a5ad6e7594
+          worktree="$(mktemp -d)/p21-frozen"
+          git worktree add --detach "$worktree" "$frozen_head"
+          (
+            cd "$worktree"
+            python scripts/verify_p21_rollback.py
+          )
+          git worktree remove --force "$worktree"
