@@ -16,7 +16,11 @@ class OrganicDiscoveryRepository:
         self.dsn = dsn
 
     @contextmanager
-    def _cursor(self, *, application_role: bool = True) -> Iterator[psycopg.Cursor]:
+    def _cursor(
+        self,
+        *,
+        application_role: bool = True,
+    ) -> Iterator[psycopg.Cursor]:
         with (
             psycopg.connect(self.dsn, row_factory=dict_row) as connection,
             connection.cursor() as cursor,
@@ -43,7 +47,11 @@ class OrganicDiscoveryRepository:
                 (actor_subject,),
             )
             row = cursor.fetchone()
-        return dict(row["result"]) if row and isinstance(row["result"], dict) else {}
+        return (
+            dict(row["result"])
+            if row and isinstance(row["result"], dict)
+            else {}
+        )
 
     def pages(self, *, actor_subject: str) -> list[dict[str, Any]]:
         with self._cursor() as cursor:
@@ -53,10 +61,19 @@ class OrganicDiscoveryRepository:
             )
             return [dict(row) for row in cursor.fetchall()]
 
-    def evaluate(self, *, page_id: UUID, actor_subject: str) -> dict[str, Any]:
+    def evaluate(
+        self,
+        *,
+        page_id: UUID,
+        actor_subject: str,
+    ) -> dict[str, Any]:
         with self._cursor() as cursor:
             cursor.execute(
-                "SELECT growth_private.evaluate_indexability(%s, %s, now()) AS result",
+                """
+                SELECT growth_private.evaluate_indexability(
+                  %s, %s, now()
+                ) AS result
+                """,
                 (page_id, actor_subject),
             )
             row = cursor.fetchone()
@@ -155,6 +172,64 @@ class OrganicDiscoveryRepository:
             row = cursor.fetchone()
         if not row or not isinstance(row["result"], dict):
             raise RuntimeError("Tender alert subscription returned no result")
+        return dict(row["result"])
+
+    def confirm_alert(
+        self,
+        *,
+        confirmation_token_digest: str,
+    ) -> dict[str, Any]:
+        with self._cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT growth_private.confirm_tender_alert(
+                  %s, now()
+                ) AS result
+                """,
+                (confirmation_token_digest,),
+            )
+            row = cursor.fetchone()
+        if not row or not isinstance(row["result"], dict):
+            raise RuntimeError("Tender alert confirmation returned no result")
+        return dict(row["result"])
+
+    def fail_alert_delivery(
+        self,
+        *,
+        subscription_id: UUID,
+        reason: str,
+    ) -> dict[str, Any]:
+        with self._cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT growth_private.fail_tender_alert_delivery(
+                  %s, %s, now()
+                ) AS result
+                """,
+                (subscription_id, reason),
+            )
+            row = cursor.fetchone()
+        if not row or not isinstance(row["result"], dict):
+            raise RuntimeError("Tender alert compensation returned no result")
+        return dict(row["result"])
+
+    def unsubscribe_alert(
+        self,
+        *,
+        confirmation_token_digest: str,
+    ) -> dict[str, Any]:
+        with self._cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT growth_private.unsubscribe_tender_alert(
+                  %s, now()
+                ) AS result
+                """,
+                (confirmation_token_digest,),
+            )
+            row = cursor.fetchone()
+        if not row or not isinstance(row["result"], dict):
+            raise RuntimeError("Tender alert unsubscribe returned no result")
         return dict(row["result"])
 
     def contacts(self, *, actor_subject: str) -> list[dict[str, Any]]:
