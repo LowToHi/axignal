@@ -169,8 +169,14 @@ jobs:
         run: |
           rm -rf artifacts
           mkdir -p artifacts
+          set +e
           AXIGNAL_SEAT_EVIDENCE_DIR=artifacts \
-            python scripts/verify_seat_governance_e2e.py
+            python scripts/verify_seat_governance_e2e.py \
+            > >(tee artifacts/seat-governance-e2e.log) \
+            2> >(tee -a artifacts/seat-governance-e2e.log >&2)
+          status=$?
+          set -e
+          exit "$status"
 
       - name: Execute browser seat lifecycle
         run: |
@@ -205,6 +211,7 @@ jobs:
           name: seat-governance-e2e-${{ github.sha }}
           path: |
             artifacts/seat-governance-e2e.json
+            artifacts/seat-governance-e2e.log
             playwright-report
             test-results
           if-no-files-found: ignore
