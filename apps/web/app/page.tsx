@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+
 import { AuthGate } from "@/components/auth-gate";
 import { BillingBridge } from "@/components/billing-bridge";
 import { HumanReviewBridge } from "@/components/human-review-bridge";
@@ -12,6 +14,17 @@ import {
 } from "@/lib/server-auth";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "AXIGNAL Workspace",
+  description: "Private AXIGNAL B2G investigation workspace.",
+  robots: {
+    index: false,
+    follow: false,
+    noarchive: true,
+    noimageindex: true
+  }
+};
 
 function boolEnv(name: string): boolean {
   return ["1", "true", "yes", "on"].includes(
