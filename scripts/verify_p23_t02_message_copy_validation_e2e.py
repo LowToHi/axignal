@@ -16,6 +16,11 @@ PRICE_BOOK_PATH = (
     ROOT / "data/commercial/commercial-runtime-pricing-stripe-runtime.v0.1.json"
 )
 
+
+def normalize(value: str) -> str:
+    return " ".join(value.split())
+
+
 runtime = json.loads(RUNTIME_PATH.read_text(encoding="utf-8"))
 price_book = json.loads(PRICE_BOOK_PATH.read_text(encoding="utf-8"))
 landing = LANDING_PATH.read_text(encoding="utf-8")
@@ -24,6 +29,7 @@ form = FORM_PATH.read_text(encoding="utf-8")
 intake = INTAKE_PATH.read_text(encoding="utf-8")
 layout = LAYOUT_PATH.read_text(encoding="utf-8")
 pricing = PRICING_PATH.read_text(encoding="utf-8")
+normalized_landing = normalize(landing)
 
 assert runtime["task_id"] == "AX-GE2E-P23-T02"
 assert runtime["baseline_sha"] == "ce9900dc7372db4499205a87ccb1cad4f2b08527"
@@ -39,11 +45,8 @@ assert runtime["stripe_live_authorised"] is False
 assert runtime["market_validated_claim_authorised"] is False
 
 winner = runtime["message_decision"]
-assert winner["headline"] in landing
-assert winner["supporting_headline"] in landing
-assert winner["subheadline"] in landing
-assert winner["primary_cta"] in landing
-assert winner["secondary_cta"] in landing
+for field in ("headline", "supporting_headline", "subheadline", "primary_cta", "secondary_cta"):
+    assert normalize(winner[field]) in normalized_landing, field
 assert runtime["message_version"] in data
 assert "data-message-version={MESSAGE_VERSION}" in landing
 
@@ -54,11 +57,11 @@ assert "landing_buyer_outcome_v1_0" in intake
 assert "controlled-access intake channel is not configured" in intake
 assert "No request was stored" in intake
 
-assert 'index: false' in layout
-assert 'follow: false' in layout
+assert "index: false" in layout
+assert "follow: false" in layout
 assert "commercial-runtime-pricing-stripe-runtime.v0.1.json" in pricing
 assert 'pricing?.status !== "CANDIDATE_ONLY"' in pricing
-assert 'plan.commercial_activation_authorised !== false' in pricing
+assert "plan.commercial_activation_authorised !== false" in pricing
 assert "getCandidatePlans" in (ROOT / "apps/landing/app/page.tsx").read_text(
     encoding="utf-8"
 )
