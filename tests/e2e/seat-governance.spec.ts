@@ -37,6 +37,8 @@ async function confirmCheckout(page: import("@playwright/test").Page) {
 async function confirmUpgrade(page: import("@playwright/test").Page) {
   const billing = page.getByRole("complementary", { name: "Plan y facturación" });
   await billing.getByRole("button", { name: "Upgrade explícito a Team" }).click();
+  await expect(billing.getByText("UPGRADE_PENDING", { exact: true })).toBeVisible();
+
   const result = await page.evaluate(async () => {
     const response = await fetch("/api/billing/test/provider-event", {
       method: "POST",
