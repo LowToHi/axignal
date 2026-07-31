@@ -131,10 +131,11 @@ current = (
 ).read_text(encoding="utf-8")
 v15_contract = ROOT / "docs/contracts/31-global-e2e-development-contract-v1.5.md"
 if v15_contract.is_file():
-    assert "P01 | `ENGINEERING_IN_PROGRESS` | `IN_PROGRESS`" in current
+    assert "| P01 | IN_PROGRESS | IN_PROGRESS | Secondary research only |" in current
     assert "Primary evidence remains missing" in current
-    assert "P02–P24 canonical acceptance" in current
-    assert "BLOCKED" in current
+    assert "| P02–P16 | Engineering evidence ready | Canonical acceptance blocked |" in current
+    assert "| P17–P23 | Engineering evidence ready | Canonical acceptance blocked |" in current
+    assert "| P24 | Acceptance framework implemented | Canonical acceptance blocked |" in current
 else:
     assert "P01 IN_PROGRESS" in current
     assert "primary research remains missing" in current
