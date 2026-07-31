@@ -99,7 +99,7 @@ Engineering E2E is present. Production providers and public signup remain blocke
 
 ## 6. P26 scope and tasks
 
-### P26-T01 — Organic Discovery and Founder Admin Foundation
+### `AX-GE2E-P26-T01` — Organic Discovery and Founder Admin Foundation
 
 State: `ENGINEERING_E2E_PASS / CANONICAL_ACCEPTANCE_BLOCKED`
 
@@ -115,7 +115,7 @@ Includes:
 - AI-citation ledger;
 - Founder Admin shell and currently authorised growth modules.
 
-### P26-T02 — Customers, Trials and Billing Administration
+### `AX-GE2E-P26-T02` — Customers, Trials and Billing Administration
 
 State: `NOT_STARTED`
 
@@ -131,7 +131,7 @@ Must implement:
 - typed authority and audit;
 - no direct provider-state fabrication.
 
-### P26-T03 — Risk, Abuse, Sources and Coverage Administration
+### `AX-GE2E-P26-T03` — Risk, Abuse, Sources and Coverage Administration
 
 State: `NOT_STARTED`
 
@@ -147,7 +147,7 @@ Must implement:
 - independent kill switches;
 - no browser or model source admission.
 
-### P26-T04 — Operations, SLO, Incidents, DR, Settings and Audit
+### `AX-GE2E-P26-T04` — Operations, SLO, Incidents, DR, Settings and Audit
 
 State: `NOT_STARTED`
 
