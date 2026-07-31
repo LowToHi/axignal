@@ -80,7 +80,7 @@ def main() -> None:
         (
             "SeatSettings.from_env()",
             "seat_settings.enabled",
-            "seat_access_decision",
+            ".access_decision(",
             "SEAT_GOVERNANCE_BOOTSTRAP_PATHS",
         ),
     )
