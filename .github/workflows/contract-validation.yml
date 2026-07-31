@@ -55,7 +55,9 @@ jobs:
           from pathlib import Path
           from jsonschema import Draft202012Validator
 
-          schema = json.loads(Path('schemas/task.schema.json').read_text(encoding='utf-8'))
+          schema = json.loads(
+              Path('schemas/task.schema.json').read_text(encoding='utf-8')
+          )
           validator = Draft202012Validator(schema)
           paths = [
               *sorted(Path('docs/tasks').glob('**/*.task.json')),
@@ -67,21 +69,40 @@ jobs:
           task_ids: list[str] = []
           for path in paths:
               instance = json.loads(path.read_text(encoding='utf-8'))
-              errors = sorted(validator.iter_errors(instance), key=lambda error: list(error.path))
-              assert not errors, f"{path}: {[error.message for error in errors]}"
+              errors = sorted(
+                  validator.iter_errors(instance),
+                  key=lambda error: list(error.path),
+              )
+              assert not errors, (
+                  f"{path}: {[error.message for error in errors]}"
+              )
               task_ids.append(instance['task_id'])
               print(f'PASS {path}: {instance["task_id"]}')
           registry = json.loads(
-              Path('data/programmes/global-e2e-task-registry.v1.4.json').read_text(encoding='utf-8')
+              Path(
+                  'data/programmes/global-e2e-task-registry.v1.4.json'
+              ).read_text(encoding='utf-8')
           )
           for shard in registry['shards']:
-              data = json.loads(Path(shard['path']).read_text(encoding='utf-8'))
+              data = json.loads(
+                  Path(shard['path']).read_text(encoding='utf-8')
+              )
               for instance in data['tasks']:
-                  errors = sorted(validator.iter_errors(instance), key=lambda error: list(error.path))
-                  assert not errors, f"{instance['task_id']}: {[error.message for error in errors]}"
+                  errors = sorted(
+                      validator.iter_errors(instance),
+                      key=lambda error: list(error.path),
+                  )
+                  assert not errors, (
+                      f"{instance['task_id']}: "
+                      f"{[error.message for error in errors]}"
+                  )
                   task_ids.append(instance['task_id'])
-                  print(f'PASS global registry: {instance["task_id"]}')
-          assert len(task_ids) == len(set(task_ids)), 'Duplicate typed task IDs across task locations'
+                  print(
+                      f'PASS global registry: {instance["task_id"]}'
+                  )
+          assert len(task_ids) == len(set(task_ids)), (
+              'Duplicate typed task IDs across task locations'
+          )
           PY
 
       - name: Validate v1.4 global programme
@@ -90,11 +111,11 @@ jobs:
       - name: Validate P01 research programme
         run: python scripts/verify_p01_research_program.py
 
-      - name: Validate P02 ontology foundation
-        run: python scripts/verify_p02_ontology_foundation.py
-
       - name: Validate P02 individual library contracts
         run: python scripts/verify_p02_library_contracts.py
+
+      - name: Validate P02 ontology foundation
+        run: python scripts/verify_p02_ontology_foundation.py
 
       - name: Rehearse byte-exact P02 rollback at frozen P02 head
         env:
@@ -278,8 +299,22 @@ jobs:
       - name: Validate P15 Energy and Climate Transition Workspace
         run: python scripts/verify_p15_energy_climate_transition_workspace.py
 
-      - name: Rehearse byte-exact P15 rollback
-        run: python scripts/verify_p15_rollback.py
+      - name: Rehearse byte-exact P15 rollback at frozen P15 head
+        env:
+          P15_ENGINEERING_HEAD: ef0d252eecde429d7ff30dbbce82b75ab1a7aac3
+        run: |
+          set -euo pipefail
+          verification_dir="${RUNNER_TEMP}/axignal-p15-rollback"
+          rm -rf "${verification_dir}"
+          git worktree add --detach "${verification_dir}" "${P15_ENGINEERING_HEAD}"
+          trap 'git worktree remove --force "${verification_dir}" >/dev/null 2>&1 || true' EXIT
+          python "${verification_dir}/scripts/verify_p15_rollback.py"
+
+      - name: Validate P16 Innovation and IP Workspace
+        run: python scripts/verify_p16_innovation_ip_workspace.py
+
+      - name: Rehearse byte-exact P16 rollback
+        run: python scripts/verify_p16_rollback.py
 
       - name: Validate modular skill registries
         run: |
@@ -287,7 +322,10 @@ jobs:
           from pathlib import Path
           import yaml
 
-          paths = [Path('skills/registry.yaml'), *sorted(Path('skills').glob('*.registry.yaml'))]
+          paths = [
+              Path('skills/registry.yaml'),
+              *sorted(Path('skills').glob('*.registry.yaml')),
+          ]
           all_ids: list[str] = []
           for path in paths:
               data = yaml.safe_load(path.read_text(encoding='utf-8'))
@@ -295,12 +333,18 @@ jobs:
               assert data['canonical_brand'] == 'AXIGNAL', path
               assert data['canonical_domain'] == 'axignal.com', path
               ids = [item['skill_id'] for item in data['skills']]
-              assert len(ids) == len(set(ids)), f'Duplicate skill IDs inside {path}'
+              assert len(ids) == len(set(ids)), (
+                  f'Duplicate skill IDs inside {path}'
+              )
               all_ids.extend(ids)
               print(f'PASS {path}: {len(ids)} skills')
 
-          assert len(all_ids) == len(set(all_ids)), 'Duplicate skill IDs across registries'
-          print(f'PASS combined registry: {len(all_ids)} unique skills')
+          assert len(all_ids) == len(set(all_ids)), (
+              'Duplicate skill IDs across registries'
+          )
+          print(
+              f'PASS combined registry: {len(all_ids)} unique skills'
+          )
           PY
 
       - name: Validate OpenAPI
