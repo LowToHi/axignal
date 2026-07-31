@@ -103,7 +103,7 @@ def seed_candidate(
           %s,
           CASE WHEN %s THEN 'Synthetic Germany cybersecurity tenders'
                ELSE 'Cybersecurity government tenders in Germany' END,
-          'Current public-contract opportunities with buyer, value, deadline, provenance and declared coverage.',
+          'Current opportunities with buyer, value, deadline and provenance.',
           'CANDIDATE', %s, %s, 2400000000000, %s, 0.91,
           0.82, 0.86, 0.88, %s, 3,
           'public-intelligence-snapshot@1.0.0', %s, %s, %s, %s, %s
@@ -150,7 +150,9 @@ def main() -> None:
     identity_organisations_before = scalar(
         "SELECT count(*) FROM identity_private.organisations"
     )
-    trial_grants_before = scalar("SELECT count(*) FROM identity_private.trial_grants")
+    trial_grants_before = scalar(
+        "SELECT count(*) FROM identity_private.trial_grants"
+    )
 
     admitted_id = seed_candidate(
         path="/tenders/germany/cybersecurity",
@@ -270,7 +272,9 @@ def main() -> None:
     identity_organisations_after = scalar(
         "SELECT count(*) FROM identity_private.organisations"
     )
-    trial_grants_after = scalar("SELECT count(*) FROM identity_private.trial_grants")
+    trial_grants_after = scalar(
+        "SELECT count(*) FROM identity_private.trial_grants"
+    )
     assert identity_organisations_after == identity_organisations_before
     assert trial_grants_after == trial_grants_before
 
@@ -292,7 +296,9 @@ def main() -> None:
     )
     append_only_audit = expect_failure(
         "append_only_relation",
-        lambda: call("DELETE FROM growth_private.founder_admin_audit_events"),
+        lambda: call(
+            "DELETE FROM growth_private.founder_admin_audit_events"
+        ),
     )
 
     evidence = {
