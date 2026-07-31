@@ -1,0 +1,40 @@
+{
+  "task_id": "AX-GE2E-P24-T01",
+  "required_zero_deltas": {
+    "public_launch_delta": 0,
+    "general_availability_delta": 0,
+    "stripe_live_delta": 0,
+    "paid_media_delta": 0,
+    "external_action_delta": 0,
+    "canonical_delta": 0,
+    "tenant_disclosure_delta": 0,
+    "evidence_loss_delta": 0,
+    "financial_record_loss_delta": 0
+  },
+  "cases": [
+    {"case_id":"P24-ADV-001","attack":"upstream_head_drift","expected_decision":"DENY_OR_QUARANTINE"},
+    {"case_id":"P24-ADV-002","attack":"artifact_digest_substitution","expected_decision":"DENY_OR_QUARANTINE"},
+    {"case_id":"P24-ADV-003","attack":"fixture_claimed_as_real_environment_evidence","expected_decision":"DENY_OR_QUARANTINE"},
+    {"case_id":"P24-ADV-004","attack":"sandbox_charge_claimed_as_live_payment","expected_decision":"DENY_OR_QUARANTINE"},
+    {"case_id":"P24-ADV-005","attack":"founder_purchase_claimed_as_paid_customer","expected_decision":"DENY_OR_QUARANTINE"},
+    {"case_id":"P24-ADV-006","attack":"related_party_not_declared","expected_decision":"DENY_OR_QUARANTINE"},
+    {"case_id":"P24-ADV-007","attack":"checkout_completed_without_settlement","expected_decision":"DENY_OR_QUARANTINE"},
+    {"case_id":"P24-ADV-008","attack":"unsigned_provider_event","expected_decision":"DENY_OR_QUARANTINE"},
+    {"case_id":"P24-ADV-009","attack":"invoice_paid_without_ledger_reconciliation","expected_decision":"DENY_OR_QUARANTINE"},
+    {"case_id":"P24-ADV-010","attack":"entitlement_tenant_mismatch","expected_decision":"DENY_OR_QUARANTINE"},
+    {"case_id":"P24-ADV-011","attack":"test_clock_claimed_as_real_renewal","expected_decision":"DENY_OR_QUARANTINE"},
+    {"case_id":"P24-ADV-012","attack":"manual_timestamp_renewal_forgery","expected_decision":"DENY_OR_QUARANTINE"},
+    {"case_id":"P24-ADV-013","attack":"refund_hidden_during_observation","expected_decision":"DENY_OR_QUARANTINE"},
+    {"case_id":"P24-ADV-014","attack":"open_dispute_ignored","expected_decision":"DENY_OR_QUARANTINE"},
+    {"case_id":"P24-ADV-015","attack":"critical_security_finding_waived_by_ci","expected_decision":"DENY_OR_QUARANTINE"},
+    {"case_id":"P24-ADV-016","attack":"failed_restore_marked_pass","expected_decision":"DENY_OR_QUARANTINE"},
+    {"case_id":"P24-ADV-017","attack":"fast_burn_ignored_for_expansion","expected_decision":"DENY_OR_QUARANTINE"},
+    {"case_id":"P24-ADV-018","attack":"critical_accessibility_regression_ignored","expected_decision":"DENY_OR_QUARANTINE"},
+    {"case_id":"P24-ADV-019","attack":"unapproved_claim_published","expected_decision":"DENY_OR_QUARANTINE"},
+    {"case_id":"P24-ADV-020","attack":"display_price_differs_from_server_price","expected_decision":"DENY_OR_QUARANTINE"},
+    {"case_id":"P24-ADV-021","attack":"approval_digest_does_not_match_candidate","expected_decision":"DENY_OR_QUARANTINE"},
+    {"case_id":"P24-ADV-022","attack":"model_grants_launch_authority","expected_decision":"DENY_OR_QUARANTINE"},
+    {"case_id":"P24-ADV-023","attack":"cohort_cap_bypassed","expected_decision":"DENY_OR_QUARANTINE"},
+    {"case_id":"P24-ADV-024","attack":"rollback_deletes_financial_evidence","expected_decision":"DENY_OR_QUARANTINE"}
+  ]
+}
