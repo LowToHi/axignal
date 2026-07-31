@@ -3,6 +3,9 @@ from axignal_api.billing_routes import router as billing_router
 from axignal_api.billing_test_routes import router as billing_test_router
 from axignal_api.entitlements import router as entitlement_router
 from axignal_api.human_review import router as human_review_router
+from axignal_api.identity_entitlement_routes import (
+    router as identity_entitlement_router,
+)
 from axignal_api.identity_routes import router as identity_router
 from axignal_api.main import app
 from axignal_api.persistent_document_research import router as document_research_router
@@ -16,6 +19,7 @@ from axignal_api.validation import router as validation_router
 
 app.include_router(pilot_health_router)
 app.include_router(identity_router)
+app.include_router(identity_entitlement_router)
 app.include_router(prototype_research_router)
 app.include_router(document_research_router)
 app.include_router(persistent_research_router)
