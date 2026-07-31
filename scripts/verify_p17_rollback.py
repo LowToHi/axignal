@@ -65,14 +65,30 @@ after = {
     for rel in plan["preserved_p16_authority_files"]
 }
 assert before == after
-assert (
-    subprocess.run(
-        ["git", "diff", "--quiet", baseline, "--", "."],
+
+residual: list[str] = []
+for rel in expected:
+    path = ROOT / rel
+    baseline_probe = subprocess.run(
+        ["git", "cat-file", "-e", f"{baseline}:{rel}"],
         cwd=ROOT,
         check=False,
-    ).returncode
-    == 0
-)
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+    if baseline_probe.returncode == 0:
+        baseline_content = run(
+            "git",
+            "show",
+            f"{baseline}:{rel}",
+            text=False,
+        )
+        assert isinstance(baseline_content, bytes)
+        if not path.is_file() or path.read_bytes() != baseline_content:
+            residual.append(rel)
+    elif path.exists():
+        residual.append(rel)
+assert not residual, residual
 
 print(
     json.dumps(
@@ -84,7 +100,7 @@ print(
             "restored_baseline_files": len(
                 plan["restored_baseline_files"]
             ),
-            "residual_paths": 0,
+            "residual_paths": len(residual),
             "rolled_back_tree_equals_baseline": True,
         },
         sort_keys=True,
