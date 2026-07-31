@@ -6,6 +6,21 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 CONTRACT = ROOT / "data/growth/organic-discovery-runtime.v0.1.json"
+MODULE_LABELS = {
+    "OVERVIEW": "Overview",
+    "ORGANIC_SEO": "Organic SEO",
+    "PAGES_AND_SITEMAPS": "Pages & Sitemaps",
+    "AI_CITATIONS": "AI Citations",
+    "TENDER_ALERTS": "Tender Alerts",
+    "CRM": "CRM",
+    "CUSTOMERS_AND_TRIALS": "Customers & Trials",
+    "BILLING": "Billing",
+    "RISK_AND_ABUSE": "Risk & Abuse",
+    "SOURCES_AND_COVERAGE": "Sources & Coverage",
+    "OPERATIONS": "Operations",
+    "SETTINGS": "Settings",
+    "AUDIT": "Audit",
+}
 
 
 def read(path: str) -> str:
@@ -64,7 +79,10 @@ def main() -> None:
         "unsubscribe_tender_alert",
     ):
         assert f"FUNCTION growth_private.{function}" in alert_migration
-    assert "REVOKE ALL ON ALL TABLES IN SCHEMA growth_private FROM axignal_app" in migration
+    assert (
+        "REVOKE ALL ON ALL TABLES IN SCHEMA growth_private FROM axignal_app"
+        in migration
+    )
     assert "SECURITY DEFINER" in migration
     assert "append_only_relation" in migration
 
@@ -83,17 +101,7 @@ def main() -> None:
 
     admin = read("apps/web/app/admin/founder-admin-dashboard.tsx")
     for module in contract["founder_admin_modules"]:
-        normalized = module.replace("_AND_", " & ").replace("_", " ").title()
-        if module == "OVERVIEW":
-            assert "Overview" in admin
-        elif module == "ORGANIC_SEO":
-            assert "Organic SEO" in admin
-        elif module == "PAGES_AND_SITEMAPS":
-            assert "Pages & Sitemaps" in admin
-        elif module == "AI_CITATIONS":
-            assert "AI Citations" in admin
-        else:
-            assert normalized.split(" ")[0] in admin
+        assert MODULE_LABELS[module] in admin
 
     robots = read("apps/web/app/robots.ts")
     assert 'userAgent: "OAI-SearchBot"' in robots
