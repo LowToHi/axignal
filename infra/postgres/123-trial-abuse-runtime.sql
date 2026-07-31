@@ -211,10 +211,16 @@ DECLARE
   v_new_active boolean := false;
 BEGIN
   IF TG_OP = 'INSERT' THEN
-    v_new_active := NEW.state IN ('QUEUED', 'RUNNING');
+    v_new_active := NEW.state IN (
+      'QUEUED', 'RETRIEVING', 'PROPOSING', 'ADMISSION_PENDING'
+    );
   ELSE
-    v_old_active := OLD.state IN ('QUEUED', 'RUNNING');
-    v_new_active := NEW.state IN ('QUEUED', 'RUNNING');
+    v_old_active := OLD.state IN (
+      'QUEUED', 'RETRIEVING', 'PROPOSING', 'ADMISSION_PENDING'
+    );
+    v_new_active := NEW.state IN (
+      'QUEUED', 'RETRIEVING', 'PROPOSING', 'ADMISSION_PENDING'
+    );
   END IF;
 
   SELECT * INTO v_account
