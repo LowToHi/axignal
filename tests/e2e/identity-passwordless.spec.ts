@@ -3,9 +3,19 @@ import { expect, test } from "@playwright/test";
 test.describe.configure({ mode: "serial", retries: 0 });
 test.skip(
   process.env.AXIGNAL_PLAYWRIGHT_EXTERNAL_SERVER !== "true" ||
-    process.env.AXIGNAL_PLAYWRIGHT_BASE_URL !== "http://localhost:18080",
+    process.env.AXIGNAL_PLAYWRIGHT_BASE_URL !== "http://127.0.0.1:18080",
   "P25 identity E2E requires the isolated passwordless topology."
 );
+
+function identitySessionCookie(
+  cookies: Awaited<ReturnType<import("@playwright/test").BrowserContext["cookies"]>>
+) {
+  return cookies.find(
+    (cookie) =>
+      cookie.name === "__Host-axignal_session" ||
+      cookie.name === "axignal_identity_session"
+  );
+}
 
 test("registers, revokes and reauthenticates with a real WebAuthn boundary", async ({
   page,
@@ -25,7 +35,7 @@ test("registers, revokes and reauthenticates with a real WebAuthn boundary", asy
     }
   });
 
-  await page.goto("/");
+  await page.goto("http://localhost:18080/");
   await expect(
     page.getByRole("region", { name: "Acceso seguro a AXIGNAL" })
   ).toBeVisible();
@@ -75,10 +85,7 @@ test("registers, revokes and reauthenticates with a real WebAuthn boundary", asy
   expect(trial.body.expires_at).toBeNull();
   expect(trial.body.token_budget_ceiling).toBe(1_000_000);
 
-  const cookies = await context.cookies();
-  const sessionCookie = cookies.find(
-    (cookie) => cookie.name === "axignal_identity_session"
-  );
+  const sessionCookie = identitySessionCookie(await context.cookies());
   expect(sessionCookie).toBeDefined();
   expect(sessionCookie?.httpOnly).toBeTruthy();
   expect(sessionCookie?.sameSite).toBe("Lax");
@@ -102,9 +109,7 @@ test("registers, revokes and reauthenticates with a real WebAuthn boundary", asy
   await page.getByRole("button", { name: "Usar passkey" }).click();
   await expect(page.locator("main.shell")).toBeVisible();
 
-  const renewed = (await context.cookies()).find(
-    (cookie) => cookie.name === "axignal_identity_session"
-  );
+  const renewed = identitySessionCookie(await context.cookies());
   expect(renewed).toBeDefined();
   expect(renewed?.value).not.toBe(sessionCookie?.value);
 
