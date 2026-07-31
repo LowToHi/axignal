@@ -9,14 +9,25 @@ from hashlib import sha256
 from typing import Annotated, Any
 from uuid import UUID
 
-from fastapi import Header, HTTPException, status
+from fastapi import Header, HTTPException, Request, status
 
+from axignal_api.seat_config import SeatSettings
+from axignal_api.seat_repository import SeatRepository
 from axignal_api.settings import Settings
 
 ASSERTION_AUDIENCE = "axignal-api"
 ASSERTION_VERSION = "v1"
 MAX_ASSERTION_TTL_SECONDS = 300
 CLOCK_SKEW_SECONDS = 30
+SAFE_METHODS = {"GET", "HEAD", "OPTIONS"}
+SEAT_GOVERNANCE_EXEMPT_PREFIXES = (
+    "/v1/billing",
+    "/v1/entitlements",
+)
+SEAT_GOVERNANCE_BOOTSTRAP_PATHS = {
+    "/v1/organisation/seats/bootstrap-owner",
+    "/v1/organisation/seats/invitations/accept",
+}
 
 IdentityAssertionHeader = Annotated[
     str | None,
@@ -31,6 +42,10 @@ class AuthenticatedIdentity:
     tenant_id: UUID
     issued_at: datetime
     expires_at: datetime
+    membership_id: UUID | None = None
+    role_ids: tuple[str, ...] = ()
+    seat_state: str | None = None
+    seat_plan_code: str | None = None
 
 
 def _b64url_encode(value: bytes) -> str:
@@ -143,7 +158,60 @@ def _identity_from_payload(payload: dict[str, Any]) -> AuthenticatedIdentity:
     )
 
 
+def _seat_governance_is_exempt(request: Request | None) -> bool:
+    if request is None:
+        return False
+    path = request.url.path
+    if path in SEAT_GOVERNANCE_BOOTSTRAP_PATHS:
+        return True
+    return any(path.startswith(prefix) for prefix in SEAT_GOVERNANCE_EXEMPT_PREFIXES)
+
+
+def _enforce_seat_governance(
+    identity: AuthenticatedIdentity,
+    request: Request | None,
+) -> AuthenticatedIdentity:
+    seat_settings = SeatSettings.from_env()
+    if not seat_settings.enabled or _seat_governance_is_exempt(request):
+        return identity
+    try:
+        seat_settings.require_runtime()
+        assert seat_settings.database_url is not None
+        decision = SeatRepository(seat_settings.database_url).access_decision(
+            tenant_id=identity.tenant_id,
+            principal_id=identity.subject,
+            write=(request is not None and request.method not in SAFE_METHODS),
+        )
+    except RuntimeError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Seat-governance authorization is unavailable",
+        ) from exc
+
+    if decision.get("decision") != "ALLOW":
+        reason = str(decision.get("reason") or "seat_access_denied")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=reason,
+        )
+
+    membership_id = decision.get("membership_id")
+    roles = decision.get("roles")
+    return AuthenticatedIdentity(
+        subject=identity.subject,
+        email=identity.email,
+        tenant_id=identity.tenant_id,
+        issued_at=identity.issued_at,
+        expires_at=identity.expires_at,
+        membership_id=UUID(str(membership_id)) if membership_id else None,
+        role_ids=tuple(str(role) for role in roles) if isinstance(roles, list) else (),
+        seat_state=str(decision.get("seat_state") or ""),
+        seat_plan_code=str(decision.get("plan_code") or ""),
+    )
+
+
 def require_identity(
+    request: Request,
     assertion: IdentityAssertionHeader = None,
 ) -> AuthenticatedIdentity:
     settings = Settings.from_env()
@@ -161,7 +229,7 @@ def require_identity(
         )
     assert settings.identity_assertion_secret is not None
     try:
-        return verify_identity_assertion(
+        identity = verify_identity_assertion(
             assertion,
             secret=settings.identity_assertion_secret,
         )
@@ -170,3 +238,4 @@ def require_identity(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired identity assertion",
         ) from exc
+    return _enforce_seat_governance(identity, request)
