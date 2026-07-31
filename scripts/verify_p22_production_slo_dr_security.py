@@ -60,7 +60,11 @@ for binding in runtime["input_contract_bindings"]:
 
 slo = runtime["slo_contract"]
 assert slo["window_days"] == 30
-assert {service["service"] for service in slo["services"]} == {"api", "web", "worker"}
+assert {service["service"] for service in slo["services"]} == {
+    "api",
+    "web",
+    "worker",
+}
 assert reference.availability_bps(good=999, total=1000) == 9990
 assert reference.latency_compliant(observed_ms=499, threshold_ms=500) is True
 assert reference.latency_compliant(observed_ms=501, threshold_ms=500) is False
@@ -89,7 +93,11 @@ assert reference.release_decision(
     human_release_approval=False,
 ) == "DENY"
 
-postgres = next(item for item in runtime["dr_contract"]["tiers"] if item["asset"] == "postgres_primary")
+postgres = next(
+    item
+    for item in runtime["dr_contract"]["tiers"]
+    if item["asset"] == "postgres_primary"
+)
 assert reference.restore_decision(
     encrypted_backup=True,
     digest_verified=True,
@@ -150,8 +158,12 @@ assert reference.production_readiness(
     {gate: "PASS" for gate in runtime["readiness_gates"]},
     runtime["readiness_gates"],
 ) == "READY_FOR_TYPED_HUMAN_PRODUCTION_APPROVAL"
+failed_restore_gates = {
+    gate: ("FAIL" if gate == "restore_test_passed" else "PASS")
+    for gate in runtime["readiness_gates"]
+}
 assert reference.production_readiness(
-    {gate: ("FAIL" if gate == "restore_test_passed" else "PASS") for gate in runtime["readiness_gates"]},
+    failed_restore_gates,
     runtime["readiness_gates"],
 ) == "BLOCKED"
 
@@ -167,15 +179,22 @@ assert all(value == 0 for value in cases["required_zero_deltas"].values())
 for case in cases["cases"]:
     assert case["expected_decision"] == "DENY_OR_QUARANTINE"
 
-print(json.dumps({
-    "status": "PASS",
-    "task_id": runtime["task_id"],
-    "baseline_sha": runtime["baseline_sha"],
-    "modules": len(runtime["modules"]),
-    "invariants": len(runtime["invariants"]),
-    "readiness_gates": len(runtime["readiness_gates"]),
-    "conformance_fixtures": len(fixtures["fixtures"]),
-    "adversarial_cases": len(cases["cases"]),
-    "production_deployment_authorised": runtime["production_deployment_authorised"],
-    "stripe_live_authorised": runtime["stripe_live_authorised"],
-}, sort_keys=True))
+print(
+    json.dumps(
+        {
+            "status": "PASS",
+            "task_id": runtime["task_id"],
+            "baseline_sha": runtime["baseline_sha"],
+            "modules": len(runtime["modules"]),
+            "invariants": len(runtime["invariants"]),
+            "readiness_gates": len(runtime["readiness_gates"]),
+            "conformance_fixtures": len(fixtures["fixtures"]),
+            "adversarial_cases": len(cases["cases"]),
+            "production_deployment_authorised": runtime[
+                "production_deployment_authorised"
+            ],
+            "stripe_live_authorised": runtime["stripe_live_authorised"],
+        },
+        sort_keys=True,
+    )
+)
