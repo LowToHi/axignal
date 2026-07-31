@@ -46,14 +46,14 @@ def domain_is_disposable(value: str) -> bool:
 
 
 def keyed_digest(value: str, *, pepper: str, namespace: str) -> str:
-    material = f"{namespace}\x00{value}".encode("utf-8")
-    return hmac.new(pepper.encode("utf-8"), material, sha256).hexdigest()
+    material = f"{namespace}\x00{value}".encode()
+    return hmac.new(pepper.encode(), material, sha256).hexdigest()
 
 
 def digest_random_token(token: str) -> str:
     if len(token) < 20:
         raise ValueError("token_too_short")
-    return sha256(token.encode("utf-8")).hexdigest()
+    return sha256(token.encode()).hexdigest()
 
 
 def normalize_installation_id(value: str) -> str:
