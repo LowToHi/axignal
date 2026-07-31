@@ -3,6 +3,7 @@
 Version: `1.5.0`
 Status: `NORMATIVE CANDIDATE / HUMAN APPROVAL REQUIRED / NO PUBLIC LAUNCH`
 Goal ID: `AXIGNAL-GOAL-001`
+Programme: `P00–P27`
 Contract: `31`
 Decision: `ADR-016`
 Canonical baseline: `main@b9a08a2a07d04d635164e161d1b27a7a53df8575`
