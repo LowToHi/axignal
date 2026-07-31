@@ -27,6 +27,8 @@ def main() -> None:
     form = read("apps/landing/components/pilot-access-form.tsx")
     endpoint = read("apps/landing/app/api/pilot-intake/route.ts")
     css = read("apps/landing/app/globals.css")
+    message_css = read("apps/landing/app/message-copy.css")
+    pricing = read("apps/landing/lib/candidate-pricing.ts")
     tests = read("tests/landing/landing.spec.ts")
 
     require(
@@ -37,7 +39,10 @@ def main() -> None:
             "prefers-reduced-motion",
             "Synthetic demonstration · not investment performance",
             "Proposal is not admission",
-            "Request private access",
+            "Request a research workspace",
+            "Turn scattered sources into a decision your team can verify.",
+            "data-message-version={MESSAGE_VERSION}",
+            'id="pricing"',
         ],
         "landing experience",
     )
@@ -58,9 +63,10 @@ def main() -> None:
             'fetch("/api/pilot-intake"',
             'name="consent"',
             'name="website"',
+            "messageVersion",
             "aria-live",
         ],
-        "pilot form",
+        "controlled-access form",
     )
     require(
         endpoint,
@@ -68,10 +74,11 @@ def main() -> None:
             "AXIGNAL_PILOT_INTAKE_WEBHOOK_URL",
             "AXIGNAL_PILOT_INTAKE_BEARER_TOKEN",
             "AXIGNAL_PILOT_CONTACT_EMAIL",
+            "messageVersion",
             "AbortSignal.timeout",
             '"cache-control": "no-store"',
         ],
-        "pilot intake endpoint",
+        "controlled-access intake endpoint",
     )
     require(
         css,
@@ -84,11 +91,32 @@ def main() -> None:
         "landing styles",
     )
     require(
+        message_css,
+        [
+            ".problem-section",
+            ".pricing-section",
+            ".assurance-section",
+            ".faq-section",
+        ],
+        "buyer-message styles",
+    )
+    require(
+        pricing,
+        [
+            "commercial-runtime-pricing-stripe-runtime.v0.1.json",
+            'pricing?.status !== "CANDIDATE_ONLY"',
+            "plan.commercial_activation_authorised !== false",
+        ],
+        "server-resolved candidate pricing",
+    )
+    require(
         tests,
         [
             "reducedMotion",
             "semantic-globe",
             "pilot-intake",
+            "messageVersion",
+            "professional_monthly",
             "scrollWidth",
         ],
         "landing browser tests",
@@ -99,6 +127,8 @@ def main() -> None:
         "REMOTE_PILOT_ACCEPTED",
         "guaranteed return",
         "live investment performance",
+        "zero hallucinations",
+        "market validated",
     ]
     joined = "\n".join((experience, form, endpoint))
     violations = [value for value in forbidden if value in joined]
@@ -106,6 +136,9 @@ def main() -> None:
 
     evidence = {
         "status": "PASS",
+        "message_version": "buyer-outcome-v1.0",
+        "real_landing_copy_implemented": True,
+        "server_price_book_bound": True,
         "gsap_scrolltrigger": True,
         "react_three_fiber": True,
         "semantic_globe": True,
