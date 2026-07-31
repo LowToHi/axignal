@@ -78,7 +78,8 @@ def main() -> None:
     require_text(
         ROOT / "apps/api/src/axignal_api/identity.py",
         (
-            "AXIGNAL_SEAT_GOVERNANCE_ENABLED",
+            "SeatSettings.from_env()",
+            "seat_settings.enabled",
             "seat_access_decision",
             "SEAT_GOVERNANCE_BOOTSTRAP_PATHS",
         ),
