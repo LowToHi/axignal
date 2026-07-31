@@ -116,8 +116,8 @@ assert '"partial_launch_allowed": false' in current
 
 v15_contract = ROOT / "docs/contracts/31-global-e2e-development-contract-v1.5.md"
 if v15_contract.is_file():
-    assert "| P00 | `ENGINEERING_E2E_PASS` | `CANONICALLY_ACCEPTED` |" in phase_map
-    assert "| P01 | `ENGINEERING_IN_PROGRESS` | `IN_PROGRESS` |" in phase_map
+    assert "| `P00` | `ENGINEERING_E2E_PASS` | `CANONICALLY_ACCEPTED` |" in phase_map
+    assert "| `P01` | `ENGINEERING_IN_PROGRESS` | `IN_PROGRESS` |" in phase_map
     assert "`AX-GE2E-P00-T01`" in task_catalogue
     assert "`AX-GE2E-P01-T01`" in task_catalogue
     assert "P00 accepted" in current
