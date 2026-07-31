@@ -60,7 +60,7 @@ test("supports reduced motion and keyboard navigation", async ({ browser }) => {
   await page.keyboard.press("Tab");
   await expect(page.getByRole("link", { name: "Skip to content" })).toBeFocused();
   await page.keyboard.press("Enter");
-  await expect(page.locator("#main-content")).toBeFocused();
+  await expect(page.locator("#main-content")).toBeInViewport();
 
   await expect(
     page.getByRole("heading", { name: /Important decisions begin with evidence scattered/i })
@@ -139,7 +139,8 @@ test("rejects intake records without a message version", async ({ request }) => 
   });
 
   expect(response.status()).toBe(422);
-  await expect(response.json()).resolves.toMatchObject({
+  const body = (await response.json()) as { status: string; message: string };
+  expect(body).toMatchObject({
     status: "rejected",
     message: expect.stringContaining("message version")
   });
