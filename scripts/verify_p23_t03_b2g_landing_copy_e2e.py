@@ -7,7 +7,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 RUNTIME_PATH = ROOT / "data/experience/b2g-landing-copy-e2e-runtime.v0.1.json"
-PREVIOUS_RUNTIME_PATH = ROOT / "data/experience/message-copy-validation-e2e-runtime.v0.1.json"
+PREVIOUS_RUNTIME_PATH = (
+    ROOT / "data/experience/message-copy-validation-e2e-runtime.v0.1.json"
+)
 LANDING_PATH = ROOT / "apps/landing/components/landing-experience.tsx"
 DATA_PATH = ROOT / "apps/landing/lib/landing-data.ts"
 FORM_PATH = ROOT / "apps/landing/components/pilot-access-form.tsx"
@@ -16,7 +18,9 @@ LAYOUT_PATH = ROOT / "apps/landing/app/layout.tsx"
 PRICING_PATH = ROOT / "apps/landing/lib/candidate-pricing.ts"
 PAGE_PATH = ROOT / "apps/landing/app/page.tsx"
 TEST_PATH = ROOT / "tests/landing/landing.spec.ts"
-PRICE_BOOK_PATH = ROOT / "data/commercial/commercial-runtime-pricing-stripe-runtime.v0.1.json"
+PRICE_BOOK_PATH = (
+    ROOT / "data/commercial/commercial-runtime-pricing-stripe-runtime.v0.1.json"
+)
 
 
 def normalize(value: str) -> str:
@@ -38,10 +42,13 @@ normalized_landing = normalize(landing)
 
 assert runtime["task_id"] == "AX-GE2E-P23-T03"
 assert runtime["baseline_sha"] == "4301d02880b65a59fb5aa9fed01abad963a23ffd"
-assert runtime["supersedes_task"] == previous_runtime["task_id"] == "AX-GE2E-P23-T02"
+assert runtime["supersedes_task"] == previous_runtime["task_id"]
+assert previous_runtime["task_id"] == "AX-GE2E-P23-T02"
 assert runtime["state"] == "B2G_VERTICAL_MESSAGE_IMPLEMENTED"
 assert runtime["message_version"] == "b2g-opportunity-v1.0"
-assert runtime["market_category"] == "BUSINESS_TO_GOVERNMENT_OPPORTUNITY_INTELLIGENCE"
+assert runtime["market_category"] == (
+    "BUSINESS_TO_GOVERNMENT_OPPORTUNITY_INTELLIGENCE"
+)
 assert runtime["market_wedge"] == "GLOBAL_PUBLIC_CONTRACTS_AND_TENDERS"
 assert runtime["ted_narrative_status"] == "REMOVED_FROM_PUBLIC_NARRATIVE"
 assert runtime["engineering_evidence_ready"] is True
@@ -55,7 +62,15 @@ assert runtime["stripe_live_authorised"] is False
 assert runtime["market_validated_claim_authorised"] is False
 
 message = runtime["message_decision"]
-for field in ("eyebrow", "headline", "supporting_headline", "subheadline", "primary_cta", "secondary_cta"):
+message_fields = (
+    "eyebrow",
+    "headline",
+    "supporting_headline",
+    "subheadline",
+    "primary_cta",
+    "secondary_cta",
+)
+for field in message_fields:
     assert normalize(message[field]) in normalized_landing, field
 
 assert "BUSINESS-TO-GOVERNMENT (B2G) OPPORTUNITY INTELLIGENCE" in landing
@@ -103,8 +118,8 @@ assert plans["TEAM_MONTHLY"]["amount_minor"] == 39900
 assert plans["PROFESSIONAL_MONTHLY"]["commercial_activation_authorised"] is False
 assert plans["TEAM_MONTHLY"]["commercial_activation_authorised"] is False
 
-# Prohibited phrases must not appear as affirmative marketing claims. The FAQ may
-# name those phrases only to deny them explicitly and establish a truth boundary.
+# Prohibited phrases must not appear as affirmative marketing claims. The FAQ
+# may name those phrases only to deny them explicitly and establish a boundary.
 affirmative_copy = "\n".join((landing, form, layout)).lower()
 for phrase in runtime["prohibited_claims"]:
     assert phrase.lower() not in affirmative_copy, phrase
