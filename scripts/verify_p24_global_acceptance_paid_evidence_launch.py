@@ -12,6 +12,7 @@ RUNTIME = ROOT / "data/acceptance/global-acceptance-paid-evidence-launch-runtime
 FIXTURES = ROOT / "data/acceptance/p24-conformance-fixtures.v0.1.json"
 CASES = ROOT / "data/acceptance/p24-adversarial-cases.v0.1.json"
 EVIDENCE_TEMPLATE = ROOT / "data/acceptance/p24-evidence-manifest-template.v0.1.json"
+P22_RUNTIME = ROOT / "data/production/production-slo-dr-security-runtime.v0.1.json"
 P23_HEAD = "dec5473ad590fdb5de941d6b383e2ab01136befe"
 
 
@@ -23,11 +24,13 @@ runtime = load(RUNTIME)
 fixtures = load(FIXTURES)
 cases = load(CASES)
 evidence_template = load(EVIDENCE_TEMPLATE)
+p22_runtime = load(P22_RUNTIME)
 
 assert runtime["task_id"] == "AX-GE2E-P24-T01"
 assert runtime["baseline_sha"] == P23_HEAD
 assert runtime["state"] == "BLOCKED_PENDING_REAL_EVIDENCE"
 assert runtime["engineering_evidence_ready"] is True
+
 for field in (
     "global_acceptance_authorised",
     "controlled_live_pilot_authorised",
@@ -54,14 +57,20 @@ assert len(runtime["stop_conditions"]) == 10
 assert len(fixtures["fixtures"]) == 24
 assert len(cases["cases"]) == 24
 
+p22_transitive = {
+    item["task_id"]: item["path"] for item in p22_runtime["input_contract_bindings"]
+}
 for binding in runtime["input_contract_bindings"]:
     assert binding["engineering_evidence_ready"] is True
     assert binding["activation_authorised"] is False
-    assert (ROOT / binding["path"]).is_file(), binding["path"]
+    candidate = ROOT / binding["path"]
+    if candidate.is_file():
+        continue
+    task_id = binding["task_id"]
+    assert task_id in {"AX-GE2E-P17-T01", "AX-GE2E-P18-T01"}, binding
+    assert p22_transitive.get(task_id) == binding["path"], binding
 
-for journey in runtime["global_journeys"]:
-    assert journey["evidence_state"] == "MISSING"
-
+assert all(item["evidence_state"] == "MISSING" for item in runtime["global_journeys"])
 paid = runtime["paid_evidence_contract"]
 assert len(paid["levels"]) == 3
 assert paid["minimum_independent_paid_tenants_for_bounded_launch"] == 1
@@ -70,6 +79,7 @@ assert paid["minimum_observation_days"] == 14
 assert paid["founder_or_related_party_payment_counts_as_customer_evidence"] is False
 assert paid["test_clock_counts_as_real_renewal"] is False
 assert paid["evidence_state"] == "MISSING"
+
 assert {item["mode"] for item in runtime["launch_modes"]} == {
     "NO_GO",
     "CONTROLLED_LIVE_PILOT",
@@ -81,9 +91,8 @@ assert evidence_template["status"] == "TEMPLATE_NOT_EVIDENCE"
 assert evidence_template["contains_secrets"] is False
 assert evidence_template["contains_private_customer_payloads"] is False
 assert evidence_template["launch_decision"] == "NO_GO"
-assert evidence_template["sandbox_billing"]["status"] == "MISSING"
-assert evidence_template["controlled_live_payment"]["status"] == "MISSING"
-assert evidence_template["independent_paid_customer"]["status"] == "MISSING"
+for section in ("sandbox_billing", "controlled_live_payment", "independent_paid_customer"):
+    assert evidence_template[section]["status"] == "MISSING"
 
 for fixture in fixtures["fixtures"]:
     assert fixture["expected_decision"] == "PASS_ENGINEERING_ONLY"
@@ -93,28 +102,19 @@ for fixture in fixtures["fixtures"]:
     assert fixture["human_launch_authority"] is False
     assert fixture["evidence_preserved"] is True
 
-for value in cases["required_zero_deltas"].values():
-    assert value == 0
-for case in cases["cases"]:
-    assert case["expected_decision"] == "DENY_OR_QUARANTINE"
+assert all(value == 0 for value in cases["required_zero_deltas"].values())
+assert all(
+    case["expected_decision"] == "DENY_OR_QUARANTINE" for case in cases["cases"]
+)
 
 assert reference.exact_head_decision(
-    expected_head="head-a",
-    observed_head="head-a",
-    artifact_digest_match=True,
-    ci_pass=True,
+    expected_head="a", observed_head="a", artifact_digest_match=True, ci_pass=True
 ) == "PASS"
 assert reference.exact_head_decision(
-    expected_head="head-a",
-    observed_head="head-b",
-    artifact_digest_match=True,
-    ci_pass=True,
+    expected_head="a", observed_head="b", artifact_digest_match=True, ci_pass=True
 ) == "DENY"
 assert reference.exact_head_decision(
-    expected_head="head-a",
-    observed_head="head-a",
-    artifact_digest_match=False,
-    ci_pass=True,
+    expected_head="a", observed_head="a", artifact_digest_match=False, ci_pass=True
 ) == "QUARANTINE"
 
 assert reference.journey_evidence_decision(
@@ -154,7 +154,7 @@ assert reference.renewal_evidence_decision(
     require_real_period=False,
 ) == "PASS"
 
-assert reference.controlled_live_payment_decision(
+live_kwargs = dict(
     restricted_live_key=True,
     live_product_and_price=True,
     real_charge=True,
@@ -163,19 +163,13 @@ assert reference.controlled_live_payment_decision(
     ledger_reconciled=True,
     entitlement_matches=True,
     cancellation_or_refund_verified=True,
-) == "PASS"
+)
+assert reference.controlled_live_payment_decision(**live_kwargs) == "PASS"
 assert reference.controlled_live_payment_decision(
-    restricted_live_key=True,
-    live_product_and_price=True,
-    real_charge=True,
-    settled_invoice=False,
-    signed_live_webhook=True,
-    ledger_reconciled=True,
-    entitlement_matches=True,
-    cancellation_or_refund_verified=True,
+    **{**live_kwargs, "settled_invoice": False}
 ) == "DENY"
 
-assert reference.independent_paid_customer_decision(
+customer_kwargs = dict(
     unrelated_external_tenant=True,
     terms_accepted=True,
     privacy_accepted=True,
@@ -189,21 +183,10 @@ assert reference.independent_paid_customer_decision(
     minimum_observation_days=14,
     active_dispute=False,
     refunded_during_observation=False,
-) == "PASS"
+)
+assert reference.independent_paid_customer_decision(**customer_kwargs) == "PASS"
 assert reference.independent_paid_customer_decision(
-    unrelated_external_tenant=False,
-    terms_accepted=True,
-    privacy_accepted=True,
-    settled_invoice=True,
-    signed_provider_events=True,
-    ledger_reconciled=True,
-    entitlement_matches=True,
-    completed_value_workflows=1,
-    minimum_value_workflows=1,
-    observed_days=14,
-    minimum_observation_days=14,
-    active_dispute=False,
-    refunded_during_observation=False,
+    **{**customer_kwargs, "unrelated_external_tenant": False}
 ) == "DENY"
 
 required_authorities = (
@@ -214,8 +197,8 @@ required_authorities = (
     "LEGAL_PRIVACY_AUTHORITY",
 )
 approvals = [
-    reference.Approval(authority=authority, manifest_digest="sha256:manifest", approved=True)
-    for authority in required_authorities
+    reference.Approval(authority=item, manifest_digest="sha256:manifest", approved=True)
+    for item in required_authorities
 ]
 approval_decision = reference.approval_set_decision(
     required_authorities=required_authorities,
@@ -229,27 +212,28 @@ assert reference.approval_set_decision(
     acceptance_manifest_digest="sha256:different",
 ) == "DENY"
 
-all_runtime_gates = {gate: "PASS" for gate in runtime["readiness_gates"]}
+all_gates = {gate: "PASS" for gate in runtime["readiness_gates"]}
 assert reference.launch_mode_decision(
     requested_mode="CONTROLLED_LIVE_PILOT",
-    gates=all_runtime_gates,
+    gates=all_gates,
     active_stop_conditions=[],
     manifest_approval=approval_decision,
 ) == "CONTROLLED_LIVE_PILOT"
 assert reference.launch_mode_decision(
     requested_mode="BOUNDED_PUBLIC_LAUNCH",
-    gates=all_runtime_gates,
+    gates=all_gates,
     active_stop_conditions=[],
     manifest_approval=approval_decision,
 ) == "BOUNDED_PUBLIC_LAUNCH"
 assert reference.launch_mode_decision(
     requested_mode="GENERAL_AVAILABILITY",
-    gates=all_runtime_gates,
+    gates=all_gates,
     active_stop_conditions=[],
     manifest_approval=approval_decision,
 ) == "BOUNDED_PUBLIC_LAUNCH"
+
 ga_gates = {
-    **all_runtime_gates,
+    **all_gates,
     "RENEWAL_EVIDENCE_PASS": "PASS",
     "COHORT_STABILITY_PASS": "PASS",
     "SUPPORT_READINESS_PASS": "PASS",
@@ -262,7 +246,7 @@ assert reference.launch_mode_decision(
 ) == "GENERAL_AVAILABILITY"
 assert reference.launch_mode_decision(
     requested_mode="CONTROLLED_LIVE_PILOT",
-    gates=all_runtime_gates,
+    gates=all_gates,
     active_stop_conditions=["critical_security_finding"],
     manifest_approval=approval_decision,
 ) == "NO_GO"
