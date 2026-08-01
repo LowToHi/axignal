@@ -20,6 +20,11 @@ PACKAGE_RE = re.compile(r"^([A-Za-z0-9_.-]+)(?:\[[^]]+\])?==([^\s;\\]+)")
 FROM_RE = re.compile(r"^\s*FROM\s+(?:--platform=\S+\s+)?(\S+)(?:\s+AS\s+(\S+))?", re.I)
 IMAGE_LINE_RE = re.compile(r"^\s*image:\s*[\"']?([^\"'\s#]+)")
 USES_RE = re.compile(r"^\s*-?\s*uses:\s*[\"']?([^\"'\s#]+)")
+DYNAMIC_RELEASE_IMAGE_RE = re.compile(
+    r"^\$\{([A-Z0-9_]+)_IMAGE_REPOSITORY:\?required\}:"
+    r"\$\{\1_IMAGE_TAG:\?required\}@sha256:"
+    r"\$\{\1_IMAGE_DIGEST:\?required\}$"
+)
 
 
 @dataclass(frozen=True)
@@ -126,14 +131,15 @@ def load_image_lock(findings: list[Finding]) -> dict[str, str]:
         findings.append(Finding(rel(IMAGE_LOCK), 1, f"cannot load image lock: {exc}"))
         return {}
 
-    if payload.get("schema") != "axignal.g6-supply-chain-lock.v1":
-        findings.append(Finding(rel(IMAGE_LOCK), 1, "unexpected image-lock schema"))
-    if payload.get("python") != "3.13.14":
-        findings.append(Finding(rel(IMAGE_LOCK), 1, "Python toolchain is not pinned to 3.13.14"))
-    if payload.get("pip") != "26.1.2":
-        findings.append(Finding(rel(IMAGE_LOCK), 1, "pip toolchain is not pinned to 26.1.2"))
-    if payload.get("pip_tools") != "7.6.0":
-        findings.append(Finding(rel(IMAGE_LOCK), 1, "pip-tools is not pinned to 7.6.0"))
+    expected_toolchain = {
+        "schema": "axignal.g6-supply-chain-lock.v1",
+        "python": "3.13.14",
+        "pip": "26.1.2",
+        "pip_tools": "7.6.0",
+    }
+    for key, expected in expected_toolchain.items():
+        if payload.get(key) != expected:
+            findings.append(Finding(rel(IMAGE_LOCK), 1, f"unexpected {key}: {payload.get(key)!r}"))
 
     result: dict[str, str] = {}
     for index, item in enumerate(payload.get("images", []), 1):
@@ -156,23 +162,26 @@ def verify_image_reference(
     reference: str,
     image_lock: dict[str, str],
     findings: list[Finding],
-) -> None:
+) -> bool:
     if reference == "scratch":
-        return
+        return False
+    if DYNAMIC_RELEASE_IMAGE_RE.fullmatch(reference):
+        return True
     if "@" not in reference:
         findings.append(Finding(rel(path), line, f"mutable image reference: {reference}"))
-        return
+        return False
     named, digest = reference.rsplit("@", 1)
     if ":" not in named.rsplit("/", 1)[-1]:
         findings.append(Finding(rel(path), line, f"image lacks a human-readable tag before digest: {reference}"))
     if not SHA256_RE.fullmatch(digest):
         findings.append(Finding(rel(path), line, f"invalid image digest: {reference}"))
-        return
+        return False
     expected = image_lock.get(named)
     if expected is None:
         findings.append(Finding(rel(path), line, f"image is not governed by image lock: {named}"))
     elif expected != digest:
         findings.append(Finding(rel(path), line, f"digest differs from image lock for {named}"))
+    return False
 
 
 def dockerfiles() -> Iterable[Path]:
@@ -211,20 +220,28 @@ def yaml_supply_chain_files() -> Iterable[Path]:
     return sorted(path for path in candidates if path.is_file())
 
 
-def inspect_yaml_images(image_lock: dict[str, str], findings: list[Finding]) -> int:
+def inspect_yaml_images(
+    image_lock: dict[str, str], findings: list[Finding]
+) -> tuple[int, int]:
     count = 0
+    dynamic_release_count = 0
     for path in yaml_supply_chain_files():
         for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
             match = IMAGE_LINE_RE.match(line)
-            if match:
+            if not match:
+                continue
+            dynamic_release_count += int(
                 verify_image_reference(path, number, match.group(1), image_lock, findings)
-                count += 1
-    return count
+            )
+            count += 1
+    return count, dynamic_release_count
 
 
 def inspect_workflow_actions(findings: list[Finding]) -> int:
     count = 0
-    for path in sorted((ROOT / ".github/workflows").glob("*.y*ml")):
+    workflow_paths = sorted((ROOT / ".github/workflows").glob("*.yml"))
+    workflow_paths += sorted((ROOT / ".github/workflows").glob("*.yaml"))
+    for path in workflow_paths:
         for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
             match = USES_RE.match(line)
             if not match:
@@ -256,14 +273,23 @@ def inspect_release_build_contract(findings: list[Finding]) -> None:
     ):
         if required not in runtime:
             findings.append(Finding("infra/runtime/Dockerfile", 1, f"missing runtime build invariant: {required}"))
-    prohibited = ("pip install --no-cache-dir .", "pip install .", "-e .")
-    for token in prohibited:
-        if token in runtime:
-            findings.append(Finding("infra/runtime/Dockerfile", 1, f"floating project installation remains: {token}"))
+    for prohibited in ("pip install --no-cache-dir .", "pip install .", "-e ."):
+        if prohibited in runtime:
+            findings.append(Finding("infra/runtime/Dockerfile", 1, f"floating project installation remains: {prohibited}"))
 
-    web = (ROOT / "infra/pilot/Dockerfile.web").read_text(encoding="utf-8")
-    if "pnpm install --frozen-lockfile" not in web:
-        findings.append(Finding("infra/pilot/Dockerfile.web", 1, "web build does not enforce pnpm frozen lockfile"))
+    for dockerfile in ("infra/pilot/Dockerfile.web", "infra/landing/Dockerfile"):
+        content = (ROOT / dockerfile).read_text(encoding="utf-8")
+        if "pnpm install --frozen-lockfile" not in content:
+            findings.append(Finding(dockerfile, 1, "web build does not enforce pnpm frozen lockfile"))
+
+    landing_compose = (ROOT / "infra/landing/compose.yaml").read_text(encoding="utf-8")
+    required_reference = (
+        "${AXIGNAL_LANDING_IMAGE_REPOSITORY:?required}:"
+        "${AXIGNAL_LANDING_IMAGE_TAG:?required}@sha256:"
+        "${AXIGNAL_LANDING_IMAGE_DIGEST:?required}"
+    )
+    if required_reference not in landing_compose:
+        findings.append(Finding("infra/landing/compose.yaml", 1, "landing release image is not forced into tag@sha256 form"))
 
 
 def main() -> int:
@@ -273,7 +299,7 @@ def main() -> int:
     inspect_pyproject(runtime_packages, dev_packages, findings)
     image_lock = load_image_lock(findings)
     docker_froms = inspect_dockerfiles(image_lock, findings)
-    yaml_images = inspect_yaml_images(image_lock, findings)
+    yaml_images, dynamic_release_images = inspect_yaml_images(image_lock, findings)
     workflow_actions = inspect_workflow_actions(findings)
     inspect_release_build_contract(findings)
 
@@ -285,6 +311,7 @@ def main() -> int:
         "governed_images": len(image_lock),
         "docker_from_references": docker_froms,
         "yaml_image_references": yaml_images,
+        "dynamic_release_image_references": dynamic_release_images,
         "workflow_action_references": workflow_actions,
         "findings": [finding.as_dict() for finding in findings],
     }
