@@ -11,6 +11,7 @@ from axignal_api.admission_types import (
     AdmissionPolicyError,
     AdmissionRuntimeError,
 )
+from axignal_api.runtime_invariants import require_runtime_value
 from axignal_api.settings import Settings
 
 LOGGER = logging.getLogger("axignal.deterministic-admission-runtime")
@@ -61,11 +62,17 @@ class DeterministicAdmissionRuntime:
 
 def build_runtime(settings: Settings) -> DeterministicAdmissionRuntime:
     settings.require_admission_runtime()
-    assert settings.admission_database_url is not None
-    assert settings.valkey_url is not None
-    repository = AdmissionRepository(admission_dsn=settings.admission_database_url)
-    queue = ValkeyAdmissionQueue(
+    admission_database_url = require_runtime_value(
+        settings.admission_database_url,
+        name="AXIGNAL_ADMISSION_DATABASE_URL",
+    )
+    valkey_url = require_runtime_value(
         settings.valkey_url,
+        name="AXIGNAL_VALKEY_URL",
+    )
+    repository = AdmissionRepository(admission_dsn=admission_database_url)
+    queue = ValkeyAdmissionQueue(
+        valkey_url,
         queue_key=settings.admission_queue_key,
     )
     return DeterministicAdmissionRuntime(repository=repository, queue=queue)
