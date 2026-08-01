@@ -1,0 +1,106 @@
+{
+  "claim_contribution": false,
+  "decision": "IN_PROGRESS",
+  "expires_at": "2026-08-31T23:59:59Z",
+  "gate_id": "PUBLIC-LAUNCH-GATE-7",
+  "generated_at": "2026-08-01T17:33:11Z",
+  "inventory": {
+    "active": [],
+    "candidate": [
+      "src_ted_search_api_v3"
+    ],
+    "exhaustive": false,
+    "rejected": [],
+    "revoked": [],
+    "scope": "CURRENT_REPOSITORY_AND_RETAINED_PILOT_EVIDENCE_ONLY",
+    "status": "MISSING",
+    "suspended": []
+  },
+  "library_id": "AX-LIB-O01",
+  "limitations": [
+    "This bundle is a fail-closed inventory and rights work product, not a source admission.",
+    "The inventory is explicitly non-exhaustive and cannot support global procurement coverage.",
+    "A prior repository source-profile reference could not be resolved and is not reused as authority.",
+    "Previously asserted scoped rights are downgraded to MISSING until current legal evidence is retained and signed.",
+    "The retained pilot proves one bounded technical execution only.",
+    "No public coverage, multilingual, redistribution or product-admission claim is authorised."
+  ],
+  "parent_evidence_head_sha": "2b47b4b15569b21c44cca8858ee54c841fbc1647",
+  "rc6r_baseline_sha": "55ed7fb6d73bee8ca22ccdcaeaf4c5a550819a22",
+  "schema_version": "axignal.source-inventory-rights-bundle/v0.1",
+  "sources": [
+    {
+      "admission": {
+        "human_authority": "MISSING",
+        "legal": "MISSING",
+        "quality": "MISSING",
+        "rights": "MISSING",
+        "technical": "PASS"
+      },
+      "contributes_to_public_claim": false,
+      "evidence": [
+        {
+          "expires_at": "2026-08-31T23:59:59Z",
+          "kind": "CI_ARTIFACT",
+          "reference": "github-actions:artifact:8821132341/pilot-ted-runtime.json",
+          "sha256": "73745e1ca9364930b1ebf0845d1263adcf8eb1d2d8dc0a56f0bc7a9f46a20ac9"
+        },
+        {
+          "expires_at": "2026-08-31T23:59:59Z",
+          "kind": "CI_ARTIFACT",
+          "reference": "github-actions:artifact:8821132341/pilot-web-health.json",
+          "sha256": "143360a1947cbe51eff6555cf8c4c94bb69a3e7072ff67e4a53995f70507ab20"
+        },
+        {
+          "expires_at": "2026-08-31T23:59:59Z",
+          "kind": "CI_ARTIFACT",
+          "reference": "github-actions:artifact:8821132341/pilot-runtime-exact-head.txt",
+          "sha256": "7926ecd8edb59161d844f5d10bb95d9a332e0277e8d11f6784e0f1a293d4d86b"
+        }
+      ],
+      "field_policy": {
+        "attribution": "MISSING",
+        "derived_data": "MISSING",
+        "internal_retention": "MISSING",
+        "model_training": "MISSING",
+        "normalised_fact_storage": "MISSING",
+        "public_api_redistribution": "DENIED",
+        "raw_payload_storage": "MISSING",
+        "source_native_text_republication": "MISSING"
+      },
+      "name": "TED Search API v3.0",
+      "source_id": "src_ted_search_api_v3",
+      "state": "CANDIDATE",
+      "technical_observation": {
+        "api_redistribution": false,
+        "candidate_claim_count": 12,
+        "canonical_claim_count": 12,
+        "live_api_requests": 1,
+        "model_calls": 0,
+        "notice_count": 3,
+        "public_general_availability": false,
+        "status": "PASS",
+        "task": "AX-F8-T14"
+      },
+      "terms_review": {
+        "expiry": null,
+        "publisher": null,
+        "reviewed_at": null,
+        "reviewer": null,
+        "signature": null,
+        "status": "MISSING",
+        "terms_reference": null,
+        "terms_version": null
+      }
+    }
+  ],
+  "unresolved_requirements": [
+    "Complete O01 source inventory and prove exhaustiveness.",
+    "Review and retain the exact current TED terms or legal instrument.",
+    "Decide field-level storage, presentation, attribution, retention, derived-data and model-use rights.",
+    "Measure source quality, historical depth, update frequency and end-to-end lag.",
+    "Obtain typed Legal, Privacy/Data Rights, Source Quality and Human Coverage Authority decisions.",
+    "Execute six representative real multilingual journeys.",
+    "Rehearse source/library kill switch and rollback."
+  ]
+}
