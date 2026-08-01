@@ -22,16 +22,21 @@ on:
       - "data/energy-climate/**"
       - "data/innovation-ip/**"
       - "apps/api/src/axignal_api/o01_contact_policy.py"
+      - "apps/api/src/axignal_api/o01_approval_renewal.py"
       - "apps/api/tests/test_o01_contact_policy.py"
+      - "apps/api/tests/test_o01_approval_renewal.py"
       - "schemas/global-coverage-source-language-*.schema.json"
       - "scripts/verify_gate7_global_coverage.py"
       - "scripts/verify_gate7_source_snapshots.py"
       - "scripts/verify_gate7_source_rights.py"
       - "scripts/verify_gate7_o01_campaign_contract.py"
       - "scripts/verify_gate7_o01_legal_privacy_reconciliation.py"
+      - "scripts/verify_gate7_o01_renewal.py"
+      - "scripts/prepare_gate7_o01_renewal.py"
       - "scripts/materialize_gate7_o01_approval_manifest.py"
       - "docs/acceptance/Gate-7-global-coverage-sources-multilingual-v0.1.md"
       - ".github/workflows/gate7-global-coverage-source-language.yml"
+      - ".github/workflows/o01-approval-renewal.yml"
   push:
     branches:
       - main
@@ -49,16 +54,21 @@ on:
       - "data/energy-climate/**"
       - "data/innovation-ip/**"
       - "apps/api/src/axignal_api/o01_contact_policy.py"
+      - "apps/api/src/axignal_api/o01_approval_renewal.py"
       - "apps/api/tests/test_o01_contact_policy.py"
+      - "apps/api/tests/test_o01_approval_renewal.py"
       - "schemas/global-coverage-source-language-*.schema.json"
       - "scripts/verify_gate7_global_coverage.py"
       - "scripts/verify_gate7_source_snapshots.py"
       - "scripts/verify_gate7_source_rights.py"
       - "scripts/verify_gate7_o01_campaign_contract.py"
       - "scripts/verify_gate7_o01_legal_privacy_reconciliation.py"
+      - "scripts/verify_gate7_o01_renewal.py"
+      - "scripts/prepare_gate7_o01_renewal.py"
       - "scripts/materialize_gate7_o01_approval_manifest.py"
       - "docs/acceptance/Gate-7-global-coverage-sources-multilingual-v0.1.md"
       - ".github/workflows/gate7-global-coverage-source-language.yml"
+      - ".github/workflows/o01-approval-renewal.yml"
 
 permissions:
   contents: read
@@ -115,22 +125,36 @@ jobs:
         run: |
           python -m compileall -q \
             apps/api/src/axignal_api/o01_contact_policy.py \
+            apps/api/src/axignal_api/o01_approval_renewal.py \
             apps/api/tests/test_o01_contact_policy.py \
+            apps/api/tests/test_o01_approval_renewal.py \
             scripts/verify_gate7_global_coverage.py \
             scripts/verify_gate7_source_snapshots.py \
             scripts/verify_gate7_source_rights.py \
             scripts/verify_gate7_o01_campaign_contract.py \
             scripts/verify_gate7_o01_legal_privacy_reconciliation.py \
+            scripts/verify_gate7_o01_renewal.py \
+            scripts/prepare_gate7_o01_renewal.py \
             scripts/materialize_gate7_o01_approval_manifest.py
           ruff check \
             apps/api/src/axignal_api/o01_contact_policy.py \
+            apps/api/src/axignal_api/o01_approval_renewal.py \
             apps/api/tests/test_o01_contact_policy.py \
+            apps/api/tests/test_o01_approval_renewal.py \
             scripts/verify_gate7_global_coverage.py \
             scripts/verify_gate7_source_snapshots.py \
             scripts/verify_gate7_source_rights.py \
             scripts/verify_gate7_o01_campaign_contract.py \
             scripts/verify_gate7_o01_legal_privacy_reconciliation.py \
+            scripts/verify_gate7_o01_renewal.py \
+            scripts/prepare_gate7_o01_renewal.py \
             scripts/materialize_gate7_o01_approval_manifest.py
+
+      - name: Execute contextual policy and renewal tests
+        run: |
+          pytest -q \
+            apps/api/tests/test_o01_contact_policy.py \
+            apps/api/tests/test_o01_approval_renewal.py
 
       - name: Verify repository source snapshots
         shell: bash
@@ -153,6 +177,13 @@ jobs:
           python scripts/verify_gate7_o01_legal_privacy_reconciliation.py \
             | tee artifacts/gate7/o01-legal-privacy-reconciliation.json
 
+      - name: Verify O01 approval-renewal contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/verify_gate7_o01_renewal.py \
+            | tee artifacts/gate7/o01-approval-renewal-contract.json
+
       - name: Materialise O01 exact-head approval manifest
         shell: bash
         run: |
@@ -164,6 +195,23 @@ jobs:
             artifacts/gate7/approval-manifest.v0.2.json
           cp artifacts/o01-legal-privacy/approval-manifest.v0.2.sha256 \
             artifacts/gate7/approval-manifest.v0.2.sha256
+
+      - name: Materialise deterministic O01 renewal package
+        shell: bash
+        run: |
+          set -euo pipefail
+          AXIGNAL_RENEWAL_PREPARATION=1 \
+          AXIGNAL_EXACT_SHA="$AXIGNAL_EXACT_SHA" \
+            python scripts/prepare_gate7_o01_renewal.py \
+              --now '2026-08-01T12:00:00Z' \
+              --output-dir "$GITHUB_WORKSPACE/artifacts/gate7/o01-renewal" \
+            | tee artifacts/gate7/o01-approval-renewal-result.json
+          cmp \
+            artifacts/gate7/approval-manifest.v0.2.json \
+            artifacts/o01-legal-privacy/approval-manifest.v0.2.json
+          cmp \
+            artifacts/gate7/approval-manifest.v0.2.sha256 \
+            artifacts/o01-legal-privacy/approval-manifest.v0.2.sha256
 
       - name: Verify O01 evidence campaign remains blocked
         shell: bash
@@ -188,7 +236,7 @@ jobs:
             python scripts/verify_gate7_global_coverage.py \
             | tee artifacts/gate7/gate7-console.json
 
-      - name: Enforce launch, contextual-policy and claim boundary
+      - name: Enforce launch, renewal and claim boundary
         run: |
           python - <<'PY'
           import json
@@ -204,6 +252,15 @@ jobs:
           )
           reconciliation = json.loads(
               Path("artifacts/gate7/o01-legal-privacy-reconciliation.json").read_text()
+          )
+          renewal_contract = json.loads(
+              Path("artifacts/gate7/o01-approval-renewal-contract.json").read_text()
+          )
+          renewal_result = json.loads(
+              Path("artifacts/gate7/o01-approval-renewal-result.json").read_text()
+          )
+          renewal_package = json.loads(
+              Path("artifacts/gate7/o01-renewal/renewal-package.v0.1.json").read_text()
           )
           manifest_result = json.loads(
               Path("artifacts/gate7/o01-approval-manifest-result.json").read_text()
@@ -247,10 +304,50 @@ jobs:
           assert reconciliation["product_admitted"] is False
           assert reconciliation["public_claim_contribution"] is False
 
+          assert renewal_contract["status"] == "PASS"
+          assert renewal_contract["output"] == "O01_APPROVAL_RENEWAL_CONTRACT_PASS"
+          assert renewal_contract["mode"] == "SEMI_AUTOMATIC"
+          assert renewal_contract["automatic_signature"] is False
+          assert renewal_contract["automatic_expiry_extension"] is False
+          assert renewal_contract["grace_period_seconds"] == 0
+          assert renewal_contract["campaign_status"] == "BLOCKED"
+          assert renewal_contract["execution_authorised"] is False
+          assert renewal_contract["external_request_budget"] == 0
+
+          assert renewal_result["status"] == "PASS"
+          assert renewal_result["output"] == "O01_APPROVAL_RENEWAL_PACKAGE_READY"
+          assert renewal_result["head_sha"] == os.environ["AXIGNAL_EXACT_SHA"]
+          assert renewal_result["change_class"] == "BASELINE_REQUIRED"
+          assert renewal_result["authority_status"] == "MISSING"
+          assert renewal_result["execution_authorised"] is False
+          assert renewal_result["external_request_budget"] == 0
+          assert renewal_result["human_decisions_required"] == [
+              "LEGAL",
+              "PRIVACY_DATA_RIGHTS",
+          ]
+
+          assert renewal_package["head_sha"] == os.environ["AXIGNAL_EXACT_SHA"]
+          assert renewal_package["status"] == "READY_FOR_TYPED_DECISIONS"
+          assert renewal_package["delta"]["change_class"] == "BASELINE_REQUIRED"
+          assert renewal_package["renewal"]["new_typed_decisions_required"] is True
+          assert renewal_package["renewal"]["automatic_approval"] is False
+          assert renewal_package["renewal"]["automatic_signature"] is False
+          assert renewal_package["renewal"]["automatic_expiry_extension"] is False
+          assert renewal_package["renewal"]["grace_period_seconds"] == 0
+          assert renewal_package["campaign_effect"]["campaign_status"] == "BLOCKED"
+          assert renewal_package["campaign_effect"]["execution_authorised"] is False
+          assert renewal_package["campaign_effect"]["external_request_budget"] == 0
+          assert renewal_package["campaign_effect"]["source_state"] == "CANDIDATE"
+          assert renewal_package["campaign_effect"]["product_admitted"] is False
+          assert renewal_package["campaign_effect"]["public_claim_contribution"] is False
+          assert renewal_package["campaign_effect"]["public_launch_authorised"] is False
+
           assert manifest_result["status"] == "PASS"
           assert manifest_result["head_sha"] == os.environ["AXIGNAL_EXACT_SHA"]
+          assert manifest_result["historical_only"] is False
           assert manifest["head_sha"] == os.environ["AXIGNAL_EXACT_SHA"]
           assert manifest["status"] == "READY_FOR_TYPED_DECISIONS"
+          assert manifest["historical_only"] is False
           assert manifest["legal_decision"] == "MISSING"
           assert manifest["privacy_data_rights_decision"] == "MISSING"
           assert manifest["campaign_status"] == "BLOCKED"
