@@ -93,6 +93,11 @@ jobs:
               json.dumps(payload, indent=2, sort_keys=True) + "\n"
           )
           PY
+      - name: Verify immutable supply-chain contract
+        shell: bash
+        run: |
+          set -o pipefail
+          python scripts/verify_g6_supply_chain.py | tee g6-supply-chain-verification.json
       - name: Prove generated locks install with hashes
         shell: bash
         run: |
@@ -132,6 +137,7 @@ jobs:
             git push origin "HEAD:${GITHUB_REF_NAME}"
           fi
       - name: Upload inventory for reviewed pinning
+        if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: g6-supply-chain-inventory
@@ -141,4 +147,6 @@ jobs:
             data/supply-chain/image-lock.v1.json
             runtime-freeze.txt
             dev-freeze.txt
+            g6-supply-chain-verification.json
+          if-no-files-found: ignore
           retention-days: 14
