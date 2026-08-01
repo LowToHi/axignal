@@ -15,7 +15,8 @@ DATA_PATH = ROOT / "apps/landing/lib/landing-data.ts"
 FORM_PATH = ROOT / "apps/landing/components/pilot-access-form.tsx"
 INTAKE_PATH = ROOT / "apps/landing/app/api/pilot-intake/route.ts"
 LAYOUT_PATH = ROOT / "apps/landing/app/layout.tsx"
-PRICING_PATH = ROOT / "apps/landing/lib/candidate-pricing.ts"
+PRICING_ADAPTER_PATH = ROOT / "apps/landing/lib/candidate-pricing.ts"
+PRICING_CONTRACT_PATH = ROOT / "apps/landing/lib/candidate-pricing-contract.ts"
 PAGE_PATH = ROOT / "apps/landing/app/page.tsx"
 TEST_PATH = ROOT / "tests/landing/landing.spec.ts"
 PRICE_BOOK_PATH = (
@@ -35,7 +36,8 @@ data = DATA_PATH.read_text(encoding="utf-8")
 form = FORM_PATH.read_text(encoding="utf-8")
 intake = INTAKE_PATH.read_text(encoding="utf-8")
 layout = LAYOUT_PATH.read_text(encoding="utf-8")
-pricing = PRICING_PATH.read_text(encoding="utf-8")
+pricing_adapter = PRICING_ADAPTER_PATH.read_text(encoding="utf-8")
+pricing_contract_source = PRICING_CONTRACT_PATH.read_text(encoding="utf-8")
 page = PAGE_PATH.read_text(encoding="utf-8")
 tests = TEST_PATH.read_text(encoding="utf-8")
 normalized_landing = normalize(landing)
@@ -97,10 +99,11 @@ assert "Bid or proposal management" in intake
 assert "index: false" in layout
 assert "follow: false" in layout
 assert "Business-to-Government (B2G) Opportunity Intelligence" in layout
-assert "commercial-runtime-pricing-stripe-runtime.v0.1.json" in pricing
-assert 'pricing?.status !== "CANDIDATE_ONLY"' in pricing
-assert 'plan.plan_code === "CONTROLLED_TRIAL_7D"' in pricing
-assert 'plan.self_service_activation !== false' in pricing
+assert "commercial-runtime-pricing-stripe-runtime.v0.1.json" in pricing_adapter
+assert "candidatePlansFromRuntime" in pricing_adapter
+assert 'pricing?.status !== "CANDIDATE_ONLY"' in pricing_contract_source
+assert 'plan.plan_code === "CONTROLLED_TRIAL_7D"' in pricing_contract_source
+assert 'plan.self_service_activation !== false' in pricing_contract_source
 assert "getCandidatePlans" in page
 
 pricing_contract = price_book["pricing_contract"]
