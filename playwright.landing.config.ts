@@ -1,5 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const baseURL = "http://127.0.0.1:3001";
+
 export default defineConfig({
   testDir: "./tests/landing",
   fullyParallel: false,
@@ -7,7 +9,7 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [["html", { open: "never" }], ["list"]] : "list",
   use: {
-    baseURL: "http://127.0.0.1:3001",
+    baseURL,
     trace: "retain-on-failure",
     screenshot: "only-on-failure"
   },
@@ -19,8 +21,11 @@ export default defineConfig({
     command: process.env.CI
       ? "pnpm --filter @axignal/landing start"
       : "pnpm --filter @axignal/landing dev",
-    url: "http://127.0.0.1:3001",
+    url: baseURL,
     reuseExistingServer: !process.env.CI,
-    timeout: 120_000
+    timeout: 120_000,
+    env: {
+      AXIGNAL_LANDING_PUBLIC_ORIGIN: new URL(baseURL).origin
+    }
   }
 });
