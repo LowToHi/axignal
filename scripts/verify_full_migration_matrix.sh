@@ -146,7 +146,6 @@ schema_fingerprint() {
     -d "$database" \
     --schema-only \
     --no-owner \
-    --no-privileges \
     --exclude-schema=axignal_migration_audit \
     | grep -Ev '^(--|SET |SELECT pg_catalog[.]set_config|\\restrict |\\unrestrict |$)' \
     | sha256sum \
@@ -229,8 +228,7 @@ for checkpoint in "${supported_checkpoints[@]}"; do
     -U axignal \
     -d "$candidate_database" \
     --format=custom \
-    --no-owner \
-    --no-privileges > "$snapshot_file"
+    --no-owner > "$snapshot_file"
 
   apply_range "$candidate_database" "$(( checkpoint_index + 1 ))" "$(( ${#migration_sources[@]} - 1 ))"
   verify_sentinel "$candidate_database" "$checkpoint"
@@ -248,8 +246,7 @@ for checkpoint in "${supported_checkpoints[@]}"; do
     -U axignal \
     -d "$restore_database" \
     --exit-on-error \
-    --no-owner \
-    --no-privileges < "$snapshot_file"
+    --no-owner < "$snapshot_file"
 
   verify_sentinel "$restore_database" "$checkpoint"
   restored_fingerprint="$(schema_fingerprint "$restore_database")"
@@ -264,7 +261,7 @@ for checkpoint in "${supported_checkpoints[@]}"; do
     printf ',\n'
   fi
   first_result=false
-  printf '    {"checkpoint": "%s", "upgrade_to_head": true, "schema_equivalent": true, "sentinel_preserved": true, "snapshot_restore": true}' "$checkpoint"
+  printf '    {"checkpoint": "%s", "upgrade_to_head": true, "schema_equivalent": true, "authority_grants_equivalent": true, "sentinel_preserved": true, "snapshot_restore": true}' "$checkpoint"
 
   drop_database "$candidate_database"
   drop_database "$restore_database"
