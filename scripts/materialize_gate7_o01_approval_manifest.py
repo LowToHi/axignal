@@ -18,7 +18,7 @@ APPROVAL_REQUEST_PATH = ROOT / (
     "data/acceptance/approvals/"
     "AX-LIB-O01-legal-privacy-approval-request.v0.2.json"
 )
-EVIDENCE_RETENTION_SAFE_EXPIRY = "2026-08-31T18:00:00Z"
+INITIAL_EVIDENCE_RETENTION_SAFE_EXPIRY = "2026-08-31T18:00:00Z"
 
 INPUT_PATHS = (
     ROOT / "data/acceptance/legal/AX-LIB-O01-TED-official-terms-snapshot.v0.1.json",
@@ -34,6 +34,7 @@ INPUT_PATHS = (
     ROOT / "apps/api/src/axignal_api/o01_approval_renewal.py",
     ROOT / "apps/api/tests/test_o01_contact_policy.py",
     ROOT / "apps/api/tests/test_o01_approval_renewal.py",
+    ROOT / "apps/api/tests/test_o01_typed_authority_extraction.py",
     ROOT / "scripts/verify_gate7_o01_legal_privacy_reconciliation.py",
     ROOT / "scripts/verify_gate7_o01_renewal.py",
     ROOT / "scripts/extract_gate7_o01_typed_authority.py",
@@ -83,25 +84,20 @@ def canonical_bytes(payload: dict[str, Any]) -> bytes:
     ).encode("utf-8")
 
 
-def approval_maximum_expiry() -> tuple[str, bool]:
+def initial_approval_maximum_expiry() -> str:
     payload = json.loads(APPROVAL_REQUEST_PATH.read_text(encoding="utf-8"))
     value = payload["approval_contract"]["maximum_expiry"]
     expiry = datetime.fromisoformat(value.replace("Z", "+00:00"))
     safe_expiry = datetime.fromisoformat(
-        EVIDENCE_RETENTION_SAFE_EXPIRY.replace("Z", "+00:00")
+        INITIAL_EVIDENCE_RETENTION_SAFE_EXPIRY.replace("Z", "+00:00")
     )
     if expiry.tzinfo is None:
-        raise ManifestError("Approval maximum expiry must include a timezone")
+        raise ManifestError("Initial approval maximum expiry must include a timezone")
     if expiry.astimezone(UTC) > safe_expiry.astimezone(UTC):
         raise ManifestError(
-            "Approval maximum expiry exceeds the retained-evidence safe boundary"
+            "Initial approval maximum expiry exceeds its evidence-safe boundary"
         )
-
-    expired = expiry.astimezone(UTC) <= datetime.now(UTC)
-    renewal_preparation = os.environ.get("AXIGNAL_RENEWAL_PREPARATION") == "1"
-    if expired and not renewal_preparation:
-        raise ManifestError("Approval maximum expiry is not current")
-    return value, expired
+    return value
 
 
 def materialize() -> dict[str, Any]:
@@ -109,7 +105,7 @@ def materialize() -> dict[str, Any]:
     if reconciliation["status"] != "PASS":
         raise ManifestError("Reconciliation verifier did not pass")
 
-    maximum_expiry, historical_only = approval_maximum_expiry()
+    initial_maximum_expiry = initial_approval_maximum_expiry()
     head, tree, committed_at = exact_git_identity()
     files = {
         str(path.relative_to(ROOT)): f"sha256:{sha256_file(path)}"
@@ -125,14 +121,20 @@ def materialize() -> dict[str, Any]:
         "head_sha": head,
         "git_tree": tree,
         "head_committed_at": committed_at,
-        "maximum_expiry": maximum_expiry,
-        "evidence_retention_safe_expiry": EVIDENCE_RETENTION_SAFE_EXPIRY,
-        "status": (
-            "HISTORICAL_INPUT_FOR_RENEWAL"
-            if historical_only
-            else "READY_FOR_TYPED_DECISIONS"
-        ),
-        "historical_only": historical_only,
+        "status": "READY_FOR_TYPED_DECISIONS",
+        "initial_approval_window": {
+            "maximum_expiry": initial_maximum_expiry,
+            "evidence_retention_safe_expiry": INITIAL_EVIDENCE_RETENTION_SAFE_EXPIRY,
+        },
+        "renewal_contract": {
+            "task_id": "AX-GE2E-G7-O01-T04",
+            "mode": "SEMI_AUTOMATIC",
+            "decision_manifest_digest": "THIS_MANIFEST_DIGEST",
+            "maximum_expiry_source": "CURRENT_RENEWAL_EVIDENCE_PACKAGE",
+            "approval_survives_terms_change": False,
+            "automatic_signature": False,
+            "automatic_expiry_extension": False,
+        },
         "required_authorities": ["LEGAL", "PRIVACY_DATA_RIGHTS"],
         "required_decision": "APPROVE",
         "required_fields": [
@@ -171,6 +173,9 @@ def materialize() -> dict[str, Any]:
     digest = hashlib.sha256(content).hexdigest()
     DIGEST_PATH.write_text(f"sha256:{digest}  {MANIFEST_PATH.name}\n", encoding="utf-8")
 
+    initial_expiry = datetime.fromisoformat(
+        initial_maximum_expiry.replace("Z", "+00:00")
+    ).astimezone(UTC)
     return {
         "status": "PASS",
         "task_id": manifest["task_id"],
@@ -179,9 +184,9 @@ def materialize() -> dict[str, Any]:
         "manifest_path": str(MANIFEST_PATH.relative_to(ROOT)),
         "manifest_digest": f"sha256:{digest}",
         "manifest_status": manifest["status"],
-        "historical_only": historical_only,
-        "maximum_expiry": maximum_expiry,
-        "evidence_retention_safe_expiry": EVIDENCE_RETENTION_SAFE_EXPIRY,
+        "initial_maximum_expiry": initial_maximum_expiry,
+        "initial_approval_window_expired": initial_expiry <= datetime.now(UTC),
+        "renewal_maximum_expiry_source": "CURRENT_RENEWAL_EVIDENCE_PACKAGE",
         "required_authorities": manifest["required_authorities"],
         "legal_decision": "MISSING",
         "privacy_data_rights_decision": "MISSING",
