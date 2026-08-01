@@ -20,7 +20,10 @@ test("rejects missing and cross-origin landing mutations", async (
   { request },
   testInfo
 ) => {
-  const missing = await request.post("/api/pilot-intake", { data: invalidIntake });
+  const missing = await request.post("/api/pilot-intake", {
+    headers: { origin: "", "sec-fetch-site": "" },
+    data: invalidIntake
+  });
   expect(missing.status()).toBe(403);
   await expect(missing.json()).resolves.toMatchObject({ code: "origin_required" });
 
