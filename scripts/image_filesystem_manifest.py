@@ -16,7 +16,10 @@ def normalise_prefix(value: str) -> str:
 
 def selected(name: str, prefixes: tuple[str, ...]) -> bool:
     canonical = "/" + name.lstrip("./")
-    return any(canonical == prefix or canonical.startswith(prefix.rstrip("/") + "/") for prefix in prefixes)
+    return any(
+        canonical == prefix or canonical.startswith(prefix.rstrip("/") + "/")
+        for prefix in prefixes
+    )
 
 
 def digest_stream(stream: BinaryIO) -> str:
@@ -56,11 +59,15 @@ def build_manifest(archive: BinaryIO, prefixes: tuple[str, ...]) -> dict[str, ob
                 entry["type"] = "directory"
             else:
                 entry["type"] = "other"
-                entry["tar_type"] = member.type.decode("latin1") if isinstance(member.type, bytes) else str(member.type)
+                entry["tar_type"] = (
+                    member.type.decode("latin1")
+                    if isinstance(member.type, bytes)
+                    else str(member.type)
+                )
             entries.append(entry)
 
     entries.sort(key=lambda item: (str(item["path"]), str(item["type"])))
-    encoded = json.dumps(entries, separators=(",", ":"), sort_keys=True).encode("utf-8")
+    encoded = json.dumps(entries, separators=(",", ":"), sort_keys=True).encode()
     return {
         "schema": "axignal.image-filesystem-manifest.v1",
         "prefixes": list(prefixes),
