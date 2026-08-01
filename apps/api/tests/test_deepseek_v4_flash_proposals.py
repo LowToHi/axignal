@@ -7,6 +7,8 @@ import httpx
 import pytest
 
 from axignal_api.deepseek_proposals import (
+    DEEPSEEK_API_MODEL,
+    DEEPSEEK_CHECKPOINT,
     DEEPSEEK_METHOD_VERSION,
     DEEPSEEK_MODEL,
     DEEPSEEK_PREVIOUS_MODEL,
@@ -40,8 +42,10 @@ def load_proposal_payload() -> dict[str, object]:
     return proposal.model_dump(mode="json")
 
 
-def test_deepseek_checkpoint_identity_is_exact_and_previous_alias_is_rejected() -> None:
-    assert DEEPSEEK_MODEL == "deepseek-v4-flash-0731"
+def test_deepseek_api_alias_and_checkpoint_identity_are_separate() -> None:
+    assert DEEPSEEK_API_MODEL == "deepseek-v4-flash"
+    assert DEEPSEEK_MODEL == DEEPSEEK_API_MODEL
+    assert DEEPSEEK_CHECKPOINT == "deepseek-v4-flash-0731"
     assert DEEPSEEK_PREVIOUS_MODEL == "deepseek-v4-flash"
 
 
@@ -60,7 +64,7 @@ def test_deepseek_adapter_uses_direct_bounded_json_contract() -> None:
         assert request.url.path == "/chat/completions"
         assert request.headers["authorization"] == "Bearer test-secret"
         body = json.loads(request.content)
-        assert body["model"] == DEEPSEEK_MODEL
+        assert body["model"] == DEEPSEEK_API_MODEL
         assert body["temperature"] == 0
         assert body["max_tokens"] == 600
         assert body["thinking"] == {"type": "disabled"}
@@ -70,9 +74,10 @@ def test_deepseek_adapter_uses_direct_bounded_json_contract() -> None:
         return httpx.Response(
             200,
             json={
+                "model": DEEPSEEK_API_MODEL,
                 "choices": [
                     {"message": {"content": json.dumps(returned)}}
-                ]
+                ],
             },
         )
 
@@ -87,31 +92,36 @@ def test_deepseek_adapter_uses_direct_bounded_json_contract() -> None:
         research_question="Extract supporting and adverse evidence",
     )
 
-    assert result.actual_usage["local_model"] == DEEPSEEK_MODEL
+    assert result.actual_usage["local_model"] == DEEPSEEK_CHECKPOINT
     assert result.gates.MODEL_AUTHORITY_BLOCKED is True
     assert result.canonical_claims == []
     assert all(item.producer_id == DEEPSEEK_PRODUCER_ID for item in result.candidate_claims)
-    assert all(item.model_version == DEEPSEEK_MODEL for item in result.candidate_claims)
+    assert all(item.model_version == DEEPSEEK_CHECKPOINT for item in result.candidate_claims)
     assert all(item.method_version == DEEPSEEK_METHOD_VERSION for item in result.candidate_claims)
     assert all(item.prompt_version == DEEPSEEK_PROMPT_VERSION for item in result.candidate_claims)
     assert all(item.state == "ADMISSION_QUEUED" for item in result.candidate_claims)
 
 
-def test_deepseek_adapter_rejects_non_official_host_and_wrong_model() -> None:
+def test_deepseek_adapter_rejects_non_official_host_wrong_alias_and_checkpoint() -> None:
     with pytest.raises(ValueError, match="official HTTPS API host"):
         DeepSeekV4FlashProposalAdapter(
             api_key="test-secret",
             base_url="https://proxy.example.test",
         )
-    with pytest.raises(ValueError, match=DEEPSEEK_MODEL):
+    with pytest.raises(ValueError, match=DEEPSEEK_API_MODEL):
         DeepSeekV4FlashProposalAdapter(
             api_key="test-secret",
             model="deepseek-v4-pro",
         )
-    with pytest.raises(ValueError, match=DEEPSEEK_MODEL):
+    with pytest.raises(ValueError, match=DEEPSEEK_API_MODEL):
         DeepSeekV4FlashProposalAdapter(
             api_key="test-secret",
-            model=DEEPSEEK_PREVIOUS_MODEL,
+            model=DEEPSEEK_CHECKPOINT,
+        )
+    with pytest.raises(ValueError, match=DEEPSEEK_CHECKPOINT):
+        DeepSeekV4FlashProposalAdapter(
+            api_key="test-secret",
+            checkpoint=DEEPSEEK_PREVIOUS_MODEL,
         )
 
 
@@ -135,7 +145,7 @@ def test_deepseek_adapter_fails_closed_on_invalid_json() -> None:
         )
 
 
-def test_deepseek_settings_require_secret_exact_checkpoint_and_unambiguous_routing(
+def test_deepseek_settings_require_secret_alias_checkpoint_and_unambiguous_routing(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setenv("AXIGNAL_PERSISTENT_RESEARCH_ENABLED", "true")
@@ -152,14 +162,21 @@ def test_deepseek_settings_require_secret_exact_checkpoint_and_unambiguous_routi
         Settings.from_env().require_document_proposal_worker()
 
     monkeypatch.setenv("DEEPSEEK_API_KEY", "test-secret")
-    assert Settings.from_env().deepseek_model == DEEPSEEK_MODEL
-    Settings.from_env().require_document_proposal_worker()
+    settings = Settings.from_env()
+    assert settings.deepseek_model == DEEPSEEK_API_MODEL
+    assert settings.deepseek_checkpoint == DEEPSEEK_CHECKPOINT
+    settings.require_document_proposal_worker()
 
-    monkeypatch.setenv("AXIGNAL_DEEPSEEK_MODEL", DEEPSEEK_PREVIOUS_MODEL)
-    with pytest.raises(RuntimeError, match=DEEPSEEK_MODEL):
+    monkeypatch.setenv("AXIGNAL_DEEPSEEK_MODEL", DEEPSEEK_CHECKPOINT)
+    with pytest.raises(RuntimeError, match="supported API alias"):
         Settings.from_env().require_document_proposal_worker()
 
-    monkeypatch.setenv("AXIGNAL_DEEPSEEK_MODEL", DEEPSEEK_MODEL)
+    monkeypatch.setenv("AXIGNAL_DEEPSEEK_MODEL", DEEPSEEK_API_MODEL)
+    monkeypatch.setenv("AXIGNAL_DEEPSEEK_CHECKPOINT", DEEPSEEK_PREVIOUS_MODEL)
+    with pytest.raises(RuntimeError, match=DEEPSEEK_CHECKPOINT):
+        Settings.from_env().require_document_proposal_worker()
+
+    monkeypatch.setenv("AXIGNAL_DEEPSEEK_CHECKPOINT", DEEPSEEK_CHECKPOINT)
     monkeypatch.setenv("AXIGNAL_LOCAL_MODEL_BASE_URL", "http://local-model.test")
     with pytest.raises(RuntimeError, match="cannot be enabled together"):
         Settings.from_env().require_document_proposal_worker()
