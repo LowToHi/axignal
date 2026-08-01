@@ -213,6 +213,7 @@ def build_runtime(settings: Settings) -> PersistentDocumentProposalWorker:
             api_key=deepseek_api_key,
             base_url=settings.deepseek_base_url,
             model=settings.deepseek_model,
+            checkpoint=settings.deepseek_checkpoint,
             max_output_tokens=settings.deepseek_max_output_tokens,
             timeout_seconds=settings.deepseek_timeout_seconds,
         )
