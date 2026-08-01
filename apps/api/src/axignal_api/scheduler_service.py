@@ -7,6 +7,7 @@ import psycopg
 from redis import Redis
 
 from axignal_api.object_store import LocalFilesystemObjectStore
+from axignal_api.runtime_invariants import require_runtime_value
 from axignal_api.scheduler import (
     SchedulerOutboxPublisher,
     SchedulerRepository,
@@ -21,11 +22,17 @@ from axignal_api.telemetry import build_tracer_provider, tracer_for
 def healthcheck(settings: Settings) -> int:
     settings.require_scheduler()
     settings.require_object_store()
-    assert settings.scheduler_database_url is not None
-    assert settings.valkey_url is not None
-    with psycopg.connect(settings.scheduler_database_url) as connection:
+    scheduler_database_url = require_runtime_value(
+        settings.scheduler_database_url,
+        name="AXIGNAL_SCHEDULER_DATABASE_URL",
+    )
+    valkey_url = require_runtime_value(
+        settings.valkey_url,
+        name="AXIGNAL_VALKEY_URL",
+    )
+    with psycopg.connect(scheduler_database_url) as connection:
         connection.execute("SELECT 1")
-    Redis.from_url(settings.valkey_url).ping()
+    Redis.from_url(valkey_url).ping()
     if settings.object_store_backend == "local":
         store = LocalFilesystemObjectStore(settings.object_store_root)
         probe = store.put(
@@ -40,13 +47,19 @@ def healthcheck(settings: Settings) -> int:
 def run_forever(settings: Settings) -> int:
     settings.require_scheduler()
     settings.require_object_store()
-    assert settings.scheduler_database_url is not None
-    assert settings.valkey_url is not None
+    scheduler_database_url = require_runtime_value(
+        settings.scheduler_database_url,
+        name="AXIGNAL_SCHEDULER_DATABASE_URL",
+    )
+    valkey_url = require_runtime_value(
+        settings.valkey_url,
+        name="AXIGNAL_VALKEY_URL",
+    )
     provider = build_tracer_provider(service_name=settings.otel_service_name)
     tracer = tracer_for(provider, "axignal.scheduler.service")
-    repository = SchedulerRepository(settings.scheduler_database_url)
+    repository = SchedulerRepository(scheduler_database_url)
     queue = ValkeySchedulerQueue(
-        settings.valkey_url,
+        valkey_url,
         queue_key=settings.scheduler_queue_key,
     )
     publisher = SchedulerOutboxPublisher(repository, queue, tracer=tracer)
