@@ -56,14 +56,17 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install -e ".[dev]"
-      - name: Lint repository evidence
+      - name: Lint repository verifiers
         run: |
           ruff check \
-            apps/api/tests/test_critical_repositories_wrappers.py \
-            apps/api/tests/test_critical_repositories_proposal_ted.py \
-            apps/api/tests/test_critical_repository_cursors.py \
             scripts/inventory_critical_repositories.py \
             scripts/verify_critical_repository_coverage.py
+      - name: Lint intentional private-boundary test doubles
+        run: |
+          ruff check --ignore B010,SIM117,F401 \
+            apps/api/tests/test_critical_repositories_wrappers.py \
+            apps/api/tests/test_critical_repositories_proposal_ted.py \
+            apps/api/tests/test_critical_repository_cursors.py
       - name: Execute repository characterization suite
         run: |
           pytest \
