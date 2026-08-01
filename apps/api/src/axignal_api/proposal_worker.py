@@ -6,7 +6,10 @@ import logging
 import time
 from pathlib import Path
 
-from axignal_api.deepseek_proposals import DeepSeekV4FlashProposalAdapter
+from axignal_api.deepseek_proposals import (
+    DEEPSEEK_CHECKPOINT,
+    DeepSeekV4FlashProposalAdapter,
+)
 from axignal_api.document_proposals import (
     DocumentPipelineError,
     DocumentSecurityError,
@@ -213,7 +216,7 @@ def build_runtime(settings: Settings) -> PersistentDocumentProposalWorker:
             api_key=deepseek_api_key,
             base_url=settings.deepseek_base_url,
             model=settings.deepseek_model,
-            checkpoint=settings.deepseek_checkpoint,
+            checkpoint=DEEPSEEK_CHECKPOINT,
             max_output_tokens=settings.deepseek_max_output_tokens,
             timeout_seconds=settings.deepseek_timeout_seconds,
         )
