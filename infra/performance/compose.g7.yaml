@@ -1,0 +1,61 @@
+services:
+  api:
+    environment:
+      AXIGNAL_LIVE_SOURCES_ENABLED: "false"
+      AXIGNAL_TED_LIVE_SOURCES_ENABLED: "false"
+    deploy:
+      resources:
+        limits:
+          memory: ${AXIGNAL_G7_API_MEMORY_LIMIT:-1024M}
+
+  research-worker:
+    environment:
+      AXIGNAL_LIVE_SOURCES_ENABLED: "false"
+      AXIGNAL_TED_LIVE_SOURCES_ENABLED: "false"
+      AXIGNAL_WORLD_BANK_FIXTURE_PATH: /tmp/axignal-g7-world-bank.json
+    volumes:
+      - ../performance/world-bank-fixture.json:/tmp/axignal-g7-world-bank.json:ro
+    deploy:
+      resources:
+        limits:
+          memory: ${AXIGNAL_G7_WORKER_MEMORY_LIMIT:-768M}
+
+  g7-api-proxy:
+    image: caddy:2.10.0-alpine@sha256:ae4458638da8e1a91aafffb231c5f8778e964bca650c8a8cb23a7e8ac557aa3c
+    command:
+      - caddy
+      - reverse-proxy
+      - --from
+      - :8080
+      - --to
+      - api:8000
+    depends_on:
+      api:
+        condition: service_healthy
+    expose:
+      - "8080"
+    ports:
+      - target: 8080
+        published: "0"
+        host_ip: 127.0.0.1
+        protocol: tcp
+        mode: ingress
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget -q --spider http://127.0.0.1:8080/readyz
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - backend
+      - g7-ingress
+    restart: "no"
+    deploy:
+      resources:
+        limits:
+          memory: ${AXIGNAL_G7_PROXY_MEMORY_LIMIT:-128M}
+
+networks:
+  g7-ingress:
+    internal: false

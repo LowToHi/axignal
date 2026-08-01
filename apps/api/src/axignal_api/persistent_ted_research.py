@@ -6,11 +6,13 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import BaseModel, ConfigDict, Field
 
+from axignal_api.concurrent_repository import (
+    ConcurrentTEDResearchRepository as TEDResearchRepository,
+)
 from axignal_api.connectors.ted import SOURCE_ID
 from axignal_api.identity import AuthenticatedIdentity, require_identity
 from axignal_api.queue import OutboxPublisher, ValkeyResearchQueue
 from axignal_api.settings import Settings
-from axignal_api.ted_repository import TEDResearchRepository
 
 router = APIRouter(prefix="/v1", tags=["persistent-ted-research"])
 Authenticated = Annotated[AuthenticatedIdentity, Depends(require_identity)]

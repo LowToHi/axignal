@@ -1,0 +1,43 @@
+{
+  "approval_contract": {
+    "allowed_decisions": [
+      "APPROVE",
+      "REJECT"
+    ],
+    "approval_survives_head_change": false,
+    "maximum_expiry": "2026-08-31T23:59:59Z",
+    "required_fields": [
+      "authority",
+      "decision",
+      "scope",
+      "manifest_digest",
+      "head_sha",
+      "timestamp",
+      "expiry",
+      "conditions",
+      "signature"
+    ]
+  },
+  "approvals": [],
+  "blocking_reasons": [
+    "The final exact-head SHA is not frozen until CI passes.",
+    "No human signature is present.",
+    "No lawful-basis or retention decision has been supplied.",
+    "A machine assessment cannot act as Legal or Privacy/Data Rights authority."
+  ],
+  "gate_id": "PUBLIC-LAUNCH-GATE-7",
+  "inputs": [
+    "data/acceptance/legal/AX-LIB-O01-TED-official-terms-snapshot.v0.1.json",
+    "data/acceptance/legal/AX-LIB-O01-TED-field-rights-matrix.v0.1.json"
+  ],
+  "library_id": "AX-LIB-O01",
+  "manifest_digest": null,
+  "requested_authorities": [
+    "LEGAL",
+    "PRIVACY_DATA_RIGHTS"
+  ],
+  "schema_version": "axignal.typed-approval-request/v0.1",
+  "source_id": "src_ted_search_api_v3",
+  "status": "BLOCKED_UNTIL_EXACT_HEAD_IS_FROZEN",
+  "target_head_sha": null
+}

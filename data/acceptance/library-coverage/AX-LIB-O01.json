@@ -1,0 +1,200 @@
+{
+  "library_id": "AX-LIB-O01",
+  "kind": "OPPORTUNITY",
+  "canonical_name": "Global Public Procurement",
+  "runtime_reference": "data/procurement/global-procurement-bid-workspace-runtime.v0.1.json",
+  "canonical_state": "BLOCKED",
+  "countries_covered": [],
+  "languages": [
+    {
+      "language": "en",
+      "ingestion": "MISSING",
+      "normalisation": "MISSING",
+      "search": "MISSING",
+      "presentation": "MISSING",
+      "evidence": []
+    },
+    {
+      "language": "es",
+      "ingestion": "MISSING",
+      "normalisation": "MISSING",
+      "search": "MISSING",
+      "presentation": "MISSING",
+      "evidence": []
+    },
+    {
+      "language": "fr",
+      "ingestion": "MISSING",
+      "normalisation": "MISSING",
+      "search": "MISSING",
+      "presentation": "MISSING",
+      "evidence": []
+    },
+    {
+      "language": "de",
+      "ingestion": "MISSING",
+      "normalisation": "MISSING",
+      "search": "MISSING",
+      "presentation": "MISSING",
+      "evidence": []
+    },
+    {
+      "language": "pt",
+      "ingestion": "MISSING",
+      "normalisation": "MISSING",
+      "search": "MISSING",
+      "presentation": "MISSING",
+      "evidence": []
+    },
+    {
+      "language": "it",
+      "ingestion": "MISSING",
+      "normalisation": "MISSING",
+      "search": "MISSING",
+      "presentation": "MISSING",
+      "evidence": []
+    }
+  ],
+  "sectors": [
+    "PUBLIC_PROCUREMENT"
+  ],
+  "historical_depth": {
+    "earliest_date": null,
+    "latest_date": null,
+    "status": "MISSING",
+    "evidence": []
+  },
+  "update_frequency": {
+    "declared": null,
+    "observed": null,
+    "status": "MISSING",
+    "evidence": []
+  },
+  "sources": {
+    "active": [],
+    "suspended": [],
+    "candidate": [
+      {
+        "source_id": "src_ted_search_api_v3",
+        "name": "TED Search API v3.0",
+        "state": "CANDIDATE",
+        "contributes_to_public_claim": false,
+        "admission": {
+          "legal": "MISSING",
+          "technical": "PASS",
+          "quality": "MISSING",
+          "rights": "MISSING",
+          "human_authority": "MISSING"
+        },
+        "rights_expiry": null,
+        "evidence": [
+          {
+            "kind": "SOURCE_SNAPSHOT",
+            "reference": "data/acceptance/source-rights/AX-LIB-O01-source-inventory-rights.v0.1.json",
+            "sha256": "544329412388cf7a29aaa975daff883c8de347cc359ff2cad461e37876e66ea8",
+            "expires_at": "2026-08-31T23:59:59Z"
+          },
+          {
+            "kind": "SOURCE_SNAPSHOT",
+            "reference": "data/acceptance/legal/AX-LIB-O01-TED-official-terms-snapshot.v0.1.json",
+            "sha256": "f64e4b63e3e1bbef1b95ed04e5f89721e1afe5bad08d0825213b7328656430fc",
+            "expires_at": "2026-08-31T23:59:59Z"
+          },
+          {
+            "kind": "SOURCE_SNAPSHOT",
+            "reference": "data/acceptance/legal/AX-LIB-O01-TED-field-rights-matrix.v0.1.json",
+            "sha256": "228d2a05eaeab1a5021677797dd623da29523a7730e6d16f61555e97cd198193",
+            "expires_at": "2026-08-31T23:59:59Z"
+          },
+          {
+            "kind": "SOURCE_SNAPSHOT",
+            "reference": "data/acceptance/approvals/AX-LIB-O01-legal-privacy-approval-request.v0.1.json",
+            "sha256": "420dfba0950b959dcb9e5192a14eed2805f535b8bb5ffe42cb9b9bb0268b9ba1",
+            "expires_at": "2026-08-31T23:59:59Z"
+          },
+          {
+            "kind": "CI_ARTIFACT",
+            "reference": "github-actions:artifact:8821132341/pilot-ted-runtime.json",
+            "sha256": "73745e1ca9364930b1ebf0845d1263adcf8eb1d2d8dc0a56f0bc7a9f46a20ac9",
+            "expires_at": "2026-08-31T23:59:59Z"
+          },
+          {
+            "kind": "CI_ARTIFACT",
+            "reference": "github-actions:artifact:8821132341/pilot-web-health.json",
+            "sha256": "143360a1947cbe51eff6555cf8c4c94bb69a3e7072ff67e4a53995f70507ab20",
+            "expires_at": "2026-08-31T23:59:59Z"
+          },
+          {
+            "kind": "CI_ARTIFACT",
+            "reference": "github-actions:artifact:8821132341/pilot-runtime-exact-head.txt",
+            "sha256": "7926ecd8edb59161d844f5d10bb95d9a332e0277e8d11f6784e0f1a293d4d86b",
+            "expires_at": "2026-08-31T23:59:59Z"
+          }
+        ]
+      }
+    ]
+  },
+  "rights": {
+    "status": "MISSING",
+    "evidence": [
+      {
+        "kind": "LEGAL_REVIEW",
+        "reference": "data/acceptance/legal/AX-LIB-O01-TED-official-terms-snapshot.v0.1.json",
+        "sha256": "f64e4b63e3e1bbef1b95ed04e5f89721e1afe5bad08d0825213b7328656430fc",
+        "expires_at": "2026-08-31T23:59:59Z"
+      },
+      {
+        "kind": "LEGAL_REVIEW",
+        "reference": "data/acceptance/legal/AX-LIB-O01-TED-field-rights-matrix.v0.1.json",
+        "sha256": "228d2a05eaeab1a5021677797dd623da29523a7730e6d16f61555e97cd198193",
+        "expires_at": "2026-08-31T23:59:59Z"
+      }
+    ]
+  },
+  "quality": {
+    "status": "MISSING",
+    "completeness": null,
+    "accuracy": null,
+    "freshness": null,
+    "duplicate_rate": null,
+    "evidence": []
+  },
+  "lag": {
+    "status": "MISSING",
+    "p50_seconds": null,
+    "p95_seconds": null,
+    "max_seconds": null,
+    "evidence": []
+  },
+  "reviews": [],
+  "limitations": [
+    "Official TED and EUR-Lex sources were captured on 2026-08-01, but the resulting machine assessment is not a typed Legal or Privacy/Data Rights decision.",
+    "TED presents procurement notices as freely reusable for commercial or non-commercial purposes unless otherwise noted, and SIMAP metadata as CC0; AXIGNAL nevertheless keeps legal and rights admission MISSING until human approval.",
+    "TED notices may contain professional contact data and natural-person tenderer data; AXIGNAL policy blocks those classes from ingestion, persistence, indexing, search and presentation.",
+    "Raw source payload storage, full-text republication, public API redistribution and model training remain denied pending typed approvals.",
+    "Third-party attachments, protected marks, names, designs and logos are excluded from the default allow path.",
+    "The retained evidence proves one bounded TED Search API execution, not country-level or global procurement coverage.",
+    "The O01 source inventory remains non-exhaustive.",
+    "No representative measurement yet supports historical depth, observed update frequency, completeness, accuracy, freshness, duplicate rate or end-to-end lag.",
+    "The required English, Spanish, French, German, Portuguese and Italian ingestion-to-presentation journeys have not been executed on representative real notices.",
+    "No Gate 7 source kill-switch rehearsal or library rollback rehearsal is bound to the current evidence head.",
+    "No public global-procurement, multilingual or source-admission claim is authorised."
+  ],
+  "synthetic_data": {
+    "present": false,
+    "disclosed": true,
+    "contributes_to_public_claim": false,
+    "evidence": []
+  },
+  "kill_switch": {
+    "implemented": false,
+    "tested": false,
+    "evidence": []
+  },
+  "rollback": {
+    "implemented": false,
+    "tested": false,
+    "evidence": []
+  },
+  "claim_decision": "DENIED"
+}

@@ -1,0 +1,129 @@
+{
+  "schema_version": "axignal.global-coverage-source-language-index/v0.1",
+  "gate_id": "PUBLIC-LAUNCH-GATE-7",
+  "baseline_sha": "55ed7fb6d73bee8ca22ccdcaeaf4c5a550819a22",
+  "required_languages": ["en", "es", "fr", "de", "pt", "it"],
+  "required_authorities": [
+    "PRODUCT",
+    "SECURITY",
+    "PRIVACY_DATA_RIGHTS",
+    "LEGAL",
+    "SOURCE_QUALITY",
+    "UX_ACCESSIBILITY",
+    "HUMAN_COVERAGE_AUTHORITY"
+  ],
+  "libraries": [
+    {
+      "library_id": "AX-LIB-F01",
+      "kind": "FOUNDATIONAL",
+      "canonical_name": "Jurisdiction and geography",
+      "runtime_reference": "data/foundations/foundational-library-runtime.v0.1.json",
+      "evidence_file": "data/acceptance/library-coverage/AX-LIB-F01.json"
+    },
+    {
+      "library_id": "AX-LIB-F02",
+      "kind": "FOUNDATIONAL",
+      "canonical_name": "Entities, organisations and ownership",
+      "runtime_reference": "data/foundations/foundational-library-runtime.v0.1.json",
+      "evidence_file": "data/acceptance/library-coverage/AX-LIB-F02.json"
+    },
+    {
+      "library_id": "AX-LIB-F03",
+      "kind": "FOUNDATIONAL",
+      "canonical_name": "Taxonomies and classifications",
+      "runtime_reference": "data/foundations/foundational-library-runtime.v0.1.json",
+      "evidence_file": "data/acceptance/library-coverage/AX-LIB-F03.json"
+    },
+    {
+      "library_id": "AX-LIB-F04",
+      "kind": "FOUNDATIONAL",
+      "canonical_name": "Time, currency, value and units",
+      "runtime_reference": "data/foundations/foundational-library-runtime.v0.1.json",
+      "evidence_file": "data/acceptance/library-coverage/AX-LIB-F04.json"
+    },
+    {
+      "library_id": "AX-LIB-F05",
+      "kind": "FOUNDATIONAL",
+      "canonical_name": "Languages, terminology and translation",
+      "runtime_reference": "data/foundations/foundational-library-runtime.v0.1.json",
+      "evidence_file": "data/acceptance/library-coverage/AX-LIB-F05.json"
+    },
+    {
+      "library_id": "AX-LIB-F06",
+      "kind": "FOUNDATIONAL",
+      "canonical_name": "Source rights and provenance",
+      "runtime_reference": "data/foundations/foundational-library-runtime.v0.1.json",
+      "evidence_file": "data/acceptance/library-coverage/AX-LIB-F06.json"
+    },
+    {
+      "library_id": "AX-LIB-F07",
+      "kind": "FOUNDATIONAL",
+      "canonical_name": "Documents and content",
+      "runtime_reference": "data/foundations/foundational-library-runtime.v0.1.json",
+      "evidence_file": "data/acceptance/library-coverage/AX-LIB-F07.json"
+    },
+    {
+      "library_id": "AX-LIB-O01",
+      "kind": "OPPORTUNITY",
+      "canonical_name": "Global Public Procurement",
+      "runtime_reference": "data/procurement/global-procurement-bid-workspace-runtime.v0.1.json",
+      "evidence_file": "data/acceptance/library-coverage/AX-LIB-O01.json"
+    },
+    {
+      "library_id": "AX-LIB-O02",
+      "kind": "OPPORTUNITY",
+      "canonical_name": "Grants and Non-Dilutive Funding",
+      "runtime_reference": "data/grants/grants-application-workspace-runtime.v0.1.json",
+      "evidence_file": "data/acceptance/library-coverage/AX-LIB-O02.json"
+    },
+    {
+      "library_id": "AX-LIB-O03",
+      "kind": "OPPORTUNITY",
+      "canonical_name": "Regulatory and Policy Demand",
+      "runtime_reference": "data/regulatory/regulatory-market-entry-workspace-runtime.v0.1.json",
+      "evidence_file": "data/acceptance/library-coverage/AX-LIB-O03.json"
+    },
+    {
+      "library_id": "AX-LIB-O04",
+      "kind": "OPPORTUNITY",
+      "canonical_name": "Infrastructure and Capital Projects",
+      "runtime_reference": "data/infrastructure/infrastructure-project-pursuit-workspace-runtime.v0.1.json",
+      "evidence_file": "data/acceptance/library-coverage/AX-LIB-O04.json"
+    },
+    {
+      "library_id": "AX-LIB-O05",
+      "kind": "OPPORTUNITY",
+      "canonical_name": "Corporate, Filings and Ownership Signals",
+      "runtime_reference": "data/corporate/corporate-ownership-account-workspace-runtime.v0.1.json",
+      "evidence_file": "data/acceptance/library-coverage/AX-LIB-O05.json"
+    },
+    {
+      "library_id": "AX-LIB-O06",
+      "kind": "OPPORTUNITY",
+      "canonical_name": "Sovereign, Macro and Public Finance",
+      "runtime_reference": "data/sovereign-macro/sovereign-macro-strategy-workspace-runtime.v0.1.json",
+      "evidence_file": "data/acceptance/library-coverage/AX-LIB-O06.json"
+    },
+    {
+      "library_id": "AX-LIB-O07",
+      "kind": "OPPORTUNITY",
+      "canonical_name": "Trade, Supply Chain and Market Flows",
+      "runtime_reference": "data/trade-supply-chain/trade-supply-chain-workspace-runtime.v0.1.json",
+      "evidence_file": "data/acceptance/library-coverage/AX-LIB-O07.json"
+    },
+    {
+      "library_id": "AX-LIB-O08",
+      "kind": "OPPORTUNITY",
+      "canonical_name": "Energy and Climate Transition",
+      "runtime_reference": "data/energy-climate/energy-climate-transition-workspace-runtime.v0.1.json",
+      "evidence_file": "data/acceptance/library-coverage/AX-LIB-O08.json"
+    },
+    {
+      "library_id": "AX-LIB-O09",
+      "kind": "OPPORTUNITY",
+      "canonical_name": "Innovation, Research and Intellectual Property",
+      "runtime_reference": "data/innovation-ip/innovation-ip-workspace-runtime.v0.1.json",
+      "evidence_file": "data/acceptance/library-coverage/AX-LIB-O09.json"
+    }
+  ]
+}

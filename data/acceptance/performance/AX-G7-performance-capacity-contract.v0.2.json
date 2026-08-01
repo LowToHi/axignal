@@ -1,0 +1,87 @@
+{
+  "contract_id": "AX-G7-PERFORMANCE-CAPACITY-v0.2",
+  "supersedes": "AX-G7-PERFORMANCE-CAPACITY-v0.1",
+  "revision_reason": "Separate concurrent liveness load from dependency readiness probes and add a queue amplification bound after the first exact-head characterisation exposed readiness probe contention and duplicate outbox delivery.",
+  "gate": "G7",
+  "baseline": {
+    "authority_branch": "release/axignal-rc6r-55ed7fb",
+    "authority_sha": "55ed7fb6d73bee8ca22ccdcaeaf4c5a550819a22"
+  },
+  "status": "IN_PROGRESS",
+  "profiles": {
+    "CI_CHARACTERISATION": {
+      "closure_authority": false,
+      "purpose": "Regression and harness validation on an ephemeral CI runner",
+      "minimum_liveness_requests": 200,
+      "minimum_readiness_requests": 10,
+      "minimum_research_runs": 12,
+      "minimum_soak_seconds": 60,
+      "thresholds": {
+        "liveness_error_rate_max": 0.0,
+        "liveness_p95_ms_max": 500.0,
+        "liveness_p99_ms_max": 1000.0,
+        "readiness_error_rate_max": 0.0,
+        "readiness_p95_ms_max": 3000.0,
+        "enqueue_error_rate_max": 0.0,
+        "enqueue_p95_ms_max": 2000.0,
+        "research_success_rate_min": 1.0,
+        "completion_p95_seconds_max": 45.0,
+        "completion_p99_seconds_max": 60.0,
+        "tenant_fairness_ratio_min": 0.5,
+        "queue_max_depth_max": 12,
+        "queue_residual_max": 0,
+        "container_restarts_max": 0,
+        "memory_limit_utilisation_max": 0.9
+      }
+    },
+    "PRODUCTION_REPRESENTATIVE": {
+      "closure_authority": false,
+      "purpose": "Launch-capacity evidence on declared, stable hardware",
+      "minimum_liveness_requests": 5000,
+      "minimum_readiness_requests": 600,
+      "minimum_research_runs": 400,
+      "minimum_soak_seconds": 3600,
+      "thresholds": {
+        "liveness_error_rate_max": 0.001,
+        "liveness_p95_ms_max": 250.0,
+        "liveness_p99_ms_max": 500.0,
+        "readiness_error_rate_max": 0.001,
+        "readiness_p95_ms_max": 1000.0,
+        "enqueue_error_rate_max": 0.001,
+        "enqueue_p95_ms_max": 750.0,
+        "research_success_rate_min": 0.995,
+        "completion_p95_seconds_max": 30.0,
+        "completion_p99_seconds_max": 60.0,
+        "tenant_fairness_ratio_min": 0.8,
+        "queue_max_depth_max": 400,
+        "queue_residual_max": 0,
+        "container_restarts_max": 0,
+        "memory_limit_utilisation_max": 0.85,
+        "memory_growth_mib_per_hour_max": 128.0
+      }
+    }
+  },
+  "required_dimensions": [
+    "api_liveness_latency",
+    "dependency_readiness",
+    "research_enqueue_latency",
+    "worker_throughput",
+    "queue_peak",
+    "queue_residue",
+    "multi_tenant_fairness",
+    "backpressure",
+    "memory_growth",
+    "container_restarts",
+    "machine_fingerprint"
+  ],
+  "required_launch_decisions": [
+    "SRE_OPERATIONS",
+    "PRODUCT_CAPACITY_AUTHORITY"
+  ],
+  "truth_boundary": {
+    "ci_pass_closes_g7": false,
+    "production_campaign_pass_closes_g7": false,
+    "human_capacity_acceptance_required": true,
+    "public_launch_authorised": false
+  }
+}

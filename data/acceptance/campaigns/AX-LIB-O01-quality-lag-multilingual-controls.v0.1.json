@@ -1,0 +1,279 @@
+{
+  "approval_input": {
+    "approval_manifest_digest": "sha256:b6063d529c11cf23312f9d04e516530b2b6d162a375fc502ba277b8f45d186fe",
+    "artifact_digest": "sha256:402fba527b0eeb7c6e58330644e6f1fcefcd6b31b4d7de004ea0578f9e7c7d65",
+    "artifact_id": 8822228662,
+    "evidence_head_sha": "e423ea55dd282eb7d337c002806faba150330a56",
+    "evidence_tree": "f7e6a9813e565a84b5dca8c0508a6d18e4257d40",
+    "gate7_report_sha256": "1ec13c712475d2e95205c628baa2e5d4499aa9a6e06f20177d3a6d8d482d2a2e",
+    "workflow_run": 30712199578
+  },
+  "approvals": [],
+  "campaign_id": "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.1",
+  "campaign_status": "BLOCKED",
+  "claim_effect": {
+    "global_coverage_authorised": false,
+    "multilingual_authorised": false,
+    "product_admitted": false,
+    "public_claim_contribution": false,
+    "public_launch_authorised": false
+  },
+  "controls": {
+    "attachment_retrieval": "DENIED",
+    "contact_field_persistence": "DENIED",
+    "external_request_budget": 0,
+    "model_training": "DENIED",
+    "natural_person_persistence": "DENIED",
+    "personal_data_filter": "REQUIRED_BEFORE_PERSISTENCE",
+    "public_api_redistribution": "DENIED",
+    "raw_payload_persistence": "DENIED",
+    "source_text_republication": "DENIED",
+    "third_party_content_persistence": "DENIED"
+  },
+  "entry_gate": {
+    "approval_survives_head_change": false,
+    "execution_authorised": false,
+    "required_authorities": [
+      "LEGAL",
+      "PRIVACY_DATA_RIGHTS"
+    ],
+    "required_decision": "APPROVE",
+    "required_fields": [
+      "authority",
+      "decision",
+      "scope",
+      "manifest_digest",
+      "head_sha",
+      "timestamp",
+      "expiry",
+      "conditions",
+      "signature"
+    ],
+    "status": "BLOCKED_BY_TYPED_HUMAN_APPROVALS"
+  },
+  "expires_at": "2026-08-31T18:18:19Z",
+  "gate_id": "PUBLIC-LAUNCH-GATE-7",
+  "kill_switch_rehearsal": {
+    "expected_results": [
+      "source-level TED acquisition disabled",
+      "O01 acquisition disabled",
+      "workers stop acquiring new records",
+      "queued prohibited work cancelled or quarantined",
+      "candidate source contributes zero to new claims",
+      "existing citations and ledgers remain traceable",
+      "operator alerts and audit evidence emitted",
+      "controlled recovery succeeds"
+    ],
+    "status": "NOT_EXECUTED"
+  },
+  "lag_contract": {
+    "metrics": [
+      "source_to_retrieval_seconds",
+      "retrieval_latency_seconds",
+      "retrieval_to_normalisation_seconds",
+      "normalisation_to_index_seconds",
+      "index_to_presentation_seconds",
+      "publication_to_presentation_seconds",
+      "p50_seconds",
+      "p95_seconds",
+      "max_seconds",
+      "declared_vs_observed_update_frequency"
+    ],
+    "required_timestamps": [
+      "source_publication_at",
+      "source_updated_at_when_present",
+      "retrieval_started_at",
+      "retrieval_completed_at",
+      "normalised_at",
+      "indexed_at",
+      "presented_at"
+    ],
+    "status": "MISSING"
+  },
+  "library_id": "AX-LIB-O01",
+  "multilingual_journeys": [
+    {
+      "language": "en",
+      "required_stages": [
+        "source_ingestion",
+        "personal_data_filtering",
+        "language_detection",
+        "normalisation_or_translation",
+        "indexing",
+        "search_and_retrieval",
+        "accessible_presentation",
+        "source_citation"
+      ],
+      "status": "MISSING"
+    },
+    {
+      "language": "es",
+      "required_stages": [
+        "source_ingestion",
+        "personal_data_filtering",
+        "language_detection",
+        "normalisation_or_translation",
+        "indexing",
+        "search_and_retrieval",
+        "accessible_presentation",
+        "source_citation"
+      ],
+      "status": "MISSING"
+    },
+    {
+      "language": "fr",
+      "required_stages": [
+        "source_ingestion",
+        "personal_data_filtering",
+        "language_detection",
+        "normalisation_or_translation",
+        "indexing",
+        "search_and_retrieval",
+        "accessible_presentation",
+        "source_citation"
+      ],
+      "status": "MISSING"
+    },
+    {
+      "language": "de",
+      "required_stages": [
+        "source_ingestion",
+        "personal_data_filtering",
+        "language_detection",
+        "normalisation_or_translation",
+        "indexing",
+        "search_and_retrieval",
+        "accessible_presentation",
+        "source_citation"
+      ],
+      "status": "MISSING"
+    },
+    {
+      "language": "pt",
+      "required_stages": [
+        "source_ingestion",
+        "personal_data_filtering",
+        "language_detection",
+        "normalisation_or_translation",
+        "indexing",
+        "search_and_retrieval",
+        "accessible_presentation",
+        "source_citation"
+      ],
+      "status": "MISSING"
+    },
+    {
+      "language": "it",
+      "required_stages": [
+        "source_ingestion",
+        "personal_data_filtering",
+        "language_detection",
+        "normalisation_or_translation",
+        "indexing",
+        "search_and_retrieval",
+        "accessible_presentation",
+        "source_citation"
+      ],
+      "status": "MISSING"
+    }
+  ],
+  "permitted_field_classes": [
+    "NOTICE_IDENTIFIERS_AND_PUBLICATION_METADATA",
+    "NON_PERSONAL_PROCUREMENT_FACTS",
+    "BUYER_AND_SUPPLIER_LEGAL_ENTITY_DATA_AFTER_NATURAL_PERSON_EXCLUSION",
+    "NORMALISED_DERIVED_FACTS_AND_TRANSLATIONS_AFTER_APPROVAL",
+    "SOURCE_URL_AND_PROVENANCE"
+  ],
+  "prohibited_field_classes": [
+    "PROFESSIONAL_CONTACT_PERSON_DATA",
+    "NATURAL_PERSON_TENDERER_OR_CONTRACTOR",
+    "RAW_FULL_PAYLOAD",
+    "FULL_SOURCE_NATIVE_TEXT",
+    "ATTACHMENTS_AND_THIRD_PARTY_WORKS",
+    "LOGOS_TRADEMARKS_NAMES_AND_INDUSTRIAL_PROPERTY",
+    "PUBLIC_API_REDISTRIBUTION",
+    "MODEL_TRAINING_OR_FINE_TUNING"
+  ],
+  "quality_contract": {
+    "metrics": [
+      "required_field_completeness",
+      "identifier_validity",
+      "notice_type_fidelity",
+      "buyer_legal_entity_fidelity",
+      "cpv_fidelity",
+      "nuts_fidelity",
+      "date_and_deadline_fidelity",
+      "amount_currency_and_unit_fidelity",
+      "duplicate_rate_before_canonicalisation",
+      "duplicate_rate_after_canonicalisation",
+      "false_merge_rate",
+      "false_split_rate",
+      "source_citation_fidelity",
+      "invalid_or_rejected_record_rate"
+    ],
+    "status": "MISSING"
+  },
+  "required_outputs": [
+    "sampling_manifest",
+    "sanitised_sample_inventory",
+    "quality_report",
+    "lag_report",
+    "six_language_journey_artifacts",
+    "kill_switch_report",
+    "rollback_report",
+    "evidence_expiry_matrix",
+    "typed_approval_requests"
+  ],
+  "rollback_rehearsal": {
+    "must_preserve": [
+      "source_ids",
+      "permitted_normalised_facts",
+      "provenance",
+      "citations",
+      "measurement_ledgers",
+      "rejection_and_purge_evidence",
+      "audit_history",
+      "worker_and_queue_consistency"
+    ],
+    "must_not_restore": [
+      "prohibited_personal_data",
+      "third_party_attachments",
+      "PRODUCT_ADMITTED_source_state"
+    ],
+    "status": "NOT_EXECUTED"
+  },
+  "sampling_manifest": {
+    "campaign_expiry": null,
+    "countries_or_jurisdictions": [],
+    "cpv_strata": [],
+    "deterministic_seed": null,
+    "measurement_window": null,
+    "notice_types": [],
+    "pagination_and_truncation_limits": null,
+    "parser_normaliser_index_presenter_versions": null,
+    "query_definitions": [],
+    "rate_limit_and_retry_policy": null,
+    "replacement_rules": null,
+    "sample_size": null,
+    "status": "MISSING"
+  },
+  "schema_version": "axignal.o01-evidence-campaign-contract/v0.1",
+  "source_id": "src_ted_search_api_v3",
+  "source_state": "CANDIDATE",
+  "stop_conditions": [
+    "personal data retained outside approved quarantine",
+    "attachment or third-party content retrieved",
+    "official source terms changed",
+    "digest or head mismatch",
+    "human decision missing or expired",
+    "API behaviour violates frozen sampling contract",
+    "timestamp or provenance lost",
+    "retry or rate-limit policy violated",
+    "candidate source contributes to a public claim",
+    "global or multilingual public claim enabled"
+  ],
+  "synthetic_data": {
+    "contributes_to_claim": false,
+    "present": false
+  }
+}
