@@ -12,7 +12,9 @@ test("rejects missing, cross-origin and cross-site web mutations", async (
 ) => {
   const origin = projectOrigin(testInfo);
 
-  const missing = await request.post("/api/auth/logout");
+  const missing = await request.post("/api/auth/logout", {
+    headers: { origin: "", "sec-fetch-site": "" }
+  });
   expect(missing.status()).toBe(403);
   await expect(missing.json()).resolves.toMatchObject({ code: "origin_required" });
 
