@@ -307,6 +307,7 @@ jobs:
           set -euo pipefail
           docker run --detach \
             --name axignal-g6-postgres-runtime \
+            --env POSTGRES_USER=axignal \
             --env POSTGRES_PASSWORD=g6-reproducibility-only \
             --env POSTGRES_DB=axignal \
             axignal-g6-postgres:a
@@ -316,13 +317,13 @@ jobs:
           }
           trap cleanup EXIT
           for _ in $(seq 1 90); do
-            if docker exec axignal-g6-postgres-runtime pg_isready -U postgres -d axignal >/dev/null 2>&1; then
+            if docker exec axignal-g6-postgres-runtime pg_isready -U axignal -d axignal >/dev/null 2>&1; then
               break
             fi
             sleep 2
           done
           docker exec axignal-g6-postgres-runtime \
-            psql -U postgres -d axignal -Atc \
+            psql -U axignal -d axignal -Atc \
             "SELECT extname || '=' || extversion FROM pg_extension WHERE extname IN ('postgis', 'vector') ORDER BY extname" \
             | tee postgres-extension-versions.txt
           grep -q '^postgis=' postgres-extension-versions.txt
