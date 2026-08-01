@@ -1,0 +1,254 @@
+name: Gate 7 Consolidated Engineering Authority
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "data/acceptance/**"
+      - "data/contracts/**"
+      - "apps/api/src/axignal_api/concurrent_repository.py"
+      - "apps/api/src/axignal_api/persistent_research.py"
+      - "apps/api/src/axignal_api/persistent_ted_research.py"
+      - "apps/api/src/axignal_api/queue.py"
+      - "apps/api/src/axignal_api/worker.py"
+      - "apps/api/src/axignal_api/o01_contact_policy.py"
+      - "apps/api/src/axignal_api/o01_approval_renewal.py"
+      - "apps/api/src/axignal_api/procurement_domain.py"
+      - "apps/api/tests/test_worker_concurrency.py"
+      - "apps/api/tests/test_o01_*.py"
+      - "apps/api/tests/test_procurement_domain_contracts.py"
+      - "scripts/verify_gate7_*.py"
+      - "scripts/verify_o01_domain_contracts.py"
+      - "scripts/extract_gate7_o01_typed_authority.py"
+      - "scripts/materialize_gate7_o01_approval_manifest.py"
+      - "scripts/prepare_gate7_o01_renewal.py"
+      - "docs/acceptance/Gate-7-consolidated-engineering-v1.md"
+      - ".github/workflows/gate7-consolidated-engineering.yml"
+  push:
+    branches:
+      - main
+      - "agent/**"
+    paths:
+      - "data/acceptance/**"
+      - "data/contracts/**"
+      - "apps/api/src/axignal_api/concurrent_repository.py"
+      - "apps/api/src/axignal_api/persistent_research.py"
+      - "apps/api/src/axignal_api/persistent_ted_research.py"
+      - "apps/api/src/axignal_api/queue.py"
+      - "apps/api/src/axignal_api/worker.py"
+      - "apps/api/src/axignal_api/o01_contact_policy.py"
+      - "apps/api/src/axignal_api/o01_approval_renewal.py"
+      - "apps/api/src/axignal_api/procurement_domain.py"
+      - "apps/api/tests/test_worker_concurrency.py"
+      - "apps/api/tests/test_o01_*.py"
+      - "apps/api/tests/test_procurement_domain_contracts.py"
+      - "scripts/verify_gate7_*.py"
+      - "scripts/verify_o01_domain_contracts.py"
+      - "scripts/extract_gate7_o01_typed_authority.py"
+      - "scripts/materialize_gate7_o01_approval_manifest.py"
+      - "scripts/prepare_gate7_o01_renewal.py"
+      - "docs/acceptance/Gate-7-consolidated-engineering-v1.md"
+      - ".github/workflows/gate7-consolidated-engineering.yml"
+
+permissions:
+  contents: read
+
+env:
+  AXIGNAL_EXACT_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+
+concurrency:
+  group: gate7-consolidated-engineering-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  consolidated-authority:
+    name: Single-head Gate 7 engineering authority
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact branch head
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Freeze exact head and tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual_sha="$(git rev-parse HEAD)"
+          actual_tree="$(git rev-parse 'HEAD^{tree}')"
+          test "$actual_sha" = "$AXIGNAL_EXACT_SHA"
+          mkdir -p artifacts/gate7-consolidated
+          {
+            printf 'exact_head_sha=%s\n' "$actual_sha"
+            printf 'git_tree_sha=%s\n' "$actual_tree"
+          } | tee artifacts/gate7-consolidated/exact-head.txt
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.13.14"
+
+      - name: Install frozen development graph
+        run: |
+          python -m pip install --upgrade "pip==26.1.2"
+          python -m pip install \
+            --require-hashes \
+            --only-binary=:all: \
+            --requirement requirements/python-dev.lock
+          python -m pip check
+          python -m pip install --no-deps --no-build-isolation .
+
+      - name: Validate consolidated implementation
+        run: |
+          python -m compileall -q \
+            apps/api/src/axignal_api/concurrent_repository.py \
+            apps/api/src/axignal_api/o01_approval_renewal.py \
+            apps/api/src/axignal_api/o01_contact_policy.py \
+            apps/api/src/axignal_api/procurement_domain.py \
+            apps/api/src/axignal_api/queue.py \
+            apps/api/src/axignal_api/worker.py \
+            apps/api/tests/test_worker_concurrency.py \
+            apps/api/tests/test_o01_approval_renewal.py \
+            apps/api/tests/test_o01_contact_policy.py \
+            apps/api/tests/test_o01_typed_authority_extraction.py \
+            apps/api/tests/test_procurement_domain_contracts.py \
+            scripts/verify_gate7_consolidation.py
+          ruff check \
+            apps/api/src/axignal_api/concurrent_repository.py \
+            apps/api/src/axignal_api/o01_approval_renewal.py \
+            apps/api/src/axignal_api/o01_contact_policy.py \
+            apps/api/src/axignal_api/procurement_domain.py \
+            apps/api/src/axignal_api/queue.py \
+            apps/api/src/axignal_api/worker.py \
+            apps/api/tests/test_worker_concurrency.py \
+            apps/api/tests/test_o01_approval_renewal.py \
+            apps/api/tests/test_o01_contact_policy.py \
+            apps/api/tests/test_o01_typed_authority_extraction.py \
+            apps/api/tests/test_procurement_domain_contracts.py \
+            scripts/verify_gate7_consolidation.py
+          pytest -q \
+            apps/api/tests/test_worker_concurrency.py \
+            apps/api/tests/test_o01_approval_renewal.py \
+            apps/api/tests/test_o01_contact_policy.py \
+            apps/api/tests/test_o01_typed_authority_extraction.py \
+            apps/api/tests/test_procurement_domain_contracts.py
+
+      - name: Verify source, rights, legal, campaign and domain contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/verify_gate7_source_snapshots.py \
+            | tee artifacts/gate7-consolidated/source-snapshot-integrity.json
+          python scripts/verify_gate7_source_rights.py \
+            | tee artifacts/gate7-consolidated/source-rights-policy.json
+          python scripts/verify_gate7_o01_legal_privacy_reconciliation.py \
+            | tee artifacts/gate7-consolidated/o01-legal-privacy-reconciliation.json
+          python scripts/verify_gate7_o01_renewal.py \
+            | tee artifacts/gate7-consolidated/o01-approval-renewal-contract.json
+          python scripts/verify_o01_domain_contracts.py \
+            | tee artifacts/gate7-consolidated/o01-domain-contracts.json
+
+      - name: Materialise exact-head approval and renewal evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          AXIGNAL_EXACT_SHA="$AXIGNAL_EXACT_SHA" \
+            python scripts/materialize_gate7_o01_approval_manifest.py \
+            | tee artifacts/gate7-consolidated/o01-approval-manifest-result.json
+          cp artifacts/o01-legal-privacy/approval-manifest.v0.2.json \
+            artifacts/gate7-consolidated/approval-manifest.v0.2.json
+          cp artifacts/o01-legal-privacy/approval-manifest.v0.2.sha256 \
+            artifacts/gate7-consolidated/approval-manifest.v0.2.sha256
+          AXIGNAL_RENEWAL_PREPARATION=1 \
+          AXIGNAL_EXACT_SHA="$AXIGNAL_EXACT_SHA" \
+            python scripts/prepare_gate7_o01_renewal.py \
+              --now '2026-08-01T12:00:00Z' \
+              --output-dir "$GITHUB_WORKSPACE/artifacts/gate7-consolidated/o01-renewal" \
+            | tee artifacts/gate7-consolidated/o01-approval-renewal-result.json
+
+      - name: Verify O01 evidence campaign remains blocked
+        shell: bash
+        run: |
+          set -euo pipefail
+          AXIGNAL_EXACT_SHA="$AXIGNAL_EXACT_SHA" \
+            python scripts/verify_gate7_o01_campaign_contract.py \
+            | tee artifacts/gate7-consolidated/o01-campaign-contract.json
+
+      - name: Materialise current Gate 7 report
+        shell: bash
+        run: |
+          set -euo pipefail
+          AXIGNAL_EVIDENCE_HEAD_SHA="$AXIGNAL_EXACT_SHA" \
+          AXIGNAL_REQUIRE_GATE7_PASS=false \
+          AXIGNAL_GATE7_EVIDENCE_DIR=artifacts/gate7-consolidated \
+            python scripts/verify_gate7_global_coverage.py \
+            | tee artifacts/gate7-consolidated/gate7-console.json
+
+      - name: Verify canonical consolidation and freeze authority inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/verify_gate7_consolidation.py \
+            --approval-manifest-sha-file \
+              artifacts/gate7-consolidated/approval-manifest.v0.2.sha256 \
+            --output \
+              artifacts/gate7-consolidated/consolidation-attestation.json
+          cp \
+            data/acceptance/gate7/AX-G7-consolidated-engineering-contract.v1.json \
+            artifacts/gate7-consolidated/
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          attestation = json.loads(
+              Path(
+                  "artifacts/gate7-consolidated/consolidation-attestation.json"
+              ).read_text(encoding="utf-8")
+          )
+          summary = json.loads(
+              Path("artifacts/gate7-consolidated/gate7-summary.json").read_text(
+                  encoding="utf-8"
+              )
+          )
+          assert attestation["status"] == "PASS"
+          assert attestation["output"] == "GATE7_CONSOLIDATED_ENGINEERING_PASS"
+          assert attestation["exact_head_sha"] == os.environ["AXIGNAL_EXACT_SHA"]
+          assert attestation["stack_consolidated"] is True
+          assert attestation["single_exact_head"] is True
+          assert attestation["ci_failing"] == 0
+          assert attestation["stale_head_evidence"] == 0
+          assert attestation["unresolved_conflicts"] == 0
+          assert attestation["campaign_authority"] is False
+          assert attestation["public_launch"] == "NO_GO"
+          assert summary["libraries"] == 16
+          assert summary["public_launch_authorised"] is False
+          PY
+          find artifacts/gate7-consolidated \
+            -type f \
+            ! -name payload.sha256 \
+            -print0 \
+            | sort -z \
+            | xargs -0 sha256sum \
+            > artifacts/gate7-consolidated/payload.sha256
+
+      - name: Reject sensitive material
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -R -E \
+            'sk_(live|test)_|rk_(live|test)_|whsec_|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----' \
+            artifacts/gate7-consolidated
+          ! grep -R -E '"signature"[[:space:]]*:[[:space:]]*"[^"]+"' \
+            artifacts/gate7-consolidated
+
+      - name: Upload consolidated Gate 7 evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: gate7-consolidated-engineering-${{ env.AXIGNAL_EXACT_SHA }}
+          path: artifacts/gate7-consolidated
+          if-no-files-found: error
+          retention-days: 30
