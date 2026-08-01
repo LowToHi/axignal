@@ -6,14 +6,58 @@
   "canonical_state": "BLOCKED",
   "countries_covered": [],
   "languages": [
-    {"language": "en", "ingestion": "MISSING", "normalisation": "MISSING", "search": "MISSING", "presentation": "MISSING", "evidence": []},
-    {"language": "es", "ingestion": "MISSING", "normalisation": "MISSING", "search": "MISSING", "presentation": "MISSING", "evidence": []},
-    {"language": "fr", "ingestion": "MISSING", "normalisation": "MISSING", "search": "MISSING", "presentation": "MISSING", "evidence": []},
-    {"language": "de", "ingestion": "MISSING", "normalisation": "MISSING", "search": "MISSING", "presentation": "MISSING", "evidence": []},
-    {"language": "pt", "ingestion": "MISSING", "normalisation": "MISSING", "search": "MISSING", "presentation": "MISSING", "evidence": []},
-    {"language": "it", "ingestion": "MISSING", "normalisation": "MISSING", "search": "MISSING", "presentation": "MISSING", "evidence": []}
+    {
+      "language": "en",
+      "ingestion": "MISSING",
+      "normalisation": "MISSING",
+      "search": "MISSING",
+      "presentation": "MISSING",
+      "evidence": []
+    },
+    {
+      "language": "es",
+      "ingestion": "MISSING",
+      "normalisation": "MISSING",
+      "search": "MISSING",
+      "presentation": "MISSING",
+      "evidence": []
+    },
+    {
+      "language": "fr",
+      "ingestion": "MISSING",
+      "normalisation": "MISSING",
+      "search": "MISSING",
+      "presentation": "MISSING",
+      "evidence": []
+    },
+    {
+      "language": "de",
+      "ingestion": "MISSING",
+      "normalisation": "MISSING",
+      "search": "MISSING",
+      "presentation": "MISSING",
+      "evidence": []
+    },
+    {
+      "language": "pt",
+      "ingestion": "MISSING",
+      "normalisation": "MISSING",
+      "search": "MISSING",
+      "presentation": "MISSING",
+      "evidence": []
+    },
+    {
+      "language": "it",
+      "ingestion": "MISSING",
+      "normalisation": "MISSING",
+      "search": "MISSING",
+      "presentation": "MISSING",
+      "evidence": []
+    }
   ],
-  "sectors": ["PUBLIC_PROCUREMENT"],
+  "sectors": [
+    "PUBLIC_PROCUREMENT"
+  ],
   "historical_depth": {
     "earliest_date": null,
     "latest_date": null,
@@ -47,7 +91,25 @@
           {
             "kind": "SOURCE_SNAPSHOT",
             "reference": "data/acceptance/source-rights/AX-LIB-O01-source-inventory-rights.v0.1.json",
-            "sha256": "50e57f71fcdc2f4342d5877c481fe8d894a0442ae5caecf57dc6245e6b229859",
+            "sha256": "544329412388cf7a29aaa975daff883c8de347cc359ff2cad461e37876e66ea8",
+            "expires_at": "2026-08-31T23:59:59Z"
+          },
+          {
+            "kind": "SOURCE_SNAPSHOT",
+            "reference": "data/acceptance/legal/AX-LIB-O01-TED-official-terms-snapshot.v0.1.json",
+            "sha256": "f64e4b63e3e1bbef1b95ed04e5f89721e1afe5bad08d0825213b7328656430fc",
+            "expires_at": "2026-08-31T23:59:59Z"
+          },
+          {
+            "kind": "SOURCE_SNAPSHOT",
+            "reference": "data/acceptance/legal/AX-LIB-O01-TED-field-rights-matrix.v0.1.json",
+            "sha256": "228d2a05eaeab1a5021677797dd623da29523a7730e6d16f61555e97cd198193",
+            "expires_at": "2026-08-31T23:59:59Z"
+          },
+          {
+            "kind": "SOURCE_SNAPSHOT",
+            "reference": "data/acceptance/approvals/AX-LIB-O01-legal-privacy-approval-request.v0.1.json",
+            "sha256": "420dfba0950b959dcb9e5192a14eed2805f535b8bb5ffe42cb9b9bb0268b9ba1",
             "expires_at": "2026-08-31T23:59:59Z"
           },
           {
@@ -74,7 +136,20 @@
   },
   "rights": {
     "status": "MISSING",
-    "evidence": []
+    "evidence": [
+      {
+        "kind": "LEGAL_REVIEW",
+        "reference": "data/acceptance/legal/AX-LIB-O01-TED-official-terms-snapshot.v0.1.json",
+        "sha256": "f64e4b63e3e1bbef1b95ed04e5f89721e1afe5bad08d0825213b7328656430fc",
+        "expires_at": "2026-08-31T23:59:59Z"
+      },
+      {
+        "kind": "LEGAL_REVIEW",
+        "reference": "data/acceptance/legal/AX-LIB-O01-TED-field-rights-matrix.v0.1.json",
+        "sha256": "228d2a05eaeab1a5021677797dd623da29523a7730e6d16f61555e97cd198193",
+        "expires_at": "2026-08-31T23:59:59Z"
+      }
+    ]
   },
   "quality": {
     "status": "MISSING",
@@ -93,15 +168,17 @@
   },
   "reviews": [],
   "limitations": [
-    "The retained evidence proves one bounded authenticated TED Search API request, not country-level or global procurement coverage.",
-    "TED remains a candidate because legal, quality, rights and Human Coverage Authority admission are incomplete.",
-    "The source inventory is explicitly non-exhaustive and cannot support a global claim.",
-    "The prior repository source-profile reference could not be resolved and was removed from the authority chain.",
-    "Field-level storage, attribution, retention, derived-data, source-text republication and model-use rights remain MISSING; public API redistribution is DENIED.",
+    "Official TED and EUR-Lex sources were captured on 2026-08-01, but the resulting machine assessment is not a typed Legal or Privacy/Data Rights decision.",
+    "TED presents procurement notices as freely reusable for commercial or non-commercial purposes unless otherwise noted, and SIMAP metadata as CC0; AXIGNAL nevertheless keeps legal and rights admission MISSING until human approval.",
+    "TED notices may contain professional contact data and natural-person tenderer data; AXIGNAL policy blocks those classes from ingestion, persistence, indexing, search and presentation.",
+    "Raw source payload storage, full-text republication, public API redistribution and model training remain denied pending typed approvals.",
+    "Third-party attachments, protected marks, names, designs and logos are excluded from the default allow path.",
+    "The retained evidence proves one bounded TED Search API execution, not country-level or global procurement coverage.",
+    "The O01 source inventory remains non-exhaustive.",
     "No representative measurement yet supports historical depth, observed update frequency, completeness, accuracy, freshness, duplicate rate or end-to-end lag.",
     "The required English, Spanish, French, German, Portuguese and Italian ingestion-to-presentation journeys have not been executed on representative real notices.",
     "No Gate 7 source kill-switch rehearsal or library rollback rehearsal is bound to the current evidence head.",
-    "No public global-procurement or multilingual claim is authorised."
+    "No public global-procurement, multilingual or source-admission claim is authorised."
   ],
   "synthetic_data": {
     "present": false,
