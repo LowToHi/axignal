@@ -7,6 +7,7 @@ on:
       - "apps/api/tests/test_critical_repositories*.py"
       - "scripts/inventory_critical_repositories.py"
       - "scripts/verify_critical_repository_coverage.py"
+      - "scripts/verify_critical_repository_transactions.py"
       - ".github/workflows/critical-repository-coverage.yml"
   push:
     branches:
@@ -40,14 +41,8 @@ jobs:
           name: critical-repository-inventory
           path: |
             critical-repository-inventory.json
-            apps/api/src/axignal_api/admission_repository.py
-            apps/api/src/axignal_api/billing_repository.py
-            apps/api/src/axignal_api/entitlement_repository.py
-            apps/api/src/axignal_api/identity_repository.py
-            apps/api/src/axignal_api/organic_repository.py
-            apps/api/src/axignal_api/proposal_repository.py
-            apps/api/src/axignal_api/retention_repository.py
-            apps/api/src/axignal_api/seat_repository.py
-            apps/api/src/axignal_api/ted_repository.py
+            apps/api/src/axignal_api/*_repository.py
+            apps/api/tests/test_*.py
+            scripts/verify_*.py
           if-no-files-found: error
           retention-days: 14
