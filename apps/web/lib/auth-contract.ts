@@ -53,7 +53,7 @@ function sign(version: string, payload: string, secret: string): string {
     .digest("base64url");
 }
 
-function equalText(left: string, right: string): boolean {
+export function constantTimeTextEqual(left: string, right: string): boolean {
   const leftBuffer = Buffer.from(left);
   const rightBuffer = Buffer.from(right);
   return (
@@ -78,7 +78,7 @@ export function verifySignedToken<T>(token: string, secret: string): T | null {
   const payload = parts[1];
   const signature = parts[2];
   if (!version || !payload || !signature || version !== SESSION_VERSION) return null;
-  if (!equalText(signature, sign(version, payload, secret))) return null;
+  if (!constantTimeTextEqual(signature, sign(version, payload, secret))) return null;
   try {
     return JSON.parse(decode(payload).toString("utf8")) as T;
   } catch {
@@ -119,20 +119,23 @@ export function authenticateLegacyCredentials(
   configuration: {
     configuredEmail: string;
     encodedPassword: string;
-    subject: string;
+    subject: string | (() => string);
     nowSeconds?: number;
   }
 ): SessionClaims | null {
   const configuredEmail = configuration.configuredEmail.toLowerCase();
   if (
-    !equalText(email.trim().toLowerCase(), configuredEmail) ||
+    !constantTimeTextEqual(email.trim().toLowerCase(), configuredEmail) ||
     !verifyScryptPassword(password, configuration.encodedPassword)
   ) {
     return null;
   }
   const now = configuration.nowSeconds ?? Math.floor(Date.now() / 1000);
   return {
-    sub: configuration.subject,
+    sub:
+      typeof configuration.subject === "function"
+        ? configuration.subject()
+        : configuration.subject,
     email: configuredEmail,
     iat: now,
     exp: now + SESSION_TTL_SECONDS
