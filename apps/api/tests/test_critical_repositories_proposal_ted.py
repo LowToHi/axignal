@@ -419,6 +419,7 @@ def test_ted_upsert_and_dossier_helper_paths() -> None:
             ),
         ),
         retrieval_key="key",
+        request_hash="sha256:ted-request",
         request_url="https://ted.test",
         retrieved_at="2026-08-01T00:00:00Z",
         http_status=200,
