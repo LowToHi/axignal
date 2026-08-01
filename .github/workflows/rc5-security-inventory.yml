@@ -73,6 +73,90 @@ jobs:
           )
           print(json.dumps(summary, indent=2, sort_keys=True))
           PY
+      - name: Build redacted finding context
+        run: |
+          python - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+          from urllib.parse import urlsplit
+
+          report = json.loads(Path("detect-secrets-report.json").read_text(encoding="utf-8"))
+          safe_markers = (
+              "127.0.0.1",
+              "localhost",
+              "example.invalid",
+              "example.com",
+              "fixture",
+              "test",
+              "dummy",
+              "placeholder",
+              "replace",
+              "sha256",
+              "checksum",
+              "digest",
+              "fingerprint",
+              "commit",
+              "expected",
+              "secrets.",
+              "secret_name",
+              "environment",
+              "password_required",
+          )
+          key_pattern = re.compile(
+              r"[A-Za-z0-9_.-]*(?:secret|password|token|key|sha|hash|digest|commit|fingerprint|url|dsn)[A-Za-z0-9_.-]*",
+              re.IGNORECASE,
+          )
+          url_pattern = re.compile(r"https?://[^\s\"'<>]+", re.IGNORECASE)
+          quoted_pattern = re.compile(r"(['\"])(?:\\.|(?!\1).)*\1")
+          long_token_pattern = re.compile(r"\b[A-Za-z0-9_+/=-]{16,}\b")
+
+          entries = []
+          for path, findings in sorted(report.get("results", {}).items()):
+              source = Path(path)
+              lines = source.read_text(encoding="utf-8", errors="replace").splitlines()
+              for finding in findings:
+                  line_number = int(finding["line_number"])
+                  line = lines[line_number - 1] if 0 < line_number <= len(lines) else ""
+                  lower = line.casefold()
+                  hosts = []
+                  for raw_url in url_pattern.findall(line):
+                      try:
+                          parsed = urlsplit(raw_url)
+                      except ValueError:
+                          continue
+                      if parsed.hostname:
+                          hosts.append(parsed.hostname.casefold())
+                  redacted = re.sub(
+                      r"(https?://)[^/@\s]+@",
+                      r"\1<redacted-userinfo>@",
+                      line,
+                      flags=re.IGNORECASE,
+                  )
+                  redacted = quoted_pattern.sub(lambda match: f"{match.group(1)}<redacted>{match.group(1)}", redacted)
+                  redacted = long_token_pattern.sub("<redacted-token>", redacted)
+                  entries.append(
+                      {
+                          "path": path,
+                          "line_number": line_number,
+                          "type": finding.get("type"),
+                          "hashed_secret": finding.get("hashed_secret"),
+                          "markers": [marker for marker in safe_markers if marker in lower],
+                          "keys": sorted(set(key_pattern.findall(line))),
+                          "url_hosts": sorted(set(hosts)),
+                          "redacted_context": redacted[:400],
+                      }
+                  )
+          payload = {
+              "schema": "axignal.secret-redacted-context.v1",
+              "finding_count": len(entries),
+              "findings": entries,
+          }
+          Path("detect-secrets-redacted-context.json").write_text(
+              json.dumps(payload, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          PY
       - name: Inventory remote I/O and download surfaces
         run: |
           git grep -n -I -E \
@@ -110,6 +194,7 @@ jobs:
           path: |
             detect-secrets-report.json
             detect-secrets-summary.json
+            detect-secrets-redacted-context.json
             remote-io-inventory.txt
             remote-io-files.txt
             remote-io-summary.txt
