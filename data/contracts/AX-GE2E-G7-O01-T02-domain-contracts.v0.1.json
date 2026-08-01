@@ -1,14 +1,18 @@
 {
   "ai_checkpoint": {
+    "api_alias_managed_by_provider": true,
+    "api_model": "deepseek-v4-flash",
     "base_url": "https://api.deepseek.com",
     "canonical_claim_authority": false,
+    "checkpoint_binding": "PROVIDER_MANAGED_ALIAS_USER_SUPPLIED_NOTICE",
+    "checkpoint_exposed_by_api": false,
     "enabled_by_default": false,
     "external_action_authority": false,
-    "model": "deepseek-v4-flash-0731",
-    "previous_model": "deepseek-v4-flash",
+    "previous_model_label": "deepseek-v4-flash",
     "price_change_declared": false,
     "proposal_authority_only": true,
     "provider": "deepseek",
+    "provider_checkpoint": "deepseek-v4-flash-0731",
     "transport": "direct_openai_compatible_api"
   },
   "audit_contract": {
