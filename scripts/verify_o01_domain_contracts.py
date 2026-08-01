@@ -32,8 +32,9 @@ EXPECTED_DATA_CLASSES = {
     "AMBIGUOUS_PERSONAL",
     "BLOCKED",
 }
-MODEL = "deepseek-v4-flash-0731"
-OLD_MODEL = "deepseek-v4-flash"
+API_MODEL = "deepseek-v4-flash"
+CHECKPOINT = "deepseek-v4-flash-0731"
+CHECKPOINT_BINDING = "PROVIDER_MANAGED_ALIAS_USER_SUPPLIED_NOTICE"
 
 
 class ContractVerificationError(RuntimeError):
@@ -142,8 +143,14 @@ def verify_contract(contract: dict[str, Any]) -> None:
     checkpoint = contract["ai_checkpoint"]
     require(checkpoint["provider"] == "deepseek", "Provider drift")
     require(checkpoint["base_url"] == "https://api.deepseek.com", "Base URL drift")
-    require(checkpoint["model"] == MODEL, "Checkpoint drift")
-    require(checkpoint["previous_model"] == OLD_MODEL, "Previous checkpoint trace missing")
+    require(checkpoint["api_model"] == API_MODEL, "DeepSeek API alias drift")
+    require(checkpoint["provider_checkpoint"] == CHECKPOINT, "Checkpoint drift")
+    require(
+        checkpoint["checkpoint_binding"] == CHECKPOINT_BINDING,
+        "Checkpoint binding basis drift",
+    )
+    require(checkpoint["api_alias_managed_by_provider"] is True, "Alias policy missing")
+    require(checkpoint["checkpoint_exposed_by_api"] is False, "Unsupported runtime proof")
     require(checkpoint["price_change_declared"] is False, "Unexpected price change")
     require(checkpoint["proposal_authority_only"] is True, "Model authority widened")
     require(checkpoint["canonical_claim_authority"] is False, "Model can write claims")
@@ -185,40 +192,37 @@ def verify_implementation() -> None:
     )
     require("PRESENTED_EXTERNALLY" in tests, "Subscriber presentation test missing")
 
-    deepseek = require_source_literals(
+    require_source_literals(
         DEEPSEEK_PATH,
         (
-            f'DEEPSEEK_MODEL = "{MODEL}"',
+            f'DEEPSEEK_API_MODEL = "{API_MODEL}"',
+            f'DEEPSEEK_CHECKPOINT = "{CHECKPOINT}"',
+            "self.api_model",
+            "self.model_version",
             "proposal authority only",
             "canonical claims",
         ),
     )
-    require(
-        f'DEEPSEEK_MODEL = "{OLD_MODEL}"' not in deepseek,
-        "Old checkpoint remains the admitted constant",
-    )
 
-    settings = require_source_literals(
+    require_source_literals(
         SETTINGS_PATH,
         (
-            f'deepseek_model: str = "{MODEL}"',
-            f'"{MODEL}"',
+            f'deepseek_model: str = "{API_MODEL}"',
+            f'deepseek_checkpoint: str = "{CHECKPOINT}"',
+            "supported API alias",
         ),
-    )
-    require(
-        'deepseek_model: str = "deepseek-v4-flash"' not in settings,
-        "Settings still default to the old checkpoint",
     )
 
-    deepseek_tests = require_source_literals(
+    require_source_literals(
         DEEPSEEK_TEST_PATH,
         (
-            MODEL,
+            API_MODEL,
+            CHECKPOINT,
+            "test_deepseek_api_alias_and_checkpoint_identity_are_separate",
             "test_deepseek_adapter_uses_direct_bounded_json_contract",
-            "test_deepseek_adapter_rejects_non_official_host_and_wrong_model",
+            "test_deepseek_adapter_rejects_non_official_host_wrong_alias_and_checkpoint",
         ),
     )
-    require(OLD_MODEL in deepseek_tests, "Old-model rejection is not tested")
 
 
 def verify() -> dict[str, Any]:
@@ -242,7 +246,9 @@ def verify() -> dict[str, Any]:
         "output": contract["output"],
         "entities": len(EXPECTED_ENTITIES),
         "contact_policy_decisions": sorted(EXPECTED_CONTACT_POLICIES),
-        "model": MODEL,
+        "api_model": API_MODEL,
+        "provider_checkpoint": CHECKPOINT,
+        "checkpoint_binding": CHECKPOINT_BINDING,
         "external_ted_request_budget": 0,
         "source_state": "CANDIDATE",
         "product_admitted": False,
