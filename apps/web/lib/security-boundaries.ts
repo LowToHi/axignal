@@ -1,5 +1,11 @@
 export const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
+/**
+ * External callbacks must be added individually after signature verification exists.
+ * AXIGNAL currently exposes no browser-external mutation callback in either frontend.
+ */
+export const MUTATION_ORIGIN_EXEMPT_PATHS = new Set<string>();
+
 export type MutationSecurityInput = {
   method: string;
   pathname: string;
@@ -9,10 +15,14 @@ export type MutationSecurityInput = {
   requestOrigin: string;
   environment: string | undefined;
   legacyPasswordLoginEnabled: string | undefined;
+  exemptPaths?: ReadonlySet<string>;
 };
 
 export type MutationSecurityDecision =
-  | { allowed: true; code: "not_mutating" | "same_origin" }
+  | {
+      allowed: true;
+      code: "not_mutating" | "same_origin" | "trusted_callback";
+    }
   | {
       allowed: false;
       code:
@@ -24,10 +34,12 @@ export type MutationSecurityDecision =
       status: 403 | 404 | 503;
     };
 
-function normaliseOrigin(value: string): string | null {
+export function normaliseOrigin(value: string): string | null {
   try {
     const parsed = new URL(value);
     if (!["http:", "https:"].includes(parsed.protocol)) return null;
+    if (parsed.username || parsed.password) return null;
+    if (parsed.pathname !== "/" || parsed.search || parsed.hash) return null;
     return parsed.origin;
   } catch {
     return null;
@@ -66,10 +78,16 @@ export function evaluateMutationSecurity(
     };
   }
 
+  const exemptPaths = input.exemptPaths ?? MUTATION_ORIGIN_EXEMPT_PATHS;
+  if (exemptPaths.has(input.pathname)) {
+    return { allowed: true, code: "trusted_callback" };
+  }
+
+  const configuredOrigin = input.configuredPublicOrigin?.trim();
   const expected = normaliseOrigin(
     input.environment === "production"
-      ? input.configuredPublicOrigin ?? ""
-      : input.configuredPublicOrigin ?? input.requestOrigin
+      ? configuredOrigin ?? ""
+      : configuredOrigin || input.requestOrigin
   );
   if (!expected) {
     return {
@@ -89,7 +107,7 @@ export function evaluateMutationSecurity(
 
   if (
     input.secFetchSite !== null &&
-    input.secFetchSite.toLowerCase() !== "same-origin"
+    input.secFetchSite.trim().toLowerCase() !== "same-origin"
   ) {
     return { allowed: false, code: "cross_site_forbidden", status: 403 };
   }
@@ -97,35 +115,56 @@ export function evaluateMutationSecurity(
   return { allowed: true, code: "same_origin" };
 }
 
-export const CONTENT_SECURITY_POLICY = [
-  "default-src 'self'",
-  "base-uri 'self'",
-  "object-src 'none'",
-  "frame-ancestors 'none'",
-  "form-action 'self'",
-  "script-src 'self' 'unsafe-inline'",
-  "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https:",
-  "font-src 'self' data:",
-  "connect-src 'self' https: wss:",
-  "worker-src 'self' blob:",
-  "manifest-src 'self'",
-  "upgrade-insecure-requests"
-].join("; ");
+export function contentSecurityPolicy(production: boolean): string {
+  const scriptSources = [
+    "'self'",
+    "'unsafe-inline'",
+    "https://challenges.cloudflare.com"
+  ];
+  if (!production) scriptSources.push("'unsafe-eval'");
+
+  const directives = [
+    "default-src 'self'",
+    "base-uri 'self'",
+    "object-src 'none'",
+    "frame-ancestors 'none'",
+    "form-action 'self'",
+    `script-src ${scriptSources.join(" ")}`,
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: blob:",
+    "font-src 'self' data:",
+    "connect-src 'self' https://challenges.cloudflare.com",
+    "frame-src 'self' https://challenges.cloudflare.com",
+    "worker-src 'self' blob:",
+    "child-src 'self' blob: https://challenges.cloudflare.com",
+    "media-src 'self'",
+    "manifest-src 'self'"
+  ];
+  if (production) directives.push("upgrade-insecure-requests");
+  return directives.join("; ");
+}
 
 export function securityHeaders(production: boolean): Array<{
   key: string;
   value: string;
 }> {
   const headers = [
-    { key: "Content-Security-Policy", value: CONTENT_SECURITY_POLICY },
+    {
+      key: "Content-Security-Policy",
+      value: contentSecurityPolicy(production)
+    },
     { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
     { key: "X-Content-Type-Options", value: "nosniff" },
     { key: "X-Frame-Options", value: "DENY" },
     { key: "X-DNS-Prefetch-Control", value: "off" },
+    { key: "X-Permitted-Cross-Domain-Policies", value: "none" },
+    { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+    { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
+    { key: "Origin-Agent-Cluster", value: "?1" },
     {
       key: "Permissions-Policy",
-      value: "camera=(), microphone=(), geolocation=(), browsing-topics=()"
+      value:
+        "camera=(), microphone=(), geolocation=(), payment=(), publickey-credentials-get=(self), browsing-topics=()"
     }
   ];
   if (production) {
