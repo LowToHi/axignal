@@ -9,6 +9,7 @@ import pytest
 from axignal_api.deepseek_proposals import (
     DEEPSEEK_METHOD_VERSION,
     DEEPSEEK_MODEL,
+    DEEPSEEK_PREVIOUS_MODEL,
     DEEPSEEK_PRODUCER_ID,
     DEEPSEEK_PROMPT_VERSION,
     DeepSeekV4FlashProposalAdapter,
@@ -37,6 +38,11 @@ def load_proposal_payload() -> dict[str, object]:
         PROPOSAL_FIXTURE.read_text(encoding="utf-8")
     )
     return proposal.model_dump(mode="json")
+
+
+def test_deepseek_checkpoint_identity_is_exact_and_previous_alias_is_rejected() -> None:
+    assert DEEPSEEK_MODEL == "deepseek-v4-flash-0731"
+    assert DEEPSEEK_PREVIOUS_MODEL == "deepseek-v4-flash"
 
 
 def test_deepseek_adapter_uses_direct_bounded_json_contract() -> None:
@@ -97,10 +103,15 @@ def test_deepseek_adapter_rejects_non_official_host_and_wrong_model() -> None:
             api_key="test-secret",
             base_url="https://proxy.example.test",
         )
-    with pytest.raises(ValueError, match="deepseek-v4-flash"):
+    with pytest.raises(ValueError, match=DEEPSEEK_MODEL):
         DeepSeekV4FlashProposalAdapter(
             api_key="test-secret",
             model="deepseek-v4-pro",
+        )
+    with pytest.raises(ValueError, match=DEEPSEEK_MODEL):
+        DeepSeekV4FlashProposalAdapter(
+            api_key="test-secret",
+            model=DEEPSEEK_PREVIOUS_MODEL,
         )
 
 
@@ -124,7 +135,7 @@ def test_deepseek_adapter_fails_closed_on_invalid_json() -> None:
         )
 
 
-def test_deepseek_settings_require_secret_and_reject_ambiguous_routing(
+def test_deepseek_settings_require_secret_exact_checkpoint_and_unambiguous_routing(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setenv("AXIGNAL_PERSISTENT_RESEARCH_ENABLED", "true")
@@ -141,8 +152,14 @@ def test_deepseek_settings_require_secret_and_reject_ambiguous_routing(
         Settings.from_env().require_document_proposal_worker()
 
     monkeypatch.setenv("DEEPSEEK_API_KEY", "test-secret")
+    assert Settings.from_env().deepseek_model == DEEPSEEK_MODEL
     Settings.from_env().require_document_proposal_worker()
 
+    monkeypatch.setenv("AXIGNAL_DEEPSEEK_MODEL", DEEPSEEK_PREVIOUS_MODEL)
+    with pytest.raises(RuntimeError, match=DEEPSEEK_MODEL):
+        Settings.from_env().require_document_proposal_worker()
+
+    monkeypatch.setenv("AXIGNAL_DEEPSEEK_MODEL", DEEPSEEK_MODEL)
     monkeypatch.setenv("AXIGNAL_LOCAL_MODEL_BASE_URL", "http://local-model.test")
     with pytest.raises(RuntimeError, match="cannot be enabled together"):
         Settings.from_env().require_document_proposal_worker()
