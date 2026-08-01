@@ -76,7 +76,7 @@ export function candidatePlansFromRuntime(
       return [];
     }
 
-    if (planCode === "CONTROLLED_TRIAL_7D") {
+    if (plan.plan_code === "CONTROLLED_TRIAL_7D") {
       if (
         plan.billing_mode !== "NO_CHARGE" ||
         plan.amount_minor !== 0 ||
