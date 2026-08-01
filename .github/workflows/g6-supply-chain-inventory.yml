@@ -140,6 +140,7 @@ jobs:
     needs: immutable-inputs
     env:
       DOCKER_BUILDKIT: "1"
+      G6_NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: "sE1UcqEPMP7P8nQTWYIUav+mBCOkc/NgMKGKSkXQz0s="
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
@@ -164,6 +165,8 @@ jobs:
               --no-cache \
               --provenance=false \
               --sbom=false \
+              --build-arg AXIGNAL_BUILD_SHA="${GITHUB_SHA}" \
+              --build-arg NEXT_SERVER_ACTIONS_ENCRYPTION_KEY="${G6_NEXT_SERVER_ACTIONS_ENCRYPTION_KEY}" \
               --tag "axignal-g6-web:${variant}" \
               --file infra/pilot/Dockerfile.web \
               .
@@ -172,6 +175,8 @@ jobs:
               --no-cache \
               --provenance=false \
               --sbom=false \
+              --build-arg AXIGNAL_BUILD_SHA="${GITHUB_SHA}" \
+              --build-arg NEXT_SERVER_ACTIONS_ENCRYPTION_KEY="${G6_NEXT_SERVER_ACTIONS_ENCRYPTION_KEY}" \
               --tag "axignal-g6-landing:${variant}" \
               --file infra/landing/Dockerfile \
               .
