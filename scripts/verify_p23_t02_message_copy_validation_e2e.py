@@ -12,7 +12,8 @@ DATA_PATH = ROOT / "apps/landing/lib/landing-data.ts"
 FORM_PATH = ROOT / "apps/landing/components/pilot-access-form.tsx"
 INTAKE_PATH = ROOT / "apps/landing/app/api/pilot-intake/route.ts"
 LAYOUT_PATH = ROOT / "apps/landing/app/layout.tsx"
-PRICING_PATH = ROOT / "apps/landing/lib/candidate-pricing.ts"
+PRICING_ADAPTER_PATH = ROOT / "apps/landing/lib/candidate-pricing.ts"
+PRICING_CONTRACT_PATH = ROOT / "apps/landing/lib/candidate-pricing-contract.ts"
 PRICE_BOOK_PATH = ROOT / "data/commercial/commercial-runtime-pricing-stripe-runtime.v0.1.json"
 
 previous = json.loads(PREVIOUS_RUNTIME_PATH.read_text(encoding="utf-8"))
@@ -23,7 +24,8 @@ data = DATA_PATH.read_text(encoding="utf-8")
 form = FORM_PATH.read_text(encoding="utf-8")
 intake = INTAKE_PATH.read_text(encoding="utf-8")
 layout = LAYOUT_PATH.read_text(encoding="utf-8")
-pricing = PRICING_PATH.read_text(encoding="utf-8")
+pricing_adapter = PRICING_ADAPTER_PATH.read_text(encoding="utf-8")
+pricing_contract_source = PRICING_CONTRACT_PATH.read_text(encoding="utf-8")
 
 assert previous["task_id"] == "AX-GE2E-P23-T02"
 assert previous["message_version"] == "buyer-outcome-v1.0"
@@ -54,8 +56,11 @@ assert "No request was stored" in intake
 
 assert "index: false" in layout
 assert "follow: false" in layout
-assert "commercial-runtime-pricing-stripe-runtime.v0.1.json" in pricing
-assert 'plan.plan_code === "CONTROLLED_TRIAL_7D"' in pricing
+assert "commercial-runtime-pricing-stripe-runtime.v0.1.json" in pricing_adapter
+assert "parseCandidatePlans" in pricing_adapter
+assert 'planCode === "CONTROLLED_TRIAL_7D"' in pricing_contract_source
+assert "plan.self_service_activation !== false" in pricing_contract_source
+assert "plan.commercial_activation_authorised !== false" in pricing_contract_source
 assert "getCandidatePlans" in (ROOT / "apps/landing/app/page.tsx").read_text(encoding="utf-8")
 
 pricing_contract = price_book["pricing_contract"]
@@ -76,6 +81,7 @@ print(
             "active_message_version": current["message_version"],
             "real_landing_implemented": current["implemented_in_real_landing"],
             "controlled_trial_visible": current["controlled_trial_visible"],
+            "pricing_contract_separated_from_io": True,
             "publication_authorised": current["public_publication_authorised"],
         },
         sort_keys=True,
