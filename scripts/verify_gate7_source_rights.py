@@ -300,9 +300,15 @@ def verify_cross_file_digests(
     for reference, digest in expected.items():
         if reference != str(BUNDLE_PATH.relative_to(ROOT)):
             require(reference in bundle_refs, f"Bundle missing evidence: {reference}")
-            require(bundle_refs[reference]["sha256"] == digest, f"Bundle hash mismatch: {reference}")
+            require(
+                bundle_refs[reference]["sha256"] == digest,
+                f"Bundle hash mismatch: {reference}",
+            )
         require(reference in dossier_refs, f"Dossier missing evidence: {reference}")
-        require(dossier_refs[reference]["sha256"] == digest, f"Dossier hash mismatch: {reference}")
+        require(
+            dossier_refs[reference]["sha256"] == digest,
+            f"Dossier hash mismatch: {reference}",
+        )
     return expected
 
 
