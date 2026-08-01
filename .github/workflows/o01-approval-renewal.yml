@@ -156,7 +156,7 @@ jobs:
         run: |
           set -euo pipefail
           args=(
-            --output-dir artifacts/o01-renewal/current
+            --output-dir "$GITHUB_WORKSPACE/artifacts/o01-renewal/current"
           )
           if [ -n "${PREVIOUS_PACKAGE:-}" ]; then
             args+=(--previous-package "$PREVIOUS_PACKAGE")
@@ -296,6 +296,11 @@ jobs:
           set -euo pipefail
           result='artifacts/o01-renewal/renewal-result.json'
           test -f "$result"
+          status="$(python -c 'import json,sys; print(json.load(open(sys.argv[1])).get("status", "FAIL"))' "$result")"
+          if [ "$status" != 'PASS' ]; then
+            cat "$result"
+            exit 1
+          fi
           change_class="$(python -c 'import json,sys; print(json.load(open(sys.argv[1]))["change_class"])' "$result")"
           authority_status="$(python -c 'import json,sys; print(json.load(open(sys.argv[1]))["authority_status"])' "$result")"
           case "$change_class" in
