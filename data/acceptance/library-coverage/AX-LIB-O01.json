@@ -45,13 +45,13 @@
         "rights_expiry": null,
         "evidence": [
           {
-            "kind": "REPOSITORY_FILE",
+            "kind": "SOURCE_SNAPSHOT",
             "reference": "data/sources/accepted-source-profile.v0.1.json",
             "sha256": "c1492f0ce5b19e2d7bbf88f704e286ed3de7713182758e24a5ec9a7e255bc46a",
             "expires_at": "2026-08-31T23:59:59Z"
           },
           {
-            "kind": "REPOSITORY_FILE",
+            "kind": "SOURCE_SNAPSHOT",
             "reference": "data/procurement/global-procurement-bid-workspace-runtime.v0.1.json",
             "sha256": "1c1da39b851a3e6a5e0d5fa125f1f8ac2970a56cd8fb0d49d4d31c01a1248af2",
             "expires_at": "2026-08-31T23:59:59Z"
