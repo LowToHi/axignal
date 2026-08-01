@@ -88,7 +88,7 @@ def verify_policy(policy: dict[str, Any], legal_snapshot: dict[str, Any]) -> Non
     require(schedule["cron_utc"] == "17 6 * * *", "Renewal cron drift")
     require(schedule["renewal_window_days"] == 14, "Renewal window drift")
     require(schedule["urgent_window_days"] == 3, "Urgent window drift")
-    require(schedule["grace_period_seconds"] == 0, "Expiry grace period is forbidden")
+    require(schedule["grace_period_seconds"] == 0, "Expiry grace is forbidden")
     require(schedule["overlapping_renewal_allowed"] is True, "Overlap is disabled")
 
     require(
@@ -141,7 +141,7 @@ def verify_policy(policy: dict[str, Any], legal_snapshot: dict[str, Any]) -> Non
     }
     require(
         set(monitored_documents) == set(source_documents),
-        "Terms monitor does not cover the complete official source snapshot",
+        "Terms monitor does not cover all official source documents",
     )
     allowed_hosts = set(policy["official_source_hosts"])
     for document_id, document in monitored_documents.items():
@@ -150,9 +150,9 @@ def verify_policy(policy: dict[str, Any], legal_snapshot: dict[str, Any]) -> Non
             f"Official URL drift: {document_id}",
         )
         parsed = urlparse(document["url"])
-        require(parsed.scheme == "https", f"Non-HTTPS official source: {document_id}")
+        require(parsed.scheme == "https", f"Non-HTTPS source: {document_id}")
         require(parsed.hostname in allowed_hosts, f"Non-allowlisted source: {document_id}")
-        require(document["critical_anchors"], f"Missing legal anchors: {document_id}")
+        require(document["critical_anchors"], f"Missing anchors: {document_id}")
 
 
 def verify_implementation_contract() -> None:
@@ -176,7 +176,8 @@ def verify_implementation_contract() -> None:
     ):
         require(literal in tests, f"Renewal test contract missing: {literal}")
     for literal in (
-        "FETCH_OFFICIAL_TERMS_FROM_ALLOWLISTED_HOSTS",
+        "def fetch_document",
+        "official_source_hosts",
         "machine_generated_decision",
         '"execution_authorised": False',
         '"external_request_budget": 0',
@@ -190,7 +191,7 @@ def verify() -> dict[str, Any]:
     verify_policy(policy, legal_snapshot)
     verify_implementation_contract()
     for location, value in iter_signatures(policy):
-        require(value in (None, ""), f"Machine signature in renewal policy: {location}")
+        require(value in (None, ""), f"Machine signature in policy: {location}")
 
     files = {
         str(path.relative_to(ROOT)): hashlib.sha256(path.read_bytes()).hexdigest()
