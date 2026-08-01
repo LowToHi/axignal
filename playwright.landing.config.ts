@@ -1,6 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
 const baseURL = "http://127.0.0.1:3001";
+const publicOrigin = new URL(baseURL).origin;
 
 export default defineConfig({
   testDir: "./tests/landing",
@@ -10,6 +11,10 @@ export default defineConfig({
   reporter: process.env.CI ? [["html", { open: "never" }], ["list"]] : "list",
   use: {
     baseURL,
+    extraHTTPHeaders: {
+      origin: publicOrigin,
+      "sec-fetch-site": "same-origin"
+    },
     trace: "retain-on-failure",
     screenshot: "only-on-failure"
   },
@@ -25,7 +30,7 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
     env: {
-      AXIGNAL_LANDING_PUBLIC_ORIGIN: new URL(baseURL).origin
+      AXIGNAL_LANDING_PUBLIC_ORIGIN: publicOrigin
     }
   }
 });
