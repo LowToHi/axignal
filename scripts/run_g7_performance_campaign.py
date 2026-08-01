@@ -23,7 +23,7 @@ from typing import Any
 from uuid import UUID
 
 CONTRACT_PATH = Path(
-    "data/acceptance/performance/AX-G7-performance-capacity-contract.v0.1.json"
+    "data/acceptance/performance/AX-G7-performance-capacity-contract.v0.2.json"
 )
 ASSERTION_VERSION = "v1"
 ASSERTION_AUDIENCE = "axignal-api"
@@ -131,6 +131,26 @@ def metric_summary(values: list[float]) -> dict[str, float | int | None]:
     }
 
 
+def http_summary(results: list[HttpResult]) -> dict[str, Any]:
+    latencies = [result.latency_ms for result in results]
+    errors = sum(not result.ok for result in results)
+    statuses = sorted({result.status for result in results}, key=str)
+    return {
+        "total": len(results),
+        "errors": errors,
+        "error_rate": errors / len(results) if results else 1.0,
+        "latency_ms": metric_summary(latencies),
+        "status_counts": {
+            str(status): sum(result.status == status for result in results)
+            for status in statuses
+        },
+        "error_counts": {
+            error: sum(result.error == error for result in results)
+            for error in sorted({result.error for result in results if result.error})
+        },
+    }
+
+
 def parse_byte_value(value: str) -> float:
     units = {
         "B": 1.0,
@@ -151,28 +171,36 @@ def parse_byte_value(value: str) -> float:
 
 
 def compose_container_ids(project: str) -> list[str]:
-    command = [
-        "docker",
-        "ps",
-        "--quiet",
-        "--filter",
-        f"label=com.docker.compose.project={project}",
-    ]
-    result = subprocess.run(command, check=True, capture_output=True, text=True)
+    result = subprocess.run(
+        [
+            "docker",
+            "ps",
+            "--quiet",
+            "--filter",
+            f"label=com.docker.compose.project={project}",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
     return [item for item in result.stdout.splitlines() if item]
 
 
 def service_container_id(project: str, service: str) -> str | None:
-    command = [
-        "docker",
-        "ps",
-        "--quiet",
-        "--filter",
-        f"label=com.docker.compose.project={project}",
-        "--filter",
-        f"label=com.docker.compose.service={service}",
-    ]
-    result = subprocess.run(command, check=True, capture_output=True, text=True)
+    result = subprocess.run(
+        [
+            "docker",
+            "ps",
+            "--quiet",
+            "--filter",
+            f"label=com.docker.compose.project={project}",
+            "--filter",
+            f"label=com.docker.compose.service={service}",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
     return next((item for item in result.stdout.splitlines() if item), None)
 
 
@@ -264,9 +292,8 @@ class ResourceSampler:
             self._stop.wait(self.interval_seconds)
 
     def _sample(self) -> dict[str, Any]:
-        container_ids = compose_container_ids(self.project)
         containers: list[dict[str, Any]] = []
-        for container_id in container_ids:
+        for container_id in compose_container_ids(self.project):
             result = subprocess.run(
                 [
                     "docker",
@@ -332,61 +359,73 @@ def memory_summary(samples: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
-def execute_health_requests(
-    *, base_url: str, count: int, concurrency: int
+def execute_concurrent_requests(
+    *,
+    base_url: str,
+    path: str,
+    count: int,
+    concurrency: int,
 ) -> list[HttpResult]:
     def execute(_: int) -> HttpResult:
-        return request_json(url=f"{base_url}/readyz", timeout=5)
+        return request_json(url=f"{base_url}{path}", timeout=5)
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=concurrency) as executor:
         return list(executor.map(execute, range(count)))
 
 
-def execute_soak_health(
-    *, base_url: str, duration_seconds: int, requests_per_second: float
-) -> list[HttpResult]:
-    results: list[HttpResult] = []
-    interval = 1.0 / max(requests_per_second, 0.1)
+def execute_soak(
+    *,
+    base_url: str,
+    duration_seconds: int,
+    liveness_requests_per_second: float,
+    readiness_interval_seconds: float = 5.0,
+) -> tuple[list[HttpResult], list[HttpResult]]:
+    liveness: list[HttpResult] = []
+    readiness: list[HttpResult] = []
+    liveness_interval = 1.0 / max(liveness_requests_per_second, 0.1)
     deadline = time.monotonic() + duration_seconds
-    next_request = time.monotonic()
+    next_liveness = time.monotonic()
+    next_readiness = time.monotonic()
     while time.monotonic() < deadline:
-        results.append(request_json(url=f"{base_url}/readyz", timeout=5))
-        next_request += interval
-        delay = next_request - time.monotonic()
+        now = time.monotonic()
+        if now >= next_liveness:
+            liveness.append(request_json(url=f"{base_url}/healthz", timeout=5))
+            next_liveness += liveness_interval
+        if now >= next_readiness:
+            readiness.append(request_json(url=f"{base_url}/readyz", timeout=5))
+            next_readiness += readiness_interval_seconds
+        delay = min(next_liveness, next_readiness, deadline) - time.monotonic()
         if delay > 0:
             time.sleep(delay)
-    return results
+    return liveness, readiness
 
 
 def create_research_run(
     *, base_url: str, secret: str, index: int
-) -> tuple[int, UUID, HttpResult]:
-    tenant_index = index % len(TENANTS)
-    tenant_id = TENANTS[tenant_index]
-    subject = f"usr_g7_tenant_{tenant_index + 1}"
+) -> tuple[UUID, HttpResult]:
+    tenant_id = TENANTS[index % len(TENANTS)]
+    subject = f"usr_g7_tenant_{index % len(TENANTS) + 1}"
     assertion = build_assertion(
         secret=secret,
         tenant_id=tenant_id,
         subject=subject,
     )
-    payload = {
-        "context_id": f"ctx_g7_capacity_{index:06d}",
-        "opportunity_id": f"opp_g7_capacity_{index:06d}",
-        "question": f"G7 bounded capacity observation {index}",
-        "include_private_knowledge": False,
-    }
     result = request_json(
         url=f"{base_url}/v1/research-runs",
         method="POST",
         headers={"X-AXIGNAL-Identity-Assertion": assertion},
-        payload=payload,
+        payload={
+            "context_id": f"ctx_g7_capacity_{index:06d}",
+            "opportunity_id": f"opp_g7_capacity_{index:06d}",
+            "question": f"G7 bounded capacity observation {index}",
+            "include_private_knowledge": False,
+        },
         timeout=10,
     )
-    if not result.ok or result.body is None:
-        return tenant_index, tenant_id, result
-    result.body["tenant_id"] = str(tenant_id)
-    result.body["subject"] = subject
-    return tenant_index, tenant_id, result
+    if result.ok and result.body is not None:
+        result.body["tenant_id"] = str(tenant_id)
+        result.body["subject"] = subject
+    return tenant_id, result
 
 
 def execute_research_batch(
@@ -396,6 +435,8 @@ def execute_research_batch(
     count: int,
     concurrency: int,
     poll_timeout_seconds: int,
+    compose_project: str,
+    queue_key: str,
 ) -> dict[str, Any]:
     started = time.monotonic()
     with concurrent.futures.ThreadPoolExecutor(max_workers=concurrency) as executor:
@@ -413,8 +454,7 @@ def execute_research_batch(
     accepted: list[dict[str, Any]] = []
     enqueue_results: list[HttpResult] = []
     tenant_requested = {str(tenant): 0 for tenant in TENANTS}
-    for tenant_index, tenant_id, result in created:
-        del tenant_index
+    for tenant_id, result in created:
         tenant_requested[str(tenant_id)] += 1
         enqueue_results.append(result)
         if result.ok and result.body is not None:
@@ -429,8 +469,16 @@ def execute_research_batch(
 
     pending = {run["run_id"]: run for run in accepted}
     terminal: list[dict[str, Any]] = []
+    queue_samples: list[int] = []
     deadline = time.monotonic() + poll_timeout_seconds
+    next_queue_probe = 0.0
     while pending and time.monotonic() < deadline:
+        now = time.monotonic()
+        if now >= next_queue_probe:
+            depth = queue_depth(compose_project, queue_key)
+            if depth is not None:
+                queue_samples.append(depth)
+            next_queue_probe = now + 0.5
         for run_id, run in list(pending.items()):
             assertion = build_assertion(
                 secret=secret,
@@ -449,9 +497,7 @@ def execute_research_batch(
                         {
                             **run,
                             "state": state,
-                            "completion_seconds": (
-                                time.monotonic() - run["accepted_at"]
-                            ),
+                            "completion_seconds": time.monotonic() - run["accepted_at"],
                             "error_code": result.body.get("error_code"),
                         }
                     )
@@ -459,6 +505,9 @@ def execute_research_batch(
         if pending:
             time.sleep(0.25)
 
+    final_depth = queue_depth(compose_project, queue_key)
+    if final_depth is not None:
+        queue_samples.append(final_depth)
     elapsed = time.monotonic() - started
     completed = [run for run in terminal if run["state"] == "COMPLETED"]
     tenant_completion: dict[str, list[float]] = {str(tenant): [] for tenant in TENANTS}
@@ -496,6 +545,8 @@ def execute_research_batch(
         },
         "tenant_completion_p95_seconds": tenant_p95,
         "tenant_fairness_ratio": fairness,
+        "queue_peak_observed": max(queue_samples, default=None),
+        "queue_samples": queue_samples,
         "terminal_runs": terminal,
     }
 
@@ -503,9 +554,11 @@ def execute_research_batch(
 def evaluate(
     *,
     profile: dict[str, Any],
-    health: dict[str, Any],
+    liveness: dict[str, Any],
+    readiness: dict[str, Any],
     research: dict[str, Any],
     resources: dict[str, Any],
+    queue_peak: int | None,
     queue_residual: int | None,
     restarts: dict[str, int],
     soak_seconds: int,
@@ -521,12 +574,43 @@ def evaluate(
         if actual is None or actual < expected:
             findings.append(f"{name}:{actual}<{expected}")
 
-    minimum("health_request_count", health["total"], profile["minimum_health_requests"])
+    minimum(
+        "liveness_request_count",
+        liveness["total"],
+        profile["minimum_liveness_requests"],
+    )
+    minimum(
+        "readiness_request_count",
+        readiness["total"],
+        profile["minimum_readiness_requests"],
+    )
     minimum("research_run_count", research["requested"], profile["minimum_research_runs"])
     minimum("soak_seconds", soak_seconds, profile["minimum_soak_seconds"])
-    maximum("health_error_rate", health["error_rate"], thresholds["health_error_rate_max"])
-    maximum("health_p95_ms", health["latency_ms"]["p95"], thresholds["health_p95_ms_max"])
-    maximum("health_p99_ms", health["latency_ms"]["p99"], thresholds["health_p99_ms_max"])
+    maximum(
+        "liveness_error_rate",
+        liveness["error_rate"],
+        thresholds["liveness_error_rate_max"],
+    )
+    maximum(
+        "liveness_p95_ms",
+        liveness["latency_ms"]["p95"],
+        thresholds["liveness_p95_ms_max"],
+    )
+    maximum(
+        "liveness_p99_ms",
+        liveness["latency_ms"]["p99"],
+        thresholds["liveness_p99_ms_max"],
+    )
+    maximum(
+        "readiness_error_rate",
+        readiness["error_rate"],
+        thresholds["readiness_error_rate_max"],
+    )
+    maximum(
+        "readiness_p95_ms",
+        readiness["latency_ms"]["p95"],
+        thresholds["readiness_p95_ms_max"],
+    )
     maximum(
         "enqueue_error_rate",
         research["enqueue_error_rate"],
@@ -557,11 +641,8 @@ def evaluate(
         research["tenant_fairness_ratio"],
         thresholds["tenant_fairness_ratio_min"],
     )
-    maximum(
-        "queue_residual",
-        queue_residual,
-        thresholds["queue_residual_max"],
-    )
+    maximum("queue_peak", queue_peak, thresholds["queue_max_depth_max"])
+    maximum("queue_residual", queue_residual, thresholds["queue_residual_max"])
     maximum(
         "container_restarts",
         sum(restarts.values()),
@@ -601,10 +682,7 @@ def main() -> int:
     parser.add_argument("--soak-seconds", type=int, required=True)
     parser.add_argument("--soak-rps", type=float, default=2.0)
     parser.add_argument("--sample-interval-seconds", type=float, default=5.0)
-    parser.add_argument(
-        "--queue-key",
-        default="axignal:research:queue:v1",
-    )
+    parser.add_argument("--queue-key", default="axignal:research:queue:v1")
     args = parser.parse_args()
 
     contract = json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
@@ -617,8 +695,9 @@ def main() -> int:
     campaign_started = datetime.now(UTC)
     sampler.start()
     try:
-        burst = execute_health_requests(
+        liveness_burst = execute_concurrent_requests(
             base_url=args.base_url,
+            path="/healthz",
             count=args.health_requests,
             concurrency=args.health_concurrency,
         )
@@ -628,36 +707,43 @@ def main() -> int:
             count=args.research_runs,
             concurrency=args.research_concurrency,
             poll_timeout_seconds=args.poll_timeout_seconds,
+            compose_project=args.compose_project,
+            queue_key=args.queue_key,
         )
-        soak = execute_soak_health(
+        liveness_soak, readiness = execute_soak(
             base_url=args.base_url,
             duration_seconds=args.soak_seconds,
-            requests_per_second=args.soak_rps,
+            liveness_requests_per_second=args.soak_rps,
         )
     finally:
         sampler.stop()
 
-    all_health = burst + soak
-    health_latencies = [result.latency_ms for result in all_health]
-    health_errors = sum(not result.ok for result in all_health)
-    health = {
-        "total": len(all_health),
-        "errors": health_errors,
-        "error_rate": health_errors / len(all_health) if all_health else 1.0,
-        "latency_ms": metric_summary(health_latencies),
-        "status_counts": {
-            str(status): sum(result.status == status for result in all_health)
-            for status in sorted({result.status for result in all_health}, key=str)
-        },
-    }
+    liveness = http_summary(liveness_burst + liveness_soak)
+    readiness_summary = http_summary(readiness)
     residual = queue_depth(args.compose_project, args.queue_key)
     restarts = container_restarts(args.compose_project)
     resources = memory_summary(sampler.samples)
+    sampled_queue_peak = max(
+        (
+            sample["queue_depth"]
+            for sample in sampler.samples
+            if sample["queue_depth"] is not None
+        ),
+        default=None,
+    )
+    queue_candidates = [
+        value
+        for value in (sampled_queue_peak, research["queue_peak_observed"])
+        if value is not None
+    ]
+    queue_peak = max(queue_candidates, default=None)
     findings = evaluate(
         profile=profile,
-        health=health,
+        liveness=liveness,
+        readiness=readiness_summary,
         research=research,
         resources=resources,
+        queue_peak=queue_peak,
         queue_residual=residual,
         restarts=restarts,
         soak_seconds=args.soak_seconds,
@@ -665,6 +751,7 @@ def main() -> int:
     result = {
         "status": "PASS" if not findings else "FAIL",
         "output": "AX_G7_PERFORMANCE_CHARACTERISATION_READY",
+        "contract_id": contract["contract_id"],
         "gate": "G7",
         "gate_decision": "IN_PROGRESS",
         "profile": args.profile,
@@ -676,19 +763,15 @@ def main() -> int:
         "campaign_started_at": campaign_started.isoformat(),
         "campaign_finished_at": datetime.now(UTC).isoformat(),
         "machine_fingerprint": machine_fingerprint(),
-        "health": health,
+        "liveness": liveness,
+        "readiness": readiness_summary,
         "research": research,
         "resources": resources,
         "resource_sample_errors": sampler.errors,
         "queue": {
-            "maximum_observed_depth": max(
-                (
-                    sample["queue_depth"]
-                    for sample in sampler.samples
-                    if sample["queue_depth"] is not None
-                ),
-                default=None,
-            ),
+            "maximum_observed_depth": queue_peak,
+            "resource_sampler_peak": sampled_queue_peak,
+            "research_polling_peak": research["queue_peak_observed"],
             "residual_depth": residual,
         },
         "container_restarts": restarts,
