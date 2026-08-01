@@ -157,13 +157,18 @@ def test_proposal_persist_result_idempotent_and_orchestrated(monkeypatch) -> Non
         "admission_state": "ADMITTED",
         "kill_switch": False,
     }
-    monkeypatch.setattr(repository, "_source_object", lambda *_: uuid4())
+    source_object_id = uuid4()
+    evidence_id = uuid4()
+    candidate_id = uuid4()
+    handoff_id = uuid4()
+    dossier_id = uuid4()
+    monkeypatch.setattr(repository, "_source_object", lambda *_: source_object_id)
     monkeypatch.setattr(repository, "_fragments", lambda *_: None)
-    monkeypatch.setattr(repository, "_evidence", lambda *_: uuid4())
-    monkeypatch.setattr(repository, "_candidate", lambda *_: uuid4())
+    monkeypatch.setattr(repository, "_evidence", lambda *_: evidence_id)
+    monkeypatch.setattr(repository, "_candidate", lambda *_: candidate_id)
     monkeypatch.setattr(repository, "_package", lambda *_: {"package": True})
-    monkeypatch.setattr(repository, "_handoff", lambda *_: uuid4())
-    monkeypatch.setattr(repository, "_dossier", lambda *_: uuid4())
+    monkeypatch.setattr(repository, "_handoff", lambda *_: handoff_id)
+    monkeypatch.setattr(repository, "_dossier", lambda *_: dossier_id)
     cursor = Cursor(one=[{"state": "HANDOFF_PENDING"}])
     attach(repository, cursor)
     persisted = repository.persist_result(
@@ -172,10 +177,16 @@ def test_proposal_persist_result_idempotent_and_orchestrated(monkeypatch) -> Non
         source=source,
         result=result,
     )
-    assert persisted["idempotent_replay"] is False
-    assert len(persisted["evidence_ids"]) == 1
-    assert len(persisted["candidate_claim_ids"]) == 1
-    assert any("research.run.proposed" in str(statement) for statement, _ in cursor.executions)
+    assert "idempotent_replay" not in persisted
+    assert persisted["source_object_id"] == source_object_id
+    assert persisted["evidence_ids"] == [evidence_id]
+    assert persisted["candidate_claim_ids"] == [candidate_id]
+    assert persisted["admission_handoff_id"] == handoff_id
+    assert persisted["dossier_id"] == dossier_id
+    assert any(
+        "research.document_proposal.completed" in str(statement)
+        for statement, _ in cursor.executions
+    )
 
     attach(repository, Cursor(one=[None]))
     with pytest.raises(LookupError):
@@ -189,7 +200,14 @@ def test_proposal_persist_result_idempotent_and_orchestrated(monkeypatch) -> Non
 
 def test_proposal_failure_and_idempotent_helper_paths() -> None:
     repository = DocumentProposalRepository(proposal_dsn="postgresql://proposal")
-    job = SimpleNamespace(tenant_id=TENANT, research_run_id=RUN)
+    job = SimpleNamespace(
+        tenant_id=TENANT,
+        research_run_id=RUN,
+        as_payload=lambda: {
+            "tenant_id": str(TENANT),
+            "research_run_id": str(RUN),
+        },
+    )
     cursor = Cursor()
     attach(repository, cursor)
     repository.record_failure(
@@ -380,6 +398,18 @@ def test_ted_upsert_and_dossier_helper_paths() -> None:
         "dataset_url": "https://ted.test",
     }
     page = SimpleNamespace(
+        source_id="ted-search-api",
+        query={"country": "ES"},
+        requested_fields=("publication-number", "buyer-name"),
+        total_notice_count=1,
+        notices=(
+            SimpleNamespace(
+                fields={
+                    "publication-number": "2026-000001",
+                    "buyer-name": "Public buyer",
+                }
+            ),
+        ),
         retrieval_key="key",
         request_url="https://ted.test",
         retrieved_at="2026-08-01T00:00:00Z",
@@ -402,16 +432,20 @@ def test_ted_upsert_and_dossier_helper_paths() -> None:
     evidence_ids = [uuid4(), uuid4()]
     candidates = (
         SimpleNamespace(
-            candidate_claim_id="a",
-            statement="A",
-            evidence_key="ev-a",
-            relationship="SUPPORTING",
+            predicate="buyer_name",
+            statement="Buyer is Public buyer",
+            object_value={
+                "publication_number": "2026-000001",
+                "value": "Public buyer",
+            },
         ),
         SimpleNamespace(
-            candidate_claim_id="b",
-            statement="B",
-            evidence_key="ev-b",
-            relationship="ADVERSE",
+            predicate="country_code",
+            statement="Country is ES",
+            object_value={
+                "publication_number": "2026-000001",
+                "value": "ES",
+            },
         ),
     )
     sections = repository._dossier_sections(
@@ -421,8 +455,13 @@ def test_ted_upsert_and_dossier_helper_paths() -> None:
         canonical_by_candidate={candidate_ids[0]: uuid4()},
     )
     assert len(sections) == 2
-    assert sections[0]["status"] == "ADMITTED"
-    assert sections[1]["status"] == "PROVISIONAL"
+    notice, methodology = sections
+    assert notice["section_id"] == "ted_notice_2026_000001"
+    assert notice["status"] == "TRACEABLE"
+    assert notice["facts"][0]["canonical_claim_id"] is not None
+    assert notice["facts"][1]["canonical_claim_id"] is None
+    assert methodology["section_id"] == "methodology"
+    assert methodology["profile_id"]
 
 
 def test_repository_cursor_credentials_fail_closed() -> None:
