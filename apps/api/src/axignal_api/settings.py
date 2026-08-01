@@ -71,7 +71,7 @@ class Settings:
     validation_enabled: bool = False
     deepseek_proposal_enabled: bool = False
     deepseek_base_url: str = "https://api.deepseek.com"
-    deepseek_model: str = "deepseek-v4-flash"
+    deepseek_model: str = "deepseek-v4-flash-0731"
     deepseek_api_key: str | None = None
     deepseek_max_output_tokens: int = 1_200
     deepseek_timeout_seconds: float = 45.0
@@ -156,7 +156,7 @@ class Settings:
             ).rstrip("/"),
             deepseek_model=environ.get(
                 "AXIGNAL_DEEPSEEK_MODEL",
-                "deepseek-v4-flash",
+                "deepseek-v4-flash-0731",
             ),
             deepseek_api_key=environ.get("DEEPSEEK_API_KEY"),
             deepseek_max_output_tokens=_int_env(
@@ -202,9 +202,9 @@ class Settings:
         if self.deepseek_proposal_enabled:
             if not self.deepseek_api_key:
                 raise RuntimeError("DEEPSEEK_API_KEY is required")
-            if self.deepseek_model != "deepseek-v4-flash":
+            if self.deepseek_model != "deepseek-v4-flash-0731":
                 raise RuntimeError(
-                    "AXIGNAL_DEEPSEEK_MODEL must be deepseek-v4-flash"
+                    "AXIGNAL_DEEPSEEK_MODEL must be deepseek-v4-flash-0731"
                 )
             return
         if not self.local_model_base_url and not self.document_proposal_fixture_path:
