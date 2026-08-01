@@ -4,7 +4,11 @@ from contextlib import contextmanager
 from typing import Any, cast
 from uuid import UUID
 
-from axignal_api.concurrent_repository import ConcurrentTEDResearchRepository
+from axignal_api import persistent_research, persistent_ted_research
+from axignal_api.concurrent_repository import (
+    ConcurrentResearchRepository,
+    ConcurrentTEDResearchRepository,
+)
 from axignal_api.queue import OutboxPublisher, ResearchJob
 from axignal_api.worker import ResearchWorker
 
@@ -162,3 +166,8 @@ def test_duplicate_delivery_is_ignored_before_source_retrieval() -> None:
     )
 
     assert repository.claims == 1
+
+
+def test_api_publishers_are_wired_to_atomic_repository_types() -> None:
+    assert persistent_research.ResearchRepository is ConcurrentResearchRepository
+    assert persistent_ted_research.TEDResearchRepository is ConcurrentTEDResearchRepository
