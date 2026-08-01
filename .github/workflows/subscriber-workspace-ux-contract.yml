@@ -1,0 +1,79 @@
+name: Subscriber Workspace UX Contract
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "data/experience/subscriber-workspace-ux-contract.v1.json"
+      - "docs/research/2026-08-01-subscriber-workspace-tooling-ux-study.md"
+      - "docs/experience/subscriber-workspace-information-architecture-v1.md"
+      - "skills/subscriber-workspace-ux.registry.yaml"
+      - "skills/subscriber-workspace-ux/**"
+      - "scripts/verify_subscriber_workspace_ux_contract.py"
+      - ".github/workflows/subscriber-workspace-ux-contract.yml"
+  push:
+    branches: ["agent/**"]
+    paths:
+      - "data/experience/subscriber-workspace-ux-contract.v1.json"
+      - "docs/research/2026-08-01-subscriber-workspace-tooling-ux-study.md"
+      - "docs/experience/subscriber-workspace-information-architecture-v1.md"
+      - "skills/subscriber-workspace-ux.registry.yaml"
+      - "skills/subscriber-workspace-ux/**"
+      - "scripts/verify_subscriber_workspace_ux_contract.py"
+      - ".github/workflows/subscriber-workspace-ux-contract.yml"
+
+permissions:
+  contents: read
+
+env:
+  AXIGNAL_EXACT_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Prove exact-head checkout
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$AXIGNAL_EXACT_SHA"
+          git rev-parse HEAD
+          git rev-parse 'HEAD^{tree}'
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.13"
+
+      - name: Install validator dependency
+        run: python -m pip install --disable-pip-version-check pyyaml
+
+      - name: Validate files and contract
+        run: |
+          python -m json.tool data/experience/subscriber-workspace-ux-contract.v1.json >/dev/null
+          python -m py_compile scripts/verify_subscriber_workspace_ux_contract.py
+          python scripts/verify_subscriber_workspace_ux_contract.py | tee subscriber-workspace-ux-evidence.json
+
+      - name: Reject premature claims
+        run: |
+          ! grep -R '"public_launch_authorised": true' data/experience/subscriber-workspace-ux-contract.v1.json
+          ! grep -R '"perfect_ux_claim_authorised": true' data/experience/subscriber-workspace-ux-contract.v1.json
+          ! grep -R -E 'SUBSCRIBER_WORKSPACE_(FINAL|PERFECT)_PASS' \
+            data/experience/subscriber-workspace-ux-contract.v1.json \
+            docs/research/2026-08-01-subscriber-workspace-tooling-ux-study.md \
+            docs/experience/subscriber-workspace-information-architecture-v1.md
+
+      - name: Upload evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: subscriber-workspace-ux-${{ env.AXIGNAL_EXACT_SHA }}
+          path: subscriber-workspace-ux-evidence.json
+          if-no-files-found: error
+          retention-days: 30
