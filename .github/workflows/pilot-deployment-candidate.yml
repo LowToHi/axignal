@@ -146,21 +146,53 @@ jobs:
           docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" -f "$AXIGNAL_PILOT_COMPOSE_FILE" -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE" exec -T api \
             python -c "import urllib.request; print(urllib.request.urlopen('http://127.0.0.1:8000/readyz').read().decode())" \
             | tee pilot-api-readiness.json
-      - name: Verify authenticated demo route
+      - name: Verify protected demo without reopening legacy login
         shell: bash
         run: |
-          set -o pipefail
-          curl --fail --silent --show-error \
-            --dump-header pilot-login-headers.txt \
-            --output pilot-login.json \
-            --cookie-jar pilot-cookie-jar.txt \
-            -H 'content-type: application/json' \
-            -d '{"email":"pilot@example.test","password":"pilot-password"}' \
-            http://127.0.0.1:18080/api/auth/login
-          grep -q '"authenticated":true' pilot-login.json
-          COOKIE_VALUE="$(
-            sed -n 's/^[Ss]et-[Cc]ookie: axignal_session=\([^;]*\).*/\1/p' \
-              pilot-login-headers.txt | tr -d '\r' | tail -n 1
+          set -euo pipefail
+          set -a
+          source "$AXIGNAL_PILOT_ENV_FILE"
+          set +a
+
+          LOGIN_STATUS="$(
+            curl --silent --show-error \
+              --output pilot-login-disabled.json \
+              --write-out '%{http_code}' \
+              -H 'content-type: application/json' \
+              -d '{"email":"pilot@example.test","password":"pilot-password"}' \
+              http://127.0.0.1:18080/api/auth/login
+          )"
+          test "$LOGIN_STATUS" = "404"
+          grep -q '"error":"Not found."' pilot-login-disabled.json
+
+          COOKIE_VALUE="$(python - <<'PY'
+          import base64
+          import hashlib
+          import hmac
+          import json
+          import os
+          import time
+
+          version = "v1"
+          now = int(time.time())
+          claims = {
+              "sub": os.environ["AXIGNAL_AUTH_SUBJECT"],
+              "email": os.environ["AXIGNAL_AUTH_EMAIL"].lower(),
+              "iat": now,
+              "exp": now + 8 * 60 * 60,
+          }
+          encoded = base64.urlsafe_b64encode(
+              json.dumps(claims, separators=(",", ":")).encode("utf-8")
+          ).rstrip(b"=").decode("ascii")
+          signature = base64.urlsafe_b64encode(
+              hmac.new(
+                  os.environ["AXIGNAL_SESSION_SECRET"].encode("utf-8"),
+                  f"{version}.{encoded}".encode("utf-8"),
+                  hashlib.sha256,
+              ).digest()
+          ).rstrip(b"=").decode("ascii")
+          print(f"{version}.{encoded}.{signature}")
+          PY
           )"
           test -n "$COOKIE_VALUE"
           curl --fail --silent --show-error \
@@ -274,9 +306,7 @@ jobs:
           path: |
             pilot-web-health.json
             pilot-api-readiness.json
-            pilot-login-headers.txt
-            pilot-login.json
-            pilot-cookie-jar.txt
+            pilot-login-disabled.json
             pilot-demo-headers.txt
             pilot-demo.html
             pilot-ted-runtime.json
