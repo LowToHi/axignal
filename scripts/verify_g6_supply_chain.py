@@ -4,9 +4,9 @@ import json
 import re
 import sys
 import tomllib
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable
 
 ROOT = Path(__file__).resolve().parents[1]
 RUNTIME_LOCK = ROOT / "requirements/python-runtime.lock"
@@ -16,8 +16,13 @@ PYPROJECT = ROOT / "pyproject.toml"
 
 SHA256_RE = re.compile(r"sha256:[0-9a-f]{64}$")
 ACTION_SHA_RE = re.compile(r"^[0-9a-f]{40}$")
-PACKAGE_RE = re.compile(r"^([A-Za-z0-9_.-]+)(?:\[[^]]+\])?==([^\s;\\]+)")
-FROM_RE = re.compile(r"^\s*FROM\s+(?:--platform=\S+\s+)?(\S+)(?:\s+AS\s+(\S+))?", re.I)
+PACKAGE_RE = re.compile(
+    r"^([A-Za-z0-9_.-]+)(?:\[[^]]+\])?==([^\s;\\]+)"
+)
+FROM_RE = re.compile(
+    r"^\s*FROM\s+(?:--platform=\S+\s+)?(\S+)(?:\s+AS\s+(\S+))?",
+    re.I,
+)
 IMAGE_LINE_RE = re.compile(r"^\s*image:\s*[\"']?([^\"'\s#]+)")
 USES_RE = re.compile(r"^\s*-?\s*uses:\s*[\"']?([^\"'\s#]+)")
 DYNAMIC_RELEASE_IMAGE_RE = re.compile(
@@ -39,6 +44,13 @@ class Finding:
 
 def rel(path: Path) -> str:
     return path.relative_to(ROOT).as_posix()
+
+
+def record(
+    findings: list[Finding], path: str | Path, line: int, message: str
+) -> None:
+    rendered_path = rel(path) if isinstance(path, Path) else path
+    findings.append(Finding(rendered_path, line, message))
 
 
 def normalise_package(name: str) -> str:
@@ -78,26 +90,48 @@ def inspect_lock(path: Path, findings: list[Finding]) -> set[str]:
     packages: set[str] = set()
     for line, statement in logical_lock_statements(path):
         if statement.startswith("--"):
-            findings.append(Finding(rel(path), line, "global pip options are not permitted in the lock"))
+            record(
+                findings,
+                path,
+                line,
+                "global pip options are not permitted in the lock",
+            )
             continue
         match = PACKAGE_RE.match(statement)
         if not match:
-            findings.append(Finding(rel(path), line, "requirement is not an exact package==version pin"))
+            record(
+                findings,
+                path,
+                line,
+                "requirement is not an exact package==version pin",
+            )
             continue
         package = normalise_package(match.group(1))
         packages.add(package)
         hashes = re.findall(r"--hash=(sha256:[0-9a-f]{64})", statement)
         if not hashes:
-            findings.append(Finding(rel(path), line, f"{package} has no SHA-256 distribution hash"))
+            record(
+                findings,
+                path,
+                line,
+                f"{package} has no SHA-256 distribution hash",
+            )
         if " @ " in statement or "git+" in statement or "-e " in statement:
-            findings.append(Finding(rel(path), line, f"{package} uses a non-registry or editable source"))
+            record(
+                findings,
+                path,
+                line,
+                f"{package} uses a non-registry or editable source",
+            )
     if not packages:
-        findings.append(Finding(rel(path), 1, "lock contains no exact packages"))
+        record(findings, path, 1, "lock contains no exact packages")
     return packages
 
 
 def inspect_pyproject(
-    runtime_packages: set[str], dev_packages: set[str], findings: list[Finding]
+    runtime_packages: set[str],
+    dev_packages: set[str],
+    findings: list[Finding],
 ) -> None:
     data = tomllib.loads(PYPROJECT.read_text(encoding="utf-8"))
     runtime = data["project"]["dependencies"]
@@ -107,28 +141,53 @@ def inspect_pyproject(
     for requirement in runtime:
         package = direct_requirement_name(requirement)
         if package not in runtime_packages:
-            findings.append(Finding(rel(PYPROJECT), 1, f"runtime dependency {package} is absent from runtime lock"))
+            record(
+                findings,
+                PYPROJECT,
+                1,
+                f"runtime dependency {package} is absent from runtime lock",
+            )
         if package not in dev_packages:
-            findings.append(Finding(rel(PYPROJECT), 1, f"runtime dependency {package} is absent from dev lock"))
+            record(
+                findings,
+                PYPROJECT,
+                1,
+                f"runtime dependency {package} is absent from dev lock",
+            )
 
     for requirement in development:
         package = direct_requirement_name(requirement)
         if package not in dev_packages:
-            findings.append(Finding(rel(PYPROJECT), 1, f"development dependency {package} is absent from dev lock"))
+            record(
+                findings,
+                PYPROJECT,
+                1,
+                f"development dependency {package} is absent from dev lock",
+            )
 
     for requirement in build_requirements:
         if "==" not in requirement:
-            findings.append(Finding(rel(PYPROJECT), 1, f"build requirement is not exact: {requirement}"))
+            record(
+                findings,
+                PYPROJECT,
+                1,
+                f"build requirement is not exact: {requirement}",
+            )
         package = direct_requirement_name(requirement)
         if package not in dev_packages:
-            findings.append(Finding(rel(PYPROJECT), 1, f"build requirement {package} is absent from dev lock"))
+            record(
+                findings,
+                PYPROJECT,
+                1,
+                f"build requirement {package} is absent from dev lock",
+            )
 
 
 def load_image_lock(findings: list[Finding]) -> dict[str, str]:
     try:
         payload = json.loads(IMAGE_LOCK.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
-        findings.append(Finding(rel(IMAGE_LOCK), 1, f"cannot load image lock: {exc}"))
+        record(findings, IMAGE_LOCK, 1, f"cannot load image lock: {exc}")
         return {}
 
     expected_toolchain = {
@@ -139,19 +198,39 @@ def load_image_lock(findings: list[Finding]) -> dict[str, str]:
     }
     for key, expected in expected_toolchain.items():
         if payload.get(key) != expected:
-            findings.append(Finding(rel(IMAGE_LOCK), 1, f"unexpected {key}: {payload.get(key)!r}"))
+            record(
+                findings,
+                IMAGE_LOCK,
+                1,
+                f"unexpected {key}: {payload.get(key)!r}",
+            )
 
     result: dict[str, str] = {}
     for index, item in enumerate(payload.get("images", []), 1):
         reference = item.get("reference")
         digest = item.get("digest")
         if not isinstance(reference, str) or not isinstance(digest, str):
-            findings.append(Finding(rel(IMAGE_LOCK), index, "image entry is not a string reference/digest pair"))
+            record(
+                findings,
+                IMAGE_LOCK,
+                index,
+                "image entry is not a string reference/digest pair",
+            )
             continue
         if reference in result:
-            findings.append(Finding(rel(IMAGE_LOCK), index, f"duplicate image reference {reference}"))
+            record(
+                findings,
+                IMAGE_LOCK,
+                index,
+                f"duplicate image reference {reference}",
+            )
         if not SHA256_RE.fullmatch(digest):
-            findings.append(Finding(rel(IMAGE_LOCK), index, f"invalid digest for {reference}"))
+            record(
+                findings,
+                IMAGE_LOCK,
+                index,
+                f"invalid digest for {reference}",
+            )
         result[reference] = digest
     return result
 
@@ -168,25 +247,41 @@ def verify_image_reference(
     if DYNAMIC_RELEASE_IMAGE_RE.fullmatch(reference):
         return True
     if "@" not in reference:
-        findings.append(Finding(rel(path), line, f"mutable image reference: {reference}"))
+        record(findings, path, line, f"mutable image reference: {reference}")
         return False
     named, digest = reference.rsplit("@", 1)
     if ":" not in named.rsplit("/", 1)[-1]:
-        findings.append(Finding(rel(path), line, f"image lacks a human-readable tag before digest: {reference}"))
+        record(
+            findings,
+            path,
+            line,
+            f"image lacks a human-readable tag before digest: {reference}",
+        )
     if not SHA256_RE.fullmatch(digest):
-        findings.append(Finding(rel(path), line, f"invalid image digest: {reference}"))
+        record(findings, path, line, f"invalid image digest: {reference}")
         return False
     expected = image_lock.get(named)
     if expected is None:
-        findings.append(Finding(rel(path), line, f"image is not governed by image lock: {named}"))
+        record(
+            findings,
+            path,
+            line,
+            f"image is not governed by image lock: {named}",
+        )
     elif expected != digest:
-        findings.append(Finding(rel(path), line, f"digest differs from image lock for {named}"))
+        record(
+            findings,
+            path,
+            line,
+            f"digest differs from image lock for {named}",
+        )
     return False
 
 
 def dockerfiles() -> Iterable[Path]:
     for path in ROOT.rglob("Dockerfile*"):
-        if any(part in {".git", "node_modules", ".next", ".venv"} for part in path.parts):
+        excluded = {".git", "node_modules", ".next", ".venv"}
+        if any(part in excluded for part in path.parts):
             continue
         if path.is_file():
             yield path
@@ -196,7 +291,8 @@ def inspect_dockerfiles(image_lock: dict[str, str], findings: list[Finding]) -> 
     count = 0
     for path in sorted(dockerfiles()):
         aliases: set[str] = set()
-        for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        lines = path.read_text(encoding="utf-8").splitlines()
+        for number, line in enumerate(lines, 1):
             match = FROM_RE.match(line)
             if not match:
                 continue
@@ -226,12 +322,19 @@ def inspect_yaml_images(
     count = 0
     dynamic_release_count = 0
     for path in yaml_supply_chain_files():
-        for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        lines = path.read_text(encoding="utf-8").splitlines()
+        for number, line in enumerate(lines, 1):
             match = IMAGE_LINE_RE.match(line)
             if not match:
                 continue
             dynamic_release_count += int(
-                verify_image_reference(path, number, match.group(1), image_lock, findings)
+                verify_image_reference(
+                    path,
+                    number,
+                    match.group(1),
+                    image_lock,
+                    findings,
+                )
             )
             count += 1
     return count, dynamic_release_count
@@ -242,7 +345,8 @@ def inspect_workflow_actions(findings: list[Finding]) -> int:
     workflow_paths = sorted((ROOT / ".github/workflows").glob("*.yml"))
     workflow_paths += sorted((ROOT / ".github/workflows").glob("*.yaml"))
     for path in workflow_paths:
-        for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        lines = path.read_text(encoding="utf-8").splitlines()
+        for number, line in enumerate(lines, 1):
             match = USES_RE.match(line)
             if not match:
                 continue
@@ -252,19 +356,35 @@ def inspect_workflow_actions(findings: list[Finding]) -> int:
                 continue
             if reference.startswith("docker://"):
                 if "@sha256:" not in reference:
-                    findings.append(Finding(rel(path), number, f"mutable docker action: {reference}"))
+                    record(
+                        findings,
+                        path,
+                        number,
+                        f"mutable docker action: {reference}",
+                    )
                 continue
             if "@" not in reference:
-                findings.append(Finding(rel(path), number, f"action has no immutable revision: {reference}"))
+                record(
+                    findings,
+                    path,
+                    number,
+                    f"action has no immutable revision: {reference}",
+                )
                 continue
             revision = reference.rsplit("@", 1)[1]
             if not ACTION_SHA_RE.fullmatch(revision):
-                findings.append(Finding(rel(path), number, f"action is not pinned to a 40-character SHA: {reference}"))
+                record(
+                    findings,
+                    path,
+                    number,
+                    f"action is not pinned to a 40-character SHA: {reference}",
+                )
     return count
 
 
 def inspect_release_build_contract(findings: list[Finding]) -> None:
-    runtime = (ROOT / "infra/runtime/Dockerfile").read_text(encoding="utf-8")
+    runtime_path = ROOT / "infra/runtime/Dockerfile"
+    runtime = runtime_path.read_text(encoding="utf-8")
     for required in (
         "requirements/python-runtime.lock",
         "--require-hashes",
@@ -272,24 +392,45 @@ def inspect_release_build_contract(findings: list[Finding]) -> None:
         "PYTHONPATH=/app/apps/api/src",
     ):
         if required not in runtime:
-            findings.append(Finding("infra/runtime/Dockerfile", 1, f"missing runtime build invariant: {required}"))
+            record(
+                findings,
+                "infra/runtime/Dockerfile",
+                1,
+                f"missing runtime build invariant: {required}",
+            )
     for prohibited in ("pip install --no-cache-dir .", "pip install .", "-e ."):
         if prohibited in runtime:
-            findings.append(Finding("infra/runtime/Dockerfile", 1, f"floating project installation remains: {prohibited}"))
+            record(
+                findings,
+                "infra/runtime/Dockerfile",
+                1,
+                f"floating project installation remains: {prohibited}",
+            )
 
     for dockerfile in ("infra/pilot/Dockerfile.web", "infra/landing/Dockerfile"):
         content = (ROOT / dockerfile).read_text(encoding="utf-8")
         if "pnpm install --frozen-lockfile" not in content:
-            findings.append(Finding(dockerfile, 1, "web build does not enforce pnpm frozen lockfile"))
+            record(
+                findings,
+                dockerfile,
+                1,
+                "web build does not enforce pnpm frozen lockfile",
+            )
 
-    landing_compose = (ROOT / "infra/landing/compose.yaml").read_text(encoding="utf-8")
+    landing_path = ROOT / "infra/landing/compose.yaml"
+    landing_compose = landing_path.read_text(encoding="utf-8")
     required_reference = (
         "${AXIGNAL_LANDING_IMAGE_REPOSITORY:?required}:"
         "${AXIGNAL_LANDING_IMAGE_TAG:?required}@sha256:"
         "${AXIGNAL_LANDING_IMAGE_DIGEST:?required}"
     )
     if required_reference not in landing_compose:
-        findings.append(Finding("infra/landing/compose.yaml", 1, "landing release image is not forced into tag@sha256 form"))
+        record(
+            findings,
+            "infra/landing/compose.yaml",
+            1,
+            "landing release image is not forced into tag@sha256 form",
+        )
 
 
 def main() -> int:
