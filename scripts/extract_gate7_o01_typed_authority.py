@@ -13,6 +13,8 @@ from axignal_api.o01_approval_renewal import (
     TypedAuthorityDecision,
 )
 
+ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_PREVIOUS_EVIDENCE_DIR = ROOT / "artifacts/o01-renewal/previous"
 REQUIRED_FIELDS = {
     "authority",
     "decision",
@@ -55,6 +57,22 @@ def candidate_objects(body: str) -> list[dict[str, Any]]:
         if isinstance(value, dict):
             result.append(value)
     return result
+
+
+def discover_maximum_expiry(evidence_dir: Path) -> datetime | None:
+    packages = sorted(evidence_dir.rglob("renewal-package.v0.1.json"))
+    if not packages:
+        return None
+    if len(packages) != 1:
+        raise AuthorityExtractionError(
+            "Expected exactly one recovered renewal evidence package"
+        )
+    package = json.loads(packages[0].read_text(encoding="utf-8"))
+    if package.get("terms_observations", {}).get("mode") != "ONLINE_OFFICIAL_SOURCE_CHECK":
+        raise AuthorityExtractionError(
+            "Recovered authority evidence was not produced from official online sources"
+        )
+    return parse_time(package["renewal"]["maximum_expiry"])
 
 
 def extract_latest_decision(
@@ -181,7 +199,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--privacy-comments", type=Path, required=True)
     parser.add_argument("--expected-head", required=True)
     parser.add_argument("--expected-manifest", required=True)
-    parser.add_argument("--maximum-expiry", required=True)
+    parser.add_argument("--maximum-expiry")
+    parser.add_argument(
+        "--previous-evidence-dir",
+        type=Path,
+        default=DEFAULT_PREVIOUS_EVIDENCE_DIR,
+    )
     parser.add_argument("--output", type=Path, required=True)
     return parser
 
@@ -190,15 +213,33 @@ def main() -> int:
     args = build_parser().parse_args()
     now = datetime.now(UTC)
     try:
-        result = extract(
-            legal_comments_path=args.legal_comments,
-            privacy_comments_path=args.privacy_comments,
-            expected_head_sha=args.expected_head,
-            expected_manifest_digest=args.expected_manifest,
-            maximum_expiry=parse_time(args.maximum_expiry),
-            now=now,
-            output_path=args.output,
+        maximum_expiry = (
+            parse_time(args.maximum_expiry)
+            if args.maximum_expiry
+            else discover_maximum_expiry(args.previous_evidence_dir)
         )
+        if maximum_expiry is None:
+            if args.output.exists():
+                args.output.unlink()
+            result = {
+                "status": "MISSING",
+                "reason": "NO_PREVIOUS_ONLINE_EVIDENCE_PACKAGE",
+                "expected_head_sha": args.expected_head,
+                "expected_manifest_digest": args.expected_manifest,
+                "authorities_found": [],
+                "authorities_missing": sorted(REQUIRED_AUTHORITIES),
+                "output_written": False,
+            }
+        else:
+            result = extract(
+                legal_comments_path=args.legal_comments,
+                privacy_comments_path=args.privacy_comments,
+                expected_head_sha=args.expected_head,
+                expected_manifest_digest=args.expected_manifest,
+                maximum_expiry=maximum_expiry,
+                now=now,
+                output_path=args.output,
+            )
     except (OSError, TypeError, ValueError, json.JSONDecodeError, AuthorityExtractionError) as exc:
         print(json.dumps({"status": "FAIL", "error": str(exc)}, sort_keys=True))
         return 1
