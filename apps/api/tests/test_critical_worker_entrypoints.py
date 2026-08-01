@@ -518,6 +518,10 @@ def test_scheduler_main_routes_healthcheck(monkeypatch) -> None:
     runtime_settings = setting()
     monkeypatch.setattr(sys, "argv", ["scheduler", "--healthcheck"])
     monkeypatch.setattr(scheduler_module.Settings, "from_env", lambda: runtime_settings)
-    monkeypatch.setattr(scheduler_module, "healthcheck", lambda value: int(value is runtime_settings) - 1)
+    monkeypatch.setattr(
+        scheduler_module,
+        "healthcheck",
+        lambda value: int(value is runtime_settings) - 1,
+    )
 
     assert scheduler_module.main() == 0
