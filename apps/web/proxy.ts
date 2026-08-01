@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import {
   evaluateMutationSecurity,
   MUTATION_ORIGIN_EXEMPT_PATHS,
+  resolveRequestAuthorityOrigin,
 } from "./lib/security-boundaries";
 
 export function proxy(request: NextRequest) {
@@ -13,7 +14,11 @@ export function proxy(request: NextRequest) {
     origin: request.headers.get("origin"),
     secFetchSite: request.headers.get("sec-fetch-site"),
     configuredPublicOrigin: process.env.AXIGNAL_PUBLIC_ORIGIN,
-    requestOrigin: request.nextUrl.origin,
+    requestOrigin: resolveRequestAuthorityOrigin({
+      host: request.headers.get("host"),
+      forwardedProtocol: request.headers.get("x-forwarded-proto"),
+      requestOrigin: request.nextUrl.origin,
+    }),
     environment: process.env.NODE_ENV,
     legacyPasswordLoginEnabled:
       process.env.AXIGNAL_LEGACY_PASSWORD_LOGIN_ENABLED,

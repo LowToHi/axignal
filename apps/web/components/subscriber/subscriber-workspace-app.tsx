@@ -260,11 +260,26 @@ export function SubscriberWorkspaceApp({ serverIdentity }: AppProps) {
     const request: SubscriberWorkspaceActionRequest = { action_id: `ax_action_${crypto.randomUUID().replaceAll("-", "")}`, action_type: actionType, tenant_revision: bootstrap.tenant.revision, payload, ...(confirmed ? { confirmation: { confirmed: true, authority: "subscriber" } } : {}) };
     const response = await fetch("/api/subscriber-workspace/actions", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(request) });
     const body = await response.json();
-    if (!response.ok) throw new Error(typeof body?.error === "string" ? body.error : "Mutation was rejected.");
+    if (!response.ok) {
+      const message = typeof body?.error === "string" ? body.error : "Mutation was rejected.";
+      const code = typeof body?.code === "string" ? body.code : null;
+      throw new Error(code ? `${message} (${code})` : message);
+    }
     const result = body as SubscriberWorkspaceActionResult;
     setBootstrap(result.bootstrap);
+    setViewState(result.bootstrap.state);
+    setError(null);
     return result;
   }, [bootstrap]);
+
+  async function handleIntelligenceAction(actionType: "route.view" | "lens.change" | "opportunity.select", payload: Record<string, unknown>) {
+    try {
+      await postAction(actionType, payload);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "The investigation action could not be persisted.");
+      setViewState("partial");
+    }
+  }
 
   async function handleOperation(actionType: OperationsActionType, payload: OperationsActionPayload) {
     const record = bootstrap?.route_data.workspaces.find((item) => item.id === payload.workspaceId);
@@ -297,12 +312,13 @@ export function SubscriberWorkspaceApp({ serverIdentity }: AppProps) {
       state={viewState}
       lens={lens}
       fixtureMode={fixtureMode}
+      {...(error ? { readOnlyReason: error } : {})}
       copy={{ expectedReturn: "Evidence fit", confidence: "Assessment confidence" }}
-      onLensChange={(nextLens) => { setLens(nextLens); void postAction("lens.change", { lens: nextLens.toLowerCase() }); }}
-      onOpportunitySelect={(id) => { setSelectedOpportunity(id); void postAction("opportunity.select", { opportunity_id: id }); }}
+      onLensChange={(nextLens) => { setLens(nextLens); void handleIntelligenceAction("lens.change", { lens: nextLens.toLowerCase() }); }}
+      onOpportunitySelect={(id) => { setSelectedOpportunity(id); void handleIntelligenceAction("opportunity.select", { opportunity_id: id }); }}
       onClaimSelect={(id) => router.push(`/investigations?claim=${encodeURIComponent(id)}`)}
       onTimelineSelect={(id) => router.push(`/investigations?as_of=${encodeURIComponent(id)}`)}
-      onNavigatorSubmit={async (message) => { await postAction("route.view", { route: `/investigations?command=${message.slice(0, 80)}` }); }}
+      onNavigatorSubmit={async (message) => { await handleIntelligenceAction("route.view", { route: `/investigations?command=${message.slice(0, 80)}` }); }}
       onRetry={() => void load()}
     />;
   } else {
