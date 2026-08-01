@@ -1,0 +1,36 @@
+{
+  "images": [
+    {
+      "digest": "sha256:6771159cd4fa5d9bba1258caf0b82e6b73458c694d178ad97c5e925c2d0e1a91",
+      "reference": "python:3.13-slim"
+    },
+    {
+      "digest": "sha256:9bef0ef1e268f60627da9ba7d7605e8831d5b56ad07487d24d1aa386336d1944",
+      "reference": "node:22.14.0-alpine"
+    },
+    {
+      "digest": "sha256:77e89c11c4779c394ebeeaac1099dafb77b728abc8cd45dcaf6c4695503a0c37",
+      "reference": "postgis/postgis:17-3.5"
+    },
+    {
+      "digest": "sha256:742f40ea20b9ff2ff31db5458d127452988a2164df9e17441e191f3b72252193",
+      "reference": "postgres:17-alpine"
+    },
+    {
+      "digest": "sha256:a038175878d66b9d274fbf8be73c0305e93798b83917647f167e18cef3c71eec",
+      "reference": "valkey/valkey:8-alpine"
+    },
+    {
+      "digest": "sha256:ae4458638da8e1a91aafffb231c5f8778e964bca650c8a8cb23a7e8ac557aa3c",
+      "reference": "caddy:2.10.0-alpine"
+    },
+    {
+      "digest": "sha256:867d1074c2f750936fb9358ec9eefa009308053cf156b2c7ca1761ba5ef78452",
+      "reference": "otel/opentelemetry-collector-contrib:0.130.0"
+    }
+  ],
+  "pip": "26.1.2",
+  "pip_tools": "7.6.0",
+  "python": "3.13.14",
+  "schema": "axignal.g6-supply-chain-lock.v1"
+}
