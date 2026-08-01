@@ -13,9 +13,10 @@ from axignal_api.document_proposals import (
 )
 
 DEEPSEEK_BASE_URL = "https://api.deepseek.com"
-DEEPSEEK_MODEL = "deepseek-v4-flash"
-DEEPSEEK_METHOD_VERSION = "deepseek-json-proposal@0.1.0"
-DEEPSEEK_PROMPT_VERSION = "deepseek-document-proposal@0.1.0"
+DEEPSEEK_MODEL = "deepseek-v4-flash-0731"
+DEEPSEEK_PREVIOUS_MODEL = "deepseek-v4-flash"
+DEEPSEEK_METHOD_VERSION = "deepseek-json-proposal@0.2.0"
+DEEPSEEK_PROMPT_VERSION = "deepseek-document-proposal@0.2.0"
 DEEPSEEK_PRODUCER_ID = "deepseek-direct"
 
 
@@ -41,7 +42,7 @@ class DeepSeekV4FlashProposalAdapter:
         if parsed.path not in {"", "/"}:
             raise ValueError("DeepSeek base URL must not contain an additional path")
         if model != DEEPSEEK_MODEL:
-            raise ValueError("Only deepseek-v4-flash is admitted for this adapter")
+            raise ValueError(f"Only {DEEPSEEK_MODEL} is admitted for this adapter")
         if not api_key.strip():
             raise ValueError("DEEPSEEK_API_KEY is required")
         if not 1 <= max_output_tokens <= 4_096:
@@ -124,7 +125,7 @@ class DeepSeekV4FlashProposalAdapter:
                     "schema_version": 1,
                     "producer_type": "LOCAL_MODEL",
                     "producer_id": DEEPSEEK_PRODUCER_ID,
-                    "model_version": DEEPSEEK_MODEL,
+                    "model_version": self.model_version,
                     "method_version": DEEPSEEK_METHOD_VERSION,
                     "prompt_version": DEEPSEEK_PROMPT_VERSION,
                 }
