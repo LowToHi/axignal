@@ -29,9 +29,20 @@ def repository_path(reference: str) -> Path:
     logical = PurePosixPath(reference)
     if logical.is_absolute() or ".." in logical.parts or not logical.parts:
         raise SourceSnapshotError(f"Unsafe SOURCE_SNAPSHOT reference: {reference}")
-    candidate = (ROOT / Path(*logical.parts)).resolve()
+
+    candidate = ROOT.joinpath(*logical.parts)
+    current = ROOT
+    for part in logical.parts:
+        current = current / part
+        if current.is_symlink():
+            raise SourceSnapshotError(
+                f"SOURCE_SNAPSHOT path contains a symlink: {reference}"
+            )
+
+    repository_root = ROOT.resolve()
+    resolved = candidate.resolve(strict=False)
     try:
-        candidate.relative_to(ROOT.resolve())
+        resolved.relative_to(repository_root)
     except ValueError as exc:
         raise SourceSnapshotError(
             f"SOURCE_SNAPSHOT escapes repository root: {reference}"
@@ -60,10 +71,10 @@ def verify() -> dict[str, Any]:
             reference = evidence["reference"]
             expected = evidence["sha256"]
             target = repository_path(reference)
-            if not target.is_file() or target.is_symlink():
+            if not target.is_file():
                 raise SourceSnapshotError(
                     f"{coverage_file.relative_to(ROOT)}:{location}: "
-                    f"SOURCE_SNAPSHOT is missing, not a regular file, or a symlink: {reference}"
+                    f"SOURCE_SNAPSHOT is missing or not a regular file: {reference}"
                 )
             actual = sha256_file(target)
             if actual != expected:
