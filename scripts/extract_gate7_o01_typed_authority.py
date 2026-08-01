@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -30,6 +31,13 @@ class AuthorityExtractionError(RuntimeError):
     """Raised when external typed authority is ambiguous or structurally unsafe."""
 
 
+def parse_time(value: str) -> datetime:
+    parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    if parsed.tzinfo is None:
+        raise AuthorityExtractionError("Authority time boundary requires a timezone")
+    return parsed.astimezone(UTC)
+
+
 def load_comments(path: Path) -> list[dict[str, Any]]:
     value = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(value, list):
@@ -55,6 +63,8 @@ def extract_latest_decision(
     authority: str,
     expected_head_sha: str,
     expected_manifest_digest: str,
+    maximum_expiry: datetime,
+    now: datetime,
 ) -> tuple[TypedAuthorityDecision | None, dict[str, Any] | None]:
     matches: list[tuple[int, TypedAuthorityDecision, dict[str, Any]]] = []
     for comment in comments:
@@ -73,12 +83,19 @@ def extract_latest_decision(
                 or decision.manifest_digest != expected_manifest_digest
             ):
                 continue
+            if decision.timestamp.astimezone(UTC) > now:
+                continue
+            if decision.expiry.astimezone(UTC) > maximum_expiry:
+                continue
             comment_id = int(comment.get("id") or 0)
             user = comment.get("user") if isinstance(comment.get("user"), dict) else {}
+            comment_author = user.get("login")
+            if not isinstance(comment_author, str) or not comment_author.strip():
+                continue
             source = {
                 "issue_comment_id": comment_id,
                 "issue_comment_url": comment.get("html_url") or comment.get("url"),
-                "comment_author": user.get("login"),
+                "comment_author": comment_author,
                 "created_at": comment.get("created_at"),
                 "updated_at": comment.get("updated_at"),
             }
@@ -97,6 +114,8 @@ def extract(
     privacy_comments_path: Path,
     expected_head_sha: str,
     expected_manifest_digest: str,
+    maximum_expiry: datetime,
+    now: datetime,
     output_path: Path,
 ) -> dict[str, Any]:
     decisions: list[TypedAuthorityDecision] = []
@@ -111,6 +130,8 @@ def extract(
             authority=authority,
             expected_head_sha=expected_head_sha,
             expected_manifest_digest=expected_manifest_digest,
+            maximum_expiry=maximum_expiry,
+            now=now,
         )
         if decision is not None:
             decisions.append(decision)
@@ -124,6 +145,7 @@ def extract(
             "status": "MISSING" if len(missing) == 2 else "INCOMPLETE",
             "expected_head_sha": expected_head_sha,
             "expected_manifest_digest": expected_manifest_digest,
+            "maximum_expiry": maximum_expiry.isoformat().replace("+00:00", "Z"),
             "authorities_found": sorted(item.authority for item in decisions),
             "authorities_missing": missing,
             "output_written": False,
@@ -144,6 +166,7 @@ def extract(
         "status": "COMPLETE",
         "expected_head_sha": expected_head_sha,
         "expected_manifest_digest": expected_manifest_digest,
+        "maximum_expiry": maximum_expiry.isoformat().replace("+00:00", "Z"),
         "authorities_found": sorted(item.authority for item in decisions),
         "authorities_missing": [],
         "output_written": True,
@@ -158,18 +181,22 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--privacy-comments", type=Path, required=True)
     parser.add_argument("--expected-head", required=True)
     parser.add_argument("--expected-manifest", required=True)
+    parser.add_argument("--maximum-expiry", required=True)
     parser.add_argument("--output", type=Path, required=True)
     return parser
 
 
 def main() -> int:
     args = build_parser().parse_args()
+    now = datetime.now(UTC)
     try:
         result = extract(
             legal_comments_path=args.legal_comments,
             privacy_comments_path=args.privacy_comments,
             expected_head_sha=args.expected_head,
             expected_manifest_digest=args.expected_manifest,
+            maximum_expiry=parse_time(args.maximum_expiry),
+            now=now,
             output_path=args.output,
         )
     except (OSError, TypeError, ValueError, json.JSONDecodeError, AuthorityExtractionError) as exc:
