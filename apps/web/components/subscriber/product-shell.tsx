@@ -6,7 +6,6 @@ import {
   BookOpen,
   BriefcaseBusiness,
   Building2,
-  ChartNoAxesCombined,
   ChevronDown,
   CircleHelp,
   Command,
@@ -66,8 +65,8 @@ type NavItem = {
 
 const primary: NavItem[] = [
   { href: "/", label: "Command Center", icon: Zap },
-  { href: "/opportunities", label: "Opportunities", icon: Globe2 },
-  { href: "/investigations", label: "Investigations", icon: ChartNoAxesCombined },
+  { href: "/opportunities", label: "Opportunities", icon: Search },
+  { href: "/investigations", label: "Investigations", icon: Globe2 },
   { href: "/workspaces", label: "Workspaces", icon: BriefcaseBusiness },
   { href: "/libraries", label: "Libraries", icon: LibraryBig },
   { href: "/alerts", label: "Alerts", icon: Bell },
