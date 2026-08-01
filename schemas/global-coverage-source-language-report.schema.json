@@ -1,0 +1,417 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://axignal.com/schemas/global-coverage-source-language-report.schema.json",
+  "title": "AXIGNAL global coverage, sources and multilingual acceptance report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "gate_id",
+    "baseline_sha",
+    "decision",
+    "claims",
+    "required_languages",
+    "required_authorities",
+    "libraries"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "axignal.global-coverage-source-language-report/v0.1"
+    },
+    "gate_id": {
+      "const": "PUBLIC-LAUNCH-GATE-7"
+    },
+    "baseline_sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "decision": {
+      "enum": ["IN_PROGRESS", "PASS", "REJECTED"]
+    },
+    "claims": {
+      "$ref": "#/$defs/claims"
+    },
+    "required_languages": {
+      "type": "array",
+      "minItems": 2,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z]{2}(-[A-Z]{2})?$"
+      }
+    },
+    "required_authorities": {
+      "type": "array",
+      "minItems": 4,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "PRODUCT",
+          "SECURITY",
+          "PRIVACY_DATA_RIGHTS",
+          "LEGAL",
+          "SOURCE_QUALITY",
+          "UX_ACCESSIBILITY",
+          "HUMAN_COVERAGE_AUTHORITY"
+        ]
+      }
+    },
+    "libraries": {
+      "type": "array",
+      "minItems": 16,
+      "maxItems": 16,
+      "items": {
+        "$ref": "#/$defs/library"
+      }
+    }
+  },
+  "$defs": {
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "global_coverage_authorised",
+        "multilingual_authorised",
+        "all_sources_admitted",
+        "public_claim_text"
+      ],
+      "properties": {
+        "global_coverage_authorised": {"type": "boolean"},
+        "multilingual_authorised": {"type": "boolean"},
+        "all_sources_admitted": {"type": "boolean"},
+        "public_claim_text": {
+          "type": ["string", "null"],
+          "minLength": 1
+        }
+      }
+    },
+    "evidenceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "reference", "sha256", "expires_at"],
+      "properties": {
+        "kind": {
+          "enum": [
+            "CI_ARTIFACT",
+            "SOURCE_SNAPSHOT",
+            "LEGAL_REVIEW",
+            "QUALITY_REPORT",
+            "LANGUAGE_JOURNEY",
+            "OPERATIONS_REHEARSAL",
+            "HUMAN_APPROVAL"
+          ]
+        },
+        "reference": {"type": "string", "minLength": 1},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "gateStatus": {
+      "enum": ["MISSING", "FAIL", "PASS"]
+    },
+    "admission": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "legal",
+        "technical",
+        "quality",
+        "rights",
+        "human_authority"
+      ],
+      "properties": {
+        "legal": {"$ref": "#/$defs/gateStatus"},
+        "technical": {"$ref": "#/$defs/gateStatus"},
+        "quality": {"$ref": "#/$defs/gateStatus"},
+        "rights": {"$ref": "#/$defs/gateStatus"},
+        "human_authority": {"$ref": "#/$defs/gateStatus"}
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_id",
+        "name",
+        "state",
+        "contributes_to_public_claim",
+        "admission",
+        "rights_expiry",
+        "evidence"
+      ],
+      "properties": {
+        "source_id": {"type": "string", "minLength": 1},
+        "name": {"type": "string", "minLength": 1},
+        "state": {
+          "enum": [
+            "DISCOVERED",
+            "CANDIDATE",
+            "PRODUCT_ADMITTED",
+            "SUSPENDED",
+            "REVOKED",
+            "REJECTED"
+          ]
+        },
+        "contributes_to_public_claim": {"type": "boolean"},
+        "admission": {"$ref": "#/$defs/admission"},
+        "rights_expiry": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "evidence": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/evidenceRef"}
+        }
+      }
+    },
+    "languageJourney": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "language",
+        "ingestion",
+        "normalisation",
+        "search",
+        "presentation",
+        "evidence"
+      ],
+      "properties": {
+        "language": {
+          "type": "string",
+          "pattern": "^[a-z]{2}(-[A-Z]{2})?$"
+        },
+        "ingestion": {"$ref": "#/$defs/gateStatus"},
+        "normalisation": {"$ref": "#/$defs/gateStatus"},
+        "search": {"$ref": "#/$defs/gateStatus"},
+        "presentation": {"$ref": "#/$defs/gateStatus"},
+        "evidence": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/evidenceRef"}
+        }
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authority",
+        "decision",
+        "reviewed_at",
+        "expires_at",
+        "manifest_reference",
+        "signature"
+      ],
+      "properties": {
+        "authority": {
+          "enum": [
+            "PRODUCT",
+            "SECURITY",
+            "PRIVACY_DATA_RIGHTS",
+            "LEGAL",
+            "SOURCE_QUALITY",
+            "UX_ACCESSIBILITY",
+            "HUMAN_COVERAGE_AUTHORITY"
+          ]
+        },
+        "decision": {"enum": ["APPROVE", "REJECT"]},
+        "reviewed_at": {"type": "string", "format": "date-time"},
+        "expires_at": {"type": "string", "format": "date-time"},
+        "manifest_reference": {"type": "string", "minLength": 1},
+        "signature": {"type": "string", "minLength": 1}
+      }
+    },
+    "control": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["implemented", "tested", "evidence"],
+      "properties": {
+        "implemented": {"type": "boolean"},
+        "tested": {"type": "boolean"},
+        "evidence": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/evidenceRef"}
+        }
+      }
+    },
+    "library": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "library_id",
+        "kind",
+        "canonical_name",
+        "runtime_reference",
+        "canonical_state",
+        "countries_covered",
+        "languages",
+        "sectors",
+        "historical_depth",
+        "update_frequency",
+        "sources",
+        "rights",
+        "quality",
+        "lag",
+        "reviews",
+        "limitations",
+        "synthetic_data",
+        "kill_switch",
+        "rollback",
+        "claim_decision"
+      ],
+      "properties": {
+        "library_id": {
+          "type": "string",
+          "pattern": "^AX-LIB-[FO][0-9]{2}$"
+        },
+        "kind": {"enum": ["FOUNDATIONAL", "OPPORTUNITY"]},
+        "canonical_name": {"type": "string", "minLength": 1},
+        "runtime_reference": {"type": "string", "minLength": 1},
+        "canonical_state": {
+          "enum": ["BLOCKED", "IN_REVIEW", "ACCEPTED", "REJECTED"]
+        },
+        "countries_covered": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^[A-Z]{2}$"}
+        },
+        "languages": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/languageJourney"}
+        },
+        "sectors": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "historical_depth": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["earliest_date", "latest_date", "status", "evidence"],
+          "properties": {
+            "earliest_date": {"type": ["string", "null"], "format": "date"},
+            "latest_date": {"type": ["string", "null"], "format": "date"},
+            "status": {"$ref": "#/$defs/gateStatus"},
+            "evidence": {
+              "type": "array",
+              "items": {"$ref": "#/$defs/evidenceRef"}
+            }
+          }
+        },
+        "update_frequency": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["declared", "observed", "status", "evidence"],
+          "properties": {
+            "declared": {"type": ["string", "null"]},
+            "observed": {"type": ["string", "null"]},
+            "status": {"$ref": "#/$defs/gateStatus"},
+            "evidence": {
+              "type": "array",
+              "items": {"$ref": "#/$defs/evidenceRef"}
+            }
+          }
+        },
+        "sources": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["active", "suspended", "candidate"],
+          "properties": {
+            "active": {
+              "type": "array",
+              "items": {"$ref": "#/$defs/source"}
+            },
+            "suspended": {
+              "type": "array",
+              "items": {"$ref": "#/$defs/source"}
+            },
+            "candidate": {
+              "type": "array",
+              "items": {"$ref": "#/$defs/source"}
+            }
+          }
+        },
+        "rights": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "evidence"],
+          "properties": {
+            "status": {"$ref": "#/$defs/gateStatus"},
+            "evidence": {
+              "type": "array",
+              "items": {"$ref": "#/$defs/evidenceRef"}
+            }
+          }
+        },
+        "quality": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "completeness",
+            "accuracy",
+            "freshness",
+            "duplicate_rate",
+            "evidence"
+          ],
+          "properties": {
+            "status": {"$ref": "#/$defs/gateStatus"},
+            "completeness": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+            "accuracy": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+            "freshness": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+            "duplicate_rate": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+            "evidence": {
+              "type": "array",
+              "items": {"$ref": "#/$defs/evidenceRef"}
+            }
+          }
+        },
+        "lag": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "p50_seconds", "p95_seconds", "max_seconds", "evidence"],
+          "properties": {
+            "status": {"$ref": "#/$defs/gateStatus"},
+            "p50_seconds": {"type": ["integer", "null"], "minimum": 0},
+            "p95_seconds": {"type": ["integer", "null"], "minimum": 0},
+            "max_seconds": {"type": ["integer", "null"], "minimum": 0},
+            "evidence": {
+              "type": "array",
+              "items": {"$ref": "#/$defs/evidenceRef"}
+            }
+          }
+        },
+        "reviews": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/review"}
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "synthetic_data": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["present", "disclosed", "contributes_to_public_claim", "evidence"],
+          "properties": {
+            "present": {"type": "boolean"},
+            "disclosed": {"type": "boolean"},
+            "contributes_to_public_claim": {"type": "boolean"},
+            "evidence": {
+              "type": "array",
+              "items": {"$ref": "#/$defs/evidenceRef"}
+            }
+          }
+        },
+        "kill_switch": {"$ref": "#/$defs/control"},
+        "rollback": {"$ref": "#/$defs/control"},
+        "claim_decision": {
+          "enum": ["DENIED", "PENDING", "APPROVED"]
+        }
+      }
+    }
+  }
+}
