@@ -23,6 +23,9 @@ on:
 permissions:
   contents: read
 
+env:
+  AXIGNAL_EXACT_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+
 concurrency:
   group: g6-supply-chain-${{ github.ref }}
   cancel-in-progress: true
@@ -33,7 +36,25 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Checkout exact branch head
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Prove immutable-input exact head
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual_sha="$(git rev-parse HEAD)"
+          tree_sha="$(git rev-parse 'HEAD^{tree}')"
+          test "$actual_sha" = "$AXIGNAL_EXACT_SHA"
+          {
+            printf 'exact_head_sha=%s\n' "$actual_sha"
+            printf 'git_tree_sha=%s\n' "$tree_sha"
+          } | tee g6-immutable-exact-head.txt
+
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.13.14"
@@ -110,20 +131,21 @@ jobs:
           set -euo pipefail
           docker compose -f compose.yaml config > compose-root.rendered.yaml
           AXIGNAL_LANDING_IMAGE_REPOSITORY=registry.example.invalid/axignal/landing \
-          AXIGNAL_LANDING_IMAGE_TAG="${GITHUB_SHA}" \
+          AXIGNAL_LANDING_IMAGE_TAG="$AXIGNAL_EXACT_SHA" \
           AXIGNAL_LANDING_IMAGE_DIGEST=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa \
-          AXIGNAL_BUILD_SHA="${GITHUB_SHA}" \
+          AXIGNAL_BUILD_SHA="$AXIGNAL_EXACT_SHA" \
             docker compose -f infra/landing/compose.yaml config > compose-landing.rendered.yaml
           grep -F \
-            "registry.example.invalid/axignal/landing:${GITHUB_SHA}@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" \
+            "registry.example.invalid/axignal/landing:${AXIGNAL_EXACT_SHA}@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" \
             compose-landing.rendered.yaml
 
       - name: Upload immutable-input evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: g6-immutable-input-evidence
+          name: g6-immutable-input-evidence-${{ env.AXIGNAL_EXACT_SHA }}
           path: |
+            g6-immutable-exact-head.txt
             g6-supply-chain-verification.json
             runtime-freeze.txt
             locked-image-references.txt
@@ -142,7 +164,25 @@ jobs:
       DOCKER_BUILDKIT: "1"
       G6_NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: "sE1UcqEPMP7P8nQTWYIUav+mBCOkc/NgMKGKSkXQz0s="
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Checkout exact branch head
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Prove reproducible-image exact head
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual_sha="$(git rev-parse HEAD)"
+          tree_sha="$(git rev-parse 'HEAD^{tree}')"
+          test "$actual_sha" = "$AXIGNAL_EXACT_SHA"
+          {
+            printf 'exact_head_sha=%s\n' "$actual_sha"
+            printf 'git_tree_sha=%s\n' "$tree_sha"
+          } | tee g6-images-exact-head.txt
+
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.13.14"
@@ -165,7 +205,7 @@ jobs:
               --no-cache \
               --provenance=false \
               --sbom=false \
-              --build-arg AXIGNAL_BUILD_SHA="${GITHUB_SHA}" \
+              --build-arg AXIGNAL_BUILD_SHA="$AXIGNAL_EXACT_SHA" \
               --build-arg NEXT_SERVER_ACTIONS_ENCRYPTION_KEY="${G6_NEXT_SERVER_ACTIONS_ENCRYPTION_KEY}" \
               --tag "axignal-g6-web:${variant}" \
               --file infra/pilot/Dockerfile.web \
@@ -175,7 +215,7 @@ jobs:
               --no-cache \
               --provenance=false \
               --sbom=false \
-              --build-arg AXIGNAL_BUILD_SHA="${GITHUB_SHA}" \
+              --build-arg AXIGNAL_BUILD_SHA="$AXIGNAL_EXACT_SHA" \
               --build-arg NEXT_SERVER_ACTIONS_ENCRYPTION_KEY="${G6_NEXT_SERVER_ACTIONS_ENCRYPTION_KEY}" \
               --tag "axignal-g6-landing:${variant}" \
               --file infra/landing/Dockerfile \
@@ -188,6 +228,16 @@ jobs:
               --tag "axignal-g6-postgres:${variant}" \
               infra/postgres
           done
+
+      - name: Verify image build identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          for image in axignal-g6-web:a axignal-g6-web:b axignal-g6-landing:a axignal-g6-landing:b; do
+            configured_sha="$(docker inspect --format '{{ index .Config.Env }}' "$image" | grep -o "AXIGNAL_BUILD_SHA=[0-9a-f]\{40\}" | cut -d= -f2)"
+            test "$configured_sha" = "$AXIGNAL_EXACT_SHA"
+            printf 'PASS\t%s\t%s\n' "$image" "$configured_sha"
+          done | tee g6-image-build-identities.tsv
 
       - name: Capture effective filesystem manifests
         shell: bash
@@ -292,6 +342,7 @@ jobs:
           print(json.dumps({
               "schema": "axignal.g6-image-reproducibility.v1",
               "status": "PASS",
+              "exact_head_sha": "${AXIGNAL_EXACT_SHA}",
               "manifests": manifests,
           }, indent=2, sort_keys=True))
           PY
@@ -333,8 +384,10 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: g6-image-reproducibility-evidence
+          name: g6-image-reproducibility-evidence-${{ env.AXIGNAL_EXACT_SHA }}
           path: |
+            g6-images-exact-head.txt
+            g6-image-build-identities.tsv
             *-a.json
             *-b.json
             runtime-packages-a.txt
