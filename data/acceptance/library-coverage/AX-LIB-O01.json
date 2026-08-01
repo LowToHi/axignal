@@ -1,0 +1,127 @@
+{
+  "library_id": "AX-LIB-O01",
+  "kind": "OPPORTUNITY",
+  "canonical_name": "Global Public Procurement",
+  "runtime_reference": "data/procurement/global-procurement-bid-workspace-runtime.v0.1.json",
+  "canonical_state": "BLOCKED",
+  "countries_covered": [],
+  "languages": [
+    {"language": "en", "ingestion": "MISSING", "normalisation": "MISSING", "search": "MISSING", "presentation": "MISSING", "evidence": []},
+    {"language": "es", "ingestion": "MISSING", "normalisation": "MISSING", "search": "MISSING", "presentation": "MISSING", "evidence": []},
+    {"language": "fr", "ingestion": "MISSING", "normalisation": "MISSING", "search": "MISSING", "presentation": "MISSING", "evidence": []},
+    {"language": "de", "ingestion": "MISSING", "normalisation": "MISSING", "search": "MISSING", "presentation": "MISSING", "evidence": []},
+    {"language": "pt", "ingestion": "MISSING", "normalisation": "MISSING", "search": "MISSING", "presentation": "MISSING", "evidence": []},
+    {"language": "it", "ingestion": "MISSING", "normalisation": "MISSING", "search": "MISSING", "presentation": "MISSING", "evidence": []}
+  ],
+  "sectors": ["PUBLIC_PROCUREMENT"],
+  "historical_depth": {
+    "earliest_date": null,
+    "latest_date": null,
+    "status": "MISSING",
+    "evidence": []
+  },
+  "update_frequency": {
+    "declared": null,
+    "observed": null,
+    "status": "MISSING",
+    "evidence": []
+  },
+  "sources": {
+    "active": [],
+    "suspended": [],
+    "candidate": [
+      {
+        "source_id": "src_ted_search_api_v3",
+        "name": "TED Search API v3.0",
+        "state": "CANDIDATE",
+        "contributes_to_public_claim": false,
+        "admission": {
+          "legal": "MISSING",
+          "technical": "PASS",
+          "quality": "MISSING",
+          "rights": "PASS",
+          "human_authority": "MISSING"
+        },
+        "rights_expiry": null,
+        "evidence": [
+          {
+            "kind": "REPOSITORY_FILE",
+            "reference": "data/sources/accepted-source-profile.v0.1.json",
+            "sha256": "c1492f0ce5b19e2d7bbf88f704e286ed3de7713182758e24a5ec9a7e255bc46a",
+            "expires_at": "2026-08-31T23:59:59Z"
+          },
+          {
+            "kind": "REPOSITORY_FILE",
+            "reference": "data/procurement/global-procurement-bid-workspace-runtime.v0.1.json",
+            "sha256": "1c1da39b851a3e6a5e0d5fa125f1f8ac2970a56cd8fb0d49d4d31c01a1248af2",
+            "expires_at": "2026-08-31T23:59:59Z"
+          },
+          {
+            "kind": "CI_ARTIFACT",
+            "reference": "github-actions:artifact:8821132341/pilot-ted-runtime.json",
+            "sha256": "c44f53a6f61fb46bb242c99e10afb5854d58e88e9e502cbd73ec933862a54c22",
+            "expires_at": "2026-08-31T23:59:59Z"
+          },
+          {
+            "kind": "CI_ARTIFACT",
+            "reference": "github-actions:artifact:8821132341/pilot-web-health.json",
+            "sha256": "b88d836f255028d0678e9889cec0ee4a2f2b9903710b75d3f48b6c9b1ac3266e",
+            "expires_at": "2026-08-31T23:59:59Z"
+          },
+          {
+            "kind": "CI_ARTIFACT",
+            "reference": "github-actions:artifact:8821132341/pilot-runtime-exact-head.txt",
+            "sha256": "c950fcb05aeb674a22ae6d7ca388147e7af9cb35290bf29fa30f1ead2553ae5f",
+            "expires_at": "2026-08-31T23:59:59Z"
+          }
+        ]
+      }
+    ]
+  },
+  "rights": {
+    "status": "MISSING",
+    "evidence": []
+  },
+  "quality": {
+    "status": "MISSING",
+    "completeness": null,
+    "accuracy": null,
+    "freshness": null,
+    "duplicate_rate": null,
+    "evidence": []
+  },
+  "lag": {
+    "status": "MISSING",
+    "p50_seconds": null,
+    "p95_seconds": null,
+    "max_seconds": null,
+    "evidence": []
+  },
+  "reviews": [],
+  "limitations": [
+    "The retained exact-head evidence proves one bounded authenticated TED Search API request, not country-level or global procurement coverage.",
+    "TED is recorded as a candidate for Gate 7 because technical execution and scoped metadata rights do not satisfy legal, quality and Human Coverage Authority admission together.",
+    "The accepted source profile forbids API redistribution and does not authorize copying procurement bodies or source-native descriptions into a public AXIGNAL API.",
+    "No representative measurement yet supports historical depth, observed update frequency, completeness, accuracy, freshness, duplicate rate or end-to-end lag.",
+    "The required English, Spanish, French, German, Portuguese and Italian ingestion-to-presentation journeys have not been executed on representative real notices.",
+    "No Gate 7 source kill-switch rehearsal or library rollback rehearsal is bound to the current evidence head.",
+    "No public global-procurement or multilingual claim is authorized."
+  ],
+  "synthetic_data": {
+    "present": false,
+    "disclosed": true,
+    "contributes_to_public_claim": false,
+    "evidence": []
+  },
+  "kill_switch": {
+    "implemented": false,
+    "tested": false,
+    "evidence": []
+  },
+  "rollback": {
+    "implemented": false,
+    "tested": false,
+    "evidence": []
+  },
+  "claim_decision": "DENIED"
+}
