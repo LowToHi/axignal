@@ -6,7 +6,6 @@ from pathlib import Path
 
 import httpx
 import pytest
-
 from scripts.asset_download_security import (
     AssetDownloadError,
     AssetDownloadPolicy,
