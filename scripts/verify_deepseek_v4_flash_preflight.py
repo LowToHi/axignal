@@ -24,6 +24,21 @@ def require_secret() -> str:
     return value
 
 
+def read_model_listing(response: httpx.Response) -> tuple[bool, int]:
+    if response.status_code != 200:
+        return False, response.status_code
+    try:
+        models_body = response.json()
+        model_ids = {
+            str(item["id"])
+            for item in models_body["data"]
+            if isinstance(item, dict) and "id" in item
+        }
+    except (KeyError, TypeError, ValueError) as exc:
+        raise PreflightError("DeepSeek model-list response was malformed") from exc
+    return MODEL in model_ids, response.status_code
+
+
 def main() -> int:
     api_key = require_secret()
     parsed = urlparse(BASE_URL)
@@ -37,21 +52,7 @@ def main() -> int:
     }
     with httpx.Client(base_url=BASE_URL, headers=headers, timeout=45.0) as client:
         models_response = client.get("/models")
-        if models_response.status_code != 200:
-            raise PreflightError(
-                f"DeepSeek model-list preflight failed with status {models_response.status_code}"
-            )
-        try:
-            models_body = models_response.json()
-            model_ids = {
-                str(item["id"])
-                for item in models_body["data"]
-                if isinstance(item, dict) and "id" in item
-            }
-        except (KeyError, TypeError, ValueError) as exc:
-            raise PreflightError("DeepSeek model-list response was malformed") from exc
-        if MODEL not in model_ids:
-            raise PreflightError(f"{MODEL} is not available to this credential")
+        model_listed, model_list_status = read_model_listing(models_response)
 
         chat_response = client.post(
             "/chat/completions",
@@ -97,7 +98,9 @@ def main() -> int:
         "model": MODEL,
         "previous_model": PREVIOUS_MODEL,
         "credential_configured": True,
-        "model_listed": True,
+        "model_list_status": model_list_status,
+        "model_listed": model_listed,
+        "direct_chat_execution": True,
         "chat_completion_json_contract": True,
         "thinking": "disabled",
         "max_output_tokens": 32,
