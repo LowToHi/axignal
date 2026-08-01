@@ -11,6 +11,7 @@ DOMAIN_PATH = ROOT / "apps/api/src/axignal_api/procurement_domain.py"
 DOMAIN_TEST_PATH = ROOT / "apps/api/tests/test_procurement_domain_contracts.py"
 DEEPSEEK_PATH = ROOT / "apps/api/src/axignal_api/deepseek_proposals.py"
 SETTINGS_PATH = ROOT / "apps/api/src/axignal_api/settings.py"
+PROPOSAL_WORKER_PATH = ROOT / "apps/api/src/axignal_api/proposal_worker.py"
 DEEPSEEK_TEST_PATH = ROOT / "apps/api/tests/test_deepseek_v4_flash_proposals.py"
 
 EXPECTED_ENTITIES = {
@@ -70,6 +71,10 @@ def verify_contract(contract: dict[str, Any]) -> None:
     require(contract["status"] == "IMPLEMENTED_CANDIDATE", "Unsafe task status")
     require(contract["output"] == "O01_DOMAIN_CONTRACTS_PASS", "Output contract drift")
     require(set(contract["entities"]) == EXPECTED_ENTITIES, "Domain entity set drift")
+    require(
+        str(PROPOSAL_WORKER_PATH.relative_to(ROOT)) in contract["required_files"],
+        "Proposal worker is not part of the governed file set",
+    )
 
     claims = contract["claim_effect"]
     require(claims["source_state"] == "CANDIDATE", "TED source was activated")
@@ -214,6 +219,15 @@ def verify_implementation() -> None:
     )
 
     require_source_literals(
+        PROPOSAL_WORKER_PATH,
+        (
+            "DEEPSEEK_CHECKPOINT",
+            "model=settings.deepseek_model",
+            "checkpoint=DEEPSEEK_CHECKPOINT",
+        ),
+    )
+
+    require_source_literals(
         DEEPSEEK_TEST_PATH,
         (
             API_MODEL,
@@ -237,6 +251,7 @@ def verify() -> dict[str, Any]:
             DOMAIN_TEST_PATH,
             DEEPSEEK_PATH,
             SETTINGS_PATH,
+            PROPOSAL_WORKER_PATH,
             DEEPSEEK_TEST_PATH,
         )
     }
