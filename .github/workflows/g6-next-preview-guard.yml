@@ -1,0 +1,43 @@
+name: G6 Inactive Next Preview Guard
+
+on:
+  pull_request:
+    paths:
+      - "apps/web/**"
+      - "apps/landing/**"
+      - "infra/pilot/Dockerfile.web"
+      - "infra/landing/Dockerfile"
+      - "scripts/verify_no_next_preview_mode.py"
+      - ".github/workflows/g6-next-preview-guard.yml"
+  push:
+    branches:
+      - main
+      - "agent/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: g6-next-preview-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Reject active Draft or Preview Mode
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.13.14"
+      - name: Verify preview capability remains absent
+        run: python scripts/verify_no_next_preview_mode.py | tee g6-next-preview-guard.json
+      - name: Upload guard evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: g6-next-preview-guard
+          path: g6-next-preview-guard.json
+          if-no-files-found: ignore
+          retention-days: 14
