@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import subprocess
 from copy import deepcopy
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -41,9 +42,14 @@ def load_json(path: Path) -> dict[str, Any]:
     return payload
 
 
-def validate_schema(payload: dict[str, Any], schema: dict[str, Any], label: str) -> None:
+def validate_schema(
+    payload: dict[str, Any], schema: dict[str, Any], label: str
+) -> None:
     validator = Draft202012Validator(schema, format_checker=FormatChecker())
-    errors = sorted(validator.iter_errors(payload), key=lambda item: list(item.path))
+    errors = sorted(
+        validator.iter_errors(payload),
+        key=lambda error: tuple(str(part) for part in error.absolute_path),
+    )
     if not errors:
         return
     rendered = []
@@ -51,6 +57,17 @@ def validate_schema(payload: dict[str, Any], schema: dict[str, Any], label: str)
         location = ".".join(str(part) for part in error.absolute_path) or "$"
         rendered.append(f"{label}:{location}: {error.message}")
     raise Gate7ContractError("\n".join(rendered))
+
+
+def validate_library_schema(
+    library: dict[str, Any], report_schema: dict[str, Any], label: str
+) -> None:
+    schema = {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$defs": report_schema["$defs"],
+        "$ref": "#/$defs/library",
+    }
+    validate_schema(library, schema, label)
 
 
 def ensure_unique(values: list[str], label: str) -> None:
@@ -68,6 +85,38 @@ def parse_time(value: str) -> datetime:
     return parsed.astimezone(UTC)
 
 
+def parse_date(value: str) -> date:
+    try:
+        return date.fromisoformat(value)
+    except ValueError as exc:
+        raise Gate7ContractError(f"Invalid date: {value}") from exc
+
+
+def git_value(*arguments: str) -> str:
+    result = subprocess.run(
+        ["git", *arguments],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        detail = result.stderr.strip() or result.stdout.strip()
+        raise Gate7ContractError(f"Git command failed: {detail}")
+    return result.stdout.strip()
+
+
+def exact_git_identity() -> tuple[str, str]:
+    actual_head = git_value("rev-parse", "HEAD")
+    expected_head = os.environ.get("AXIGNAL_EVIDENCE_HEAD_SHA", actual_head)
+    if actual_head != expected_head:
+        raise Gate7ContractError(
+            f"Evidence checkout {actual_head} does not equal expected head {expected_head}"
+        )
+    git_tree = git_value("rev-parse", "HEAD^{tree}")
+    return actual_head, git_tree
+
+
 def baseline_is_ancestor(baseline_sha: str) -> bool:
     result = subprocess.run(
         ["git", "merge-base", "--is-ancestor", baseline_sha, "HEAD"],
@@ -80,9 +129,9 @@ def baseline_is_ancestor(baseline_sha: str) -> bool:
         return True
     if result.returncode == 1:
         return False
+    detail = result.stderr.strip() or result.stdout.strip()
     raise Gate7ContractError(
-        "Unable to verify Gate 7 baseline ancestry: "
-        f"{result.stderr.strip() or result.stdout.strip()}"
+        f"Unable to verify Gate 7 baseline ancestry: {detail}"
     )
 
 
@@ -107,7 +156,7 @@ def missing_library(
         "runtime_reference": library["runtime_reference"],
         "canonical_state": "BLOCKED",
         "countries_covered": [],
-        "languages": [missing_language(language) for language in required_languages],
+        "languages": [missing_language(item) for item in required_languages],
         "sectors": [],
         "historical_depth": {
             "earliest_date": None,
@@ -157,14 +206,15 @@ def missing_library(
 
 
 def evidence_current(evidence: list[dict[str, Any]], now: datetime) -> bool:
-    return bool(evidence) and all(parse_time(item["expires_at"]) > now for item in evidence)
+    return bool(evidence) and all(
+        parse_time(item["expires_at"]) > now for item in evidence
+    )
 
 
 def source_is_admitted(source: dict[str, Any], now: datetime) -> bool:
-    admission = source["admission"]
     if source["state"] != "PRODUCT_ADMITTED":
         return False
-    if any(value != PASS for value in admission.values()):
+    if any(value != PASS for value in source["admission"].values()):
         return False
     rights_expiry = source["rights_expiry"]
     if rights_expiry is not None and parse_time(rights_expiry) <= now:
@@ -174,9 +224,19 @@ def source_is_admitted(source: dict[str, Any], now: datetime) -> bool:
 
 def validate_source_boundaries(library: dict[str, Any], now: datetime) -> None:
     source_ids: list[str] = []
+    allowed_states = {
+        "active": {"PRODUCT_ADMITTED"},
+        "suspended": {"SUSPENDED", "REVOKED"},
+        "candidate": {"DISCOVERED", "CANDIDATE", "REJECTED"},
+    }
     for bucket_name in ("active", "suspended", "candidate"):
         for source in library["sources"][bucket_name]:
             source_ids.append(source["source_id"])
+            if source["state"] not in allowed_states[bucket_name]:
+                raise Gate7ContractError(
+                    f"{library['library_id']} source {source['source_id']} has state "
+                    f"{source['state']} in bucket {bucket_name}"
+                )
             if bucket_name == "active" and not source_is_admitted(source, now):
                 raise Gate7ContractError(
                     f"{library['library_id']} exposes a non-admitted active source: "
@@ -187,15 +247,15 @@ def validate_source_boundaries(library: dict[str, Any], now: datetime) -> None:
                     f"{library['library_id']} lets {bucket_name} source "
                     f"{source['source_id']} contribute to a public claim"
                 )
-            if bucket_name == "suspended" and source["state"] not in {
-                "SUSPENDED",
-                "REVOKED",
-            }:
-                raise Gate7ContractError(
-                    f"{library['library_id']} has an invalid suspended-source state"
-                )
     ensure_unique(source_ids, f"{library['library_id']} source ids")
 
+
+def active_sources_pass(sources: list[dict[str, Any]], now: datetime) -> bool:
+    return (
+        bool(sources)
+        and all(source_is_admitted(source, now) for source in sources)
+        and any(source["contributes_to_public_claim"] for source in sources)
+    )
 
 
 def language_journeys_pass(
@@ -237,11 +297,54 @@ def reviews_pass(
             return False
         if not review["signature"].strip():
             return False
+        if not review["manifest_reference"].strip():
+            return False
     return True
 
 
 def metric_block_pass(block: dict[str, Any], now: datetime) -> bool:
     return block["status"] == PASS and evidence_current(block["evidence"], now)
+
+
+def historical_depth_pass(block: dict[str, Any], now: datetime) -> bool:
+    if not metric_block_pass(block, now):
+        return False
+    earliest = block["earliest_date"]
+    latest = block["latest_date"]
+    if earliest is None or latest is None:
+        return False
+    return parse_date(earliest) <= parse_date(latest)
+
+
+def update_frequency_pass(block: dict[str, Any], now: datetime) -> bool:
+    return (
+        metric_block_pass(block, now)
+        and bool(block["declared"])
+        and bool(block["observed"])
+    )
+
+
+def quality_pass(block: dict[str, Any], now: datetime) -> bool:
+    metrics = (
+        block["completeness"],
+        block["accuracy"],
+        block["freshness"],
+        block["duplicate_rate"],
+    )
+    return metric_block_pass(block, now) and all(
+        metric is not None for metric in metrics
+    )
+
+
+def lag_pass(block: dict[str, Any], now: datetime) -> bool:
+    if not metric_block_pass(block, now):
+        return False
+    p50 = block["p50_seconds"]
+    p95 = block["p95_seconds"]
+    maximum = block["max_seconds"]
+    if p50 is None or p95 is None or maximum is None:
+        return False
+    return p50 <= p95 <= maximum
 
 
 def control_pass(control: dict[str, Any], now: datetime) -> bool:
@@ -250,6 +353,14 @@ def control_pass(control: dict[str, Any], now: datetime) -> bool:
         and control["tested"]
         and evidence_current(control["evidence"], now)
     )
+
+
+def synthetic_data_pass(synthetic: dict[str, Any], now: datetime) -> bool:
+    if synthetic["contributes_to_public_claim"]:
+        return False
+    if not synthetic["present"]:
+        return synthetic["disclosed"]
+    return synthetic["disclosed"] and evidence_current(synthetic["evidence"], now)
 
 
 def library_passes(
@@ -265,31 +376,23 @@ def library_passes(
         return False
     if not library["limitations"]:
         return False
-    if not library["sources"]["active"]:
-        return False
-    if any(
-        not source_is_admitted(source, now)
-        for source in library["sources"]["active"]
-    ):
+    if not active_sources_pass(library["sources"]["active"], now):
         return False
     if not language_journeys_pass(library, required_languages, now):
         return False
-    if not metric_block_pass(library["historical_depth"], now):
+    if not historical_depth_pass(library["historical_depth"], now):
         return False
-    if not metric_block_pass(library["update_frequency"], now):
+    if not update_frequency_pass(library["update_frequency"], now):
         return False
     if not metric_block_pass(library["rights"], now):
         return False
-    if not metric_block_pass(library["quality"], now):
+    if not quality_pass(library["quality"], now):
         return False
-    if not metric_block_pass(library["lag"], now):
+    if not lag_pass(library["lag"], now):
         return False
     if not reviews_pass(library, required_authorities, now):
         return False
-    synthetic = library["synthetic_data"]
-    if synthetic["present"] and not synthetic["disclosed"]:
-        return False
-    if synthetic["contributes_to_public_claim"]:
+    if not synthetic_data_pass(library["synthetic_data"], now):
         return False
     if not control_pass(library["kill_switch"], now):
         return False
@@ -301,9 +404,7 @@ def library_passes(
 def library_rejected(library: dict[str, Any]) -> bool:
     if library["canonical_state"] == "REJECTED":
         return True
-    if library["claim_decision"] == "DENIED" and any(
-        review["decision"] == "REJECT" for review in library["reviews"]
-    ):
+    if any(review["decision"] == "REJECT" for review in library["reviews"]):
         return True
     status_blocks = (
         library["historical_depth"],
@@ -334,9 +435,8 @@ def validate_claim_authority(report: dict[str, Any]) -> None:
 
 
 def build_report(
-    index: dict[str, Any], report_schema: dict[str, Any]
+    index: dict[str, Any], report_schema: dict[str, Any], now: datetime
 ) -> tuple[dict[str, Any], list[str]]:
-    now = datetime.now(UTC)
     required_languages = index["required_languages"]
     required_authorities = index["required_authorities"]
     libraries: list[dict[str, Any]] = []
@@ -354,6 +454,11 @@ def build_report(
         else:
             missing_files.append(entry["evidence_file"])
             library = missing_library(entry, required_languages)
+        validate_library_schema(
+            library,
+            report_schema,
+            f"library:{entry['library_id']}",
+        )
         for field in ("library_id", "kind", "canonical_name", "runtime_reference"):
             if library[field] != entry[field]:
                 raise Gate7ContractError(
@@ -365,7 +470,9 @@ def build_report(
     library_ids = [library["library_id"] for library in libraries]
     ensure_unique(library_ids, "Gate 7 library ids")
     if set(library_ids) != EXPECTED_LIBRARY_IDS:
-        raise Gate7ContractError("Gate 7 must cover exactly AX-LIB-F01-F07 and O01-O09")
+        raise Gate7ContractError(
+            "Gate 7 must cover exactly AX-LIB-F01-F07 and O01-O09"
+        )
 
     rejected = any(library_rejected(library) for library in libraries)
     all_pass = not missing_files and all(
@@ -381,8 +488,9 @@ def build_report(
     claim_text = None
     if decision == PASS:
         claim_text = (
-            "AXIGNAL provides the countries, languages, sectors, history and sources "
-            "listed in this report; disclosed limitations remain part of the claim."
+            "AXIGNAL provides only the countries, languages, sectors, historical "
+            "periods and admitted sources listed in this report; every disclosed "
+            "limitation remains part of the claim."
         )
 
     report = {
@@ -405,12 +513,21 @@ def build_report(
     return report, missing_files
 
 
-def render_markdown(report: dict[str, Any], missing_files: list[str]) -> str:
+def render_markdown(
+    report: dict[str, Any],
+    missing_files: list[str],
+    evidence_head_sha: str,
+    git_tree: str,
+    report_sha256: str,
+) -> str:
     claims = report["claims"]
     lines = [
         "# AXIGNAL Gate 7 — Global coverage, sources and multilingual acceptance",
         "",
+        f"- Evidence head SHA: `{evidence_head_sha}`",
+        f"- Git tree: `{git_tree}`",
         f"- Baseline SHA: `{report['baseline_sha']}`",
+        f"- Report SHA-256: `{report_sha256}`",
         f"- Decision: **{report['decision']}**",
         "- Global coverage claim: "
         + ("AUTHORISED" if claims["global_coverage_authorised"] else "DENIED"),
@@ -419,7 +536,7 @@ def render_markdown(report: dict[str, Any], missing_files: list[str]) -> str:
         "- All sources admitted: "
         + ("YES" if claims["all_sources_admitted"] else "NO"),
         "",
-        "| Library | Canonical state | Countries | Active sources | Languages PASS | Claim |",
+        "| Library | State | Countries | Active sources | Languages PASS | Claim |",
         "|---|---|---:|---:|---:|---|",
     ]
     for library in report["libraries"]:
@@ -428,12 +545,17 @@ def render_markdown(report: dict[str, Any], missing_files: list[str]) -> str:
             for journey in library["languages"]
             if all(
                 journey[stage] == PASS
-                for stage in ("ingestion", "normalisation", "search", "presentation")
+                for stage in (
+                    "ingestion",
+                    "normalisation",
+                    "search",
+                    "presentation",
+                )
             )
         )
         lines.append(
-            "| {library_id} | {state} | {countries} | {sources} | {languages} | "
-            "{claim} |".format(
+            "| {library_id} | {state} | {countries} | {sources} | "
+            "{languages} | {claim} |".format(
                 library_id=library["library_id"],
                 state=library["canonical_state"],
                 countries=len(library["countries_covered"]),
@@ -453,7 +575,7 @@ def render_markdown(report: dict[str, Any], missing_files: list[str]) -> str:
             "## Binding definitions",
             "",
             "```text",
-            'global = evidence-backed coverage + disclosed limitations',
+            "global = evidence-backed coverage + disclosed limitations",
             "multilingual = ingestion + normalisation + search + presentation",
             "source admitted = legal + technical + quality + rights + human authority",
             "```",
@@ -466,7 +588,19 @@ def render_markdown(report: dict[str, Any], missing_files: list[str]) -> str:
     return "\n".join(lines)
 
 
-def run_adversarial_contracts(report: dict[str, Any]) -> int:
+def adversarial_evidence(now: datetime) -> list[dict[str, Any]]:
+    expiry = (now + timedelta(days=1)).isoformat().replace("+00:00", "Z")
+    return [
+        {
+            "kind": "CI_ARTIFACT",
+            "reference": "adversarial-fixture",
+            "sha256": "0" * 64,
+            "expires_at": expiry,
+        }
+    ]
+
+
+def run_adversarial_contracts(report: dict[str, Any], now: datetime) -> int:
     checks = 0
 
     premature = deepcopy(report)
@@ -478,16 +612,13 @@ def run_adversarial_contracts(report: dict[str, Any]) -> int:
     else:
         raise Gate7ContractError("Premature global claim was not rejected")
 
-    synthetic = deepcopy(report["libraries"][0])
-    synthetic["synthetic_data"]["present"] = True
-    synthetic["synthetic_data"]["disclosed"] = False
-    synthetic["synthetic_data"]["contributes_to_public_claim"] = True
-    if library_passes(
-        synthetic,
-        report["required_languages"],
-        report["required_authorities"],
-        datetime.now(UTC),
-    ):
+    synthetic = {
+        "present": True,
+        "disclosed": False,
+        "contributes_to_public_claim": True,
+        "evidence": adversarial_evidence(now),
+    }
+    if synthetic_data_pass(synthetic, now):
         raise Gate7ContractError("Undisclosed synthetic data passed Gate 7")
     checks += 1
 
@@ -510,14 +641,14 @@ def run_adversarial_contracts(report: dict[str, Any]) -> int:
         }
     ]
     try:
-        validate_source_boundaries(suspended, datetime.now(UTC))
+        validate_source_boundaries(suspended, now)
     except Gate7ContractError:
         checks += 1
     else:
         raise Gate7ContractError("Suspended source contributed to a public claim")
 
-    active = deepcopy(report["libraries"][0])
-    active["sources"]["active"] = [
+    unreviewed = deepcopy(report["libraries"][0])
+    unreviewed["sources"]["active"] = [
         {
             "source_id": "adversarial-unreviewed",
             "name": "Adversarial unreviewed source",
@@ -531,20 +662,41 @@ def run_adversarial_contracts(report: dict[str, Any]) -> int:
                 "human_authority": MISSING,
             },
             "rights_expiry": None,
-            "evidence": [],
+            "evidence": adversarial_evidence(now),
         }
     ]
     try:
-        validate_source_boundaries(active, datetime.now(UTC))
+        validate_source_boundaries(unreviewed, now)
     except Gate7ContractError:
         checks += 1
     else:
         raise Gate7ContractError("Unreviewed active source was not rejected")
 
+    admitted_non_contributor = {
+        "source_id": "adversarial-non-contributor",
+        "name": "Adversarial admitted non-contributor",
+        "state": "PRODUCT_ADMITTED",
+        "contributes_to_public_claim": False,
+        "admission": {
+            "legal": PASS,
+            "technical": PASS,
+            "quality": PASS,
+            "rights": PASS,
+            "human_authority": PASS,
+        },
+        "rights_expiry": None,
+        "evidence": adversarial_evidence(now),
+    }
+    if active_sources_pass([admitted_non_contributor], now):
+        raise Gate7ContractError("A library passed without a contributing source")
+    checks += 1
+
     return checks
 
 
 def main() -> int:
+    evidence_head_sha, git_tree = exact_git_identity()
+    now = datetime.now(UTC)
     index = load_json(INDEX_PATH)
     index_schema = load_json(INDEX_SCHEMA_PATH)
     report_schema = load_json(REPORT_SCHEMA_PATH)
@@ -557,8 +709,8 @@ def main() -> int:
     if not baseline_is_ancestor(index["baseline_sha"]):
         raise Gate7ContractError("Gate 7 baseline is not an ancestor of HEAD")
 
-    report, missing_files = build_report(index, report_schema)
-    adversarial_checks = run_adversarial_contracts(report)
+    report, missing_files = build_report(index, report_schema, now)
+    adversarial_checks = run_adversarial_contracts(report, now)
 
     evidence_dir = Path(
         os.environ.get("AXIGNAL_GATE7_EVIDENCE_DIR", "artifacts/gate7")
@@ -566,22 +718,30 @@ def main() -> int:
     if not evidence_dir.is_absolute():
         evidence_dir = ROOT / evidence_dir
     evidence_dir.mkdir(parents=True, exist_ok=True)
-    report_path = evidence_dir / "global-coverage-source-language-report.json"
-    markdown_path = evidence_dir / "global-coverage-source-language-report.md"
-    summary_path = evidence_dir / "gate7-summary.json"
-    report_path.write_text(
-        json.dumps(report, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
-    markdown_path.write_text(
-        render_markdown(report, missing_files),
-        encoding="utf-8",
-    )
+
+    report_text = json.dumps(report, indent=2, sort_keys=True) + "\n"
+    report_sha256 = hashlib.sha256(report_text.encode("utf-8")).hexdigest()
+    generated_at = now.isoformat().replace("+00:00", "Z")
+    attestation = {
+        "schema_version": "axignal.gate7-evidence-attestation/v0.1",
+        "gate_id": report["gate_id"],
+        "baseline_sha": report["baseline_sha"],
+        "evidence_head_sha": evidence_head_sha,
+        "git_tree": git_tree,
+        "report_sha256": report_sha256,
+        "generated_at": generated_at,
+        "gate_decision": report["decision"],
+        "missing_evidence_files": len(missing_files),
+        "public_launch_authorised": False,
+    }
     summary = {
         "status": PASS,
         "gate_id": report["gate_id"],
         "gate_decision": report["decision"],
         "baseline_sha": report["baseline_sha"],
+        "evidence_head_sha": evidence_head_sha,
+        "git_tree": git_tree,
+        "report_sha256": report_sha256,
         "libraries": len(report["libraries"]),
         "missing_evidence_files": len(missing_files),
         "global_coverage_authorised": report["claims"][
@@ -592,7 +752,26 @@ def main() -> int:
         "adversarial_checks": adversarial_checks,
         "public_launch_authorised": False,
     }
-    summary_path.write_text(
+
+    (evidence_dir / "global-coverage-source-language-report.json").write_text(
+        report_text,
+        encoding="utf-8",
+    )
+    (evidence_dir / "global-coverage-source-language-report.md").write_text(
+        render_markdown(
+            report,
+            missing_files,
+            evidence_head_sha,
+            git_tree,
+            report_sha256,
+        ),
+        encoding="utf-8",
+    )
+    (evidence_dir / "gate7-evidence-attestation.json").write_text(
+        json.dumps(attestation, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    (evidence_dir / "gate7-summary.json").write_text(
         json.dumps(summary, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
