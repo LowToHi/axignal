@@ -68,7 +68,7 @@ jobs:
           set -e
           printf 'exit_code=%s\n' "$status" >> "$GITHUB_OUTPUT"
 
-      - name: Upload exact-head inventory
+      - name: Upload exact-head inventory and sources
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
@@ -76,6 +76,9 @@ jobs:
           path: |
             rc6-exact-head-identity.txt
             rc6-exact-head-provenance.json
+            .github/workflows
+            scripts/verify_release_exact_head_provenance.py
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 30
 
