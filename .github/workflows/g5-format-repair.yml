@@ -1,0 +1,84 @@
+name: G5 Format Repair
+
+on:
+  pull_request:
+    branches:
+      - "release/axignal-rc3-ad2d3ab"
+    paths:
+      - ".github/workflows/g5-format-repair.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: agent/axignal-rc4-security-boundaries-v2
+          fetch-depth: 1
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "22.14.0"
+      - name: Enable pinned pnpm
+        run: corepack enable
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Format only G5 files
+        run: |
+          pnpm exec prettier --write \
+            apps/web/proxy.ts \
+            apps/landing/proxy.ts \
+            apps/web/lib/security-boundaries.ts \
+            apps/landing/lib/security-boundaries.ts \
+            apps/web/next.config.ts \
+            apps/landing/next.config.ts \
+            apps/web/app/api/auth/login/route.ts \
+            apps/web/tests/security-boundaries.test.ts \
+            apps/landing/tests/security-boundaries.test.ts \
+            apps/web/tsconfig.test.json \
+            apps/landing/tsconfig.test.json \
+            tests/e2e/security-boundaries.spec.ts \
+            tests/landing/security-boundaries.spec.ts \
+            playwright.config.ts \
+            playwright.landing.config.ts
+          cmp apps/web/lib/security-boundaries.ts apps/landing/lib/security-boundaries.ts
+      - name: Validate formatted G5 files
+        env:
+          AXIGNAL_PUBLIC_ORIGIN: https://axignal.com
+          AXIGNAL_LANDING_PUBLIC_ORIGIN: https://axignal.com
+        run: |
+          pnpm --filter @axignal/web test
+          pnpm --filter @axignal/landing test
+          pnpm --filter @axignal/web typecheck
+          pnpm --filter @axignal/landing typecheck
+          pnpm --filter @axignal/web build
+          pnpm --filter @axignal/landing build
+      - name: Commit repair and remove ephemeral workflow
+        run: |
+          rm .github/workflows/g5-format-repair.yml
+          git config user.name "axignal-ci"
+          git config user.email "axignal-ci@users.noreply.github.com"
+          git add \
+            apps/web/proxy.ts \
+            apps/landing/proxy.ts \
+            apps/web/lib/security-boundaries.ts \
+            apps/landing/lib/security-boundaries.ts \
+            apps/web/next.config.ts \
+            apps/landing/next.config.ts \
+            apps/web/app/api/auth/login/route.ts \
+            apps/web/tests/security-boundaries.test.ts \
+            apps/landing/tests/security-boundaries.test.ts \
+            apps/web/tsconfig.test.json \
+            apps/landing/tsconfig.test.json \
+            tests/e2e/security-boundaries.spec.ts \
+            tests/landing/security-boundaries.spec.ts \
+            playwright.config.ts \
+            playwright.landing.config.ts \
+            .github/workflows/g5-format-repair.yml
+          git commit -m "Format and validate G5 web security boundaries"
+          git push origin HEAD:agent/axignal-rc4-security-boundaries-v2
