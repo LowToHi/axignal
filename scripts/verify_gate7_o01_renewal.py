@@ -15,6 +15,8 @@ LEGAL_SNAPSHOT_PATH = ROOT / (
 )
 RENEWAL_SOURCE_PATH = ROOT / "apps/api/src/axignal_api/o01_approval_renewal.py"
 RENEWAL_TEST_PATH = ROOT / "apps/api/tests/test_o01_approval_renewal.py"
+EXTRACTION_TEST_PATH = ROOT / "apps/api/tests/test_o01_typed_authority_extraction.py"
+EXTRACTOR_PATH = ROOT / "scripts/extract_gate7_o01_typed_authority.py"
 PREPARER_PATH = ROOT / "scripts/prepare_gate7_o01_renewal.py"
 EXPECTED_CHANGE_CLASSES = {
     "NO_MATERIAL_CHANGE",
@@ -158,6 +160,8 @@ def verify_policy(policy: dict[str, Any], legal_snapshot: dict[str, Any]) -> Non
 def verify_implementation_contract() -> None:
     source = RENEWAL_SOURCE_PATH.read_text(encoding="utf-8")
     tests = RENEWAL_TEST_PATH.read_text(encoding="utf-8")
+    extraction_tests = EXTRACTION_TEST_PATH.read_text(encoding="utf-8")
+    extractor = EXTRACTOR_PATH.read_text(encoding="utf-8")
     preparer = PREPARER_PATH.read_text(encoding="utf-8")
     for literal in (
         "class AuthorityStatus",
@@ -176,9 +180,24 @@ def verify_implementation_contract() -> None:
     ):
         require(literal in tests, f"Renewal test contract missing: {literal}")
     for literal in (
+        "test_complete_external_authority_envelope_is_materialised",
+        "test_informal_and_wrong_head_comments_do_not_grant_authority",
+        "test_latest_exact_bound_decision_supersedes_earlier_comment",
+    ):
+        require(literal in extraction_tests, f"Authority extraction test missing: {literal}")
+    for literal in (
+        "REQUIRED_FIELDS",
+        "expected_head_sha",
+        "expected_manifest_digest",
+        "comment_author",
+        "AuthorityEnvelope",
+    ):
+        require(literal in extractor, f"Authority extractor contract missing: {literal}")
+    for literal in (
         "def fetch_document",
         "official_source_hosts",
-        "machine_generated_decision",
+        '"approval_target"',
+        "expected_manifest_digest=current_manifest_digest",
         '"execution_authorised": False',
         '"external_request_budget": 0',
     ):
@@ -200,6 +219,8 @@ def verify() -> dict[str, Any]:
             LEGAL_SNAPSHOT_PATH,
             RENEWAL_SOURCE_PATH,
             RENEWAL_TEST_PATH,
+            EXTRACTION_TEST_PATH,
+            EXTRACTOR_PATH,
             PREPARER_PATH,
         )
     }
@@ -208,6 +229,7 @@ def verify() -> dict[str, Any]:
         "task_id": "AX-GE2E-G7-O01-T04",
         "output": "O01_APPROVAL_RENEWAL_CONTRACT_PASS",
         "mode": "SEMI_AUTOMATIC",
+        "authority_source": "GITHUB_ISSUES_124_125",
         "change_classes": sorted(EXPECTED_CHANGE_CLASSES),
         "human_decisions_required": ["LEGAL", "PRIVACY_DATA_RIGHTS"],
         "automatic_signature": False,
