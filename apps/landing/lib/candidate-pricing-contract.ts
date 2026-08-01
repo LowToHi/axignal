@@ -52,8 +52,9 @@ export function parseCandidatePlans(
   runtime: CommercialRuntime
 ): readonly CandidatePlan[] {
   const pricing = runtime.pricing_contract;
+  const currency = pricing?.currency;
 
-  if (pricing?.status !== "CANDIDATE_ONLY" || pricing.currency !== "EUR") {
+  if (pricing?.status !== "CANDIDATE_ONLY" || currency !== "EUR") {
     throw new Error("The controlled-access candidate price book is not available.");
   }
 
@@ -84,7 +85,7 @@ export function parseCandidatePlans(
           name: presentation.name,
           description: presentation.description,
           amountMinor: 0,
-          currency: pricing.currency,
+          currency,
           billingPeriod: "trial",
           durationDays: plan.duration_days,
           aiTokenBudget: plan.ai_token_budget,
@@ -114,7 +115,7 @@ export function parseCandidatePlans(
         name: presentation.name,
         description: presentation.description,
         amountMinor: plan.amount_minor,
-        currency: pricing.currency,
+        currency,
         billingPeriod: "month",
         durationDays: null,
         aiTokenBudget: null,
