@@ -1,7 +1,7 @@
 {
   "schema_version": "axignal.global-coverage-source-language-index/v0.1",
   "gate_id": "PUBLIC-LAUNCH-GATE-7",
-  "baseline_sha": "63ac2a50e5e96b8f1df15dd1ba900c330207d2fa",
+  "baseline_sha": "55ed7fb6d73bee8ca22ccdcaeaf4c5a550819a22",
   "required_languages": ["en", "es", "fr", "de", "pt", "it"],
   "required_authorities": [
     "PRODUCT",
