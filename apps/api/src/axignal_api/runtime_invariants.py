@@ -1,15 +1,11 @@
 from __future__ import annotations
 
-from typing import TypeVar
-
-T = TypeVar("T")
-
 
 class RuntimeConfigurationInvariantError(RuntimeError):
     """Raised when validated runtime settings still lack a required value."""
 
 
-def require_runtime_value(value: T | None, *, name: str) -> T:
+def require_runtime_value[T](value: T | None, *, name: str) -> T:
     """Return a required setting or fail explicitly after settings validation.
 
     Runtime entrypoints previously relied on ``assert`` for this boundary. Python
