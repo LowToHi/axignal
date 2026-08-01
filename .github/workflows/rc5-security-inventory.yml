@@ -1,4 +1,4 @@
-name: RC5 Security Inventory
+name: RC5 Secret and Asset Hardening
 
 on:
   pull_request:
@@ -6,13 +6,20 @@ on:
       - "release/axignal-rc4-58f666b"
     paths:
       - ".github/workflows/rc5-security-inventory.yml"
+      - "data/security/reviewed-secret-baseline.v1.json"
+      - "scripts/verify_secret_baseline.py"
+      - "scripts/asset_download_security.py"
+      - "scripts/acquire_globe_assets.py"
+      - "apps/api/tests/test_asset_download_security.py"
+      - "docs/landing/assets-manifest.json"
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  inventory:
+  reviewed-secret-baseline:
+    name: Reviewed secret baseline
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -22,142 +29,11 @@ jobs:
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: "3.13"
-      - name: Install pinned inventory tools
+      - name: Install pinned detector
         run: python -m pip install --disable-pip-version-check "detect-secrets==1.5.0"
-      - name: Generate secret-pattern inventory
-        run: |
-          detect-secrets scan --all-files \
-            --exclude-files '(^|/)(\.git|\.pytest_cache|\.ruff_cache|pnpm-lock\.yaml|.*\.lock|test-results|playwright-report|bandit-report\.json|pip-audit-report\.json|coverage-python\.xml)(/|$)' \
-            > detect-secrets-report.json
-          python - <<'PY'
-          import json
-          from collections import Counter
-          from pathlib import Path
-
-          report = json.loads(Path("detect-secrets-report.json").read_text(encoding="utf-8"))
-          results = report.get("results", {})
-          plugins = Counter()
-          areas = Counter()
-          total = 0
-          for path, findings in results.items():
-              total += len(findings)
-              if path.startswith("apps/"):
-                  area = "apps"
-              elif path.startswith("scripts/"):
-                  area = "scripts"
-              elif path.startswith("tests/"):
-                  area = "tests"
-              elif path.startswith(".github/"):
-                  area = "workflows"
-              elif path.startswith("docs/"):
-                  area = "docs"
-              else:
-                  area = "root_or_other"
-              areas[area] += len(findings)
-              for finding in findings:
-                  plugins[finding.get("type", "unknown")] += 1
-          summary = {
-              "schema": "axignal.secret-inventory-summary.v1",
-              "finding_count": total,
-              "file_count": len(results),
-              "by_area": dict(sorted(areas.items())),
-              "by_plugin": dict(sorted(plugins.items())),
-              "paths": [
-                  {"path": path, "count": len(findings)}
-                  for path, findings in sorted(results.items())
-              ],
-          }
-          Path("detect-secrets-summary.json").write_text(
-              json.dumps(summary, indent=2, sort_keys=True) + "\n",
-              encoding="utf-8",
-          )
-          print(json.dumps(summary, indent=2, sort_keys=True))
-          PY
-      - name: Build redacted finding context
-        run: |
-          python - <<'PY'
-          import json
-          import re
-          from pathlib import Path
-          from urllib.parse import urlsplit
-
-          report = json.loads(Path("detect-secrets-report.json").read_text(encoding="utf-8"))
-          safe_markers = (
-              "127.0.0.1",
-              "localhost",
-              "example.invalid",
-              "example.com",
-              "fixture",
-              "test",
-              "dummy",
-              "placeholder",
-              "replace",
-              "sha256",
-              "checksum",
-              "digest",
-              "fingerprint",
-              "commit",
-              "expected",
-              "secrets.",
-              "secret_name",
-              "environment",
-              "password_required",
-          )
-          key_pattern = re.compile(
-              r"[A-Za-z0-9_.-]*(?:secret|password|token|key|sha|hash|digest|commit|fingerprint|url|dsn)[A-Za-z0-9_.-]*",
-              re.IGNORECASE,
-          )
-          url_pattern = re.compile(r"https?://[^\s\"'<>]+", re.IGNORECASE)
-          quoted_pattern = re.compile(r"(['\"])(?:\\.|(?!\1).)*\1")
-          long_token_pattern = re.compile(r"\b[A-Za-z0-9_+/=-]{16,}\b")
-
-          entries = []
-          for path, findings in sorted(report.get("results", {}).items()):
-              source = Path(path)
-              lines = source.read_text(encoding="utf-8", errors="replace").splitlines()
-              for finding in findings:
-                  line_number = int(finding["line_number"])
-                  line = lines[line_number - 1] if 0 < line_number <= len(lines) else ""
-                  lower = line.casefold()
-                  hosts = []
-                  for raw_url in url_pattern.findall(line):
-                      try:
-                          parsed = urlsplit(raw_url)
-                      except ValueError:
-                          continue
-                      if parsed.hostname:
-                          hosts.append(parsed.hostname.casefold())
-                  redacted = re.sub(
-                      r"(https?://)[^/@\s]+@",
-                      r"\1<redacted-userinfo>@",
-                      line,
-                      flags=re.IGNORECASE,
-                  )
-                  redacted = quoted_pattern.sub(lambda match: f"{match.group(1)}<redacted>{match.group(1)}", redacted)
-                  redacted = long_token_pattern.sub("<redacted-token>", redacted)
-                  entries.append(
-                      {
-                          "path": path,
-                          "line_number": line_number,
-                          "type": finding.get("type"),
-                          "hashed_secret": finding.get("hashed_secret"),
-                          "markers": [marker for marker in safe_markers if marker in lower],
-                          "keys": sorted(set(key_pattern.findall(line))),
-                          "url_hosts": sorted(set(hosts)),
-                          "redacted_context": redacted[:400],
-                      }
-                  )
-          payload = {
-              "schema": "axignal.secret-redacted-context.v1",
-              "finding_count": len(entries),
-              "findings": entries,
-          }
-          Path("detect-secrets-redacted-context.json").write_text(
-              json.dumps(payload, indent=2, sort_keys=True) + "\n",
-              encoding="utf-8",
-          )
-          PY
-      - name: Inventory remote I/O and download surfaces
+      - name: Verify exact reviewed inventory
+        run: python scripts/verify_secret_baseline.py | tee secret-baseline-verification.json
+      - name: Inventory remote I/O surfaces
         run: |
           git grep -n -I -E \
             '(^|[^A-Za-z])(httpx|requests|urllib|urlopen|urlretrieve|aiohttp|fetch\(|axios|download|remote[_ -]?asset|asset[_ -]?url)' \
@@ -173,31 +49,98 @@ jobs:
             ':(glob)**/*.yaml' \
             > remote-io-inventory.txt || true
           cut -d: -f1 remote-io-inventory.txt | sort -u > remote-io-files.txt
-          if test -s remote-io-files.txt; then
-            tar -czf remote-io-source.tar.gz -T remote-io-files.txt
-          else
-            tar -czf remote-io-source.tar.gz --files-from /dev/null
-          fi
           python - <<'PY'
+          import json
           from pathlib import Path
 
           files = [line for line in Path("remote-io-files.txt").read_text().splitlines() if line]
-          Path("remote-io-summary.txt").write_text(
-              f"matched_files={len(files)}\n" + "\n".join(files) + ("\n" if files else ""),
+          Path("remote-io-summary.json").write_text(
+              json.dumps(
+                  {
+                      "schema": "axignal.remote-io-inventory.v1",
+                      "matched_file_count": len(files),
+                      "matched_files": files,
+                  },
+                  indent=2,
+                  sort_keys=True,
+              )
+              + "\n",
               encoding="utf-8",
           )
           PY
-      - name: Upload non-secret audit evidence
+      - name: Upload non-secret review evidence
+        if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: rc5-security-inventory
+          name: rc5-secret-baseline-evidence
           path: |
-            detect-secrets-report.json
-            detect-secrets-summary.json
-            detect-secrets-redacted-context.json
-            remote-io-inventory.txt
+            secret-baseline-verification.json
             remote-io-files.txt
-            remote-io-summary.txt
-            remote-io-source.tar.gz
+            remote-io-summary.json
           if-no-files-found: error
-          retention-days: 3
+          retention-days: 14
+
+  bounded-asset-acquisition:
+    name: Bounded asset acquisition
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.13"
+      - name: Install frozen application test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+      - name: Enforce focused static analysis
+        run: |
+          ruff check \
+            scripts/asset_download_security.py \
+            scripts/acquire_globe_assets.py \
+            scripts/verify_secret_baseline.py \
+            apps/api/tests/test_asset_download_security.py
+          python -m compileall -q \
+            scripts/asset_download_security.py \
+            scripts/acquire_globe_assets.py \
+            scripts/verify_secret_baseline.py \
+            apps/api/tests/test_asset_download_security.py
+      - name: Run adversarial downloader tests
+        run: pytest apps/api/tests/test_asset_download_security.py
+      - name: Verify acquisition manifest and fail-closed state
+        run: |
+          test "$(grep -c 'expected_sha256' docs/landing/assets-manifest.json)" -eq 5
+          ! grep -E 'urllib|urlopen|urlretrieve|requests\.' scripts/acquire_globe_assets.py
+          python scripts/acquire_globe_assets.py \
+            --output /tmp/axignal-asset-dry-run \
+            --dry-run | tee asset-acquisition-dry-run.json
+          set +e
+          python scripts/acquire_globe_assets.py \
+            --output /tmp/axignal-asset-denied \
+            > asset-acquisition-denied.json
+          exit_code=$?
+          set -e
+          test "$exit_code" -eq 2
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          dry_run = json.loads(Path("asset-acquisition-dry-run.json").read_text())
+          denied = json.loads(Path("asset-acquisition-denied.json").read_text())
+          assert dry_run["status"] == "DRY_RUN"
+          assert len(dry_run["assets"]) == 5
+          assert all(asset["digest_pinned"] is False for asset in dry_run["assets"])
+          assert denied["status"] == "DENIED"
+          assert "pinned expected_sha256" in denied["error"]
+          assert not list(Path("/tmp/axignal-asset-denied").glob("*"))
+          PY
+      - name: Upload asset security evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: rc5-asset-security-evidence
+          path: |
+            asset-acquisition-dry-run.json
+            asset-acquisition-denied.json
+          if-no-files-found: error
+          retention-days: 14
