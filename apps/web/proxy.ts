@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 import {
   evaluateMutationSecurity,
-  MUTATION_ORIGIN_EXEMPT_PATHS
+  MUTATION_ORIGIN_EXEMPT_PATHS,
 } from "./lib/security-boundaries";
 
 export function proxy(request: NextRequest) {
@@ -15,8 +15,9 @@ export function proxy(request: NextRequest) {
     configuredPublicOrigin: process.env.AXIGNAL_PUBLIC_ORIGIN,
     requestOrigin: request.nextUrl.origin,
     environment: process.env.NODE_ENV,
-    legacyPasswordLoginEnabled: process.env.AXIGNAL_LEGACY_PASSWORD_LOGIN_ENABLED,
-    exemptPaths: MUTATION_ORIGIN_EXEMPT_PATHS
+    legacyPasswordLoginEnabled:
+      process.env.AXIGNAL_LEGACY_PASSWORD_LOGIN_ENABLED,
+    exemptPaths: MUTATION_ORIGIN_EXEMPT_PATHS,
   });
 
   if (decision.allowed) return NextResponse.next();
@@ -24,18 +25,18 @@ export function proxy(request: NextRequest) {
   return NextResponse.json(
     {
       error: "request_rejected",
-      code: decision.code
+      code: decision.code,
     },
     {
       status: decision.status,
       headers: {
         "cache-control": "no-store",
-        "x-axignal-security-boundary": decision.code
-      }
-    }
+        "x-axignal-security-boundary": decision.code,
+      },
+    },
   );
 }
 
 export const config = {
-  matcher: "/api/:path*"
+  matcher: "/api/:path*",
 };

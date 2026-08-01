@@ -57,7 +57,7 @@ export function legacyPasswordLoginAllowed(input: {
 }
 
 export function evaluateMutationSecurity(
-  input: MutationSecurityInput
+  input: MutationSecurityInput,
 ): MutationSecurityDecision {
   const method = input.method.toUpperCase();
   if (!MUTATING_METHODS.has(method)) {
@@ -68,13 +68,13 @@ export function evaluateMutationSecurity(
     input.pathname === "/api/auth/login" &&
     !legacyPasswordLoginAllowed({
       environment: input.environment,
-      enabled: input.legacyPasswordLoginEnabled
+      enabled: input.legacyPasswordLoginEnabled,
     })
   ) {
     return {
       allowed: false,
       code: "legacy_password_login_disabled",
-      status: 404
+      status: 404,
     };
   }
 
@@ -86,14 +86,14 @@ export function evaluateMutationSecurity(
   const configuredOrigin = input.configuredPublicOrigin?.trim();
   const expected = normaliseOrigin(
     input.environment === "production"
-      ? configuredOrigin ?? ""
-      : configuredOrigin || input.requestOrigin
+      ? (configuredOrigin ?? "")
+      : configuredOrigin || input.requestOrigin,
   );
   if (!expected) {
     return {
       allowed: false,
       code: "public_origin_not_configured",
-      status: 503
+      status: 503,
     };
   }
 
@@ -119,7 +119,7 @@ export function contentSecurityPolicy(production: boolean): string {
   const scriptSources = [
     "'self'",
     "'unsafe-inline'",
-    "https://challenges.cloudflare.com"
+    "https://challenges.cloudflare.com",
   ];
   if (!production) scriptSources.push("'unsafe-eval'");
 
@@ -138,7 +138,7 @@ export function contentSecurityPolicy(production: boolean): string {
     "worker-src 'self' blob:",
     "child-src 'self' blob: https://challenges.cloudflare.com",
     "media-src 'self'",
-    "manifest-src 'self'"
+    "manifest-src 'self'",
   ];
   if (production) directives.push("upgrade-insecure-requests");
   return directives.join("; ");
@@ -151,7 +151,7 @@ export function securityHeaders(production: boolean): Array<{
   const headers = [
     {
       key: "Content-Security-Policy",
-      value: contentSecurityPolicy(production)
+      value: contentSecurityPolicy(production),
     },
     { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
     { key: "X-Content-Type-Options", value: "nosniff" },
@@ -164,13 +164,13 @@ export function securityHeaders(production: boolean): Array<{
     {
       key: "Permissions-Policy",
       value:
-        "camera=(), microphone=(), geolocation=(), payment=(), publickey-credentials-get=(self), browsing-topics=()"
-    }
+        "camera=(), microphone=(), geolocation=(), payment=(), publickey-credentials-get=(self), browsing-topics=()",
+    },
   ];
   if (production) {
     headers.push({
       key: "Strict-Transport-Security",
-      value: "max-age=63072000; includeSubDomains; preload"
+      value: "max-age=63072000; includeSubDomains; preload",
     });
   }
   return headers;

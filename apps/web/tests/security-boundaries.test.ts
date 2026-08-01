@@ -7,7 +7,7 @@ import {
   legacyPasswordLoginAllowed,
   MUTATION_ORIGIN_EXEMPT_PATHS,
   normaliseOrigin,
-  securityHeaders
+  securityHeaders,
 } from "../lib/security-boundaries";
 
 const sameOriginInput = {
@@ -18,7 +18,7 @@ const sameOriginInput = {
   configuredPublicOrigin: "https://axignal.com/",
   requestOrigin: "http://127.0.0.1:3000",
   environment: "production",
-  legacyPasswordLoginEnabled: undefined
+  legacyPasswordLoginEnabled: undefined,
 };
 
 test("allows reads without an Origin header", () => {
@@ -27,16 +27,16 @@ test("allows reads without an Origin header", () => {
       ...sameOriginInput,
       method: "GET",
       origin: null,
-      secFetchSite: null
+      secFetchSite: null,
     }),
-    { allowed: true, code: "not_mutating" }
+    { allowed: true, code: "not_mutating" },
   );
 });
 
 test("allows exact same-origin browser mutations", () => {
   assert.deepEqual(evaluateMutationSecurity(sameOriginInput), {
     allowed: true,
-    code: "same_origin"
+    code: "same_origin",
   });
 });
 
@@ -44,31 +44,31 @@ test("fails closed when the production public origin is absent", () => {
   assert.deepEqual(
     evaluateMutationSecurity({
       ...sameOriginInput,
-      configuredPublicOrigin: undefined
+      configuredPublicOrigin: undefined,
     }),
     {
       allowed: false,
       code: "public_origin_not_configured",
-      status: 503
-    }
+      status: 503,
+    },
   );
 });
 
 test("rejects missing, malformed and cross-origin mutation headers", () => {
   assert.deepEqual(
     evaluateMutationSecurity({ ...sameOriginInput, origin: null }),
-    { allowed: false, code: "origin_required", status: 403 }
+    { allowed: false, code: "origin_required", status: 403 },
   );
   assert.deepEqual(
     evaluateMutationSecurity({ ...sameOriginInput, origin: "null" }),
-    { allowed: false, code: "origin_required", status: 403 }
+    { allowed: false, code: "origin_required", status: 403 },
   );
   assert.deepEqual(
     evaluateMutationSecurity({
       ...sameOriginInput,
-      origin: "https://attacker.example"
+      origin: "https://attacker.example",
     }),
-    { allowed: false, code: "cross_origin_forbidden", status: 403 }
+    { allowed: false, code: "cross_origin_forbidden", status: 403 },
   );
 });
 
@@ -76,7 +76,7 @@ test("rejects same-site and cross-site fetch metadata", () => {
   for (const secFetchSite of ["same-site", "cross-site", "none"]) {
     assert.deepEqual(
       evaluateMutationSecurity({ ...sameOriginInput, secFetchSite }),
-      { allowed: false, code: "cross_site_forbidden", status: 403 }
+      { allowed: false, code: "cross_site_forbidden", status: 403 },
     );
   }
 });
@@ -84,7 +84,7 @@ test("rejects same-site and cross-site fetch metadata", () => {
 test("permits clients without Fetch Metadata only when Origin is exact", () => {
   assert.deepEqual(
     evaluateMutationSecurity({ ...sameOriginInput, secFetchSite: null }),
-    { allowed: true, code: "same_origin" }
+    { allowed: true, code: "same_origin" },
   );
 });
 
@@ -102,28 +102,31 @@ test("normalises only authority-only HTTP origins", () => {
 test("disables legacy password login in production and by default", () => {
   assert.equal(
     legacyPasswordLoginAllowed({ environment: "production", enabled: "true" }),
-    false
+    false,
   );
   assert.equal(
-    legacyPasswordLoginAllowed({ environment: "development", enabled: undefined }),
-    false
+    legacyPasswordLoginAllowed({
+      environment: "development",
+      enabled: undefined,
+    }),
+    false,
   );
   assert.equal(
     legacyPasswordLoginAllowed({ environment: "development", enabled: "true" }),
-    true
+    true,
   );
 
   assert.deepEqual(
     evaluateMutationSecurity({
       ...sameOriginInput,
       pathname: "/api/auth/login",
-      legacyPasswordLoginEnabled: "true"
+      legacyPasswordLoginEnabled: "true",
     }),
     {
       allowed: false,
       code: "legacy_password_login_disabled",
-      status: 404
-    }
+      status: 404,
+    },
   );
 });
 
@@ -134,14 +137,22 @@ test("emits production headers without unsafe-eval and permits Turnstile", () =>
   assert.doesNotMatch(policy, /'unsafe-eval'/);
   assert.match(policy, /upgrade-insecure-requests/);
 
-  const headers = new Map(securityHeaders(true).map(({ key, value }) => [key, value]));
+  const headers = new Map(
+    securityHeaders(true).map(({ key, value }) => [key, value]),
+  );
   assert.equal(headers.get("X-Frame-Options"), "DENY");
   assert.equal(headers.get("X-Content-Type-Options"), "nosniff");
   assert.equal(headers.get("Cross-Origin-Opener-Policy"), "same-origin");
-  assert.match(headers.get("Strict-Transport-Security") ?? "", /includeSubDomains/);
+  assert.match(
+    headers.get("Strict-Transport-Security") ?? "",
+    /includeSubDomains/,
+  );
 });
 
 test("permits unsafe-eval only in the development CSP", () => {
   assert.match(contentSecurityPolicy(false), /'unsafe-eval'/);
-  assert.doesNotMatch(contentSecurityPolicy(false), /upgrade-insecure-requests/);
+  assert.doesNotMatch(
+    contentSecurityPolicy(false),
+    /upgrade-insecure-requests/,
+  );
 });

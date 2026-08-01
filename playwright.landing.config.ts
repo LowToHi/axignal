@@ -13,14 +13,14 @@ export default defineConfig({
     baseURL,
     extraHTTPHeaders: {
       origin: publicOrigin,
-      "sec-fetch-site": "same-origin"
+      "sec-fetch-site": "same-origin",
     },
     trace: "retain-on-failure",
-    screenshot: "only-on-failure"
+    screenshot: "only-on-failure",
   },
   projects: [
     { name: "landing-desktop", use: { ...devices["Desktop Chrome"] } },
-    { name: "landing-mobile", use: { ...devices["Pixel 7"] } }
+    { name: "landing-mobile", use: { ...devices["Pixel 7"] } },
   ],
   webServer: {
     command: process.env.CI
@@ -30,7 +30,7 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
     env: {
-      AXIGNAL_LANDING_PUBLIC_ORIGIN: publicOrigin
-    }
-  }
+      AXIGNAL_LANDING_PUBLIC_ORIGIN: publicOrigin,
+    },
+  },
 });

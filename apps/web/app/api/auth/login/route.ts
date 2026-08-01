@@ -4,19 +4,19 @@ import { legacyPasswordLoginAllowed } from "../../../../lib/security-boundaries"
 import {
   authenticateCredentials,
   createSessionToken,
-  sessionCookieOptions
+  sessionCookieOptions,
 } from "../../../../lib/server-auth";
 
 export async function POST(request: Request) {
   if (
     !legacyPasswordLoginAllowed({
       environment: process.env.NODE_ENV,
-      enabled: process.env.AXIGNAL_LEGACY_PASSWORD_LOGIN_ENABLED
+      enabled: process.env.AXIGNAL_LEGACY_PASSWORD_LOGIN_ENABLED,
     })
   ) {
     return NextResponse.json(
       { error: "Not found." },
-      { status: 404, headers: { "cache-control": "no-store" } }
+      { status: 404, headers: { "cache-control": "no-store" } },
     );
   }
 
@@ -24,10 +24,14 @@ export async function POST(request: Request) {
     email?: unknown;
     password?: unknown;
   } | null;
-  if (!body || typeof body.email !== "string" || typeof body.password !== "string") {
+  if (
+    !body ||
+    typeof body.email !== "string" ||
+    typeof body.password !== "string"
+  ) {
     return NextResponse.json(
       { error: "Email and password are required." },
-      { status: 400, headers: { "cache-control": "no-store" } }
+      { status: 400, headers: { "cache-control": "no-store" } },
     );
   }
 
@@ -36,19 +40,22 @@ export async function POST(request: Request) {
     if (!claims) {
       return NextResponse.json(
         { error: "Invalid credentials." },
-        { status: 401, headers: { "cache-control": "no-store" } }
+        { status: 401, headers: { "cache-control": "no-store" } },
       );
     }
     const response = NextResponse.json(
       { authenticated: true, email: claims.email },
-      { headers: { "cache-control": "no-store" } }
+      { headers: { "cache-control": "no-store" } },
     );
-    response.cookies.set({ ...sessionCookieOptions(), value: createSessionToken(claims) });
+    response.cookies.set({
+      ...sessionCookieOptions(),
+      value: createSessionToken(claims),
+    });
     return response;
   } catch {
     return NextResponse.json(
       { error: "Authentication is not configured." },
-      { status: 503, headers: { "cache-control": "no-store" } }
+      { status: 503, headers: { "cache-control": "no-store" } },
     );
   }
 }

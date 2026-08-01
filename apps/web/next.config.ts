@@ -13,10 +13,10 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/:path*",
-        headers: securityHeaders(production)
-      }
+        headers: securityHeaders(production),
+      },
     ];
-  }
+  },
 };
 
 export default nextConfig;
