@@ -131,6 +131,7 @@ def test_cursor_contexts_propagate_connection_errors(monkeypatch) -> None:
 
     monkeypatch.setattr(admission_module.psycopg, "connect", fail)
     repository = admission_module.AdmissionRepository(app_dsn="postgresql://app")
-    with pytest.raises(RuntimeError, match="database unavailable"):
-        with repository._cursor("axignal_app"):
-            pass
+    with pytest.raises(
+        RuntimeError, match="database unavailable"
+    ), repository._cursor("axignal_app"):
+        pass
