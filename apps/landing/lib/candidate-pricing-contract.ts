@@ -58,14 +58,15 @@ export function parseCandidatePlans(
   }
 
   const plans = (pricing.plans ?? []).flatMap((plan): CandidatePlan[] => {
-    const presentation = plan.plan_code
-      ? supportedOffers.get(plan.plan_code)
-      : undefined;
+    const planCode = plan.plan_code;
+    if (!planCode) return [];
+
+    const presentation = supportedOffers.get(planCode);
     if (!presentation || plan.commercial_activation_authorised !== false) {
       return [];
     }
 
-    if (plan.plan_code === "CONTROLLED_TRIAL_7D") {
+    if (planCode === "CONTROLLED_TRIAL_7D") {
       if (
         plan.billing_mode !== "NO_CHARGE" ||
         plan.amount_minor !== 0 ||
@@ -79,7 +80,7 @@ export function parseCandidatePlans(
 
       return [
         {
-          planCode: plan.plan_code,
+          planCode,
           name: presentation.name,
           description: presentation.description,
           amountMinor: 0,
@@ -109,7 +110,7 @@ export function parseCandidatePlans(
 
     return [
       {
-        planCode: plan.plan_code,
+        planCode,
         name: presentation.name,
         description: presentation.description,
         amountMinor: plan.amount_minor,
