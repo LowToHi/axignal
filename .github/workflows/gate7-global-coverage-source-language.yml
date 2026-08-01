@@ -24,6 +24,7 @@ on:
       - "schemas/global-coverage-source-language-*.schema.json"
       - "scripts/verify_gate7_global_coverage.py"
       - "scripts/verify_gate7_source_snapshots.py"
+      - "scripts/verify_gate7_source_rights.py"
       - "docs/acceptance/Gate-7-global-coverage-sources-multilingual-v0.1.md"
       - ".github/workflows/gate7-global-coverage-source-language.yml"
   push:
@@ -45,6 +46,7 @@ on:
       - "schemas/global-coverage-source-language-*.schema.json"
       - "scripts/verify_gate7_global_coverage.py"
       - "scripts/verify_gate7_source_snapshots.py"
+      - "scripts/verify_gate7_source_rights.py"
       - "docs/acceptance/Gate-7-global-coverage-sources-multilingual-v0.1.md"
       - ".github/workflows/gate7-global-coverage-source-language.yml"
 
@@ -101,10 +103,12 @@ jobs:
         run: |
           python -m compileall -q \
             scripts/verify_gate7_global_coverage.py \
-            scripts/verify_gate7_source_snapshots.py
+            scripts/verify_gate7_source_snapshots.py \
+            scripts/verify_gate7_source_rights.py
           ruff check \
             scripts/verify_gate7_global_coverage.py \
-            scripts/verify_gate7_source_snapshots.py
+            scripts/verify_gate7_source_snapshots.py \
+            scripts/verify_gate7_source_rights.py
 
       - name: Verify repository source snapshots
         shell: bash
@@ -112,6 +116,13 @@ jobs:
           set -euo pipefail
           python scripts/verify_gate7_source_snapshots.py \
             | tee artifacts/gate7/source-snapshot-integrity.json
+
+      - name: Verify O01 legal and rights fail-closed policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/verify_gate7_source_rights.py \
+            | tee artifacts/gate7/source-rights-policy.json
 
       - name: Materialise and verify Gate 7 report
         shell: bash
@@ -139,8 +150,21 @@ jobs:
           snapshot_integrity = json.loads(
               Path("artifacts/gate7/source-snapshot-integrity.json").read_text()
           )
+          rights_policy = json.loads(
+              Path("artifacts/gate7/source-rights-policy.json").read_text()
+          )
           assert snapshot_integrity["status"] == "PASS"
-          assert snapshot_integrity["source_snapshots_checked"] >= 1
+          assert snapshot_integrity["source_snapshots_checked"] >= 4
+          assert rights_policy["status"] == "PASS"
+          assert rights_policy["source_state"] == "CANDIDATE"
+          assert rights_policy["legal_admission"] == "MISSING"
+          assert rights_policy["rights_admission"] == "MISSING"
+          assert rights_policy["privacy_data_rights_approval"] == "MISSING"
+          assert rights_policy["claim_contribution"] is False
+          assert rights_policy["controls"]["personal_data_blocked"] is True
+          assert rights_policy["controls"]["third_party_content_blocked"] is True
+          assert rights_policy["controls"]["public_api_redistribution_denied"] is True
+          assert rights_policy["controls"]["model_training_denied"] is True
           assert summary["status"] == "PASS"
           assert summary["evidence_head_sha"] == os.environ["AXIGNAL_EXACT_SHA"]
           assert summary["libraries"] == 16
