@@ -206,7 +206,6 @@ export function SubscriberWorkspaceApp({ serverIdentity }: AppProps) {
   const [viewState, setViewState] = useState<SubscriberWorkspaceSurfaceState>("loading");
   const [error, setError] = useState<string | null>(null);
   const [locale, setLocale] = useState<ShellLocale>("en");
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [lens, setLens] = useState<IntelligenceLens>("GLOBE");
   const [selectedOpportunity, setSelectedOpportunity] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<Partial<Record<OperationsActionType, MutationFeedback>>>({});
@@ -225,7 +224,7 @@ export function SubscriberWorkspaceApp({ serverIdentity }: AppProps) {
       const nextLocale = ["en", "es", "fr", "de", "pt", "it"].includes(savedLocale ?? "") ? savedLocale as ShellLocale : (body as SubscriberWorkspaceBootstrap).locale;
       const savedTheme = cookiePreferences.axignal_theme ?? window.localStorage.getItem("axignal:subscriber:theme");
       setLocale(nextLocale);
-      setTheme(savedTheme === "light" || savedTheme === "dark" ? savedTheme : (body as SubscriberWorkspaceBootstrap).theme === "light" ? "light" : "dark");
+      document.documentElement.dataset.theme = savedTheme === "light" || savedTheme === "dark" ? savedTheme : (body as SubscriberWorkspaceBootstrap).theme === "light" ? "light" : "dark";
       setSelectedOpportunity((body as SubscriberWorkspaceBootstrap).route_data.opportunities[0]?.id ?? null);
     } catch (cause) {
       setViewState("source_unavailable");
@@ -234,13 +233,12 @@ export function SubscriberWorkspaceApp({ serverIdentity }: AppProps) {
   }, []);
 
   useEffect(() => { void load(); }, [load]);
-  useEffect(() => { document.documentElement.dataset.theme = theme; }, [theme]);
   useEffect(() => { document.documentElement.lang = locale; }, [locale]);
 
   function changeTheme(nextTheme: "dark" | "light") {
     window.localStorage.setItem("axignal:subscriber:theme", nextTheme);
     document.cookie = `axignal_theme=${encodeURIComponent(nextTheme)}; Path=/; Max-Age=31536000; SameSite=Lax`;
-    setTheme(nextTheme);
+    document.documentElement.dataset.theme = nextTheme;
   }
 
   function changeLocale(nextLocale: ShellLocale) {
