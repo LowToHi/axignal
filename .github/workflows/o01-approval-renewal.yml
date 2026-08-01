@@ -16,6 +16,7 @@ on:
       - "apps/api/tests/test_o01_approval_renewal.py"
       - "data/acceptance/approvals/AX-LIB-O01-approval-renewal-policy.v0.1.json"
       - "data/acceptance/fixtures/o01-renewal/**"
+      - "scripts/extract_gate7_o01_typed_authority.py"
       - "scripts/prepare_gate7_o01_renewal.py"
       - "scripts/verify_gate7_o01_renewal.py"
       - "scripts/materialize_gate7_o01_approval_manifest.py"
@@ -29,6 +30,7 @@ on:
       - "apps/api/tests/test_o01_approval_renewal.py"
       - "data/acceptance/approvals/AX-LIB-O01-approval-renewal-policy.v0.1.json"
       - "data/acceptance/fixtures/o01-renewal/**"
+      - "scripts/extract_gate7_o01_typed_authority.py"
       - "scripts/prepare_gate7_o01_renewal.py"
       - "scripts/verify_gate7_o01_renewal.py"
       - "scripts/materialize_gate7_o01_approval_manifest.py"
@@ -93,12 +95,14 @@ jobs:
           python -m compileall -q \
             apps/api/src/axignal_api/o01_approval_renewal.py \
             apps/api/tests/test_o01_approval_renewal.py \
+            scripts/extract_gate7_o01_typed_authority.py \
             scripts/prepare_gate7_o01_renewal.py \
             scripts/verify_gate7_o01_renewal.py \
             scripts/materialize_gate7_o01_approval_manifest.py
           ruff check \
             apps/api/src/axignal_api/o01_approval_renewal.py \
             apps/api/tests/test_o01_approval_renewal.py \
+            scripts/extract_gate7_o01_typed_authority.py \
             scripts/prepare_gate7_o01_renewal.py \
             scripts/verify_gate7_o01_renewal.py \
             scripts/materialize_gate7_o01_approval_manifest.py
@@ -162,11 +166,50 @@ jobs:
           echo "package=$package" >> "$GITHUB_OUTPUT"
           echo "Recovered online package from default-branch artifact ${artifact_id}."
 
+      - name: Recover typed authority from approval issues
+        id: authority
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/o01-renewal/authority
+          AXIGNAL_RENEWAL_PREPARATION=1 \
+          AXIGNAL_EXACT_SHA="$AXIGNAL_EXACT_SHA" \
+            python scripts/materialize_gate7_o01_approval_manifest.py \
+            | tee artifacts/o01-renewal/authority/manifest-result.json
+          manifest_digest="$(python -c 'import json,sys; print(json.load(open(sys.argv[1]))["manifest_digest"])' artifacts/o01-renewal/authority/manifest-result.json)"
+          gh api --paginate \
+            -H 'Accept: application/vnd.github+json' \
+            "/repos/${GITHUB_REPOSITORY}/issues/124/comments" \
+            --slurp > artifacts/o01-renewal/authority/legal-pages.json
+          gh api --paginate \
+            -H 'Accept: application/vnd.github+json' \
+            "/repos/${GITHUB_REPOSITORY}/issues/125/comments" \
+            --slurp > artifacts/o01-renewal/authority/privacy-pages.json
+          jq -s 'add' artifacts/o01-renewal/authority/legal-pages.json \
+            > artifacts/o01-renewal/authority/legal-comments.json
+          jq -s 'add' artifacts/o01-renewal/authority/privacy-pages.json \
+            > artifacts/o01-renewal/authority/privacy-comments.json
+          python scripts/extract_gate7_o01_typed_authority.py \
+            --legal-comments artifacts/o01-renewal/authority/legal-comments.json \
+            --privacy-comments artifacts/o01-renewal/authority/privacy-comments.json \
+            --expected-head "$AXIGNAL_EXACT_SHA" \
+            --expected-manifest "$manifest_digest" \
+            --output artifacts/o01-renewal/authority/current-authority.json \
+            | tee artifacts/o01-renewal/authority/extraction-result.json
+          if [ -f artifacts/o01-renewal/authority/current-authority.json ]; then
+            echo 'path=artifacts/o01-renewal/authority/current-authority.json' \
+              >> "$GITHUB_OUTPUT"
+          else
+            echo 'path=' >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Prepare exact-head renewal package
         id: prepare
         shell: bash
         env:
           PREVIOUS_PACKAGE: ${{ steps.previous.outputs.package }}
+          CURRENT_AUTHORITY: ${{ steps.authority.outputs.path }}
         run: |
           set -euo pipefail
           args=(
@@ -175,9 +218,8 @@ jobs:
           if [ -n "${PREVIOUS_PACKAGE:-}" ]; then
             args+=(--previous-package "$PREVIOUS_PACKAGE")
           fi
-          decisions='data/acceptance/approvals/AX-LIB-O01-current-authority.v0.1.json'
-          if [ -f "$decisions" ]; then
-            args+=(--current-decisions "$decisions")
+          if [ -n "${CURRENT_AUTHORITY:-}" ]; then
+            args+=(--current-decisions "$CURRENT_AUTHORITY")
           fi
           online=false
           if [ "${{ github.event_name }}" = 'schedule' ]; then
@@ -223,6 +265,8 @@ jobs:
           assert result["status"] == "PASS"
           assert result["output"] == "O01_APPROVAL_RENEWAL_PACKAGE_READY"
           assert result["head_sha"] == os.environ["AXIGNAL_EXACT_SHA"]
+          assert result["approval_manifest_digest"] == package["approval_target"]["manifest_digest"]
+          assert result["new_typed_decisions_required"] == package["renewal"]["new_typed_decisions_required"]
           assert result["execution_authorised"] is False
           assert result["external_request_budget"] == 0
           assert result["human_decisions_required"] == [
@@ -230,7 +274,7 @@ jobs:
               "PRIVACY_DATA_RIGHTS",
           ]
           assert package["head_sha"] == os.environ["AXIGNAL_EXACT_SHA"]
-          assert package["renewal"]["new_typed_decisions_required"] is True
+          assert package["approval_target"]["head_sha"] == os.environ["AXIGNAL_EXACT_SHA"]
           assert package["renewal"]["automatic_approval"] is False
           assert package["renewal"]["automatic_signature"] is False
           assert package["renewal"]["automatic_expiry_extension"] is False
@@ -242,9 +286,28 @@ jobs:
           assert package["campaign_effect"]["product_admitted"] is False
           assert package["campaign_effect"]["public_claim_contribution"] is False
           assert package["campaign_effect"]["public_launch_authorised"] is False
+
+          for template_path in (
+              Path("artifacts/o01-renewal/current/legal-decision-template.v0.1.json"),
+              Path("artifacts/o01-renewal/current/privacy_data_rights-decision-template.v0.1.json"),
+          ):
+              template = json.loads(template_path.read_text())
+              assert set(template) == {
+                  "authority",
+                  "decision",
+                  "scope",
+                  "manifest_digest",
+                  "head_sha",
+                  "timestamp",
+                  "expiry",
+                  "conditions",
+                  "signature",
+              }
+              assert template["manifest_digest"] == result["approval_manifest_digest"]
+              assert template["signature"] is None
           PY
           ! grep -R -E \
-            '"signature"[[:space:]]*:[[:space:]]*"[^\"]+"|sk_(live|test)_|rk_(live|test)_|whsec_' \
+            'sk_(live|test)_|rk_(live|test)_|whsec_' \
             artifacts/o01-renewal
 
       - name: Emit deduplicated renewal notification
@@ -268,6 +331,7 @@ jobs:
           print()
           print("```text")
           print(f"head_sha           {result['head_sha']}")
+          print(f"manifest_digest    {result['approval_manifest_digest']}")
           print(f"change_class       {result['change_class']}")
           print(f"authority_status   {result['authority_status']}")
           print(f"renewal_phase      {result['renewal_phase']}")
@@ -303,7 +367,7 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-      - name: Fail closed on unavailable or changed official terms
+      - name: Fail closed on unavailable, changed or expired authority
         if: always()
         shell: bash
         run: |
@@ -323,7 +387,9 @@ jobs:
               exit 1
               ;;
           esac
-          if [ "$authority_status" = 'EXPIRED' ]; then
-            echo 'Renewal blocked because current typed authority is expired.'
-            exit 1
-          fi
+          case "$authority_status" in
+            EXPIRED|INVALID_BINDING|REJECTED)
+              echo "Renewal blocked by authority status ${authority_status}."
+              exit 1
+              ;;
+          esac
