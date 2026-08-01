@@ -174,6 +174,8 @@ test("API identity assertions are signed, short-lived and tenant-bound", () => {
   const secret = "identity-assertion-secret-with-sufficient-test-entropy";
   withEnvironment({ AXIGNAL_IDENTITY_ASSERTION_SECRET: secret }, () => {
     const before = Math.floor(Date.now() / 1000);
+    const authenticatedAt = "2026-08-01T10:00:00.500Z";
+    const stepUpValidUntil = "2026-08-01T10:05:00.900Z";
     const token = buildApiIdentityAssertion({
       subject: "usr_founder",
       email: "owner@axignal.example",
@@ -182,8 +184,8 @@ test("API identity assertions are signed, short-lived and tenant-bound", () => {
       sessionId: "33333333-3333-4333-8333-333333333333",
       authMethod: "PASSKEY",
       assuranceLevel: "AAL2",
-      authenticatedAt: "2026-08-01T10:00:00.500Z",
-      stepUpValidUntil: "2026-08-01T10:05:00.900Z"
+      authenticatedAt,
+      stepUpValidUntil
     });
     const after = Math.floor(Date.now() / 1000);
     const payload = decodeAndVerify(token, secret);
@@ -196,8 +198,11 @@ test("API identity assertions are signed, short-lived and tenant-bound", () => {
     assert.equal(payload.session_id, "33333333-3333-4333-8333-333333333333");
     assert.equal(payload.auth_method, "PASSKEY");
     assert.equal(payload.assurance_level, "AAL2");
-    assert.equal(payload.authenticated_at, 1_775_210_400);
-    assert.equal(payload.step_up_valid_until, 1_775_210_700);
+    assert.equal(payload.authenticated_at, Math.floor(Date.parse(authenticatedAt) / 1000));
+    assert.equal(
+      payload.step_up_valid_until,
+      Math.floor(Date.parse(stepUpValidUntil) / 1000)
+    );
     assert.ok(payload.iat >= before && payload.iat <= after);
     assert.equal(payload.exp - payload.iat, 60);
   });
