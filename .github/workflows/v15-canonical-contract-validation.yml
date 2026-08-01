@@ -10,15 +10,40 @@ on:
 permissions:
   contents: read
 
+env:
+  AXIGNAL_EXACT_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+
 jobs:
   validate-v15:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout exact branch head 1
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
           fetch-depth: 0
 
+      - name: Prove exact-head checkout 1
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual_sha="$(git rev-parse HEAD)"
+          tree_sha="$(git rev-parse 'HEAD^{tree}')"
+          test "$actual_sha" = "$AXIGNAL_EXACT_SHA"
+          {
+            printf 'exact_head_sha=%s\n' "$actual_sha"
+            printf 'git_tree_sha=%s\n' "$tree_sha"
+          } | tee v15-canonical-contract-validation-exact-head-1.txt
+
+      - name: Upload exact-head identity 1
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: v15-canonical-contract-validation-exact-head-1-${{ env.AXIGNAL_EXACT_SHA }}
+          path: v15-canonical-contract-validation-exact-head-1.txt
+          if-no-files-found: error
+          retention-days: 30
       - name: Set up Python
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
@@ -57,7 +82,7 @@ jobs:
       - name: Upload non-sensitive contract evidence
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: axignal-v15-canonical-contract-evidence
+          name: axignal-v15-canonical-contract-evidence-${{ env.AXIGNAL_EXACT_SHA }}
           path: |
             docs/contracts/31-global-e2e-development-contract-v1.5.md
             docs/adr/ADR-016-v1-5-canonical-programme-and-final-launch-gate.md

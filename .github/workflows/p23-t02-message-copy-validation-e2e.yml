@@ -33,6 +33,9 @@ on:
 permissions:
   contents: read
 
+env:
+  AXIGNAL_EXACT_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+
 concurrency:
   group: p23-t02-message-copy-${{ github.ref }}
   cancel-in-progress: true
@@ -43,10 +46,33 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
-      - name: Checkout exact revision
+      - name: Checkout exact branch head 1
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
           persist-credentials: false
+          fetch-depth: 0
+
+      - name: Prove exact-head checkout 1
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual_sha="$(git rev-parse HEAD)"
+          tree_sha="$(git rev-parse 'HEAD^{tree}')"
+          test "$actual_sha" = "$AXIGNAL_EXACT_SHA"
+          {
+            printf 'exact_head_sha=%s\n' "$actual_sha"
+            printf 'git_tree_sha=%s\n' "$tree_sha"
+          } | tee p23-t02-message-copy-validation-e2e-exact-head-1.txt
+
+      - name: Upload exact-head identity 1
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: p23-t02-message-copy-validation-e2e-exact-head-1-${{ env.AXIGNAL_EXACT_SHA }}
+          path: p23-t02-message-copy-validation-e2e-exact-head-1.txt
+          if-no-files-found: error
+          retention-days: 30
       - name: Set up Node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
@@ -78,7 +104,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: p23-t02-message-copy-e2e-${{ github.sha }}
+          name: p23-t02-message-copy-e2e-${{ env.AXIGNAL_EXACT_SHA }}
           path: |
             p23-t02-message-copy-evidence.json
             playwright-report

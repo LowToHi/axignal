@@ -327,6 +327,7 @@ jobs:
 
           python - <<'PY' | tee reproducibility-summary.json
           import json
+          import os
           from pathlib import Path
 
           names = ("runtime", "web", "landing", "postgres")
@@ -342,7 +343,7 @@ jobs:
           print(json.dumps({
               "schema": "axignal.g6-image-reproducibility.v1",
               "status": "PASS",
-              "exact_head_sha": "${AXIGNAL_EXACT_SHA}",
+              "exact_head_sha": os.environ["AXIGNAL_EXACT_SHA"],
               "manifests": manifests,
           }, indent=2, sort_keys=True))
           PY
