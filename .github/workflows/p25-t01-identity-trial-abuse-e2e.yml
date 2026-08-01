@@ -53,6 +53,9 @@ on:
 permissions:
   contents: read
 
+env:
+  AXIGNAL_EXACT_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+
 concurrency:
   group: p25-t01-identity-trial-abuse-${{ github.ref }}
   cancel-in-progress: true
@@ -71,10 +74,24 @@ jobs:
       AXIGNAL_PLAYWRIGHT_BASE_URL: http://127.0.0.1:18080
 
     steps:
-      - name: Checkout exact revision
+      - name: Checkout exact branch head
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
           persist-credentials: false
+          fetch-depth: 0
+
+      - name: Prove exact-head checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual_sha="$(git rev-parse HEAD)"
+          tree_sha="$(git rev-parse 'HEAD^{tree}')"
+          test "$actual_sha" = "$AXIGNAL_EXACT_SHA"
+          {
+            printf 'exact_head_sha=%s\n' "$actual_sha"
+            printf 'git_tree_sha=%s\n' "$tree_sha"
+          } | tee p25-exact-head.txt
 
       - name: Set up Python
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
@@ -121,7 +138,7 @@ jobs:
         shell: bash
         run: |
           cat > "$AXIGNAL_PILOT_ENV_FILE" <<'ENV'
-          AXIGNAL_BUILD_SHA=${{ github.sha }}
+          AXIGNAL_BUILD_SHA=${{ env.AXIGNAL_EXACT_SHA }}
           AXIGNAL_PILOT_SITE_ADDRESS=:80
           AXIGNAL_PILOT_CADDY_SITE_ADDRESS=:80
           AXIGNAL_PILOT_EDGE_MODE=shared-traefik
@@ -159,7 +176,16 @@ jobs:
           )
           "${compose[@]}" config >/dev/null
           "${compose[@]}" up --build --detach --wait
-          curl --fail --silent http://127.0.0.1:18080/api/health >/dev/null
+          curl --fail --silent http://127.0.0.1:18080/api/health \
+            | tee p25-web-health.json >/dev/null
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          health = json.loads(Path("p25-web-health.json").read_text())
+          assert health["buildSha"] == os.environ["AXIGNAL_EXACT_SHA"], health
+          PY
 
       - name: Execute identity and trial-abuse database E2E
         shell: bash
@@ -230,8 +256,10 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: identity-trial-abuse-e2e-${{ github.sha }}
+          name: identity-trial-abuse-e2e-${{ env.AXIGNAL_EXACT_SHA }}
           path: |
+            p25-exact-head.txt
+            p25-web-health.json
             artifacts/identity-trial-abuse-e2e.json
             artifacts/identity-trial-abuse-e2e.log
             playwright-report
