@@ -25,3 +25,4 @@ services:
     environment:
       AXIGNAL_IDENTITY_RUNTIME_ENABLED: "true"
       AXIGNAL_TEST_RUNTIME_ENABLED: "true"
+      AXIGNAL_PUBLIC_ORIGIN: http://localhost:18080
