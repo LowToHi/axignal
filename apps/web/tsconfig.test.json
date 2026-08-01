@@ -11,6 +11,10 @@
     "sourceMap": false,
     "types": ["node"]
   },
-  "include": ["lib/auth-token.ts", "tests/**/*.test.ts"],
+  "include": [
+    "lib/auth-token.ts",
+    "lib/security-boundaries.ts",
+    "tests/**/*.test.ts"
+  ],
   "exclude": ["node_modules", ".next", "dist"]
 }
