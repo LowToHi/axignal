@@ -50,6 +50,7 @@ jobs:
     timeout-minutes: 20
     env:
       AXIGNAL_EXACT_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+      DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
       GH_TOKEN: ${{ github.token }}
     steps:
       - name: Checkout exact branch head
@@ -115,7 +116,7 @@ jobs:
           python scripts/verify_gate7_o01_renewal.py \
             | tee artifacts/o01-renewal/renewal-contract.json
 
-      - name: Recover previous retained renewal package
+      - name: Recover previous retained online renewal package
         id: previous
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         shell: bash
@@ -126,11 +127,18 @@ jobs:
             gh api \
               -H 'Accept: application/vnd.github+json' \
               "/repos/${GITHUB_REPOSITORY}/actions/artifacts?per_page=100" \
-              --jq '[.artifacts[] | select(.expired == false) | select(.name | startswith("o01-approval-renewal-"))] | sort_by(.created_at) | reverse | .[0].id // empty'
+              | jq -r --arg branch "$DEFAULT_BRANCH" \
+                '[.artifacts[]
+                  | select(.expired == false)
+                  | select(.name | startswith("o01-approval-renewal-"))
+                  | select(.workflow_run.head_branch == $branch)]
+                 | sort_by(.created_at)
+                 | reverse
+                 | .[0].id // empty'
           } || true)"
           if [ -z "$artifact_id" ]; then
             echo 'package=' >> "$GITHUB_OUTPUT"
-            echo 'No previous retained renewal package was found.'
+            echo 'No previous online renewal package from the default branch was found.'
             exit 0
           fi
           gh api \
@@ -145,8 +153,14 @@ jobs:
             echo 'Previous artifact contained no renewal package.'
             exit 0
           fi
+          observation_mode="$(python -c 'import json,sys; print(json.load(open(sys.argv[1]))["terms_observations"]["mode"])' "$package")"
+          if [ "$observation_mode" != 'ONLINE_OFFICIAL_SOURCE_CHECK' ]; then
+            echo 'package=' >> "$GITHUB_OUTPUT"
+            echo 'Previous package was not produced from an online official-source check.'
+            exit 0
+          fi
           echo "package=$package" >> "$GITHUB_OUTPUT"
-          echo "Recovered previous package from artifact ${artifact_id}."
+          echo "Recovered online package from default-branch artifact ${artifact_id}."
 
       - name: Prepare exact-head renewal package
         id: prepare
