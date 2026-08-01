@@ -39,7 +39,7 @@ def main() -> int:
         assert profile["minimum_research_runs"] > 0
         assert profile["minimum_soak_seconds"] > 0
         thresholds = profile["thresholds"]
-        assert REQUIRED_THRESHOLDS <= set(thresholds)
+        assert set(thresholds) >= REQUIRED_THRESHOLDS
         assert 0 <= thresholds["health_error_rate_max"] < 1
         assert 0 <= thresholds["enqueue_error_rate_max"] < 1
         assert 0 < thresholds["research_success_rate_min"] <= 1
