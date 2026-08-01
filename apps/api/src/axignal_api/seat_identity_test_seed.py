@@ -15,7 +15,9 @@ def _enabled(name: str) -> bool:
 
 def main() -> None:
     if environ.get("AXIGNAL_ENVIRONMENT", "").strip().casefold() != "test":
-        raise RuntimeError("Passwordless seat-owner seed requires AXIGNAL_ENVIRONMENT=test")
+        raise RuntimeError(
+            "Passwordless seat-owner seed requires AXIGNAL_ENVIRONMENT=test"
+        )
     if not _enabled("AXIGNAL_TEST_RUNTIME_ENABLED"):
         raise RuntimeError("Passwordless seat-owner seed requires the test runtime")
     if not _enabled("AXIGNAL_IDENTITY_RUNTIME_ENABLED"):
