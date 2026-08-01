@@ -13,6 +13,10 @@ export default defineConfig({
   reporter: process.env.CI ? [["html", { open: "never" }], ["list"]] : "list",
   use: {
     baseURL,
+    extraHTTPHeaders: {
+      origin: publicOrigin,
+      "sec-fetch-site": "same-origin"
+    },
     trace: "retain-on-failure",
     screenshot: "only-on-failure"
   },
