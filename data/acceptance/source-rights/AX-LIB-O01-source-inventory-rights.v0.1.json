@@ -3,7 +3,7 @@
   "decision": "IN_PROGRESS",
   "expires_at": "2026-08-31T23:59:59Z",
   "gate_id": "PUBLIC-LAUNCH-GATE-7",
-  "generated_at": "2026-08-01T17:33:11Z",
+  "generated_at": "2026-08-01T17:50:00Z",
   "inventory": {
     "active": [],
     "candidate": [
@@ -12,22 +12,24 @@
     "exhaustive": false,
     "rejected": [],
     "revoked": [],
-    "scope": "CURRENT_REPOSITORY_AND_RETAINED_PILOT_EVIDENCE_ONLY",
+    "scope": "CURRENT_REPOSITORY_RETAINED_PILOT_AND_OFFICIAL_TED_LEGAL_SOURCES_ONLY",
     "status": "MISSING",
     "suspended": []
   },
   "library_id": "AX-LIB-O01",
   "limitations": [
-    "This bundle is a fail-closed inventory and rights work product, not a source admission.",
-    "The inventory is explicitly non-exhaustive and cannot support global procurement coverage.",
-    "A prior repository source-profile reference could not be resolved and is not reused as authority.",
-    "Previously asserted scoped rights are downgraded to MISSING until current legal evidence is retained and signed.",
+    "This bundle is a machine-prepared legal and rights work product, not Legal or Privacy/Data Rights approval.",
+    "Official sources support reuse of non-personal TED notices and metadata, including commercial value-added services, but do not resolve AXIGNAL secondary processing of personal data.",
+    "The source inventory is explicitly non-exhaustive and cannot support global procurement coverage.",
+    "Personal contact data and natural-person tenderer data remain blocked from ingestion, persistence, indexing, search and presentation.",
+    "Raw source payload storage, full-text republication, public API redistribution and model training remain denied pending typed human decisions.",
+    "Third-party attachments, industrial property, protected names and logos remain outside the default allow path.",
     "The retained pilot proves one bounded technical execution only.",
     "No public coverage, multilingual, redistribution or product-admission claim is authorised."
   ],
-  "parent_evidence_head_sha": "2b47b4b15569b21c44cca8858ee54c841fbc1647",
+  "parent_evidence_head_sha": "736c226763648fb2c08136b2211f3709cafe5fb3",
   "rc6r_baseline_sha": "55ed7fb6d73bee8ca22ccdcaeaf4c5a550819a22",
-  "schema_version": "axignal.source-inventory-rights-bundle/v0.1",
+  "schema_version": "axignal.source-inventory-rights-bundle/v0.2",
   "sources": [
     {
       "admission": {
@@ -56,17 +58,38 @@
           "kind": "CI_ARTIFACT",
           "reference": "github-actions:artifact:8821132341/pilot-runtime-exact-head.txt",
           "sha256": "7926ecd8edb59161d844f5d10bb95d9a332e0277e8d11f6784e0f1a293d4d86b"
+        },
+        {
+          "expires_at": "2026-08-31T23:59:59Z",
+          "kind": "SOURCE_SNAPSHOT",
+          "reference": "data/acceptance/legal/AX-LIB-O01-TED-official-terms-snapshot.v0.1.json",
+          "sha256": "f64e4b63e3e1bbef1b95ed04e5f89721e1afe5bad08d0825213b7328656430fc"
+        },
+        {
+          "expires_at": "2026-08-31T23:59:59Z",
+          "kind": "SOURCE_SNAPSHOT",
+          "reference": "data/acceptance/legal/AX-LIB-O01-TED-field-rights-matrix.v0.1.json",
+          "sha256": "228d2a05eaeab1a5021677797dd623da29523a7730e6d16f61555e97cd198193"
+        },
+        {
+          "expires_at": "2026-08-31T23:59:59Z",
+          "kind": "SOURCE_SNAPSHOT",
+          "reference": "data/acceptance/approvals/AX-LIB-O01-legal-privacy-approval-request.v0.1.json",
+          "sha256": "420dfba0950b959dcb9e5192a14eed2805f535b8bb5ffe42cb9b9bb0268b9ba1"
         }
       ],
       "field_policy": {
-        "attribution": "MISSING",
-        "derived_data": "MISSING",
-        "internal_retention": "MISSING",
-        "model_training": "MISSING",
-        "normalised_fact_storage": "MISSING",
-        "public_api_redistribution": "DENIED",
-        "raw_payload_storage": "MISSING",
-        "source_native_text_republication": "MISSING"
+        "attribution": "REQUIRED_AFTER_APPROVAL",
+        "derived_data": "ALLOW_AFTER_TYPED_LEGAL_AND_PRIVACY_APPROVAL",
+        "internal_retention": "DENIED_UNTIL_RETENTION_IS_APPROVED",
+        "model_training": "DENIED",
+        "normalised_fact_storage": "ALLOW_AFTER_TYPED_LEGAL_AND_PRIVACY_APPROVAL",
+        "personal_contact_data": "BLOCK_INGESTION_INDEXING_SEARCH_AND_PRESENTATION",
+        "public_api_redistribution": "DENIED_PENDING_TYPED_LEGAL_AND_PRIVACY_APPROVAL",
+        "raw_payload_storage": "DENIED",
+        "source_native_text_republication": "LINK_ONLY_PENDING_APPROVAL",
+        "third_party_attachments": "DENIED_UNLESS_SEPARATELY_CLEARED",
+        "trademarks_logos_and_names": "DENIED_OR_SEPARATE_CONSENT_REQUIRED"
       },
       "name": "TED Search API v3.0",
       "source_id": "src_ted_search_api_v3",
@@ -83,24 +106,27 @@
         "task": "AX-F8-T14"
       },
       "terms_review": {
-        "expiry": null,
-        "publisher": null,
-        "reviewed_at": null,
-        "reviewer": null,
+        "expiry": "2026-08-31T23:59:59Z",
+        "legal_snapshot_sha256": "f64e4b63e3e1bbef1b95ed04e5f89721e1afe5bad08d0825213b7328656430fc",
+        "publisher": "Publications Office of the European Union",
+        "reviewed_at": "2026-08-01T17:50:00Z",
+        "reviewer": "AXIGNAL_MACHINE_LEGAL_RESEARCH",
+        "rights_matrix_sha256": "228d2a05eaeab1a5021677797dd623da29523a7730e6d16f61555e97cd198193",
         "signature": null,
-        "status": "MISSING",
-        "terms_reference": null,
-        "terms_version": null
+        "status": "PENDING_TYPED_HUMAN_APPROVAL",
+        "terms_reference": "data/acceptance/legal/AX-LIB-O01-TED-official-terms-snapshot.v0.1.json",
+        "terms_version": "TED legal notice © European Union 1998-2026; TED API 3.0; Commission Decision 2011/833/EU observed in force"
       }
     }
   ],
   "unresolved_requirements": [
     "Complete O01 source inventory and prove exhaustiveness.",
-    "Review and retain the exact current TED terms or legal instrument.",
-    "Decide field-level storage, presentation, attribution, retention, derived-data and model-use rights.",
+    "Obtain typed Legal approval or rejection bound to an immutable exact-head manifest.",
+    "Obtain typed Privacy/Data Rights approval or rejection covering lawful basis, minimisation, retention, deletion and data-subject rights.",
+    "Implement and verify field filtering for personal data, third-party content and protected marks.",
     "Measure source quality, historical depth, update frequency and end-to-end lag.",
-    "Obtain typed Legal, Privacy/Data Rights, Source Quality and Human Coverage Authority decisions.",
     "Execute six representative real multilingual journeys.",
-    "Rehearse source/library kill switch and rollback."
+    "Rehearse source/library kill switch and rollback.",
+    "Obtain Source Quality and Human Coverage Authority decisions."
   ]
 }
