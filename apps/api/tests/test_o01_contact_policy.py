@@ -125,16 +125,15 @@ def test_overprivileged_or_misclassified_channels_fail_closed() -> None:
             channel_type=ContactChannelType.NAMED_PROFESSIONAL_EMAIL,
         )
 
-    overprivileged = channel(
-        channel_type=ContactChannelType.NAMED_PROFESSIONAL_EMAIL,
-        contact_name="Procurement Officer",
-        endpoint="mailto:officer@example.test",
-        data_class=ContactDataClass.PROFESSIONAL_PERSONAL,
-        policy_decision=ContactPolicyDecision.ALLOW,
-        allowed_actions=frozenset({ContactAction.COPY}),
-    )
     with pytest.raises(ValueError, match="Named professional contacts require CONTEXTUAL"):
-        validate_o01_contact_channel(overprivileged)
+        channel(
+            channel_type=ContactChannelType.NAMED_PROFESSIONAL_EMAIL,
+            contact_name="Procurement Officer",
+            endpoint="mailto:officer@example.test",
+            data_class=ContactDataClass.PROFESSIONAL_PERSONAL,
+            policy_decision=ContactPolicyDecision.ALLOW,
+            allowed_actions=frozenset({ContactAction.COPY}),
+        )
 
 
 def test_non_procurement_and_crm_use_remain_forbidden() -> None:
