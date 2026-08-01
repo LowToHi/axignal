@@ -175,16 +175,18 @@ def inspect_workflow(name: str, path: Path, text: str) -> list[WorkflowFinding]:
             )
 
     for line in text.splitlines():
-        if "AXIGNAL_BUILD_SHA" in line or "--build-arg AXIGNAL_BUILD_SHA" in line:
-            if "GITHUB_SHA" in line:
-                findings.append(
-                    WorkflowFinding(
-                        name,
-                        relative,
-                        "BUILD_SHA_USES_EVENT_SHA",
-                        line.strip(),
-                    )
+        if (
+            "AXIGNAL_BUILD_SHA" in line
+            or "--build-arg AXIGNAL_BUILD_SHA" in line
+        ) and "GITHUB_SHA" in line:
+            findings.append(
+                WorkflowFinding(
+                    name,
+                    relative,
+                    "BUILD_SHA_USES_EVENT_SHA",
+                    line.strip(),
                 )
+            )
 
     if "AXIGNAL_BUILD_SHA" in text and "AXIGNAL_EXACT_SHA" not in text:
         findings.append(
