@@ -23,6 +23,10 @@ function identitySessionCookie(
 }
 
 async function loginWithPasskey(page: Page, context: BrowserContext) {
+  await page.setExtraHTTPHeaders({
+    origin: "http://localhost:18080",
+    "sec-fetch-site": "same-origin"
+  });
   const cdp = await context.newCDPSession(page);
   await cdp.send("WebAuthn.enable");
   const authenticator = await cdp.send("WebAuthn.addVirtualAuthenticator", {
