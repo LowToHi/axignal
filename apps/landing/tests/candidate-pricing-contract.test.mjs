@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import { candidatePlansFromRuntime } from "../lib/candidate-pricing-contract.ts";
-import { getCandidatePlans } from "../lib/candidate-pricing.ts";
 
 const validPlans = [
   {
@@ -51,7 +51,16 @@ function validRuntime() {
 }
 
 test("the repository price book exposes only the three controlled offers", async () => {
-  const plans = await getCandidatePlans();
+  const runtime = JSON.parse(
+    await readFile(
+      new URL(
+        "../../../data/commercial/commercial-runtime-pricing-stripe-runtime.v0.1.json",
+        import.meta.url
+      ),
+      "utf8"
+    )
+  );
+  const plans = candidatePlansFromRuntime(runtime);
 
   assert.deepEqual(
     plans.map((plan) => plan.planCode),
