@@ -5,6 +5,7 @@ RUN corepack enable
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json tsconfig.base.json ./
 COPY apps ./apps
 COPY packages ./packages
+COPY data/commercial/commercial-runtime-pricing-stripe-runtime.v0.1.json ./data/commercial/commercial-runtime-pricing-stripe-runtime.v0.1.json
 RUN pnpm install --frozen-lockfile
 RUN pnpm --filter @axignal/landing build
 
@@ -16,6 +17,8 @@ ENV HOSTNAME=0.0.0.0
 WORKDIR /app
 COPY --from=builder --chown=node:node /app/apps/landing/.next/standalone ./
 COPY --from=builder --chown=node:node /app/apps/landing/.next/static ./apps/landing/.next/static
+COPY --from=builder --chown=node:node /app/data/commercial/commercial-runtime-pricing-stripe-runtime.v0.1.json ./data/commercial/commercial-runtime-pricing-stripe-runtime.v0.1.json
+WORKDIR /app/apps/landing
 USER node
 EXPOSE 3000
-CMD ["node", "apps/landing/server.js"]
+CMD ["node", "server.js"]
