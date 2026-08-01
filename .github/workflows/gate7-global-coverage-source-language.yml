@@ -21,11 +21,15 @@ on:
       - "data/trade-supply-chain/**"
       - "data/energy-climate/**"
       - "data/innovation-ip/**"
+      - "apps/api/src/axignal_api/o01_contact_policy.py"
+      - "apps/api/tests/test_o01_contact_policy.py"
       - "schemas/global-coverage-source-language-*.schema.json"
       - "scripts/verify_gate7_global_coverage.py"
       - "scripts/verify_gate7_source_snapshots.py"
       - "scripts/verify_gate7_source_rights.py"
       - "scripts/verify_gate7_o01_campaign_contract.py"
+      - "scripts/verify_gate7_o01_legal_privacy_reconciliation.py"
+      - "scripts/materialize_gate7_o01_approval_manifest.py"
       - "docs/acceptance/Gate-7-global-coverage-sources-multilingual-v0.1.md"
       - ".github/workflows/gate7-global-coverage-source-language.yml"
   push:
@@ -44,11 +48,15 @@ on:
       - "data/trade-supply-chain/**"
       - "data/energy-climate/**"
       - "data/innovation-ip/**"
+      - "apps/api/src/axignal_api/o01_contact_policy.py"
+      - "apps/api/tests/test_o01_contact_policy.py"
       - "schemas/global-coverage-source-language-*.schema.json"
       - "scripts/verify_gate7_global_coverage.py"
       - "scripts/verify_gate7_source_snapshots.py"
       - "scripts/verify_gate7_source_rights.py"
       - "scripts/verify_gate7_o01_campaign_contract.py"
+      - "scripts/verify_gate7_o01_legal_privacy_reconciliation.py"
+      - "scripts/materialize_gate7_o01_approval_manifest.py"
       - "docs/acceptance/Gate-7-global-coverage-sources-multilingual-v0.1.md"
       - ".github/workflows/gate7-global-coverage-source-language.yml"
 
@@ -83,6 +91,8 @@ jobs:
           mkdir -p artifacts/gate7
           printf 'exact_head_sha=%s\n' "$actual_sha" \
             | tee exact-head.txt artifacts/gate7/exact-head.txt
+          printf 'git_tree=%s\n' "$(git rev-parse 'HEAD^{tree}')" \
+            | tee -a artifacts/gate7/exact-head.txt
 
       - name: Set up Python
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
@@ -104,15 +114,23 @@ jobs:
       - name: Verify implementation quality
         run: |
           python -m compileall -q \
+            apps/api/src/axignal_api/o01_contact_policy.py \
+            apps/api/tests/test_o01_contact_policy.py \
             scripts/verify_gate7_global_coverage.py \
             scripts/verify_gate7_source_snapshots.py \
             scripts/verify_gate7_source_rights.py \
-            scripts/verify_gate7_o01_campaign_contract.py
+            scripts/verify_gate7_o01_campaign_contract.py \
+            scripts/verify_gate7_o01_legal_privacy_reconciliation.py \
+            scripts/materialize_gate7_o01_approval_manifest.py
           ruff check \
+            apps/api/src/axignal_api/o01_contact_policy.py \
+            apps/api/tests/test_o01_contact_policy.py \
             scripts/verify_gate7_global_coverage.py \
             scripts/verify_gate7_source_snapshots.py \
             scripts/verify_gate7_source_rights.py \
-            scripts/verify_gate7_o01_campaign_contract.py
+            scripts/verify_gate7_o01_campaign_contract.py \
+            scripts/verify_gate7_o01_legal_privacy_reconciliation.py \
+            scripts/materialize_gate7_o01_approval_manifest.py
 
       - name: Verify repository source snapshots
         shell: bash
@@ -121,12 +139,31 @@ jobs:
           python scripts/verify_gate7_source_snapshots.py \
             | tee artifacts/gate7/source-snapshot-integrity.json
 
-      - name: Verify O01 legal and rights fail-closed policy
+      - name: Verify O01 legal and rights historical fail-closed policy
         shell: bash
         run: |
           set -euo pipefail
           python scripts/verify_gate7_source_rights.py \
             | tee artifacts/gate7/source-rights-policy.json
+
+      - name: Verify O01 contextual Legal and Privacy reconciliation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/verify_gate7_o01_legal_privacy_reconciliation.py \
+            | tee artifacts/gate7/o01-legal-privacy-reconciliation.json
+
+      - name: Materialise O01 exact-head approval manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          AXIGNAL_EXACT_SHA="$AXIGNAL_EXACT_SHA" \
+            python scripts/materialize_gate7_o01_approval_manifest.py \
+            | tee artifacts/gate7/o01-approval-manifest-result.json
+          cp artifacts/o01-legal-privacy/approval-manifest.v0.2.json \
+            artifacts/gate7/approval-manifest.v0.2.json
+          cp artifacts/o01-legal-privacy/approval-manifest.v0.2.sha256 \
+            artifacts/gate7/approval-manifest.v0.2.sha256
 
       - name: Verify O01 evidence campaign remains blocked
         shell: bash
@@ -151,7 +188,7 @@ jobs:
             python scripts/verify_gate7_global_coverage.py \
             | tee artifacts/gate7/gate7-console.json
 
-      - name: Enforce launch and claim boundary
+      - name: Enforce launch, contextual-policy and claim boundary
         run: |
           python - <<'PY'
           import json
@@ -165,11 +202,22 @@ jobs:
           rights = json.loads(
               Path("artifacts/gate7/source-rights-policy.json").read_text()
           )
+          reconciliation = json.loads(
+              Path("artifacts/gate7/o01-legal-privacy-reconciliation.json").read_text()
+          )
+          manifest_result = json.loads(
+              Path("artifacts/gate7/o01-approval-manifest-result.json").read_text()
+          )
+          manifest = json.loads(
+              Path("artifacts/gate7/approval-manifest.v0.2.json").read_text()
+          )
           campaign = json.loads(
               Path("artifacts/gate7/o01-campaign-contract.json").read_text()
           )
+
           assert snapshots["status"] == "PASS"
           assert snapshots["source_snapshots_checked"] >= 4
+
           assert rights["status"] == "PASS"
           assert rights["source_state"] == "CANDIDATE"
           assert rights["legal_admission"] == "MISSING"
@@ -180,6 +228,39 @@ jobs:
           assert rights["controls"]["third_party_content_blocked"] is True
           assert rights["controls"]["public_api_redistribution_denied"] is True
           assert rights["controls"]["model_training_denied"] is True
+
+          assert reconciliation["status"] == "PASS"
+          assert reconciliation["output"] == "O01_LEGAL_PRIVACY_RECONCILIATION_PASS"
+          assert reconciliation["contact_policy"] == {
+              "AMBIGUOUS_PERSONAL": "LINK_ONLY",
+              "BLOCKED": "BLOCK",
+              "FUNCTIONAL_NON_PERSONAL": "ALLOW",
+              "INSTITUTIONAL": "ALLOW",
+              "PROFESSIONAL_PERSONAL": "CONTEXTUAL",
+          }
+          assert reconciliation["legal_decision"] == "MISSING"
+          assert reconciliation["privacy_data_rights_decision"] == "MISSING"
+          assert reconciliation["campaign_status"] == "BLOCKED"
+          assert reconciliation["execution_authorised"] is False
+          assert reconciliation["external_request_budget"] == 0
+          assert reconciliation["source_state"] == "CANDIDATE"
+          assert reconciliation["product_admitted"] is False
+          assert reconciliation["public_claim_contribution"] is False
+
+          assert manifest_result["status"] == "PASS"
+          assert manifest_result["head_sha"] == os.environ["AXIGNAL_EXACT_SHA"]
+          assert manifest["head_sha"] == os.environ["AXIGNAL_EXACT_SHA"]
+          assert manifest["status"] == "READY_FOR_TYPED_DECISIONS"
+          assert manifest["legal_decision"] == "MISSING"
+          assert manifest["privacy_data_rights_decision"] == "MISSING"
+          assert manifest["campaign_status"] == "BLOCKED"
+          assert manifest["execution_authorised"] is False
+          assert manifest["external_request_budget"] == 0
+          assert manifest["source_state"] == "CANDIDATE"
+          assert manifest["product_admitted"] is False
+          assert manifest["public_claim_contribution"] is False
+          assert manifest["public_launch_authorised"] is False
+
           assert campaign["status"] == "PASS"
           assert campaign["contract_head_sha"] == os.environ["AXIGNAL_EXACT_SHA"]
           assert campaign["campaign_status"] == "BLOCKED"
@@ -190,6 +271,7 @@ jobs:
           assert campaign["kill_switch_rehearsal"] == "NOT_EXECUTED"
           assert campaign["rollback_rehearsal"] == "NOT_EXECUTED"
           assert campaign["claim_contribution"] is False
+
           assert summary["status"] == "PASS"
           assert summary["evidence_head_sha"] == os.environ["AXIGNAL_EXACT_SHA"]
           assert summary["libraries"] == 16
@@ -201,12 +283,14 @@ jobs:
               assert summary["all_sources_admitted"] is False
           PY
 
-      - name: Reject sensitive evidence
+      - name: Reject sensitive evidence and machine signatures
         shell: bash
         run: |
           set -euo pipefail
           ! grep -R -E \
             'sk_(live|test)_|rk_(live|test)_|whsec_|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----' \
+            artifacts/gate7
+          ! grep -R -E '"signature"[[:space:]]*:[[:space:]]*"[^\"]+"' \
             artifacts/gate7
 
       - name: Upload Gate 7 evidence
