@@ -1,0 +1,151 @@
+{
+  "ai_checkpoint": {
+    "base_url": "https://api.deepseek.com",
+    "canonical_claim_authority": false,
+    "enabled_by_default": false,
+    "external_action_authority": false,
+    "model": "deepseek-v4-flash-0731",
+    "previous_model": "deepseek-v4-flash",
+    "price_change_declared": false,
+    "proposal_authority_only": true,
+    "provider": "deepseek",
+    "transport": "direct_openai_compatible_api"
+  },
+  "audit_contract": {
+    "contact_endpoint_replication": false,
+    "message_body_replication": false,
+    "tenant_scoped": true,
+    "workspace_scoped_when_applicable": true
+  },
+  "claim_effect": {
+    "global_coverage_authorised": false,
+    "multilingual_authorised": false,
+    "product_admitted": false,
+    "public_claim_contribution": false,
+    "public_launch_authorised": false,
+    "source_state": "CANDIDATE"
+  },
+  "clarification_contract": {
+    "autonomous_send": false,
+    "external_handoff_recorded": true,
+    "model_may_prepare_draft": true,
+    "sent_state_is_subscriber_confirmed": true,
+    "subscriber_approval_required": true
+  },
+  "contact_channel_contract": {
+    "data_classes": [
+      "INSTITUTIONAL",
+      "FUNCTIONAL_NON_PERSONAL",
+      "PROFESSIONAL_PERSONAL",
+      "AMBIGUOUS_PERSONAL",
+      "BLOCKED"
+    ],
+    "entity": "ProcurementContactChannel",
+    "invariants": {
+      "ambiguous_personal_requires_link_only_or_block": true,
+      "blocked_data_exposes_endpoint": false,
+      "bulk_contact_export": false,
+      "cross_opportunity_reuse": false,
+      "global_person_search": false,
+      "marketing_use": false,
+      "named_professional_contact_requires_contextual_policy": true,
+      "workspace_uses_channel_reference": true
+    },
+    "not_entities": [
+      "Person",
+      "Lead",
+      "CRMContact",
+      "Prospect"
+    ],
+    "policy_decisions": [
+      "ALLOW",
+      "CONTEXTUAL",
+      "LINK_ONLY",
+      "BLOCK"
+    ],
+    "priority_order": [
+      "PROCUREMENT_PLATFORM",
+      "BUYER_PROFILE",
+      "OFFICIAL_FORM",
+      "FUNCTIONAL_EMAIL",
+      "NAMED_PROFESSIONAL_EMAIL",
+      "OFFICIAL_PHONE",
+      "NAMED_PROFESSIONAL_PHONE",
+      "SOURCE_LINK_ONLY"
+    ],
+    "channel_types": [
+      "PROCUREMENT_PLATFORM",
+      "BUYER_PROFILE",
+      "OFFICIAL_FORM",
+      "FUNCTIONAL_EMAIL",
+      "NAMED_PROFESSIONAL_EMAIL",
+      "OFFICIAL_PHONE",
+      "NAMED_PROFESSIONAL_PHONE",
+      "SOURCE_LINK_ONLY"
+    ]
+  },
+  "entities": [
+    "SourceProvenance",
+    "ProcurementFact",
+    "OpportunityVersion",
+    "Opportunity",
+    "ProcurementContactChannel",
+    "TenderWorkspace",
+    "Clarification",
+    "PolicyDecisionRecord",
+    "AuditEvent"
+  ],
+  "execution_boundary": {
+    "approval_survives_head_change": false,
+    "approvals": [],
+    "external_ted_request_budget": 0,
+    "real_campaign_authorised": false
+  },
+  "fact_origins": [
+    "SOURCE_FACT",
+    "NORMALIZED_FACT",
+    "TRANSLATED_FACT",
+    "EXTRACTED_REQUIREMENT",
+    "AXIGNAL_INFERENCE",
+    "AXIGNAL_RECOMMENDATION",
+    "SUBSCRIBER_PROVIDED"
+  ],
+  "gate_id": "PUBLIC-LAUNCH-GATE-7",
+  "library_id": "AX-LIB-O01",
+  "output": "O01_DOMAIN_CONTRACTS_PASS",
+  "prohibited_transitions": [
+    "TED_PRODUCT_ADMITTED",
+    "O01_ACCEPTED",
+    "GLOBAL_PROCUREMENT_CLAIM_ENABLED",
+    "MULTILINGUAL_CLAIM_ENABLED",
+    "PUBLIC_LAUNCH_GO",
+    "AUTONOMOUS_BID_SUBMISSION",
+    "AUTONOMOUS_EXTERNAL_COMMUNICATION"
+  ],
+  "required_files": [
+    "apps/api/src/axignal_api/procurement_domain.py",
+    "apps/api/tests/test_procurement_domain_contracts.py",
+    "apps/api/src/axignal_api/deepseek_proposals.py",
+    "apps/api/src/axignal_api/settings.py",
+    "apps/api/tests/test_deepseek_v4_flash_proposals.py",
+    "scripts/verify_o01_domain_contracts.py"
+  ],
+  "schema_version": "axignal.o01-domain-contracts/v0.1",
+  "source_id": "src_ted_search_api_v3",
+  "status": "IMPLEMENTED_CANDIDATE",
+  "task_id": "AX-GE2E-G7-O01-T02",
+  "workspace_contract": {
+    "axignal_signs_or_submits_bid": false,
+    "explicit_creation_required": true,
+    "external_presentation_is_user_attested": true,
+    "snapshot_fields": [
+      "opportunity_version",
+      "source_notice_id",
+      "source_version",
+      "subscriber_profile_version",
+      "assessment_version",
+      "created_by",
+      "created_at"
+    ]
+  }
+}
