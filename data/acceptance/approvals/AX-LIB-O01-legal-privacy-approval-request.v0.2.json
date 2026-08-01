@@ -41,7 +41,7 @@
     "approval_survives_head_change": false,
     "approval_survives_manifest_change": false,
     "partial_or_informal_approval_valid": false,
-    "maximum_expiry": "2026-08-31T23:59:59Z"
+    "maximum_expiry": "2026-08-31T18:00:00Z"
   },
   "decision_scope": {
     "contact_policy": {
@@ -86,7 +86,8 @@
     "raw payloads remain ephemeral and are not persisted",
     "attachments and third-party works remain disabled",
     "public API redistribution and model training remain denied",
-    "any head, tree, manifest, contract or artifact change invalidates approval"
+    "any head, tree, manifest, contract or artifact change invalidates approval",
+    "the approval expires before the retained evidence artifact"
   ],
   "blocking_reasons": [
     "The exact-head approval manifest has not yet been materialised by CI.",
