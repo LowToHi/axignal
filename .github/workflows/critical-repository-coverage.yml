@@ -41,15 +41,8 @@ jobs:
           name: critical-repository-inventory
           path: |
             critical-repository-inventory.json
-            apps/api/src/axignal_api/admission_repository.py
-            apps/api/src/axignal_api/billing_repository.py
-            apps/api/src/axignal_api/entitlement_repository.py
-            apps/api/src/axignal_api/identity_repository.py
-            apps/api/src/axignal_api/organic_repository.py
-            apps/api/src/axignal_api/proposal_repository.py
-            apps/api/src/axignal_api/retention_repository.py
-            apps/api/src/axignal_api/seat_repository.py
-            apps/api/src/axignal_api/ted_repository.py
+            pyproject.toml
+            apps/api/src/axignal_api
             apps/api/tests/test_critical_repositories_wrappers.py
             apps/api/tests/test_critical_repositories_proposal_ted.py
             apps/api/tests/test_critical_repository_cursors.py
@@ -81,7 +74,9 @@ jobs:
             apps/api/tests/test_critical_repositories_proposal_ted.py \
             apps/api/tests/test_critical_repository_cursors.py
       - name: Execute repository characterization suite
+        shell: bash
         run: |
+          set -o pipefail
           pytest \
             apps/api/tests/test_critical_repositories_wrappers.py \
             apps/api/tests/test_critical_repositories_proposal_ted.py \
@@ -96,7 +91,8 @@ jobs:
             --cov=axignal_api.seat_repository \
             --cov=axignal_api.ted_repository \
             --cov-report=term-missing \
-            --cov-report=json:critical-repository-coverage.json
+            --cov-report=json:critical-repository-coverage.json \
+            2>&1 | tee critical-repository-pytest.log
       - name: Enforce per-module coverage floors
         run: python scripts/verify_critical_repository_coverage.py critical-repository-coverage.json
       - name: Upload repository coverage evidence
@@ -104,6 +100,8 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: critical-repository-coverage
-          path: critical-repository-coverage.json
+          path: |
+            critical-repository-coverage.json
+            critical-repository-pytest.log
           if-no-files-found: warn
           retention-days: 14
