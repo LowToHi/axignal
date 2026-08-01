@@ -59,7 +59,7 @@ test("UUID validation accepts supported UUIDs and rejects malformed identifiers"
 });
 
 test("timestamp converts valid ISO instants and rejects missing or invalid values", () => {
-  assert.equal(timestamp("2026-08-01T00:00:00Z"), 1_754_006_400);
+  assert.equal(timestamp("2026-08-01T00:00:00Z"), 1_785_542_400);
   assert.equal(timestamp("invalid"), undefined);
   assert.equal(timestamp(null), undefined);
   assert.equal(timestamp(undefined), undefined);
