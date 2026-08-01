@@ -4,6 +4,7 @@ import hashlib
 import json
 import os
 import subprocess
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -13,13 +14,17 @@ ROOT = Path(__file__).resolve().parents[1]
 OUTPUT_DIR = ROOT / "artifacts/o01-legal-privacy"
 MANIFEST_PATH = OUTPUT_DIR / "approval-manifest.v0.2.json"
 DIGEST_PATH = OUTPUT_DIR / "approval-manifest.v0.2.sha256"
-MAXIMUM_EXPIRY = "2026-08-31T23:59:59Z"
+APPROVAL_REQUEST_PATH = ROOT / (
+    "data/acceptance/approvals/"
+    "AX-LIB-O01-legal-privacy-approval-request.v0.2.json"
+)
+EVIDENCE_RETENTION_SAFE_EXPIRY = "2026-08-31T18:00:00Z"
 
 INPUT_PATHS = (
     ROOT / "data/acceptance/legal/AX-LIB-O01-TED-official-terms-snapshot.v0.1.json",
     ROOT / "data/acceptance/legal/AX-LIB-O01-TED-field-rights-matrix.v0.1.json",
     ROOT / "data/acceptance/legal/AX-LIB-O01-TED-contact-policy-reconciliation.v0.2.json",
-    ROOT / "data/acceptance/approvals/AX-LIB-O01-legal-privacy-approval-request.v0.2.json",
+    APPROVAL_REQUEST_PATH,
     ROOT / "data/acceptance/campaigns/AX-LIB-O01-quality-lag-multilingual-controls.v0.1.json",
     ROOT / "data/contracts/AX-GE2E-G7-O01-T02-domain-contracts.v0.1.json",
     ROOT / "apps/api/src/axignal_api/procurement_domain.py",
@@ -70,11 +75,30 @@ def canonical_bytes(payload: dict[str, Any]) -> bytes:
     ).encode("utf-8")
 
 
+def approval_maximum_expiry() -> str:
+    payload = json.loads(APPROVAL_REQUEST_PATH.read_text(encoding="utf-8"))
+    value = payload["approval_contract"]["maximum_expiry"]
+    expiry = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    safe_expiry = datetime.fromisoformat(
+        EVIDENCE_RETENTION_SAFE_EXPIRY.replace("Z", "+00:00")
+    )
+    if expiry.tzinfo is None:
+        raise ManifestError("Approval maximum expiry must include a timezone")
+    if expiry.astimezone(UTC) > safe_expiry.astimezone(UTC):
+        raise ManifestError(
+            "Approval maximum expiry exceeds the retained-evidence safe boundary"
+        )
+    if expiry.astimezone(UTC) <= datetime.now(UTC):
+        raise ManifestError("Approval maximum expiry is not current")
+    return value
+
+
 def materialize() -> dict[str, Any]:
     reconciliation = verify()
     if reconciliation["status"] != "PASS":
         raise ManifestError("Reconciliation verifier did not pass")
 
+    maximum_expiry = approval_maximum_expiry()
     head, tree, committed_at = exact_git_identity()
     files = {
         str(path.relative_to(ROOT)): f"sha256:{sha256_file(path)}"
@@ -90,7 +114,8 @@ def materialize() -> dict[str, Any]:
         "head_sha": head,
         "git_tree": tree,
         "head_committed_at": committed_at,
-        "maximum_expiry": MAXIMUM_EXPIRY,
+        "maximum_expiry": maximum_expiry,
+        "evidence_retention_safe_expiry": EVIDENCE_RETENTION_SAFE_EXPIRY,
         "status": "READY_FOR_TYPED_DECISIONS",
         "required_authorities": ["LEGAL", "PRIVACY_DATA_RIGHTS"],
         "required_decision": "APPROVE",
@@ -136,7 +161,8 @@ def materialize() -> dict[str, Any]:
         "git_tree": tree,
         "manifest_path": str(MANIFEST_PATH.relative_to(ROOT)),
         "manifest_digest": f"sha256:{digest}",
-        "maximum_expiry": MAXIMUM_EXPIRY,
+        "maximum_expiry": maximum_expiry,
+        "evidence_retention_safe_expiry": EVIDENCE_RETENTION_SAFE_EXPIRY,
         "required_authorities": manifest["required_authorities"],
         "legal_decision": "MISSING",
         "privacy_data_rights_decision": "MISSING",
