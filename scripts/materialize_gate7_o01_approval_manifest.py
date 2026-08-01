@@ -132,9 +132,6 @@ def materialize() -> dict[str, Any]:
             else "READY_FOR_TYPED_DECISIONS"
         ),
         "historical_only": historical_only,
-        "renewal_preparation_mode": (
-            os.environ.get("AXIGNAL_RENEWAL_PREPARATION") == "1"
-        ),
         "required_authorities": ["LEGAL", "PRIVACY_DATA_RIGHTS"],
         "required_decision": "APPROVE",
         "required_fields": [
