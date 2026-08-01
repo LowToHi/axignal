@@ -8,8 +8,8 @@ from pathlib import Path
 from typing import Any
 
 from axignal_api.o01_approval_renewal import (
-    AuthorityEnvelope,
     REQUIRED_AUTHORITIES,
+    AuthorityEnvelope,
     TypedAuthorityDecision,
 )
 
