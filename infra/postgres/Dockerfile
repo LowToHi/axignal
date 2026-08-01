@@ -1,8 +1,10 @@
+FROM pgvector/pgvector:pg17@sha256:7ae6051efd0e60444282c27c7e141af07f322ce033300e727a49c3dd11075e38 AS pgvector
+
 FROM postgis/postgis:17-3.5@sha256:77e89c11c4779c394ebeeaac1099dafb77b728abc8cd45dcaf6c4695503a0c37
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends postgresql-17-pgvector \
-    && rm -rf /var/lib/apt/lists/*
+COPY --from=pgvector /usr/lib/postgresql/17/lib/vector.so /usr/lib/postgresql/17/lib/vector.so
+COPY --from=pgvector /usr/share/postgresql/17/extension/vector.control /usr/share/postgresql/17/extension/vector.control
+COPY --from=pgvector /usr/share/postgresql/17/extension/vector--*.sql /usr/share/postgresql/17/extension/
 
 COPY init.sql /docker-entrypoint-initdb.d/010-axignal-extensions.sql
 COPY 020-research-spine.sql /docker-entrypoint-initdb.d/020-axignal-research-spine.sql
