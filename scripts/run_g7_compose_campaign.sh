@@ -15,15 +15,16 @@ health_concurrency="${AXIGNAL_G7_HEALTH_CONCURRENCY:-20}"
 research_concurrency="${AXIGNAL_G7_RESEARCH_CONCURRENCY:-6}"
 soak_rps="${AXIGNAL_G7_SOAK_RPS:-2}"
 output_dir="$(mkdir -p "$AXIGNAL_G7_OUTPUT_DIR" && cd "$AXIGNAL_G7_OUTPUT_DIR" && pwd)"
-env_file="$output_dir/g7.env"
+env_file="$(mktemp "${RUNNER_TEMP:-${TMPDIR:-/tmp}}/axignal-g7-env.XXXXXX")"
 compose_files=(
   -f infra/pilot/compose.yaml
   -f infra/performance/compose.g7.yaml
 )
 
-cat > "$env_file" <<ENV
-AXIGNAL_BUILD_SHA=$AXIGNAL_EXACT_SHA
-AXIGNAL_G7_API_PORT=$port
+{
+  printf 'AXIGNAL_BUILD_SHA=%s\n' "$AXIGNAL_EXACT_SHA"
+  printf 'AXIGNAL_G7_API_PORT=%s\n' "$port"
+  cat <<'ENV'
 AXIGNAL_POSTGRES_DB=axignal
 AXIGNAL_POSTGRES_USER=axignal
 AXIGNAL_POSTGRES_PASSWORD=ci-admin-password-not-for-deployment
@@ -36,7 +37,7 @@ AXIGNAL_SCHEDULER_DB_PASSWORD=ci-scheduler-password-not-for-deployment
 AXIGNAL_AUTH_EMAIL=g7@example.test
 AXIGNAL_AUTH_SUBJECT=usr_g7_capacity
 AXIGNAL_AUTH_TENANT_ID=11111111-1111-4111-8111-111111111111
-AXIGNAL_AUTH_PASSWORD_SCRYPT=scrypt\$00112233445566778899aabbccddeeff\$c90f8bf5f5c77a981b682204633909aba0e58fe328cb71c9c357399c5ca92ea4a088a494b462b96f17efb7360ac400648f893f36fa31d4ec996236784dcbee94
+AXIGNAL_AUTH_PASSWORD_SCRYPT='scrypt$00112233445566778899aabbccddeeff$c90f8bf5f5c77a981b682204633909aba0e58fe328cb71c9c357399c5ca92ea4a088a494b462b96f17efb7360ac400648f893f36fa31d4ec996236784dcbee94'
 AXIGNAL_SESSION_SECRET=ci-session-secret-with-at-least-32-bytes
 AXIGNAL_IDENTITY_ASSERTION_SECRET=ci-identity-secret-with-at-least-32-bytes
 AXIGNAL_VALIDATION_PARTICIPANT_SALT=ci-participant-salt-with-at-least-32-bytes
@@ -44,6 +45,8 @@ AXIGNAL_OTEL_ENABLED=false
 AXIGNAL_LIVE_SOURCES_ENABLED=false
 AXIGNAL_TED_LIVE_SOURCES_ENABLED=false
 ENV
+} > "$env_file"
+chmod 600 "$env_file"
 
 compose() {
   docker compose \
@@ -63,24 +66,41 @@ capture() {
 
 cleanup() {
   local exit_code=$?
+  trap - EXIT
   capture
   compose down --volumes --remove-orphans > "$output_dir/cleanup.log" 2>&1 || true
-  return "$exit_code"
+  rm -f "$env_file"
+  exit "$exit_code"
 }
 trap cleanup EXIT
 
-compose config > "$output_dir/compose-rendered.yaml"
-compose up --build --detach --wait api
+compose config --no-interpolate > "$output_dir/compose-template.yaml"
+compose config | sha256sum | awk '{print $1}' > "$output_dir/compose-resolved.sha256"
+
 compose --profile workers up \
   --build \
   --detach \
   --wait \
   --scale "research-worker=$workers" \
+  api \
   research-worker
 
-curl --fail --silent --show-error \
-  "http://127.0.0.1:$port/readyz" \
-  > "$output_dir/readiness.json"
+published_endpoint="$(compose port api 8000)"
+printf '%s\n' "$published_endpoint" | tee "$output_dir/api-port.txt"
+test "$published_endpoint" = "127.0.0.1:$port"
+
+readiness_ready=0
+for attempt in $(seq 1 30); do
+  if curl --fail --silent --show-error \
+    "http://127.0.0.1:$port/readyz" \
+    > "$output_dir/readiness.json" \
+    2>> "$output_dir/readiness-errors.log"; then
+    readiness_ready=1
+    break
+  fi
+  sleep 1
+done
+test "$readiness_ready" = 1
 
 python scripts/run_g7_performance_campaign.py \
   --profile "$AXIGNAL_G7_PROFILE" \
