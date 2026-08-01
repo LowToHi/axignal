@@ -28,7 +28,8 @@ def main() -> None:
     endpoint = read("apps/landing/app/api/pilot-intake/route.ts")
     css = read("apps/landing/app/globals.css")
     message_css = read("apps/landing/app/message-copy.css")
-    pricing = read("apps/landing/lib/candidate-pricing.ts")
+    pricing_adapter = read("apps/landing/lib/candidate-pricing.ts")
+    pricing_contract = read("apps/landing/lib/candidate-pricing-contract.ts")
     tests = read("tests/landing/landing.spec.ts")
 
     require(
@@ -105,15 +106,23 @@ def main() -> None:
         "B2G message styles",
     )
     require(
-        pricing,
+        pricing_adapter,
         [
             "commercial-runtime-pricing-stripe-runtime.v0.1.json",
+            "parseCandidatePlans",
+            "getCandidatePlans",
+        ],
+        "server pricing adapter",
+    )
+    require(
+        pricing_contract,
+        [
             'pricing?.status !== "CANDIDATE_ONLY"',
-            'plan.plan_code === "CONTROLLED_TRIAL_7D"',
+            'planCode === "CONTROLLED_TRIAL_7D"',
             "plan.self_service_activation !== false",
             "plan.commercial_activation_authorised !== false",
         ],
-        "server-resolved B2G trial and candidate pricing",
+        "B2G trial and candidate pricing contract",
     )
     require(
         tests,
@@ -150,6 +159,7 @@ def main() -> None:
         "real_landing_copy_implemented": True,
         "controlled_trial_visible": True,
         "server_price_book_bound": True,
+        "pricing_contract_separated_from_io": True,
         "gsap_scrolltrigger": True,
         "react_three_fiber": True,
         "semantic_globe": True,
