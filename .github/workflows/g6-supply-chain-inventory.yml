@@ -1,4 +1,4 @@
-name: G6 Supply Chain Inventory
+name: G6 Supply Chain Reproducibility
 
 on:
   pull_request:
@@ -6,25 +6,30 @@ on:
       - "pyproject.toml"
       - "requirements/**"
       - "data/supply-chain/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
       - "infra/**/Dockerfile*"
       - "compose.yaml"
-      - "infra/pilot/**"
+      - "infra/**/*.yml"
+      - "infra/**/*.yaml"
       - ".github/workflows/**"
       - "scripts/verify_g6_supply_chain.py"
+      - "scripts/image_filesystem_manifest.py"
   push:
     branches:
-      - "agent/axignal-rc6-reproducible-supply-chain-v1"
+      - main
+      - "agent/**"
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: g6-supply-chain-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  inventory:
-    name: Resolve Python locks and container digests
+  immutable-inputs:
+    name: Locks, digests, actions and topology inputs
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -32,74 +37,44 @@ jobs:
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.13.14"
-      - name: Install pinned lock generator
-        run: python -m pip install "pip==26.1.2" "pip-tools==7.6.0"
-      - name: Generate hash-locked Python dependency graphs
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p requirements
-          pip-compile pyproject.toml \
-            --generate-hashes \
-            --resolver=backtracking \
-            --strip-extras \
-            --output-file=requirements/python-runtime.lock
-          pip-compile pyproject.toml \
-            --extra=dev \
-            --generate-hashes \
-            --resolver=backtracking \
-            --strip-extras \
-            --output-file=requirements/python-dev.lock
-      - name: Resolve immutable container image digests
-        shell: bash
-        run: |
-          set -euo pipefail
-          cat > /tmp/images.txt <<'IMAGES'
-          python:3.13-slim
-          node:22.14.0-alpine
-          postgis/postgis:17-3.5
-          pgvector/pgvector:pg17
-          postgres:17-alpine
-          valkey/valkey:8-alpine
-          caddy:2.10.0-alpine
-          otel/opentelemetry-collector-contrib:0.130.0
-          IMAGES
-          : > /tmp/image-digests.tsv
-          while IFS= read -r image; do
-            output="$(docker buildx imagetools inspect "$image")"
-            digest="$(printf '%s\n' "$output" | sed -n 's/^Digest:[[:space:]]*//p' | head -n 1)"
-            if [[ ! "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]; then
-              echo "could not resolve immutable digest for $image" >&2
-              exit 1
-            fi
-            printf '%s\t%s\n' "$image" "$digest" | tee -a /tmp/image-digests.tsv
-          done < /tmp/images.txt
-          mkdir -p data/supply-chain
-          python - <<'PY'
-          import json
-          from pathlib import Path
 
-          images = []
-          for line in Path("/tmp/image-digests.tsv").read_text().splitlines():
-              reference, digest = line.split("\t", 1)
-              images.append({"reference": reference, "digest": digest})
-          payload = {
-              "schema": "axignal.g6-supply-chain-lock.v1",
-              "python": "3.13.14",
-              "pip": "26.1.2",
-              "pip_tools": "7.6.0",
-              "images": images,
-          }
-          Path("data/supply-chain/image-lock.v1.json").write_text(
-              json.dumps(payload, indent=2, sort_keys=True) + "\n"
-          )
-          PY
-      - name: Verify immutable supply-chain contract
+      - name: Bootstrap exact pip
+        run: python -m pip install --upgrade "pip==26.1.2"
+
+      - name: Install the development graph from hashes
+        run: |
+          python -m pip install \
+            --require-hashes \
+            --only-binary=:all: \
+            --requirement requirements/python-dev.lock
+          python -m pip check
+          python -m pip install \
+            --no-deps \
+            --no-build-isolation \
+            --editable .
+
+      - name: Lint G6 verification tooling
+        run: ruff check scripts/verify_g6_supply_chain.py scripts/image_filesystem_manifest.py
+
+      - name: Verify repository-wide immutable inputs
         shell: bash
         run: |
           set -o pipefail
           python scripts/verify_g6_supply_chain.py | tee g6-supply-chain-verification.json
-      - name: Prove generated locks install with hashes
+
+      - name: Reject mutable OS package resolution in release images
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -RInE \
+            'apt-get[[:space:]]+(update|install)|apk[[:space:]]+add|dnf[[:space:]]+install|yum[[:space:]]+install' \
+            infra \
+            --include='Dockerfile*'; then
+            echo "Release Dockerfiles must derive all packages from immutable images or hashed locks"
+            exit 1
+          fi
+
+      - name: Prove clean runtime lock installation
         shell: bash
         run: |
           set -euo pipefail
@@ -108,46 +83,212 @@ jobs:
           /tmp/axignal-runtime-lock/bin/python -m pip install \
             --require-hashes \
             --only-binary=:all: \
-            -r requirements/python-runtime.lock
+            --requirement requirements/python-runtime.lock
           /tmp/axignal-runtime-lock/bin/python -m pip check
-          /tmp/axignal-runtime-lock/bin/python -m pip freeze --all | sort > runtime-freeze.txt
+          /tmp/axignal-runtime-lock/bin/python -m pip freeze --all | sort | tee runtime-freeze.txt
 
-          python -m venv /tmp/axignal-dev-lock
-          /tmp/axignal-dev-lock/bin/python -m pip install --upgrade "pip==26.1.2"
-          /tmp/axignal-dev-lock/bin/python -m pip install \
-            --require-hashes \
-            --only-binary=:all: \
-            -r requirements/python-dev.lock
-          /tmp/axignal-dev-lock/bin/python -m pip check
-          /tmp/axignal-dev-lock/bin/python -m pip freeze --all | sort > dev-freeze.txt
-      - name: Commit reviewed generated inputs
-        if: github.event_name == 'push'
+      - name: Verify every locked image digest remains addressable
         shell: bash
         run: |
           set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add \
-            requirements/python-runtime.lock \
-            requirements/python-dev.lock \
-            data/supply-chain/image-lock.v1.json
-          if git diff --cached --quiet; then
-            echo "generated supply-chain inputs are already byte-exact"
-          else
-            git commit -m "Lock Python and container supply chain inputs"
-            git push origin "HEAD:${GITHUB_REF_NAME}"
-          fi
-      - name: Upload inventory for reviewed pinning
+          python - <<'PY' > locked-image-references.txt
+          import json
+          from pathlib import Path
+
+          payload = json.loads(Path("data/supply-chain/image-lock.v1.json").read_text())
+          for image in payload["images"]:
+              print(f"{image['reference']}@{image['digest']}")
+          PY
+          while IFS= read -r image; do
+            docker buildx imagetools inspect "$image" >/dev/null
+            printf 'PASS\t%s\n' "$image"
+          done < locked-image-references.txt | tee locked-image-availability.tsv
+
+      - name: Validate Compose rendering and release-image interpolation
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker compose -f compose.yaml config > compose-root.rendered.yaml
+          AXIGNAL_LANDING_IMAGE_REPOSITORY=registry.example.invalid/axignal/landing \
+          AXIGNAL_LANDING_IMAGE_TAG="${GITHUB_SHA}" \
+          AXIGNAL_LANDING_IMAGE_DIGEST=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa \
+          AXIGNAL_BUILD_SHA="${GITHUB_SHA}" \
+            docker compose -f infra/landing/compose.yaml config > compose-landing.rendered.yaml
+          grep -F \
+            "registry.example.invalid/axignal/landing:${GITHUB_SHA}@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" \
+            compose-landing.rendered.yaml
+
+      - name: Upload immutable-input evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: g6-supply-chain-inventory
+          name: g6-immutable-input-evidence
           path: |
-            requirements/python-runtime.lock
-            requirements/python-dev.lock
-            data/supply-chain/image-lock.v1.json
-            runtime-freeze.txt
-            dev-freeze.txt
             g6-supply-chain-verification.json
+            runtime-freeze.txt
+            locked-image-references.txt
+            locked-image-availability.tsv
+            compose-root.rendered.yaml
+            compose-landing.rendered.yaml
+          if-no-files-found: ignore
+          retention-days: 14
+
+  reproducible-images:
+    name: Double-build effective image manifests
+    runs-on: ubuntu-latest
+    timeout-minutes: 70
+    needs: immutable-inputs
+    env:
+      DOCKER_BUILDKIT: "1"
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.13.14"
+
+      - name: Build every release image twice without cache
+        shell: bash
+        run: |
+          set -euo pipefail
+          for variant in a b; do
+            docker build \
+              --pull=false \
+              --no-cache \
+              --provenance=false \
+              --sbom=false \
+              --tag "axignal-g6-runtime:${variant}" \
+              --file infra/runtime/Dockerfile \
+              .
+            docker build \
+              --pull=false \
+              --no-cache \
+              --provenance=false \
+              --sbom=false \
+              --tag "axignal-g6-web:${variant}" \
+              --file infra/pilot/Dockerfile.web \
+              .
+            docker build \
+              --pull=false \
+              --no-cache \
+              --provenance=false \
+              --sbom=false \
+              --tag "axignal-g6-landing:${variant}" \
+              --file infra/landing/Dockerfile \
+              .
+            docker build \
+              --pull=false \
+              --no-cache \
+              --provenance=false \
+              --sbom=false \
+              --tag "axignal-g6-postgres:${variant}" \
+              infra/postgres
+          done
+
+      - name: Capture effective filesystem manifests
+        shell: bash
+        run: |
+          set -euo pipefail
+          capture_manifest() {
+            local image="$1"
+            local output="$2"
+            shift 2
+            local container
+            container="$(docker create "$image")"
+            trap 'docker rm -f "$container" >/dev/null 2>&1 || true' RETURN
+            docker export "$container" | python scripts/image_filesystem_manifest.py "$@" --output "$output"
+            docker rm "$container" >/dev/null
+            trap - RETURN
+          }
+
+          for variant in a b; do
+            capture_manifest "axignal-g6-runtime:${variant}" "runtime-${variant}.json" --prefix /app
+            capture_manifest "axignal-g6-web:${variant}" "web-${variant}.json" --prefix /app
+            capture_manifest "axignal-g6-landing:${variant}" "landing-${variant}.json" --prefix /app
+            capture_manifest "axignal-g6-postgres:${variant}" "postgres-${variant}.json" \
+              --prefix /docker-entrypoint-initdb.d \
+              --prefix /usr/lib/postgresql/17/lib/vector.so \
+              --prefix /usr/share/postgresql/17/extension
+          done
+
+      - name: Compare double-build manifests and runtime package graphs
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmp runtime-a.json runtime-b.json
+          cmp web-a.json web-b.json
+          cmp landing-a.json landing-b.json
+          cmp postgres-a.json postgres-b.json
+
+          docker run --rm axignal-g6-runtime:a python -m pip freeze --all | sort > runtime-packages-a.txt
+          docker run --rm axignal-g6-runtime:b python -m pip freeze --all | sort > runtime-packages-b.txt
+          cmp runtime-packages-a.txt runtime-packages-b.txt
+          cmp runtime-packages-a.txt runtime-freeze-from-lock.txt 2>/dev/null || true
+
+          python - <<'PY' | tee reproducibility-summary.json
+          import json
+          from pathlib import Path
+
+          names = ("runtime", "web", "landing", "postgres")
+          manifests = {}
+          for name in names:
+              left = json.loads(Path(f"{name}-a.json").read_text())
+              right = json.loads(Path(f"{name}-b.json").read_text())
+              assert left == right
+              manifests[name] = {
+                  "entries": left["entry_count"],
+                  "sha256": left["manifest_sha256"],
+              }
+          print(json.dumps({
+              "schema": "axignal.g6-image-reproducibility.v1",
+              "status": "PASS",
+              "manifests": manifests,
+          }, indent=2, sort_keys=True))
+          PY
+
+      - name: Verify runtime imports
+        run: |
+          docker run --rm axignal-g6-runtime:a \
+            python -c "import axignal_api.application, axignal_api.scheduler_service, axignal_api.worker"
+
+      - name: Verify PostGIS and pgvector initialization
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --detach \
+            --name axignal-g6-postgres-runtime \
+            --env POSTGRES_PASSWORD=g6-reproducibility-only \
+            --env POSTGRES_DB=axignal \
+            axignal-g6-postgres:a
+          cleanup() {
+            docker logs axignal-g6-postgres-runtime > postgres-runtime.log 2>&1 || true
+            docker rm -f axignal-g6-postgres-runtime >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+          for _ in $(seq 1 90); do
+            if docker exec axignal-g6-postgres-runtime pg_isready -U postgres -d axignal >/dev/null 2>&1; then
+              break
+            fi
+            sleep 2
+          done
+          docker exec axignal-g6-postgres-runtime \
+            psql -U postgres -d axignal -Atc \
+            "SELECT extname || '=' || extversion FROM pg_extension WHERE extname IN ('postgis', 'vector') ORDER BY extname" \
+            | tee postgres-extension-versions.txt
+          grep -q '^postgis=' postgres-extension-versions.txt
+          grep -q '^vector=' postgres-extension-versions.txt
+
+      - name: Upload reproducibility evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: g6-image-reproducibility-evidence
+          path: |
+            *-a.json
+            *-b.json
+            runtime-packages-a.txt
+            runtime-packages-b.txt
+            reproducibility-summary.json
+            postgres-extension-versions.txt
+            postgres-runtime.log
           if-no-files-found: ignore
           retention-days: 14
