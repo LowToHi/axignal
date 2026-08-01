@@ -113,7 +113,7 @@ export function candidatePlansFromRuntime(
 
     return [
       {
-        planCode: plan.plan_code,
+        planCode: plan.plan_code!,
         name: presentation.name,
         description: presentation.description,
         amountMinor: plan.amount_minor,
