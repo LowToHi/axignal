@@ -8,8 +8,9 @@ from urllib.parse import urlparse
 import httpx
 
 BASE_URL = "https://api.deepseek.com"
-MODEL = "deepseek-v4-flash"
-OUTPUT = Path("deepseek-v4-flash-preflight-evidence.json")
+MODEL = "deepseek-v4-flash-0731"
+PREVIOUS_MODEL = "deepseek-v4-flash"
+OUTPUT = Path("deepseek-v4-flash-0731-preflight-evidence.json")
 
 
 class PreflightError(RuntimeError):
@@ -50,7 +51,7 @@ def main() -> int:
         except (KeyError, TypeError, ValueError) as exc:
             raise PreflightError("DeepSeek model-list response was malformed") from exc
         if MODEL not in model_ids:
-            raise PreflightError("deepseek-v4-flash is not available to this credential")
+            raise PreflightError(f"{MODEL} is not available to this credential")
 
         chat_response = client.post(
             "/chat/completions",
@@ -94,6 +95,7 @@ def main() -> int:
         "transport": "direct",
         "base_url_host": "api.deepseek.com",
         "model": MODEL,
+        "previous_model": PREVIOUS_MODEL,
         "credential_configured": True,
         "model_listed": True,
         "chat_completion_json_contract": True,
