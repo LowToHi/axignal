@@ -83,10 +83,11 @@ compose --profile workers up \
   --wait \
   --scale "research-worker=$workers" \
   api \
-  research-worker
+  research-worker \
+  g7-api-proxy
 
-published_endpoint="$(compose port api 8000)"
-printf '%s\n' "$published_endpoint" | tee "$output_dir/api-port.txt"
+published_endpoint="$(compose port g7-api-proxy 8080)"
+printf '%s\n' "$published_endpoint" | tee "$output_dir/api-proxy-port.txt"
 test "$published_endpoint" = "127.0.0.1:$port"
 
 readiness_ready=0
