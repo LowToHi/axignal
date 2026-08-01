@@ -25,6 +25,9 @@ on:
 permissions:
   contents: read
 
+env:
+  AXIGNAL_EXACT_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+
 concurrency:
   group: executable-spine-${{ github.ref }}
   cancel-in-progress: true
@@ -35,7 +38,33 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Checkout exact branch head 1
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Prove exact-head checkout 1
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual_sha="$(git rev-parse HEAD)"
+          tree_sha="$(git rev-parse 'HEAD^{tree}')"
+          test "$actual_sha" = "$AXIGNAL_EXACT_SHA"
+          {
+            printf 'exact_head_sha=%s\n' "$actual_sha"
+            printf 'git_tree_sha=%s\n' "$tree_sha"
+          } | tee executable-spine-exact-head-1.txt
+
+      - name: Upload exact-head identity 1
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: executable-spine-exact-head-1-${{ env.AXIGNAL_EXACT_SHA }}
+          path: executable-spine-exact-head-1.txt
+          if-no-files-found: error
+          retention-days: 30
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "22.14.0"
@@ -52,7 +81,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: typescript-diagnostics
+          name: typescript-diagnostics-${{ env.AXIGNAL_EXACT_SHA }}
           path: typecheck.log
           if-no-files-found: error
           retention-days: 7
@@ -66,7 +95,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: playwright-evidence
+          name: playwright-evidence-${{ env.AXIGNAL_EXACT_SHA }}
           path: |
             playwright-report
             test-results
@@ -78,7 +107,33 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Checkout exact branch head 2
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Prove exact-head checkout 2
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual_sha="$(git rev-parse HEAD)"
+          tree_sha="$(git rev-parse 'HEAD^{tree}')"
+          test "$actual_sha" = "$AXIGNAL_EXACT_SHA"
+          {
+            printf 'exact_head_sha=%s\n' "$actual_sha"
+            printf 'git_tree_sha=%s\n' "$tree_sha"
+          } | tee executable-spine-exact-head-2.txt
+
+      - name: Upload exact-head identity 2
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: executable-spine-exact-head-2-${{ env.AXIGNAL_EXACT_SHA }}
+          path: executable-spine-exact-head-2.txt
+          if-no-files-found: error
+          retention-days: 30
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.13"
@@ -92,7 +147,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: ruff-diagnostics
+          name: ruff-diagnostics-${{ env.AXIGNAL_EXACT_SHA }}
           path: ruff-report.json
           if-no-files-found: error
           retention-days: 7
@@ -109,7 +164,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: local-document-proposal-diagnostics
+          name: local-document-proposal-diagnostics-${{ env.AXIGNAL_EXACT_SHA }}
           path: local-document-proposal-acceptance.log
           if-no-files-found: error
           retention-days: 7
@@ -135,7 +190,33 @@ jobs:
       AXIGNAL_ADMISSION_QUEUE_KEY: axignal:admission:queue:ci
       AXIGNAL_IDENTITY_ASSERTION_SECRET: ci-identity-assertion-secret-with-at-least-32-bytes
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Checkout exact branch head 3
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Prove exact-head checkout 3
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual_sha="$(git rev-parse HEAD)"
+          tree_sha="$(git rev-parse 'HEAD^{tree}')"
+          test "$actual_sha" = "$AXIGNAL_EXACT_SHA"
+          {
+            printf 'exact_head_sha=%s\n' "$actual_sha"
+            printf 'git_tree_sha=%s\n' "$tree_sha"
+          } | tee executable-spine-exact-head-3.txt
+
+      - name: Upload exact-head identity 3
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: executable-spine-exact-head-3-${{ env.AXIGNAL_EXACT_SHA }}
+          path: executable-spine-exact-head-3.txt
+          if-no-files-found: error
+          retention-days: 30
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.13"
@@ -205,7 +286,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: persistent-research-diagnostics
+          name: persistent-research-diagnostics-${{ env.AXIGNAL_EXACT_SHA }}
           path: |
             cumulative-migration-rehearsal.log
             human-review-migration-rehearsal.log
