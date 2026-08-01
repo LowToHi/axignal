@@ -39,6 +39,27 @@ def read_model_listing(response: httpx.Response) -> tuple[bool, int]:
     return MODEL in model_ids, response.status_code
 
 
+def safe_provider_error(response: httpx.Response) -> str:
+    try:
+        body = response.json()
+    except ValueError:
+        return f"status={response.status_code}; non_json_error_body"
+    if not isinstance(body, dict):
+        return f"status={response.status_code}; malformed_error_body"
+    error = body.get("error")
+    if not isinstance(error, dict):
+        return f"status={response.status_code}; missing_error_object"
+    safe_fields = []
+    for key in ("type", "code", "message"):
+        value = error.get(key)
+        if value is None:
+            continue
+        normalised = " ".join(str(value).split())[:240]
+        safe_fields.append(f"{key}={normalised}")
+    detail = "; ".join(safe_fields) or "empty_error_object"
+    return f"status={response.status_code}; {detail}"
+
+
 def main() -> int:
     api_key = require_secret()
     parsed = urlparse(BASE_URL)
@@ -79,7 +100,7 @@ def main() -> int:
         )
         if chat_response.status_code != 200:
             raise PreflightError(
-                f"DeepSeek chat preflight failed with status {chat_response.status_code}"
+                f"DeepSeek chat preflight failed: {safe_provider_error(chat_response)}"
             )
         try:
             chat_body = chat_response.json()
