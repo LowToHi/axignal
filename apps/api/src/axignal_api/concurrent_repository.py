@@ -6,12 +6,12 @@ from uuid import UUID
 from redis.exceptions import RedisError
 
 from axignal_api.queue import ResearchJob
-from axignal_api.repository import OutboxEvent
+from axignal_api.repository import OutboxEvent, ResearchRepository
 from axignal_api.ted_repository import TEDResearchRepository
 
 
-class ConcurrentTEDResearchRepository(TEDResearchRepository):
-    """Repository operations that must remain atomic across concurrent workers."""
+class ConcurrentRepositoryMixin:
+    """Atomic operations shared by API publishers and research workers."""
 
     def claim_run_for_worker(
         self,
@@ -37,8 +37,8 @@ class ConcurrentTEDResearchRepository(TEDResearchRepository):
 
         Redis plus PostgreSQL still provides at-least-once delivery if the process
         dies after enqueue and before commit. Consumer-side run claiming therefore
-        remains mandatory. The row locks prevent the normal multi-worker duplicate
-        publication storm observed by G7.
+        remains mandatory. The row locks prevent concurrent API requests or worker
+        loops from publishing the same pending event in the normal execution path.
         """
         published = 0
         with self._cursor(role="axignal_worker") as cursor:
@@ -102,3 +102,11 @@ class ConcurrentTEDResearchRepository(TEDResearchRepository):
                     raise RuntimeError("Locked outbox event lost its PENDING state")
                 published += 1
         return published
+
+
+class ConcurrentResearchRepository(ConcurrentRepositoryMixin, ResearchRepository):
+    """Concurrency-safe repository for the generic persistent research API."""
+
+
+class ConcurrentTEDResearchRepository(ConcurrentRepositoryMixin, TEDResearchRepository):
+    """Concurrency-safe repository for TED API publication and worker execution."""
