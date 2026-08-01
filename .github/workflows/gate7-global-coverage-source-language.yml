@@ -76,7 +76,9 @@ jobs:
           set -euo pipefail
           actual_sha="$(git rev-parse HEAD)"
           test "$actual_sha" = "$AXIGNAL_EXACT_SHA"
-          printf 'exact_head_sha=%s\n' "$actual_sha" | tee exact-head.txt
+          mkdir -p artifacts/gate7
+          printf 'exact_head_sha=%s\n' "$actual_sha" \
+            | tee exact-head.txt artifacts/gate7/exact-head.txt
 
       - name: Set up Python
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
@@ -108,7 +110,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p artifacts/gate7
           python scripts/verify_gate7_source_snapshots.py \
             | tee artifacts/gate7/source-snapshot-integrity.json
 
@@ -116,8 +117,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p artifacts/gate7
-          cp exact-head.txt artifacts/gate7/exact-head.txt
           require_pass=false
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && \
              [ "${{ inputs.require_gate_pass }}" = "true" ]; then
