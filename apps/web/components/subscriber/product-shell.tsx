@@ -277,7 +277,7 @@ export function ProductShell({
           <Building2 size={16} /><span>{identity.organisation}</span><ChevronDown size={14} />
         </button>
         <button className={styles.searchTrigger} type="button" onClick={() => setSearchOpen(true)}>
-          <Search size={16} /><span>Search opportunities, entities, sources…</span><kbd>Ctrl K</kbd>
+          <Search size={16} /><span>Search opportunities, entities, sources…</span><kbd aria-label="Command K on Apple, Control K on Windows and Linux"><span aria-hidden="true">⌘ K&nbsp; / &nbsp;Ctrl K</span></kbd>
         </button>
         <span className={styles.entitlement}><span />{identity.entitlementLabel}</span>
         <label className={styles.localeSelect}>
