@@ -81,15 +81,17 @@ def test_proposal_repository_simple_wrappers_and_role_separation() -> None:
     attach(
         repository,
         Cursor(
-            many=[[
-                {
-                    "proposal_outbox_event_id": event_id,
-                    "aggregate_id": aggregate_id,
-                    "event_type": "research.document_proposal.requested",
-                    "payload": {"schema_version": 1},
-                    "attempts": 0,
-                }
-            ]]
+            many=[
+                [
+                    {
+                        "proposal_outbox_event_id": event_id,
+                        "aggregate_id": aggregate_id,
+                        "event_type": "research.document_proposal.requested",
+                        "payload": {"schema_version": 1},
+                        "attempts": 0,
+                    }
+                ]
+            ]
         ),
     )
     events = repository.pending_proposal_outbox(limit=3)
@@ -109,9 +111,7 @@ def test_proposal_repository_simple_wrappers_and_role_separation() -> None:
     attach(repository, Cursor(one=[{"source_id": "source"}]))
     assert repository.get_source("source") == {"source_id": "source"}
     attach(repository, Cursor(one=[{"research_run_id": RUN}]))
-    assert repository.get_run_for_worker(tenant_id=TENANT, run_id=RUN) == {
-        "research_run_id": RUN
-    }
+    assert repository.get_run_for_worker(tenant_id=TENANT, run_id=RUN) == {"research_run_id": RUN}
     attach(repository, Cursor(rowcount=1))
     repository.transition_run(tenant_id=TENANT, run_id=RUN, state="PROPOSING")
     attach(repository, Cursor(rowcount=0))
@@ -271,13 +271,19 @@ def test_proposal_failure_and_idempotent_helper_paths() -> None:
 
     handoff_id = uuid4()
     cursor = Cursor(one=[{"admission_handoff_id": handoff_id}])
-    assert repository._handoff(
-        cursor, TENANT, RUN, [candidate_id], {"package": True}, "sha256:package"
-    ) == handoff_id
+    assert (
+        repository._handoff(
+            cursor, TENANT, RUN, [candidate_id], {"package": True}, "sha256:package"
+        )
+        == handoff_id
+    )
     cursor = Cursor(one=[None, {"admission_handoff_id": handoff_id}])
-    assert repository._handoff(
-        cursor, TENANT, RUN, [candidate_id], {"package": True}, "sha256:package"
-    ) == handoff_id
+    assert (
+        repository._handoff(
+            cursor, TENANT, RUN, [candidate_id], {"package": True}, "sha256:package"
+        )
+        == handoff_id
+    )
 
 
 def test_ted_repository_create_validation_idempotency_and_orchestration(monkeypatch) -> None:
@@ -423,9 +429,7 @@ def test_ted_upsert_and_dossier_helper_paths() -> None:
     )
     inserted = uuid4()
     cursor = Cursor(one=[{"source_object_id": inserted}])
-    assert repository._upsert_ted_source_object(
-        cursor=cursor, source=source, page=page
-    ) == inserted
+    assert repository._upsert_ted_source_object(cursor=cursor, source=source, page=page) == inserted
     cursor = Cursor(one=[None, None])
     with pytest.raises(RuntimeError, match="source object upsert"):
         repository._upsert_ted_source_object(cursor=cursor, source=source, page=page)
@@ -468,21 +472,19 @@ def test_ted_upsert_and_dossier_helper_paths() -> None:
 
 def test_repository_cursor_credentials_fail_closed() -> None:
     proposal = DocumentProposalRepository()
-    with pytest.raises(RuntimeError, match="axignal_app"), proposal._cursor(
-        "axignal_app"
-    ):
+    with pytest.raises(RuntimeError, match="axignal_app"), proposal._cursor("axignal_app"):
         pass
-    with pytest.raises(
-        RuntimeError, match="axignal_proposal_worker"
-    ), proposal._cursor("axignal_proposal_worker"):
+    with (
+        pytest.raises(RuntimeError, match="axignal_proposal_worker"),
+        proposal._cursor("axignal_proposal_worker"),
+    ):
         pass
 
     admission = AdmissionRepository()
-    with pytest.raises(RuntimeError, match="axignal_app"), admission._cursor(
-        "axignal_app"
-    ):
+    with pytest.raises(RuntimeError, match="axignal_app"), admission._cursor("axignal_app"):
         pass
-    with pytest.raises(
-        RuntimeError, match="axignal_admission_runtime"
-    ), admission._cursor("axignal_admission_runtime"):
+    with (
+        pytest.raises(RuntimeError, match="axignal_admission_runtime"),
+        admission._cursor("axignal_admission_runtime"),
+    ):
         pass

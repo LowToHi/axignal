@@ -5,7 +5,7 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from datetime import UTC, datetime, timedelta
 from typing import Any
-from uuid import UUID, uuid4
+from uuid import UUID
 
 import psycopg
 import pytest
@@ -64,7 +64,7 @@ class Plan:
 
 def attach(repository: object, *cursors: Cursor) -> Plan:
     plan = Plan(*cursors)
-    setattr(repository, "_cursor", plan)
+    repository._cursor = plan
     return plan
 
 
@@ -83,9 +83,12 @@ def identity_subjects() -> dict[str, str]:
 def test_identity_repository_success_and_role_surface() -> None:
     repository = IdentityRepository("postgresql://identity")
     plan = attach(repository, Cursor(one=[{"allowed": True}]))
-    assert repository.consume_rate_limit(
-        key_hmac="key", route_key="signup", limit=5, window_seconds=60, now=NOW
-    ) is True
+    assert (
+        repository.consume_rate_limit(
+            key_hmac="key", route_key="signup", limit=5, window_seconds=60, now=NOW
+        )
+        is True
+    )
     assert plan.contexts == [{"role": "axignal_app"}]
 
     direct_rows = [
@@ -202,13 +205,9 @@ def test_identity_repository_success_and_role_surface() -> None:
         assert invoke() == {"status": "PASS"}
 
     attach(repository, Cursor(one=[{"revoked": True}]))
-    assert repository.revoke_session(
-        token_digest="session", reason="LOGOUT", now=NOW
-    ) is True
+    assert repository.revoke_session(token_digest="session", reason="LOGOUT", now=NOW) is True
     attach(repository, Cursor(one=[None]))
-    assert repository.revoke_session(
-        token_digest="session", reason="LOGOUT", now=NOW
-    ) is False
+    assert repository.revoke_session(token_digest="session", reason="LOGOUT", now=NOW) is False
 
     attach(repository, Cursor(one=[{"result": {"state": "PREPARED"}}]))
     assert repository.trial_status(tenant_id=TENANT) == {"state": "PREPARED"}
@@ -320,16 +319,16 @@ def test_billing_repository_roles_success_and_missing_rows() -> None:
     assert billing_event(repository) == {"state": "ACTIVE"}
     assert plan.contexts == [{"role": "axignal_billing_worker"}]
     plan = attach(repository, Cursor(one=[row]))
-    assert repository.rollback(
-        selection_id=ENTITY, actor_subject="operator", now=NOW
-    ) == row
+    assert repository.rollback(selection_id=ENTITY, actor_subject="operator", now=NOW) == row
     assert plan.contexts == [{"role": "axignal_billing_worker"}]
     attach(repository, Cursor(many=[[{"ledger_entry_id": ENTITY}]]))
     assert len(repository.ledger(tenant_id=TENANT)) == 1
 
-    for invoke in [*app_calls, lambda: billing_event(repository), lambda: repository.rollback(
-        selection_id=ENTITY, actor_subject="operator", now=NOW
-    )]:
+    for invoke in [
+        *app_calls,
+        lambda: billing_event(repository),
+        lambda: repository.rollback(selection_id=ENTITY, actor_subject="operator", now=NOW),
+    ]:
         attach(repository, Cursor(one=[None]))
         with pytest.raises(RuntimeError):
             invoke()
@@ -339,13 +338,9 @@ def test_entitlement_repository_lifecycle_and_expiry_guard(monkeypatch) -> None:
     repository = EntitlementRepository("postgresql://entitlement")
     row = {"entitlement_id": ENTITY}
     attach(repository, Cursor(one=[row]))
-    assert repository.activate_trial(
-        tenant_id=TENANT, actor_subject="buyer", now=NOW
-    ) == row
+    assert repository.activate_trial(tenant_id=TENANT, actor_subject="buyer", now=NOW) == row
     attach(repository, Cursor(one=[{"expired": True}]))
-    assert repository.expire_due_trial(
-        tenant_id=TENANT, actor_subject="system", now=NOW
-    ) is True
+    assert repository.expire_due_trial(tenant_id=TENANT, actor_subject="system", now=NOW) is True
 
     monkeypatch.setattr(repository, "expire_due_trial", lambda **_: False)
     mutations = [
@@ -370,9 +365,7 @@ def test_entitlement_repository_lifecycle_and_expiry_guard(monkeypatch) -> None:
             actor_subject="buyer",
             now=NOW,
         ),
-        lambda: repository.expire_trial(
-            tenant_id=TENANT, actor_subject="operator", now=NOW
-        ),
+        lambda: repository.expire_trial(tenant_id=TENANT, actor_subject="operator", now=NOW),
     ]
     for invoke in mutations:
         attach(repository, Cursor(one=[row]))
@@ -453,9 +446,7 @@ def test_seat_repository_mutations_access_and_summary() -> None:
         assert plan.contexts == [{"role": "axignal_app", "tenant_id": TENANT}]
 
     attach(repository, Cursor(one=[row]))
-    assert repository.invitation_by_operation(
-        tenant_id=TENANT, operation_id="invite-op"
-    ) == row
+    assert repository.invitation_by_operation(tenant_id=TENANT, operation_id="invite-op") == row
     attach(repository, Cursor(one=[{"decision": {"allowed": True}}]))
     assert repository.access_decision(
         tenant_id=TENANT, principal_id="member", write=True, now=NOW
@@ -494,7 +485,7 @@ def test_organic_repository_public_admin_alert_and_failure_contracts() -> None:
             raise psycopg.OperationalError("denied")
             yield Cursor()
 
-    setattr(repository, "_cursor", Denied())
+    repository._cursor = Denied()
     assert repository.founder_authorized(subject="intruder") is False
 
     attach(repository, Cursor(one=[{"result": result}]))
@@ -524,9 +515,7 @@ def test_organic_repository_public_admin_alert_and_failure_contracts() -> None:
             source_path="/spain/agriculture",
         ),
         lambda: repository.confirm_alert(confirmation_token_digest="token"),
-        lambda: repository.fail_alert_delivery(
-            subscription_id=ENTITY, reason="DELIVERY_FAILED"
-        ),
+        lambda: repository.fail_alert_delivery(subscription_id=ENTITY, reason="DELIVERY_FAILED"),
         lambda: repository.unsubscribe_alert(confirmation_token_digest="token"),
     ]
     for invoke in calls:
@@ -534,46 +523,59 @@ def test_organic_repository_public_admin_alert_and_failure_contracts() -> None:
         assert invoke() == result
 
     attach(repository, Cursor(one=[{"result": result}]))
-    assert repository.public_page(
-        country_slug="spain",
-        sector_slug="agriculture",
-        page_kind="MARKET",
-        locale="en",
-    ) == result
+    assert (
+        repository.public_page(
+            country_slug="spain",
+            sector_slug="agriculture",
+            page_kind="MARKET",
+            locale="en",
+        )
+        == result
+    )
     attach(repository, Cursor(one=[None]))
-    assert repository.public_page(
-        country_slug="missing",
-        sector_slug="missing",
-        page_kind="MARKET",
-        locale="en",
-    ) is None
+    assert (
+        repository.public_page(
+            country_slug="missing",
+            sector_slug="missing",
+            page_kind="MARKET",
+            locale="en",
+        )
+        is None
+    )
     attach(repository, Cursor(many=[[result]]))
     assert repository.sitemap() == [result]
     attach(repository, Cursor(one=[{"citation_event_id": ENTITY}]))
-    assert repository.record_citation(
-        actor_subject="founder",
-        provider="search",
-        surface="web",
-        cited_url="https://axignal.test/page",
-        query_hmac="query",
-        source="test",
-        metadata={"rank": 1},
-        observed_at=NOW,
-    ) == ENTITY
+    assert (
+        repository.record_citation(
+            actor_subject="founder",
+            provider="search",
+            surface="web",
+            cited_url="https://axignal.test/page",
+            query_hmac="query",
+            source="test",
+            metadata={"rank": 1},
+            observed_at=NOW,
+        )
+        == ENTITY
+    )
     plan = attach(repository, Cursor())
     repository.test_bootstrap_founder(subject="founder")
     assert plan.contexts == [{"application_role": False}]
 
-    for invoke in [calls[0], calls[3], lambda: repository.record_citation(
-        actor_subject="founder",
-        provider="search",
-        surface="web",
-        cited_url="https://axignal.test",
-        query_hmac="query",
-        source="test",
-        metadata={},
-        observed_at=NOW,
-    )]:
+    for invoke in [
+        calls[0],
+        calls[3],
+        lambda: repository.record_citation(
+            actor_subject="founder",
+            provider="search",
+            surface="web",
+            cited_url="https://axignal.test",
+            query_hmac="query",
+            source="test",
+            metadata={},
+            observed_at=NOW,
+        ),
+    ]:
         attach(repository, Cursor(one=[None]))
         with pytest.raises(RuntimeError):
             invoke()
@@ -587,20 +589,26 @@ def test_retention_repository_roles_lifecycle_and_tombstones() -> None:
     assert plan.contexts == [{"role": "axignal_app", "tenant_id": TENANT}]
 
     plan = attach(repository, Cursor(one=[row]))
-    assert repository.request_deletion(
-        tenant_id=TENANT,
-        actor_subject="owner",
-        retention_seconds=3600,
-        now=NOW,
-    ) == row
+    assert (
+        repository.request_deletion(
+            tenant_id=TENANT,
+            actor_subject="owner",
+            retention_seconds=3600,
+            now=NOW,
+        )
+        == row
+    )
     assert plan.contexts[0]["role"] == "axignal_app"
     plan = attach(repository, Cursor(one=[row]))
-    assert repository.suspend(
-        tenant_id=TENANT,
-        reason_code="SECURITY",
-        actor_subject="operator",
-        now=NOW,
-    ) == row
+    assert (
+        repository.suspend(
+            tenant_id=TENANT,
+            reason_code="SECURITY",
+            actor_subject="operator",
+            now=NOW,
+        )
+        == row
+    )
     assert plan.contexts == [{"role": "axignal_operator"}]
     plan = attach(repository, Cursor(one=[{"queued": 2}]))
     assert repository.queue_due(now=NOW) == 2
@@ -610,9 +618,7 @@ def test_retention_repository_roles_lifecycle_and_tombstones() -> None:
     attach(repository, Cursor(one=[row]))
     assert repository.claim(worker_id="worker", lease_seconds=30, now=NOW) == row
     attach(repository, Cursor(one=[row]))
-    assert repository.purge(
-        deletion_id=ENTITY, worker_id="worker", now=NOW
-    ) == row
+    assert repository.purge(deletion_id=ENTITY, worker_id="worker", now=NOW) == row
     attach(repository, Cursor(one=[{"result": row}]))
     assert repository.reapply_tombstone(tenant_id=TENANT, now=NOW) == row
 
@@ -629,9 +635,7 @@ def test_retention_repository_roles_lifecycle_and_tombstones() -> None:
             actor_subject="operator",
             now=NOW,
         ),
-        lambda: repository.purge(
-            deletion_id=ENTITY, worker_id="worker", now=NOW
-        ),
+        lambda: repository.purge(deletion_id=ENTITY, worker_id="worker", now=NOW),
         lambda: repository.reapply_tombstone(tenant_id=TENANT, now=NOW),
     ]:
         attach(repository, Cursor(one=[None]))
