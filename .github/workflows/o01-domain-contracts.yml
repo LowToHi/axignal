@@ -9,6 +9,7 @@ on:
       - "apps/api/tests/test_procurement_domain_contracts.py"
       - "apps/api/src/axignal_api/deepseek_proposals.py"
       - "apps/api/src/axignal_api/settings.py"
+      - "apps/api/src/axignal_api/proposal_worker.py"
       - "apps/api/tests/test_deepseek_v4_flash_proposals.py"
       - "scripts/verify_o01_domain_contracts.py"
       - ".github/workflows/o01-domain-contracts.yml"
@@ -22,6 +23,7 @@ on:
       - "apps/api/tests/test_procurement_domain_contracts.py"
       - "apps/api/src/axignal_api/deepseek_proposals.py"
       - "apps/api/src/axignal_api/settings.py"
+      - "apps/api/src/axignal_api/proposal_worker.py"
       - "apps/api/tests/test_deepseek_v4_flash_proposals.py"
       - "scripts/verify_o01_domain_contracts.py"
       - ".github/workflows/o01-domain-contracts.yml"
@@ -81,6 +83,7 @@ jobs:
             apps/api/src/axignal_api/procurement_domain.py \
             apps/api/src/axignal_api/deepseek_proposals.py \
             apps/api/src/axignal_api/settings.py \
+            apps/api/src/axignal_api/proposal_worker.py \
             apps/api/tests/test_procurement_domain_contracts.py \
             apps/api/tests/test_deepseek_v4_flash_proposals.py \
             scripts/verify_o01_domain_contracts.py
@@ -88,6 +91,7 @@ jobs:
             apps/api/src/axignal_api/procurement_domain.py \
             apps/api/src/axignal_api/deepseek_proposals.py \
             apps/api/src/axignal_api/settings.py \
+            apps/api/src/axignal_api/proposal_worker.py \
             apps/api/tests/test_procurement_domain_contracts.py \
             apps/api/tests/test_deepseek_v4_flash_proposals.py \
             scripts/verify_o01_domain_contracts.py
