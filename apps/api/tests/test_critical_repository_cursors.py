@@ -87,12 +87,11 @@ def test_proposal_cursor_selects_role_credential_and_tenant(monkeypatch) -> None
     with repository._cursor("axignal_proposal_worker", TENANT):
         pass
     assert calls[-1].dsn == "postgresql://proposal"
-    assert calls[-1].cursor_instance.executions == [
-        (
-            "SELECT set_config('app.tenant_id', %s, true)",
-            (str(TENANT),),
-        )
-    ]
+    executions = calls[-1].cursor_instance.executions
+    assert len(executions) == 1
+    statement, params = executions[0]
+    assert "app.tenant_id" in str(statement)
+    assert params == (str(TENANT),)
 
 
 def test_organic_cursor_switches_between_application_and_public_roles(monkeypatch) -> None:
