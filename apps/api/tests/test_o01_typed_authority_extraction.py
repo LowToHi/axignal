@@ -13,6 +13,7 @@ SCRIPT_PATH = ROOT / "scripts/extract_gate7_o01_typed_authority.py"
 HEAD = "a" * 40
 MANIFEST = f"sha256:{'b' * 64}"
 NOW = datetime(2026, 8, 1, 12, 0, tzinfo=UTC)
+MAXIMUM_EXPIRY = NOW + timedelta(days=27)
 
 
 def load_script() -> ModuleType:
@@ -23,7 +24,12 @@ def load_script() -> ModuleType:
     return module
 
 
-def decision(authority: str, *, head: str = HEAD) -> dict[str, object]:
+def decision(
+    authority: str,
+    *,
+    head: str = HEAD,
+    expiry: datetime | None = None,
+) -> dict[str, object]:
     return {
         "authority": authority,
         "decision": "APPROVE",
@@ -31,7 +37,9 @@ def decision(authority: str, *, head: str = HEAD) -> dict[str, object]:
         "manifest_digest": MANIFEST,
         "head_sha": head,
         "timestamp": NOW.isoformat().replace("+00:00", "Z"),
-        "expiry": (NOW + timedelta(days=20)).isoformat().replace("+00:00", "Z"),
+        "expiry": (expiry or NOW + timedelta(days=20)).isoformat().replace(
+            "+00:00", "Z"
+        ),
         "conditions": ["No public claims"],
         "signature": f"approved-authority:{authority.casefold()}",
     }
@@ -52,6 +60,18 @@ def write_comments(path: Path, values: list[dict[str, object]]) -> None:
     path.write_text(json.dumps(values), encoding="utf-8")
 
 
+def extract(module: ModuleType, legal: Path, privacy: Path, output: Path):
+    return module.extract(
+        legal_comments_path=legal,
+        privacy_comments_path=privacy,
+        expected_head_sha=HEAD,
+        expected_manifest_digest=MANIFEST,
+        maximum_expiry=MAXIMUM_EXPIRY,
+        now=NOW,
+        output_path=output,
+    )
+
+
 def test_complete_external_authority_envelope_is_materialised(tmp_path: Path) -> None:
     module = load_script()
     legal = tmp_path / "legal.json"
@@ -63,13 +83,7 @@ def test_complete_external_authority_envelope_is_materialised(tmp_path: Path) ->
         [comment(2, decision("PRIVACY_DATA_RIGHTS"), "privacy-reviewer")],
     )
 
-    result = module.extract(
-        legal_comments_path=legal,
-        privacy_comments_path=privacy,
-        expected_head_sha=HEAD,
-        expected_manifest_digest=MANIFEST,
-        output_path=output,
-    )
+    result = extract(module, legal, privacy, output)
 
     assert result["status"] == "COMPLETE"
     assert result["output_written"] is True
@@ -95,16 +109,37 @@ def test_informal_and_wrong_head_comments_do_not_grant_authority(tmp_path: Path)
     )
     write_comments(privacy, [])
 
-    result = module.extract(
-        legal_comments_path=legal,
-        privacy_comments_path=privacy,
-        expected_head_sha=HEAD,
-        expected_manifest_digest=MANIFEST,
-        output_path=output,
-    )
+    result = extract(module, legal, privacy, output)
 
     assert result["status"] == "MISSING"
     assert result["output_written"] is False
+    assert not output.exists()
+
+
+def test_decision_cannot_outlive_current_renewal_evidence(tmp_path: Path) -> None:
+    module = load_script()
+    legal = tmp_path / "legal.json"
+    privacy = tmp_path / "privacy.json"
+    output = tmp_path / "authority.json"
+    too_late = MAXIMUM_EXPIRY + timedelta(seconds=1)
+    write_comments(
+        legal,
+        [comment(1, decision("LEGAL", expiry=too_late), "legal-reviewer")],
+    )
+    write_comments(
+        privacy,
+        [
+            comment(
+                2,
+                decision("PRIVACY_DATA_RIGHTS", expiry=too_late),
+                "privacy-reviewer",
+            )
+        ],
+    )
+
+    result = extract(module, legal, privacy, output)
+
+    assert result["status"] == "MISSING"
     assert not output.exists()
 
 
@@ -128,13 +163,7 @@ def test_latest_exact_bound_decision_supersedes_earlier_comment(tmp_path: Path) 
         [comment(12, decision("PRIVACY_DATA_RIGHTS"), "privacy-reviewer")],
     )
 
-    result = module.extract(
-        legal_comments_path=legal,
-        privacy_comments_path=privacy,
-        expected_head_sha=HEAD,
-        expected_manifest_digest=MANIFEST,
-        output_path=output,
-    )
+    result = extract(module, legal, privacy, output)
 
     envelope = AuthorityEnvelope.model_validate_json(output.read_text())
     legal_decision = next(item for item in envelope.decisions if item.authority == "LEGAL")
