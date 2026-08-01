@@ -58,6 +58,7 @@ jobs:
           python:3.13-slim
           node:22.14.0-alpine
           postgis/postgis:17-3.5
+          pgvector/pgvector:pg17
           postgres:17-alpine
           valkey/valkey:8-alpine
           caddy:2.10.0-alpine
