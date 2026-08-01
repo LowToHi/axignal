@@ -72,12 +72,12 @@ assert_source_anchor() {
 assert_head_schema() {
   local database="$1"
   test "$(scalar "$database" "SELECT to_regclass('axignal_global.scheduled_jobs') IS NOT NULL;")" = "t"
-  test "$(scalar "$database" "SELECT to_regclass('tenant_private.billing_selections') IS NOT NULL;")" = "t"
-  test "$(scalar "$database" "SELECT to_regclass('tenant_private.seat_assignments') IS NOT NULL;")" = "t"
+  test "$(scalar "$database" "SELECT to_regclass('tenant_private.billing_plan_selections') IS NOT NULL;")" = "t"
+  test "$(scalar "$database" "SELECT to_regclass('tenant_private.organisation_seat_allocations') IS NOT NULL;")" = "t"
   test "$(scalar "$database" "SELECT to_regclass('identity_private.users') IS NOT NULL;")" = "t"
   test "$(scalar "$database" "SELECT to_regclass('identity_private.identity_sessions') IS NOT NULL;")" = "t"
   test "$(scalar "$database" "SELECT to_regclass('growth_private.seo_page_candidates') IS NOT NULL;")" = "t"
-  test "$(scalar "$database" "SELECT to_regclass('growth_private.alert_subscriptions') IS NOT NULL;")" = "t"
+  test "$(scalar "$database" "SELECT to_regclass('growth_private.tender_alert_subscriptions') IS NOT NULL;")" = "t"
   assert_source_anchor "$database"
 }
 
