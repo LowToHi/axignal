@@ -120,7 +120,7 @@ class ProcurementFact(BaseModel):
     missing_information: tuple[str, ...] = ()
 
     @model_validator(mode="after")
-    def validate_origin(self) -> "ProcurementFact":
+    def validate_origin(self) -> ProcurementFact:
         if self.origin in {
             FactOrigin.SOURCE_FACT,
             FactOrigin.NORMALIZED_FACT,
@@ -172,7 +172,7 @@ class ProcurementContactChannel(BaseModel):
     superseded_by: str | None = None
 
     @model_validator(mode="after")
-    def validate_channel_policy(self) -> "ProcurementContactChannel":
+    def validate_channel_policy(self) -> ProcurementContactChannel:
         if self.searchable_globally or self.exportable or self.marketing_use:
             raise ValueError("Procurement contact channels cannot become CRM or marketing data")
 
@@ -183,12 +183,15 @@ class ProcurementContactChannel(BaseModel):
                 raise ValueError("Blocked data cannot expose endpoints or actions")
             return self
 
-        if self.data_class is ContactDataClass.AMBIGUOUS_PERSONAL:
-            if self.policy_decision not in {
+        if (
+            self.data_class is ContactDataClass.AMBIGUOUS_PERSONAL
+            and self.policy_decision
+            not in {
                 ContactPolicyDecision.LINK_ONLY,
                 ContactPolicyDecision.BLOCK,
-            }:
-                raise ValueError("Ambiguous personal data must be LINK_ONLY or BLOCK")
+            }
+        ):
+            raise ValueError("Ambiguous personal data must be LINK_ONLY or BLOCK")
 
         if self.data_class is ContactDataClass.PROFESSIONAL_PERSONAL:
             if self.policy_decision is not ContactPolicyDecision.CONTEXTUAL:
@@ -223,9 +226,11 @@ class ProcurementContactChannel(BaseModel):
         if scheme not in expected_schemes[self.channel_type]:
             raise ValueError("Contact endpoint scheme does not match channel type")
 
-        if self.policy_decision is ContactPolicyDecision.LINK_ONLY:
-            if self.allowed_actions != frozenset({ContactAction.OPEN}):
-                raise ValueError("LINK_ONLY permits only OPEN")
+        if (
+            self.policy_decision is ContactPolicyDecision.LINK_ONLY
+            and self.allowed_actions != frozenset({ContactAction.OPEN})
+        ):
+            raise ValueError("LINK_ONLY permits only OPEN")
 
         if self.status is ContactStatus.SUPERSEDED and not self.superseded_by:
             raise ValueError("Superseded channels require a replacement reference")
@@ -243,7 +248,7 @@ class Opportunity(BaseModel):
     contact_channels: tuple[ProcurementContactChannel, ...] = ()
 
     @model_validator(mode="after")
-    def validate_bindings(self) -> "Opportunity":
+    def validate_bindings(self) -> Opportunity:
         if self.current_version.opportunity_id != self.opportunity_id:
             raise ValueError("Opportunity version belongs to another opportunity")
         if any(item.opportunity_id != self.opportunity_id for item in self.contact_channels):
@@ -271,7 +276,7 @@ class TenderWorkspace(BaseModel):
     presented_externally_confirmed_at: datetime | None = None
 
     @model_validator(mode="after")
-    def validate_workspace_state(self) -> "TenderWorkspace":
+    def validate_workspace_state(self) -> TenderWorkspace:
         if self.opportunity_version.opportunity_id != self.opportunity_id:
             raise ValueError("Workspace snapshot belongs to another opportunity")
         if len(self.contact_channel_ids) != len(set(self.contact_channel_ids)):
@@ -305,7 +310,7 @@ class Clarification(BaseModel):
     sent_at: datetime | None = None
 
     @model_validator(mode="after")
-    def validate_human_control(self) -> "Clarification":
+    def validate_human_control(self) -> Clarification:
         approval_states = {
             ClarificationState.USER_APPROVED,
             ClarificationState.EXTERNAL_HANDOFF,
@@ -362,7 +367,7 @@ class AuditEvent(BaseModel):
     details: dict[str, Any] = Field(default_factory=dict)
 
     @model_validator(mode="after")
-    def reject_contact_replication(self) -> "AuditEvent":
+    def reject_contact_replication(self) -> AuditEvent:
         prohibited = {
             "contact_name",
             "contact_email",
