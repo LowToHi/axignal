@@ -23,6 +23,7 @@ on:
       - "data/innovation-ip/**"
       - "schemas/global-coverage-source-language-*.schema.json"
       - "scripts/verify_gate7_global_coverage.py"
+      - "scripts/verify_gate7_source_snapshots.py"
       - "docs/acceptance/Gate-7-global-coverage-sources-multilingual-v0.1.md"
       - ".github/workflows/gate7-global-coverage-source-language.yml"
   push:
@@ -43,6 +44,7 @@ on:
       - "data/innovation-ip/**"
       - "schemas/global-coverage-source-language-*.schema.json"
       - "scripts/verify_gate7_global_coverage.py"
+      - "scripts/verify_gate7_source_snapshots.py"
       - "docs/acceptance/Gate-7-global-coverage-sources-multilingual-v0.1.md"
       - ".github/workflows/gate7-global-coverage-source-language.yml"
 
@@ -95,8 +97,20 @@ jobs:
 
       - name: Verify implementation quality
         run: |
-          python -m compileall -q scripts/verify_gate7_global_coverage.py
-          ruff check scripts/verify_gate7_global_coverage.py
+          python -m compileall -q \
+            scripts/verify_gate7_global_coverage.py \
+            scripts/verify_gate7_source_snapshots.py
+          ruff check \
+            scripts/verify_gate7_global_coverage.py \
+            scripts/verify_gate7_source_snapshots.py
+
+      - name: Verify repository source snapshots
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/gate7
+          python scripts/verify_gate7_source_snapshots.py \
+            | tee artifacts/gate7/source-snapshot-integrity.json
 
       - name: Materialise and verify Gate 7 report
         shell: bash
@@ -123,6 +137,11 @@ jobs:
           from pathlib import Path
 
           summary = json.loads(Path("artifacts/gate7/gate7-summary.json").read_text())
+          snapshot_integrity = json.loads(
+              Path("artifacts/gate7/source-snapshot-integrity.json").read_text()
+          )
+          assert snapshot_integrity["status"] == "PASS"
+          assert snapshot_integrity["source_snapshots_checked"] >= 1
           assert summary["status"] == "PASS"
           assert summary["evidence_head_sha"] == os.environ["AXIGNAL_EXACT_SHA"]
           assert summary["libraries"] == 16
