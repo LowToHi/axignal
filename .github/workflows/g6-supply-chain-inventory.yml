@@ -51,7 +51,7 @@ jobs:
           python -m pip install \
             --no-deps \
             --no-build-isolation \
-            --editable .
+            .
 
       - name: Lint G6 verification tooling
         run: ruff check scripts/verify_g6_supply_chain.py scripts/image_filesystem_manifest.py
@@ -222,7 +222,53 @@ jobs:
           docker run --rm axignal-g6-runtime:a python -m pip freeze --all | sort > runtime-packages-a.txt
           docker run --rm axignal-g6-runtime:b python -m pip freeze --all | sort > runtime-packages-b.txt
           cmp runtime-packages-a.txt runtime-packages-b.txt
-          cmp runtime-packages-a.txt runtime-freeze-from-lock.txt 2>/dev/null || true
+
+          python - <<'PY' | tee runtime-package-verification.json
+          import json
+          import re
+          from pathlib import Path
+
+          def normalise(name: str) -> str:
+              return re.sub(r"[-_.]+", "-", name).lower()
+
+          expected = {}
+          current = []
+          for raw in Path("requirements/python-runtime.lock").read_text().splitlines():
+              stripped = raw.strip()
+              if not current and (not stripped or stripped.startswith("#")):
+                  continue
+              current.append(stripped)
+              if stripped.endswith("\\"):
+                  continue
+              statement = " ".join(current)
+              current = []
+              match = re.match(r"^([A-Za-z0-9_.-]+)(?:\[[^]]+\])?==([^\s;\\]+)", statement)
+              if match:
+                  expected[normalise(match.group(1))] = match.group(2)
+
+          actual = {}
+          for raw in Path("runtime-packages-a.txt").read_text().splitlines():
+              if "==" not in raw:
+                  continue
+              name, version = raw.split("==", 1)
+              actual[normalise(name)] = version
+
+          missing = {name: version for name, version in expected.items() if actual.get(name) != version}
+          unexpected = {
+              name: version
+              for name, version in actual.items()
+              if name not in expected and name not in {"pip", "setuptools"}
+          }
+          assert not missing, missing
+          assert not unexpected, unexpected
+          print(json.dumps({
+              "schema": "axignal.g6-runtime-package-verification.v1",
+              "status": "PASS",
+              "expected_packages": len(expected),
+              "actual_packages": len(actual),
+              "tooling_packages": sorted(set(actual) - set(expected)),
+          }, indent=2, sort_keys=True))
+          PY
 
           python - <<'PY' | tee reproducibility-summary.json
           import json
@@ -287,6 +333,7 @@ jobs:
             *-b.json
             runtime-packages-a.txt
             runtime-packages-b.txt
+            runtime-package-verification.json
             reproducibility-summary.json
             postgres-extension-versions.txt
             postgres-runtime.log
