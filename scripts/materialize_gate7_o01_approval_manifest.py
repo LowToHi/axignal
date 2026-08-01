@@ -36,6 +36,7 @@ INPUT_PATHS = (
     ROOT / "apps/api/tests/test_o01_approval_renewal.py",
     ROOT / "scripts/verify_gate7_o01_legal_privacy_reconciliation.py",
     ROOT / "scripts/verify_gate7_o01_renewal.py",
+    ROOT / "scripts/extract_gate7_o01_typed_authority.py",
     ROOT / "scripts/prepare_gate7_o01_renewal.py",
     ROOT / "scripts/materialize_gate7_o01_approval_manifest.py",
     ROOT / ".github/workflows/o01-approval-renewal.yml",
