@@ -3,6 +3,7 @@ import { defineConfig, devices } from "@playwright/test";
 const useDevelopmentServer = process.env.AXIGNAL_PLAYWRIGHT_DEV_SERVER === "true";
 const useExternalServer = process.env.AXIGNAL_PLAYWRIGHT_EXTERNAL_SERVER === "true";
 const baseURL = process.env.AXIGNAL_PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:3000";
+const publicOrigin = new URL(baseURL).origin;
 
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -32,6 +33,10 @@ export default defineConfig({
             : "pnpm --filter @axignal/web dev",
         url: baseURL,
         reuseExistingServer: !process.env.CI,
-        timeout: 120_000
+        timeout: 120_000,
+        env: {
+          AXIGNAL_PUBLIC_ORIGIN: publicOrigin,
+          AXIGNAL_LEGACY_PASSWORD_LOGIN_ENABLED: useDevelopmentServer ? "true" : "false"
+        }
       }
 });
