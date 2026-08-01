@@ -17,6 +17,7 @@ from urllib.parse import urlparse
 from axignal_api.o01_approval_renewal import (
     AuthorityEnvelope,
     ChangeClass,
+    RenewalPhase,
     classify_delta,
     evaluate_authority,
 )
@@ -280,24 +281,23 @@ def decision_template(
     authority: str,
     *,
     head_sha: str,
-    package_digest: str,
+    manifest_digest: str,
     maximum_expiry: str,
     change_class: str,
 ) -> dict[str, Any]:
     return {
         "authority": authority,
         "decision": None,
-        "scope": "AX-LIB-O01 bounded private evidence campaign renewal",
-        "manifest_digest": package_digest,
+        "scope": (
+            "AX-LIB-O01 bounded private evidence campaign renewal; "
+            f"change class reviewed: {change_class}"
+        ),
+        "manifest_digest": manifest_digest,
         "head_sha": head_sha,
         "timestamp": None,
         "expiry": None,
-        "maximum_expiry": maximum_expiry,
-        "conditions": [],
+        "conditions": [f"Expiry must not exceed {maximum_expiry}"],
         "signature": None,
-        "change_class_reviewed": change_class,
-        "machine_generated_template": True,
-        "machine_generated_decision": False,
     }
 
 
@@ -342,16 +342,11 @@ def materialise_renewal(
     )
 
     envelope = load_authority_envelope(current_decisions_path)
-    expected_authority_digest = (
-        sha256_file(previous_package_path)
-        if previous_package_path is not None and previous_package_path.is_file()
-        else current_manifest_digest
-    )
     schedule = policy["schedule"]
     authority = evaluate_authority(
         envelope,
         expected_head_sha=head_sha,
-        expected_manifest_digest=expected_authority_digest,
+        expected_manifest_digest=current_manifest_digest,
         now=now,
         renewal_window_days=int(schedule["renewal_window_days"]),
         urgent_window_days=int(schedule["urgent_window_days"]),
@@ -365,6 +360,15 @@ def materialise_renewal(
         "BLOCKED_EVIDENCE_UNAVAILABLE"
         if delta.change_class is ChangeClass.EVIDENCE_UNAVAILABLE
         else "READY_FOR_TYPED_DECISIONS"
+    )
+    material_delta = delta.change_class not in {
+        ChangeClass.NO_MATERIAL_CHANGE,
+        ChangeClass.BASELINE_REQUIRED,
+    }
+    new_decisions_required = (
+        not authority.execution_authorised
+        or authority.phase is not RenewalPhase.NOT_DUE
+        or material_delta
     )
     notification_triggers = set(policy["notification"]["notify_when"])
     notification_required = (
@@ -381,6 +385,10 @@ def materialise_renewal(
         "git_tree": git_tree,
         "status": package_status,
         "mode": policy["mode"],
+        "approval_target": {
+            "head_sha": head_sha,
+            "manifest_digest": current_manifest_digest,
+        },
         "current_approval_manifest_digest": current_manifest_digest,
         "previous_package_digest": (
             sha256_file(previous_package_path)
@@ -408,7 +416,7 @@ def materialise_renewal(
             "execution_authorised_before_package": authority.execution_authorised,
         },
         "renewal": {
-            "new_typed_decisions_required": True,
+            "new_typed_decisions_required": new_decisions_required,
             "automatic_approval": False,
             "automatic_signature": False,
             "automatic_expiry_extension": False,
@@ -458,7 +466,7 @@ def materialise_renewal(
         template = decision_template(
             authority_name,
             head_sha=head_sha,
-            package_digest=package_digest,
+            manifest_digest=current_manifest_digest,
             maximum_expiry=iso_z(maximum_expiry),
             change_class=delta.change_class.value,
         )
@@ -472,12 +480,14 @@ def materialise_renewal(
         "output": "O01_APPROVAL_RENEWAL_PACKAGE_READY",
         "head_sha": head_sha,
         "git_tree": git_tree,
+        "approval_manifest_digest": current_manifest_digest,
         "package_path": str(package_path.relative_to(ROOT)),
         "package_digest": package_digest,
         "package_status": package_status,
         "change_class": delta.change_class.value,
         "authority_status": authority.status.value,
         "renewal_phase": authority.phase.value,
+        "new_typed_decisions_required": new_decisions_required,
         "maximum_expiry": iso_z(maximum_expiry),
         "notification_required": notification_required,
         "execution_authorised": False,
