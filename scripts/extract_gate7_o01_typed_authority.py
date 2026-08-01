@@ -40,11 +40,22 @@ def parse_time(value: str) -> datetime:
     return parsed.astimezone(UTC)
 
 
+def flatten_comments(value: Any) -> list[dict[str, Any]]:
+    if isinstance(value, dict):
+        return [value]
+    if isinstance(value, list):
+        result: list[dict[str, Any]] = []
+        for item in value:
+            result.extend(flatten_comments(item))
+        return result
+    return []
+
+
 def load_comments(path: Path) -> list[dict[str, Any]]:
     value = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(value, list):
         raise AuthorityExtractionError(f"Comment input must be an array: {path}")
-    return [item for item in value if isinstance(item, dict)]
+    return flatten_comments(value)
 
 
 def candidate_objects(body: str) -> list[dict[str, Any]]:
