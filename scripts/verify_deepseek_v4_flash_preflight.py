@@ -8,8 +8,8 @@ from urllib.parse import urlparse
 import httpx
 
 BASE_URL = "https://api.deepseek.com"
-MODEL = "deepseek-v4-flash-0731"
-PREVIOUS_MODEL = "deepseek-v4-flash"
+API_MODEL = "deepseek-v4-flash"
+PROVIDER_CHECKPOINT = "deepseek-v4-flash-0731"
 OUTPUT = Path("deepseek-v4-flash-0731-preflight-evidence.json")
 
 
@@ -36,7 +36,7 @@ def read_model_listing(response: httpx.Response) -> tuple[bool, int]:
         }
     except (KeyError, TypeError, ValueError) as exc:
         raise PreflightError("DeepSeek model-list response was malformed") from exc
-    return MODEL in model_ids, response.status_code
+    return API_MODEL in model_ids, response.status_code
 
 
 def safe_provider_error(response: httpx.Response) -> str:
@@ -78,7 +78,7 @@ def main() -> int:
         chat_response = client.post(
             "/chat/completions",
             json={
-                "model": MODEL,
+                "model": API_MODEL,
                 "temperature": 0,
                 "max_tokens": 32,
                 "thinking": {"type": "disabled"},
@@ -107,20 +107,29 @@ def main() -> int:
             content = chat_body["choices"][0]["message"]["content"]
             decoded = json.loads(content)
             usage = chat_body.get("usage") or {}
+            returned_model = chat_body.get("model")
         except (KeyError, IndexError, TypeError, ValueError) as exc:
             raise PreflightError("DeepSeek chat response was malformed") from exc
         if decoded != {"status": "ok"}:
             raise PreflightError("DeepSeek chat preflight returned an unexpected JSON contract")
+        if returned_model is not None and returned_model not in {
+            API_MODEL,
+            PROVIDER_CHECKPOINT,
+        }:
+            raise PreflightError("DeepSeek response reported an unexpected model identity")
 
     evidence = {
         "provider": "deepseek",
         "transport": "direct",
         "base_url_host": "api.deepseek.com",
-        "model": MODEL,
-        "previous_model": PREVIOUS_MODEL,
+        "api_model_requested": API_MODEL,
+        "api_model_returned": returned_model,
+        "provider_checkpoint": PROVIDER_CHECKPOINT,
+        "checkpoint_binding": "PROVIDER_MANAGED_ALIAS_USER_SUPPLIED_NOTICE",
+        "checkpoint_exposed_by_api": returned_model == PROVIDER_CHECKPOINT,
         "credential_configured": True,
         "model_list_status": model_list_status,
-        "model_listed": model_listed,
+        "api_model_listed": model_listed,
         "direct_chat_execution": True,
         "chat_completion_json_contract": True,
         "thinking": "disabled",
