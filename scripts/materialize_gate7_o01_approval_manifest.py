@@ -25,13 +25,20 @@ INPUT_PATHS = (
     ROOT / "data/acceptance/legal/AX-LIB-O01-TED-field-rights-matrix.v0.1.json",
     ROOT / "data/acceptance/legal/AX-LIB-O01-TED-contact-policy-reconciliation.v0.2.json",
     APPROVAL_REQUEST_PATH,
+    ROOT / "data/acceptance/approvals/AX-LIB-O01-approval-renewal-policy.v0.1.json",
     ROOT / "data/acceptance/campaigns/AX-LIB-O01-quality-lag-multilingual-controls.v0.1.json",
+    ROOT / "data/acceptance/fixtures/o01-renewal/terms-observations.v0.1.json",
     ROOT / "data/contracts/AX-GE2E-G7-O01-T02-domain-contracts.v0.1.json",
     ROOT / "apps/api/src/axignal_api/procurement_domain.py",
     ROOT / "apps/api/src/axignal_api/o01_contact_policy.py",
+    ROOT / "apps/api/src/axignal_api/o01_approval_renewal.py",
     ROOT / "apps/api/tests/test_o01_contact_policy.py",
+    ROOT / "apps/api/tests/test_o01_approval_renewal.py",
     ROOT / "scripts/verify_gate7_o01_legal_privacy_reconciliation.py",
+    ROOT / "scripts/verify_gate7_o01_renewal.py",
+    ROOT / "scripts/prepare_gate7_o01_renewal.py",
     ROOT / "scripts/materialize_gate7_o01_approval_manifest.py",
+    ROOT / ".github/workflows/o01-approval-renewal.yml",
 )
 
 
@@ -75,7 +82,7 @@ def canonical_bytes(payload: dict[str, Any]) -> bytes:
     ).encode("utf-8")
 
 
-def approval_maximum_expiry() -> str:
+def approval_maximum_expiry() -> tuple[str, bool]:
     payload = json.loads(APPROVAL_REQUEST_PATH.read_text(encoding="utf-8"))
     value = payload["approval_contract"]["maximum_expiry"]
     expiry = datetime.fromisoformat(value.replace("Z", "+00:00"))
@@ -88,9 +95,12 @@ def approval_maximum_expiry() -> str:
         raise ManifestError(
             "Approval maximum expiry exceeds the retained-evidence safe boundary"
         )
-    if expiry.astimezone(UTC) <= datetime.now(UTC):
+
+    expired = expiry.astimezone(UTC) <= datetime.now(UTC)
+    renewal_preparation = os.environ.get("AXIGNAL_RENEWAL_PREPARATION") == "1"
+    if expired and not renewal_preparation:
         raise ManifestError("Approval maximum expiry is not current")
-    return value
+    return value, expired
 
 
 def materialize() -> dict[str, Any]:
@@ -98,7 +108,7 @@ def materialize() -> dict[str, Any]:
     if reconciliation["status"] != "PASS":
         raise ManifestError("Reconciliation verifier did not pass")
 
-    maximum_expiry = approval_maximum_expiry()
+    maximum_expiry, historical_only = approval_maximum_expiry()
     head, tree, committed_at = exact_git_identity()
     files = {
         str(path.relative_to(ROOT)): f"sha256:{sha256_file(path)}"
@@ -116,7 +126,15 @@ def materialize() -> dict[str, Any]:
         "head_committed_at": committed_at,
         "maximum_expiry": maximum_expiry,
         "evidence_retention_safe_expiry": EVIDENCE_RETENTION_SAFE_EXPIRY,
-        "status": "READY_FOR_TYPED_DECISIONS",
+        "status": (
+            "HISTORICAL_INPUT_FOR_RENEWAL"
+            if historical_only
+            else "READY_FOR_TYPED_DECISIONS"
+        ),
+        "historical_only": historical_only,
+        "renewal_preparation_mode": (
+            os.environ.get("AXIGNAL_RENEWAL_PREPARATION") == "1"
+        ),
         "required_authorities": ["LEGAL", "PRIVACY_DATA_RIGHTS"],
         "required_decision": "APPROVE",
         "required_fields": [
@@ -145,6 +163,7 @@ def materialize() -> dict[str, Any]:
         "public_launch_authorised": False,
         "approval_survives_head_change": False,
         "approval_survives_manifest_change": False,
+        "approval_survives_terms_change": False,
         "files": files,
     }
 
@@ -161,6 +180,8 @@ def materialize() -> dict[str, Any]:
         "git_tree": tree,
         "manifest_path": str(MANIFEST_PATH.relative_to(ROOT)),
         "manifest_digest": f"sha256:{digest}",
+        "manifest_status": manifest["status"],
+        "historical_only": historical_only,
         "maximum_expiry": maximum_expiry,
         "evidence_retention_safe_expiry": EVIDENCE_RETENTION_SAFE_EXPIRY,
         "required_authorities": manifest["required_authorities"],
