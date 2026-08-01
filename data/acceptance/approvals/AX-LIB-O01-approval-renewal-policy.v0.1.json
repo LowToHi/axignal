@@ -106,7 +106,7 @@
         "commercial or non-commercial purposes",
         "additional rights if specific content depicts identifiable private individuals or includes third-party works",
         "logos (including that of ted) may not be used without the prior consent",
-        "contact details are required for a correct operation of public procurement procedures"
+        "contact details of the contracting authorities and successful tenderers are required for a correct operation of public procurement procedures"
       ]
     },
     {
@@ -159,6 +159,12 @@
       "effective_expiry"
     ],
     "notify_when": [
+      "BASELINE_REQUIRED",
+      "NO_CURRENT_APPROVAL",
+      "MISSING",
+      "INCOMPLETE",
+      "INVALID_BINDING",
+      "REJECTED",
       "RENEWAL_WINDOW_OPEN",
       "URGENT_RENEWAL",
       "EXPIRED",
