@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-"""Characterise database credential, role and tenant cursor boundaries."""
-
 from typing import Any
 from uuid import UUID
 
