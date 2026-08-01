@@ -23,6 +23,7 @@ from axignal_api.connectors.world_bank import (
     WorldBankConnector,
 )
 from axignal_api.queue import OutboxPublisher, ResearchJob, ValkeyResearchQueue
+from axignal_api.runtime_invariants import require_runtime_value
 from axignal_api.settings import Settings
 from axignal_api.ted_repository import TEDResearchRepository
 from axignal_api.ted_runtime import (
@@ -240,10 +241,16 @@ class ResearchWorker:
 
 def build_runtime(settings: Settings) -> tuple[OutboxPublisher, ResearchWorker]:
     settings.require_persistent_research()
-    assert settings.database_url is not None
-    assert settings.valkey_url is not None
-    repository = TEDResearchRepository(settings.database_url)
-    queue = ValkeyResearchQueue(settings.valkey_url, queue_key=settings.queue_key)
+    database_url = require_runtime_value(
+        settings.database_url,
+        name="AXIGNAL_DATABASE_URL",
+    )
+    valkey_url = require_runtime_value(
+        settings.valkey_url,
+        name="AXIGNAL_VALKEY_URL",
+    )
+    repository = TEDResearchRepository(database_url)
+    queue = ValkeyResearchQueue(valkey_url, queue_key=settings.queue_key)
     world_bank_connector = WorldBankConnector(
         live_enabled=settings.live_sources_enabled,
         fixture_path=settings.world_bank_fixture_path,
