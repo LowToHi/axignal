@@ -75,7 +75,17 @@ class DuplicateRepository:
     def get_run_for_worker(self, *, tenant_id: UUID, run_id: UUID) -> dict[str, object]:
         assert tenant_id == TENANT_ID
         assert run_id == RUN_ID
-        return {"state": "RETRIEVING"}
+        return {"state": "QUEUED", "opportunity_id": "opp_test"}
+
+    def get_source(self, source_id: str) -> dict[str, object]:
+        assert source_id == "world-bank-wdi"
+        return {
+            "admission_state": "ADMITTED",
+            "kill_switch": False,
+            "rights_status": "COMMERCIAL_REUSE_WITH_ATTRIBUTION",
+            "commercial_use": True,
+            "redistribution": True,
+        }
 
 
 class ForbiddenConnector:
