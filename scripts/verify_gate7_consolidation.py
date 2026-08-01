@@ -195,7 +195,9 @@ def main() -> int:
 
     digest_text = args.approval_manifest_sha_file.read_text(encoding="utf-8").strip()
     approval_manifest_digest = digest_text.split()[0]
-    assert SHA256_PATTERN.fullmatch(approval_manifest_digest)
+    approval_manifest_hex = approval_manifest_digest.removeprefix("sha256:")
+    assert SHA256_PATTERN.fullmatch(approval_manifest_hex)
+    approval_manifest_digest = f"sha256:{approval_manifest_hex}"
 
     parsed_expiries = sorted(
         (datetime.fromisoformat(value.replace("Z", "+00:00")), value)
