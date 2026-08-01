@@ -1,6 +1,11 @@
 name: G4b Ruff Repair
 
 on:
+  pull_request:
+    branches:
+      - "release/axignal-rc3a-27cfbd6"
+    paths:
+      - ".github/workflows/g4b-ruff-repair.yml"
   push:
     branches:
       - "agent/axignal-rc3b-critical-repository-coverage-v1"
@@ -17,6 +22,7 @@ concurrency:
 
 jobs:
   repair:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -38,7 +44,8 @@ jobs:
             apps/api/tests/test_critical_repositories_proposal_ted.py \
             apps/api/tests/test_critical_repositories_wrappers.py \
             apps/api/tests/test_critical_repository_cursors.py
-          ruff check apps/api/tests/test_critical_repositories_proposal_ted.py \
+          ruff check \
+            apps/api/tests/test_critical_repositories_proposal_ted.py \
             apps/api/tests/test_critical_repositories_wrappers.py \
             apps/api/tests/test_critical_repository_cursors.py
           python -m py_compile \
