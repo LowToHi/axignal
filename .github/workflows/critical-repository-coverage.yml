@@ -38,6 +38,16 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: critical-repository-inventory
-          path: critical-repository-inventory.json
+          path: |
+            critical-repository-inventory.json
+            apps/api/src/axignal_api/admission_repository.py
+            apps/api/src/axignal_api/billing_repository.py
+            apps/api/src/axignal_api/entitlement_repository.py
+            apps/api/src/axignal_api/identity_repository.py
+            apps/api/src/axignal_api/organic_repository.py
+            apps/api/src/axignal_api/proposal_repository.py
+            apps/api/src/axignal_api/retention_repository.py
+            apps/api/src/axignal_api/seat_repository.py
+            apps/api/src/axignal_api/ted_repository.py
           if-no-files-found: error
           retention-days: 14
