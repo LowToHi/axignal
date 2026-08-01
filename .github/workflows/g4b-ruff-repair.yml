@@ -40,7 +40,7 @@ jobs:
             apps/api/tests/test_critical_repositories_proposal_ted.py \
             apps/api/tests/test_critical_repositories_wrappers.py \
             apps/api/tests/test_critical_repository_cursors.py
-          ruff check --fix \
+          ruff check --fix --unsafe-fixes \
             apps/api/tests/test_critical_repositories_proposal_ted.py \
             apps/api/tests/test_critical_repositories_wrappers.py \
             apps/api/tests/test_critical_repository_cursors.py
