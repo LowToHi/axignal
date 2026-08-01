@@ -25,6 +25,7 @@ on:
       - "apps/api/src/axignal_api/o01_approval_renewal.py"
       - "apps/api/tests/test_o01_contact_policy.py"
       - "apps/api/tests/test_o01_approval_renewal.py"
+      - "apps/api/tests/test_o01_typed_authority_extraction.py"
       - "schemas/global-coverage-source-language-*.schema.json"
       - "scripts/verify_gate7_global_coverage.py"
       - "scripts/verify_gate7_source_snapshots.py"
@@ -32,6 +33,7 @@ on:
       - "scripts/verify_gate7_o01_campaign_contract.py"
       - "scripts/verify_gate7_o01_legal_privacy_reconciliation.py"
       - "scripts/verify_gate7_o01_renewal.py"
+      - "scripts/extract_gate7_o01_typed_authority.py"
       - "scripts/prepare_gate7_o01_renewal.py"
       - "scripts/materialize_gate7_o01_approval_manifest.py"
       - "docs/acceptance/Gate-7-global-coverage-sources-multilingual-v0.1.md"
@@ -57,6 +59,7 @@ on:
       - "apps/api/src/axignal_api/o01_approval_renewal.py"
       - "apps/api/tests/test_o01_contact_policy.py"
       - "apps/api/tests/test_o01_approval_renewal.py"
+      - "apps/api/tests/test_o01_typed_authority_extraction.py"
       - "schemas/global-coverage-source-language-*.schema.json"
       - "scripts/verify_gate7_global_coverage.py"
       - "scripts/verify_gate7_source_snapshots.py"
@@ -64,6 +67,7 @@ on:
       - "scripts/verify_gate7_o01_campaign_contract.py"
       - "scripts/verify_gate7_o01_legal_privacy_reconciliation.py"
       - "scripts/verify_gate7_o01_renewal.py"
+      - "scripts/extract_gate7_o01_typed_authority.py"
       - "scripts/prepare_gate7_o01_renewal.py"
       - "scripts/materialize_gate7_o01_approval_manifest.py"
       - "docs/acceptance/Gate-7-global-coverage-sources-multilingual-v0.1.md"
@@ -128,12 +132,14 @@ jobs:
             apps/api/src/axignal_api/o01_approval_renewal.py \
             apps/api/tests/test_o01_contact_policy.py \
             apps/api/tests/test_o01_approval_renewal.py \
+            apps/api/tests/test_o01_typed_authority_extraction.py \
             scripts/verify_gate7_global_coverage.py \
             scripts/verify_gate7_source_snapshots.py \
             scripts/verify_gate7_source_rights.py \
             scripts/verify_gate7_o01_campaign_contract.py \
             scripts/verify_gate7_o01_legal_privacy_reconciliation.py \
             scripts/verify_gate7_o01_renewal.py \
+            scripts/extract_gate7_o01_typed_authority.py \
             scripts/prepare_gate7_o01_renewal.py \
             scripts/materialize_gate7_o01_approval_manifest.py
           ruff check \
@@ -141,12 +147,14 @@ jobs:
             apps/api/src/axignal_api/o01_approval_renewal.py \
             apps/api/tests/test_o01_contact_policy.py \
             apps/api/tests/test_o01_approval_renewal.py \
+            apps/api/tests/test_o01_typed_authority_extraction.py \
             scripts/verify_gate7_global_coverage.py \
             scripts/verify_gate7_source_snapshots.py \
             scripts/verify_gate7_source_rights.py \
             scripts/verify_gate7_o01_campaign_contract.py \
             scripts/verify_gate7_o01_legal_privacy_reconciliation.py \
             scripts/verify_gate7_o01_renewal.py \
+            scripts/extract_gate7_o01_typed_authority.py \
             scripts/prepare_gate7_o01_renewal.py \
             scripts/materialize_gate7_o01_approval_manifest.py
 
@@ -154,7 +162,8 @@ jobs:
         run: |
           pytest -q \
             apps/api/tests/test_o01_contact_policy.py \
-            apps/api/tests/test_o01_approval_renewal.py
+            apps/api/tests/test_o01_approval_renewal.py \
+            apps/api/tests/test_o01_typed_authority_extraction.py
 
       - name: Verify repository source snapshots
         shell: bash
@@ -319,6 +328,7 @@ jobs:
           assert renewal_result["head_sha"] == os.environ["AXIGNAL_EXACT_SHA"]
           assert renewal_result["change_class"] == "BASELINE_REQUIRED"
           assert renewal_result["authority_status"] == "MISSING"
+          assert renewal_result["new_typed_decisions_required"] is True
           assert renewal_result["execution_authorised"] is False
           assert renewal_result["external_request_budget"] == 0
           assert renewal_result["human_decisions_required"] == [
@@ -328,6 +338,10 @@ jobs:
 
           assert renewal_package["head_sha"] == os.environ["AXIGNAL_EXACT_SHA"]
           assert renewal_package["status"] == "READY_FOR_TYPED_DECISIONS"
+          assert renewal_package["approval_target"] == {
+              "head_sha": os.environ["AXIGNAL_EXACT_SHA"],
+              "manifest_digest": renewal_result["approval_manifest_digest"],
+          }
           assert renewal_package["delta"]["change_class"] == "BASELINE_REQUIRED"
           assert renewal_package["renewal"]["new_typed_decisions_required"] is True
           assert renewal_package["renewal"]["automatic_approval"] is False
@@ -344,10 +358,15 @@ jobs:
 
           assert manifest_result["status"] == "PASS"
           assert manifest_result["head_sha"] == os.environ["AXIGNAL_EXACT_SHA"]
-          assert manifest_result["historical_only"] is False
+          assert manifest_result["manifest_status"] == "READY_FOR_TYPED_DECISIONS"
+          assert manifest_result["renewal_maximum_expiry_source"] == "CURRENT_RENEWAL_EVIDENCE_PACKAGE"
           assert manifest["head_sha"] == os.environ["AXIGNAL_EXACT_SHA"]
           assert manifest["status"] == "READY_FOR_TYPED_DECISIONS"
-          assert manifest["historical_only"] is False
+          assert manifest["renewal_contract"]["task_id"] == "AX-GE2E-G7-O01-T04"
+          assert manifest["renewal_contract"]["decision_manifest_digest"] == "THIS_MANIFEST_DIGEST"
+          assert manifest["renewal_contract"]["maximum_expiry_source"] == "CURRENT_RENEWAL_EVIDENCE_PACKAGE"
+          assert manifest["renewal_contract"]["automatic_signature"] is False
+          assert manifest["renewal_contract"]["automatic_expiry_extension"] is False
           assert manifest["legal_decision"] == "MISSING"
           assert manifest["privacy_data_rights_decision"] == "MISSING"
           assert manifest["campaign_status"] == "BLOCKED"
