@@ -9,7 +9,6 @@ set -euo pipefail
 : "${AXIGNAL_G7_SOAK_SECONDS:?required}"
 
 project="${AXIGNAL_G7_COMPOSE_PROJECT:-axignal-g7}"
-port="${AXIGNAL_G7_API_PORT:-18081}"
 workers="${AXIGNAL_G7_WORKERS:-2}"
 health_concurrency="${AXIGNAL_G7_HEALTH_CONCURRENCY:-20}"
 research_concurrency="${AXIGNAL_G7_RESEARCH_CONCURRENCY:-6}"
@@ -23,7 +22,6 @@ compose_files=(
 
 {
   printf 'AXIGNAL_BUILD_SHA=%s\n' "$AXIGNAL_EXACT_SHA"
-  printf 'AXIGNAL_G7_API_PORT=%s\n' "$port"
   cat <<'ENV'
 AXIGNAL_POSTGRES_DB=axignal
 AXIGNAL_POSTGRES_USER=axignal
@@ -60,6 +58,7 @@ capture() {
   compose ps --all > "$output_dir/compose-ps.txt" 2>&1 || true
   compose logs --no-color > "$output_dir/compose.log" 2>&1 || true
   docker ps \
+    --all \
     --filter "label=com.docker.compose.project=$project" \
     --format '{{json .}}' > "$output_dir/docker-ps.jsonl" 2>&1 || true
 }
@@ -84,16 +83,24 @@ compose --profile workers up \
   --scale "research-worker=$workers" \
   api \
   research-worker \
-  g7-api-proxy
+  g7-api-proxy \
+  2>&1 | tee "$output_dir/compose-up.log"
 
 published_endpoint="$(compose port g7-api-proxy 8080)"
 printf '%s\n' "$published_endpoint" | tee "$output_dir/api-proxy-port.txt"
-test "$published_endpoint" = "127.0.0.1:$port"
+case "$published_endpoint" in
+  127.0.0.1:[0-9]*) ;;
+  *)
+    printf 'Unexpected G7 proxy endpoint: %s\n' "$published_endpoint" >&2
+    exit 1
+    ;;
+esac
+base_url="http://$published_endpoint"
 
 readiness_ready=0
 for attempt in $(seq 1 30); do
   if curl --fail --silent --show-error \
-    "http://127.0.0.1:$port/readyz" \
+    "$base_url/readyz" \
     > "$output_dir/readiness.json" \
     2>> "$output_dir/readiness-errors.log"; then
     readiness_ready=1
@@ -105,7 +112,7 @@ test "$readiness_ready" = 1
 
 python scripts/run_g7_performance_campaign.py \
   --profile "$AXIGNAL_G7_PROFILE" \
-  --base-url "http://127.0.0.1:$port" \
+  --base-url "$base_url" \
   --identity-secret ci-identity-secret-with-at-least-32-bytes \
   --compose-project "$project" \
   --expected-sha "$AXIGNAL_EXACT_SHA" \
