@@ -163,7 +163,16 @@ jobs:
               http://127.0.0.1:18080/api/auth/login
           )"
           test "$LOGIN_STATUS" = "404"
-          grep -q '"error":"Not found."' pilot-login-disabled.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          payload = json.loads(Path("pilot-login-disabled.json").read_text())
+          assert payload == {
+              "error": "request_rejected",
+              "code": "legacy_password_login_disabled",
+          }
+          PY
 
           COOKIE_VALUE="$(python - <<'PY'
           import base64
