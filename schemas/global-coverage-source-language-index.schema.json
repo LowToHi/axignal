@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://axignal.com/schemas/global-coverage-source-language-index.schema.json",
+  "title": "AXIGNAL Gate 7 library coverage evidence index",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "gate_id",
+    "baseline_sha",
+    "required_languages",
+    "required_authorities",
+    "libraries"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "axignal.global-coverage-source-language-index/v0.1"
+    },
+    "gate_id": {"const": "PUBLIC-LAUNCH-GATE-7"},
+    "baseline_sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "required_languages": {
+      "type": "array",
+      "minItems": 2,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z]{2}(-[A-Z]{2})?$"
+      }
+    },
+    "required_authorities": {
+      "type": "array",
+      "minItems": 4,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "PRODUCT",
+          "SECURITY",
+          "PRIVACY_DATA_RIGHTS",
+          "LEGAL",
+          "SOURCE_QUALITY",
+          "UX_ACCESSIBILITY",
+          "HUMAN_COVERAGE_AUTHORITY"
+        ]
+      }
+    },
+    "libraries": {
+      "type": "array",
+      "minItems": 16,
+      "maxItems": 16,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "library_id",
+          "kind",
+          "canonical_name",
+          "runtime_reference",
+          "evidence_file"
+        ],
+        "properties": {
+          "library_id": {
+            "type": "string",
+            "pattern": "^AX-LIB-[FO][0-9]{2}$"
+          },
+          "kind": {"enum": ["FOUNDATIONAL", "OPPORTUNITY"]},
+          "canonical_name": {"type": "string", "minLength": 1},
+          "runtime_reference": {"type": "string", "minLength": 1},
+          "evidence_file": {
+            "type": "string",
+            "pattern": "^data/acceptance/library-coverage/AX-LIB-[FO][0-9]{2}\\.json$"
+          }
+        }
+      }
+    }
+  }
+}
