@@ -63,16 +63,20 @@ export function candidatePlansFromRuntime(
   if (pricing?.status !== "CANDIDATE_ONLY" || pricing.currency !== "EUR") {
     throw new Error("The controlled-access candidate price book is not available.");
   }
+  const currency = pricing.currency;
 
   const plans = (pricing.plans ?? []).flatMap((plan): CandidatePlan[] => {
-    const presentation = plan.plan_code
-      ? supportedOffers.get(plan.plan_code)
-      : undefined;
-    if (!presentation || plan.commercial_activation_authorised !== false) {
+    const planCode = plan.plan_code;
+    const presentation = planCode ? supportedOffers.get(planCode) : undefined;
+    if (
+      !planCode ||
+      !presentation ||
+      plan.commercial_activation_authorised !== false
+    ) {
       return [];
     }
 
-    if (plan.plan_code === "CONTROLLED_TRIAL_7D") {
+    if (planCode === "CONTROLLED_TRIAL_7D") {
       if (
         plan.billing_mode !== "NO_CHARGE" ||
         plan.amount_minor !== 0 ||
@@ -86,11 +90,11 @@ export function candidatePlansFromRuntime(
 
       return [
         {
-          planCode: plan.plan_code,
+          planCode,
           name: presentation.name,
           description: presentation.description,
           amountMinor: 0,
-          currency: pricing.currency,
+          currency,
           billingPeriod: "trial",
           durationDays: plan.duration_days,
           aiTokenBudget: plan.ai_token_budget,
@@ -113,11 +117,11 @@ export function candidatePlansFromRuntime(
 
     return [
       {
-        planCode: plan.plan_code!,
+        planCode,
         name: presentation.name,
         description: presentation.description,
         amountMinor: plan.amount_minor,
-        currency: pricing.currency,
+        currency,
         billingPeriod: "month",
         durationDays: null,
         aiTokenBudget: null,
