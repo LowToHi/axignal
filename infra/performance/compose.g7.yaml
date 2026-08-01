@@ -1,0 +1,23 @@
+services:
+  api:
+    environment:
+      AXIGNAL_LIVE_SOURCES_ENABLED: "false"
+      AXIGNAL_TED_LIVE_SOURCES_ENABLED: "false"
+    ports:
+      - "127.0.0.1:${AXIGNAL_G7_API_PORT:-18081}:8000"
+    deploy:
+      resources:
+        limits:
+          memory: ${AXIGNAL_G7_API_MEMORY_LIMIT:-1024M}
+
+  research-worker:
+    environment:
+      AXIGNAL_LIVE_SOURCES_ENABLED: "false"
+      AXIGNAL_TED_LIVE_SOURCES_ENABLED: "false"
+      AXIGNAL_WORLD_BANK_FIXTURE_PATH: /tmp/axignal-g7-world-bank.json
+    volumes:
+      - ../performance/world-bank-fixture.json:/tmp/axignal-g7-world-bank.json:ro
+    deploy:
+      resources:
+        limits:
+          memory: ${AXIGNAL_G7_WORKER_MEMORY_LIMIT:-768M}
