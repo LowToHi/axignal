@@ -1,0 +1,47 @@
+name: Full PostgreSQL Migration Matrix
+
+on:
+  pull_request:
+    paths:
+      - "infra/postgres/**"
+      - "scripts/verify_full_migration_matrix.sh"
+      - ".github/workflows/full-migration-matrix.yml"
+  push:
+    branches:
+      - "agent/axignal-rc1-migration-matrix-v1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: full-migration-matrix-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  migration-matrix:
+    name: Supported upgrades and snapshot restores
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Validate rehearsal script syntax
+        run: bash -n scripts/verify_full_migration_matrix.sh
+      - name: Start isolated PostgreSQL topology
+        run: docker compose up --build --detach --wait postgres
+      - name: Execute full migration matrix
+        shell: bash
+        run: |
+          set -o pipefail
+          bash scripts/verify_full_migration_matrix.sh 2>&1 | tee full-migration-matrix.log
+      - name: Upload migration evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: full-migration-matrix
+          path: full-migration-matrix.log
+          if-no-files-found: error
+          retention-days: 14
+      - name: Destroy isolated topology
+        if: always()
+        run: docker compose down --volumes --remove-orphans
