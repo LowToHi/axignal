@@ -38,6 +38,9 @@ EXACT_SHA_EXPRESSION_PARTS = (
     "github.event.pull_request.head.sha",
     "github.sha",
 )
+TREE_ATTESTATION_PATTERN = re.compile(
+    r"git\s+rev-parse\s+['\"]?HEAD\^\{tree\}['\"]?"
+)
 
 
 @dataclass(frozen=True)
@@ -140,7 +143,7 @@ def inspect_workflow(name: str, path: Path, text: str) -> list[WorkflowFinding]:
                 "Workflow does not assert checked-out HEAD against the exact SHA",
             )
         )
-    if "git rev-parse HEAD^{tree}" not in text:
+    if TREE_ATTESTATION_PATTERN.search(text) is None:
         findings.append(
             WorkflowFinding(
                 name,
