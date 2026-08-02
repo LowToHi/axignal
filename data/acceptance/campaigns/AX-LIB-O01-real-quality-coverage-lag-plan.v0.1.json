@@ -4,14 +4,14 @@
   "campaign_id": "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.1",
   "frozen_before_execution": true,
   "authority": {
-    "evaluator_head_sha": "3c421d0b8e48c009f5361d4156fd8c1dc07c8101",
-    "evaluator_tree_sha": "59e2543c2bd735a552f85560344f285328d53412",
+    "evaluator_head_sha": "740895ba1a5bd58bb286d7c3c48f2d59488192af",
+    "evaluator_tree_sha": "b778f327592a82fc43d35a03b5f4601e00d12802",
     "target_head_sha": "b754b5641e5f17c5a084434aace4f939a4be0e84",
     "target_tree_sha": "615efd6e8a7f3369292775dbcf3223f8cc006f29",
-    "manifest_reference": "sha256:0c722eb4b02c4446ac26154b6ade49e1efb7b5c7787f8ac4925a0af8dd3d7898",
-    "authority_artifact_id": 8831184086,
-    "authority_artifact_digest": "sha256:166617d29a6f30e892caff5f1afce2cd7eb00f1e10b9e7e8961696010b3725ac",
-    "effective_expiry": "2026-08-27T23:59:59Z"
+    "manifest_reference": "sha256:e5de7d2e362ecb07c5b8200df1f14f6521d7e37328333313d86e2cd620e31871",
+    "authority_artifact_id": 8831937571,
+    "authority_artifact_digest": "sha256:cd417229151a4541700adaa90782691be8a59b185e49143d16deda4980e27d72",
+    "effective_expiry": "2026-08-28T10:00:00Z"
   },
   "source": {
     "source_id": "src_ted_search_api_v3",

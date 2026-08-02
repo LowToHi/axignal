@@ -11,7 +11,10 @@ from urllib.parse import urlsplit
 
 from axignal_api.o01_quality_campaign import evaluate_thresholds, sha256_prefixed
 
-EXPECTED_PLAN_SHA256 = "sha256:2facc571ddb074117feac694df4146e644a8ae43f4965a232ba078c1588e894d"
+EXPECTED_PLAN_SHA256 = "sha256:7d323a9a920f1fe96832b5f6e631b4da257c3ce995ef433705aff95c3ed1643b"
+EXPECTED_EVALUATOR_HEAD = "740895ba1a5bd58bb286d7c3c48f2d59488192af"
+EXPECTED_EVALUATOR_TREE = "b778f327592a82fc43d35a03b5f4601e00d12802"
+EXPECTED_MANIFEST_REFERENCE = "sha256:e5de7d2e362ecb07c5b8200df1f14f6521d7e37328333313d86e2cd620e31871"
 
 EXPECTED_QUALITY_METRICS = {
     "identifier_accuracy",
@@ -77,9 +80,12 @@ def verify_plan(plan_path: Path) -> dict[str, Any]:
     require(plan["frozen_before_execution"] is True, "Sample was not frozen")
     authority = plan["authority"]
     require(
-        authority["evaluator_head_sha"]
-        == "3c421d0b8e48c009f5361d4156fd8c1dc07c8101",
+        authority["evaluator_head_sha"] == EXPECTED_EVALUATOR_HEAD,
         "O01-B evaluator head drift",
+    )
+    require(
+        authority["evaluator_tree_sha"] == EXPECTED_EVALUATOR_TREE,
+        "O01-B evaluator tree drift",
     )
     require(
         authority["target_head_sha"]
@@ -87,8 +93,7 @@ def verify_plan(plan_path: Path) -> dict[str, Any]:
         "O01 campaign target head drift",
     )
     require(
-        authority["manifest_reference"]
-        == "sha256:0c722eb4b02c4446ac26154b6ade49e1efb7b5c7787f8ac4925a0af8dd3d7898",
+        authority["manifest_reference"] == EXPECTED_MANIFEST_REFERENCE,
         "O01-B manifest drift",
     )
     expiry = datetime.fromisoformat(authority["effective_expiry"].replace("Z", "+00:00"))

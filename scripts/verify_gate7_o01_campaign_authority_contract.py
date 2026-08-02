@@ -11,7 +11,7 @@ MANIFEST_PATH = (
     / "data/acceptance/approvals/AX-LIB-O01-campaign-authority-manifest.v0.1.json"
 )
 EXPECTED_MANIFEST_REFERENCE = (
-    "sha256:0c722eb4b02c4446ac26154b6ade49e1efb7b5c7787f8ac4925a0af8dd3d7898"
+    "sha256:e5de7d2e362ecb07c5b8200df1f14f6521d7e37328333313d86e2cd620e31871"
 )
 EXPECTED_HEAD = "b754b5641e5f17c5a084434aace4f939a4be0e84"
 EXPECTED_TREE = "615efd6e8a7f3369292775dbcf3223f8cc006f29"
