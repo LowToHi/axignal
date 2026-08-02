@@ -1,0 +1,69 @@
+{
+  "schema_version": "axignal.o01-official-source-retry-policy/v0.1",
+  "task_id": "AX-GE2E-G7-O01-E",
+  "library_id": "AX-LIB-O01",
+  "source_id": "src_ted_search_api_v3",
+  "trigger_evidence": {
+    "workflow_run_id": 30771301480,
+    "job_id": 91558921256,
+    "request_head_sha": "b28b0438fb8e38f9c213e2621e92e1dc20d42011",
+    "artifact_id": 8840624551,
+    "artifact_digest": "sha256:b585a8c11bc5d23075a86696dca7153a376aa49c4e22e2b7677c834d9b9500ce",
+    "failure": "HTTP_202_EMPTY_BODY",
+    "response_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "preflight_passed": true,
+    "state_transition_applied": false
+  },
+  "scope": "OFFICIAL_DOCUMENT_GET_ONLY",
+  "final_status_required": 200,
+  "maximum_attempts_per_source": 2,
+  "retryable_http_statuses": [202, 429, 500, 502, 503, 504],
+  "minimum_retry_delay_seconds": 2.0,
+  "maximum_retry_after_seconds": 120.0,
+  "request_headers": {
+    "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,text/plain;q=0.8,*/*;q=0.1",
+    "accept_encoding": "identity",
+    "accept_language": "en",
+    "cache_control": "no-cache",
+    "user_agent": "AXIGNAL-O01-E-Evidence/2.0"
+  },
+  "attempt_ledger": {
+    "persisted": true,
+    "fields": [
+      "attempt",
+      "url",
+      "final_url",
+      "http_status",
+      "content_type",
+      "retry_after",
+      "response_bytes",
+      "response_sha256",
+      "started_at",
+      "completed_at",
+      "duration_seconds",
+      "resolved_addresses",
+      "selected_address",
+      "redirects_followed",
+      "retry_wait_seconds",
+      "accepted",
+      "response_body_persisted"
+    ],
+    "response_body_persisted": false
+  },
+  "accepted_semantics": {
+    "http_202_is_evidence": false,
+    "http_202_may_be_retried": true,
+    "second_http_202_is_failure": true,
+    "http_200_without_all_frozen_anchors_is_failure": true,
+    "network_budget_consumed_per_request": true
+  },
+  "non_authorisations": {
+    "threshold_change": false,
+    "source_scope_change": false,
+    "new_host": false,
+    "raw_body_retention": false,
+    "public_claim_contribution": false,
+    "gate7_closed": false,
+    "public_launch": "NO_GO"
+  }
+}
