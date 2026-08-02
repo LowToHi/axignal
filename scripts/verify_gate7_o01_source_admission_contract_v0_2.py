@@ -146,6 +146,18 @@ def main() -> int:
         contract["admitted_effect"]["gate7_closed"] is False,
         "Contract incorrectly closes Gate 7",
     )
+    require(
+        contract["admitted_effect"]["bounded_claim_contribution"] is False,
+        "Contract incorrectly enables claim contribution",
+    )
+    require(
+        contract["admitted_effect"]["o01_canonical_state"] == "IN_REVIEW",
+        "Contract incorrectly accepts O01 without history/frequency evidence",
+    )
+    require(
+        contract["admitted_effect"]["o01_claim_decision"] == "PENDING",
+        "Contract incorrectly approves the O01 public claim",
+    )
 
     target = manifest["target_head_sha"]
     current = git("rev-parse", "HEAD").decode().strip()
@@ -173,6 +185,9 @@ def main() -> int:
                 "automatic_human_approval": False,
                 "automatic_human_signature": False,
                 "source_state_before_decision": "CANDIDATE",
+                "bounded_claim_contribution": False,
+                "o01_canonical_state_after_source_admission": "IN_REVIEW",
+                "o01_claim_decision_after_source_admission": "PENDING",
                 "global_coverage_claim_authorised": False,
                 "gate7_closed": False,
                 "public_launch": "NO_GO",
