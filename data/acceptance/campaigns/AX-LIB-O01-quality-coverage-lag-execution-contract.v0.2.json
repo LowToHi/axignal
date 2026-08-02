@@ -56,7 +56,7 @@
     "end_inclusive": "2026-07-31T23:59:59Z",
     "query_end": "20260731",
     "query_start": "20260701",
-    "rationale": "Same frozen complete calendar month as v0.1; no post-result window selection.",
+    "rationale": "Last complete calendar month before campaign execution.",
     "start_inclusive": "2026-07-01T00:00:00Z"
   },
   "non_authorisations": {
