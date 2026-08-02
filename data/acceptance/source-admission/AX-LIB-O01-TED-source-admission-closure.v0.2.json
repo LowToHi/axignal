@@ -1,0 +1,89 @@
+{
+  "authority": {
+    "authorities": {
+      "HUMAN_COVERAGE_AUTHORITY": {
+        "comment_id": 5160049875,
+        "issue_number": 154,
+        "status": "APPROVED_CURRENT"
+      },
+      "LEGAL": {
+        "comment_id": 5160047515,
+        "issue_number": 151,
+        "status": "APPROVED_CURRENT"
+      },
+      "PRIVACY_DATA_RIGHTS": {
+        "comment_id": 5160046784,
+        "issue_number": 150,
+        "status": "APPROVED_CURRENT"
+      },
+      "PRODUCT": {
+        "comment_id": 5160045034,
+        "issue_number": 148,
+        "status": "APPROVED_CURRENT"
+      },
+      "SECURITY": {
+        "comment_id": 5160045861,
+        "issue_number": 149,
+        "status": "APPROVED_CURRENT"
+      },
+      "SOURCE_QUALITY": {
+        "comment_id": 5160048342,
+        "issue_number": 152,
+        "status": "APPROVED_CURRENT"
+      },
+      "UX_ACCESSIBILITY": {
+        "comment_id": 5160048963,
+        "issue_number": 153,
+        "status": "APPROVED_CURRENT"
+      }
+    },
+    "effective_expiry": "2026-08-28T10:00:00Z",
+    "expiry_within_evidence": true,
+    "head_match": true,
+    "issue_match": true,
+    "manifest_match": true,
+    "scope_match": true,
+    "signatures_human": true
+  },
+  "closed_at": "2026-08-02T19:49:57Z",
+  "decision": "ADMIT",
+  "evidence": {
+    "admission_artifact_digest": "sha256:c6d5675ed4e126afaf35ea3dbee439e10b2c9262d9bcd6410b6983402115fe28",
+    "admission_artifact_id": 8838419160,
+    "admission_artifact_size_bytes": 3938,
+    "admission_job_id": 91540012718,
+    "admission_workflow_run_id": 30764109662,
+    "campaign_artifact_digest": "sha256:a2328776b89ffaa44dde20649a5bee39711d7ac13b6bbc11c72e608631eca092",
+    "campaign_artifact_id": 8838091687,
+    "campaign_registry_sha256": "sha256:2bc13a2d52734106b87a30498331a4a0a1d34e17a3ddfe2cc1ba8ebd19af758b",
+    "contract_sha256": "sha256:c53228699844481ad53da3be3f8d71a7c9d4c324080173aff092da2ab9d14c33",
+    "evaluation_head_sha": "dc653fc02abce6cc1f2e9ffbf9f616922c072f76",
+    "evaluation_tree_sha": "b589046caeb31b2c72671f7481f24429ce7d59f0",
+    "manifest_reference": "sha256:46756443a0bda4cacee532eeba923afbbeadf8522d8b9e0e4ae4f88025f09b4e",
+    "target_head_sha": "b9762fc6074018d0c2f6043a357f2ffe4cfe60fd"
+  },
+  "gate_id": "O01-TED-SOURCE-ADMISSION",
+  "library_id": "AX-LIB-O01",
+  "output": "O01_TED_SOURCE_ADMISSION_PASS",
+  "permanent_boundary": {
+    "bid_submission_authorised": false,
+    "bounded_claim_contribution": false,
+    "bounded_product_use_authorised": true,
+    "contact_marketing_authorised": false,
+    "external_notification_delivery_authorised": false,
+    "gate7_closed": false,
+    "global_coverage_claim_authorised": false,
+    "model_training_authorised": false,
+    "o01_canonical_state": "IN_REVIEW",
+    "o01_claim_decision": "PENDING",
+    "public_launch": "NO_GO",
+    "public_redistribution_authorised": false
+  },
+  "phase_closed": true,
+  "previous_state": "CANDIDATE",
+  "product_admitted": true,
+  "schema_version": "axignal.o01-ted-source-admission-closure/v0.2",
+  "source_id": "src_ted_search_api_v3",
+  "source_state": "PRODUCT_ADMITTED",
+  "status": "PASS"
+}
