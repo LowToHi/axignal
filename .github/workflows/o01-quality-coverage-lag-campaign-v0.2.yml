@@ -1,0 +1,114 @@
+name: O01 Quality Coverage and Lag Campaign v0.2
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "apps/api/src/axignal_api/gate7_o01_*.py"
+      - "apps/api/tests/test_gate7_o01_*.py"
+      - "apps/api/tests/test_o01_quality_controls.py"
+      - "data/acceptance/campaigns/AX-LIB-O01-real-quality-coverage-lag-plan.v0.2.json"
+      - "scripts/*gate7_o01*v0_2*"
+      - "scripts/rehearse_gate7_o01_controls.py"
+      - "scripts/measure_gate7_o01_multilingual_journeys.py"
+      - "docs/runbooks/o01-quality-coverage-lag-campaign-v0.2.md"
+      - ".github/workflows/o01-quality-coverage-lag-campaign-v0.2.yml"
+  push:
+    branches: [main, "agent/**"]
+    paths:
+      - "apps/api/src/axignal_api/gate7_o01_*.py"
+      - "apps/api/tests/test_gate7_o01_*.py"
+      - "apps/api/tests/test_o01_quality_controls.py"
+      - "data/acceptance/campaigns/AX-LIB-O01-real-quality-coverage-lag-plan.v0.2.json"
+      - "scripts/*gate7_o01*v0_2*"
+      - "scripts/rehearse_gate7_o01_controls.py"
+      - "scripts/measure_gate7_o01_multilingual_journeys.py"
+      - "docs/runbooks/o01-quality-coverage-lag-campaign-v0.2.md"
+      - ".github/workflows/o01-quality-coverage-lag-campaign-v0.2.yml"
+
+permissions:
+  contents: read
+  actions: read
+  issues: read
+
+concurrency:
+  group: o01-quality-coverage-lag-v0-2-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  AXIGNAL_EXACT_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+  PLAN_PATH: data/acceptance/campaigns/AX-LIB-O01-real-quality-coverage-lag-plan.v0.2.json
+  AUTHORITY_MANIFEST: data/acceptance/approvals/AX-LIB-O01-campaign-authority-manifest.v0.2.json
+  RESULT_DIR: artifacts/o01-quality-coverage-lag-v0.2/current
+  RAW_TMP_DIR: /tmp/axignal-o01-v0-2-raw-responses
+  KILL_SWITCH_PATH: /tmp/axignal-o01-v0-2.kill
+
+jobs:
+  real-campaign-v0-2:
+    name: Execute authorised frozen TED campaign v0.2
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.13.14"
+      - name: Install frozen development graph
+        run: |
+          python -m pip install --upgrade "pip==26.1.2"
+          python -m pip install --require-hashes --only-binary=:all: \
+            --requirement requirements/python-dev.lock
+          python -m pip check
+          python -m pip install --no-deps --no-build-isolation .
+      - name: Execute exact authorised campaign controller
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash scripts/run_gate7_o01_campaign_ci_v0_2.sh
+      - name: Enforce privacy and permanent authority boundary
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -d "$RAW_TMP_DIR"
+          test ! -e "$RESULT_DIR/raw-responses.tar.gz"
+          if [ -f "$RESULT_DIR/sanitised-sample-inventory.v0.1.jsonl" ]; then
+            ! grep -E '"(buyer-email|buyer-tel|buyer-contact-point)"[[:space:]]*:' \
+              "$RESULT_DIR/sanitised-sample-inventory.v0.1.jsonl"
+          fi
+          if [ -f "$RESULT_DIR/notification-ledger.v0.1.jsonl" ]; then
+            jq -e -s 'all(.[]; .external_delivery_authorised == false)' \
+              "$RESULT_DIR/notification-ledger.v0.1.jsonl"
+          fi
+          ! grep -R -E \
+            'sk_(live|test)_|rk_(live|test)_|whsec_|BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY' \
+            "$RESULT_DIR" --exclude='raw-responses.cms'
+          if [ -f "$RESULT_DIR/final-result.json" ]; then
+            jq -e \
+              '.authority_boundary.source_state == "CANDIDATE" and .authority_boundary.product_admitted == false and .authority_boundary.public_claims_authorised == false and .authority_boundary.public_redistribution_authorised == false and .authority_boundary.contact_marketing_authorised == false and .authority_boundary.model_training_authorised == false and .authority_boundary.bid_submission_authorised == false and .authority_boundary.public_launch == "NO_GO"' \
+              "$RESULT_DIR/final-result.json"
+          fi
+      - name: Publish campaign summary
+        if: always()
+        shell: bash
+        run: |
+          if [ -f "$RESULT_DIR/final-result.json" ]; then
+            {
+              echo '## O01-C v0.2 real campaign'
+              echo '```json'
+              jq '{output, sample_count, criteria, thresholds: .thresholds.checks, authority_boundary}' \
+                "$RESULT_DIR/final-result.json"
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Upload retained O01-C v0.2 evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: o01-quality-coverage-lag-v0-2-${{ env.AXIGNAL_EXACT_SHA }}
+          path: artifacts/o01-quality-coverage-lag-v0.2
+          if-no-files-found: error
+          retention-days: 30
