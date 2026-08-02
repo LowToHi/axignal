@@ -6,6 +6,7 @@ on:
       - ".github/workflows/o01-ted-source-admission-v0.2.yml"
       - "apps/api/src/axignal_api/o01_source_admission_authority.py"
       - "apps/api/tests/test_o01_source_admission_authority.py"
+      - "data/acceptance/campaign-results/AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.6-r4.json"
       - "data/acceptance/source-admission/AX-LIB-O01-TED-source-admission-contract.v0.2.json"
       - "data/acceptance/source-admission/AX-LIB-O01-TED-source-admission-authority-manifest.v0.2.json"
       - "data/acceptance/campaigns/AX-LIB-O01-quality-coverage-lag-closure.v0.6-r4.json"
@@ -20,6 +21,7 @@ on:
       - ".github/workflows/o01-ted-source-admission-v0.2.yml"
       - "apps/api/src/axignal_api/o01_source_admission_authority.py"
       - "apps/api/tests/test_o01_source_admission_authority.py"
+      - "data/acceptance/campaign-results/AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.6-r4.json"
       - "data/acceptance/source-admission/AX-LIB-O01-TED-source-admission-contract.v0.2.json"
       - "data/acceptance/source-admission/AX-LIB-O01-TED-source-admission-authority-manifest.v0.2.json"
       - "data/acceptance/campaigns/AX-LIB-O01-quality-coverage-lag-closure.v0.6-r4.json"
@@ -48,6 +50,7 @@ env:
   MANIFEST: data/acceptance/source-admission/AX-LIB-O01-TED-source-admission-authority-manifest.v0.2.json
   CONTRACT: data/acceptance/source-admission/AX-LIB-O01-TED-source-admission-contract.v0.2.json
   CLOSURE: data/acceptance/campaigns/AX-LIB-O01-quality-coverage-lag-closure.v0.6-r4.json
+  CAMPAIGN_REGISTRY: data/acceptance/campaign-results/AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.6-r4.json
   RESULT_DIR: artifacts/o01-ted-source-admission-v0.2
 
 jobs:
@@ -91,6 +94,7 @@ jobs:
             scripts/verify_gate7_o01_source_admission_contract_v0_2.py
           python -m pytest -q apps/api/tests/test_o01_source_admission_authority.py
           python -m json.tool "$CONTRACT" >/dev/null
+          python -m json.tool "$CAMPAIGN_REGISTRY" >/dev/null
           python -m json.tool schemas/o01-source-admission-authority-manifest.schema.json >/dev/null
 
       - name: Detect frozen manifest
@@ -101,7 +105,7 @@ jobs:
             echo "present=true" >> "$GITHUB_OUTPUT"
           else
             echo "present=false" >> "$GITHUB_OUTPUT"
-            printf '%s\n' '{"status":"PENDING_MANIFEST","output":"O01_TED_SOURCE_ADMISSION_NOT_EVALUATED","source_state":"CANDIDATE","public_launch":"NO_GO"}' > "$RESULT_DIR/result.json"
+            printf '%s\n' '{"status":"PENDING_MANIFEST","output":"O01_TED_SOURCE_ADMISSION_NOT_EVALUATED","source_state":"CANDIDATE","bounded_claim_contribution":false,"public_launch":"NO_GO"}' > "$RESULT_DIR/result.json"
           fi
 
       - name: Verify frozen admission contract
@@ -133,6 +137,7 @@ jobs:
         if: steps.manifest.outputs.present == 'true'
         run: |
           jq -e '
+            .bounded_claim_contribution == false and
             .global_coverage_claim_authorised == false and
             .public_launch == "NO_GO" and
             .permanent_boundary.public_redistribution_authorised == false and
@@ -152,6 +157,7 @@ jobs:
             if test -f "$MANIFEST"; then sha256sum "$MANIFEST"; fi
             sha256sum "$CONTRACT"
             sha256sum "$CLOSURE"
+            sha256sum "$CAMPAIGN_REGISTRY"
           } > "$RESULT_DIR/exact-provenance.txt"
 
       - name: Upload retained admission evidence
