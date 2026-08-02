@@ -15,7 +15,7 @@ MANIFEST = (
     / "data/acceptance/approvals/"
     "AX-LIB-O01-campaign-authority-manifest.v0.6.json"
 )
-MANIFEST_SHA = "sha256:04356ad097ddb4efcc4622b4bd0224a96a9481f0efb28e237d04eca7be20ac8a"
+MANIFEST_SHA = "sha256:227d636f6c22cfaeb8b44014ad455e3bb21907f1ffe5be68a847b1a9235144ca"
 
 
 class PlanMaterializationError(RuntimeError):
