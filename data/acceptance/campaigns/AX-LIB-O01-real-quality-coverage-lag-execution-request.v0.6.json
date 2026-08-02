@@ -1,0 +1,32 @@
+{
+  "authority_boundary": {
+    "product_admitted": false,
+    "public_claims_authorised": false,
+    "public_launch": "NO_GO",
+    "source_state": "CANDIDATE"
+  },
+  "campaign_id": "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.6",
+  "check_query_syntax": false,
+  "controller_parent_sha": "efd2cbd6b6c1ba0d1605df0210dbd1866ddc951b",
+  "execute": true,
+  "execution_mode": "REAL_BOUNDED_PRIVATE_EVIDENCE",
+  "manifest_reference": "sha256:04356ad097ddb4efcc4622b4bd0224a96a9481f0efb28e237d04eca7be20ac8a",
+  "one_shot": true,
+  "query_contract": "buyer-country IN ({country}) AND publication-date = (20260701 <> 20260731) SORT BY publication-number",
+  "remediation_of": {
+    "experimental_delta": "/sampling/check_query_syntax: true -> false",
+    "previous_artifact_digest": "sha256:8eedfe9e8d8aab14732f66d92b1fe72be4a022e38f3a25ddbc0243769bda7c12",
+    "previous_artifact_id": 8837430628,
+    "previous_controller_head_sha": "718b03f7f0633ca8553e76a5cd14f1faa68d06f8",
+    "previous_network_requests_used": 49,
+    "previous_output": "O01_QUALITY_COVERAGE_LAG_FAIL",
+    "previous_sample_count": 0,
+    "previous_workflow_run_id": 30760876484,
+    "query_scope_fields_sample_thresholds_retention_unchanged": true
+  },
+  "requested_at": "2026-08-02T18:32:55Z",
+  "requested_by": "LowToHi",
+  "schema_version": "axignal.o01-real-campaign-execution-request/v0.6",
+  "source_scope": "ALL",
+  "target_head_sha": "33d05c747f2a6049633cf0348f6476ea7134b1bc"
+}
