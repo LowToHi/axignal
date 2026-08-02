@@ -1,0 +1,88 @@
+{
+  "base_contract": {
+    "materialized_campaign_id": "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.4",
+    "materialized_canonical_sha256": "sha256:b8c9df6737c945afef3d4b7250b0a0ffd530dee52f32ea87c92c3d2851beeca1",
+    "materializer": "scripts/verify_gate7_o01_v0_4_scope_contract.py"
+  },
+  "campaign_id": "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.5",
+  "change_class": "VERSIONED_CANONICAL_DATE_RANGE_QUERY_CORRECTION",
+  "diagnostic_evidence": {
+    "all_country_strata_zero": true,
+    "artifact_digest": "sha256:cd5ac074c4d9911849b717c3a055724c33e42a5e5fb7b0daeb77c9e2e8a6de84",
+    "artifact_id": 8837306195,
+    "classification": "NON_CANONICAL_DATE_RANGE_ZERO_RESULT_CONFIRMED",
+    "controller_head_sha": "8b622f7606c544aa53604d2a86a1c8aee4490c79",
+    "fabricated_evidence": 0,
+    "http_200_projection_requests": 48,
+    "network_requests_used": 49,
+    "raw_plaintext_removed": true,
+    "raw_plaintext_uploaded": false,
+    "request_scope": "ALL",
+    "response_body_bytes": 81,
+    "response_body_sha256": "sha256:c006a89557974a508c38b48894ad3a389f763747cb4b56f73410d8d9dca02c76",
+    "sample_count": 0,
+    "workflow_run_id": 30760465948
+  },
+  "experimental_operations": [
+    {
+      "from": "buyer-country IN ({country}) AND publication-date >= 20260701 AND publication-date <= 20260731 SORT BY publication-number",
+      "op": "test_replace",
+      "path": "/sampling/query_contract",
+      "reason": "TED official expert-search documentation specifies a date interval as publication-date = (YYYYMMDD <> YYYYMMDD). The prior infix comparison form passed syntax checking but returned the same empty response across all twelve strata under scope ALL.",
+      "to": "buyer-country IN ({country}) AND publication-date = (20260701 <> 20260731) SORT BY publication-number"
+    }
+  ],
+  "invariants": {
+    "authority_boundary_unchanged": true,
+    "countries_unchanged": true,
+    "ephemeral_contact_projection_unchanged": true,
+    "lag_metrics_unchanged": true,
+    "languages_unchanged": true,
+    "measurement_window_unchanged": true,
+    "network_request_budget_unchanged": true,
+    "pagination_unchanged": true,
+    "quality_metrics_unchanged": true,
+    "retained_projection_unchanged": true,
+    "retention_unchanged": true,
+    "retry_policy_unchanged": true,
+    "sample_allocation_unchanged": true,
+    "source_scope_all_unchanged": true,
+    "thresholds_unchanged": true
+  },
+  "metadata_operations": [
+    {
+      "from": "axignal.o01-quality-coverage-lag-execution-contract/v0.4",
+      "op": "test_replace",
+      "path": "/schema_version",
+      "to": "axignal.o01-quality-coverage-lag-execution-contract/v0.5"
+    },
+    {
+      "from": "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.4",
+      "op": "test_replace",
+      "path": "/campaign_id",
+      "to": "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.5"
+    },
+    {
+      "from": "AX-GE2E-G7-O01-C-R3",
+      "op": "test_replace",
+      "path": "/task_id",
+      "to": "AX-GE2E-G7-O01-C-R4"
+    }
+  ],
+  "non_authorisations": {
+    "bid_submission": false,
+    "contact_marketing": false,
+    "external_notification_delivery": false,
+    "model_training": false,
+    "public_claims": false,
+    "public_launch": "NO_GO",
+    "public_redistribution": false,
+    "ted_product_admission": false
+  },
+  "official_query_evidence": {
+    "canonical_interval_example": "publication-date = (20240101 <> 20240131)",
+    "source": "https://ted.europa.eu/en/help/search-browse"
+  },
+  "schema_version": "axignal.o01-execution-contract-delta/v0.1",
+  "task_id": "AX-GE2E-G7-O01-C-R4"
+}
