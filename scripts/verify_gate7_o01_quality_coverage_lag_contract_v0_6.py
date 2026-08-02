@@ -4,7 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
-import verify_gate7_o01_quality_coverage_lag_contract_v0_5 as proven
+import verify_gate7_o01_quality_coverage_lag_contract_v0_4 as proven
 from materialize_gate7_o01_quality_coverage_lag_plan_v0_6 import materialize_plan
 
 QUERY = (
@@ -19,6 +19,7 @@ class ContractError(RuntimeError):
 
 def configure_proven_verifier() -> None:
     proven.materialize_plan = materialize_plan
+    proven.QUERY = QUERY
 
 
 def verify_plan(path: Path) -> dict[str, object]:
