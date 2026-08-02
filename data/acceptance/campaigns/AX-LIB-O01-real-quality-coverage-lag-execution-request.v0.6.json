@@ -1,0 +1,30 @@
+{
+  "authority_boundary": {
+    "product_admitted": false,
+    "public_claims_authorised": false,
+    "public_launch": "NO_GO",
+    "source_state": "CANDIDATE"
+  },
+  "campaign_id": "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.6",
+  "check_query_syntax": false,
+  "controller_parent_sha": "a62443bfd3ed1d95d74e6e8248a9f0eb48e86bbe",
+  "execute": true,
+  "execution_mode": "REAL_BOUNDED_PRIVATE_EVIDENCE",
+  "manifest_reference": "sha256:227d636f6c22cfaeb8b44014ad455e3bb21907f1ffe5be68a847b1a9235144ca",
+  "one_shot": true,
+  "query_contract": "buyer-country IN ({country}) AND publication-date = (20260701 <> 20260731) SORT BY publication-number",
+  "remediation_of": {
+    "corrected_evidence_artifact_digest": "sha256:3e3db25536958dc852f555ac4bd829e719d079e7198b7553c887d99f9ff786bb",
+    "experimental_contract_delta": false,
+    "previous_failed_request_head_sha": "d3affdf6302d86febfdebd7f9f0d87321326de75",
+    "previous_failure_class": "EVIDENCE_PROVENANCE_DIGEST_MISMATCH",
+    "previous_output": "FAIL_BEFORE_AUTHORITY_AND_NETWORK",
+    "previous_workflow_run_id": 30761373195,
+    "query_scope_fields_sample_thresholds_retention_unchanged": true
+  },
+  "requested_at": "2026-08-02T18:40:10Z",
+  "requested_by": "LowToHi",
+  "schema_version": "axignal.o01-real-campaign-execution-request/v0.6",
+  "source_scope": "ALL",
+  "target_head_sha": "b66dfbdcca0198faaabf5d346018b5496f3a5287"
+}
