@@ -1,0 +1,95 @@
+{
+  "admission_effect": {
+    "blocks_product_admission": true,
+    "failure_class": "VERSIONED_QUERY_CONTRACT_DEFECT",
+    "lag_admission": "MISSING",
+    "multilingual_admission": "MISSING",
+    "quality_admission": "MISSING",
+    "retriable_only_under_new_versioned_contract": true,
+    "source_next_state": "CANDIDATE",
+    "source_rejected": false
+  },
+  "authority": {
+    "effective_expiry": "2026-08-28T10:00:00Z",
+    "execution_authorised_at_run": true,
+    "legal": "APPROVED_CURRENT",
+    "manifest_reference": "sha256:e5de7d2e362ecb07c5b8200df1f14f6521d7e37328333313d86e2cd620e31871",
+    "official_evidence_expires_at": "2026-08-29T10:02:52.417201Z",
+    "privacy_data_rights": "APPROVED_CURRENT"
+  },
+  "authority_boundary": {
+    "bid_submission_authorised": false,
+    "contact_marketing_authorised": false,
+    "external_notification_delivery_authorised": false,
+    "model_training_authorised": false,
+    "public_claims_authorised": false,
+    "public_launch": "NO_GO",
+    "public_redistribution_authorised": false,
+    "ted_product_admitted": false
+  },
+  "campaign_id": "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.1",
+  "evidence_expires_at": "2026-08-29T10:02:52.417201Z",
+  "failure": {
+    "country_stratum": "AUT",
+    "diagnostic_message": "Syntax error in expert query at line 1, col 116: extraneous input 'ASC' expecting <EOF>",
+    "diagnostic_network_requests": 1,
+    "error_type": "O01QualityCampaignError",
+    "http_status": 400,
+    "page": 1,
+    "raw_response_retained": false,
+    "request_body_sha256": "sha256:e9f8db5bffc770ccb147d60dea17a4b2bfbb79f356872d0804affa31666751ca",
+    "response_body_sha256": "sha256:f9b24c1d055f023d7defbae20af8a2198f17c430fe8180dfcdcb7b505a92fb37",
+    "stage": "TED_SEARCH_HTTP"
+  },
+  "git_identity": {
+    "controller_head_sha": "57c893d41e4832f4fb50d8dabf4719275e70669b",
+    "controller_tree_sha": "562e119333d50737bbf0d1e0ef12f593628b28d0",
+    "evaluator_head_sha": "740895ba1a5bd58bb286d7c3c48f2d59488192af",
+    "evaluator_tree_sha": "b778f327592a82fc43d35a03b5f4601e00d12802",
+    "target_head_sha": "b754b5641e5f17c5a084434aace4f939a4be0e84",
+    "target_tree_sha": "615efd6e8a7f3369292775dbcf3223f8cc006f29"
+  },
+  "measurement_outcome": {
+    "countries_observed": 0,
+    "fabricated_evidence": 0,
+    "kill_switch_rehearsal_complete": false,
+    "lag_report_complete": false,
+    "multilingual_journeys_complete": false,
+    "quality_report_complete": false,
+    "rollback_rehearsal_complete": false,
+    "sample_count": 0,
+    "sample_frozen": true,
+    "thresholds_evaluated": false
+  },
+  "observed_at": "2026-08-02T13:11:04Z",
+  "output": "O01_QUALITY_COVERAGE_LAG_FAIL",
+  "privacy_and_retention": {
+    "contact_values_persisted": false,
+    "public_redistribution": false,
+    "raw_directory_existed": true,
+    "raw_directory_removed": true,
+    "raw_plaintext_uploaded": false
+  },
+  "schema_version": "axignal.o01-campaign-result/v0.1",
+  "source_id": "src_ted_search_api_v3",
+  "source_state": "CANDIDATE",
+  "status": "FAIL",
+  "task_id": "AX-GE2E-G7-O01-C",
+  "workflow_evidence": {
+    "artifact_digest": "sha256:6a3d55557d16459e546839a6170db02e618b3a4c31cfadf6761a0d2885dab47f",
+    "artifact_expires_at": "2026-09-01T13:11:04Z",
+    "artifact_id": 8833930837,
+    "authority_envelope_sha256": "76572d3b8c7e89e376fd574b65bd083606f52bb236e6a682013acaceb30f07e5",
+    "authority_result_sha256": "b8d3018ef565737c626ff496f0d93a075b49f5dbb0aac9689c93b6c1e061f5da",
+    "campaign_result_path": "current/campaign-run-result.json",
+    "campaign_result_sha256": "0d5c88da9f48371a754d58486ef4a738be67a8c76fcae953d6055767b91475df",
+    "exact_head_path": "current/exact-head.txt",
+    "exact_head_sha256": "2e3313b5ecb900ba5e72c7542201f4335ff5e8f8b21e73556c7d7b7d849e1281",
+    "failure_record_path": "current/campaign-failure.v0.1.json",
+    "failure_record_sha256": "d692358ea7fea6333c569ebe2d1fb241080866074014f56557c3f80906262189",
+    "job_id": 91500445963,
+    "official_baseline_preflight_sha256": "1d06039a77c0c89ac391dd0fbbd5bb94ad0c5f0ebc84da557d893030da1b5b70",
+    "plan_contract_result_sha256": "be5ccba5a435db436afdbd011c997e0133acf06a9424a27a6ce8c5bac6bc1150",
+    "run_id": 30749337528
+  }
+}
