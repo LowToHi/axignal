@@ -27,8 +27,15 @@ def test_published_lag_key_is_adapted_in_memory(tmp_path: Path) -> None:
     assert json.loads(path.read_text(encoding="utf-8")) == original
 
 
-def test_final_result_lag_is_adapted_without_file_mutation(tmp_path: Path) -> None:
-    path = tmp_path / "final-result.v0.1.json"
+@pytest.mark.parametrize(
+    "name",
+    ["final-result.v0.1.json", "campaign-console.json"],
+)
+def test_result_documents_are_adapted_without_file_mutation(
+    tmp_path: Path,
+    name: str,
+) -> None:
+    path = tmp_path / name
     original = {
         "status": "PASS",
         "lag": {PUBLISHED_KEY: False},
@@ -37,6 +44,20 @@ def test_final_result_lag_is_adapted_without_file_mutation(tmp_path: Path) -> No
     loaded = schema_aware_load_json(path)
     assert loaded["lag"][INTERNAL_ALIAS] is False
     assert json.loads(path.read_text(encoding="utf-8")) == original
+
+
+def test_console_and_final_result_normalise_identically(tmp_path: Path) -> None:
+    original = {
+        "status": "PASS",
+        "lag": {PUBLISHED_KEY: False},
+    }
+    final_path = tmp_path / "final-result.v0.1.json"
+    console_path = tmp_path / "campaign-console.json"
+    final_path.write_text(json.dumps(original), encoding="utf-8")
+    console_path.write_text(json.dumps(original), encoding="utf-8")
+    assert schema_aware_load_json(final_path) == schema_aware_load_json(console_path)
+    assert json.loads(final_path.read_text(encoding="utf-8")) == original
+    assert json.loads(console_path.read_text(encoding="utf-8")) == original
 
 
 def test_loader_remains_non_recursive_while_adapter_is_installed(
