@@ -1,0 +1,14 @@
+{
+  "schema_version": "axignal.o01-history-contract-diagnostic-request/v0.1",
+  "task_id": "AX-GE2E-G7-O01-E-DIAGNOSTIC",
+  "execute": true,
+  "one_shot": true,
+  "repository": "LowToHi/axignal",
+  "source_branch": "agent/ax-gate7-o01-e-history-frequency-lag",
+  "controller_parent_sha": "2cebee650ca95ac37ddd2acf211efbbd63b4ae51",
+  "maximum_network_requests": 6,
+  "raw_bodies_retained": false,
+  "claim_contribution": false,
+  "gate7_closed": false,
+  "public_launch": "NO_GO"
+}
