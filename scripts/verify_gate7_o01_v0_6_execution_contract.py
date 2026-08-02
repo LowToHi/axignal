@@ -71,10 +71,14 @@ def materialize() -> tuple[dict[str, Any], dict[str, Any]]:
         operation["path"] == "/sampling/check_query_syntax",
         "Only sampling.check_query_syntax may change",
     )
+    require(
+        operation["from"] is True and operation["to"] is False,
+        "Execution-mode delta must be true to false",
+    )
 
     result = deepcopy(base)
     require(
-        result["sampling"]["check_query_syntax"] is operation["from"],
+        result["sampling"]["check_query_syntax"] is True,
         "Base execution-mode precondition failed",
     )
     result["sampling"]["check_query_syntax"] = operation["to"]
@@ -96,7 +100,10 @@ def materialize() -> tuple[dict[str, Any], dict[str, Any]]:
         "check_query_syntax"
     ]
     require(comparison == baseline, "An undeclared contract value changed")
-    require(result["sampling"]["check_query_syntax"] is False, "Query execution is not enabled")
+    require(
+        result["sampling"]["check_query_syntax"] is False,
+        "Query execution is not enabled",
+    )
     require(result["source"]["scope"] == "ALL", "ALL scope regressed")
     require(
         result["sampling"]["query_contract"]
