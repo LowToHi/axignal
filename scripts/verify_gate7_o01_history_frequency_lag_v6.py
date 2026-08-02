@@ -30,7 +30,10 @@ DIAGNOSTIC_DIGEST = (
 def verify_plan(plan: dict, plan_path: Path) -> dict:
     require(plan["schema_version"] == PLAN_SCHEMA, "Unexpected plan schema")
     require(plan["task_id"] == "AX-GE2E-G7-O01-E", "Unexpected task id")
-    require(plan["campaign_id"] == "AX-LIB-O01-TED-HISTORY-FREQUENCY-LAG-v0.5", "Unexpected campaign")
+    require(
+        plan["campaign_id"] == "AX-LIB-O01-TED-HISTORY-FREQUENCY-LAG-v0.5",
+        "Unexpected campaign",
+    )
     require(plan["library_id"] == "AX-LIB-O01", "Unexpected library")
     require(plan["frozen_before_execution"] is True, "Plan is not frozen")
     verify_baseline(plan)
@@ -118,7 +121,10 @@ def verify_plan(plan: dict, plan_path: Path) -> dict:
         == "NUMERIC_ISSUE_COLUMN_0_TEXT_ISO_DATE_COLUMN_1",
         "Parser contract drift",
     )
-    require(plan["release_calendar_parser_lock"] == "requirements/o01-xls.lock", "Parser lock path drift")
+    require(
+        plan["release_calendar_parser_lock"] == "requirements/o01-xls.lock",
+        "Parser lock path drift",
+    )
 
     history = plan["history"]
     require(history["declared_public_years"] == 10, "Public depth drift")
@@ -139,7 +145,10 @@ def verify_plan(plan: dict, plan_path: Path) -> dict:
     require(sampling["search_pagination_mode"] == "PAGE_NUMBER", "Search mode drift")
     require(sampling["check_query_syntax"] is False, "Query syntax mode drift")
     require(sampling["sort_clause"] is None, "Sort clause enabled")
-    require(sampling["notice_fields"] == ["publication-number", "publication-date"], "Notice field drift")
+    require(
+        sampling["notice_fields"] == ["publication-number", "publication-date"],
+        "Notice field drift",
+    )
     require(sampling["raw_notice_payloads_persisted"] is False, "Raw notices enabled")
     require(sampling["release_calendar_body_persisted"] is False, "XLS retained")
     require(sampling["daily_package_bodies_persisted"] is False, "Packages retained")
@@ -162,7 +171,10 @@ def verify_plan(plan: dict, plan_path: Path) -> dict:
     require(thresholds["reference_year_weekend_editions_max"] == 0, "Weekend drift")
     require(thresholds["search_presence_ratio_min"] == 1.0, "Search ratio lowered")
     require(thresholds["package_presence_ratio_min"] >= 0.9, "Package ratio lowered")
-    require(thresholds["publication_to_axignal_p95_seconds_max"] <= 32430, "Lag threshold widened")
+    require(
+        thresholds["publication_to_axignal_p95_seconds_max"] <= 32430,
+        "Lag threshold widened",
+    )
     require(thresholds["fabricated_evidence_max"] == 0, "Fabrication allowed")
     require(thresholds["synthetic_evidence_max"] == 0, "Synthetic evidence allowed")
 
@@ -214,15 +226,25 @@ def verify_plan(plan: dict, plan_path: Path) -> dict:
 
 def verify_result(result_dir: Path, plan: dict, plan_path: Path) -> dict:
     compatibility_plan = dict(plan)
-    compatibility_plan["schema_version"] = "axignal.o01-history-frequency-lag-plan/v0.4"
+    compatibility_plan["schema_version"] = (
+        "axignal.o01-history-frequency-lag-plan/v0.4"
+    )
     result = verify_v4_result(result_dir, compatibility_plan, plan_path)
     require(
-        plan["history_contract_diagnostic"]["artifact_digest"] == DIAGNOSTIC_DIGEST,
+        plan["history_contract_diagnostic"]["artifact_digest"]
+        == DIAGNOSTIC_DIGEST,
         "Result consumed the wrong diagnostic authority",
     )
     final = load_json(result_dir / "final-result.v0.1.json")
-    require(final["schema_version"] == "axignal.o01-history-frequency-lag-result/v0.6", "Unexpected result schema")
-    require(final["history_diagnostic_artifact_digest"] == DIAGNOSTIC_DIGEST, "Result authority drift")
+    require(
+        final["schema_version"]
+        == "axignal.o01-history-frequency-lag-result/v0.6",
+        "Unexpected result schema",
+    )
+    require(
+        final["history_diagnostic_artifact_digest"] == DIAGNOSTIC_DIGEST,
+        "Result authority drift",
+    )
     return {
         **result,
         "implementation": "NUMERIC_XLS_NO_SORT_V0_6_EFFECTIVE_AUTHORITY",
