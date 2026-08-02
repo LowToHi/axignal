@@ -1,0 +1,267 @@
+name: O01 Campaign Human Authority
+
+on:
+  workflow_dispatch:
+    inputs:
+      require_authorised:
+        description: Fail unless both current human decisions authorise the campaign
+        required: true
+        type: boolean
+        default: false
+  issue_comment:
+    types: [created, edited]
+  pull_request:
+    paths:
+      - "apps/api/src/axignal_api/o01_campaign_authority.py"
+      - "apps/api/tests/test_o01_campaign_authority.py"
+      - "data/acceptance/approvals/AX-LIB-O01-campaign-authority-manifest.v0.1.json"
+      - "scripts/extract_gate7_o01_campaign_authority.py"
+      - "scripts/sign_gate7_o01_campaign_decision.py"
+      - "scripts/verify_gate7_o01_campaign_authority_contract.py"
+      - "docs/runbooks/o01-campaign-human-authority.md"
+      - ".github/workflows/o01-campaign-authority.yml"
+  push:
+    branches:
+      - main
+      - "agent/**"
+    paths:
+      - "apps/api/src/axignal_api/o01_campaign_authority.py"
+      - "apps/api/tests/test_o01_campaign_authority.py"
+      - "data/acceptance/approvals/AX-LIB-O01-campaign-authority-manifest.v0.1.json"
+      - "scripts/extract_gate7_o01_campaign_authority.py"
+      - "scripts/sign_gate7_o01_campaign_decision.py"
+      - "scripts/verify_gate7_o01_campaign_authority_contract.py"
+      - "docs/runbooks/o01-campaign-human-authority.md"
+      - ".github/workflows/o01-campaign-authority.yml"
+
+permissions:
+  contents: read
+  actions: read
+  issues: read
+
+concurrency:
+  group: o01-campaign-authority-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  campaign-authority:
+    if: >-
+      github.event_name != 'issue_comment' ||
+      github.event.issue.number == 124 ||
+      github.event.issue.number == 125
+    name: Evaluate Legal and Privacy/Data Rights authority
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      AXIGNAL_EXACT_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+      GH_TOKEN: ${{ github.token }}
+      MANIFEST_PATH: data/acceptance/approvals/AX-LIB-O01-campaign-authority-manifest.v0.1.json
+    steps:
+      - name: Checkout exact evaluator head
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Freeze evaluator head and target authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$AXIGNAL_EXACT_SHA"
+          mkdir -p artifacts/o01-campaign-authority
+          target_head="$(jq -r '.target.head_sha' "$MANIFEST_PATH")"
+          target_tree="$(jq -r '.target.git_tree_sha' "$MANIFEST_PATH")"
+          test "$(git rev-parse "${target_head}^{tree}")" = "$target_tree"
+          git merge-base --is-ancestor "$target_head" HEAD
+          {
+            printf 'evaluator_head_sha=%s\n' "$(git rev-parse HEAD)"
+            printf 'evaluator_tree_sha=%s\n' "$(git rev-parse 'HEAD^{tree}')"
+            printf 'target_head_sha=%s\n' "$target_head"
+            printf 'target_tree_sha=%s\n' "$target_tree"
+          } | tee artifacts/o01-campaign-authority/exact-head.txt
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.13.14"
+
+      - name: Bootstrap exact pip
+        run: python -m pip install --upgrade "pip==26.1.2"
+
+      - name: Install frozen development graph
+        run: |
+          python -m pip install \
+            --require-hashes \
+            --only-binary=:all: \
+            --requirement requirements/python-dev.lock
+          python -m pip check
+          python -m pip install --no-deps --no-build-isolation .
+
+      - name: Validate authority implementation and manifest contract
+        run: |
+          python -m compileall -q \
+            apps/api/src/axignal_api/o01_campaign_authority.py \
+            apps/api/tests/test_o01_campaign_authority.py \
+            scripts/extract_gate7_o01_campaign_authority.py \
+            scripts/sign_gate7_o01_campaign_decision.py \
+            scripts/verify_gate7_o01_campaign_authority_contract.py
+          ruff check \
+            apps/api/src/axignal_api/o01_campaign_authority.py \
+            apps/api/tests/test_o01_campaign_authority.py \
+            scripts/extract_gate7_o01_campaign_authority.py \
+            scripts/sign_gate7_o01_campaign_decision.py \
+            scripts/verify_gate7_o01_campaign_authority_contract.py
+          pytest -q apps/api/tests/test_o01_campaign_authority.py
+          python scripts/verify_gate7_o01_campaign_authority_contract.py \
+            | tee artifacts/o01-campaign-authority/contract-result.json
+
+      - name: Verify retained O01-A official evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          artifact_id="$(jq -r '.official_evidence.artifact_id' "$MANIFEST_PATH")"
+          expected_artifact_digest="$(jq -r '.official_evidence.artifact_digest' "$MANIFEST_PATH")"
+          expected_baseline_digest="$(jq -r '.official_evidence.baseline_digest' "$MANIFEST_PATH")"
+          gh api \
+            -H 'Accept: application/vnd.github+json' \
+            "/repos/${GITHUB_REPOSITORY}/actions/artifacts/${artifact_id}" \
+            > artifacts/o01-campaign-authority/baseline-artifact-metadata.json
+          jq -e --arg digest "$expected_artifact_digest" \
+            '.expired == false and .digest == $digest' \
+            artifacts/o01-campaign-authority/baseline-artifact-metadata.json
+          gh api \
+            -H 'Accept: application/vnd.github+json' \
+            "/repos/${GITHUB_REPOSITORY}/actions/artifacts/${artifact_id}/zip" \
+            > /tmp/o01-official-baseline.zip
+          mkdir -p artifacts/o01-campaign-authority/official-baseline
+          unzip -q /tmp/o01-official-baseline.zip \
+            -d artifacts/o01-campaign-authority/official-baseline
+          baseline="$(find artifacts/o01-campaign-authority/official-baseline \
+            -name 'official-online-baseline.v0.1.json' -type f | head -n 1)"
+          test -n "$baseline"
+          actual_baseline_digest="sha256:$(sha256sum "$baseline" | awk '{print $1}')"
+          test "$actual_baseline_digest" = "$expected_baseline_digest"
+          BASELINE_PATH="$baseline" python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          manifest = json.loads(Path(os.environ["MANIFEST_PATH"]).read_text())
+          baseline = json.loads(Path(os.environ["BASELINE_PATH"]).read_text())
+          assert baseline["exact_head_sha"] == manifest["target"]["head_sha"]
+          assert baseline["git_tree_sha"] == manifest["target"]["git_tree_sha"]
+          assert baseline["baseline_payload_digest"] == manifest["official_evidence"]["baseline_payload_digest"]
+          assert baseline["evidence_expiry"] == manifest["official_evidence"]["evidence_expires_at"]
+          assert baseline["official_online_baseline"] == "PRESENT"
+          assert baseline["official_terms_available"] is True
+          assert baseline["terms_change_class"] == "BASELINE_ESTABLISHED"
+          assert baseline["authority_boundary"]["campaign_authority"] is False
+          PY
+
+      - name: Fetch current human decision surfaces
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api --paginate \
+            -H 'Accept: application/vnd.github+json' \
+            "/repos/${GITHUB_REPOSITORY}/issues/124/comments?per_page=100" \
+            --slurp > artifacts/o01-campaign-authority/legal-comments-pages.json
+          gh api --paginate \
+            -H 'Accept: application/vnd.github+json' \
+            "/repos/${GITHUB_REPOSITORY}/issues/125/comments?per_page=100" \
+            --slurp > artifacts/o01-campaign-authority/privacy-comments-pages.json
+          jq '[.[][]]' \
+            artifacts/o01-campaign-authority/legal-comments-pages.json \
+            > artifacts/o01-campaign-authority/legal-comments.json
+          jq '[.[][]]' \
+            artifacts/o01-campaign-authority/privacy-comments-pages.json \
+            > artifacts/o01-campaign-authority/privacy-comments.json
+
+      - name: Evaluate current typed human authority
+        id: authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=(
+            --manifest "$MANIFEST_PATH"
+            --legal-comments artifacts/o01-campaign-authority/legal-comments.json
+            --privacy-comments artifacts/o01-campaign-authority/privacy-comments.json
+            --output-dir artifacts/o01-campaign-authority/current
+          )
+          if [ "${{ github.event_name }}" = 'workflow_dispatch' ] \
+            && [ "${{ inputs.require_authorised }}" = 'true' ]; then
+            args+=(--require-authorised)
+          fi
+          python scripts/extract_gate7_o01_campaign_authority.py "${args[@]}" \
+            | tee artifacts/o01-campaign-authority/result.json
+
+      - name: Enforce authority boundary
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f artifacts/o01-campaign-authority/current/result.v0.1.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          result = json.loads(
+              Path("artifacts/o01-campaign-authority/current/result.v0.1.json").read_text()
+          )
+          boundary = result["authority_boundary"]
+          assert boundary == {
+              "bid_submission_authorised": False,
+              "contact_marketing_authorised": False,
+              "model_training_authorised": False,
+              "public_claims_authorised": False,
+              "public_launch": "NO_GO",
+              "public_redistribution_authorised": False,
+              "ted_product_admitted": False,
+          }
+          if result["execution_authorised"]:
+              assert result["output"] == "O01_CAMPAIGN_AUTHORISED"
+              assert result["legal"] == "APPROVED_CURRENT"
+              assert result["privacy_data_rights"] == "APPROVED_CURRENT"
+              assert result["head_match"] is True
+              assert result["manifest_match"] is True
+              assert result["signatures_human"] is True
+              assert result["expiry_within_evidence"] is True
+              assert Path(
+                  "artifacts/o01-campaign-authority/current/"
+                  "campaign-authority-envelope.v0.1.json"
+              ).is_file()
+          else:
+              assert result["output"] == "O01_CAMPAIGN_AUTHORITY_BLOCKED"
+              assert not Path(
+                  "artifacts/o01-campaign-authority/current/"
+                  "campaign-authority-envelope.v0.1.json"
+              ).exists()
+          PY
+          ! grep -R -E \
+            'sk_(live|test)_|rk_(live|test)_|whsec_|BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY' \
+            artifacts/o01-campaign-authority
+
+      - name: Publish authority status to job summary
+        if: always()
+        shell: bash
+        run: |
+          if [ -f artifacts/o01-campaign-authority/current/result.v0.1.json ]; then
+            {
+              echo '## O01-B campaign authority'
+              echo
+              echo '```json'
+              jq '{output, legal, privacy_data_rights, head_match, manifest_match, signatures_human, expiry_within_evidence, execution_authorised, effective_expiry}' \
+                artifacts/o01-campaign-authority/current/result.v0.1.json
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload campaign authority evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: o01-campaign-authority-${{ env.AXIGNAL_EXACT_SHA }}
+          path: artifacts/o01-campaign-authority
+          if-no-files-found: error
+          retention-days: 30
