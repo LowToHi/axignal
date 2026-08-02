@@ -1,3 +1,4 @@
+# ruff: noqa: I001
 from __future__ import annotations
 
 import argparse
@@ -6,6 +7,7 @@ from pathlib import Path
 
 from axignal_api.o01_quality_common import O01QualityCampaignError
 from axignal_api.o01_quality_execute import run_campaign
+
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
