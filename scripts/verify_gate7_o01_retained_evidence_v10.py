@@ -7,7 +7,7 @@ from typing import Any
 
 import verify_gate7_o01_retained_evidence_v8 as implementation
 
-PUBLISHED_KEY = "direct_first-seen-timestamp-claimed"
+PUBLISHED_KEY = "direct_first-seen_timestamp_claimed"
 INTERNAL_ALIAS = "direct_first_seen_timestamp_claimed"
 ORIGINAL_LOAD_JSON = implementation.load_json
 
