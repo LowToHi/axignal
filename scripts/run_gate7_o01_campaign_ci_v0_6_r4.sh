@@ -24,6 +24,24 @@ cp apps/api/src/axignal_api/o01_quality_stage_timing_v2.py \
 cp apps/api/tests/test_o01_quality_stage_timing_v2.py \
   apps/api/tests/test_o01_quality_stage_timing.py
 
+# Bind every campaign import to the exact checked-out source tree. The package
+# was installed before the request-only wrapper materialised the corrected
+# module, so importing from site-packages would execute stale code.
+export PYTHONPATH="$PWD/apps/api/src${PYTHONPATH:+:$PYTHONPATH}"
+python - <<'PY'
+from pathlib import Path
+
+import axignal_api.o01_quality_stage_timing as timing
+
+expected = Path("apps/api/src/axignal_api/o01_quality_stage_timing.py").resolve()
+observed = Path(timing.__file__).resolve()
+if observed != expected:
+    raise SystemExit(
+        f"O01 runtime provenance mismatch: expected {expected}, observed {observed}"
+    )
+print(f"o01_stage_timing_runtime={observed}")
+PY
+
 # The frozen verifier emits the threshold check key without the redundant
 # `_seconds` suffix. Correct only the result-schema consumers. The historical
 # remediation field keeps its original `_seconds` name and value.
