@@ -265,8 +265,12 @@ jobs:
               | head -n 1
           } || true)"
           if [ -z "$existing" ]; then
-            gh issue comment "$target" --repo "$GITHUB_REPOSITORY" \
-              --body-file /tmp/o01-official-baseline-comment.md
+            jq -n --rawfile body /tmp/o01-official-baseline-comment.md \
+              '{body: $body}' \
+              | gh api --method POST \
+                  -H 'Accept: application/vnd.github+json' \
+                  "/repos/${GITHUB_REPOSITORY}/issues/${target}/comments" \
+                  --input -
           else
             echo "Baseline notification already exists as comment ${existing}."
           fi
