@@ -1,4 +1,4 @@
-# ruff: noqa: F401,F403
+# ruff: noqa: F401,F403,F405
 from .o01_quality_common import *
 from .o01_quality_normalize import *
 from .o01_quality_reports import *
