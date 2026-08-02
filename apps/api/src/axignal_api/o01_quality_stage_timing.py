@@ -4,7 +4,6 @@ import json
 import sqlite3
 from dataclasses import asdict, replace
 from datetime import UTC, datetime
-from pathlib import Path
 from time import perf_counter
 from typing import Any
 
@@ -12,7 +11,7 @@ from .o01_quality_common import NormalizedNotice, PageObservation
 from .o01_quality_coverage_lag import lag_report as legacy_lag_report
 from .o01_quality_normalize import normalize_notice
 from .o01_quality_reports import metric_summary
-from .o01_quality_retention import json_line, sha256_prefixed
+from .o01_quality_retention import sha256_prefixed
 
 _STAGE_TIMINGS: dict[str, dict[str, float]] = {}
 
@@ -68,7 +67,6 @@ def index_and_enqueue(
 
     try:
         for source, sampled_country, observation in selected:
-            publication_number = str(source["publication-number"])
             queue_started_at = _now()
             normalisation_started = perf_counter()
             draft = normalize_notice(
