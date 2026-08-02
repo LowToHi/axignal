@@ -1,0 +1,182 @@
+{
+  "schema_version": "axignal.o01-history-frequency-lag-plan/v0.4",
+  "task_id": "AX-GE2E-G7-O01-E",
+  "campaign_id": "AX-LIB-O01-TED-HISTORY-FREQUENCY-LAG-v0.4",
+  "library_id": "AX-LIB-O01",
+  "frozen_before_execution": true,
+  "baseline": {
+    "exact_head_sha": "97a61f79f5c709ed25af2dcaf960236b711deb4f",
+    "admission_output": "O01_TED_SOURCE_ADMISSION_PASS",
+    "admission_artifact_id": 8838855002,
+    "admission_artifact_digest": "sha256:870261e24767ab170b191ee4a5e8fca27b9c406aec7113237cc41220eb80f74a",
+    "source_state": "PRODUCT_ADMITTED",
+    "o01_canonical_state": "IN_REVIEW",
+    "o01_claim_decision": "PENDING"
+  },
+  "calendar_format_probe": {
+    "head_sha": "267c86bc31518dcb735d2604dedc93974cbc74f2",
+    "artifact_id": 8839697337,
+    "artifact_digest": "sha256:5b77b1a6975443ad9f9cb2af4668821aa508a2b2d72749ff4aa546aae25016f8",
+    "years": [2025, 2026],
+    "format": "XLS_OLE2",
+    "magic_hex": "d0cf11e0a1b11ae1",
+    "raw_body_retained": false
+  },
+  "history_contract_diagnostic": {
+    "head_sha": "6d0a5c1ade15a6a6f0f7d7345de1bbbc172e5885",
+    "artifact_id": 8839903336,
+    "artifact_digest": "sha256:f6a7524549b8e97a9b65fc21e9a1d728943d80c842d6cb75978a8d83f9e91dc6",
+    "workbook_rows": 255,
+    "issue_column": 0,
+    "issue_cell_type": "NUMBER",
+    "publication_date_column": 1,
+    "publication_date_cell_type": "TEXT_ISO_DATE",
+    "invalid_sort_token": "ASC",
+    "raw_bodies_retained": false
+  },
+  "source": {
+    "source_id": "src_ted_search_api_v3",
+    "name": "TED Search API v3.0",
+    "state": "PRODUCT_ADMITTED",
+    "endpoint": "https://api.ted.europa.eu/v3/notices/search",
+    "scope": "ALL",
+    "authentication": "NONE"
+  },
+  "official_sources": [
+    {
+      "purpose": "PUBLIC_SEARCH_DEPTH",
+      "url": "https://ted.europa.eu/en/help/search-browse",
+      "anchors": ["All notices", "last 10 years from today"]
+    },
+    {
+      "purpose": "PUBLICATION_SCHEDULE_AND_PACKAGES",
+      "url": "https://ted.europa.eu/en/help/data-reuse",
+      "anchors": [
+        "daily package: file containing all the notices in xml format for each day.",
+        "Daily edition (published every Monday to Friday)",
+        "On the day of the publication at 9:30 at the latest"
+      ]
+    },
+    {
+      "purpose": "PUBLIC_RETENTION_BOUNDARY",
+      "url": "https://ted.europa.eu/en/legal-notice",
+      "anchors": ["for ten years in the TED website", "non-public internal archive"]
+    },
+    {
+      "purpose": "SEARCH_API_OPERATION",
+      "url": "https://docs.ted.europa.eu/api/latest/search.html",
+      "anchors": [
+        "The Search API allows access to published procurement notices for analysis and reuse",
+        "POST /v3/notices/search"
+      ]
+    },
+    {
+      "purpose": "RELEASE_CALENDAR_DOWNLOAD_CONTRACT",
+      "url": "https://docs.ted.europa.eu/ODS/latest/reuse/calendar.html",
+      "anchors": [
+        "https://ted.europa.eu/{lang}/release-calendar/-/download/file/{format}/{year}",
+        "{format} can be: XLS, PDF, CSV"
+      ]
+    }
+  ],
+  "release_calendar_years": [2025, 2026],
+  "frequency_reference_year": 2025,
+  "release_calendar_url_template": "https://ted.europa.eu/en/release-calendar/-/download/file/XLS/{year}",
+  "release_calendar_format": "XLS_OLE2_BIFF8",
+  "release_calendar_parser_contract": "NUMERIC_ISSUE_COLUMN_0_TEXT_ISO_DATE_COLUMN_1",
+  "release_calendar_parser_lock": "requirements/o01-xls.lock",
+  "daily_package_url_template": "https://ted.europa.eu/packages/daily/{package_id}",
+  "publication_timezone": "Europe/Luxembourg",
+  "history": {
+    "declared_public_years": 10,
+    "search_years": 11,
+    "query_mode": "COUNT_ONLY_CANONICAL_BOUNDED_INTERVAL_WITHOUT_SORT",
+    "pagination_mode": "PAGE_NUMBER",
+    "day_before_boundary_must_be_empty": true,
+    "full_internal_archive_claimed": false
+  },
+  "frequency": {
+    "declared": "DAILY_EDITION_MONDAY_TO_FRIDAY_EXCEPT_RELEASE_CALENDAR_EXCEPTIONS",
+    "website_availability": "PUBLICATION_DAY_00:01_TO_09:00_EUROPE_LUXEMBOURG",
+    "daily_package_availability": "PUBLICATION_DAY_BY_09:30_EUROPE_LUXEMBOURG",
+    "website_deadline_seconds": 32400,
+    "package_deadline_seconds": 34200
+  },
+  "sampling": {
+    "release_dates": 20,
+    "package_probes": 10,
+    "search_limit": 1,
+    "search_pagination_mode": "PAGE_NUMBER",
+    "check_query_syntax": false,
+    "sort_clause": null,
+    "notice_fields": ["publication-number", "publication-date"],
+    "raw_notice_payloads_persisted": false,
+    "release_calendar_body_persisted": false,
+    "daily_package_bodies_persisted": false
+  },
+  "network": {
+    "allowed_hosts": ["api.ted.europa.eu", "docs.ted.europa.eu", "ted.europa.eu"],
+    "maximum_requests": 60,
+    "maximum_attempts_per_request": 2,
+    "minimum_delay_seconds": 0.25,
+    "timeout_seconds": 30,
+    "maximum_document_bytes": 5242880,
+    "maximum_calendar_bytes": 2097152,
+    "maximum_search_response_bytes": 2097152
+  },
+  "thresholds": {
+    "history_boundary_slack_days_max": 7,
+    "latest_publication_age_days_max": 4,
+    "reference_year_editions_min": 240,
+    "reference_year_weekend_editions_max": 0,
+    "search_presence_ratio_min": 1.0,
+    "package_presence_ratio_min": 0.9,
+    "publication_to_axignal_p95_seconds_max": 32430,
+    "package_deadline_seconds": 34200,
+    "fabricated_evidence_max": 0,
+    "synthetic_evidence_max": 0
+  },
+  "evidence_retention_days": 20,
+  "non_authorisations": {
+    "full_internal_archive_access": false,
+    "exhaustive_notice_ingestion": false,
+    "exact_first_seen_timestamp_claim": false,
+    "public_claim_contribution": false,
+    "global_coverage_claim": false,
+    "public_redistribution": false,
+    "contact_marketing": false,
+    "model_training": false,
+    "bid_submission": false,
+    "external_notification_delivery": false,
+    "gate7_closed": false,
+    "public_launch": "NO_GO"
+  },
+  "recommended_success_transition": {
+    "o01_canonical_state": "ACCEPTED",
+    "o01_claim_decision": "DENIED",
+    "source_state": "PRODUCT_ADMITTED",
+    "source_contributes_to_public_claim": false,
+    "gate7_decision": "IN_PROGRESS",
+    "public_launch": "NO_GO"
+  },
+  "stop_conditions": [
+    "baseline source admission is absent, expired or no longer PRODUCT_ADMITTED",
+    "calendar format or history contract diagnostic artifact is absent, expired or mismatched",
+    "hashed XLS parser lock cannot be installed exactly",
+    "plan or one-shot request digest mismatch",
+    "execution checkout is not the exact authorised request head",
+    "DNS resolves to a non-global address",
+    "redirect leaves the exact HTTPS host allowlist",
+    "network request budget is exceeded",
+    "official source anchors are missing or changed",
+    "release calendar body does not start with the observed OLE2 signature",
+    "release calendar issue/date cell contract changes",
+    "release calendar issue sequence is not contiguous from 1",
+    "Search API query contains a SORT clause or is not a closed publication-date interval",
+    "Search API omits total notice count",
+    "history boundary cannot be proven with a zero-result preceding day",
+    "raw notice payload, release calendar body, daily package body or contact value is persisted",
+    "a metric threshold fails",
+    "a public, global, exhaustive or exact-first-seen claim is enabled"
+  ]
+}
