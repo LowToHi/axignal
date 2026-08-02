@@ -1,0 +1,95 @@
+{
+  "schema_version": "axignal.o01-official-online-baseline-contract/v0.1",
+  "task_id": "AX-GE2E-G7-O01-A",
+  "gate_id": "PUBLIC-LAUNCH-GATE-7",
+  "library_id": "AX-LIB-O01",
+  "source_id": "src_ted_search_api_v3",
+  "output": "O01_OFFICIAL_BASELINE_PASS",
+  "schedule": {
+    "cadence": "DAILY",
+    "cron_utc": "41 6 * * *"
+  },
+  "network_policy": {
+    "allowed_schemes": ["https"],
+    "allowed_ports": [443],
+    "allowed_hosts": [
+      "ted.europa.eu",
+      "docs.ted.europa.eu",
+      "eur-lex.europa.eu"
+    ],
+    "max_redirects": 3,
+    "max_response_bytes": 5242880,
+    "timeout_seconds": 20,
+    "require_all_resolved_addresses_global": true,
+    "pin_connection_to_validated_address": true,
+    "allow_url_credentials": false,
+    "allow_proxy_environment": false
+  },
+  "retention": {
+    "artifact_retention_days": 30,
+    "evidence_freshness_days": 30,
+    "artifact_safety_margin_days": 3
+  },
+  "official_documents": [
+    {
+      "document_id": "ted-legal-notice",
+      "publisher": "Publications Office of the European Union",
+      "url": "https://ted.europa.eu/en/legal-notice",
+      "content_types": ["text/html", "application/xhtml+xml"],
+      "critical_anchors": [
+        "procurement notices published in the supplement to the official journal of the european union can be freely reused",
+        "commercial or non commercial purposes",
+        "specific content depicts identifiable private individuals or includes third party works",
+        "logos including that of ted may not be used without the prior consent"
+      ]
+    },
+    {
+      "document_id": "ted-search-api-3.0",
+      "publisher": "Publications Office of the European Union",
+      "url": "https://docs.ted.europa.eu/api/latest/search.html",
+      "content_types": ["text/html", "application/xhtml+xml"],
+      "critical_anchors": [
+        "search api allows access to published procurement notices for analysis and reuse",
+        "does not require authentication",
+        "commercial organisations"
+      ]
+    },
+    {
+      "document_id": "commission-decision-2011-833-eu",
+      "publisher": "European Union",
+      "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32011D0833",
+      "content_types": ["text/html", "application/xhtml+xml"],
+      "critical_anchors": [
+        "commission decision of 12 december 2011 on the reuse of commission documents",
+        "for commercial or non commercial purposes",
+        "protection of individuals with regard to the processing of personal data",
+        "obligation for the reuser to acknowledge the source of the documents"
+      ]
+    }
+  ],
+  "challenge_markers": [
+    "in order to continue we need to verify that you are not a robot",
+    "javascript is disabled"
+  ],
+  "baseline_invariants": {
+    "official_online_baseline": "PRESENT",
+    "official_terms_available": true,
+    "first_observation_change_class": "BASELINE_ESTABLISHED",
+    "evidence_expiry": "VALID",
+    "automatic_human_signature": false,
+    "automatic_human_approval": false,
+    "permissions_generated": false,
+    "campaign_authority": false,
+    "source_admission": false,
+    "public_launch": "NO_GO"
+  },
+  "notification": {
+    "fallback_issue_number": 103,
+    "deduplicate_by": [
+      "exact_head_sha",
+      "baseline_digest",
+      "terms_change_class",
+      "evidence_expiry"
+    ]
+  }
+}
