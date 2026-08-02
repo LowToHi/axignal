@@ -55,7 +55,7 @@
     "signature_scheme": "github-identity-v1"
   },
   "execution_evidence": {
-    "artifact_digest": "sha256:8eedfe9e8d8aab14732f66d92b1fe72be4a022e38f3a25ddbc0243769bda7c12",
+    "artifact_digest": "sha256:3e3db25536958dc852f555ac4bd829e719d079e7198b7553c887d99f9ff786bb",
     "artifact_id": 8837430628,
     "classification": "SYNTAX_CHECK_MODE_ZERO_RESULT_CONFIRMED",
     "http_200_projection_requests": 48,
@@ -89,8 +89,8 @@
     "base_materialized_canonical_sha256": "sha256:1be51417eeb95dbac8d68e39ed73cfe03202732688e3e5180a714ab2a2762387",
     "base_materializer": "scripts/verify_gate7_o01_v0_5_query_contract.py",
     "delta_contract_path": "data/acceptance/campaigns/AX-LIB-O01-quality-coverage-lag-execution-contract.v0.6.delta.json",
-    "delta_contract_sha256": "sha256:a741e56ef7057ba29bf7c51b70b681e9e9ed47dfdce4003260a3abd7a04398c0",
-    "head_sha": "33d05c747f2a6049633cf0348f6476ea7134b1bc",
+    "delta_contract_sha256": "sha256:31b808da4a95a6510882154addcb87d3ceb7af9fd79227b5cd77e26b1e5c4310",
+    "head_sha": "b66dfbdcca0198faaabf5d346018b5496f3a5287",
     "materializer_path": "scripts/verify_gate7_o01_v0_6_execution_contract.py"
   },
   "task_id": "AX-GE2E-G7-O01-B-R5"
