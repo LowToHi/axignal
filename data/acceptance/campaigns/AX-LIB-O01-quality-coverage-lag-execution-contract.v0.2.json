@@ -1,0 +1,213 @@
+{
+  "campaign_id": "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.2",
+  "controls": {
+    "kill_switch": {
+      "pass_condition": "No request is emitted after the kill state becomes active; evidence is retained.",
+      "required": true,
+      "test": "Arm before a bounded acquisition step and prove that the next network request count remains unchanged."
+    },
+    "rollback": {
+      "pass_condition": "State digest equals the pre-campaign checkpoint and no public authority is expanded.",
+      "required": true,
+      "test": "Restore the pre-campaign CANDIDATE, zero-claim, zero-notification state from the retained checkpoint."
+    }
+  },
+  "fields": {
+    "ephemeral_contact_projection": [
+      "publication-number",
+      "buyer-contact-point",
+      "buyer-email",
+      "buyer-tel",
+      "buyer-internet-address",
+      "buyer-profile",
+      "submission-url-lot"
+    ],
+    "retained_raw_projection": [
+      "publication-number",
+      "publication-date",
+      "notice-identifier",
+      "notice-version",
+      "notice-type",
+      "form-type",
+      "notice-title",
+      "buyer-name",
+      "buyer-country",
+      "procedure-type",
+      "contract-nature",
+      "classification-cpv",
+      "place-of-performance-country-proc",
+      "place-of-performance-subdiv-proc",
+      "deadline",
+      "estimated-value-proc",
+      "estimated-value-cur-proc",
+      "identifier-lot"
+    ]
+  },
+  "frozen_before_execution": true,
+  "lag_metrics": [
+    "source_publication_lag",
+    "source_availability_lag",
+    "AXIGNAL_acquisition_lag",
+    "normalisation_lag",
+    "indexing_lag",
+    "subscriber_notification_lag"
+  ],
+  "measurement_window": {
+    "end_inclusive": "2026-07-31T23:59:59Z",
+    "query_end": "20260731",
+    "query_start": "20260701",
+    "rationale": "Same frozen complete calendar month as v0.1; no post-result window selection.",
+    "start_inclusive": "2026-07-01T00:00:00Z"
+  },
+  "non_authorisations": {
+    "bid_submission": false,
+    "contact_marketing": false,
+    "external_notification_delivery": false,
+    "model_training": false,
+    "public_claims": false,
+    "public_launch": "NO_GO",
+    "public_redistribution": false,
+    "ted_product_admission": false
+  },
+  "quality_metrics": [
+    "identifier_accuracy",
+    "title_completeness",
+    "buyer_accuracy",
+    "deadline_accuracy",
+    "amount_accuracy",
+    "currency_accuracy",
+    "CPV_accuracy",
+    "NUTS_accuracy",
+    "lot_completeness",
+    "contact_channel_classification_accuracy",
+    "duplicate_rate",
+    "unparseable_rate",
+    "missing_field_rate"
+  ],
+  "remediation_of": {
+    "all_other_experimental_parameters_unchanged": true,
+    "failure_class": "VERSIONED_QUERY_CONTRACT_DEFECT",
+    "permitted_delta": {
+      "evidence": "github-actions:artifact:8833930837/current/campaign-run-result.json",
+      "field": "sampling.query_contract",
+      "from": "buyer-country IN ({country}) AND publication-date >= 20260701 AND publication-date <= 20260731 SORT BY publication-number ASC",
+      "reason": "TED expert-query grammar accepts SORT BY publication-number and rejects the SQL-style ASC token.",
+      "to": "buyer-country IN ({country}) AND publication-date >= 20260701 AND publication-date <= 20260731 SORT BY publication-number"
+    },
+    "prior_artifact_digest": "sha256:6a3d55557d16459e546839a6170db02e618b3a4c31cfadf6761a0d2885dab47f",
+    "prior_artifact_id": 8833930837,
+    "prior_campaign_id": "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.1",
+    "prior_controller_head_sha": "57c893d41e4832f4fb50d8dabf4719275e70669b",
+    "prior_output": "O01_QUALITY_COVERAGE_LAG_FAIL",
+    "prior_plan_sha256": "sha256:7d323a9a920f1fe96832b5f6e631b4da257c3ce995ef433705aff95c3ed1643b",
+    "prior_result_member": "current/campaign-run-result.json",
+    "prior_result_member_sha256": "sha256:0d5c88da9f48371a754d58486ef4a738be67a8c76fcae953d6055767b91475df"
+  },
+  "retention": {
+    "artifact_retention_days": 30,
+    "contact_values_persisted": false,
+    "plaintext_raw_location": "EPHEMERAL_RUNNER_TMP_ONLY",
+    "plaintext_raw_uploaded": false,
+    "raw_responses": "CMS_ENVELOPED_DATA_AES_256_ONLY_ALLOWLISTED_SEARCH_RESPONSE_PROJECTION",
+    "recipient_certificate_path": "data/acceptance/keys/o01-evidence-recipient-cert.pem",
+    "recipient_certificate_sha256_fingerprint": "D0F1785DFC2D9996849CF90769430418B17DF633DFEE1DD503A2679507514107"
+  },
+  "sampling": {
+    "check_query_syntax": true,
+    "countries": [
+      "AUT",
+      "BEL",
+      "CZE",
+      "DEU",
+      "ESP",
+      "FRA",
+      "IRL",
+      "ITA",
+      "NLD",
+      "POL",
+      "PRT",
+      "SWE"
+    ],
+    "deterministic_seed": "AXIGNAL-O01-C-2026-07-v1",
+    "exclusion_rules": [
+      "exclude records outside the frozen publication window",
+      "exclude missing or malformed publication numbers from the measured sample",
+      "exclude duplicate publication numbers after preserving duplicate-rate evidence",
+      "exclude natural-person buyer records from retained normalized data when detectable",
+      "exclude all contact endpoints and contact-person values from persisted records",
+      "exclude attachments, full XML, full HTML, source-native full text and third-party works",
+      "exclude any response obtained after authority expiry or authority mismatch"
+    ],
+    "languages": [
+      "de",
+      "en",
+      "es",
+      "fr",
+      "it",
+      "pt"
+    ],
+    "maximum_attempts_per_request": 2,
+    "maximum_network_requests": 60,
+    "maximum_response_bytes": 20971520,
+    "minimum_delay_seconds": 0.25,
+    "notice_types": [
+      "ALL_TYPES_OBSERVED_IN_ACTIVE_SCOPE"
+    ],
+    "page_size": 100,
+    "pages_per_country": 2,
+    "pagination_mode": "PAGE_NUMBER",
+    "pagination_rules": "Fetch exactly pages 1 and 2, at most 100 notices per page; never iterate beyond the frozen page budget.",
+    "query_contract": "buyer-country IN ({country}) AND publication-date >= 20260701 AND publication-date <= 20260731 SORT BY publication-number",
+    "replacement_rules": "If a stratum has fewer than 15 parseable unique notices, retain all available notices and do not replace from another country.",
+    "request_timeout_seconds": 30,
+    "sample_size": 180,
+    "sampling_method": "STRATIFIED_COUNTRY_THEN_DETERMINISTIC_SHA256",
+    "target_per_country": 15
+  },
+  "schema_version": "axignal.o01-quality-coverage-lag-execution-contract/v0.2",
+  "source": {
+    "allowed_hosts": [
+      "api.ted.europa.eu"
+    ],
+    "authentication": "NONE",
+    "endpoint": "https://api.ted.europa.eu/v3/notices/search",
+    "scope": "ACTIVE",
+    "source_id": "src_ted_search_api_v3",
+    "source_state": "CANDIDATE"
+  },
+  "stop_conditions": [
+    "authority envelope missing, invalid or expired",
+    "target head, target tree, manifest reference or authority artifact mismatch",
+    "official terms baseline missing, expired or changed",
+    "DNS resolves to any non-global address",
+    "redirect or host leaves the exact HTTPS allowlist",
+    "network request budget exceeded",
+    "contact value written to disk, logs or retained artifacts",
+    "attachment, full notice XML, full notice HTML or source-native full text retrieved",
+    "response exceeds frozen byte limit",
+    "query or pagination differs from the frozen contract",
+    "candidate source contributes to public claims",
+    "fabricated or synthetic evidence enters campaign reports",
+    "kill switch cannot stop acquisition before another network request",
+    "rollback cannot restore the pre-campaign CANDIDATE and no-claim state"
+  ],
+  "task_id": "AX-GE2E-G7-O01-C-R1",
+  "thresholds": {
+    "AXIGNAL_acquisition_lag_p95_seconds_max": 30.0,
+    "CPV_accuracy_min": 0.9,
+    "buyer_accuracy_min": 0.95,
+    "contact_channel_classification_accuracy_min": 0.95,
+    "duplicate_rate_max": 0.05,
+    "fabricated_evidence_max": 0,
+    "identifier_accuracy_min": 0.98,
+    "indexing_lag_p95_seconds_max": 1.0,
+    "minimum_countries_observed": 8,
+    "minimum_observations_for_conditional_accuracy": 10,
+    "minimum_sample_count": 120,
+    "missing_field_rate_max": 0.65,
+    "normalisation_lag_p95_seconds_max": 1.0,
+    "subscriber_notification_lag_p95_seconds_max": 1.0,
+    "title_completeness_min": 0.7,
+    "unparseable_rate_max": 0.1
+  }
+}
