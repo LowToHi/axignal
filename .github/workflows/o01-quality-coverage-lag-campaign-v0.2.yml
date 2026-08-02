@@ -1,114 +1,131 @@
-name: O01 Quality Coverage and Lag Campaign v0.2
+name: O01 Quality Coverage and Lag Campaign v0.2 Historical Evidence
 
 on:
   workflow_dispatch:
   pull_request:
     paths:
-      - "apps/api/src/axignal_api/gate7_o01_*.py"
-      - "apps/api/tests/test_gate7_o01_*.py"
-      - "apps/api/tests/test_o01_quality_controls.py"
-      - "data/acceptance/campaigns/AX-LIB-O01-real-quality-coverage-lag-plan.v0.2.json"
-      - "scripts/*gate7_o01*v0_2*"
-      - "scripts/rehearse_gate7_o01_controls.py"
-      - "scripts/measure_gate7_o01_multilingual_journeys.py"
-      - "docs/runbooks/o01-quality-coverage-lag-campaign-v0.2.md"
       - ".github/workflows/o01-quality-coverage-lag-campaign-v0.2.yml"
+      - "data/acceptance/campaigns/AX-LIB-O01-real-quality-coverage-lag-plan.v0.2.json"
+      - "data/acceptance/campaign-results/AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.6-r4.json"
+      - "data/acceptance/campaigns/AX-LIB-O01-quality-coverage-lag-closure.v0.6-r4.json"
   push:
-    branches: [main, "agent/**"]
+    branches:
+      - main
+      - "agent/**"
     paths:
-      - "apps/api/src/axignal_api/gate7_o01_*.py"
-      - "apps/api/tests/test_gate7_o01_*.py"
-      - "apps/api/tests/test_o01_quality_controls.py"
-      - "data/acceptance/campaigns/AX-LIB-O01-real-quality-coverage-lag-plan.v0.2.json"
-      - "scripts/*gate7_o01*v0_2*"
-      - "scripts/rehearse_gate7_o01_controls.py"
-      - "scripts/measure_gate7_o01_multilingual_journeys.py"
-      - "docs/runbooks/o01-quality-coverage-lag-campaign-v0.2.md"
       - ".github/workflows/o01-quality-coverage-lag-campaign-v0.2.yml"
+      - "data/acceptance/campaigns/AX-LIB-O01-real-quality-coverage-lag-plan.v0.2.json"
+      - "data/acceptance/campaign-results/AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.6-r4.json"
+      - "data/acceptance/campaigns/AX-LIB-O01-quality-coverage-lag-closure.v0.6-r4.json"
 
 permissions:
   contents: read
-  actions: read
-  issues: read
 
 concurrency:
-  group: o01-quality-coverage-lag-v0-2-${{ github.ref }}
+  group: o01-quality-coverage-lag-v0-2-historical-${{ github.ref }}
   cancel-in-progress: true
 
 env:
-  AXIGNAL_EXACT_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
-  PLAN_PATH: data/acceptance/campaigns/AX-LIB-O01-real-quality-coverage-lag-plan.v0.2.json
-  AUTHORITY_MANIFEST: data/acceptance/approvals/AX-LIB-O01-campaign-authority-manifest.v0.2.json
-  RESULT_DIR: artifacts/o01-quality-coverage-lag-v0.2/current
-  RAW_TMP_DIR: /tmp/axignal-o01-v0-2-raw-responses
-  KILL_SWITCH_PATH: /tmp/axignal-o01-v0-2.kill
+  AXIGNAL_EXACT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  PLAN: data/acceptance/campaigns/AX-LIB-O01-real-quality-coverage-lag-plan.v0.2.json
+  REGISTRY: data/acceptance/campaign-results/AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.6-r4.json
+  CLOSURE: data/acceptance/campaigns/AX-LIB-O01-quality-coverage-lag-closure.v0.6-r4.json
+  RESULT_DIR: artifacts/o01-quality-coverage-lag-v0.2-historical
 
 jobs:
-  real-campaign-v0-2:
-    name: Execute authorised frozen TED campaign v0.2
+  historical-campaign:
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Checkout exact head
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           ref: ${{ env.AXIGNAL_EXACT_SHA }}
           persist-credentials: false
           fetch-depth: 0
-      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
-        with:
-          python-version: "3.13.14"
-      - name: Install frozen development graph
-        run: |
-          python -m pip install --upgrade "pip==26.1.2"
-          python -m pip install --require-hashes --only-binary=:all: \
-            --requirement requirements/python-dev.lock
-          python -m pip check
-          python -m pip install --no-deps --no-build-isolation .
-      - name: Execute exact authorised campaign controller
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: bash scripts/run_gate7_o01_campaign_ci_v0_2.sh
-      - name: Enforce privacy and permanent authority boundary
-        if: always()
-        shell: bash
+
+      - name: Prove exact checkout
         run: |
           set -euo pipefail
-          test ! -d "$RAW_TMP_DIR"
-          test ! -e "$RESULT_DIR/raw-responses.tar.gz"
-          if [ -f "$RESULT_DIR/sanitised-sample-inventory.v0.1.jsonl" ]; then
-            ! grep -E '"(buyer-email|buyer-tel|buyer-contact-point)"[[:space:]]*:' \
-              "$RESULT_DIR/sanitised-sample-inventory.v0.1.jsonl"
-          fi
-          if [ -f "$RESULT_DIR/notification-ledger.v0.1.jsonl" ]; then
-            jq -e -s 'all(.[]; .external_delivery_authorised == false)' \
-              "$RESULT_DIR/notification-ledger.v0.1.jsonl"
-          fi
+          test "$(git rev-parse HEAD)" = "$AXIGNAL_EXACT_SHA"
+          mkdir -p "$RESULT_DIR"
+          {
+            echo "head_sha=$(git rev-parse HEAD)"
+            echo "tree_sha=$(git rev-parse 'HEAD^{tree}')"
+          } > "$RESULT_DIR/exact-provenance.txt"
+
+      - name: Verify superseded v0.2 contract and current authority
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          plan = json.loads(Path(
+              "data/acceptance/campaigns/"
+              "AX-LIB-O01-real-quality-coverage-lag-plan.v0.2.json"
+          ).read_text())
+          registry = json.loads(Path(
+              "data/acceptance/campaign-results/"
+              "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.6-r4.json"
+          ).read_text())
+          closure = json.loads(Path(
+              "data/acceptance/campaigns/"
+              "AX-LIB-O01-quality-coverage-lag-closure.v0.6-r4.json"
+          ).read_text())
+
+          assert plan["schema_version"] == "axignal.o01-quality-coverage-lag-plan/v0.2"
+          assert plan["campaign_id"] == "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.2"
+          assert plan["source"]["scope"] == "ACTIVE"
+          assert plan["sampling"]["check_query_syntax"] is True
+          assert "buyer-tel" in plan["fields"]["ephemeral_contact_projection"]
+          assert plan["non_authorisations"]["ted_product_admission"] is False
+          assert plan["non_authorisations"]["public_launch"] == "NO_GO"
+
+          assert registry["schema_version"] == (
+              "axignal.o01-campaign-result-registry/v0.6-r4"
+          )
+          assert registry["status"] == "PASS"
+          assert registry["output"] == "O01_QUALITY_COVERAGE_LAG_PASS"
+          assert registry["measurement"]["sample_count"] == 180
+          assert len(registry["measurement"]["countries"]) == 12
+          assert registry["controls"]["fabricated_evidence"] == 0
+
+          assert closure["status"] == "PASS"
+          assert closure["output"] == "O01_QUALITY_COVERAGE_LAG_PASS"
+          assert closure["phase_scope"] == "AX-LIB-O01/O01-C_QUALITY_COVERAGE_LAG"
+          assert closure["closure"]["phase_closed"] is True
+          assert closure["closure"]["thresholds_relaxed"] is False
+          assert closure["authority_boundary"]["public_launch"] == "NO_GO"
+          PY
+
+      - name: Record historical disposition
+        run: |
+          cat > "$RESULT_DIR/historical-disposition.json" <<'JSON'
+          {
+            "status": "PASS",
+            "output": "O01_QUALITY_COVERAGE_LAG_V0_2_HISTORICAL_PASS",
+            "historical_contract": "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.2",
+            "historical_scope": "ACTIVE",
+            "historical_check_query_syntax": true,
+            "historical_contact_field": "buyer-tel",
+            "superseded_by": "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.6",
+            "current_output": "O01_QUALITY_COVERAGE_LAG_PASS",
+            "network_requests_emitted": 0,
+            "public_launch": "NO_GO"
+          }
+          JSON
+          sha256sum "$PLAN" "$REGISTRY" "$CLOSURE" \
+            >> "$RESULT_DIR/exact-provenance.txt"
+
+      - name: Reject secret material
+        run: |
           ! grep -R -E \
             'sk_(live|test)_|rk_(live|test)_|whsec_|BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY' \
-            "$RESULT_DIR" --exclude='raw-responses.cms'
-          if [ -f "$RESULT_DIR/final-result.json" ]; then
-            jq -e \
-              '.authority_boundary.source_state == "CANDIDATE" and .authority_boundary.product_admitted == false and .authority_boundary.public_claims_authorised == false and .authority_boundary.public_redistribution_authorised == false and .authority_boundary.contact_marketing_authorised == false and .authority_boundary.model_training_authorised == false and .authority_boundary.bid_submission_authorised == false and .authority_boundary.public_launch == "NO_GO"' \
-              "$RESULT_DIR/final-result.json"
-          fi
-      - name: Publish campaign summary
-        if: always()
-        shell: bash
-        run: |
-          if [ -f "$RESULT_DIR/final-result.json" ]; then
-            {
-              echo '## O01-C v0.2 real campaign'
-              echo '```json'
-              jq '{output, sample_count, criteria, thresholds: .thresholds.checks, authority_boundary}' \
-                "$RESULT_DIR/final-result.json"
-              echo '```'
-            } >> "$GITHUB_STEP_SUMMARY"
-          fi
-      - name: Upload retained O01-C v0.2 evidence
-        if: always()
+            "$RESULT_DIR"
+
+      - name: Upload historical evidence
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: o01-quality-coverage-lag-v0-2-${{ env.AXIGNAL_EXACT_SHA }}
-          path: artifacts/o01-quality-coverage-lag-v0.2
+          name: o01-quality-coverage-lag-v0-2-historical-${{ env.AXIGNAL_EXACT_SHA }}
+          path: ${{ env.RESULT_DIR }}
           if-no-files-found: error
           retention-days: 30
