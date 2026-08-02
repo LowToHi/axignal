@@ -26,7 +26,7 @@ permissions:
 
 concurrency:
   group: o01-quality-coverage-lag-v0-6-r4-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 env:
   AXIGNAL_EXACT_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
@@ -66,6 +66,7 @@ jobs:
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$AXIGNAL_EXACT_SHA"
           mkdir -p "$(dirname "$PLAN_PATH")" "$RESULT_DIR"
+          bash -n scripts/run_gate7_o01_campaign_ci_v0_6_r4.sh
           python -m compileall -q apps/api/src/axignal_api/o01_quality_stage_timing_v2.py apps/api/tests/test_o01_quality_stage_timing_v2.py
           ruff check apps/api/src/axignal_api/o01_quality_stage_timing_v2.py apps/api/tests/test_o01_quality_stage_timing_v2.py
           pytest -q apps/api/tests/test_o01_quality_stage_timing_v2.py apps/api/tests/test_gate7_o01_multilingual.py apps/api/tests/test_gate7_o01_runtime.py apps/api/tests/test_o01_quality_controls.py apps/api/tests/test_o01_quality_campaign.py
