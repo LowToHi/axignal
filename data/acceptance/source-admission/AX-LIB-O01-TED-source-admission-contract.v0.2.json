@@ -1,10 +1,11 @@
 {
   "admitted_effect": {
-    "bounded_claim_contribution": true,
+    "bounded_claim_contribution": false,
+    "bounded_product_use_authorised": true,
     "gate7_closed": false,
     "global_coverage_claim_authorised": false,
-    "o01_canonical_state": "ACCEPTED",
-    "o01_claim_decision": "APPROVED",
+    "o01_canonical_state": "IN_REVIEW",
+    "o01_claim_decision": "PENDING",
     "public_launch": "NO_GO",
     "source_state": "PRODUCT_ADMITTED"
   },
