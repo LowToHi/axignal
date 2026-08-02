@@ -138,7 +138,6 @@ jobs:
           echo "Recovered previous online baseline artifact ${artifact_id}."
 
       - name: Retrieve and retain official online baseline
-        id: baseline
         shell: bash
         env:
           PREVIOUS_BASELINE: ${{ steps.previous.outputs.path }}
@@ -155,6 +154,8 @@ jobs:
 
       - name: Enforce baseline acceptance and zero automatic authority
         shell: bash
+        env:
+          PREVIOUS_BASELINE: ${{ steps.previous.outputs.path }}
         run: |
           set -euo pipefail
           python - <<'PY'
@@ -182,7 +183,7 @@ jobs:
               "NO_MATERIAL_CHANGE",
               "MATERIAL_TERMS_CHANGE",
           }
-          if not Path("artifacts/o01-official-baseline/previous").exists():
+          if not os.environ.get("PREVIOUS_BASELINE"):
               assert result["terms_change_class"] == "BASELINE_ESTABLISHED"
           assert result["evidence_expiry_status"] == "VALID"
           expiry = datetime.fromisoformat(
@@ -208,8 +209,7 @@ jobs:
               == item["critical_anchors_expected"]
               for item in package["documents"].values()
           )
-          authority = package["authority_boundary"]
-          assert authority == {
+          assert package["authority_boundary"] == {
               "automatic_human_approval": False,
               "automatic_human_signature": False,
               "campaign_authority": False,
@@ -222,41 +222,72 @@ jobs:
             'sk_(live|test)_|rk_(live|test)_|whsec_|BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY' \
             artifacts/o01-official-baseline
 
-      - name: Emit deduplicated baseline notification
+      - name: Materialise deduplicated baseline notification
         shell: bash
         run: |
           set -euo pipefail
-          python - <<'PY' > /tmp/o01-official-baseline-comment.md
+          python - <<'PY'
           import json
           from pathlib import Path
 
+          root = Path("artifacts/o01-official-baseline/current")
           result = json.loads(
               Path("artifacts/o01-official-baseline/result.json").read_text()
           )
           marker = result["notification_deduplication_key"]
-          print(f"<!-- axignal-o01-official-baseline:{marker} -->")
-          print("## O01-A official online baseline")
-          print()
-          print("```text")
-          print(f"exact_head_sha          {result['exact_head_sha']}")
-          print(f"git_tree_sha            {result['git_tree_sha']}")
-          print(f"baseline_digest         {result['baseline_digest']}")
-          print(f"terms_change_class      {result['terms_change_class']}")
-          print(f"evidence_expiry         {result['evidence_expiry']}")
-          print("official_terms          AVAILABLE")
-          print("human signature         NOT GENERATED")
-          print("campaign authority      false")
-          print("public launch           NO_GO")
-          print("```")
-          print()
-          print("The retained package contains normalized official content, hashes and verified legal anchors. It creates no Legal or Privacy approval and grants no source, campaign or launch authority.")
+          lines = [
+              f"<!-- axignal-o01-official-baseline:{marker} -->",
+              "## O01-A official online baseline",
+              "",
+              "```text",
+              f"exact_head_sha          {result['exact_head_sha']}",
+              f"git_tree_sha            {result['git_tree_sha']}",
+              f"baseline_digest         {result['baseline_digest']}",
+              f"terms_change_class      {result['terms_change_class']}",
+              f"evidence_expiry         {result['evidence_expiry']}",
+              "official_terms          AVAILABLE",
+              "human signature         NOT GENERATED",
+              "campaign authority      false",
+              "public launch           NO_GO",
+              "```",
+              "",
+              (
+                  "The retained package contains normalized official content, "
+                  "hashes and verified legal anchors. It creates no Legal or "
+                  "Privacy approval and grants no source, campaign or launch "
+                  "authority."
+              ),
+          ]
+          notification = "\n".join(lines) + "\n"
+          (root / "notification.v0.1.md").write_text(
+              notification,
+              encoding="utf-8",
+          )
+          status = {
+              "schema_version": "axignal.o01-baseline-notification/v0.1",
+              "deduplication_key": marker,
+              "payload_sha256": result["baseline_digest"],
+              "materialized": True,
+              "emission_allowed_events": ["schedule", "workflow_dispatch"],
+              "automatic_human_signature": False,
+              "automatic_human_approval": False,
+          }
+          (root / "notification-status.v0.1.json").write_text(
+              json.dumps(status, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
           PY
-          if [ "${{ github.event_name }}" = 'pull_request' ]; then
-            target="${{ github.event.pull_request.number }}"
-          else
-            target="103"
-          fi
-          marker="$(head -n 1 /tmp/o01-official-baseline-comment.md)"
+          test -s artifacts/o01-official-baseline/current/notification.v0.1.md
+          test -s artifacts/o01-official-baseline/current/notification-status.v0.1.json
+
+      - name: Emit deduplicated baseline notification
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        shell: bash
+        run: |
+          set -euo pipefail
+          target="103"
+          notification="artifacts/o01-official-baseline/current/notification.v0.1.md"
+          marker="$(head -n 1 "$notification")"
           existing="$({
             gh api --paginate \
               -H 'Accept: application/vnd.github+json' \
@@ -265,8 +296,7 @@ jobs:
               | head -n 1
           } || true)"
           if [ -z "$existing" ]; then
-            jq -n --rawfile body /tmp/o01-official-baseline-comment.md \
-              '{body: $body}' \
+            jq -n --rawfile body "$notification" '{body: $body}' \
               | gh api --method POST \
                   -H 'Accept: application/vnd.github+json' \
                   "/repos/${GITHUB_REPOSITORY}/issues/${target}/comments" \
