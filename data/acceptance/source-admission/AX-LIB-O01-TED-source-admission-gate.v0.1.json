@@ -1,0 +1,80 @@
+{
+  "decision_policy": {
+    "admit_only_if_all_required_dimensions_pass": true,
+    "automatic_human_approval": false,
+    "automatic_human_signature": false,
+    "automatic_product_admission": false,
+    "failed_campaign": "BLOCK",
+    "failure_does_not_equal_source_rejection": true,
+    "missing_or_expired_evidence": "BLOCK",
+    "partial_pass": "BLOCK"
+  },
+  "evaluated_transition": {
+    "admit_to": "PRODUCT_ADMITTED",
+    "blocked_state": "CANDIDATE",
+    "from": "CANDIDATE"
+  },
+  "expected_current_decision": {
+    "claim_contribution": false,
+    "decision": "BLOCKED",
+    "output": "O01_TED_SOURCE_ADMISSION_BLOCKED",
+    "product_admitted": false,
+    "public_launch": "NO_GO",
+    "source_state": "CANDIDATE"
+  },
+  "gate_id": "O01-TED-SOURCE-ADMISSION",
+  "inputs": {
+    "campaign_artifact_digest": "sha256:6a3d55557d16459e546839a6170db02e618b3a4c31cfadf6761a0d2885dab47f",
+    "campaign_artifact_expires_at": "2026-09-01T13:11:04Z",
+    "campaign_artifact_id": 8833930837,
+    "campaign_evidence_expires_at": "2026-08-29T10:02:52.417201Z",
+    "campaign_result_member": "current/campaign-run-result.json",
+    "campaign_result_member_sha256": "sha256:0d5c88da9f48371a754d58486ef4a738be67a8c76fcae953d6055767b91475df",
+    "campaign_result_path": "data/acceptance/campaign-results/AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.1.json",
+    "campaign_result_sha256": "sha256:039042d6e0c66a6dd4af65a9417f890d9edb4afc751a3d873bf54597fff805ab",
+    "gate7_dossier_path": "data/acceptance/library-coverage/AX-LIB-O01.json",
+    "gate7_dossier_sha256": "sha256:cbbc12b17bf73b877456e491952f95f851038bbdb3d0c66ca104305c3d9de4ab"
+  },
+  "library_id": "AX-LIB-O01",
+  "non_authorisations": {
+    "bid_submission": false,
+    "contact_marketing": false,
+    "external_notification_delivery": false,
+    "model_training": false,
+    "public_claims": false,
+    "public_launch": "NO_GO",
+    "public_redistribution": false
+  },
+  "required_admission_dimensions": {
+    "campaign_output": "O01_QUALITY_COVERAGE_LAG_PASS",
+    "fabricated_evidence_max": 0,
+    "human_authority": "PASS",
+    "kill_switch_implemented_and_tested": true,
+    "language_stages": [
+      "ingestion",
+      "normalisation",
+      "search",
+      "presentation"
+    ],
+    "legal": "PASS",
+    "minimum_countries_observed": 8,
+    "minimum_sample_count": 120,
+    "public_claim_contribution_before_admission": false,
+    "quality": "PASS",
+    "raw_plaintext_uploaded": false,
+    "required_languages": [
+      "en",
+      "es",
+      "fr",
+      "de",
+      "pt",
+      "it"
+    ],
+    "rights": "PASS",
+    "rollback_implemented_and_tested": true,
+    "technical": "PASS"
+  },
+  "schema_version": "axignal.o01-ted-source-admission-gate/v0.1",
+  "source_id": "src_ted_search_api_v3",
+  "task_id": "AX-GE2E-G7-O01-D"
+}

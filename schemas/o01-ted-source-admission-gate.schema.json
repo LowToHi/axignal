@@ -1,0 +1,55 @@
+{
+  "$id": "https://axignal.com/schemas/o01-ted-source-admission-gate.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "decision_policy": {
+      "type": "object"
+    },
+    "evaluated_transition": {
+      "type": "object"
+    },
+    "expected_current_decision": {
+      "type": "object"
+    },
+    "gate_id": {
+      "const": "O01-TED-SOURCE-ADMISSION"
+    },
+    "inputs": {
+      "type": "object"
+    },
+    "library_id": {
+      "const": "AX-LIB-O01"
+    },
+    "non_authorisations": {
+      "type": "object"
+    },
+    "required_admission_dimensions": {
+      "type": "object"
+    },
+    "schema_version": {
+      "const": "axignal.o01-ted-source-admission-gate/v0.1"
+    },
+    "source_id": {
+      "const": "src_ted_search_api_v3"
+    },
+    "task_id": {
+      "const": "AX-GE2E-G7-O01-D"
+    }
+  },
+  "required": [
+    "schema_version",
+    "task_id",
+    "gate_id",
+    "library_id",
+    "source_id",
+    "evaluated_transition",
+    "inputs",
+    "required_admission_dimensions",
+    "decision_policy",
+    "expected_current_decision",
+    "non_authorisations"
+  ],
+  "title": "AXIGNAL O01 TED source admission gate",
+  "type": "object"
+}
