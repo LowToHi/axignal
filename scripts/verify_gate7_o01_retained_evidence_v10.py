@@ -30,17 +30,25 @@ def _adapt_lag_schema(value: dict[str, Any], *, context: str) -> dict[str, Any]:
     return adapted
 
 
+def _adapt_result_document(value: dict[str, Any], *, context: str) -> dict[str, Any]:
+    if "lag" not in value or not isinstance(value["lag"], dict):
+        raise implementation.VerificationError(
+            f"Lag object is missing in {context}"
+        )
+    adapted = dict(value)
+    adapted["lag"] = _adapt_lag_schema(
+        value["lag"],
+        context=f"{context}.lag",
+    )
+    return adapted
+
+
 def schema_aware_load_json(path: Path) -> dict[str, Any]:
     value = ORIGINAL_LOAD_JSON(path)
     if path.name == "publication-lag-report.v0.1.json":
         return _adapt_lag_schema(value, context=path.name)
-    if path.name == "final-result.v0.1.json":
-        adapted = dict(value)
-        adapted["lag"] = _adapt_lag_schema(
-            value["lag"],
-            context=f"{path.name}.lag",
-        )
-        return adapted
+    if path.name in {"final-result.v0.1.json", "campaign-console.json"}:
+        return _adapt_result_document(value, context=path.name)
     return value
 
 
@@ -62,6 +70,11 @@ def verify(
     result["verifier_schema_adapter"] = {
         "published_key": PUBLISHED_KEY,
         "internal_alias": INTERNAL_ALIAS,
+        "adapted_documents": [
+            "publication-lag-report.v0.1.json",
+            "final-result.v0.1.json",
+            "campaign-console.json",
+        ],
         "source_files_mutated": False,
     }
     return result
