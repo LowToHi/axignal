@@ -45,6 +45,8 @@ concurrency:
 
 env:
   AXIGNAL_EXACT_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+  AXIGNAL_SOURCE_BRANCH: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name }}
+  AXIGNAL_SOURCE_REPOSITORY: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name || github.repository }}
   AUTHORITY_MANIFEST: data/acceptance/approvals/AX-LIB-O01-campaign-authority-manifest.v0.3.json
   REQUEST_PATH: data/acceptance/campaigns/AX-LIB-O01-real-quality-coverage-lag-execution-request.v0.3.json
   PLAN_PATH: artifacts/o01-quality-coverage-lag-v0.3/materialized-plan.v0.3.json
@@ -105,18 +107,36 @@ jobs:
             --output "$PLAN_PATH" | tee "$RESULT_DIR/plan-materialization-result.json"
           python scripts/verify_gate7_o01_quality_coverage_lag_contract_v0_3.py \
             --plan "$PLAN_PATH" | tee "$RESULT_DIR/plan-contract-result.json"
-      - name: Determine whether the one-shot request is present
+      - name: Determine whether the exact one-shot request is current
         id: request
         shell: bash
         run: |
           set -euo pipefail
           execute=false
-          if [[ "${{ github.event_name }}" != "pull_request" && -f "$REQUEST_PATH" ]]; then
+          request_present=false
+          request_parent=null
+          current_parent="$(git rev-parse HEAD^)"
+          if [[ -f "$REQUEST_PATH" ]]; then
+            request_present=true
+            request_parent="$(jq -r '.controller_parent_sha' "$REQUEST_PATH")"
+          fi
+          if [[ "$request_present" == true \
+             && "$AXIGNAL_SOURCE_REPOSITORY" == "$GITHUB_REPOSITORY" \
+             && "$AXIGNAL_SOURCE_BRANCH" == "agent/ax-gate7-o01-v03-real-campaign" \
+             && "$request_parent" == "$current_parent" ]] \
+             && jq -e '.execute == true and .one_shot == true' "$REQUEST_PATH" >/dev/null; then
             execute=true
           fi
           echo "execute=$execute" >> "$GITHUB_OUTPUT"
-          printf '{"execute_real_campaign":%s,"event":"%s","request_present":%s}\n' \
-            "$execute" "${{ github.event_name }}" "$([[ -f "$REQUEST_PATH" ]] && echo true || echo false)" \
+          jq -n \
+            --argjson execute "$execute" \
+            --arg event "${{ github.event_name }}" \
+            --arg source_repository "$AXIGNAL_SOURCE_REPOSITORY" \
+            --arg source_branch "$AXIGNAL_SOURCE_BRANCH" \
+            --argjson request_present "$request_present" \
+            --arg request_parent "$request_parent" \
+            --arg current_parent "$current_parent" \
+            '{execute_real_campaign: $execute, event: $event, source_repository: $source_repository, source_branch: $source_branch, request_present: $request_present, request_parent: $request_parent, current_parent: $current_parent}' \
             | tee "$RESULT_DIR/execution-selection.json"
       - name: Upload static validation evidence
         if: always()
