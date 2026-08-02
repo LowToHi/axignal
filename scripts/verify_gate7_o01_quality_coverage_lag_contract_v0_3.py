@@ -5,7 +5,6 @@ import argparse
 import hashlib
 import json
 import ssl
-from copy import deepcopy
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit
