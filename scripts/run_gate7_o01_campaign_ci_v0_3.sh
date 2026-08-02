@@ -2,6 +2,7 @@
 set -euo pipefail
 
 : "${AXIGNAL_EXACT_SHA:?}"
+: "${AXIGNAL_SOURCE_BRANCH:?}"
 : "${PLAN_PATH:?}"
 : "${AUTHORITY_MANIFEST:?}"
 : "${REQUEST_PATH:?}"
@@ -17,7 +18,7 @@ EXPECTED_BRANCH="agent/ax-gate7-o01-v03-real-campaign"
 
 mkdir -p "$RESULT_DIR"
 test "$(git rev-parse HEAD)" = "$AXIGNAL_EXACT_SHA"
-test "${GITHUB_REF_NAME:-}" = "$EXPECTED_BRANCH"
+test "$AXIGNAL_SOURCE_BRANCH" = "$EXPECTED_BRANCH"
 test -f "$REQUEST_PATH"
 
 target="$(jq -r '.target.head_sha' "$AUTHORITY_MANIFEST")"
@@ -53,6 +54,7 @@ jq -e \
   printf 'controller_head_sha=%s\n' "$(git rev-parse HEAD)"
   printf 'controller_tree_sha=%s\n' "$(git rev-parse 'HEAD^{tree}')"
   printf 'controller_parent_sha=%s\n' "$controller_parent"
+  printf 'source_branch=%s\n' "$AXIGNAL_SOURCE_BRANCH"
   printf 'evaluator_head_sha=%s\n' "$EVALUATOR_HEAD"
   printf 'evaluator_tree_sha=%s\n' "$EVALUATOR_TREE"
   printf 'target_head_sha=%s\n' "$target"
