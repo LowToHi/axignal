@@ -20,7 +20,9 @@ from axignal_api.o01_quality_http import request_payload
 
 REQUEST_DELAY_SECONDS = 2.0
 RATE_LIMIT_WAIT_SECONDS = 10.0
-MAXIMUM_REQUESTS = 20
+MAXIMUM_REQUESTS = 24
+LEGACY_TELEPHONE_FIELD = "buyer-tel"
+CANONICAL_TELEPHONE_FIELD = "organisation-tel-buyer"
 
 
 def projection_cases(contract: dict[str, Any]) -> list[tuple[str, list[str]]]:
@@ -30,6 +32,10 @@ def projection_cases(contract: dict[str, Any]) -> list[tuple[str, list[str]]]:
     ]
     publication_number = "publication-number"
     contact_fields = [value for value in configured if value != publication_number]
+    corrected = [
+        CANONICAL_TELEPHONE_FIELD if value == LEGACY_TELEPHONE_FIELD else value
+        for value in configured
+    ]
     cases: list[tuple[str, list[str]]] = [
         ("CONTROL_START", [publication_number]),
     ]
@@ -39,7 +45,12 @@ def projection_cases(contract: dict[str, Any]) -> list[tuple[str, list[str]]]:
     )
     cases.extend(
         [
+            (
+                "FIELD_ORGANISATION_TEL_BUYER",
+                [publication_number, CANONICAL_TELEPHONE_FIELD],
+            ),
             ("FULL_EPHEMERAL_CONTACT_PROJECTION", configured),
+            ("CORRECTED_EPHEMERAL_CONTACT_PROJECTION", corrected),
             ("CONTROL_END", [publication_number]),
         ]
     )
@@ -121,7 +132,7 @@ def execute_case(
             break
         finally:
             connection.close()
-        
+
     time.sleep(REQUEST_DELAY_SECONDS)
     return {
         "case": name,
@@ -144,10 +155,15 @@ def classify(results: list[dict[str, Any]]) -> dict[str, Any]:
     unsupported = sorted(
         field for field, accepted in field_results.items() if not accepted
     )
-    full = next(
+    original = next(
         result
         for result in results
         if result["case"] == "FULL_EPHEMERAL_CONTACT_PROJECTION"
+    )
+    corrected = next(
+        result
+        for result in results
+        if result["case"] == "CORRECTED_EPHEMERAL_CONTACT_PROJECTION"
     )
     controls = [
         result
@@ -155,11 +171,16 @@ def classify(results: list[dict[str, Any]]) -> dict[str, Any]:
         if result["case"] in {"CONTROL_START", "CONTROL_END"}
     ]
     controls_pass = all(result["accepted"] for result in controls)
+    replacement_accepted = field_results.get(CANONICAL_TELEPHONE_FIELD) is True
+    exact_legacy_defect = unsupported == [LEGACY_TELEPHONE_FIELD]
+
     if not controls_pass:
         outcome = "INCONCLUSIVE_CONTROL_FAILURE"
+    elif exact_legacy_defect and replacement_accepted and corrected["accepted"]:
+        outcome = "CANONICAL_TELEPHONE_REPLACEMENT_CONFIRMED"
     elif unsupported:
         outcome = "UNSUPPORTED_CONTACT_FIELDS_IDENTIFIED"
-    elif not full["accepted"]:
+    elif not original["accepted"]:
         outcome = "COMBINATION_OR_FIELD_COUNT_DEFECT"
     else:
         outcome = "CONTACT_PROJECTION_ACCEPTED"
@@ -167,8 +188,19 @@ def classify(results: list[dict[str, Any]]) -> dict[str, Any]:
         "classification": outcome,
         "controls_pass": controls_pass,
         "unsupported_fields": unsupported,
-        "all_individual_fields_accepted": not unsupported,
-        "full_projection_accepted": full["accepted"],
+        "all_individual_configured_fields_accepted": not unsupported,
+        "original_full_projection_accepted": original["accepted"],
+        "canonical_telephone_field": CANONICAL_TELEPHONE_FIELD,
+        "canonical_telephone_field_accepted": replacement_accepted,
+        "corrected_full_projection_accepted": corrected["accepted"],
+        "sole_required_field_delta": (
+            {
+                "from": LEGACY_TELEPHONE_FIELD,
+                "to": CANONICAL_TELEPHONE_FIELD,
+            }
+            if exact_legacy_defect and replacement_accepted and corrected["accepted"]
+            else None
+        ),
     }
 
 
@@ -219,7 +251,7 @@ def main() -> int:
     ]
     classification = classify(results)
     output = {
-        "schema_version": "axignal.o01-contact-projection-diagnostic/v0.1",
+        "schema_version": "axignal.o01-contact-projection-diagnostic/v0.2",
         "status": "PASS",
         "output": "O01_CONTACT_PROJECTION_DIAGNOSTIC_COMPLETE",
         "country_stratum": country,
