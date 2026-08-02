@@ -9,6 +9,7 @@ import verify_gate7_o01_retained_evidence_v8 as implementation
 
 PUBLISHED_KEY = "direct_first-seen-timestamp-claimed"
 INTERNAL_ALIAS = "direct_first_seen_timestamp_claimed"
+ORIGINAL_LOAD_JSON = implementation.load_json
 
 
 def _adapt_lag_schema(value: dict[str, Any], *, context: str) -> dict[str, Any]:
@@ -30,7 +31,7 @@ def _adapt_lag_schema(value: dict[str, Any], *, context: str) -> dict[str, Any]:
 
 
 def schema_aware_load_json(path: Path) -> dict[str, Any]:
-    value = implementation.load_json(path)
+    value = ORIGINAL_LOAD_JSON(path)
     if path.name == "publication-lag-report.v0.1.json":
         return _adapt_lag_schema(value, context=path.name)
     if path.name == "final-result.v0.1.json":
@@ -48,7 +49,7 @@ def verify(
     artifact_metadata_path: Path,
     evidence_dir: Path,
 ) -> dict[str, Any]:
-    original_loader = implementation.load_json
+    current_loader = implementation.load_json
     implementation.load_json = schema_aware_load_json
     try:
         result = implementation.verify(
@@ -57,7 +58,7 @@ def verify(
             evidence_dir,
         )
     finally:
-        implementation.load_json = original_loader
+        implementation.load_json = current_loader
     result["verifier_schema_adapter"] = {
         "published_key": PUBLISHED_KEY,
         "internal_alias": INTERNAL_ALIAS,
