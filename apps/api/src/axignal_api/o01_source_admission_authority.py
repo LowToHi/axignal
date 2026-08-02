@@ -186,7 +186,11 @@ def evaluate_source_admission_authority(
     }
     if missing:
         return SourceAdmissionEvaluation(
-            status="MISSING" if len(missing) == len(REQUIRED_AUTHORITIES) else "INCOMPLETE",
+            status=(
+                "MISSING"
+                if len(missing) == len(REQUIRED_AUTHORITIES)
+                else "INCOMPLETE"
+            ),
             admitted=False,
             effective_expiry=None,
             authority_status=authority_status,
@@ -236,7 +240,9 @@ def evaluate_source_admission_authority(
     if not manifest_match:
         reasons.append("One or more decisions target a different admission manifest")
     if not scope_match:
-        reasons.append("One or more decisions use an authority scope not frozen by the manifest")
+        reasons.append(
+            "One or more decisions use an authority scope not frozen by the manifest"
+        )
     if not issue_match:
         reasons.append("One or more decisions were posted outside the assigned authority issue")
     if not signatures_human:
@@ -286,7 +292,11 @@ def evaluate_source_admission_authority(
         signatures_human=signatures_human,
         expiry_within_evidence=expiry_within_evidence,
         evidence_ready=evidence_ready,
-        reasons=tuple(reasons) if reasons else ("All seven human authorities are current",),
+        reasons=(
+            tuple(reasons)
+            if reasons
+            else ("All seven human authorities are current",)
+        ),
     )
 
 
@@ -310,7 +320,8 @@ def result_payload(
         "previous_state": "CANDIDATE",
         "next_state": "PRODUCT_ADMITTED" if admitted else "CANDIDATE",
         "product_admitted": admitted,
-        "bounded_claim_contribution": admitted,
+        "bounded_product_use_authorised": admitted,
+        "bounded_claim_contribution": False,
         "global_coverage_claim_authorised": False,
         "public_launch": "NO_GO",
         "head_match": evaluation.head_match,
@@ -325,9 +336,9 @@ def result_payload(
             if evaluation.effective_expiry
             else None
         ),
-        "evidence_expires_at": parse_utc(evidence_expires_at)
-        .isoformat()
-        .replace("+00:00", "Z"),
+        "evidence_expires_at": (
+            parse_utc(evidence_expires_at).isoformat().replace("+00:00", "Z")
+        ),
         "target_head_sha": target_head_sha,
         "manifest_reference": manifest_reference,
         "authorities": evaluation.authority_status,
@@ -341,9 +352,11 @@ def result_payload(
                 "comment_updated_at": source.comment_updated_at,
                 "decision": source.decision.decision.value,
                 "scope": source.decision.scope,
-                "expires_at": source.decision.expires_at.astimezone(UTC)
-                .isoformat()
-                .replace("+00:00", "Z"),
+                "expires_at": (
+                    source.decision.expires_at.astimezone(UTC)
+                    .isoformat()
+                    .replace("+00:00", "Z")
+                ),
                 "conditions": list(source.decision.conditions),
             }
             for authority, source in sorted(decision_sources.items())
