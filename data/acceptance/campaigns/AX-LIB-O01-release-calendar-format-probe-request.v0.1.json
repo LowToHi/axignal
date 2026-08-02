@@ -1,0 +1,14 @@
+{
+  "schema_version": "axignal.o01-release-calendar-format-probe-request/v0.1",
+  "task_id": "AX-GE2E-G7-O01-E-DIAGNOSTIC",
+  "execute": true,
+  "one_shot": true,
+  "repository": "LowToHi/axignal",
+  "source_branch": "agent/ax-gate7-o01-e-history-frequency-lag",
+  "controller_parent_sha": "dce6d830d7a8196807a06be5a7b54402a10eb519",
+  "maximum_network_requests": 2,
+  "raw_body_retained": false,
+  "claim_contribution": false,
+  "gate7_closed": false,
+  "public_launch": "NO_GO"
+}
