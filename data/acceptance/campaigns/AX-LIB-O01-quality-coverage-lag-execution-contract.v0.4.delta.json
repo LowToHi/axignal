@@ -1,0 +1,84 @@
+{
+  "base_contract": {
+    "path": "data/acceptance/campaigns/AX-LIB-O01-quality-coverage-lag-execution-contract.v0.3.json",
+    "sha256": "sha256:d7028945e0e82bae86da3a0a7ae0b6e03d421b820ce31f532aa28284cb4b8a49"
+  },
+  "campaign_id": "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.4",
+  "change_class": "VERSIONED_SEARCH_SCOPE_CORRECTION",
+  "diagnostic_evidence": {
+    "all_country_strata_zero": true,
+    "artifact_digest": "sha256:13e316f6e4401f5e3a46ffe449a856adb9052b3f311934dafe75ad2160371bcb",
+    "artifact_id": 8837152884,
+    "classification": "ACTIVE_SCOPE_ZERO_SAMPLE_CONFIRMED",
+    "controller_head_sha": "dfa3625b48d24e5f1931f4776f92c3cb4dc429b2",
+    "controls_pass": true,
+    "fabricated_evidence": 0,
+    "http_200_projection_requests": 48,
+    "network_requests_used": 49,
+    "official_scope_semantics": "ACTIVE is restricted; ALL covers all notices from the last ten years.",
+    "official_scope_source": "https://ted.europa.eu/en/help/search-browse",
+    "raw_plaintext_removed": true,
+    "raw_plaintext_uploaded": false,
+    "sample_count": 0,
+    "workflow_run_id": 30759915694
+  },
+  "experimental_operations": [
+    {
+      "from": "ACTIVE",
+      "op": "test_replace",
+      "path": "/source/scope",
+      "reason": "The frozen historical July 2026 campaign returned HTTP 200 with zero notices in all twelve strata under ACTIVE. TED official help defines ACTIVE as a restricted recent/deadline-dependent range and ALL as the ten-year corpus appropriate for a closed historical measurement window.",
+      "to": "ALL"
+    }
+  ],
+  "invariants": {
+    "all_other_json_pointers_unchanged": true,
+    "authority_boundary_unchanged": true,
+    "countries_unchanged": true,
+    "ephemeral_contact_projection_unchanged": true,
+    "lag_metrics_unchanged": true,
+    "languages_unchanged": true,
+    "measurement_window_unchanged": true,
+    "network_request_budget_unchanged": true,
+    "pagination_unchanged": true,
+    "quality_metrics_unchanged": true,
+    "query_unchanged": true,
+    "retained_projection_unchanged": true,
+    "retention_unchanged": true,
+    "retry_policy_unchanged": true,
+    "sample_allocation_unchanged": true,
+    "thresholds_unchanged": true
+  },
+  "metadata_operations": [
+    {
+      "from": "axignal.o01-quality-coverage-lag-execution-contract/v0.3",
+      "op": "test_replace",
+      "path": "/schema_version",
+      "to": "axignal.o01-quality-coverage-lag-execution-contract/v0.4"
+    },
+    {
+      "from": "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.3",
+      "op": "test_replace",
+      "path": "/campaign_id",
+      "to": "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.4"
+    },
+    {
+      "from": "AX-GE2E-G7-O01-C-R1",
+      "op": "test_replace",
+      "path": "/task_id",
+      "to": "AX-GE2E-G7-O01-C-R3"
+    }
+  ],
+  "non_authorisations": {
+    "bid_submission": false,
+    "contact_marketing": false,
+    "external_notification_delivery": false,
+    "model_training": false,
+    "public_claims": false,
+    "public_launch": "NO_GO",
+    "public_redistribution": false,
+    "ted_product_admission": false
+  },
+  "schema_version": "axignal.o01-execution-contract-delta/v0.1",
+  "task_id": "AX-GE2E-G7-O01-C-R3"
+}
