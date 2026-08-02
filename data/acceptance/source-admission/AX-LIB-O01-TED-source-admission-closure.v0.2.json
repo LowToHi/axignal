@@ -52,6 +52,7 @@
     "admission_artifact_id": 8838419160,
     "admission_artifact_size_bytes": 3938,
     "admission_job_id": 91540012718,
+    "admission_result_sha256": "sha256:73178dc8419cbe967eb47e8a523cbff8e548811f589e54d71a345e1511933e7f",
     "admission_workflow_run_id": 30764109662,
     "campaign_artifact_digest": "sha256:a2328776b89ffaa44dde20649a5bee39711d7ac13b6bbc11c72e608631eca092",
     "campaign_artifact_id": 8838091687,
