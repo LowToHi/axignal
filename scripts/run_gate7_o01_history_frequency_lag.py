@@ -4,7 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
-from axignal_api.o01_history_frequency_lag_v2 import run_campaign
+from axignal_api.o01_history_frequency_lag_v3 import run_campaign
 from axignal_api.o01_quality_common import O01QualityCampaignError
 
 
@@ -28,12 +28,13 @@ def main() -> int:
     ) as exc:
         args.output_dir.mkdir(parents=True, exist_ok=True)
         failure = {
-            "schema_version": "axignal.o01-history-frequency-lag-failure/v0.2",
+            "schema_version": "axignal.o01-history-frequency-lag-failure/v0.3",
             "status": "FAIL",
             "output": "O01_HISTORY_FREQUENCY_LAG_FAIL",
             "error_type": type(exc).__name__,
             "error": str(exc),
             "raw_notice_payloads_persisted": False,
+            "release_calendar_bodies_persisted": False,
             "daily_package_bodies_persisted": False,
             "contact_values_persisted": False,
             "fabricated_evidence": 0,
