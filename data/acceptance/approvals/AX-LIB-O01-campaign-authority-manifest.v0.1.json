@@ -26,7 +26,7 @@
       "APPROVE_WITH_CONDITIONS"
     ],
     "comment_author_must_be_human": true,
-    "decision_max_expires_at": "2026-08-28T00:20:27.229612Z",
+    "decision_max_expires_at": "2026-08-28T10:02:52.417201Z",
     "expiry_strictly_before_evidence": true,
     "head_match_required": true,
     "manifest_match_required": true,
@@ -58,13 +58,13 @@
     "ted_product_admission": false
   },
   "official_evidence": {
-    "artifact_digest": "sha256:01d2963f5c1ab239e6ba8ea6860b7b84dc0bf0c5bb32dd91aca9bf9764204113",
-    "artifact_expires_at": "2026-09-01T00:20:29Z",
-    "artifact_id": 8826022309,
-    "baseline_digest": "sha256:8fc00d8f5f555bd4061fd7874161cfb8f5765c92c3f43b19e98030d8e9a6251a",
-    "baseline_payload_digest": "sha256:99f2fbf598172e46a5ed48aa8d0c3ea8320e9a38f184f73a4847db1751a7db8c",
-    "evidence_expires_at": "2026-08-29T00:20:27.229612Z",
-    "observed_at": "2026-08-02T00:20:27.229612Z",
+    "artifact_digest": "sha256:c28e015f10945668f906cdaf6db72c0a58f7aaa13d1d3d73a0c892a52ceed8a7",
+    "artifact_expires_at": "2026-09-01T10:02:54Z",
+    "artifact_id": 8831909489,
+    "baseline_digest": "sha256:510f174b71b3538473154c8fc5d02bf69304a0ecf0817117ac58c6a3a897e3bd",
+    "baseline_payload_digest": "sha256:7a1bba61e83b3dbef05055c4a4e2b6680e3cd6ec454581c9e69c358df37b7b97",
+    "evidence_expires_at": "2026-08-29T10:02:52.417201Z",
+    "observed_at": "2026-08-02T10:02:52.417201Z",
     "terms_change_class": "BASELINE_ESTABLISHED"
   },
   "schema_version": "axignal.o01-campaign-authority-manifest/v0.1",
