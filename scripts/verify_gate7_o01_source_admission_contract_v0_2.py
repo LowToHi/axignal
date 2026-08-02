@@ -27,6 +27,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--manifest", required=True, type=Path)
     parser.add_argument("--contract", required=True, type=Path)
     parser.add_argument("--closure", required=True, type=Path)
+    parser.add_argument("--registry", required=True, type=Path)
     parser.add_argument(
         "--schema",
         default=(
@@ -108,6 +109,7 @@ def main() -> int:
     manifest = json.loads(args.manifest.read_text(encoding="utf-8"))
     contract = json.loads(args.contract.read_text(encoding="utf-8"))
     closure = json.loads(args.closure.read_text(encoding="utf-8"))
+    registry = json.loads(args.registry.read_text(encoding="utf-8"))
 
     validator = Draft202012Validator(schema, format_checker=FormatChecker())
     errors = sorted(validator.iter_errors(manifest), key=lambda item: list(item.path))
@@ -125,6 +127,36 @@ def main() -> int:
     require(
         args.closure.as_posix().endswith(manifest["closure_path"]),
         "Closure path mismatch",
+    )
+    require(
+        args.registry.as_posix().endswith(manifest["campaign_registry_path"]),
+        "Campaign registry path mismatch",
+    )
+    require(
+        sha256_reference(args.registry) == manifest["campaign_registry_sha256"],
+        "Campaign registry digest mismatch",
+    )
+    require(registry["status"] == "PASS", "Campaign registry status mismatch")
+    require(
+        registry["output"] == "O01_QUALITY_COVERAGE_LAG_PASS",
+        "Campaign registry output mismatch",
+    )
+    require(
+        registry["execution"]["artifact_id"] == manifest["evidence"]["artifact_id"],
+        "Campaign registry artifact ID mismatch",
+    )
+    require(
+        registry["execution"]["artifact_sha256"]
+        == manifest["evidence"]["artifact_sha256"],
+        "Campaign registry artifact digest mismatch",
+    )
+    require(
+        registry["measurement"]["history_probe"]["status"] == "UNAVAILABLE",
+        "History limitation must remain explicit",
+    )
+    require(
+        registry["measurement"]["provider_frequency"]["claim_authorised"] is False,
+        "Provider-frequency claim must remain disabled",
     )
     require(
         set(contract["authorities"]) == CANONICAL_AUTHORITIES,
@@ -181,6 +213,7 @@ def main() -> int:
                 "target_head_sha": target,
                 "current_head_sha": current,
                 "contract_sha256": manifest["contract_sha256"],
+                "campaign_registry_sha256": manifest["campaign_registry_sha256"],
                 "authorities": sorted(CANONICAL_AUTHORITIES),
                 "automatic_human_approval": False,
                 "automatic_human_signature": False,
