@@ -5,6 +5,7 @@ from pathlib import Path
 
 import pytest
 
+import verify_gate7_o01_retained_evidence_v8 as implementation
 from verify_gate7_o01_retained_evidence_v8 import VerificationError
 from verify_gate7_o01_retained_evidence_v10 import (
     INTERNAL_ALIAS,
@@ -35,6 +36,22 @@ def test_final_result_lag_is_adapted_without_file_mutation(tmp_path: Path) -> No
     path.write_text(json.dumps(original), encoding="utf-8")
     loaded = schema_aware_load_json(path)
     assert loaded["lag"][INTERNAL_ALIAS] is False
+    assert json.loads(path.read_text(encoding="utf-8")) == original
+
+
+def test_loader_remains_non_recursive_while_adapter_is_installed(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    path = tmp_path / "publication-lag-report.v0.1.json"
+    original = {
+        "status": "PASS",
+        PUBLISHED_KEY: False,
+    }
+    path.write_text(json.dumps(original), encoding="utf-8")
+    monkeypatch.setattr(implementation, "load_json", schema_aware_load_json)
+    loaded = schema_aware_load_json(path)
+    assert loaded[INTERNAL_ALIAS] is False
     assert json.loads(path.read_text(encoding="utf-8")) == original
 
 
