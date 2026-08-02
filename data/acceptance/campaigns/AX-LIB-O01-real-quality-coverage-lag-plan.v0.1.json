@@ -1,0 +1,66 @@
+{
+  "schema_version": "axignal.o01-quality-coverage-lag-plan/v0.1",
+  "task_id": "AX-GE2E-G7-O01-C",
+  "campaign_id": "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.1",
+  "frozen_before_execution": true,
+  "authority": {
+    "evaluator_head_sha": "3c421d0b8e48c009f5361d4156fd8c1dc07c8101",
+    "evaluator_tree_sha": "59e2543c2bd735a552f85560344f285328d53412",
+    "target_head_sha": "b754b5641e5f17c5a084434aace4f939a4be0e84",
+    "target_tree_sha": "615efd6e8a7f3369292775dbcf3223f8cc006f29",
+    "manifest_reference": "sha256:0c722eb4b02c4446ac26154b6ade49e1efb7b5c7787f8ac4925a0af8dd3d7898",
+    "authority_artifact_id": 8831184086,
+    "authority_artifact_digest": "sha256:166617d29a6f30e892caff5f1afce2cd7eb00f1e10b9e7e8961696010b3725ac",
+    "effective_expiry": "2026-08-27T23:59:59Z"
+  },
+  "source": {
+    "source_id": "src_ted_search_api_v3",
+    "source_state": "CANDIDATE",
+    "endpoint": "https://api.ted.europa.eu/v3/notices/search",
+    "allowed_hosts": ["api.ted.europa.eu"],
+    "scope": "ACTIVE",
+    "authentication": "NONE",
+    "declared_publication_frequency": "MONDAY_TO_FRIDAY",
+    "declared_daily_website_availability": "00:01_TO_09:00_PUBLICATION_DAY",
+    "declared_daily_xml_package_availability": "BY_09:30_PUBLICATION_DAY",
+    "official_limits": {
+      "page_number_max_retrievable_notices": 15000,
+      "max_notices_per_page": 250,
+      "max_fields_per_page": 10000,
+      "iteration_total_limit": null
+    }
+  },
+  "measurement_window": {
+    "start_inclusive": "2026-07-01T00:00:00Z",
+    "end_inclusive": "2026-07-31T23:59:59Z",
+    "query_start": "20260701",
+    "query_end": "20260731",
+    "rationale": "Last complete calendar month before campaign execution."
+  },
+  "sampling": {
+    "sampling_method": "STRATIFIED_COUNTRY_THEN_DETERMINISTIC_SHA256",
+    "deterministic_seed": "AXIGNAL-O01-C-2026-07-v1",
+    "query_contract": "buyer-country IN ({country}) AND publication-date >= 20260701 AND publication-date <= 20260731 SORT BY publication-number ASC",
+    "languages": ["de", "en", "es", "fr", "it", "pt"],
+    "countries": ["AUT", "BEL", "CZE", "DEU", "ESP", "FRA", "IRL", "ITA", "NLD", "POL", "PRT", "SWE"],
+    "notice_types": ["ALL_TYPES_OBSERVED_IN_ACTIVE_SCOPE"],
+    "sample_size": 180,
+    "target_per_country": 15,
+    "page_size": 100,
+    "pages_per_country": 2,
+    "pagination_mode": "PAGE_NUMBER",
+    "check_query_syntax": true,
+    "maximum_network_requests": 60,
+    "maximum_attempts_per_request": 2,
+    "minimum_delay_seconds": 0.25,
+    "maximum_response_bytes": 20971520,
+    "request_timeout_seconds": 30,
+    "replacement_rules": "If a stratum has fewer than 15 parseable unique notices, retain all available notices and do not replace from another country.",
+    "pagination_rules": "Fetch exactly pages 1 and 2, at most 100 notices per page; never iterate beyond the frozen page budget.",
+    "exclusion_rules": [
+      "exclude records outside the frozen publication window",
+      "exclude missing or malformed publication numbers from the measured sample",
+      "exclude duplicate publication numbers after preserving duplicate-rate evidence",
+      "exclude natural-person buyer records from retained normalized data when detectable",
+      "exclude all contact endpoints and contact-person values from persisted records",
+      "exclude attachments, fu[S[SÛÝ\˜ÙK[˜]]™H[^[™\™\\HÛÜšÜÈ‹ˆ™^ÛYH[žH™\ÜÛœÙHØZ[™YY\ˆ]]Üš]H^\žHÜˆ]]Üš]HZ\ÛX]Ú‚ˆBˆKˆ™šY[ÈŽˆÂˆœ™]Z[™YÜ˜]×Ü›Ú™XÝ[ÛˆŽˆÂˆœX›XØ][Û‹[[X™\ˆ‹ˆœX›XØ][Û‹Y]H‹ˆ››ÝXÙKZY[YšY\ˆ‹ˆ››ÝXÙK]™\œÚ[Ûˆ‹ˆ››ÝXÙK]\H‹ˆ™›Ü›K]\H‹ˆ››ÝXÙK]]H‹ˆ˜^Y\‹[˜[YH‹ˆ˜^Y\‹XÛÝ[žH‹ˆœ›ØÙY\™K]\H‹ˆ˜ÛÛ˜XÝ[˜]\™H‹ˆ˜Û\ÜÚYšXØ][Û‹XÜˆ‹ˆœXÙK[Ù‹\\™›Ü›X[˜ÙKXÛÝ[žK\›ØÈ‹ˆœXÙK[Ù‹\\™›Ü›X[˜ÙK\ÝX™]‹\›ØÈ‹ˆ™XY[™H‹ˆ™\Ý[X]Y]˜[YK\›ØÈ‹ˆ™\Ý[X]Y]˜[YKXÝ\‹\›ØÈ‹ˆšY[YšY\‹[Ý‚ˆKˆ™\[Y\˜[ØÛÛXÝÜ›Ú™XÝ[ÛˆŽˆÂˆœX›XØ][Û‹[[X™\ˆ‹ˆ˜^Y\‹XÛÛXÝ\Ú[‹ˆ˜^Y\‹Y[XZ[‹ˆ˜^Y\‹][‹ˆ˜^Y\‹Z[\›™]XY™\ÜÈ‹ˆ˜^Y\‹\›Ùš[H‹ˆœÝX›Z\ÜÚ[Û‹]\›[Ý‚ˆBˆKˆœ]X[]WÛY]šXÜÈŽˆÂˆšY[YšY\—ØXØÝ\˜XÞH‹ˆ]WØÛÛ\][™\ÜÈ‹ˆ˜^Y\—ØXØÝ\˜XÞH‹ˆ™XY[™WØXØÝ\˜XÞH‹ˆ˜[[Ý[ØXØÝ\˜XÞH‹ˆ˜Ý\œ™[˜ÞWØXØÝ\˜XÞH‹ˆÔ—ØXØÝ\˜XÞH‹ˆ“•U×ØXØÝ\˜XÞH‹ˆ›ÝØÛÛ\][™\ÜÈ‹ˆ˜ÛÛXÝØÚ[›™[ØÛ\ÜÚYšXØ][Û—ØXØÝ\˜XÞH‹ˆ™\XØ]WÜ˜]H‹ˆ[œ\œÙXX›WÜ˜]H‹ˆ›Z\ÜÚ[™×ÙšY[Ü˜]H‚ˆKˆ›Y×ÛY]šXÜÈŽˆÂˆœÛÝ\˜ÙWÜX›XØ][Û—ÛYÈ‹ˆœÛÝ\˜ÙWØ]˜Z[Xš[]WÛYÈ‹ˆVQÓSØXÜ]Z\Ú][Û—ÛYÈ‹ˆ››Ü›X[\Ø][Û—ÛYÈ‹ˆš[™^[™×ÛYÈ‹ˆœÝXœØÜšX™\—Û›ÝYšXØ][Û—ÛYÈ‚ˆKˆ™\ÚÛÈŽˆÂˆ›Z[š[][WÜØ[\WØÛÝ[ŽˆLŒˆ›Z[š[][WØÛÝ[šY\×ÛØœÙ\™YŽˆˆšY[YšY\—ØXØÝ\˜XÞWÛZ[ˆŽˆŽNˆ]WØÛÛ\][™\Ü×ÛZ[ˆŽˆÌˆ˜^Y\—ØXØÝ\˜XÞWÛZ[ˆŽˆŽMKˆÔ—ØXØÝ\˜XÞWÛZ[ˆŽˆŽLˆ˜ÛÛXÝØÚ[›™[ØÛ\ÜÚYšXØ][Û—ØXØÝ\˜XÞWÛZ[ˆŽˆŽMKˆ™\XØ]WÜ˜]WÛX^ŽˆŒKˆ[œ\œÙXX›WÜ˜]WÛX^ŽˆŒLˆ›Z\ÜÚ[™×ÙšY[Ü˜]WÛX^ŽˆKˆVQÓSØXÜ]Z\Ú][Û—ÛY×ÜMWÜÙXÛÛ™×ÛX^ŽˆÌŒˆ››Ü›X[\Ø][Û—ÛY×ÜMWÜÙXÛÛ™×ÛX^ŽˆKŒˆš[™^[™×ÛY×ÜMWÜÙXÛÛ™×ÛX^ŽˆKŒˆœÝXœØÜšX™\—Û›ÝYšXØ][Û—ÛY×ÜMWÜÙXÛÛ™×ÛX^ŽˆKŒˆ›Z[š[][WÛØœÙ\˜][Ûœ×Ù›Ü—ØÛÛ™][Û˜[ØXØÝ\˜XÞHŽˆLˆ™˜XœšXØ]YÙ]šY[˜ÙWÛX^ŽˆˆKˆœ™][[ÛˆŽˆÂˆœ˜]×Ü™\ÜÛœÙ\ÈŽˆÓT×ÑS•‘SÔQÑUWÐQT×ÌM—ÓÓ“WÐSÕÓTÕQÔÑPTÒÔ‘TÔÓ”ÑWÔ“Ò‘PÕSÓˆ‹ˆœZ[^Ü˜]×ÛØØ][ÛˆŽˆ‘TSQTSÔ•S“‘T—ÕTÓÓ“H‹ˆœZ[^Ü˜]×Ý\ØYYŽˆ˜[ÙKˆ˜ÛÛXÝÝ˜[Y\×Ü\œÚ\ÝYŽˆ˜[ÙKˆœ™XÚ\Y[ØÙ\YšXØ]WÜ]Žˆ™]KØXØÙ\[˜ÙKÚÙ^\ËÛÌKY]šY[˜ÙK\™XÚ\Y[XÙ\œ[H‹ˆœ™XÚ\Y[ØÙ\YšXØ]WÜÚLM—Ùš[™Ù\œš[Žˆ‘ŒMÎQÌ‘NNMŽPÑŽLÍŽMÌNŒMÑŒÌÑ‘QLQLÐLÎMLÍLMLÈ‹ˆ˜\Y˜XÝÜ™][[Û—Ù^\ÈŽˆÌˆKˆ››Û—Ø]]Üš\Ø][ÛœÈŽˆÂˆYÜ›ÙXÝØYZ\ÜÚ[ÛˆŽˆ˜[ÙKˆœX›X×ØÛZ[\ÈŽˆ˜[ÙKˆœX›X×Ü™Y\ÝšX][ÛˆŽˆ˜[ÙKˆ˜ÛÛXÝÛX\šÙ][™ÈŽˆ˜[ÙKˆ›[Ù[Ý˜Z[š[™ÈŽˆ˜[ÙKˆ˜šYÜÝX›Z\ÜÚ[ÛˆŽˆ˜[ÙKˆ™^\›˜[Û›ÝYšXØ][Û—Ù[]™\žHŽˆ˜[ÙKˆœX›X×Û][˜ÚŽˆ““×ÑÓÈ‚ˆKˆœÝÜØÛÛ™][ÛœÈŽˆÂˆ˜]]Üš]H[™[ÜHZ\ÜÚ[™Ë[˜[YÜˆ^\™Y‹ˆ\™Ù]XY\™Ù]™YKX[šY™\Ý™Y™\™[˜ÙHÜˆ]]Üš]H\Y˜XÝZ\ÛX]Ú‹ˆ›Ù™šXÚX[\›\È˜\Ù[[™HZ\ÜÚ[™Ë^\™YÜˆÚ[™ÙY‹ˆ‘”È™\ÛÛ™\ÈÈ[žH›Û‹YÛØ˜[Y™\ÜÈ‹ˆœ™Y\™XÝÜˆÜÝX]™\ÈH^XÝÈ[ÝÛ\Ý‹ˆ›™]ÛÜšÈ™\]Y\ÝYÙ]^ÙYYY‹ˆ˜ÛÛXÝ˜[YHÜš][ˆÈ\ÚËÙÜÈÜˆ™]Z[™Y\Y˜XÝÈ‹ˆ˜]XÚY[[›ÝXÙHS[›ÝXÙHSÜˆÛÝ\˜ÙK[˜]]™H[^™]šY]™Y‹ˆœ™\ÜÛœÙH^ÙYYÈœ›Þ™[ˆž]H[Z]‹ˆœ]Y\žHÜˆYÚ[˜][ÛˆY™™\œÈœ›ÛHHœ›Þ™[ˆ[ˆ‹ˆ˜Ø[™Y]HÛÝ\˜ÙHÛÛšX]\ÈÈX›XÈÛZ[\È‹ˆ™˜XœšXØ]YÜˆÞ[]XÈ]šY[˜ÙH[\œÈØ[\ZYÛˆ™\ÜÈ‚ˆBŸB
