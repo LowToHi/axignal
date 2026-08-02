@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import hashlib
 import json
 import sqlite3
 from dataclasses import asdict, replace
@@ -8,7 +7,12 @@ from datetime import UTC, datetime
 from time import perf_counter
 from typing import Any
 
-from .o01_quality_common import NormalizedNotice, PageObservation
+from .o01_quality_common import (
+    NormalizedNotice,
+    PageObservation,
+    canonical_json_bytes,
+    sha256_prefixed,
+)
 from .o01_quality_coverage_lag import lag_report as legacy_lag_report
 from .o01_quality_normalize import normalize_notice
 from .o01_quality_reports import metric_summary
@@ -24,20 +28,10 @@ def _iso(value: datetime) -> str:
     return value.isoformat().replace("+00:00", "Z")
 
 
-def _sha256_prefixed(payload: bytes) -> str:
-    return "sha256:" + hashlib.sha256(payload).hexdigest()
-
-
 def _record_hash(notice: NormalizedNotice) -> str:
     payload = asdict(notice)
     payload.pop("normalized_record_sha256", None)
-    encoded = json.dumps(
-        payload,
-        ensure_ascii=False,
-        separators=(",", ":"),
-        sort_keys=True,
-    ).encode("utf-8")
-    return _sha256_prefixed(encoded)
+    return sha256_prefixed(canonical_json_bytes(payload))
 
 
 def reset_stage_timings() -> None:
@@ -56,7 +50,8 @@ def index_and_enqueue(
     reset_stage_timings()
     connection = sqlite3.connect(":memory:")
     connection.execute(
-        "CREATE TABLE notices (publication_number TEXT PRIMARY KEY, title TEXT, sha256 TEXT)"
+        "CREATE TABLE notices "
+        "(publication_number TEXT PRIMARY KEY, payload TEXT NOT NULL)"
     )
     normalized: list[NormalizedNotice] = []
     acquisition_by_notice: dict[str, float] = {}
@@ -64,14 +59,12 @@ def index_and_enqueue(
 
     try:
         for source, sampled_country, observation in selected:
-            publication_number = str(source["publication-number"])
             normalisation_started_at = _now()
             normalisation_clock = perf_counter()
             draft = normalize_notice(
                 source,
-                sampled_country=sampled_country,
-                retrieval_started_at=observation.retrieval_started_at,
-                retrieval_completed_at=observation.retrieval_completed_at,
+                country=sampled_country,
+                page_observation=observation,
                 normalised_at=normalisation_started_at,
                 indexed_at=normalisation_started_at,
                 notification_enqueued_at=normalisation_started_at,
@@ -79,40 +72,41 @@ def index_and_enqueue(
             normalisation_completed_at = _now()
             normalisation_seconds = max(0.0, perf_counter() - normalisation_clock)
 
-            indexing_started_at = _now()
             indexing_clock = perf_counter()
+            indexed_payload = {
+                "publication_number": draft.publication_number,
+                "source_country_stratum": draft.source_country_stratum,
+                "titles": draft.titles,
+            }
             connection.execute(
-                "INSERT INTO notices VALUES (?, ?, ?)",
+                "INSERT INTO notices(publication_number, payload) VALUES (?, ?)",
                 (
                     draft.publication_number,
-                    draft.title,
-                    draft.normalized_record_sha256,
+                    json.dumps(indexed_payload, ensure_ascii=False, sort_keys=True),
                 ),
             )
             connection.commit()
+            indexed_at = _now()
+            indexing_seconds = max(0.0, perf_counter() - indexing_clock)
 
+            notification_clock = perf_counter()
             notification_enqueued_at = _now()
             staged = replace(
                 draft,
                 normalised_at=_iso(normalisation_completed_at),
-                indexed_at=_iso(indexing_started_at),
+                indexed_at=_iso(indexed_at),
                 notification_enqueued_at=_iso(notification_enqueued_at),
             )
             notice = replace(staged, normalized_record_sha256=_record_hash(staged))
-            connection.execute(
-                "UPDATE notices SET sha256 = ? WHERE publication_number = ?",
-                (notice.normalized_record_sha256, notice.publication_number),
-            )
-            connection.commit()
-            indexing_seconds = max(0.0, perf_counter() - indexing_clock)
-
-            notification_clock = perf_counter()
             notification_ledger.append(
                 {
+                    "notification_id": sha256_prefixed(
+                        f"O01-C|{notice.publication_number}".encode()
+                    ),
                     "publication_number": notice.publication_number,
                     "normalized_record_sha256": notice.normalized_record_sha256,
                     "enqueued_at": notice.notification_enqueued_at,
-                    "delivery_mode": "PRIVATE_INTERNAL_LEDGER_ONLY",
+                    "delivery": "PRIVATE_INTERNAL_LEDGER_ONLY",
                     "external_delivery_authorised": False,
                 }
             )
@@ -198,7 +192,7 @@ def lag_report(
     report["measurement_semantics"] = {
         "clock": "MONOTONIC_FOR_STAGE_DURATION_UTC_FOR_AUDIT_TIMESTAMPS",
         "normalisation_lag": "normalize_notice call duration",
-        "indexing_lag": "SQLite insert, commit, final hash update and commit duration",
+        "indexing_lag": "SQLite insert and commit duration",
         "subscriber_notification_lag": "private ledger append duration",
         "queue_wait_disclosed_separately": True,
         "fabricated_evidence": 0,
