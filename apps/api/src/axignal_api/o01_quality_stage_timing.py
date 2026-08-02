@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import sqlite3
 from dataclasses import asdict, replace
@@ -11,7 +12,6 @@ from .o01_quality_common import NormalizedNotice, PageObservation
 from .o01_quality_coverage_lag import lag_report as legacy_lag_report
 from .o01_quality_normalize import normalize_notice
 from .o01_quality_reports import metric_summary
-from .o01_quality_retention import sha256_prefixed
 
 _STAGE_TIMINGS: dict[str, dict[str, float]] = {}
 
@@ -24,6 +24,10 @@ def _iso(value: datetime) -> str:
     return value.isoformat().replace("+00:00", "Z")
 
 
+def _sha256_prefixed(value: bytes) -> str:
+    return "sha256:" + hashlib.sha256(value).hexdigest()
+
+
 def _semantic_hash(notice: NormalizedNotice) -> str:
     payload = asdict(notice)
     payload.pop("normalized_record_sha256", None)
@@ -33,7 +37,7 @@ def _semantic_hash(notice: NormalizedNotice) -> str:
         separators=(",", ":"),
         sort_keys=True,
     ).encode("utf-8")
-    return sha256_prefixed(encoded)
+    return _sha256_prefixed(encoded)
 
 
 def reset_stage_timings() -> None:
