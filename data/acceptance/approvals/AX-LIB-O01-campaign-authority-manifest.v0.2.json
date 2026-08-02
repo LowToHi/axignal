@@ -1,0 +1,92 @@
+{
+  "authorised_scope": {
+    "execution_contract_path": "data/acceptance/campaigns/AX-LIB-O01-quality-coverage-lag-execution-contract.v0.2.json",
+    "execution_contract_sha256": "sha256:f86672f2925343fccc61ebe0cb1085a470bbb54d062f1f936eed9347854ff3a3",
+    "private_campaign_only": true,
+    "public_claim_contribution": false,
+    "purpose": "Execute only the private bounded O01-C v0.2 remediation campaign and its quality, lag, multilingual, kill-switch and rollback evidence.",
+    "source_id": "src_ted_search_api_v3",
+    "source_state_during_campaign": "CANDIDATE"
+  },
+  "binding": {
+    "automatic_human_approval": false,
+    "automatic_human_signature": false,
+    "permissions_generated_automatically": false,
+    "survives_evidence_expiry": false,
+    "survives_execution_contract_change": false,
+    "survives_manifest_change": false,
+    "survives_target_head_change": false
+  },
+  "campaign_id": "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.2",
+  "decision_contract": {
+    "admitted_decisions": [
+      "APPROVE",
+      "APPROVE_WITH_CONDITIONS",
+      "REJECT"
+    ],
+    "authorising_decisions": [
+      "APPROVE",
+      "APPROVE_WITH_CONDITIONS"
+    ],
+    "comment_author_must_be_human": true,
+    "decision_max_expires_at": "2026-08-28T10:00:00Z",
+    "expiry_strictly_before_evidence": true,
+    "head_match_required": true,
+    "manifest_match_required": true,
+    "required_authorities": [
+      "LEGAL",
+      "PRIVACY_DATA_RIGHTS"
+    ],
+    "required_fields": [
+      "authority",
+      "decision",
+      "scope",
+      "manifest_reference",
+      "head_sha",
+      "reviewed_at",
+      "expires_at",
+      "signature",
+      "conditions"
+    ],
+    "signature_scheme": "github-identity-v1"
+  },
+  "library_id": "AX-LIB-O01",
+  "non_authorisations": {
+    "bid_submission_or_offer_presentation": false,
+    "contact_marketing": false,
+    "external_notification_delivery": false,
+    "model_training_or_fine_tuning": false,
+    "public_claims": false,
+    "public_launch": "NO_GO",
+    "public_redistribution": false,
+    "ted_product_admission": false
+  },
+  "official_evidence": {
+    "artifact_digest": "sha256:c28e015f10945668f906cdaf6db72c0a58f7aaa13d1d3d73a0c892a52ceed8a7",
+    "artifact_expires_at": "2026-09-01T10:02:54Z",
+    "artifact_id": 8831909489,
+    "baseline_digest": "sha256:510f174b71b3538473154c8fc5d02bf69304a0ecf0817117ac58c6a3a897e3bd",
+    "baseline_payload_digest": "sha256:7a1bba61e83b3dbef05055c4a4e2b6680e3cd6ec454581c9e69c358df37b7b97",
+    "evidence_expires_at": "2026-08-29T10:02:52.417201Z",
+    "observed_at": "2026-08-02T10:02:52.417201Z",
+    "terms_change_class": "BASELINE_ESTABLISHED"
+  },
+  "remediation_evidence": {
+    "fabricated_evidence": 0,
+    "failure_class": "VERSIONED_QUERY_CONTRACT_DEFECT",
+    "only_permitted_delta": "Remove the unsupported trailing ASC token from sampling.query_contract.",
+    "prior_artifact_digest": "sha256:6a3d55557d16459e546839a6170db02e618b3a4c31cfadf6761a0d2885dab47f",
+    "prior_artifact_id": 8833930837,
+    "prior_campaign_id": "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.1",
+    "prior_output": "O01_QUALITY_COVERAGE_LAG_FAIL",
+    "prior_plan_sha256": "sha256:7d323a9a920f1fe96832b5f6e631b4da257c3ce995ef433705aff95c3ed1643b",
+    "prior_result_member_sha256": "sha256:0d5c88da9f48371a754d58486ef4a738be67a8c76fcae953d6055767b91475df",
+    "raw_plaintext_uploaded": false
+  },
+  "schema_version": "axignal.o01-campaign-authority-manifest/v0.2",
+  "target": {
+    "git_tree_sha": "2d02c1d616516a14168b6c378d2d3352d2750da2",
+    "head_sha": "63b210b12988b26be04abed3701f8d97ffccebad"
+  },
+  "task_id": "AX-GE2E-G7-O01-B-R1"
+}
