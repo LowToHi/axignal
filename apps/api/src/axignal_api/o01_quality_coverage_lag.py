@@ -7,6 +7,52 @@ from typing import Any
 from .o01_quality_common import NormalizedNotice, PageObservation
 from .o01_quality_reports import metric_summary
 
+MISSING_DECLARED_FREQUENCY = "NOT_DECLARED_IN_FROZEN_EXECUTION_CONTRACT"
+MISSING_OFFICIAL_LIMITS_STATUS = "NOT_EMBEDDED_IN_FROZEN_EXECUTION_CONTRACT"
+
+
+def _source_metadata_disclosure(
+    plan: dict[str, Any],
+    *,
+    page_size: int,
+    page_cap: int,
+) -> tuple[str, dict[str, Any], list[str]]:
+    source = plan["source"]
+    sampling = plan["sampling"]
+    declared_frequency = source.get("declared_publication_frequency")
+    limitations: list[str] = []
+    if not isinstance(declared_frequency, str) or not declared_frequency.strip():
+        declared_frequency = MISSING_DECLARED_FREQUENCY
+        limitations.append(
+            "TED publication frequency was not embedded in the frozen execution "
+            "contract; no provider-frequency claim is made."
+        )
+
+    official_limits = source.get("official_limits")
+    if not isinstance(official_limits, dict) or not official_limits:
+        official_limits = {
+            "status": MISSING_OFFICIAL_LIMITS_STATUS,
+            "public_claim_authorised": False,
+            "campaign_enforced_limits": {
+                "maximum_network_requests": sampling["maximum_network_requests"],
+                "maximum_attempts_per_request": sampling[
+                    "maximum_attempts_per_request"
+                ],
+                "page_size": page_size,
+                "pages_per_country": sampling["pages_per_country"],
+                "country_retrieval_cap": page_cap,
+            },
+            "limitation": (
+                "Only the limits enforced by this frozen campaign are reported. "
+                "No unsupported claim is made about TED platform-wide limits."
+            ),
+        }
+        limitations.append(
+            "TED platform-wide official limits were not embedded in the frozen "
+            "execution contract; only enforced campaign limits are disclosed."
+        )
+    return declared_frequency, official_limits, limitations
+
 
 def coverage_report(
     *,
@@ -54,6 +100,9 @@ def coverage_report(
 
     page_size = int(plan["sampling"]["page_size"])
     page_cap = int(plan["sampling"]["pages_per_country"]) * page_size
+    declared_frequency, official_limits, source_metadata_limitations = (
+        _source_metadata_disclosure(plan, page_size=page_size, page_cap=page_cap)
+    )
     truncation = []
     for observation in page_observations:
         if observation.page != 1 or observation.total_notice_count is None:
@@ -67,6 +116,32 @@ def coverage_report(
                     "risk": "HIGH",
                 }
             )
+
+    areas_not_covered = [
+        "Countries outside the twelve frozen buyer-country strata.",
+        (
+            "Notices outside 2026-07-01 through 2026-07-31 and notices "
+            "outside TED ACTIVE scope."
+        ),
+        "National and sub-threshold procurement portals not published through TED.",
+        (
+            "Attachments, source-native full text, third-party works and full "
+            "XML/HTML payloads."
+        ),
+        (
+            "Natural-person buyers, personal contact endpoints and contact "
+            "values in retained evidence."
+        ),
+        (
+            "Exhaustive archive history; the history probe is a bounded API "
+            "observation only."
+        ),
+        (
+            "Source factual correctness beyond transformation fidelity of "
+            "projected TED fields."
+        ),
+        *source_metadata_limitations,
+    ]
 
     return {
         "schema_version": "axignal.o01-coverage-report/v0.1",
@@ -101,14 +176,14 @@ def coverage_report(
             "archive_probe": history_probe,
         },
         "frequency": {
-            "declared": plan["source"]["declared_publication_frequency"],
+            "declared": declared_frequency,
             "observed_unique_publication_dates": len(unique_dates),
             "observed_dates": unique_dates,
             "maximum_observed_calendar_gap_days": (
                 max(observed_gaps) if observed_gaps else None
             ),
         },
-        "search_limits": plan["source"]["official_limits"],
+        "search_limits": official_limits,
         "pagination_limits": {
             "frozen_page_size": page_size,
             "frozen_pages_per_country": plan["sampling"]["pages_per_country"],
@@ -118,30 +193,7 @@ def coverage_report(
             "strata_at_risk": truncation,
             "risk_present": bool(truncation),
         },
-        "areas_not_covered": [
-            "Countries outside the twelve frozen buyer-country strata.",
-            (
-                "Notices outside 2026-07-01 through 2026-07-31 and notices "
-                "outside TED ACTIVE scope."
-            ),
-            "National and sub-threshold procurement portals not published through TED.",
-            (
-                "Attachments, source-native full text, third-party works and full "
-                "XML/HTML payloads."
-            ),
-            (
-                "Natural-person buyers, personal contact endpoints and contact "
-                "values in retained evidence."
-            ),
-            (
-                "Exhaustive archive history; the history probe is a bounded API "
-                "observation only."
-            ),
-            (
-                "Source factual correctness beyond transformation fidelity of "
-                "projected TED fields."
-            ),
-        ],
+        "areas_not_covered": areas_not_covered,
     }
 
 
