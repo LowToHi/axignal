@@ -2,12 +2,11 @@ from __future__ import annotations
 
 import json
 import os
+from collections.abc import Callable
 from copy import deepcopy
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable, TypeVar
-
-T = TypeVar("T")
+from typing import Any
 
 
 class KillSwitchActive(RuntimeError):
@@ -46,7 +45,7 @@ class CampaignKillSwitch:
             raise KillSwitchActive(self.reason or "O01 campaign kill switch active")
 
 
-def guarded_dispatch(
+def guarded_dispatch[T](
     kill_switch: CampaignKillSwitch,
     dispatch: Callable[..., T],
     *args: Any,

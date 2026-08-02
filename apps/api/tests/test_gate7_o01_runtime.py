@@ -23,9 +23,8 @@ def test_actual_campaign_network_binding_obeys_kill_switch(
     switch = CampaignKillSwitch(signal_path=tmp_path / "kill.signal")
     switch.activate("operator stop")
 
-    with guarded_network_runtime(switch):
-        with pytest.raises(KillSwitchActive):
-            o01_quality_execute.post_json(endpoint="https://example.invalid")
+    with guarded_network_runtime(switch), pytest.raises(KillSwitchActive):
+        o01_quality_execute.post_json(endpoint="https://example.invalid")
 
     assert calls == []
     assert o01_quality_execute.post_json is fake_post_json

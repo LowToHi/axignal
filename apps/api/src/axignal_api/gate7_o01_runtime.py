@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any
 
 from . import o01_quality_execute
 from .gate7_o01_controls import CampaignKillSwitch, guarded_dispatch
