@@ -1,0 +1,159 @@
+{
+  "authority_boundary": {
+    "bounded_claim_contribution": false,
+    "global_coverage_claim_authorised": false,
+    "product_admitted": false,
+    "public_launch": "NO_GO",
+    "source_state": "CANDIDATE"
+  },
+  "campaign_id": "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.6",
+  "controls": {
+    "all_thresholds_pass": true,
+    "cms_structure_verified": true,
+    "contact_values_persisted": false,
+    "external_notifications_sent": 0,
+    "fabricated_evidence": 0,
+    "kill_switch_pass": true,
+    "multilingual_journeys_pass": true,
+    "plaintext_removed": true,
+    "plaintext_uploaded": false,
+    "raw_responses_sealed": true,
+    "rollback_pass": true,
+    "synthetic_evidence": 0
+  },
+  "execution": {
+    "artifact_expires_at": "2026-09-01T19:21:13Z",
+    "artifact_id": 8838091687,
+    "artifact_name": "o01-quality-coverage-lag-v0-6-r4-5291baa019a85c789d1961d73c198802e28c038a",
+    "artifact_sha256": "sha256:a2328776b89ffaa44dde20649a5bee39711d7ac13b6bbc11c72e608631eca092",
+    "evidence_expires_at": "2026-08-29T10:02:52.417201Z",
+    "head_sha": "5291baa019a85c789d1961d73c198802e28c038a",
+    "job_id": 91536955808,
+    "workflow_run_id": 30763024434
+  },
+  "lag_seconds": {
+    "AXIGNAL_acquisition": {
+      "maximum": 1.567688,
+      "p50": 1.061834,
+      "p95": 1.515635
+    },
+    "indexing": {
+      "maximum": 9.086999997975909e-05,
+      "p50": 4.4508500010920216e-05,
+      "p95": 6.418455000698484e-05
+    },
+    "normalisation": {
+      "maximum": 0.0027698039999961566,
+      "p50": 0.0002965689999996357,
+      "p95": 0.0004974693499946169
+    },
+    "queue_wait_context": {
+      "maximum": 137.232134,
+      "p50": 102.2581515,
+      "p95": 137.22610584999998,
+      "thresholded_as_normalisation": false
+    },
+    "source_publication": {
+      "limitation": "Measurement window ended before campaign execution; this is not used as local processing lag.",
+      "maximum": 2834398.120453,
+      "p50": 2834354.131699,
+      "p95": 2834398.120453
+    },
+    "subscriber_notification": {
+      "maximum": 0.00013783800000055635,
+      "p50": 9.97165000029554e-05,
+      "p95": 0.0001265914999962092
+    }
+  },
+  "limitations": [
+    "Evidence supports only the twelve measured TED buyer-country strata, not worldwide procurement coverage.",
+    "The frozen retrieval cap was 200 notices per country and every stratum had truncation risk.",
+    "Exhaustive archive depth was not established because the bounded history probe failed closed.",
+    "TED provider publication frequency was not declared in the frozen execution contract; no provider-frequency claim is authorised.",
+    "National and sub-threshold procurement portals outside TED are not covered.",
+    "Attachments, full source text, third-party works, natural-person data and retained contact values are excluded."
+  ],
+  "measurement": {
+    "contract_natures": {
+      "services": 91,
+      "supplies": 59,
+      "works": 29
+    },
+    "countries": [
+      "AUT",
+      "BEL",
+      "CZE",
+      "DEU",
+      "ESP",
+      "FRA",
+      "IRL",
+      "ITA",
+      "NLD",
+      "POL",
+      "PRT",
+      "SWE"
+    ],
+    "cpv_prefix_count": 37,
+    "history_probe": {
+      "claim_authorised": false,
+      "status": "UNAVAILABLE"
+    },
+    "languages": [
+      "de",
+      "en",
+      "es",
+      "fr",
+      "it",
+      "pt"
+    ],
+    "network_requests_maximum": 60,
+    "network_requests_used": 49,
+    "provider_frequency": {
+      "claim_authorised": false,
+      "declared": "NOT_DECLARED_IN_FROZEN_EXECUTION_CONTRACT"
+    },
+    "sample_count": 180,
+    "sample_publication_dates": {
+      "earliest": "2026-07-01",
+      "latest": "2026-07-06",
+      "maximum_calendar_gap_days": 3,
+      "unique_dates": 4
+    },
+    "truncation_risk": {
+      "present": true,
+      "strata_at_risk": 12
+    },
+    "window": {
+      "end": "2026-07-31T23:59:59Z",
+      "start": "2026-07-01T00:00:00Z"
+    }
+  },
+  "members": {
+    "coverage-report.v0.1.json": "sha256:e0cef36f102da5d594b1e868f6d6b6d69421d04e38cc3f736463bc8dfbd407fd",
+    "final-result.json": "sha256:2d33c0c01806b9724f92ca4f6497cc3ca6dc93f6b9e39274c3ff393cfb04151c",
+    "lag-report.v0.1.json": "sha256:462be971317fa6ee449690078f094d02b13ca7579511cd802bc3bbccf14c58b2",
+    "multilingual-journeys.v0.1.json": "sha256:3d41a430c10b6e9d1030c81033bac5a82ef791ba28ea3e3b9bda10be8fd80e31",
+    "operational-controls.v0.1.json": "sha256:64d9603dcf4ef07be29e11ae24a3010561a6c41a3d8676c4671bc15d71dd5a87",
+    "quality-report.v0.1.json": "sha256:2c1a2bb9c4d9e8c515a407f6cc0c09851eaa24c11dcf2682d25c0d4d0389e6b0",
+    "raw-retention.v0.1.json": "sha256:b0559987ff526382fa686d61c555050e87182ffc46e7f8a6510156de65cb341f",
+    "sampling-manifest.v0.1.json": "sha256:fcc2846132fc37af2182ef9b558d82458d2e63e62b5c6232627506f6c7a57c9b"
+  },
+  "output": "O01_QUALITY_COVERAGE_LAG_PASS",
+  "quality": {
+    "CPV_accuracy": 1.0,
+    "NUTS_accuracy": 1.0,
+    "amount_accuracy": 1.0,
+    "buyer_accuracy": 1.0,
+    "contact_channel_classification_accuracy": 1.0,
+    "currency_accuracy": 1.0,
+    "deadline_accuracy": 1.0,
+    "duplicate_rate": 0.0,
+    "identifier_accuracy": 1.0,
+    "lot_completeness": 0.9944444444444445,
+    "missing_field_rate": 0.08333333333333333,
+    "title_completeness": 1.0,
+    "unparseable_rate": 0.0
+  },
+  "schema_version": "axignal.o01-campaign-result-registry/v0.6-r4",
+  "status": "PASS"
+}
