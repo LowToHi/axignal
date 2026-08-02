@@ -8,12 +8,13 @@ import re
 import socket
 import ssl
 import unicodedata
+from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from enum import StrEnum
 from html.parser import HTMLParser
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 from urllib.parse import SplitResult, urljoin, urlsplit
 
 
