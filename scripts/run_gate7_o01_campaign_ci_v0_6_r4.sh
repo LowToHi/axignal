@@ -24,11 +24,12 @@ cp apps/api/src/axignal_api/o01_quality_stage_timing_v2.py \
 cp apps/api/tests/test_o01_quality_stage_timing_v2.py \
   apps/api/tests/test_o01_quality_stage_timing.py
 
-# The frozen verifier emits the threshold key without the redundant
-# `_seconds` suffix. Correct only the two schema-consumer assertions in the
-# ephemeral checkout; metric values and thresholds remain unchanged.
+# The frozen verifier emits the threshold check key without the redundant
+# `_seconds` suffix. Correct only the result-schema consumers. The historical
+# remediation field keeps its original `_seconds` name and value.
 sed -i \
-  's/normalisation_lag_p95_seconds/normalisation_lag_p95/g' \
+  -e 's/\.thresholds\.checks\.normalisation_lag_p95_seconds/\.thresholds\.checks\.normalisation_lag_p95/g' \
+  -e 's/select(\.key != "normalisation_lag_p95_seconds")/select(.key != "normalisation_lag_p95")/g' \
   scripts/run_gate7_o01_campaign_ci_v0_6_r1.sh
 
 temporary_request="$(mktemp)"
