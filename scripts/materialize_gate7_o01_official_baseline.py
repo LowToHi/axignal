@@ -4,6 +4,7 @@ import argparse
 import json
 import os
 import subprocess
+import time
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -26,6 +27,8 @@ CONTRACT_PATH = ROOT / (
 )
 DEFAULT_OUTPUT_DIR = ROOT / "artifacts/o01-official-baseline/current"
 PACKAGE_NAME = "official-online-baseline.v0.1.json"
+TRANSIENT_HTTP_202_ATTEMPTS = 3
+TRANSIENT_HTTP_202_BACKOFF_SECONDS = 5.0
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -50,6 +53,30 @@ def git_value(*arguments: str) -> str:
 
 def iso_z(value: datetime) -> str:
     return value.astimezone(UTC).isoformat().replace("+00:00", "Z")
+
+
+def fetch_official_document_with_bounded_202_retry(
+    document: dict[str, Any],
+    *,
+    policy: RetrievalPolicy,
+    observed_at: datetime,
+) -> tuple[Any, int]:
+    for attempt in range(1, TRANSIENT_HTTP_202_ATTEMPTS + 1):
+        try:
+            return (
+                fetch_official_document(
+                    document,
+                    policy=policy,
+                    observed_at=observed_at,
+                ),
+                attempt,
+            )
+        except BaselineError as exc:
+            is_transient_202 = "returned HTTP 202" in str(exc)
+            if not is_transient_202 or attempt >= TRANSIENT_HTTP_202_ATTEMPTS:
+                raise
+            time.sleep(TRANSIENT_HTTP_202_BACKOFF_SECONDS * attempt)
+    raise BaselineError("Bounded HTTP 202 retry exhausted without a result")
 
 
 def materialize(
@@ -84,7 +111,11 @@ def materialize(
 
     observations: dict[str, dict[str, Any]] = {}
     for document in contract["official_documents"]:
-        retrieved = fetch_official_document(document, policy=policy, observed_at=now)
+        retrieved, retrieval_attempts = fetch_official_document_with_bounded_202_retry(
+            document,
+            policy=policy,
+            observed_at=now,
+        )
         content_path = documents_dir / f"{retrieved.document_id}.normalized.txt"
         content_path.write_text(retrieved.normalized_text + "\n", encoding="utf-8")
         observations[retrieved.document_id] = {
@@ -105,6 +136,7 @@ def materialize(
             "selected_address": retrieved.selected_address,
             "etag": retrieved.etag,
             "last_modified": retrieved.last_modified,
+            "retrieval_attempts": retrieval_attempts,
         }
 
     previous = load_previous_baseline(previous_baseline_path)
@@ -150,6 +182,8 @@ def materialize(
             "bounded_response_bytes": int(network["max_response_bytes"]),
             "bounded_redirects": int(network["max_redirects"]),
             "bounded_timeout_seconds": float(network["timeout_seconds"]),
+            "http_202_retry_attempts_maximum": TRANSIENT_HTTP_202_ATTEMPTS,
+            "http_202_retry_backoff_seconds": TRANSIENT_HTTP_202_BACKOFF_SECONDS,
         },
         "authority_boundary": {
             "automatic_human_signature": False,
