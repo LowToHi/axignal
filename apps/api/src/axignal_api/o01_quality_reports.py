@@ -8,6 +8,7 @@ from .o01_quality_common import (
     CPV_RE,
     CURRENCY_RE,
     NUTS_RE,
+    PUBLICATION_NUMBER_RE,
     NormalizedNotice,
     normalize_text,
     normalized_code,

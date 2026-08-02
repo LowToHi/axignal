@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import os
 from dataclasses import asdict
-from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -158,7 +157,7 @@ def run_campaign(
                     contact_records.append(record)
             network_ledger.append(
                 {
-                    "purpose": "EPHEMERAL_CONTACT_CLASSIFICATION_NO_PERSISTENCE",
+                    "purpose": "EUHEMERAL_CONTACT_CLASSIFICATION_NO_PERSISTENCE",
                     "country": country,
                     "page": page,
                     "query": query,
