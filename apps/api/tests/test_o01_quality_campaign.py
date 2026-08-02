@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import json
 from datetime import UTC, datetime, timedelta
+from pathlib import Path
 
 from axignal_api.o01_quality_campaign import (
     PageObservation,
@@ -10,6 +12,10 @@ from axignal_api.o01_quality_campaign import (
     index_and_enqueue,
     lag_report,
     quality_report,
+)
+from axignal_api.o01_quality_failure import (
+    purge_ephemeral_directory,
+    sanitise_ted_error_body,
 )
 
 
@@ -147,3 +153,39 @@ def test_duplicate_rate_uses_candidate_universe() -> None:
     )
     assert report["metrics"]["duplicate_rate"]["value"] == 0.5
     assert report["metrics"]["contact_channel_classification_accuracy"]["value"] is None
+
+
+def test_ted_error_diagnostic_is_bounded_and_allowlisted() -> None:
+    raw = json.dumps(
+        {
+            "errors": [
+                {
+                    "errorCode": "QUERY_SYNTAX",
+                    "message": "Unexpected comparison operator",
+                    "location": {"line": 1, "column": 25},
+                    "buyer-email": "must-not-survive@example.eu",
+                    "secret": "must-not-survive",
+                }
+            ],
+            "payload": {"buyer-email": "must-not-survive@example.eu"},
+        }
+    ).encode()
+    diagnostic = sanitise_ted_error_body(raw)
+    rendered = json.dumps(diagnostic, sort_keys=True)
+
+    assert diagnostic["format"] == "JSON"
+    assert diagnostic["raw_response_retained"] is False
+    assert "QUERY_SYNTAX" in rendered
+    assert "Unexpected comparison operator" in rendered
+    assert "buyer-email" not in rendered
+    assert "must-not-survive" not in rendered
+
+
+def test_ephemeral_raw_directory_is_purged(tmp_path: Path) -> None:
+    raw_dir = tmp_path / "raw"
+    raw_dir.mkdir()
+    (raw_dir / "response.json").write_text("sensitive", encoding="utf-8")
+
+    assert purge_ephemeral_directory(raw_dir) is True
+    assert not raw_dir.exists()
+    assert purge_ephemeral_directory(raw_dir) is False
