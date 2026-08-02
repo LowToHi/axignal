@@ -75,9 +75,8 @@ def index_and_enqueue(
             normalisation_started = perf_counter()
             draft = normalize_notice(
                 source,
-                sampled_country=sampled_country,
-                retrieval_started_at=observation.retrieval_started_at,
-                retrieval_completed_at=observation.retrieval_completed_at,
+                country=sampled_country,
+                page_observation=observation,
                 normalised_at=queue_started_at,
                 indexed_at=queue_started_at,
                 notification_enqueued_at=queue_started_at,
@@ -91,7 +90,7 @@ def index_and_enqueue(
                 "INSERT INTO notices VALUES (?, ?, ?)",
                 (
                     draft.publication_number,
-                    draft.title,
+                    draft.titles[0] if draft.titles else "",
                     draft.normalized_record_sha256,
                 ),
             )
