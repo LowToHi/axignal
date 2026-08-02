@@ -65,7 +65,9 @@ def materialize_plan() -> tuple[dict[str, Any], dict[str, Any]]:
 
     base_comparable = deepcopy(base_plan)
     base_comparable.pop("authority")
-    base_comparable["schema_version"] = "axignal.o01-quality-coverage-lag-execution-contract/v0.2"
+    base_comparable["schema_version"] = (
+        "axignal.o01-quality-coverage-lag-execution-contract/v0.2"
+    )
     base_contract = load(
         ROOT
         / "data/acceptance/campaigns/"
@@ -92,7 +94,10 @@ def materialize_plan() -> tuple[dict[str, Any], dict[str, Any]]:
     comparable = deepcopy(plan)
     comparable.pop("authority")
     comparable["schema_version"] = materialized_contract["schema_version"]
-    require(comparable == materialized_contract, "v0.3 plan differs from exact materialized contract")
+    require(
+        comparable == materialized_contract,
+        "v0.3 plan differs from exact materialized contract",
+    )
     require(
         plan["fields"]["ephemeral_contact_projection"][3]
         == "organisation-tel-buyer",
@@ -146,7 +151,9 @@ def main() -> int:
         "campaign_id": plan["campaign_id"],
         "target_head_sha": plan["authority"]["target_head_sha"],
         "manifest_reference": plan["authority"]["manifest_reference"],
-        "decision_max_expires_at": manifest["decision_contract"]["decision_max_expires_at"],
+        "decision_max_expires_at": manifest["decision_contract"][
+            "decision_max_expires_at"
+        ],
         "canonical_telephone_field": "organisation-tel-buyer",
         "source_state": "CANDIDATE",
         "public_launch": "NO_GO",
