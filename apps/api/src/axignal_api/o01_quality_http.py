@@ -5,6 +5,7 @@ import json
 import ssl
 import time
 from datetime import UTC, datetime
+from email.utils import parsedate_to_datetime
 from pathlib import Path
 from typing import Any
 
@@ -19,6 +20,10 @@ from .o01_quality_common import (
     canonical_json_bytes,
     sha256_prefixed,
 )
+
+OPERATIONAL_REQUEST_FLOOR_SECONDS = 2.0
+RATE_LIMIT_FALLBACK_SECONDS = 10.0
+MAXIMUM_RATE_LIMIT_WAIT_SECONDS = 120.0
 
 
 class NetworkBudget:
@@ -41,6 +46,57 @@ def write_json(path: Path, value: Any) -> None:
     path.write_bytes(
         json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True).encode("utf-8")
         + b"\n"
+    )
+
+
+def effective_request_delay(minimum_delay_seconds: float) -> float:
+    if minimum_delay_seconds < 0:
+        raise ValueError("Minimum delay cannot be negative")
+    return max(minimum_delay_seconds, OPERATIONAL_REQUEST_FLOOR_SECONDS)
+
+
+def retry_after_seconds(
+    value: str | None,
+    *,
+    now: datetime | None = None,
+) -> float | None:
+    if value is None:
+        return None
+    candidate = value.strip()
+    if not candidate:
+        return None
+    if candidate.isdigit():
+        seconds = float(candidate)
+    else:
+        try:
+            retry_at = parsedate_to_datetime(candidate)
+        except (TypeError, ValueError, OverflowError):
+            return None
+        if retry_at.tzinfo is None:
+            retry_at = retry_at.replace(tzinfo=UTC)
+        reference = now or datetime.now(UTC)
+        seconds = max(
+            0.0,
+            (
+                retry_at.astimezone(UTC) - reference.astimezone(UTC)
+            ).total_seconds(),
+        )
+    return min(seconds, MAXIMUM_RATE_LIMIT_WAIT_SECONDS)
+
+
+def rate_limit_wait_seconds(
+    retry_after: str | None,
+    *,
+    minimum_delay_seconds: float,
+    now: datetime | None = None,
+) -> float:
+    declared = retry_after_seconds(retry_after, now=now)
+    fallback_or_declared = (
+        declared if declared is not None else RATE_LIMIT_FALLBACK_SECONDS
+    )
+    return max(
+        effective_request_delay(minimum_delay_seconds),
+        fallback_or_declared,
     )
 
 
@@ -98,6 +154,7 @@ def post_json(
     path = parsed.path + (f"?{parsed.query}" if parsed.query else "")
     body = canonical_json_bytes(payload)
     last_error: Exception | None = None
+    operational_delay = effective_request_delay(minimum_delay_seconds)
     for attempt in range(1, maximum_attempts + 1):
         budget.consume()
         addresses = resolve_public_addresses(host, parsed.port or 443)
@@ -129,12 +186,22 @@ def post_json(
             completed_at = datetime.now(UTC)
             if len(response_body) > max_response_bytes:
                 raise O01QualityCampaignError("TED response exceeded frozen byte limit")
-            if response.status == 429 or 500 <= response.status <= 599:
+            if response.status == 429:
+                last_error = O01QualityCampaignError("TED transient HTTP status 429")
+                if attempt < maximum_attempts:
+                    wait_seconds = rate_limit_wait_seconds(
+                        response.getheader("Retry-After"),
+                        minimum_delay_seconds=minimum_delay_seconds,
+                        now=completed_at,
+                    )
+                    time.sleep(wait_seconds)
+                    continue
+            elif 500 <= response.status <= 599:
                 last_error = O01QualityCampaignError(
                     f"TED transient HTTP status {response.status}"
                 )
                 if attempt < maximum_attempts:
-                    time.sleep(max(minimum_delay_seconds, float(attempt)))
+                    time.sleep(max(operational_delay, float(attempt)))
                     continue
             if response.status != 200:
                 raise O01QualityCampaignError(
@@ -163,8 +230,9 @@ def post_json(
                 "request_body_sha256": sha256_prefixed(body),
                 "response_body_sha256": sha256_prefixed(response_body),
                 "response_bytes": len(response_body),
+                "operational_delay_seconds": operational_delay,
             }
-            time.sleep(minimum_delay_seconds)
+            time.sleep(operational_delay)
             return value, response_body, metadata, started_at, completed_at
         except (
             OSError,
@@ -174,7 +242,7 @@ def post_json(
         ) as exc:
             last_error = exc
             if attempt < maximum_attempts:
-                time.sleep(max(minimum_delay_seconds, float(attempt)))
+                time.sleep(max(operational_delay, float(attempt)))
                 continue
         finally:
             connection.close()
