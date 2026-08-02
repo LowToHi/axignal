@@ -18,6 +18,7 @@ from axignal_api.o01_source_admission_authority import (
 
 HEAD = "a" * 40
 MANIFEST = "sha256:" + "b" * 64
+UNSIGNED_SIGNATURE = "pending-signature-" + "0" * 64
 EVIDENCE_EXPIRY = datetime(2026, 8, 29, 10, 2, 52, tzinfo=UTC)
 DECISION_MAX = datetime(2026, 8, 28, 10, 0, tzinfo=UTC)
 NOW = datetime(2026, 8, 2, 19, 31, tzinfo=UTC)
@@ -45,7 +46,7 @@ def _decision(authority: str, *, value: str = "APPROVE") -> SourceAdmissionDecis
         head_sha=HEAD,
         reviewed_at="2026-08-02T19:30:00Z",
         expires_at="2026-08-28T10:00:00Z",
-        signature="pending-signature",
+        signature=UNSIGNED_SIGNATURE,
         conditions=("Preserve the frozen permanent boundary.",),
     )
     return unsigned.model_copy(
