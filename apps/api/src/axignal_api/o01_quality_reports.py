@@ -1,7 +1,22 @@
-# ruff: noqa: F401,F403,F405
 from __future__ import annotations
-from .o01_quality_common import *
-from .o01_quality_normalize import *
+
+import math
+from typing import Any
+
+from .o01_quality_common import (
+    CORE_FIELDS,
+    CPV_RE,
+    CURRENCY_RE,
+    NUTS_RE,
+    NormalizedNotice,
+    normalize_text,
+    normalized_code,
+    parse_amount,
+    parse_deadline,
+    publication_number,
+    values,
+)
+
 
 def percentile(values_: list[float], percentile_: float) -> float | None:
     if not values_:
@@ -45,7 +60,9 @@ def quality_report(
     contact_classification: dict[str, Any],
 ) -> dict[str, Any]:
     sample_count = len(selected_source_records)
-    normalized_by_id = {item.publication_number: item for item in normalized_records}
+    normalized_by_id = {
+        item.publication_number: item for item in normalized_records
+    }
 
     identifier_valid = sum(
         1
@@ -53,7 +70,9 @@ def quality_report(
         if (notice_id := publication_number(record))
         and PUBLICATION_NUMBER_RE.fullmatch(notice_id)
     )
-    title_present = sum(bool(values(record, "notice-title")) for record in selected_source_records)
+    title_present = sum(
+        bool(values(record, "notice-title")) for record in selected_source_records
+    )
 
     buyer_observed = 0
     buyer_valid = 0
@@ -80,7 +99,9 @@ def quality_report(
 
         deadline_values = values(record, "deadline")
         deadline_observed += len(deadline_values)
-        deadline_valid += sum(parse_deadline(item) is not None for item in deadline_values)
+        deadline_valid += sum(
+            parse_deadline(item) is not None for item in deadline_values
+        )
 
         amount_values = values(record, "estimated-value-proc")
         amount_observed += len(amount_values)
@@ -95,11 +116,15 @@ def quality_report(
 
         cpv_values = values(record, "classification-cpv")
         cpv_observed += len(cpv_values)
-        cpv_valid += sum(bool(CPV_RE.fullmatch(normalized_code(item))) for item in cpv_values)
+        cpv_valid += sum(
+            bool(CPV_RE.fullmatch(normalized_code(item))) for item in cpv_values
+        )
 
         nuts_values = values(record, "place-of-performance-subdiv-proc")
         nuts_observed += len(nuts_values)
-        nuts_valid += sum(bool(NUTS_RE.fullmatch(normalized_code(item))) for item in nuts_values)
+        nuts_valid += sum(
+            bool(NUTS_RE.fullmatch(normalized_code(item))) for item in nuts_values
+        )
 
         lots_present += bool(values(record, "identifier-lot"))
 
@@ -125,17 +150,32 @@ def quality_report(
             "contact_channel_classification_accuracy": contact_classification,
             "duplicate_rate": ratio(duplicate_count, len(candidate_ids)),
             "unparseable_rate": ratio(unparseable_count, sample_count),
-            "missing_field_rate": ratio(missing_cells, sample_count * len(CORE_FIELDS)),
+            "missing_field_rate": ratio(
+                missing_cells,
+                sample_count * len(CORE_FIELDS),
+            ),
         },
         "definitions": {
-            "accuracy": "Deterministic AXIGNAL transformation or policy-conformance fidelity against the TED Search API projected source fields; not an assertion that the publisher's underlying facts are legally or factually correct.",
-            "title_completeness": "At least one source-projected title value is present.",
-            "lot_completeness": "At least one source-projected identifier-lot value is present; not every notice type is expected to expose a lot.",
-            "contact_channel_classification_accuracy": "Agreement of the frozen reference classifier with the O01 policy matrix. Raw contact values are processed ephemerally and never persisted.",
+            "accuracy": (
+                "Deterministic AXIGNAL transformation or policy-conformance fidelity "
+                "against the TED Search API projected source fields; not an assertion "
+                "that the publisher's underlying facts are legally or factually "
+                "correct."
+            ),
+            "title_completeness": (
+                "At least one source-projected title value is present."
+            ),
+            "lot_completeness": (
+                "At least one source-projected identifier-lot value is present; not "
+                "every notice type is expected to expose a lot."
+            ),
+            "contact_channel_classification_accuracy": (
+                "Agreement of the frozen reference classifier with the O01 policy "
+                "matrix. Raw contact values are processed ephemerally and never "
+                "persisted."
+            ),
         },
         "source_record_digests": sorted(
             item.source_record_sha256 for item in normalized_by_id.values()
         ),
     }
-
-

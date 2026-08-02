@@ -1,12 +1,9 @@
 from __future__ import annotations
 
-import argparse
 import http.client
 import json
-import os
 import ssl
 import time
-from dataclasses import asdict
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -17,17 +14,9 @@ from .o01_official_baseline import (
     select_address,
     validate_official_url,
 )
-from .o01_quality_campaign import (
+from .o01_quality_common import (
     O01QualityCampaignError,
-    PageObservation,
     canonical_json_bytes,
-    contact_classification_report,
-    coverage_report,
-    deterministic_sample,
-    index_and_enqueue,
-    lag_report,
-    publication_number,
-    quality_report,
     sha256_prefixed,
 )
 
@@ -150,7 +139,8 @@ def post_json(
             if response.status != 200:
                 raise O01QualityCampaignError(
                     "TED returned HTTP "
-                    f"{response.status}; response_sha256={sha256_prefixed(response_body)}"
+                    f"{response.status}; response_sha256="
+                    f"{sha256_prefixed(response_body)}"
                 )
             content_type = response.getheader("Content-Type", "")
             if "json" not in content_type.casefold():
@@ -189,7 +179,8 @@ def post_json(
         finally:
             connection.close()
     raise O01QualityCampaignError(
-        f"TED request failed after {maximum_attempts} attempts: {type(last_error).__name__}"
+        f"TED request failed after {maximum_attempts} attempts: "
+        f"{type(last_error).__name__}"
     )
 
 
@@ -210,5 +201,3 @@ def request_payload(
         "checkQuerySyntax": sampling["check_query_syntax"],
         "paginationMode": sampling["pagination_mode"],
     }
-
-

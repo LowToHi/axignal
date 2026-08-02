@@ -2,11 +2,8 @@ from __future__ import annotations
 
 import hashlib
 import json
-import math
 import re
-import sqlite3
 import unicodedata
-from collections import Counter
 from dataclasses import dataclass
 from datetime import UTC, date, datetime
 from decimal import Decimal, InvalidOperation
@@ -224,5 +221,3 @@ def deterministic_sample(
         )
         selected.extend((country, record) for _, record in ranked[:target_per_country])
     return selected, available
-
-

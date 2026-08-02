@@ -1,4 +1,3 @@
-# ruff: noqa: F401,F403,F405
 from __future__ import annotations
 
 import json
@@ -8,8 +7,28 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from .o01_quality_campaign import *
-from .o01_quality_http import *
+from .o01_quality_common import (
+    O01QualityCampaignError,
+    PageObservation,
+    deterministic_sample,
+    publication_number,
+    sha256_prefixed,
+)
+from .o01_quality_contacts import contact_classification_report
+from .o01_quality_coverage_lag import coverage_report, lag_report
+from .o01_quality_http import (
+    NetworkBudget,
+    ensure_authority,
+    extract_notices,
+    extract_total,
+    load_json,
+    post_json,
+    request_payload,
+    write_json,
+)
+from .o01_quality_pipeline import index_and_enqueue
+from .o01_quality_reports import quality_report
+
 
 def run_campaign(
     *,
@@ -38,7 +57,9 @@ def run_campaign(
     record_page: dict[tuple[str, str], PageObservation] = {}
     page_observations: list[PageObservation] = []
     network_ledger: list[dict[str, Any]] = []
-    retained_fields = [str(item) for item in plan["fields"]["retained_raw_projection"]]
+    retained_fields = [
+        str(item) for item in plan["fields"]["retained_raw_projection"]
+    ]
 
     for country in sampling["countries"]:
         query = str(sampling["query_contract"]).format(country=country)
@@ -88,8 +109,12 @@ def run_campaign(
                     "fields": retained_fields,
                     "returned_count": len(notices),
                     "total_notice_count": observation.total_notice_count,
-                    "retrieval_started_at": started_at.isoformat().replace("+00:00", "Z"),
-                    "retrieval_completed_at": completed_at.isoformat().replace("+00:00", "Z"),
+                    "retrieval_started_at": started_at.isoformat().replace(
+                        "+00:00", "Z"
+                    ),
+                    "retrieval_completed_at": completed_at.isoformat().replace(
+                        "+00:00", "Z"
+                    ),
                     **metadata,
                 }
             )
@@ -104,7 +129,9 @@ def run_campaign(
     }
 
     contact_records: list[dict[str, Any]] = []
-    contact_fields = [str(item) for item in plan["fields"]["ephemeral_contact_projection"]]
+    contact_fields = [
+        str(item) for item in plan["fields"]["ephemeral_contact_projection"]
+    ]
     for country in sampling["countries"]:
         query = str(sampling["query_contract"]).format(country=country)
         for page in range(1, int(sampling["pages_per_country"]) + 1):
@@ -138,8 +165,12 @@ def run_campaign(
                     "field_names": contact_fields,
                     "returned_count": len(notices),
                     "retained_contact_values": False,
-                    "retrieval_started_at": started_at.isoformat().replace("+00:00", "Z"),
-                    "retrieval_completed_at": completed_at.isoformat().replace("+00:00", "Z"),
+                    "retrieval_started_at": started_at.isoformat().replace(
+                        "+00:00", "Z"
+                    ),
+                    "retrieval_completed_at": completed_at.isoformat().replace(
+                        "+00:00", "Z"
+                    ),
                     "http_status": metadata["http_status"],
                     "response_bytes": metadata["response_bytes"],
                     "response_body_sha256": metadata["response_body_sha256"],
@@ -181,15 +212,22 @@ def run_campaign(
             "earliest_observed_publication_date": first.get("publication-date"),
             "total_notice_count": extract_total(response),
             "retrieved_at": completed_at.isoformat().replace("+00:00", "Z"),
-            "limitation": "Bounded Search API observation under the frozen scope; not proof of exhaustive archive history.",
+            "limitation": (
+                "Bounded Search API observation under the frozen scope; not proof "
+                "of exhaustive archive history."
+            ),
         }
         network_ledger.append(
             {
                 "purpose": "BOUNDED_HISTORY_PROBE",
                 "query": history_query,
                 "fields": ["publication-number", "publication-date"],
-                "retrieval_started_at": started_at.isoformat().replace("+00:00", "Z"),
-                "retrieval_completed_at": completed_at.isoformat().replace("+00:00", "Z"),
+                "retrieval_started_at": started_at.isoformat().replace(
+                    "+00:00", "Z"
+                ),
+                "retrieval_completed_at": completed_at.isoformat().replace(
+                    "+00:00", "Z"
+                ),
                 **metadata,
             }
         )
@@ -199,7 +237,9 @@ def run_campaign(
             "query": history_query,
             "scope": plan["source"]["scope"],
             "error_class": type(exc).__name__,
-            "limitation": "History probe failed closed; no historical coverage claim is made.",
+            "limitation": (
+                "History probe failed closed; no historical coverage claim is made."
+            ),
         }
 
     selected_with_pages: list[tuple[dict[str, Any], str, PageObservation]] = []
@@ -212,12 +252,16 @@ def run_campaign(
             continue
         selected_with_pages.append((record, country, observation))
 
-    normalized_records, acquisition_by_notice, notification_ledger = index_and_enqueue(
-        selected_with_pages
+    normalized_records, acquisition_by_notice, notification_ledger = (
+        index_and_enqueue(selected_with_pages)
     )
-    selected_source_records = [record for record, _country, _page in selected_with_pages]
+    selected_source_records = [
+        record for record, _country, _page in selected_with_pages
+    ]
     all_candidate_records = [
-        record for country in sorted(candidates_by_country) for record in candidates_by_country[country]
+        record
+        for country in sorted(candidates_by_country)
+        for record in candidates_by_country[country]
     ]
 
     quality = quality_report(
@@ -275,7 +319,9 @@ def run_campaign(
         "w", encoding="utf-8"
     ) as handle:
         for record in normalized_records:
-            handle.write(json.dumps(asdict(record), ensure_ascii=False, sort_keys=True) + "\n")
+            handle.write(
+                json.dumps(asdict(record), ensure_ascii=False, sort_keys=True) + "\n"
+            )
     with (output_dir / "notification-ledger.v0.1.jsonl").open(
         "w", encoding="utf-8"
     ) as handle:
@@ -299,5 +345,3 @@ def run_campaign(
     }
     write_json(output_dir / "preliminary-result.v0.1.json", preliminary)
     return preliminary
-
-

@@ -1,17 +1,27 @@
-# ruff: noqa: F401,F403,F405
 from __future__ import annotations
-from .o01_quality_common import *
-from .o01_quality_normalize import *
-from .o01_quality_reports import *
-from .o01_quality_coverage_lag import *
-from .o01_quality_contacts import *
+
+import json
+import sqlite3
+from datetime import UTC, datetime
+from typing import Any
+
+from .o01_quality_common import (
+    NormalizedNotice,
+    O01QualityCampaignError,
+    PageObservation,
+    publication_number,
+    sha256_prefixed,
+)
+from .o01_quality_normalize import normalize_notice
+
 
 def index_and_enqueue(
     records: list[tuple[dict[str, Any], str, PageObservation]],
 ) -> tuple[list[NormalizedNotice], dict[str, float], list[dict[str, Any]]]:
     connection = sqlite3.connect(":memory:")
     connection.execute(
-        "CREATE TABLE notices (publication_number TEXT PRIMARY KEY, payload TEXT NOT NULL)"
+        "CREATE TABLE notices "
+        "(publication_number TEXT PRIMARY KEY, payload TEXT NOT NULL)"
     )
     normalized: list[NormalizedNotice] = []
     acquisition_by_notice: dict[str, float] = {}
@@ -44,7 +54,9 @@ def index_and_enqueue(
         except O01QualityCampaignError:
             continue
         normalized.append(notice)
-        acquisition_by_notice[notice.publication_number] = page_observation.acquisition_seconds
+        acquisition_by_notice[
+            notice.publication_number
+        ] = page_observation.acquisition_seconds
         notification_ledger.append(
             {
                 "notification_id": sha256_prefixed(
@@ -72,7 +84,11 @@ def evaluate_thresholds(
     metrics = quality["metrics"]
     checks: dict[str, dict[str, Any]] = {}
 
-    def check_min(name: str, value: float | int | None, threshold: float | int) -> None:
+    def check_min(
+        name: str,
+        value: float | int | None,
+        threshold: float | int,
+    ) -> None:
         checks[name] = {
             "value": value,
             "operator": ">=",
@@ -80,7 +96,11 @@ def evaluate_thresholds(
             "pass": value is not None and value >= threshold,
         }
 
-    def check_max(name: str, value: float | int | None, threshold: float | int) -> None:
+    def check_max(
+        name: str,
+        value: float | int | None,
+        threshold: float | int,
+    ) -> None:
         checks[name] = {
             "value": value,
             "operator": "<=",
@@ -88,7 +108,11 @@ def evaluate_thresholds(
             "pass": value is not None and value <= threshold,
         }
 
-    check_min("sample_count", quality["sample_count"], thresholds["minimum_sample_count"])
+    check_min(
+        "sample_count",
+        quality["sample_count"],
+        thresholds["minimum_sample_count"],
+    )
     observed_countries = len(
         coverage["countries_and_jurisdictions_observed"]["buyer_country"]
     )

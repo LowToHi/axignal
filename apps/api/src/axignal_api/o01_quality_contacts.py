@@ -1,9 +1,17 @@
-# ruff: noqa: F401,F403,F405
 from __future__ import annotations
-from .o01_quality_common import *
-from .o01_quality_reports import *
 
-def reference_contact_classification(field: str, value: str, contact_point: str | None) -> tuple[str, str]:
+from collections import Counter
+from typing import Any
+
+from .o01_quality_common import values
+from .o01_quality_reports import ratio
+
+
+def reference_contact_classification(
+    field: str,
+    value: str,
+    contact_point: str | None,
+) -> tuple[str, str]:
     lower = value.casefold().strip()
     if field in {"buyer-internet-address", "buyer-profile", "submission-url-lot"}:
         return "INSTITUTIONAL", "BUYER_PROFILE"
@@ -53,7 +61,9 @@ def reference_contact_classification(field: str, value: str, contact_point: str 
     return "BLOCKED", "SOURCE_LINK_ONLY"
 
 
-def contact_classification_report(contact_records: list[dict[str, Any]]) -> dict[str, Any]:
+def contact_classification_report(
+    contact_records: list[dict[str, Any]],
+) -> dict[str, Any]:
     expected_policy = {
         ("INSTITUTIONAL", "BUYER_PROFILE"): "ALLOW",
         ("FUNCTIONAL_NON_PERSONAL", "FUNCTIONAL_EMAIL"): "ALLOW",
@@ -100,5 +110,3 @@ def contact_classification_report(contact_records: list[dict[str, Any]]) -> dict
         }
     )
     return result
-
-
