@@ -15,6 +15,8 @@ from axignal_api.o01_source_admission_authority import (  # noqa: E402
     build_github_identity_signature,
 )
 
+UNSIGNED_SIGNATURE = "pending-signature-" + "0" * 64
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
@@ -27,7 +29,7 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     payload = json.loads(args.decision.read_text(encoding="utf-8"))
-    payload["signature"] = "pending-signature"
+    payload["signature"] = UNSIGNED_SIGNATURE
     unsigned = SourceAdmissionDecision.model_validate(payload)
     payload["signature"] = build_github_identity_signature(
         unsigned,
