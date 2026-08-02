@@ -11,6 +11,10 @@ from axignal_api.o01_history_frequency_lag_v2 import (
     parse_release_calendar,
     percentile,
 )
+from axignal_api.o01_history_frequency_lag_v3 import (
+    OLE2_MAGIC,
+    parse_release_calendar_xls,
+)
 from axignal_api.o01_quality_common import O01QualityCampaignError
 
 
@@ -30,6 +34,15 @@ def test_parse_release_calendar_rejects_empty_or_wrong_year() -> None:
             "Issue;Publication date\nS 001/2024;02/01/2024\n",
             expected_year=2025,
         )
+
+
+def test_xls_parser_requires_observed_ole2_signature() -> None:
+    assert OLE2_MAGIC.hex() == "d0cf11e0a1b11ae1"
+    with pytest.raises(
+        O01QualityCampaignError,
+        match="observed OLE2 signature",
+    ):
+        parse_release_calendar_xls(b"<html>not a workbook</html>", expected_year=2025)
 
 
 def test_bounded_date_query_uses_proven_canonical_interval() -> None:
