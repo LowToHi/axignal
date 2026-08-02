@@ -115,6 +115,7 @@ jobs:
             --manifest "$MANIFEST" \
             --contract "$CONTRACT" \
             --closure "$CLOSURE" \
+            --registry "$CAMPAIGN_REGISTRY" \
             | tee "$RESULT_DIR/contract-result.json"
 
       - name: Evaluate seven human authorities
