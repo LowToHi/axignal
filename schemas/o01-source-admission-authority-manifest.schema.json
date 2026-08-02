@@ -130,6 +130,13 @@
       ],
       "type": "object"
     },
+    "campaign_registry_path": {
+      "const": "data/acceptance/campaign-results/AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.6-r4.json"
+    },
+    "campaign_registry_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
     "closure_path": {
       "const": "data/acceptance/campaigns/AX-LIB-O01-quality-coverage-lag-closure.v0.6-r4.json"
     },
@@ -310,7 +317,9 @@
     "evidence",
     "authorities",
     "decision_policy",
-    "permanent_boundary"
+    "permanent_boundary",
+    "campaign_registry_path",
+    "campaign_registry_sha256"
   ],
   "title": "AXIGNAL O01 seven-authority source admission manifest",
   "type": "object"
