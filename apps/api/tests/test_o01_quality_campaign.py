@@ -61,6 +61,8 @@ def minimal_plan() -> dict[str, object]:
         "sampling": {
             "page_size": 100,
             "pages_per_country": 2,
+            "maximum_network_requests": 60,
+            "maximum_attempts_per_request": 2,
         },
         "source": {
             "declared_publication_frequency": "MONDAY_TO_FRIDAY",
@@ -138,6 +140,50 @@ def test_real_field_projection_builds_complete_reports() -> None:
     assert lag["metrics"]["AXIGNAL_acquisition_lag"]["sample_count"] == 2
     assert len(notifications) == 2
     assert all(item["external_delivery_authorised"] is False for item in notifications)
+
+
+def test_missing_optional_source_metadata_is_disclosed_without_claims() -> None:
+    page = observation()
+    normalized, _, _ = index_and_enqueue(
+        [(source_record("000001-2026"), "ESP", page)]
+    )
+    plan = minimal_plan()
+    source = plan["source"]
+    assert isinstance(source, dict)
+    source.clear()
+
+    report = coverage_report(
+        normalized_records=normalized,
+        page_observations=[page],
+        available_by_country={"ESP": 1},
+        plan=plan,
+        history_probe={"status": "OBSERVED"},
+    )
+
+    assert (
+        report["frequency"]["declared"]
+        == "NOT_DECLARED_IN_FROZEN_EXECUTION_CONTRACT"
+    )
+    assert (
+        report["search_limits"]["status"]
+        == "NOT_EMBEDDED_IN_FROZEN_EXECUTION_CONTRACT"
+    )
+    assert report["search_limits"]["public_claim_authorised"] is False
+    assert report["search_limits"]["campaign_enforced_limits"] == {
+        "maximum_network_requests": 60,
+        "maximum_attempts_per_request": 2,
+        "page_size": 100,
+        "pages_per_country": 2,
+        "country_retrieval_cap": 200,
+    }
+    assert any(
+        "no provider-frequency claim is made" in limitation
+        for limitation in report["areas_not_covered"]
+    )
+    assert any(
+        "only enforced campaign limits are disclosed" in limitation
+        for limitation in report["areas_not_covered"]
+    )
 
 
 def test_duplicate_rate_uses_candidate_universe() -> None:
