@@ -1,0 +1,122 @@
+{
+  "schema_version": "axignal.o01-history-frequency-lag-verification-repair-plan/v0.1",
+  "task_id": "AX-GE2E-G7-O01-E-VERIFY-REPAIR",
+  "library_id": "AX-LIB-O01",
+  "source_campaign": {
+    "workflow_run_id": 30771690223,
+    "measurement_job_id": 91559905777,
+    "request_head_sha": "134fae19b78693164a797f8938ee2451656a70e4",
+    "request_tree_sha": "c789fdb4b1830699f91f9c5f2349313501f3c6a0",
+    "controller_parent_sha": "976ab6964546aaf7ace87bfe1e51a06eeaa73024",
+    "controller_parent_tree_sha": "1c2b2d719118881b9437369405c3bc245074cd74",
+    "artifact_id": 8840746749,
+    "artifact_name": "o01-history-frequency-lag-v0-7-134fae19b78693164a797f8938ee2451656a70e4",
+    "artifact_digest": "sha256:9d94a78484928a79a2a23e0d78dab52a74f68526708a6807234f3a4477ed75c5",
+    "artifact_size_bytes": 31165,
+    "artifact_expires_at": "2026-09-01T23:13:19Z",
+    "measurement_step": "SUCCESS",
+    "verification_step": "FAIL",
+    "verification_error": "Calendar edition count drift",
+    "state_transition_applied": false
+  },
+  "root_cause": {
+    "classification": "VERIFIER_OVERCONSTRAINT",
+    "incorrect_inherited_rule": "EVERY_CALENDAR_RELEASE_COUNT_EQUALS_255",
+    "correct_contract": "ISSUES_CONTIGUOUS_FROM_1_AND_REFERENCE_YEAR_MEETS_FROZEN_MINIMUM",
+    "thresholds_changed": false,
+    "measurement_changed": false,
+    "network_replay_authorised": false
+  },
+  "required_members_sha256": {
+    "admission-artifact-metadata.json": "sha256:3e956cceeecdf6b0e3e1a792b8fc99196068f6bc91e46414a07a1886aed8ec43",
+    "calendar-probe-artifact-metadata.json": "sha256:e2b0c36ae79fd31d8ef1714afcefd178ce078bd33dcac8e8f73a920fe1cd7e84",
+    "campaign-console.json": "sha256:0a24ae2dd1cd7b2a7eb6760835628fb96560e33b64daa3ece377bbd4edecb5eb",
+    "final-result.v0.1.json": "sha256:904cb3de9a53aa1e32df4d8fad3caed206f594d40ebce5f6bf65e195fe4c2d4d",
+    "history-depth-report.v0.1.json": "sha256:fdd07c226e0d00e4120995a52886f8a179c60567cf84c585d5386e7943f3fe15",
+    "history-diagnostic-artifact-metadata.json": "sha256:16af181d57e2ba8cf6793e6c6d8bc2c216c2308ba694668e1e9b7189a2d70573",
+    "official-source-attempt-ledger.v0.1.json": "sha256:9498074a81897a72093cd6a272c7af57e1030aa2c1bfb62c37dce367f801db05",
+    "official-source-observations.v0.1.json": "sha256:7db92981d6e01e9edc70497a3d2ee95447f62e267db65355010ae741e3b35bdd",
+    "preflight-provenance.txt": "sha256:5d0bdc95e68da90f309d9b94f9afadff5711e4d0c9ec28ba331fd96f79130f00",
+    "preflight-result.json": "sha256:af71a4f62b356d0275155ddb54eb6a065dd720b7bea3082772283c1bd4601554",
+    "publication-lag-report.v0.1.json": "sha256:d6aea51e87f3701142815ce1976069ce4f4df3b3f774989572c378bde34a17fe",
+    "release-calendar-observations.v0.1.json": "sha256:09635d853f3532a5ff582588d430ddfc44e205761ef11c366aac9d5d7310ea76",
+    "remediation-authority-coherence.json": "sha256:49842735bb0b19aba71afecf0dacaf077d9a1b926e4624074201f4e19b8fa487",
+    "retry-trigger-artifact-metadata.json": "sha256:12ce148cb88902d8eba54690cc4ef7e7951a07ff6f889859a82c20fa160784c0",
+    "update-frequency-report.v0.1.json": "sha256:2d5452149285d4b493891aa7076d1b9f8eb2e80c4d4710d6a168a8235398a8fc"
+  },
+  "expected_measurement": {
+    "observed_at": "2026-08-02T23:11:50.816732Z",
+    "evidence_expires_at": "2026-08-22T23:11:50.816732Z",
+    "network_requests_used": 52,
+    "network_requests_maximum": 60,
+    "official_source_count": 5,
+    "official_source_attempt_count": 5,
+    "calendar_years": {
+      "2025": {
+        "release_count": 252,
+        "first_issue": 1,
+        "last_issue": 252,
+        "first_release": "2025-01-02",
+        "last_release": "2025-12-31",
+        "role": "COMPLETED_REFERENCE_YEAR"
+      },
+      "2026": {
+        "release_count": 254,
+        "first_issue": 1,
+        "last_issue": 254,
+        "first_release": "2026-01-02",
+        "last_release": "2026-12-31",
+        "role": "PUBLISHED_ANNUAL_SCHEDULE"
+      }
+    },
+    "history": {
+      "declared_boundary_date": "2016-08-02",
+      "earliest_available_date": "2016-08-02",
+      "earliest_publication_number": "265469-2016",
+      "day_before_earliest_total": 0,
+      "boundary_slack_days": 0,
+      "latest_available_date": "2026-07-31",
+      "latest_publication_number": "529733-2026",
+      "public_depth_days": 3651
+    },
+    "frequency": {
+      "reference_year": 2025,
+      "reference_year_editions": 252,
+      "reference_year_editions_minimum": 240,
+      "reference_year_weekend_editions": 0,
+      "recent_release_sample_count": 20,
+      "search_presence_ratio": 1.0,
+      "daily_package_sample_count": 10,
+      "package_presence_ratio": 1.0
+    },
+    "lag": {
+      "search_request_p95_seconds": 0.36788410000000016,
+      "publication_to_axignal_p95_seconds": 32400.367884099996,
+      "publication_to_axignal_p95_threshold_seconds": 32430
+    }
+  },
+  "success_transition": {
+    "o01_metrics_closed": true,
+    "o01_canonical_state": "ACCEPTED",
+    "o01_claim_decision": "DENIED",
+    "source_state": "PRODUCT_ADMITTED",
+    "source_contributes_to_public_claim": false,
+    "gate7_decision": "IN_PROGRESS",
+    "public_launch": "NO_GO"
+  },
+  "repair_execution": {
+    "ted_network_requests_authorised": 0,
+    "source_artifact_downloads_authorised": 1,
+    "raw_source_bodies_expected": false,
+    "verification_only": true
+  },
+  "non_authorisations": {
+    "measurement_mutation": false,
+    "threshold_relaxation": false,
+    "calendar_count_normalisation": false,
+    "source_scope_change": false,
+    "public_claim_contribution": false,
+    "gate7_closed": false,
+    "public_launch": "NO_GO"
+  }
+}
