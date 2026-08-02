@@ -4,7 +4,8 @@ from datetime import date
 
 import pytest
 
-from axignal_api.o01_history_frequency_lag import (
+from axignal_api.o01_history_frequency_lag_v2 import (
+    bounded_date_query,
     first_available_date,
     html_text,
     parse_release_calendar,
@@ -29,6 +30,28 @@ def test_parse_release_calendar_rejects_empty_or_wrong_year() -> None:
             "Issue;Publication date\nS 001/2024;02/01/2024\n",
             expected_year=2025,
         )
+
+
+def test_bounded_date_query_uses_proven_canonical_interval() -> None:
+    assert bounded_date_query(
+        date(2015, 1, 1),
+        date(2016, 8, 3),
+    ) == (
+        "publication-date >= 20150101 AND publication-date <= 20160803"
+    )
+    assert bounded_date_query(
+        date(2026, 7, 31),
+        date(2026, 7, 31),
+        sort=True,
+    ) == (
+        "publication-date >= 20260731 AND publication-date <= 20260731 "
+        "SORT BY publication-number ASC"
+    )
+
+
+def test_bounded_date_query_rejects_inverted_range() -> None:
+    with pytest.raises(ValueError):
+        bounded_date_query(date(2026, 8, 1), date(2026, 7, 31))
 
 
 def test_first_available_date_is_exact_and_logarithmic() -> None:
