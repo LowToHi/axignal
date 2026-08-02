@@ -8,7 +8,7 @@
   "change_class": "VERSIONED_QUERY_EXECUTION_MODE_CORRECTION",
   "diagnostic_evidence": {
     "all_country_strata_zero": true,
-    "artifact_digest": "sha256:8eedfe9e8d8aab14732f66d92b1fe72be4a022e38f3a25ddbc0243769bda7c12",
+    "artifact_digest": "sha256:3e3db25536958dc852f555ac4bd829e719d079e7198b7553c887d99f9ff786bb",
     "artifact_id": 8837430628,
     "classification": "SYNTAX_CHECK_MODE_ZERO_RESULT_CONFIRMED",
     "controller_head_sha": "718b03f7f0633ca8553e76a5cd14f1faa68d06f8",
