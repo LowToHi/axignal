@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+: "${REQUEST_PATH:?}"
+: "${AXIGNAL_EXACT_SHA:?}"
+
+real_request="$REQUEST_PATH"
+test "$(git rev-parse HEAD)" = "$AXIGNAL_EXACT_SHA"
+test -f "$real_request"
+! git cat-file -e "HEAD^:${real_request}" 2>/dev/null
+test "$(git diff --name-only HEAD^ HEAD)" = "$real_request"
+
+jq -e \
+  '.schema_version == "axignal.o01-real-campaign-execution-request/v0.6-r4" and
+   .controller_parent_binding == "IMMEDIATE_PARENT_REQUEST_ONLY" and
+   .execute == true and
+   .one_shot == true and
+   .stage_timing_correction == true and
+   .instrumentation_implementation == "SELF_CONTAINED_V2"' \
+  "$real_request"
+
+cp apps/api/src/axignal_api/o01_quality_stage_timing_v2.py \
+  apps/api/src/axignal_api/o01_quality_stage_timing.py
+cp apps/api/tests/test_o01_quality_stage_timing_v2.py \
+  apps/api/tests/test_o01_quality_stage_timing.py
+
+# Bind every campaign import to the exact checked-out source tree. The package
+# was installed before the request-only wrapper materialised the corrected
+# module, so importing from site-packages would execute stale code.
+export PYTHONPATH="$PWD/apps/api/src${PYTHONPATH:+:$PYTHONPATH}"
+python - <<'PY'
+from pathlib import Path
+
+import axignal_api.o01_quality_stage_timing as timing
+
+expected = Path("apps/api/src/axignal_api/o01_quality_stage_timing.py").resolve()
+observed = Path(timing.__file__).resolve()
+if observed != expected:
+    raise SystemExit(
+        f"O01 runtime provenance mismatch: expected {expected}, observed {observed}"
+    )
+print(f"o01_stage_timing_runtime={observed}")
+PY
+
+# The frozen verifier emits the threshold check key without the redundant
+# `_seconds` suffix. Correct only the result-schema consumers. The historical
+# remediation field keeps its original `_seconds` name and value.
+sed -i \
+  -e 's/\.thresholds\.checks\.normalisation_lag_p95_seconds/\.thresholds\.checks\.normalisation_lag_p95/g' \
+  -e 's/select(\.key != "normalisation_lag_p95_seconds")/select(.key != "normalisation_lag_p95")/g' \
+  scripts/run_gate7_o01_campaign_ci_v0_6_r1.sh
+
+temporary_request="$(mktemp)"
+trap 'rm -f "$temporary_request"' EXIT
+jq \
+  --arg parent "$(git rev-parse HEAD^)" \
+  '.schema_version = "axignal.o01-real-campaign-execution-request/v0.6-r1" |
+   .controller_parent_sha = $parent' \
+  "$real_request" > "$temporary_request"
+
+export REQUEST_PATH="$temporary_request"
+bash scripts/run_gate7_o01_campaign_ci_v0_6_r1.sh

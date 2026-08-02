@@ -1,0 +1,89 @@
+{
+  "base_contract": {
+    "materialized_campaign_id": "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.5",
+    "materialized_canonical_sha256": "sha256:1be51417eeb95dbac8d68e39ed73cfe03202732688e3e5180a714ab2a2762387",
+    "materializer": "scripts/verify_gate7_o01_v0_5_query_contract.py"
+  },
+  "campaign_id": "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.6",
+  "change_class": "VERSIONED_QUERY_EXECUTION_MODE_CORRECTION",
+  "diagnostic_evidence": {
+    "all_country_strata_zero": true,
+    "artifact_digest": "sha256:3e3db25536958dc852f555ac4bd829e719d079e7198b7553c887d99f9ff786bb",
+    "artifact_id": 8837430628,
+    "classification": "SYNTAX_CHECK_MODE_ZERO_RESULT_CONFIRMED",
+    "controller_head_sha": "718b03f7f0633ca8553e76a5cd14f1faa68d06f8",
+    "fabricated_evidence": 0,
+    "http_200_projection_requests": 48,
+    "network_requests_used": 49,
+    "raw_plaintext_removed": true,
+    "raw_plaintext_uploaded": false,
+    "request_check_query_syntax": true,
+    "response_body_bytes": 81,
+    "response_body_sha256": "sha256:c006a89557974a508c38b48894ad3a389f763747cb4b56f73410d8d9dca02c76",
+    "sample_count": 0,
+    "workflow_run_id": 30760876484
+  },
+  "experimental_operations": [
+    {
+      "from": true,
+      "op": "test_replace",
+      "path": "/sampling/check_query_syntax",
+      "reason": "TED official Search API examples use checkQuerySyntax=false for notice retrieval. The prior campaigns used true and received the same 81-byte zero-result response for every projected query.",
+      "to": false
+    }
+  ],
+  "invariants": {
+    "authority_boundary_unchanged": true,
+    "countries_unchanged": true,
+    "ephemeral_contact_projection_unchanged": true,
+    "lag_metrics_unchanged": true,
+    "languages_unchanged": true,
+    "measurement_window_unchanged": true,
+    "network_request_budget_unchanged": true,
+    "pagination_unchanged": true,
+    "quality_metrics_unchanged": true,
+    "query_unchanged": true,
+    "retained_projection_unchanged": true,
+    "retention_unchanged": true,
+    "retry_policy_unchanged": true,
+    "sample_allocation_unchanged": true,
+    "source_scope_all_unchanged": true,
+    "thresholds_unchanged": true
+  },
+  "metadata_operations": [
+    {
+      "from": "axignal.o01-quality-coverage-lag-execution-contract/v0.5",
+      "op": "test_replace",
+      "path": "/schema_version",
+      "to": "axignal.o01-quality-coverage-lag-execution-contract/v0.6"
+    },
+    {
+      "from": "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.5",
+      "op": "test_replace",
+      "path": "/campaign_id",
+      "to": "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.6"
+    },
+    {
+      "from": "AX-GE2E-G7-O01-C-R4",
+      "op": "test_replace",
+      "path": "/task_id",
+      "to": "AX-GE2E-G7-O01-C-R5"
+    }
+  ],
+  "non_authorisations": {
+    "bid_submission": false,
+    "contact_marketing": false,
+    "external_notification_delivery": false,
+    "model_training": false,
+    "public_claims": false,
+    "public_launch": "NO_GO",
+    "public_redistribution": false,
+    "ted_product_admission": false
+  },
+  "official_execution_evidence": {
+    "check_query_syntax_for_retrieval": false,
+    "source": "https://op.europa.eu/en/web/ted-reusers-workshops/questions_and_answers_2023_12_14"
+  },
+  "schema_version": "axignal.o01-execution-contract-delta/v0.1",
+  "task_id": "AX-GE2E-G7-O01-C-R5"
+}

@@ -1,0 +1,204 @@
+from __future__ import annotations
+
+import json
+import sqlite3
+from dataclasses import asdict, replace
+from datetime import UTC, datetime
+from time import perf_counter
+from typing import Any
+
+from .o01_quality_common import (
+    NormalizedNotice,
+    PageObservation,
+    canonical_json_bytes,
+    sha256_prefixed,
+)
+from .o01_quality_coverage_lag import lag_report as legacy_lag_report
+from .o01_quality_normalize import normalize_notice
+from .o01_quality_reports import metric_summary
+
+_STAGE_TIMINGS: dict[str, dict[str, float]] = {}
+
+
+def _now() -> datetime:
+    return datetime.now(UTC)
+
+
+def _iso(value: datetime) -> str:
+    return value.isoformat().replace("+00:00", "Z")
+
+
+def _record_hash(notice: NormalizedNotice) -> str:
+    payload = asdict(notice)
+    payload.pop("normalized_record_sha256", None)
+    return sha256_prefixed(canonical_json_bytes(payload))
+
+
+def reset_stage_timings() -> None:
+    _STAGE_TIMINGS.clear()
+
+
+def stage_timings() -> dict[str, dict[str, float]]:
+    return {key: dict(value) for key, value in _STAGE_TIMINGS.items()}
+
+
+def index_and_enqueue(
+    selected: list[tuple[dict[str, Any], str, PageObservation]],
+) -> tuple[list[NormalizedNotice], dict[str, float], list[dict[str, Any]]]:
+    """Measure local stages separately from the bounded batch queue."""
+
+    reset_stage_timings()
+    connection = sqlite3.connect(":memory:")
+    connection.execute(
+        "CREATE TABLE notices "
+        "(publication_number TEXT PRIMARY KEY, payload TEXT NOT NULL)"
+    )
+    normalized: list[NormalizedNotice] = []
+    acquisition_by_notice: dict[str, float] = {}
+    notification_ledger: list[dict[str, Any]] = []
+
+    try:
+        for source, sampled_country, observation in selected:
+            normalisation_started_at = _now()
+            normalisation_clock = perf_counter()
+            draft = normalize_notice(
+                source,
+                country=sampled_country,
+                page_observation=observation,
+                normalised_at=normalisation_started_at,
+                indexed_at=normalisation_started_at,
+                notification_enqueued_at=normalisation_started_at,
+            )
+            normalisation_completed_at = _now()
+            normalisation_seconds = max(0.0, perf_counter() - normalisation_clock)
+
+            indexing_clock = perf_counter()
+            indexed_payload = {
+                "publication_number": draft.publication_number,
+                "source_country_stratum": draft.source_country_stratum,
+                "titles": draft.titles,
+            }
+            connection.execute(
+                "INSERT INTO notices(publication_number, payload) VALUES (?, ?)",
+                (
+                    draft.publication_number,
+                    json.dumps(indexed_payload, ensure_ascii=False, sort_keys=True),
+                ),
+            )
+            connection.commit()
+            indexed_at = _now()
+            indexing_seconds = max(0.0, perf_counter() - indexing_clock)
+
+            notification_clock = perf_counter()
+            notification_enqueued_at = _now()
+            staged = replace(
+                draft,
+                normalised_at=_iso(normalisation_completed_at),
+                indexed_at=_iso(indexed_at),
+                notification_enqueued_at=_iso(notification_enqueued_at),
+            )
+            notice = replace(staged, normalized_record_sha256=_record_hash(staged))
+            notification_ledger.append(
+                {
+                    "notification_id": sha256_prefixed(
+                        f"O01-C|{notice.publication_number}".encode()
+                    ),
+                    "publication_number": notice.publication_number,
+                    "normalized_record_sha256": notice.normalized_record_sha256,
+                    "enqueued_at": notice.notification_enqueued_at,
+                    "delivery": "PRIVATE_INTERNAL_LEDGER_ONLY",
+                    "external_delivery_authorised": False,
+                }
+            )
+            notification_seconds = max(0.0, perf_counter() - notification_clock)
+
+            normalized.append(notice)
+            acquisition_by_notice[notice.publication_number] = max(
+                0.0,
+                (
+                    observation.retrieval_completed_at
+                    - observation.retrieval_started_at
+                ).total_seconds(),
+            )
+            _STAGE_TIMINGS[notice.publication_number] = {
+                "normalisation_seconds": normalisation_seconds,
+                "indexing_seconds": indexing_seconds,
+                "notification_seconds": notification_seconds,
+                "retrieval_to_normalisation_start_seconds": max(
+                    0.0,
+                    (
+                        normalisation_started_at
+                        - observation.retrieval_completed_at
+                    ).total_seconds(),
+                ),
+            }
+    finally:
+        connection.close()
+
+    return normalized, acquisition_by_notice, notification_ledger
+
+
+def lag_report(
+    normalized_records: list[NormalizedNotice],
+    *,
+    acquisition_by_notice: dict[str, float],
+) -> dict[str, Any]:
+    """Replace only the three local-stage metrics with monotonic observations."""
+
+    report = legacy_lag_report(
+        normalized_records,
+        acquisition_by_notice=acquisition_by_notice,
+    )
+    missing = [
+        record.publication_number
+        for record in normalized_records
+        if record.publication_number not in _STAGE_TIMINGS
+    ]
+    if missing:
+        raise RuntimeError(
+            "Stage timing evidence missing for normalized notices: "
+            + ", ".join(sorted(missing)[:5])
+        )
+
+    def values(key: str) -> list[float]:
+        return [
+            _STAGE_TIMINGS[item.publication_number][key]
+            for item in normalized_records
+        ]
+
+    report["metrics"]["normalisation_lag"] = metric_summary(
+        values("normalisation_seconds"),
+        unit="seconds_stage_duration",
+    )
+    report["metrics"]["indexing_lag"] = metric_summary(
+        values("indexing_seconds"),
+        unit="seconds_stage_duration",
+    )
+    report["metrics"]["subscriber_notification_lag"] = metric_summary(
+        values("notification_seconds"),
+        unit="seconds_stage_duration",
+    )
+    report["queueing_context"] = {
+        "retrieval_to_normalisation_start_lag": metric_summary(
+            values("retrieval_to_normalisation_start_seconds"),
+            unit="seconds_queue_wait",
+        ),
+        "thresholded_as_normalisation_lag": False,
+        "reason": (
+            "Queue wait includes deterministic sampling and remaining bounded network "
+            "work; it is disclosed separately from local transformation duration."
+        ),
+    }
+    report["measurement_semantics"] = {
+        "clock": "MONOTONIC_FOR_STAGE_DURATION_UTC_FOR_AUDIT_TIMESTAMPS",
+        "normalisation_lag": "normalize_notice call duration",
+        "indexing_lag": "SQLite insert and commit duration",
+        "subscriber_notification_lag": "private ledger append duration",
+        "queue_wait_disclosed_separately": True,
+        "fabricated_evidence": 0,
+    }
+    report["confidence_limitations"].append(
+        "Local stage durations are runner observations, not production queue-capacity "
+        "claims; retrieval-to-processing wait is disclosed separately."
+    )
+    return report
