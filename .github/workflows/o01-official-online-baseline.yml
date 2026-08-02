@@ -1,0 +1,281 @@
+name: O01 Official Online Baseline
+
+on:
+  schedule:
+    - cron: "41 6 * * *"
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "apps/api/src/axignal_api/o01_official_baseline.py"
+      - "apps/api/tests/test_o01_official_baseline.py"
+      - "data/acceptance/approvals/AX-LIB-O01-official-online-baseline-contract.v0.1.json"
+      - "scripts/materialize_gate7_o01_official_baseline.py"
+      - "scripts/verify_gate7_o01_official_baseline.py"
+      - "docs/runbooks/o01-official-online-baseline.md"
+      - ".github/workflows/o01-official-online-baseline.yml"
+  push:
+    branches:
+      - main
+      - "agent/**"
+    paths:
+      - "apps/api/src/axignal_api/o01_official_baseline.py"
+      - "apps/api/tests/test_o01_official_baseline.py"
+      - "data/acceptance/approvals/AX-LIB-O01-official-online-baseline-contract.v0.1.json"
+      - "scripts/materialize_gate7_o01_official_baseline.py"
+      - "scripts/verify_gate7_o01_official_baseline.py"
+      - "docs/runbooks/o01-official-online-baseline.md"
+      - ".github/workflows/o01-official-online-baseline.yml"
+
+permissions:
+  contents: read
+  actions: read
+  issues: write
+
+concurrency:
+  group: o01-official-online-baseline-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  official-online-baseline:
+    name: Establish official online legal baseline
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      AXIGNAL_EXACT_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+      DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout exact branch head
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Freeze exact head and tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$AXIGNAL_EXACT_SHA"
+          mkdir -p artifacts/o01-official-baseline
+          {
+            printf 'exact_head_sha=%s\n' "$(git rev-parse HEAD)"
+            printf 'git_tree_sha=%s\n' "$(git rev-parse 'HEAD^{tree}')"
+          } | tee artifacts/o01-official-baseline/exact-head.txt
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.13.14"
+
+      - name: Bootstrap exact pip
+        run: python -m pip install --upgrade "pip==26.1.2"
+
+      - name: Install frozen development graph
+        run: |
+          python -m pip install \
+            --require-hashes \
+            --only-binary=:all: \
+            --requirement requirements/python-dev.lock
+          python -m pip check
+          python -m pip install --no-deps --no-build-isolation .
+
+      - name: Validate implementation and contract
+        run: |
+          python -m compileall -q \
+            apps/api/src/axignal_api/o01_official_baseline.py \
+            apps/api/tests/test_o01_official_baseline.py \
+            scripts/materialize_gate7_o01_official_baseline.py \
+            scripts/verify_gate7_o01_official_baseline.py
+          ruff check \
+            apps/api/src/axignal_api/o01_official_baseline.py \
+            apps/api/tests/test_o01_official_baseline.py \
+            scripts/materialize_gate7_o01_official_baseline.py \
+            scripts/verify_gate7_o01_official_baseline.py
+          pytest -q apps/api/tests/test_o01_official_baseline.py
+          python scripts/verify_gate7_o01_official_baseline.py \
+            | tee artifacts/o01-official-baseline/contract-result.json
+
+      - name: Recover previous retained online baseline
+        id: previous
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/o01-official-baseline/previous
+          artifact_id="$({
+            gh api \
+              -H 'Accept: application/vnd.github+json' \
+              "/repos/${GITHUB_REPOSITORY}/actions/artifacts?per_page=100" \
+              | jq -r --arg branch "$DEFAULT_BRANCH" \
+                '[.artifacts[]
+                  | select(.expired == false)
+                  | select(.name | startswith("o01-official-online-baseline-"))
+                  | select(.workflow_run.head_branch == $branch)]
+                 | sort_by(.created_at)
+                 | reverse
+                 | .[0].id // empty'
+          } || true)"
+          if [ -z "$artifact_id" ]; then
+            echo 'path=' >> "$GITHUB_OUTPUT"
+            echo 'No previous default-branch online baseline exists.'
+            exit 0
+          fi
+          gh api \
+            -H 'Accept: application/vnd.github+json' \
+            "/repos/${GITHUB_REPOSITORY}/actions/artifacts/${artifact_id}/zip" \
+            > /tmp/o01-previous-baseline.zip
+          unzip -q /tmp/o01-previous-baseline.zip \
+            -d artifacts/o01-official-baseline/previous
+          package="$(find artifacts/o01-official-baseline/previous \
+            -name 'official-online-baseline.v0.1.json' -type f | head -n 1)"
+          if [ -z "$package" ]; then
+            echo 'path=' >> "$GITHUB_OUTPUT"
+            echo 'Previous artifact contained no official baseline package.'
+            exit 0
+          fi
+          echo "path=$package" >> "$GITHUB_OUTPUT"
+          echo "Recovered previous online baseline artifact ${artifact_id}."
+
+      - name: Retrieve and retain official online baseline
+        id: baseline
+        shell: bash
+        env:
+          PREVIOUS_BASELINE: ${{ steps.previous.outputs.path }}
+        run: |
+          set -euo pipefail
+          args=(
+            --output-dir "$GITHUB_WORKSPACE/artifacts/o01-official-baseline/current"
+          )
+          if [ -n "${PREVIOUS_BASELINE:-}" ]; then
+            args+=(--previous-baseline "$PREVIOUS_BASELINE")
+          fi
+          python scripts/materialize_gate7_o01_official_baseline.py "${args[@]}" \
+            | tee artifacts/o01-official-baseline/result.json
+
+      - name: Enforce baseline acceptance and zero automatic authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          from datetime import UTC, datetime
+          from pathlib import Path
+
+          result = json.loads(
+              Path("artifacts/o01-official-baseline/result.json").read_text()
+          )
+          package = json.loads(
+              Path(
+                  "artifacts/o01-official-baseline/current/"
+                  "official-online-baseline.v0.1.json"
+              ).read_text()
+          )
+          assert result["status"] == "PASS"
+          assert result["output"] == "O01_OFFICIAL_BASELINE_PASS"
+          assert result["exact_head_sha"] == os.environ["AXIGNAL_EXACT_SHA"]
+          assert result["official_online_baseline"] == "PRESENT"
+          assert result["official_terms_available"] is True
+          assert result["terms_change_class"] in {
+              "BASELINE_ESTABLISHED",
+              "NO_MATERIAL_CHANGE",
+              "MATERIAL_TERMS_CHANGE",
+          }
+          if not Path("artifacts/o01-official-baseline/previous").exists():
+              assert result["terms_change_class"] == "BASELINE_ESTABLISHED"
+          assert result["evidence_expiry_status"] == "VALID"
+          expiry = datetime.fromisoformat(
+              result["evidence_expiry"].replace("Z", "+00:00")
+          )
+          assert expiry > datetime.now(UTC)
+          assert result["automatic_human_signature"] is False
+          assert result["automatic_human_approval"] is False
+          assert result["permissions_generated"] is False
+          assert result["campaign_authority"] is False
+          assert result["source_admission"] is False
+          assert result["public_launch"] == "NO_GO"
+          assert package["exact_head_sha"] == os.environ["AXIGNAL_EXACT_SHA"]
+          assert package["official_online_baseline"] == "PRESENT"
+          assert package["official_terms_available"] is True
+          assert len(package["documents"]) == 3
+          assert all(
+              item["status"] == "PASS"
+              for item in package["documents"].values()
+          )
+          assert all(
+              item["critical_anchors_present"]
+              == item["critical_anchors_expected"]
+              for item in package["documents"].values()
+          )
+          authority = package["authority_boundary"]
+          assert authority == {
+              "automatic_human_approval": False,
+              "automatic_human_signature": False,
+              "campaign_authority": False,
+              "permissions_generated": False,
+              "public_launch": "NO_GO",
+              "source_admission": False,
+          }
+          PY
+          ! grep -R -E \
+            'sk_(live|test)_|rk_(live|test)_|whsec_|BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY' \
+            artifacts/o01-official-baseline
+
+      - name: Emit deduplicated baseline notification
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY' > /tmp/o01-official-baseline-comment.md
+          import json
+          from pathlib import Path
+
+          result = json.loads(
+              Path("artifacts/o01-official-baseline/result.json").read_text()
+          )
+          marker = result["notification_deduplication_key"]
+          print(f"<!-- axignal-o01-official-baseline:{marker} -->")
+          print("## O01-A official online baseline")
+          print()
+          print("```text")
+          print(f"exact_head_sha          {result['exact_head_sha']}")
+          print(f"git_tree_sha            {result['git_tree_sha']}")
+          print(f"baseline_digest         {result['baseline_digest']}")
+          print(f"terms_change_class      {result['terms_change_class']}")
+          print(f"evidence_expiry         {result['evidence_expiry']}")
+          print("official_terms          AVAILABLE")
+          print("human signature         NOT GENERATED")
+          print("campaign authority      false")
+          print("public launch           NO_GO")
+          print("```")
+          print()
+          print("The retained package contains normalized official content, hashes and verified legal anchors. It creates no Legal or Privacy approval and grants no source, campaign or launch authority.")
+          PY
+          if [ "${{ github.event_name }}" = 'pull_request' ]; then
+            target="${{ github.event.pull_request.number }}"
+          else
+            target="103"
+          fi
+          marker="$(head -n 1 /tmp/o01-official-baseline-comment.md)"
+          existing="$({
+            gh api --paginate \
+              -H 'Accept: application/vnd.github+json' \
+              "/repos/${GITHUB_REPOSITORY}/issues/${target}/comments" \
+              --jq ".[] | select(.body | contains(\"${marker}\")) | .id" \
+              | head -n 1
+          } || true)"
+          if [ -z "$existing" ]; then
+            gh issue comment "$target" --repo "$GITHUB_REPOSITORY" \
+              --body-file /tmp/o01-official-baseline-comment.md
+          else
+            echo "Baseline notification already exists as comment ${existing}."
+          fi
+
+      - name: Upload retained official baseline
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: o01-official-online-baseline-${{ env.AXIGNAL_EXACT_SHA }}
+          path: artifacts/o01-official-baseline
+          if-no-files-found: error
+          retention-days: 30
