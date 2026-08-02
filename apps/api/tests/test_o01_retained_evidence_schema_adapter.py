@@ -5,12 +5,12 @@ from pathlib import Path
 
 import pytest
 
+from verify_gate7_o01_retained_evidence_v8 import VerificationError
 from verify_gate7_o01_retained_evidence_v10 import (
     INTERNAL_ALIAS,
     PUBLISHED_KEY,
     schema_aware_load_json,
 )
-from verify_gate7_o01_retained_evidence_v8 import VerificationError
 
 
 def test_published_lag_key_is_adapted_in_memory(tmp_path: Path) -> None:
