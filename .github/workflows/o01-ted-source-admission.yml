@@ -1,33 +1,19 @@
-name: O01 TED Source Admission
+name: O01 TED Source Admission v0.1 Historical Evidence
 
 on:
   workflow_dispatch:
-    inputs:
-      require_admitted:
-        description: Fail unless TED is fully product-admitted
-        required: true
-        type: boolean
-        default: false
   pull_request:
     paths:
       - "data/acceptance/campaign-results/AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.1.json"
-      - "data/acceptance/library-coverage/AX-LIB-O01.json"
       - "data/acceptance/source-admission/AX-LIB-O01-TED-source-admission-gate.v0.1.json"
-      - "schemas/o01-ted-source-admission-gate.schema.json"
-      - "scripts/verify_gate7_o01_ted_source_admission.py"
-      - "apps/api/tests/test_o01_ted_source_admission.py"
-      - "docs/acceptance/Gate-7-O01-TED-source-admission-v0.1.md"
+      - "data/acceptance/source-admission/AX-LIB-O01-TED-source-admission-closure.v0.2.json"
       - ".github/workflows/o01-ted-source-admission.yml"
   push:
     branches: [main, "agent/**"]
     paths:
       - "data/acceptance/campaign-results/AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.1.json"
-      - "data/acceptance/library-coverage/AX-LIB-O01.json"
       - "data/acceptance/source-admission/AX-LIB-O01-TED-source-admission-gate.v0.1.json"
-      - "schemas/o01-ted-source-admission-gate.schema.json"
-      - "scripts/verify_gate7_o01_ted_source_admission.py"
-      - "apps/api/tests/test_o01_ted_source_admission.py"
-      - "docs/acceptance/Gate-7-O01-TED-source-admission-v0.1.md"
+      - "data/acceptance/source-admission/AX-LIB-O01-TED-source-admission-closure.v0.2.json"
       - ".github/workflows/o01-ted-source-admission.yml"
 
 permissions:
@@ -35,68 +21,37 @@ permissions:
   actions: read
 
 concurrency:
-  group: o01-ted-source-admission-${{ github.ref }}
+  group: o01-ted-source-admission-v0-1-historical-${{ github.ref }}
   cancel-in-progress: true
 
 env:
   AXIGNAL_EXACT_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
-  ARTIFACT_DIR: artifacts/o01-ted-source-admission
+  ARTIFACT_DIR: artifacts/o01-ted-source-admission-v0.1-historical
 
 jobs:
-  admission:
-    name: Evaluate TED candidate source admission
+  historical-admission:
+    name: Verify superseded O01-D v0.1 evidence
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
-      - name: Checkout exact evaluator head
+      - name: Checkout exact head
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           ref: ${{ env.AXIGNAL_EXACT_SHA }}
           persist-credentials: false
           fetch-depth: 0
 
-      - name: Freeze exact head
-        shell: bash
+      - name: Freeze exact provenance
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$AXIGNAL_EXACT_SHA"
-          mkdir -p "$ARTIFACT_DIR/gate7"
+          mkdir -p "$ARTIFACT_DIR"
           {
-            printf 'exact_head_sha=%s\n' "$(git rev-parse HEAD)"
-            printf 'git_tree_sha=%s\n' "$(git rev-parse 'HEAD^{tree}')"
-          } | tee "$ARTIFACT_DIR/exact-head.txt"
+            echo "head_sha=$(git rev-parse HEAD)"
+            echo "tree_sha=$(git rev-parse 'HEAD^{tree}')"
+          } > "$ARTIFACT_DIR/exact-provenance.txt"
 
-      - name: Set up Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
-        with:
-          python-version: "3.13.14"
-
-      - name: Install frozen development graph
-        shell: bash
-        run: |
-          set -euo pipefail
-          python -m pip install --upgrade "pip==26.1.2"
-          python -m pip install \
-            --require-hashes \
-            --only-binary=:all: \
-            --requirement requirements/python-dev.lock
-          python -m pip check
-          python -m pip install --no-deps --no-build-isolation .
-
-      - name: Validate admission implementation
-        shell: bash
-        run: |
-          set -euo pipefail
-          python -m compileall -q \
-            scripts/verify_gate7_o01_ted_source_admission.py \
-            apps/api/tests/test_o01_ted_source_admission.py
-          ruff check \
-            scripts/verify_gate7_o01_ted_source_admission.py \
-            apps/api/tests/test_o01_ted_source_admission.py
-          pytest -q apps/api/tests/test_o01_ted_source_admission.py
-
-      - name: Verify immutable O01-C artifact
-        shell: bash
+      - name: Verify immutable failed campaign artifact
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -109,25 +64,47 @@ jobs:
             '.expired == false and .digest == $digest' \
             "$ARTIFACT_DIR/campaign-artifact-metadata.json"
           gh api "/repos/${GITHUB_REPOSITORY}/actions/artifacts/${artifact_id}/zip" \
-            > /tmp/o01-campaign-result.zip
-          mkdir -p /tmp/o01-campaign-result
-          unzip -q /tmp/o01-campaign-result.zip -d /tmp/o01-campaign-result
-          member=/tmp/o01-campaign-result/current/campaign-run-result.json
+            > /tmp/o01-campaign-v0.1.zip
+          mkdir -p /tmp/o01-campaign-v0.1
+          unzip -q /tmp/o01-campaign-v0.1.zip -d /tmp/o01-campaign-v0.1
+          member=/tmp/o01-campaign-v0.1/current/campaign-run-result.json
           test -f "$member"
           test "$(sha256sum "$member" | awk '{print $1}')" = \
             '0d5c88da9f48371a754d58486ef4a738be67a8c76fcae953d6055767b91475df'
-          MEMBER="$member" python - <<'PY'
+          cp "$member" "$ARTIFACT_DIR/campaign-run-result.v0.1.json"
+          rm -rf /tmp/o01-campaign-v0.1 /tmp/o01-campaign-v0.1.zip
+
+      - name: Prove supersession without rewriting history
+        run: |
+          python - <<'PY'
           import json
-          import os
           from pathlib import Path
 
-          member = json.loads(Path(os.environ["MEMBER"]).read_text())
           retained = json.loads(
               Path(
                   "data/acceptance/campaign-results/"
                   "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.1.json"
               ).read_text()
           )
+          member = json.loads(
+              Path(
+                  "artifacts/o01-ted-source-admission-v0.1-historical/"
+                  "campaign-run-result.v0.1.json"
+              ).read_text()
+          )
+          old_gate = json.loads(
+              Path(
+                  "data/acceptance/source-admission/"
+                  "AX-LIB-O01-TED-source-admission-gate.v0.1.json"
+              ).read_text()
+          )
+          current = json.loads(
+              Path(
+                  "data/acceptance/source-admission/"
+                  "AX-LIB-O01-TED-source-admission-closure.v0.2.json"
+              ).read_text()
+          )
+
           assert member["status"] == retained["status"] == "FAIL"
           assert member["output"] == retained["output"]
           assert member["failure_stage"] == retained["failure"]["stage"]
@@ -135,88 +112,51 @@ jobs:
           assert member["raw_directory_removed"] is True
           assert member["raw_plaintext_uploaded"] is False
           assert member["source_state"] == "CANDIDATE"
-          assert member["ted_diagnostic_probe"]["diagnostic"]["details"][
-              "message"
-          ] == retained["failure"]["diagnostic_message"]
+          assert old_gate["expected_current_decision"]["decision"] == "BLOCKED"
+          assert old_gate["expected_current_decision"]["source_state"] == "CANDIDATE"
+
+          assert current["status"] == "PASS"
+          assert current["output"] == "O01_TED_SOURCE_ADMISSION_PASS"
+          assert current["source_state"] == "PRODUCT_ADMITTED"
+          assert current["product_admitted"] is True
+          assert current["permanent_boundary"]["bounded_claim_contribution"] is False
+          assert current["permanent_boundary"]["o01_canonical_state"] == "IN_REVIEW"
+          assert current["permanent_boundary"]["o01_claim_decision"] == "PENDING"
+          assert current["permanent_boundary"]["gate7_closed"] is False
+          assert current["permanent_boundary"]["public_launch"] == "NO_GO"
           PY
-          rm -rf /tmp/o01-campaign-result /tmp/o01-campaign-result.zip
 
-      - name: Evaluate source-admission gate
-        shell: bash
+      - name: Record historical disposition
         run: |
-          set -euo pipefail
-          args=(--output-dir "$ARTIFACT_DIR")
-          if [ "${{ github.event_name }}" = workflow_dispatch ] && \
-             [ "${{ inputs.require_admitted }}" = true ]; then
-            args+=(--require-admitted)
-          fi
-          python scripts/verify_gate7_o01_ted_source_admission.py "${args[@]}" \
-            | tee "$ARTIFACT_DIR/console-result.json"
+          cat > "$ARTIFACT_DIR/historical-disposition.json" <<'JSON'
+          {
+            "status": "PASS",
+            "output": "O01_TED_SOURCE_ADMISSION_V0_1_HISTORICAL_PASS",
+            "historical_campaign_output": "O01_QUALITY_COVERAGE_LAG_FAIL",
+            "historical_source_state": "CANDIDATE",
+            "superseded_by": "O01_TED_SOURCE_ADMISSION_PASS",
+            "current_source_state": "PRODUCT_ADMITTED",
+            "bounded_claim_contribution": false,
+            "gate7_closed": false,
+            "public_launch": "NO_GO"
+          }
+          JSON
+          sha256sum \
+            data/acceptance/campaign-results/AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.1.json \
+            data/acceptance/source-admission/AX-LIB-O01-TED-source-admission-gate.v0.1.json \
+            data/acceptance/source-admission/AX-LIB-O01-TED-source-admission-closure.v0.2.json \
+            >> "$ARTIFACT_DIR/exact-provenance.txt"
 
-      - name: Materialise Gate 7 coverage report with campaign evidence
-        shell: bash
+      - name: Reject secret material
         run: |
-          set -euo pipefail
-          AXIGNAL_EVIDENCE_HEAD_SHA="$AXIGNAL_EXACT_SHA" \
-          AXIGNAL_REQUIRE_GATE7_PASS=false \
-          AXIGNAL_GATE7_EVIDENCE_DIR="$ARTIFACT_DIR/gate7" \
-            python scripts/verify_gate7_global_coverage.py \
-            | tee "$ARTIFACT_DIR/gate7/gate7-console.json"
-
-      - name: Enforce blocked disposition and launch boundary
-        shell: bash
-        run: |
-          set -euo pipefail
-          RESULT="$ARTIFACT_DIR/source-admission-result.v0.1.json" \
-          SUMMARY="$ARTIFACT_DIR/gate7/gate7-summary.json" \
-          REPORT="$ARTIFACT_DIR/gate7/global-coverage-source-language-report.json" \
-          python - <<'PY'
-          import json
-          import os
-          from pathlib import Path
-
-          result = json.loads(Path(os.environ["RESULT"]).read_text())
-          summary = json.loads(Path(os.environ["SUMMARY"]).read_text())
-          report = json.loads(Path(os.environ["REPORT"]).read_text())
-          assert result["status"] == "PASS"
-          assert result["output"] == "O01_TED_SOURCE_ADMISSION_BLOCKED"
-          assert result["decision"] == "BLOCKED"
-          assert result["next_state"] == "CANDIDATE"
-          assert result["product_admitted"] is False
-          assert result["claim_contribution"] is False
-          assert result["failure_disposition"]["source_rejected"] is False
-          assert result["authority_boundary"]["public_launch"] == "NO_GO"
-          assert summary["gate_decision"] == "IN_PROGRESS"
-          assert summary["global_coverage_authorised"] is False
-          assert summary["multilingual_authorised"] is False
-          assert summary["all_sources_admitted"] is False
-          assert summary["public_launch_authorised"] is False
-          o01 = next(
-              item
-              for item in report["libraries"]
-              if item["library_id"] == "AX-LIB-O01"
-          )
-          assert o01["canonical_state"] == "BLOCKED"
-          assert o01["claim_decision"] == "DENIED"
-          source = o01["sources"]["candidate"][0]
-          assert source["state"] == "CANDIDATE"
-          assert source["contributes_to_public_claim"] is False
-          assert any(
-              reference["reference"].endswith(
-                  "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.1.json"
-              )
-              for reference in source["evidence"]
-          )
-          PY
           ! grep -R -E \
             'sk_(live|test)_|rk_(live|test)_|whsec_|BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY' \
             "$ARTIFACT_DIR"
 
-      - name: Upload source-admission evidence
-        if: always()
+      - name: Upload historical evidence
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: o01-ted-source-admission-${{ env.AXIGNAL_EXACT_SHA }}
-          path: artifacts/o01-ted-source-admission
+          name: o01-ted-source-admission-v0-1-historical-${{ env.AXIGNAL_EXACT_SHA }}
+          path: ${{ env.ARTIFACT_DIR }}
           if-no-files-found: error
           retention-days: 30

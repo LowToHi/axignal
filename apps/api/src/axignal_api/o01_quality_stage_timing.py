@@ -1,10 +1,10 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import sqlite3
 from dataclasses import asdict, replace
 from datetime import UTC, datetime
-from pathlib import Path
 from time import perf_counter
 from typing import Any
 
@@ -12,7 +12,6 @@ from .o01_quality_common import NormalizedNotice, PageObservation
 from .o01_quality_coverage_lag import lag_report as legacy_lag_report
 from .o01_quality_normalize import normalize_notice
 from .o01_quality_reports import metric_summary
-from .o01_quality_retention import json_line, sha256_prefixed
 
 _STAGE_TIMINGS: dict[str, dict[str, float]] = {}
 
@@ -25,6 +24,10 @@ def _iso(value: datetime) -> str:
     return value.isoformat().replace("+00:00", "Z")
 
 
+def _sha256_prefixed(value: bytes) -> str:
+    return "sha256:" + hashlib.sha256(value).hexdigest()
+
+
 def _semantic_hash(notice: NormalizedNotice) -> str:
     payload = asdict(notice)
     payload.pop("normalized_record_sha256", None)
@@ -34,7 +37,7 @@ def _semantic_hash(notice: NormalizedNotice) -> str:
         separators=(",", ":"),
         sort_keys=True,
     ).encode("utf-8")
-    return sha256_prefixed(encoded)
+    return _sha256_prefixed(encoded)
 
 
 def reset_stage_timings() -> None:
@@ -68,14 +71,12 @@ def index_and_enqueue(
 
     try:
         for source, sampled_country, observation in selected:
-            publication_number = str(source["publication-number"])
             queue_started_at = _now()
             normalisation_started = perf_counter()
             draft = normalize_notice(
                 source,
-                sampled_country=sampled_country,
-                retrieval_started_at=observation.retrieval_started_at,
-                retrieval_completed_at=observation.retrieval_completed_at,
+                country=sampled_country,
+                page_observation=observation,
                 normalised_at=queue_started_at,
                 indexed_at=queue_started_at,
                 notification_enqueued_at=queue_started_at,
@@ -89,7 +90,7 @@ def index_and_enqueue(
                 "INSERT INTO notices VALUES (?, ?, ?)",
                 (
                     draft.publication_number,
-                    draft.title,
+                    draft.titles[0] if draft.titles else "",
                     draft.normalized_record_sha256,
                 ),
             )

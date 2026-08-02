@@ -1,0 +1,326 @@
+{
+  "$id": "https://axignal.com/schemas/o01-source-admission-authority-manifest.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "authorities": {
+      "additionalProperties": false,
+      "properties": {
+        "HUMAN_COVERAGE_AUTHORITY": {
+          "additionalProperties": false,
+          "properties": {
+            "issue_number": {
+              "const": 154
+            },
+            "scope": {
+              "const": "Admit only the measured twelve-country TED coverage with explicit TED-only limitations; do not imply worldwide procurement coverage."
+            }
+          },
+          "required": [
+            "issue_number",
+            "scope"
+          ],
+          "type": "object"
+        },
+        "LEGAL": {
+          "additionalProperties": false,
+          "properties": {
+            "issue_number": {
+              "const": 151
+            },
+            "scope": {
+              "const": "Admit TED under the reviewed EU reuse framework, attribution and change-disclosure conditions, with all third-party and protected-content exclusions."
+            }
+          },
+          "required": [
+            "issue_number",
+            "scope"
+          ],
+          "type": "object"
+        },
+        "PRIVACY_DATA_RIGHTS": {
+          "additionalProperties": false,
+          "properties": {
+            "issue_number": {
+              "const": 150
+            },
+            "scope": {
+              "const": "Admit only the approved non-personal TED field set; keep contact values ephemeral and excluded from persistence, search and marketing."
+            }
+          },
+          "required": [
+            "issue_number",
+            "scope"
+          ],
+          "type": "object"
+        },
+        "PRODUCT": {
+          "additionalProperties": false,
+          "properties": {
+            "issue_number": {
+              "const": 148
+            },
+            "scope": {
+              "const": "Admit TED Search API v3 as a bounded product source for AX-LIB-O01; authorize only the measured TED scope and no public launch."
+            }
+          },
+          "required": [
+            "issue_number",
+            "scope"
+          ],
+          "type": "object"
+        },
+        "SECURITY": {
+          "additionalProperties": false,
+          "properties": {
+            "issue_number": {
+              "const": 149
+            },
+            "scope": {
+              "const": "Admit the bounded TED connector under the verified CMS retention, kill-switch, rollback, network and no-secret controls."
+            }
+          },
+          "required": [
+            "issue_number",
+            "scope"
+          ],
+          "type": "object"
+        },
+        "SOURCE_QUALITY": {
+          "additionalProperties": false,
+          "properties": {
+            "issue_number": {
+              "const": 152
+            },
+            "scope": {
+              "const": "Admit TED based on the frozen 180-notice sample, twelve observed countries, six-language journeys and unchanged quality and lag thresholds."
+            }
+          },
+          "required": [
+            "issue_number",
+            "scope"
+          ],
+          "type": "object"
+        },
+        "UX_ACCESSIBILITY": {
+          "additionalProperties": false,
+          "properties": {
+            "issue_number": {
+              "const": 153
+            },
+            "scope": {
+              "const": "Admit the six verified multilingual TED journeys for bounded product presentation with source traceability and no raw-text republication."
+            }
+          },
+          "required": [
+            "issue_number",
+            "scope"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "HUMAN_COVERAGE_AUTHORITY",
+        "LEGAL",
+        "PRIVACY_DATA_RIGHTS",
+        "PRODUCT",
+        "SECURITY",
+        "SOURCE_QUALITY",
+        "UX_ACCESSIBILITY"
+      ],
+      "type": "object"
+    },
+    "campaign_registry_path": {
+      "const": "data/acceptance/campaign-results/AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.6-r4.json"
+    },
+    "campaign_registry_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "closure_path": {
+      "const": "data/acceptance/campaigns/AX-LIB-O01-quality-coverage-lag-closure.v0.6-r4.json"
+    },
+    "contract_path": {
+      "const": "data/acceptance/source-admission/AX-LIB-O01-TED-source-admission-contract.v0.2.json"
+    },
+    "contract_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "decision_max_expires_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "decision_policy": {
+      "additionalProperties": false,
+      "properties": {
+        "all_seven_required": {
+          "const": true
+        },
+        "assigned_issue_required": {
+          "const": true
+        },
+        "automatic_approval": {
+          "const": false
+        },
+        "automatic_signature": {
+          "const": false
+        },
+        "human_signature_required": {
+          "const": true
+        },
+        "same_head_required": {
+          "const": true
+        },
+        "same_manifest_required": {
+          "const": true
+        }
+      },
+      "required": [
+        "all_seven_required",
+        "same_head_required",
+        "same_manifest_required",
+        "assigned_issue_required",
+        "human_signature_required",
+        "automatic_approval",
+        "automatic_signature"
+      ],
+      "type": "object"
+    },
+    "evidence": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_id": {
+          "const": 8838091687
+        },
+        "artifact_sha256": {
+          "const": "sha256:a2328776b89ffaa44dde20649a5bee39711d7ac13b6bbc11c72e608631eca092"
+        },
+        "execution_commit_sha": {
+          "const": "5291baa019a85c789d1961d73c198802e28c038a"
+        },
+        "minimum_countries_observed": {
+          "minimum": 8,
+          "type": "integer"
+        },
+        "minimum_sample_count": {
+          "minimum": 120,
+          "type": "integer"
+        },
+        "required_languages": {
+          "items": {
+            "enum": [
+              "de",
+              "en",
+              "es",
+              "fr",
+              "it",
+              "pt"
+            ]
+          },
+          "maxItems": 6,
+          "minItems": 6,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "workflow_run_id": {
+          "const": 30763024434
+        }
+      },
+      "required": [
+        "execution_commit_sha",
+        "workflow_run_id",
+        "artifact_id",
+        "artifact_sha256",
+        "minimum_sample_count",
+        "minimum_countries_observed",
+        "required_languages"
+      ],
+      "type": "object"
+    },
+    "evidence_expires_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "gate_id": {
+      "const": "O01-TED-SOURCE-ADMISSION"
+    },
+    "library_id": {
+      "const": "AX-LIB-O01"
+    },
+    "permanent_boundary": {
+      "additionalProperties": false,
+      "properties": {
+        "bid_submission_authorised": {
+          "const": false
+        },
+        "contact_marketing_authorised": {
+          "const": false
+        },
+        "external_notification_delivery_authorised": {
+          "const": false
+        },
+        "gate7_closed": {
+          "const": false
+        },
+        "global_coverage_claim_authorised": {
+          "const": false
+        },
+        "model_training_authorised": {
+          "const": false
+        },
+        "public_launch": {
+          "const": "NO_GO"
+        },
+        "public_redistribution_authorised": {
+          "const": false
+        }
+      },
+      "required": [
+        "public_redistribution_authorised",
+        "contact_marketing_authorised",
+        "model_training_authorised",
+        "bid_submission_authorised",
+        "external_notification_delivery_authorised",
+        "global_coverage_claim_authorised",
+        "public_launch",
+        "gate7_closed"
+      ],
+      "type": "object"
+    },
+    "schema_version": {
+      "const": "axignal.o01-source-admission-authority-manifest/v0.2"
+    },
+    "source_id": {
+      "const": "src_ted_search_api_v3"
+    },
+    "target_head_sha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "task_id": {
+      "const": "AX-GE2E-G7-O01-D"
+    }
+  },
+  "required": [
+    "schema_version",
+    "gate_id",
+    "task_id",
+    "library_id",
+    "source_id",
+    "target_head_sha",
+    "contract_path",
+    "contract_sha256",
+    "closure_path",
+    "evidence_expires_at",
+    "decision_max_expires_at",
+    "evidence",
+    "authorities",
+    "decision_policy",
+    "permanent_boundary",
+    "campaign_registry_path",
+    "campaign_registry_sha256"
+  ],
+  "title": "AXIGNAL O01 seven-authority source admission manifest",
+  "type": "object"
+}
