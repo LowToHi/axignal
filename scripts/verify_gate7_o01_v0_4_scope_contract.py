@@ -46,13 +46,20 @@ def materialize() -> tuple[dict[str, Any], dict[str, Any]]:
     require(sha256_path(DELTA) == DELTA_SHA, "v0.4 delta-contract digest drift")
     base = load(BASE)
     delta = load(DELTA)
-    require(delta["base_contract"] == {"path": str(BASE.relative_to(ROOT)), "sha256": BASE_SHA}, "Base binding drift")
+    expected_base = {
+        "path": str(BASE.relative_to(ROOT)),
+        "sha256": BASE_SHA,
+    }
+    require(delta["base_contract"] == expected_base, "Base binding drift")
     operations = delta["experimental_operations"]
     require(len(operations) == 1, "Exactly one experimental operation is required")
     operation = operations[0]
     require(operation["op"] == "test_replace", "Unsupported delta operation")
     require(operation["path"] == "/source/scope", "Only source.scope may change")
-    require(operation["from"] == "ACTIVE" and operation["to"] == "ALL", "Scope delta drift")
+    require(
+        operation["from"] == "ACTIVE" and operation["to"] == "ALL",
+        "Scope delta drift",
+    )
 
     result = deepcopy(base)
     require(result["source"]["scope"] == operation["from"], "Base scope mismatch")
@@ -60,8 +67,14 @@ def materialize() -> tuple[dict[str, Any], dict[str, Any]]:
     for metadata in delta["metadata_operations"]:
         require(metadata["op"] == "test_replace", "Unsupported metadata operation")
         key = metadata["path"].removeprefix("/")
-        require(key in {"schema_version", "campaign_id", "task_id"}, "Unsupported metadata path")
-        require(result[key] == metadata["from"], f"Metadata precondition failed: {key}")
+        require(
+            key in {"schema_version", "campaign_id", "task_id"},
+            "Unsupported metadata path",
+        )
+        require(
+            result[key] == metadata["from"],
+            f"Metadata precondition failed: {key}",
+        )
         result[key] = metadata["to"]
 
     comparison = deepcopy(result)
@@ -75,7 +88,10 @@ def materialize() -> tuple[dict[str, Any], dict[str, Any]]:
     require(result["fields"] == base["fields"], "Field contract changed")
     require(result["thresholds"] == base["thresholds"], "Thresholds changed")
     require(result["retention"] == base["retention"], "Retention changed")
-    require(result["non_authorisations"] == base["non_authorisations"], "Authority boundary changed")
+    require(
+        result["non_authorisations"] == base["non_authorisations"],
+        "Authority boundary changed",
+    )
     return result, delta
 
 
@@ -85,7 +101,14 @@ def main() -> int:
     args = parser.parse_args()
     try:
         result, delta = materialize()
-    except (KeyError, OSError, TypeError, ValueError, json.JSONDecodeError, ScopeContractError) as exc:
+    except (
+        KeyError,
+        OSError,
+        TypeError,
+        ValueError,
+        json.JSONDecodeError,
+        ScopeContractError,
+    ) as exc:
         print(json.dumps({"status": "FAIL", "error": str(exc)}, sort_keys=True))
         return 1
     if args.materialized_output:
@@ -94,14 +117,18 @@ def main() -> int:
             json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
         )
+    invariants = delta["invariants"]
     payload = {
         "status": "PASS",
         "output": "O01_CAMPAIGN_SCOPE_V0_4_CONTRACT_PASS",
         "campaign_id": result["campaign_id"],
         "source_scope": result["source"]["scope"],
         "only_permitted_delta": True,
-        "query_unchanged": delta["invariants"]["query_unchanged"],
-        "fields_unchanged": delta["invariants"]["retained_projection_unchanged"] and delta["invariants"]["ephemeral_contact_projection_unchanged"],
+        "query_unchanged": invariants["query_unchanged"],
+        "fields_unchanged": (
+            invariants["retained_projection_unchanged"]
+            and invariants["ephemeral_contact_projection_unchanged"]
+        ),
         "sample_thresholds_retention_unchanged": True,
         "authority_boundary_unchanged": True,
         "automatic_human_signature": False,
