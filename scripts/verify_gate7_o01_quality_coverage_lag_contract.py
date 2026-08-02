@@ -11,6 +11,8 @@ from urllib.parse import urlsplit
 
 from axignal_api.o01_quality_campaign import evaluate_thresholds, sha256_prefixed
 
+EXPECTED_PLAN_SHA256 = "sha256:2facc571ddb074117feac694df4146e644a8ae43f4965a232ba078c1588e894d"
+
 EXPECTED_QUALITY_METRICS = {
     "identifier_accuracy",
     "title_completeness",
@@ -63,6 +65,8 @@ def cert_fingerprint(path: Path) -> str:
 
 
 def verify_plan(plan_path: Path) -> dict[str, Any]:
+    plan_digest = sha256_prefixed(plan_path.read_bytes())
+    require(plan_digest == EXPECTED_PLAN_SHA256, "Frozen O01-C plan digest drift")
     plan = load_json(plan_path)
     require(isinstance(plan, dict), "O01-C plan must be a JSON object")
     require(
@@ -155,7 +159,7 @@ def verify_plan(plan_path: Path) -> dict[str, Any]:
     return {
         "status": "PASS",
         "output": "O01_QUALITY_COVERAGE_LAG_PLAN_FROZEN",
-        "plan_sha256": sha256_prefixed(plan_path.read_bytes()),
+        "plan_sha256": plan_digest,
         "sample_frozen": True,
         "sample_size": sampling["sample_size"],
         "countries": countries,
