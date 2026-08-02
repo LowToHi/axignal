@@ -63,6 +63,38 @@
     "manifest_reference": "sha256:46756443a0bda4cacee532eeba923afbbeadf8522d8b9e0e4ae4f88025f09b4e",
     "target_head_sha": "b9762fc6074018d0c2f6043a357f2ffe4cfe60fd"
   },
+  "exact_head_validation": {
+    "admission": {
+      "artifact_digest": "sha256:7a1c62008dec7ae1b2158c885f7cd5a46d7305a70d94bebe049d453468b84f04",
+      "artifact_id": 8838550037,
+      "artifact_size_bytes": 3938,
+      "job_id": 91541154428,
+      "result_sha256": "sha256:73178dc8419cbe967eb47e8a523cbff8e548811f589e54d71a345e1511933e7f",
+      "workflow_run_id": 30764672219
+    },
+    "evidence_head_sha": "c1c643fe8f4c6d91f23f048f7d4cee2bca0ab024",
+    "evidence_tree_sha": "deca799e82e4334da0a0e52c9ff12628b9019170",
+    "global_gate": {
+      "artifact_digest": "sha256:ecf5b4ff6a08c5c14a5add8439c5ccadef7a250a475b485752af5655922056d9",
+      "artifact_id": 8838547540,
+      "artifact_size_bytes": 11589,
+      "gate_decision": "IN_PROGRESS",
+      "job_id": 91541154625,
+      "reconciliation_sha256": "sha256:c565ab6bcd1d2ced0a8b943d23f8b1fb7c40fe294f037700eb0f71dfa39512dd",
+      "report_sha256": "sha256:a34573d68f651c6c53a07e8f6d3833f719706569cd42419a13ffebab5c2f07e4",
+      "summary_sha256": "sha256:ea41b5a2b5a1c9bb3c9c9099b41059a0ff1c4613e23b6499ccd676fd3ff7cc67",
+      "workflow_run_id": 30764672193
+    },
+    "historical_v0_1": {
+      "artifact_digest": "sha256:47fb59de5b0cca2ca8d24086338b7bc2c7d4307dbb41909782b8900e5c69cad0",
+      "artifact_id": 8838544808,
+      "artifact_size_bytes": 2173,
+      "job_id": 91541154549,
+      "status": "SUPERSEDED_HISTORY_VERIFIED",
+      "workflow_run_id": 30764672207
+    },
+    "status": "PASS"
+  },
   "gate_id": "O01-TED-SOURCE-ADMISSION",
   "library_id": "AX-LIB-O01",
   "output": "O01_TED_SOURCE_ADMISSION_PASS",
