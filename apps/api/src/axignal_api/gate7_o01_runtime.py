@@ -25,7 +25,7 @@ def guarded_network_runtime(
         o01_quality_execute.post_json = original_post_json
 
 
-def run_campaign_v0_2(
+def run_campaign(
     *,
     plan_path: Path,
     authority_envelope_path: Path,
@@ -41,3 +41,37 @@ def run_campaign_v0_2(
             raw_dir=raw_dir,
             output_dir=output_dir,
         )
+
+
+def run_campaign_v0_2(
+    *,
+    plan_path: Path,
+    authority_envelope_path: Path,
+    raw_dir: Path,
+    output_dir: Path,
+    kill_switch_path: Path,
+) -> dict[str, Any]:
+    return run_campaign(
+        plan_path=plan_path,
+        authority_envelope_path=authority_envelope_path,
+        raw_dir=raw_dir,
+        output_dir=output_dir,
+        kill_switch_path=kill_switch_path,
+    )
+
+
+def run_campaign_v0_3(
+    *,
+    plan_path: Path,
+    authority_envelope_path: Path,
+    raw_dir: Path,
+    output_dir: Path,
+    kill_switch_path: Path,
+) -> dict[str, Any]:
+    return run_campaign(
+        plan_path=plan_path,
+        authority_envelope_path=authority_envelope_path,
+        raw_dir=raw_dir,
+        output_dir=output_dir,
+        kill_switch_path=kill_switch_path,
+    )
