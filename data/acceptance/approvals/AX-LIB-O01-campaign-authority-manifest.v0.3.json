@@ -1,0 +1,104 @@
+{
+  "authorised_scope": {
+    "base_contract_path": "data/acceptance/campaigns/AX-LIB-O01-quality-coverage-lag-execution-contract.v0.2.json",
+    "base_contract_sha256": "sha256:f86672f2925343fccc61ebe0cb1085a470bbb54d062f1f936eed9347854ff3a3",
+    "delta_contract_path": "data/acceptance/campaigns/AX-LIB-O01-quality-coverage-lag-execution-contract.v0.3.delta.json",
+    "delta_contract_sha256": "sha256:8ac8ab15dc8edcbbce584d8ccf4ecbd6785d30b7b364d07051b294e7c86372dc",
+    "private_campaign_only": true,
+    "public_claim_contribution": false,
+    "purpose": "Execute only the private bounded O01 evidence campaign after replacing the unsupported TED Search API field buyer-tel with the canonical organisation-tel-buyer identifier.",
+    "sole_experimental_delta": {
+      "from": "buyer-tel",
+      "path": "/fields/ephemeral_contact_projection/3",
+      "to": "organisation-tel-buyer"
+    },
+    "source_id": "src_ted_search_api_v3",
+    "source_state_during_campaign": "CANDIDATE"
+  },
+  "binding": {
+    "automatic_human_approval": false,
+    "automatic_human_signature": false,
+    "permissions_generated_automatically": false,
+    "survives_contract_delta_change": false,
+    "survives_evidence_expiry": false,
+    "survives_manifest_change": false,
+    "survives_target_head_change": false
+  },
+  "campaign_id": "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.3",
+  "decision_contract": {
+    "admitted_decisions": [
+      "APPROVE",
+      "APPROVE_WITH_CONDITIONS",
+      "REJECT"
+    ],
+    "authorising_decisions": [
+      "APPROVE",
+      "APPROVE_WITH_CONDITIONS"
+    ],
+    "comment_author_must_be_human": true,
+    "decision_max_expires_at": "2026-08-28T10:00:00Z",
+    "expiry_strictly_before_evidence": true,
+    "head_match_required": true,
+    "manifest_match_required": true,
+    "required_authorities": [
+      "LEGAL",
+      "PRIVACY_DATA_RIGHTS"
+    ],
+    "required_fields": [
+      "authority",
+      "decision",
+      "scope",
+      "manifest_reference",
+      "head_sha",
+      "reviewed_at",
+      "expires_at",
+      "signature",
+      "conditions"
+    ],
+    "signature_scheme": "github-identity-v1"
+  },
+  "library_id": "AX-LIB-O01",
+  "non_authorisations": {
+    "bid_submission_or_offer_presentation": false,
+    "contact_marketing": false,
+    "external_notification_delivery": false,
+    "model_training_or_fine_tuning": false,
+    "public_claims": false,
+    "public_launch": "NO_GO",
+    "public_redistribution": false,
+    "ted_product_admission": false
+  },
+  "official_evidence": {
+    "artifact_digest": "sha256:c28e015f10945668f906cdaf6db72c0a58f7aaa13d1d3d73a0c892a52ceed8a7",
+    "artifact_expires_at": "2026-09-01T10:02:54Z",
+    "artifact_id": 8831909489,
+    "baseline_digest": "sha256:510f174b71b3538473154c8fc5d02bf69304a0ecf0817117ac58c6a3a897e3bd",
+    "baseline_payload_digest": "sha256:7a1bba61e83b3dbef05055c4a4e2b6680e3cd6ec454581c9e69c358df37b7b97",
+    "evidence_expires_at": "2026-08-29T10:02:52.417201Z",
+    "observed_at": "2026-08-02T10:02:52.417201Z",
+    "terms_change_class": "BASELINE_ESTABLISHED"
+  },
+  "remediation_evidence": {
+    "artifact_digest": "sha256:92cc4bd197b2ebbcaa6b6984efdf2e5ef392788c54c2615d48c876e8147dea3f",
+    "artifact_expires_at": "2026-09-01T16:10:16Z",
+    "artifact_id": 8835935926,
+    "classification": "CANONICAL_TELEPHONE_REPLACEMENT_CONFIRMED",
+    "contact_values_retained": false,
+    "fabricated_evidence": 0,
+    "raw_response_retained": false,
+    "result_member": "contact-projection-diagnostic.v0.1.json",
+    "result_member_sha256": "sha256:36c1c054b5a8efd64f0ed93c667e6fd9f8acabcb35ab393a0ef6d1b7a4fdffdb",
+    "workflow_run_id": 30755976351
+  },
+  "schema_version": "axignal.o01-campaign-authority-manifest/v0.3",
+  "target": {
+    "base_contract_path": "data/acceptance/campaigns/AX-LIB-O01-quality-coverage-lag-execution-contract.v0.2.json",
+    "base_contract_sha256": "sha256:f86672f2925343fccc61ebe0cb1085a470bbb54d062f1f936eed9347854ff3a3",
+    "delta_contract_path": "data/acceptance/campaigns/AX-LIB-O01-quality-coverage-lag-execution-contract.v0.3.delta.json",
+    "delta_contract_sha256": "sha256:8ac8ab15dc8edcbbce584d8ccf4ecbd6785d30b7b364d07051b294e7c86372dc",
+    "git_tree_sha": "2edd7ff4eec113aabcba1a70cb76a032bfd785b7",
+    "head_sha": "e9621735c75b51372a6e8f6864cd18a6f42a687c",
+    "materializer_path": "scripts/verify_gate7_o01_v0_3_delta_contract.py"
+  },
+  "task_id": "AX-GE2E-G7-O01-B-R2"
+}
