@@ -8,8 +8,16 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
-BASE = ROOT / "data/acceptance/campaigns/AX-LIB-O01-quality-coverage-lag-execution-contract.v0.2.json"
-DELTA = ROOT / "data/acceptance/campaigns/AX-LIB-O01-quality-coverage-lag-execution-contract.v0.3.delta.json"
+BASE = (
+    ROOT
+    / "data/acceptance/campaigns/"
+    "AX-LIB-O01-quality-coverage-lag-execution-contract.v0.2.json"
+)
+DELTA = (
+    ROOT
+    / "data/acceptance/campaigns/"
+    "AX-LIB-O01-quality-coverage-lag-execution-contract.v0.3.delta.json"
+)
 BASE_SHA = "sha256:f86672f2925343fccc61ebe0cb1085a470bbb54d062f1f936eed9347854ff3a3"
 DELTA_SHA = "sha256:8ac8ab15dc8edcbbce584d8ccf4ecbd6785d30b7b364d07051b294e7c86372dc"
 ALLOWED_POINTERS = {
@@ -114,7 +122,8 @@ def materialize() -> tuple[dict[str, Any], dict[str, Any]]:
     require(len(delta["experimental_operations"]) == 1, "Experimental delta expanded")
     experimental = delta["experimental_operations"][0]
     require(
-        experimental == {
+        experimental
+        == {
             "from": "buyer-tel",
             "op": "test_replace",
             "path": "/fields/ephemeral_contact_projection/3",
@@ -194,7 +203,14 @@ def main() -> int:
     args = build_parser().parse_args()
     try:
         materialized, delta = materialize()
-    except (KeyError, OSError, TypeError, ValueError, json.JSONDecodeError, DeltaContractError) as exc:
+    except (
+        KeyError,
+        OSError,
+        TypeError,
+        ValueError,
+        json.JSONDecodeError,
+        DeltaContractError,
+    ) as exc:
         print(json.dumps({"status": "FAIL", "error": str(exc)}, sort_keys=True))
         return 1
     if args.materialized_output is not None:
