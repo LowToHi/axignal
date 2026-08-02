@@ -1,0 +1,97 @@
+{
+  "authorised_scope": {
+    "private_campaign_only": true,
+    "public_claim_contribution": false,
+    "purpose": "Execute only the private bounded historical July 2026 O01 evidence campaign with TED query execution enabled after prior syntax-check-only runs returned no notices.",
+    "sole_experimental_delta": {
+      "from": true,
+      "path": "/sampling/check_query_syntax",
+      "to": false
+    },
+    "source_id": "src_ted_search_api_v3",
+    "source_scope_during_campaign": "ALL",
+    "source_state_during_campaign": "CANDIDATE"
+  },
+  "binding": {
+    "automatic_human_approval": false,
+    "automatic_human_signature": false,
+    "permissions_generated_automatically": false,
+    "survives_contract_delta_change": false,
+    "survives_evidence_expiry": false,
+    "survives_manifest_change": false,
+    "survives_target_head_change": false
+  },
+  "campaign_id": "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.6",
+  "decision_contract": {
+    "admitted_decisions": [
+      "APPROVE",
+      "APPROVE_WITH_CONDITIONS",
+      "REJECT"
+    ],
+    "authorising_decisions": [
+      "APPROVE",
+      "APPROVE_WITH_CONDITIONS"
+    ],
+    "comment_author_must_be_human": true,
+    "decision_max_expires_at": "2026-08-28T10:00:00Z",
+    "expiry_strictly_before_evidence": true,
+    "head_match_required": true,
+    "manifest_match_required": true,
+    "required_authorities": [
+      "LEGAL",
+      "PRIVACY_DATA_RIGHTS"
+    ],
+    "required_fields": [
+      "authority",
+      "decision",
+      "scope",
+      "manifest_reference",
+      "head_sha",
+      "reviewed_at",
+      "expires_at",
+      "signature",
+      "conditions"
+    ],
+    "signature_scheme": "github-identity-v1"
+  },
+  "execution_evidence": {
+    "artifact_digest": "sha256:8eedfe9e8d8aab14732f66d92b1fe72be4a022e38f3a25ddbc0243769bda7c12",
+    "artifact_id": 8837430628,
+    "classification": "SYNTAX_CHECK_MODE_ZERO_RESULT_CONFIRMED",
+    "http_200_projection_requests": 48,
+    "official_retrieval_check_query_syntax": false,
+    "official_source": "https://op.europa.eu/en/web/ted-reusers-workshops/questions_and_answers_2023_12_14",
+    "request_check_query_syntax": true,
+    "response_body_bytes": 81,
+    "sample_count": 0,
+    "workflow_run_id": 30760876484
+  },
+  "library_id": "AX-LIB-O01",
+  "non_authorisations": {
+    "bid_submission_or_offer_presentation": false,
+    "contact_marketing": false,
+    "external_notification_delivery": false,
+    "model_training_or_fine_tuning": false,
+    "public_claims": false,
+    "public_launch": "NO_GO",
+    "public_redistribution": false,
+    "ted_product_admission": false
+  },
+  "official_evidence": {
+    "artifact_digest": "sha256:c28e015f10945668f906cdaf6db72c0a58f7aaa13d1d3d73a0c892a52ceed8a7",
+    "artifact_id": 8831909489,
+    "evidence_expires_at": "2026-08-29T10:02:52.417201Z",
+    "observed_at": "2026-08-02T10:02:52.417201Z",
+    "terms_change_class": "BASELINE_ESTABLISHED"
+  },
+  "schema_version": "axignal.o01-campaign-authority-manifest/v0.6",
+  "target": {
+    "base_materialized_canonical_sha256": "sha256:1be51417eeb95dbac8d68e39ed73cfe03202732688e3e5180a714ab2a2762387",
+    "base_materializer": "scripts/verify_gate7_o01_v0_5_query_contract.py",
+    "delta_contract_path": "data/acceptance/campaigns/AX-LIB-O01-quality-coverage-lag-execution-contract.v0.6.delta.json",
+    "delta_contract_sha256": "sha256:a741e56ef7057ba29bf7c51b70b681e9e9ed47dfdce4003260a3abd7a04398c0",
+    "head_sha": "33d05c747f2a6049633cf0348f6476ea7134b1bc",
+    "materializer_path": "scripts/verify_gate7_o01_v0_6_execution_contract.py"
+  },
+  "task_id": "AX-GE2E-G7-O01-B-R5"
+}
