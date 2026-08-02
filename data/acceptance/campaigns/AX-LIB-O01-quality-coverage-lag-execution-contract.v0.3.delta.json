@@ -1,0 +1,81 @@
+{
+  "base_contract": {
+    "path": "data/acceptance/campaigns/AX-LIB-O01-quality-coverage-lag-execution-contract.v0.2.json",
+    "sha256": "sha256:f86672f2925343fccc61ebe0cb1085a470bbb54d062f1f936eed9347854ff3a3"
+  },
+  "campaign_id": "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.3",
+  "change_class": "VERSIONED_FIELD_IDENTIFIER_CORRECTION",
+  "diagnostic_evidence": {
+    "artifact_digest": "sha256:92cc4bd197b2ebbcaa6b6984efdf2e5ef392788c54c2615d48c876e8147dea3f",
+    "artifact_id": 8835935926,
+    "canonical_replacement": "organisation-tel-buyer",
+    "canonical_replacement_accepted": true,
+    "classification": "CANONICAL_TELEPHONE_REPLACEMENT_CONFIRMED",
+    "contact_values_retained": false,
+    "controls_pass": true,
+    "corrected_full_projection_accepted": true,
+    "diagnostic_head_sha": "c6161603d70e7bbb0174f40019e0e7ac26d1b55c",
+    "diagnostic_tree_sha": "a2228297c2c3b967456b691d48a6036d256d7cb4",
+    "fabricated_evidence": 0,
+    "network_requests_used": 11,
+    "raw_response_retained": false,
+    "result_member": "contact-projection-diagnostic.v0.1.json",
+    "result_member_sha256": "sha256:36c1c054b5a8efd64f0ed93c667e6fd9f8acabcb35ab393a0ef6d1b7a4fdffdb",
+    "unsupported_field": "buyer-tel",
+    "workflow_run_id": 30755976351
+  },
+  "experimental_operations": [
+    {
+      "from": "buyer-tel",
+      "op": "test_replace",
+      "path": "/fields/ephemeral_contact_projection/3",
+      "reason": "TED Search API rejects buyer-tel and accepts organisation-tel-buyer, including in the full corrected contact projection.",
+      "to": "organisation-tel-buyer"
+    }
+  ],
+  "invariants": {
+    "all_other_json_pointers_unchanged": true,
+    "authority_boundary_unchanged": true,
+    "contact_projection_remains_memory_only": true,
+    "countries_unchanged": true,
+    "ephemeral_contact_projection_length_unchanged": true,
+    "lag_metrics_unchanged": true,
+    "languages_unchanged": true,
+    "measurement_window_unchanged": true,
+    "network_request_budget_unchanged": true,
+    "pagination_unchanged": true,
+    "quality_metrics_unchanged": true,
+    "query_unchanged": true,
+    "retained_projection_unchanged": true,
+    "retention_unchanged": true,
+    "retry_policy_unchanged": true,
+    "sample_allocation_unchanged": true,
+    "thresholds_unchanged": true
+  },
+  "metadata_operations": [
+    {
+      "from": "axignal.o01-quality-coverage-lag-execution-contract/v0.2",
+      "op": "test_replace",
+      "path": "/schema_version",
+      "to": "axignal.o01-quality-coverage-lag-execution-contract/v0.3"
+    },
+    {
+      "from": "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.2",
+      "op": "test_replace",
+      "path": "/campaign_id",
+      "to": "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.3"
+    }
+  ],
+  "non_authorisations": {
+    "bid_submission": false,
+    "contact_marketing": false,
+    "external_notification_delivery": false,
+    "model_training": false,
+    "public_claims": false,
+    "public_launch": "NO_GO",
+    "public_redistribution": false,
+    "ted_product_admission": false
+  },
+  "schema_version": "axignal.o01-execution-contract-delta/v0.1",
+  "task_id": "AX-GE2E-G7-O01-C-R2"
+}
