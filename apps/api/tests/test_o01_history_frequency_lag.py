@@ -5,14 +5,14 @@ from datetime import date
 import pytest
 
 from axignal_api.o01_history_frequency_lag_v2 import (
-    bounded_date_query,
     first_available_date,
     html_text,
     parse_release_calendar,
     percentile,
 )
-from axignal_api.o01_history_frequency_lag_v3 import (
+from axignal_api.o01_history_frequency_lag_v4 import (
     OLE2_MAGIC,
+    bounded_date_query,
     parse_release_calendar_xls,
 )
 from axignal_api.o01_quality_common import O01QualityCampaignError
@@ -45,21 +45,21 @@ def test_xls_parser_requires_observed_ole2_signature() -> None:
         parse_release_calendar_xls(b"<html>not a workbook</html>", expected_year=2025)
 
 
-def test_bounded_date_query_uses_proven_canonical_interval() -> None:
-    assert bounded_date_query(
-        date(2015, 1, 1),
-        date(2016, 8, 3),
-    ) == (
+def test_bounded_date_query_has_no_sort_clause() -> None:
+    query = bounded_date_query(date(2015, 1, 1), date(2016, 8, 3))
+    assert query == (
         "publication-date >= 20150101 AND publication-date <= 20160803"
     )
-    assert bounded_date_query(
-        date(2026, 7, 31),
-        date(2026, 7, 31),
-        sort=True,
-    ) == (
-        "publication-date >= 20260731 AND publication-date <= 20260731 "
-        "SORT BY publication-number ASC"
+    assert "SORT" not in query
+    assert "ASC" not in query
+
+
+def test_single_day_query_is_a_closed_interval_without_sort() -> None:
+    query = bounded_date_query(date(2026, 7, 31), date(2026, 7, 31))
+    assert query == (
+        "publication-date >= 20260731 AND publication-date <= 20260731"
     )
+    assert "SORT" not in query
 
 
 def test_bounded_date_query_rejects_inverted_range() -> None:
