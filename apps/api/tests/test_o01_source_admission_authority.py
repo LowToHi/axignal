@@ -108,7 +108,8 @@ def test_all_seven_current_human_approvals_admit() -> None:
     )
     assert payload["output"] == "O01_TED_SOURCE_ADMISSION_PASS"
     assert payload["next_state"] == "PRODUCT_ADMITTED"
-    assert payload["bounded_claim_contribution"] is True
+    assert payload["bounded_product_use_authorised"] is True
+    assert payload["bounded_claim_contribution"] is False
     assert payload["global_coverage_claim_authorised"] is False
     assert payload["public_launch"] == "NO_GO"
 
