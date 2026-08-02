@@ -1,0 +1,96 @@
+{
+  "authorised_scope": {
+    "private_campaign_only": true,
+    "public_claim_contribution": false,
+    "purpose": "Execute only the private bounded historical July 2026 O01 evidence campaign using TED scope ALL and the canonical official publication-date interval syntax.",
+    "sole_experimental_delta": {
+      "from": "buyer-country IN ({country}) AND publication-date >= 20260701 AND publication-date <= 20260731 SORT BY publication-number",
+      "path": "/sampling/query_contract",
+      "to": "buyer-country IN ({country}) AND publication-date = (20260701 <> 20260731) SORT BY publication-number"
+    },
+    "source_id": "src_ted_search_api_v3",
+    "source_scope_during_campaign": "ALL",
+    "source_state_during_campaign": "CANDIDATE"
+  },
+  "binding": {
+    "automatic_human_approval": false,
+    "automatic_human_signature": false,
+    "permissions_generated_automatically": false,
+    "survives_contract_delta_change": false,
+    "survives_evidence_expiry": false,
+    "survives_manifest_change": false,
+    "survives_target_head_change": false
+  },
+  "campaign_id": "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.5",
+  "decision_contract": {
+    "admitted_decisions": [
+      "APPROVE",
+      "APPROVE_WITH_CONDITIONS",
+      "REJECT"
+    ],
+    "authorising_decisions": [
+      "APPROVE",
+      "APPROVE_WITH_CONDITIONS"
+    ],
+    "comment_author_must_be_human": true,
+    "decision_max_expires_at": "2026-08-28T10:00:00Z",
+    "expiry_strictly_before_evidence": true,
+    "head_match_required": true,
+    "manifest_match_required": true,
+    "required_authorities": [
+      "LEGAL",
+      "PRIVACY_DATA_RIGHTS"
+    ],
+    "required_fields": [
+      "authority",
+      "decision",
+      "scope",
+      "manifest_reference",
+      "head_sha",
+      "reviewed_at",
+      "expires_at",
+      "signature",
+      "conditions"
+    ],
+    "signature_scheme": "github-identity-v1"
+  },
+  "library_id": "AX-LIB-O01",
+  "non_authorisations": {
+    "bid_submission_or_offer_presentation": false,
+    "contact_marketing": false,
+    "external_notification_delivery": false,
+    "model_training_or_fine_tuning": false,
+    "public_claims": false,
+    "public_launch": "NO_GO",
+    "public_redistribution": false,
+    "ted_product_admission": false
+  },
+  "official_evidence": {
+    "artifact_digest": "sha256:c28e015f10945668f906cdaf6db72c0a58f7aaa13d1d3d73a0c892a52ceed8a7",
+    "artifact_id": 8831909489,
+    "evidence_expires_at": "2026-08-29T10:02:52.417201Z",
+    "observed_at": "2026-08-02T10:02:52.417201Z",
+    "terms_change_class": "BASELINE_ESTABLISHED"
+  },
+  "query_evidence": {
+    "artifact_digest": "sha256:cd5ac074c4d9911849b717c3a055724c33e42a5e5fb7b0daeb77c9e2e8a6de84",
+    "artifact_id": 8837306195,
+    "classification": "NON_CANONICAL_DATE_RANGE_ZERO_RESULT_CONFIRMED",
+    "http_200_projection_requests": 48,
+    "official_canonical_example": "publication-date = (20240101 <> 20240131)",
+    "official_help_url": "https://ted.europa.eu/en/help/search-browse",
+    "request_scope": "ALL",
+    "sample_count": 0,
+    "workflow_run_id": 30760465948
+  },
+  "schema_version": "axignal.o01-campaign-authority-manifest/v0.5",
+  "target": {
+    "base_materialized_canonical_sha256": "sha256:b8c9df6737c945afef3d4b7250b0a0ffd530dee52f32ea87c92c3d2851beeca1",
+    "base_materializer": "scripts/verify_gate7_o01_v0_4_scope_contract.py",
+    "delta_contract_path": "data/acceptance/campaigns/AX-LIB-O01-quality-coverage-lag-execution-contract.v0.5.delta.json",
+    "delta_contract_sha256": "sha256:a7a811ebe64cac6c0b2591da7681a40dabc15f2c4f8f1dcc3a1147ed4c75e507",
+    "head_sha": "2f3f653c611273db0d461bb2fdad4ee7b3837028",
+    "materializer_path": "scripts/verify_gate7_o01_v0_5_query_contract.py"
+  },
+  "task_id": "AX-GE2E-G7-O01-B-R4"
+}
