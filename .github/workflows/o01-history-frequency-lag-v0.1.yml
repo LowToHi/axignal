@@ -4,24 +4,22 @@ on:
   workflow_dispatch:
   pull_request:
     paths:
-      - "apps/api/src/axignal_api/o01_history_frequency_lag.py"
+      - "apps/api/src/axignal_api/o01_history_frequency_lag*.py"
       - "apps/api/tests/test_o01_history_frequency_lag.py"
-      - "data/acceptance/campaigns/AX-LIB-O01-history-frequency-lag-plan.v0.1.json"
-      - "data/acceptance/campaigns/AX-LIB-O01-history-frequency-lag-execution-request.v0.1.json"
+      - "data/acceptance/campaigns/AX-LIB-O01-history-frequency-lag-*.json"
       - "scripts/run_gate7_o01_history_frequency_lag.py"
-      - "scripts/verify_gate7_o01_history_frequency_lag.py"
+      - "scripts/verify_gate7_o01_history_frequency_lag*.py"
       - "docs/runbooks/o01-history-frequency-lag-v0.1.md"
       - ".github/workflows/o01-history-frequency-lag-v0.1.yml"
   push:
     branches:
       - "agent/**"
     paths:
-      - "apps/api/src/axignal_api/o01_history_frequency_lag.py"
+      - "apps/api/src/axignal_api/o01_history_frequency_lag*.py"
       - "apps/api/tests/test_o01_history_frequency_lag.py"
-      - "data/acceptance/campaigns/AX-LIB-O01-history-frequency-lag-plan.v0.1.json"
-      - "data/acceptance/campaigns/AX-LIB-O01-history-frequency-lag-execution-request.v0.1.json"
+      - "data/acceptance/campaigns/AX-LIB-O01-history-frequency-lag-*.json"
       - "scripts/run_gate7_o01_history_frequency_lag.py"
-      - "scripts/verify_gate7_o01_history_frequency_lag.py"
+      - "scripts/verify_gate7_o01_history_frequency_lag*.py"
       - "docs/runbooks/o01-history-frequency-lag-v0.1.md"
       - ".github/workflows/o01-history-frequency-lag-v0.1.yml"
 
@@ -90,16 +88,20 @@ jobs:
           set -euo pipefail
           python -m compileall -q \
             apps/api/src/axignal_api/o01_history_frequency_lag.py \
+            apps/api/src/axignal_api/o01_history_frequency_lag_v2.py \
             apps/api/tests/test_o01_history_frequency_lag.py \
             scripts/run_gate7_o01_history_frequency_lag.py \
-            scripts/verify_gate7_o01_history_frequency_lag.py
+            scripts/verify_gate7_o01_history_frequency_lag.py \
+            scripts/verify_gate7_o01_history_frequency_lag_v2.py
           python -m ruff check \
             apps/api/src/axignal_api/o01_history_frequency_lag.py \
+            apps/api/src/axignal_api/o01_history_frequency_lag_v2.py \
             apps/api/tests/test_o01_history_frequency_lag.py \
             scripts/run_gate7_o01_history_frequency_lag.py \
-            scripts/verify_gate7_o01_history_frequency_lag.py
+            scripts/verify_gate7_o01_history_frequency_lag.py \
+            scripts/verify_gate7_o01_history_frequency_lag_v2.py
           python -m pytest -q apps/api/tests/test_o01_history_frequency_lag.py
-          python scripts/verify_gate7_o01_history_frequency_lag.py \
+          python scripts/verify_gate7_o01_history_frequency_lag_v2.py \
             --plan "$PLAN_PATH" \
             --output "$RESULT_DIR/plan-contract-result.json"
 
@@ -219,7 +221,7 @@ jobs:
           jq -e \
             '.expired == false and .digest == "sha256:870261e24767ab170b191ee4a5e8fca27b9c406aec7113237cc41220eb80f74a"' \
             "$RESULT_DIR/admission-artifact-metadata.json"
-          python scripts/verify_gate7_o01_history_frequency_lag.py \
+          python scripts/verify_gate7_o01_history_frequency_lag_v2.py \
             --plan "$PLAN_PATH" \
             --output "$RESULT_DIR/preflight-result.json"
           python - <<'PY'
@@ -259,7 +261,7 @@ jobs:
           PYTHONPATH: apps/api/src
         run: |
           set -euo pipefail
-          python scripts/verify_gate7_o01_history_frequency_lag.py \
+          python scripts/verify_gate7_o01_history_frequency_lag_v2.py \
             --plan "$PLAN_PATH" \
             --result-dir "$RESULT_DIR" \
             --output "$RESULT_DIR/evidence-verification.json"
