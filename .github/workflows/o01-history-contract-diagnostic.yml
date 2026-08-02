@@ -1,0 +1,174 @@
+name: O01 History Contract Diagnostic
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "scripts/probe_gate7_o01_history_contract.py"
+      - "data/acceptance/campaigns/AX-LIB-O01-history-contract-diagnostic-request.v0.1.json"
+      - "requirements/o01-xls.lock"
+      - ".github/workflows/o01-history-contract-diagnostic.yml"
+  push:
+    branches:
+      - "agent/**"
+    paths:
+      - "scripts/probe_gate7_o01_history_contract.py"
+      - "data/acceptance/campaigns/AX-LIB-O01-history-contract-diagnostic-request.v0.1.json"
+      - "requirements/o01-xls.lock"
+      - ".github/workflows/o01-history-contract-diagnostic.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: o01-history-contract-diagnostic-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  AXIGNAL_EXACT_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+  AXIGNAL_SOURCE_BRANCH: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name }}
+  REQUEST_PATH: data/acceptance/campaigns/AX-LIB-O01-history-contract-diagnostic-request.v0.1.json
+  RESULT_DIR: artifacts/o01-history-contract-diagnostic/current
+
+jobs:
+  validate:
+    name: Validate O01-E contract diagnostic
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    outputs:
+      execute_probe: ${{ steps.selection.outputs.execute }}
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Set up frozen Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.13.14"
+          check-latest: false
+
+      - name: Install frozen graphs
+        run: |
+          python -m pip install --upgrade "pip==26.1.2"
+          python -m pip install --require-hashes --only-binary=:all: \
+            --requirement requirements/python-dev.lock
+          python -m pip install --require-hashes --only-binary=:all: \
+            --requirement requirements/o01-xls.lock
+          python -m pip check
+          python -m pip install --no-deps --no-build-isolation .
+
+      - name: Validate implementation
+        env:
+          PYTHONPATH: apps/api/src
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$AXIGNAL_EXACT_SHA"
+          mkdir -p "$RESULT_DIR"
+          python -m compileall -q scripts/probe_gate7_o01_history_contract.py
+          python -m ruff check scripts/probe_gate7_o01_history_contract.py
+
+      - name: Select exact one-shot request
+        id: selection
+        shell: bash
+        run: |
+          set -euo pipefail
+          execute=false
+          parent_sha="$(git rev-parse HEAD^)"
+          if [[ -f "$REQUEST_PATH" ]]; then
+            mapfile -t changed < <(git diff --name-only HEAD^ HEAD)
+            test "${#changed[@]}" -eq 1
+            test "${changed[0]}" = "$REQUEST_PATH"
+            if git cat-file -e "HEAD^:$REQUEST_PATH" 2>/dev/null; then
+              echo "Diagnostic request existed in parent" >&2
+              exit 1
+            fi
+            jq -e \
+              --arg parent "$parent_sha" \
+              --arg branch "$AXIGNAL_SOURCE_BRANCH" \
+              --arg repository "$GITHUB_REPOSITORY" \
+              '.schema_version == "axignal.o01-history-contract-diagnostic-request/v0.1" and .execute == true and .one_shot == true and .controller_parent_sha == $parent and .source_branch == $branch and .repository == $repository and .maximum_network_requests == 6 and .raw_bodies_retained == false' \
+              "$REQUEST_PATH" >/dev/null
+            test "$AXIGNAL_SOURCE_BRANCH" = "agent/ax-gate7-o01-e-history-frequency-lag"
+            execute=true
+          fi
+          echo "execute=$execute" >> "$GITHUB_OUTPUT"
+          jq -n \
+            --argjson execute "$execute" \
+            --arg parent "$parent_sha" \
+            --arg head "$(git rev-parse HEAD)" \
+            '{execute_probe: $execute, parent_sha: $parent, head_sha: $head, network_requests_before_probe: 0}' \
+            > "$RESULT_DIR/selection.json"
+
+      - name: Upload static diagnostic evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: o01-history-contract-diagnostic-static-${{ env.AXIGNAL_EXACT_SHA }}
+          path: artifacts/o01-history-contract-diagnostic
+          if-no-files-found: error
+          retention-days: 14
+
+  probe:
+    name: Probe calendar structure and Search API modes
+    needs: validate
+    if: needs.validate.outputs.execute_probe == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact request head
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Initialize zero-network provenance
+        run: |
+          mkdir -p "$RESULT_DIR"
+          {
+            printf 'head_sha=%s\n' "$(git rev-parse HEAD)"
+            printf 'tree_sha=%s\n' "$(git rev-parse 'HEAD^{tree}')"
+            printf 'parent_sha=%s\n' "$(git rev-parse HEAD^)"
+            printf 'network_requests_emitted=0\n'
+          } > "$RESULT_DIR/preflight.txt"
+
+      - name: Set up frozen Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.13.14"
+          check-latest: false
+
+      - name: Install frozen graphs
+        run: |
+          python -m pip install --upgrade "pip==26.1.2"
+          python -m pip install --require-hashes --only-binary=:all: \
+            --requirement requirements/python-dev.lock
+          python -m pip install --require-hashes --only-binary=:all: \
+            --requirement requirements/o01-xls.lock
+          python -m pip check
+          python -m pip install --no-deps --no-build-isolation .
+
+      - name: Execute six-request diagnostic
+        env:
+          PYTHONPATH: apps/api/src
+        run: |
+          set -euo pipefail
+          python scripts/probe_gate7_o01_history_contract.py \
+            --output "$RESULT_DIR/result.v0.1.json"
+          jq -e \
+            '.status == "PASS" and .network_requests_used == 6 and .network_requests_maximum == 6 and .raw_calendar_bodies_retained == false and .raw_search_responses_retained == false and .claim_contribution == false and .gate7_closed == false and .public_launch == "NO_GO"' \
+            "$RESULT_DIR/result.v0.1.json"
+          ! find "$RESULT_DIR" -type f \( -iname '*.xls' -o -iname '*.xlsx' -o -iname '*.zip' -o -iname '*raw*' \) -print -quit | grep -q .
+
+      - name: Upload retained diagnostic evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: o01-history-contract-diagnostic-${{ env.AXIGNAL_EXACT_SHA }}
+          path: artifacts/o01-history-contract-diagnostic
+          if-no-files-found: error
+          retention-days: 14
