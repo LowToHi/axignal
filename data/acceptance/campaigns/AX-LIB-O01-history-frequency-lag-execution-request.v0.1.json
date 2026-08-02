@@ -1,0 +1,20 @@
+{
+  "schema_version": "axignal.o01-history-frequency-lag-execution-request/v0.1",
+  "task_id": "AX-GE2E-G7-O01-E",
+  "campaign_id": "AX-LIB-O01-TED-HISTORY-FREQUENCY-LAG-v0.1",
+  "execute": true,
+  "one_shot": true,
+  "repository": "LowToHi/axignal",
+  "source_branch": "agent/ax-gate7-o01-e-history-frequency-lag",
+  "controller_parent_sha": "bf19efff42e4c8e85afe3d4ed3d125fa3beea11f",
+  "controller_parent_tree_sha": "eaf168642b82fe4f6840af5aabb35bca672e2c61",
+  "plan_path": "data/acceptance/campaigns/AX-LIB-O01-history-frequency-lag-plan.v0.1.json",
+  "plan_sha256": "sha256:16620a6992b704e66e257a7e03e931bee2d5dab7d5efc1eaa30c3678c7ed5628",
+  "maximum_network_requests": 60,
+  "raw_notice_payloads_persisted": false,
+  "daily_package_bodies_persisted": false,
+  "contact_values_persisted": false,
+  "public_claim_contribution": false,
+  "gate7_closed": false,
+  "public_launch": "NO_GO"
+}
