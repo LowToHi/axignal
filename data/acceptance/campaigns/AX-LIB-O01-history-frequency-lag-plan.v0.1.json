@@ -54,6 +54,14 @@
         "The Search API allows access to published procurement notices for analysis and reuse",
         "POST /v3/notices/search"
       ]
+    },
+    {
+      "purpose": "RELEASE_CALENDAR_DOWNLOAD_CONTRACT",
+      "url": "https://docs.ted.europa.eu/ODS/latest/reuse/calendar.html",
+      "anchors": [
+        "https://ted.europa.eu/{lang}/release-calendar/-/download/file/{format}/{year}",
+        "{format} can be: XLS, PDF, CSV"
+      ]
     }
   ],
   "release_calendar_years": [
@@ -61,13 +69,13 @@
     2026
   ],
   "frequency_reference_year": 2025,
-  "release_calendar_url_template": "https://ted.europa.eu/en/release-calendar/-/download/file/csv/{year}",
+  "release_calendar_url_template": "https://ted.europa.eu/en/release-calendar/-/download/file/CSV/{year}",
   "daily_package_url_template": "https://ted.europa.eu/packages/daily/{package_id}",
   "publication_timezone": "Europe/Luxembourg",
   "history": {
     "declared_public_years": 10,
     "search_years": 11,
-    "query_mode": "COUNT_ONLY_BINARY_BOUNDARY_SEARCH",
+    "query_mode": "COUNT_ONLY_CANONICAL_BOUNDED_INTERVAL_BINARY_SEARCH",
     "day_before_boundary_must_be_empty": true,
     "full_internal_archive_claimed": false
   },
@@ -148,7 +156,8 @@
     "redirect leaves the exact HTTPS host allowlist",
     "network request budget is exceeded",
     "official source anchors are missing or changed",
-    "release calendar cannot be parsed without invention",
+    "release calendar response is HTML, malformed or not a deterministic CSV download",
+    "Search API query is not a canonical bounded publication-date interval",
     "Search API omits total notice count",
     "history boundary cannot be proven with a zero-result preceding day",
     "raw notice payload, daily package body or contact value is persisted",
