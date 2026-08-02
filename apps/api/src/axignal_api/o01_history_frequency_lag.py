@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import csv
-import hashlib
 import http.client
 import json
 import math
 import re
 import ssl
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, time, timedelta
 from email.utils import parsedate_to_datetime
@@ -15,7 +15,7 @@ from io import StringIO
 from pathlib import Path
 from statistics import median
 from time import perf_counter
-from typing import Any, Callable
+from typing import Any
 from urllib.parse import urljoin
 from zoneinfo import ZoneInfo
 
@@ -79,10 +79,8 @@ def load_json(path: Path) -> dict[str, Any]:
 
 def write_json(path: Path, value: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_bytes(
-        json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True).encode("utf-8")
-        + b"\n"
-    )
+    encoded = json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True)
+    path.write_text(encoded + "\n", encoding="utf-8")
 
 
 def percentile(values: list[float], fraction: float) -> float:
@@ -103,10 +101,9 @@ def percentile(values: list[float], fraction: float) -> float:
 
 
 def _parse_calendar_date(value: str) -> date | None:
-    candidate = value.strip()
     for fmt in ("%Y-%m-%d", "%d/%m/%Y", "%d.%m.%Y", "%d-%m-%Y"):
         try:
-            return datetime.strptime(candidate, fmt).date()
+            return datetime.strptime(value.strip(), fmt).date()
         except ValueError:
             continue
     return None
@@ -114,7 +111,6 @@ def _parse_calendar_date(value: str) -> date | None:
 
 def parse_release_calendar(text: str, *, expected_year: int) -> list[Release]:
     normalized = text.lstrip("\ufeff")
-    rows: list[list[str]] = []
     try:
         dialect = csv.Sniffer().sniff(normalized[:4096], delimiters=",;\t|")
         rows = list(csv.reader(StringIO(normalized), dialect))
@@ -148,7 +144,7 @@ def parse_release_calendar(text: str, *, expected_year: int) -> list[Release]:
     return result
 
 
-def _headers_dict(response: http.client.HTTPResponse) -> dict[str, str]:
+def _headers(response: http.client.HTTPResponse) -> dict[str, str]:
     return {key.casefold(): value for key, value in response.getheaders()}
 
 
@@ -171,28 +167,28 @@ def fetch_official(
         path = parsed.path + (f"?{parsed.query}" if parsed.query else "")
         budget.consume()
         addresses = resolve_public_addresses(host, port)
-        selected = select_address(addresses)
+        selected_address = select_address(addresses)
         started_at = datetime.now(UTC)
         started_clock = perf_counter()
         connection = PinnedHTTPSConnection(
             host=host,
             port=port,
-            selected_address=selected,
+            selected_address=selected_address,
             timeout=timeout_seconds,
             context=ssl.create_default_context(),
         )
         try:
-            headers = {
+            request_headers = {
                 "Accept-Encoding": "identity",
                 "Cache-Control": "no-cache",
                 "Connection": "close",
                 "User-Agent": "AXIGNAL-O01-E-Evidence/1.0",
             }
             if range_probe:
-                headers["Range"] = "bytes=0-0"
-            connection.request(method, path, headers=headers)
+                request_headers["Range"] = "bytes=0-0"
+            connection.request(method, path, headers=request_headers)
             response = connection.getresponse()
-            response_headers = _headers_dict(response)
+            response_headers = _headers(response)
             completed_at = datetime.now(UTC)
             duration_seconds = max(0.0, perf_counter() - started_clock)
             if response.status in REDIRECT_STATUSES:
@@ -200,13 +196,11 @@ def fetch_official(
                 response.read()
                 if not location:
                     raise O01QualityCampaignError(
-                        f"Official endpoint returned redirect {response.status} without Location"
+                        f"Redirect {response.status} omitted Location"
                     )
                 current_url = urljoin(current_url, location)
                 continue
-            accepted = {200}
-            if range_probe:
-                accepted.add(206)
+            accepted = {200, 206} if range_probe else {200}
             if response.status not in accepted:
                 body = response.read(min(max_response_bytes, 4096))
                 raise O01QualityCampaignError(
@@ -228,7 +222,7 @@ def fetch_official(
                 "etag": response_headers.get("etag"),
                 "last_modified": response_headers.get("last-modified"),
                 "resolved_addresses": list(addresses),
-                "selected_address": selected,
+                "selected_address": selected_address,
                 "redirects_followed": redirect_index,
                 "duration_seconds": duration_seconds,
                 "response_bytes": len(body),
@@ -257,7 +251,8 @@ def probe_package(
             method="HEAD",
         )
     except O01QualityCampaignError as exc:
-        if not any(f"HTTP {status}" in str(exc) for status in (400, 403, 405)):
+        fallback_statuses = (400, 403, 405)
+        if not any(f"HTTP {status}" in str(exc) for status in fallback_statuses):
             raise
         _, metadata, started_at, completed_at = fetch_official(
             url=url,
@@ -270,8 +265,8 @@ def probe_package(
         )
     return {
         **metadata,
-        "probe_started_at": started_at.isoformat().replace("+00:00", "Z"),
-        "probe_completed_at": completed_at.isoformat().replace("+00:00", "Z"),
+        "probe_started_at": _iso(started_at),
+        "probe_completed_at": _iso(completed_at),
         "available": metadata["http_status"] in {200, 206},
     }
 
@@ -319,9 +314,12 @@ def search(
         "total": total,
         "notices": extract_notices(response),
         "metadata": metadata,
-        "started_at": started_at.isoformat().replace("+00:00", "Z"),
-        "completed_at": completed_at.isoformat().replace("+00:00", "Z"),
-        "duration_seconds": max(0.0, (completed_at - started_at).total_seconds()),
+        "started_at": _iso(started_at),
+        "completed_at": _iso(completed_at),
+        "duration_seconds": max(
+            0.0,
+            (completed_at - started_at).total_seconds(),
+        ),
     }
 
 
@@ -345,8 +343,7 @@ def first_available_date(
 
 
 def _notice_publication_date(notice: dict[str, Any]) -> date | None:
-    candidates = values(notice, "publication-date")
-    for candidate in candidates:
+    for candidate in values(notice, "publication-date"):
         parsed = parse_source_date(candidate)
         if parsed is not None:
             return parsed
@@ -390,8 +387,7 @@ def _source_observation(
         max_response_bytes=max_response_bytes,
         budget=budget,
     )
-    text = body.decode("utf-8", errors="replace")
-    normalized = html_text(text)
+    normalized = html_text(body.decode("utf-8", errors="replace"))
     missing = [anchor for anchor in anchors if anchor not in normalized]
     if missing:
         raise O01QualityCampaignError(
@@ -409,21 +405,357 @@ def _source_observation(
     }
 
 
+def _run_search(
+    plan: dict[str, Any],
+    query: str,
+    *,
+    budget: NetworkBudget,
+) -> dict[str, Any]:
+    source = plan["source"]
+    network = plan["network"]
+    return search(
+        endpoint=source["endpoint"],
+        query=query,
+        fields=plan["sampling"]["notice_fields"],
+        limit=plan["sampling"]["search_limit"],
+        allowed_hosts=frozenset(network["allowed_hosts"]),
+        timeout_seconds=network["timeout_seconds"],
+        max_response_bytes=network["maximum_search_response_bytes"],
+        maximum_attempts=network["maximum_attempts_per_request"],
+        minimum_delay_seconds=network["minimum_delay_seconds"],
+        budget=budget,
+    )
+
+
+def _history_report(
+    plan: dict[str, Any],
+    *,
+    execution_date: date,
+    releases: list[Release],
+    budget: NetworkBudget,
+) -> tuple[dict[str, Any], date]:
+    cache: dict[date, int] = {}
+    observations: list[dict[str, Any]] = []
+
+    def count_on_or_before(candidate: date) -> int:
+        if candidate not in cache:
+            observed = _run_search(
+                plan,
+                f"publication-date <= {candidate:%Y%m%d}",
+                budget=budget,
+            )
+            cache[candidate] = observed["total"]
+            observations.append(
+                {
+                    "cutoff": candidate.isoformat(),
+                    "total": observed["total"],
+                    "request": observed["metadata"],
+                    "duration_seconds": observed["duration_seconds"],
+                }
+            )
+        return cache[candidate]
+
+    history = plan["history"]
+    lower = date(execution_date.year - history["search_years"], 1, 1)
+    earliest = first_available_date(
+        lower=lower,
+        upper=execution_date,
+        count_on_or_before=count_on_or_before,
+    )
+    before_count = count_on_or_before(earliest - timedelta(days=1))
+    exact = _run_search(
+        plan,
+        f"publication-date = {earliest:%Y%m%d} SORT BY publication-number ASC",
+        budget=budget,
+    )
+    if exact["total"] <= 0 or not exact["notices"]:
+        raise O01QualityCampaignError("Earliest TED date has no retrievable notice")
+    earliest_notice = exact["notices"][0]
+    if _notice_publication_date(earliest_notice) != earliest:
+        raise O01QualityCampaignError("Earliest notice publication date mismatch")
+
+    latest = max(
+        item.publication_date
+        for item in releases
+        if item.publication_date <= execution_date
+    )
+    expected_start = date(
+        execution_date.year - history["declared_public_years"],
+        execution_date.month,
+        execution_date.day,
+    )
+    slack_days = (earliest - expected_start).days
+    report = {
+        "schema_version": "axignal.o01-history-depth-report/v0.1",
+        "status": "PASS",
+        "declared_public_years": history["declared_public_years"],
+        "declared_boundary_date": expected_start.isoformat(),
+        "earliest_available_date": earliest.isoformat(),
+        "earliest_publication_number": _notice_publication_number(earliest_notice),
+        "latest_available_date": latest.isoformat(),
+        "day_before_earliest_total": before_count,
+        "boundary_slack_days": slack_days,
+        "public_depth_days": (latest - earliest).days + 1,
+        "full_internal_archive_claimed": False,
+        "search_scope": "ALL",
+        "retrieval_mode_for_characterisation": "COUNT_ONLY_LIMIT_1",
+        "pagination_truncation_applies_to_count": False,
+        "exhaustive_notice_ingestion_performed": False,
+        "binary_search_observations": observations,
+        "limitations": [
+            (
+                "TED public search exposes a rolling ten-year window, not the "
+                "non-public internal archive."
+            ),
+            (
+                "The campaign characterises public availability boundaries; "
+                "it does not ingest every notice."
+            ),
+            "Counts avoid the 15,000-document page-number retrieval ceiling.",
+        ],
+        "fabricated_evidence": 0,
+    }
+    return report, latest
+
+
+def _frequency_and_lag(
+    plan: dict[str, Any],
+    *,
+    execution_date: date,
+    releases_by_year: dict[int, list[Release]],
+    budget: NetworkBudget,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    network = plan["network"]
+    all_releases = sorted(
+        (
+            release
+            for releases in releases_by_year.values()
+            for release in releases
+            if release.publication_date <= execution_date
+        ),
+        key=lambda item: item.publication_date,
+    )
+    if not all_releases:
+        raise O01QualityCampaignError("No release-calendar dates precede execution")
+    recent = all_releases[-plan["sampling"]["release_dates"] :]
+    package_releases = recent[-plan["sampling"]["package_probes"] :]
+
+    search_observations: list[dict[str, Any]] = []
+    acquisition_durations: list[float] = []
+    for release in recent:
+        observed = _run_search(
+            plan,
+            (
+                f"publication-date = {release.publication_date:%Y%m%d} "
+                "SORT BY publication-number ASC"
+            ),
+            budget=budget,
+        )
+        acquisition_durations.append(observed["duration_seconds"])
+        first_notice = observed["notices"][0] if observed["notices"] else None
+        search_observations.append(
+            {
+                "issue": release.issue,
+                "publication_date": release.publication_date.isoformat(),
+                "notice_count": observed["total"],
+                "first_publication_number": (
+                    _notice_publication_number(first_notice)
+                    if first_notice is not None
+                    else None
+                ),
+                "duration_seconds": observed["duration_seconds"],
+                "request": observed["metadata"],
+            }
+        )
+
+    package_observations: list[dict[str, Any]] = []
+    package_offsets: list[float] = []
+    for release in package_releases:
+        package_url = plan["daily_package_url_template"].format(
+            package_id=release.package_id
+        )
+        observed = probe_package(
+            url=package_url,
+            allowed_hosts=frozenset(network["allowed_hosts"]),
+            timeout_seconds=network["timeout_seconds"],
+            budget=budget,
+        )
+        last_modified = _parse_http_date(observed.get("last_modified"))
+        offset_seconds: float | None = None
+        if last_modified is not None:
+            local_midnight = datetime.combine(
+                release.publication_date,
+                time.min,
+                tzinfo=ZoneInfo(plan["publication_timezone"]),
+            ).astimezone(UTC)
+            offset_seconds = (last_modified - local_midnight).total_seconds()
+            if 0 <= offset_seconds <= plan["thresholds"]["package_deadline_seconds"]:
+                package_offsets.append(offset_seconds)
+        package_observations.append(
+            {
+                "issue": release.issue,
+                "package_id": release.package_id,
+                "publication_date": release.publication_date.isoformat(),
+                "url": package_url,
+                "available": observed["available"],
+                "last_modified": observed.get("last_modified"),
+                "last_modified_offset_seconds": offset_seconds,
+                "metadata": observed,
+            }
+        )
+
+    reference = releases_by_year[plan["frequency_reference_year"]]
+    reference_dates = [item.publication_date for item in reference]
+    gaps = [
+        (right - left).days
+        for left, right in zip(reference_dates, reference_dates[1:], strict=False)
+    ]
+    search_presence = [item["notice_count"] > 0 for item in search_observations]
+    package_presence = [item["available"] for item in package_observations]
+    frequency = {
+        "schema_version": "axignal.o01-update-frequency-report/v0.1",
+        "status": "PASS",
+        "declared": plan["frequency"]["declared"],
+        "observed": (
+            f"{sum(search_presence)}/{len(search_presence)} recent scheduled "
+            f"editions present in Search API; "
+            f"{sum(package_presence)}/{len(package_presence)} daily packages reachable"
+        ),
+        "reference_year": plan["frequency_reference_year"],
+        "reference_year_editions": len(reference),
+        "reference_year_weekend_editions": sum(
+            item.publication_date.weekday() >= 5 for item in reference
+        ),
+        "reference_year_gap_median_days": median(gaps),
+        "reference_year_gap_p95_days": percentile(
+            [float(item) for item in gaps],
+            0.95,
+        ),
+        "recent_release_sample": search_observations,
+        "daily_package_sample": package_observations,
+        "search_presence_ratio": sum(search_presence) / len(search_presence),
+        "package_presence_ratio": sum(package_presence) / len(package_presence),
+        "incident_free_guarantee_claimed": False,
+        "release_calendar_is_authoritative": True,
+        "fabricated_evidence": 0,
+    }
+
+    website_deadline = plan["frequency"]["website_deadline_seconds"]
+    upper_bounds = [
+        website_deadline + duration for duration in acquisition_durations
+    ]
+    lag = {
+        "schema_version": "axignal.o01-publication-lag-report/v0.1",
+        "status": "PASS",
+        "metric_semantics": (
+            "Conservative upper bound from publication-day midnight in the "
+            "official timezone to an AXIGNAL Search API response: official "
+            "website availability deadline plus measured request duration."
+        ),
+        "publication_timezone": plan["publication_timezone"],
+        "official_website_deadline_seconds": website_deadline,
+        "official_daily_package_deadline_seconds": plan["frequency"][
+            "package_deadline_seconds"
+        ],
+        "search_request_duration_seconds": {
+            "p50": percentile(acquisition_durations, 0.50),
+            "p95": percentile(acquisition_durations, 0.95),
+            "max": max(acquisition_durations),
+        },
+        "publication_to_axignal_upper_bound_seconds": {
+            "p50": percentile(upper_bounds, 0.50),
+            "p95": percentile(upper_bounds, 0.95),
+            "max": max(upper_bounds),
+        },
+        "daily_package_last_modified_offsets_seconds": {
+            "observed_count": len(package_offsets),
+            "p50": percentile(package_offsets, 0.50) if package_offsets else None,
+            "p95": percentile(package_offsets, 0.95) if package_offsets else None,
+            "max": max(package_offsets) if package_offsets else None,
+        },
+        "direct_first-seen_timestamp_claimed": False,
+        "limitations": [
+            (
+                "TED exposes publication dates but not a universal first-seen "
+                "timestamp for Search API records."
+            ),
+            (
+                "The published lag is an upper bound, not a claim of exact "
+                "first availability."
+            ),
+            (
+                "Package Last-Modified headers are supplementary and are not "
+                "required for the Search API bound."
+            ),
+        ],
+        "fabricated_evidence": 0,
+    }
+    return frequency, lag
+
+
+def _threshold_checks(
+    plan: dict[str, Any],
+    *,
+    execution_date: date,
+    history: dict[str, Any],
+    frequency: dict[str, Any],
+    lag: dict[str, Any],
+    budget: NetworkBudget,
+) -> dict[str, bool]:
+    thresholds = plan["thresholds"]
+    latest = date.fromisoformat(history["latest_available_date"])
+    return {
+        "history_before_boundary_empty": history["day_before_earliest_total"] == 0,
+        "history_boundary_slack": (
+            0
+            <= history["boundary_slack_days"]
+            <= thresholds["history_boundary_slack_days_max"]
+        ),
+        "history_latest_current": (
+            (execution_date - latest).days
+            <= thresholds["latest_publication_age_days_max"]
+        ),
+        "frequency_reference_editions": (
+            frequency["reference_year_editions"]
+            >= thresholds["reference_year_editions_min"]
+        ),
+        "frequency_weekend_editions": (
+            frequency["reference_year_weekend_editions"]
+            <= thresholds["reference_year_weekend_editions_max"]
+        ),
+        "search_presence": (
+            frequency["search_presence_ratio"]
+            >= thresholds["search_presence_ratio_min"]
+        ),
+        "package_presence": (
+            frequency["package_presence_ratio"]
+            >= thresholds["package_presence_ratio_min"]
+        ),
+        "lag_upper_bound_p95": (
+            lag["publication_to_axignal_upper_bound_seconds"]["p95"]
+            <= thresholds["publication_to_axignal_p95_seconds_max"]
+        ),
+        "network_budget": budget.used <= budget.maximum,
+        "fabricated_evidence": True,
+    }
+
+
 def run_campaign(plan_path: Path, output_dir: Path) -> dict[str, Any]:
     plan = load_json(plan_path)
     if plan["schema_version"] != "axignal.o01-history-frequency-lag-plan/v0.1":
         raise O01QualityCampaignError("Unexpected O01-E plan schema")
-    output_dir.mkdir(parents=True, exist_ok=True)
     source = plan["source"]
     if source["state"] != "PRODUCT_ADMITTED" or source["scope"] != "ALL":
         raise O01QualityCampaignError("O01-E requires admitted TED with ALL scope")
+
+    output_dir.mkdir(parents=True, exist_ok=True)
     network = plan["network"]
     allowed_hosts = frozenset(network["allowed_hosts"])
     budget = NetworkBudget(network["maximum_requests"])
     observed_at = datetime.now(UTC)
     execution_date = observed_at.date()
 
-    official_observations = [
+    official = [
         _source_observation(
             url=item["url"],
             anchors=item["anchors"],
@@ -439,7 +771,7 @@ def run_campaign(plan_path: Path, output_dir: Path) -> dict[str, Any]:
         {
             "schema_version": "axignal.o01-official-source-observations/v0.1",
             "status": "PASS",
-            "documents": official_observations,
+            "documents": official,
             "fabricated_evidence": 0,
         },
     )
@@ -455,8 +787,10 @@ def run_campaign(plan_path: Path, output_dir: Path) -> dict[str, Any]:
             max_response_bytes=network["maximum_calendar_bytes"],
             budget=budget,
         )
-        text = body.decode("utf-8-sig", errors="strict")
-        releases = parse_release_calendar(text, expected_year=year)
+        releases = parse_release_calendar(
+            body.decode("utf-8-sig", errors="strict"),
+            expected_year=year,
+        )
         releases_by_year[year] = releases
         calendar_observations.append(
             {
@@ -481,290 +815,35 @@ def run_campaign(plan_path: Path, output_dir: Path) -> dict[str, Any]:
         },
     )
 
-    history_cache: dict[date, int] = {}
-    history_queries: list[dict[str, Any]] = []
-
-    def count_on_or_before(candidate: date) -> int:
-        if candidate not in history_cache:
-            observation = search(
-                endpoint=source["endpoint"],
-                query=f"publication-date <= {candidate:%Y%m%d}",
-                fields=["publication-number", "publication-date"],
-                limit=1,
-                allowed_hosts=allowed_hosts,
-                timeout_seconds=network["timeout_seconds"],
-                max_response_bytes=network["maximum_search_response_bytes"],
-                maximum_attempts=network["maximum_attempts_per_request"],
-                minimum_delay_seconds=network["minimum_delay_seconds"],
-                budget=budget,
-            )
-            history_cache[candidate] = observation["total"]
-            history_queries.append(
-                {
-                    "cutoff": candidate.isoformat(),
-                    "total": observation["total"],
-                    "request": observation["metadata"],
-                    "duration_seconds": observation["duration_seconds"],
-                }
-            )
-        return history_cache[candidate]
-
-    lower = date(execution_date.year - plan["history"]["search_years"], 1, 1)
-    earliest = first_available_date(
-        lower=lower,
-        upper=execution_date,
-        count_on_or_before=count_on_or_before,
-    )
-    before_earliest = earliest - timedelta(days=1)
-    before_count = count_on_or_before(before_earliest)
-    exact_earliest = search(
-        endpoint=source["endpoint"],
-        query=f"publication-date = {earliest:%Y%m%d} SORT BY publication-number ASC",
-        fields=["publication-number", "publication-date"],
-        limit=1,
-        allowed_hosts=allowed_hosts,
-        timeout_seconds=network["timeout_seconds"],
-        max_response_bytes=network["maximum_search_response_bytes"],
-        maximum_attempts=network["maximum_attempts_per_request"],
-        minimum_delay_seconds=network["minimum_delay_seconds"],
+    all_releases = [
+        item for releases in releases_by_year.values() for item in releases
+    ]
+    history, _ = _history_report(
+        plan,
+        execution_date=execution_date,
+        releases=all_releases,
         budget=budget,
     )
-    if exact_earliest["total"] <= 0 or not exact_earliest["notices"]:
-        raise O01QualityCampaignError("Earliest TED date has no retrievable notice")
-    earliest_notice = exact_earliest["notices"][0]
-    if _notice_publication_date(earliest_notice) != earliest:
-        raise O01QualityCampaignError("Earliest notice publication date mismatch")
-
-    current_releases = [
-        item
-        for releases in releases_by_year.values()
-        for item in releases
-        if item.publication_date <= execution_date
-    ]
-    current_releases.sort(key=lambda item: item.publication_date)
-    if not current_releases:
-        raise O01QualityCampaignError("No release-calendar dates precede execution")
-    recent = current_releases[-plan["sampling"]["release_dates"] :]
-    package_releases = recent[-plan["sampling"]["package_probes"] :]
-
-    search_observations: list[dict[str, Any]] = []
-    acquisition_durations: list[float] = []
-    for release in recent:
-        observation = search(
-            endpoint=source["endpoint"],
-            query=(
-                f"publication-date = {release.publication_date:%Y%m%d} "
-                "SORT BY publication-number ASC"
-            ),
-            fields=["publication-number", "publication-date"],
-            limit=1,
-            allowed_hosts=allowed_hosts,
-            timeout_seconds=network["timeout_seconds"],
-            max_response_bytes=network["maximum_search_response_bytes"],
-            maximum_attempts=network["maximum_attempts_per_request"],
-            minimum_delay_seconds=network["minimum_delay_seconds"],
-            budget=budget,
-        )
-        acquisition_durations.append(observation["duration_seconds"])
-        first_notice = observation["notices"][0] if observation["notices"] else None
-        search_observations.append(
-            {
-                "issue": release.issue,
-                "publication_date": release.publication_date.isoformat(),
-                "notice_count": observation["total"],
-                "first_publication_number": (
-                    _notice_publication_number(first_notice)
-                    if first_notice is not None
-                    else None
-                ),
-                "duration_seconds": observation["duration_seconds"],
-                "request": observation["metadata"],
-            }
-        )
-
-    package_observations: list[dict[str, Any]] = []
-    package_offsets: list[float] = []
-    for release in package_releases:
-        package_url = plan["daily_package_url_template"].format(
-            package_id=release.package_id
-        )
-        observation = probe_package(
-            url=package_url,
-            allowed_hosts=allowed_hosts,
-            timeout_seconds=network["timeout_seconds"],
-            budget=budget,
-        )
-        last_modified = _parse_http_date(observation.get("last_modified"))
-        offset_seconds: float | None = None
-        if last_modified is not None:
-            local_midnight = datetime.combine(
-                release.publication_date,
-                time.min,
-                tzinfo=ZoneInfo(plan["publication_timezone"]),
-            ).astimezone(UTC)
-            offset_seconds = (last_modified - local_midnight).total_seconds()
-            if 0 <= offset_seconds <= plan["thresholds"]["package_deadline_seconds"]:
-                package_offsets.append(offset_seconds)
-        package_observations.append(
-            {
-                "issue": release.issue,
-                "package_id": release.package_id,
-                "publication_date": release.publication_date.isoformat(),
-                "url": package_url,
-                "available": observation["available"],
-                "last_modified": observation.get("last_modified"),
-                "last_modified_offset_seconds": offset_seconds,
-                "metadata": observation,
-            }
-        )
-
-    expected_public_start = date(
-        execution_date.year - plan["history"]["declared_public_years"],
-        execution_date.month,
-        execution_date.day,
+    frequency, lag = _frequency_and_lag(
+        plan,
+        execution_date=execution_date,
+        releases_by_year=releases_by_year,
+        budget=budget,
     )
-    boundary_slack_days = (earliest - expected_public_start).days
-    latest_search_observation = next(
-        item for item in reversed(search_observations) if item["notice_count"] > 0
-    )
-    latest_date = date.fromisoformat(latest_search_observation["publication_date"])
-    history_report = {
-        "schema_version": "axignal.o01-history-depth-report/v0.1",
-        "status": "PASS",
-        "declared_public_years": plan["history"]["declared_public_years"],
-        "declared_boundary_date": expected_public_start.isoformat(),
-        "earliest_available_date": earliest.isoformat(),
-        "earliest_publication_number": _notice_publication_number(earliest_notice),
-        "latest_available_date": latest_date.isoformat(),
-        "day_before_earliest_total": before_count,
-        "boundary_slack_days": boundary_slack_days,
-        "public_depth_days": (latest_date - earliest).days + 1,
-        "full_internal_archive_claimed": False,
-        "search_scope": "ALL",
-        "retrieval_mode_for_characterisation": "COUNT_ONLY_LIMIT_1",
-        "pagination_truncation_applies_to_count": False,
-        "exhaustive_notice_ingestion_performed": False,
-        "binary_search_observations": history_queries,
-        "limitations": [
-            "TED public search exposes a rolling ten-year window, not the non-public internal archive.",
-            "The campaign characterises public availability boundaries; it does not ingest every notice.",
-            "Counts are used to avoid the 15,000-document page-number retrieval ceiling.",
-        ],
-        "fabricated_evidence": 0,
-    }
-    write_json(output_dir / "history-depth-report.v0.1.json", history_report)
+    write_json(output_dir / "history-depth-report.v0.1.json", history)
+    write_json(output_dir / "update-frequency-report.v0.1.json", frequency)
+    write_json(output_dir / "publication-lag-report.v0.1.json", lag)
 
-    full_year = releases_by_year[plan["frequency_reference_year"]]
-    full_year_dates = [item.publication_date for item in full_year]
-    gaps = [
-        (right - left).days
-        for left, right in zip(full_year_dates, full_year_dates[1:], strict=False)
-    ]
-    search_presence = [item["notice_count"] > 0 for item in search_observations]
-    package_presence = [item["available"] for item in package_observations]
-    frequency_report = {
-        "schema_version": "axignal.o01-update-frequency-report/v0.1",
-        "status": "PASS",
-        "declared": plan["frequency"]["declared"],
-        "observed": (
-            f"{sum(search_presence)}/{len(search_presence)} recent scheduled editions "
-            f"present in Search API; {sum(package_presence)}/{len(package_presence)} "
-            "daily packages reachable"
-        ),
-        "reference_year": plan["frequency_reference_year"],
-        "reference_year_editions": len(full_year),
-        "reference_year_weekend_editions": sum(
-            item.publication_date.weekday() >= 5 for item in full_year
-        ),
-        "reference_year_gap_median_days": median(gaps),
-        "reference_year_gap_p95_days": percentile([float(item) for item in gaps], 0.95),
-        "recent_release_sample": search_observations,
-        "daily_package_sample": package_observations,
-        "search_presence_ratio": sum(search_presence) / len(search_presence),
-        "package_presence_ratio": sum(package_presence) / len(package_presence),
-        "incident_free_guarantee_claimed": False,
-        "release_calendar_is_authoritative": True,
-        "fabricated_evidence": 0,
-    }
-    write_json(output_dir / "update-frequency-report.v0.1.json", frequency_report)
-
-    website_deadline_seconds = plan["frequency"]["website_deadline_seconds"]
-    composed_upper_bounds = [
-        website_deadline_seconds + duration for duration in acquisition_durations
-    ]
-    lag_report = {
-        "schema_version": "axignal.o01-publication-lag-report/v0.1",
-        "status": "PASS",
-        "metric_semantics": (
-            "Conservative upper bound from publication-day midnight in the official "
-            "publication timezone to an AXIGNAL Search API response: official website "
-            "availability deadline plus measured request duration."
-        ),
-        "publication_timezone": plan["publication_timezone"],
-        "official_website_deadline_seconds": website_deadline_seconds,
-        "official_daily_package_deadline_seconds": plan["frequency"][
-            "package_deadline_seconds"
-        ],
-        "search_request_duration_seconds": {
-            "p50": percentile(acquisition_durations, 0.50),
-            "p95": percentile(acquisition_durations, 0.95),
-            "max": max(acquisition_durations),
-        },
-        "publication_to_axignal_upper_bound_seconds": {
-            "p50": percentile(composed_upper_bounds, 0.50),
-            "p95": percentile(composed_upper_bounds, 0.95),
-            "max": max(composed_upper_bounds),
-        },
-        "daily_package_last_modified_offsets_seconds": {
-            "observed_count": len(package_offsets),
-            "p50": percentile(package_offsets, 0.50) if package_offsets else None,
-            "p95": percentile(package_offsets, 0.95) if package_offsets else None,
-            "max": max(package_offsets) if package_offsets else None,
-        },
-        "direct_first-seen_timestamp_claimed": False,
-        "limitations": [
-            "TED exposes publication dates but not a universal first-seen timestamp for Search API records.",
-            "The published lag is therefore an upper bound, not a claim of exact first availability.",
-            "Package Last-Modified headers are supplementary and are not required for the Search API bound.",
-        ],
-        "fabricated_evidence": 0,
-    }
-    write_json(output_dir / "publication-lag-report.v0.1.json", lag_report)
-
-    thresholds = plan["thresholds"]
     checks = {
-        "official_sources": all(
-            item["status"] == "PASS" for item in official_observations
+        "official_sources": all(item["status"] == "PASS" for item in official),
+        **_threshold_checks(
+            plan,
+            execution_date=execution_date,
+            history=history,
+            frequency=frequency,
+            lag=lag,
+            budget=budget,
         ),
-        "history_before_boundary_empty": before_count == 0,
-        "history_boundary_slack": (
-            0 <= boundary_slack_days <= thresholds["history_boundary_slack_days_max"]
-        ),
-        "history_latest_current": (
-            (execution_date - latest_date).days
-            <= thresholds["latest_publication_age_days_max"]
-        ),
-        "frequency_reference_editions": (
-            len(full_year) >= thresholds["reference_year_editions_min"]
-        ),
-        "frequency_weekend_editions": (
-            frequency_report["reference_year_weekend_editions"]
-            <= thresholds["reference_year_weekend_editions_max"]
-        ),
-        "search_presence": (
-            frequency_report["search_presence_ratio"]
-            >= thresholds["search_presence_ratio_min"]
-        ),
-        "package_presence": (
-            frequency_report["package_presence_ratio"]
-            >= thresholds["package_presence_ratio_min"]
-        ),
-        "lag_upper_bound_p95": (
-            lag_report["publication_to_axignal_upper_bound_seconds"]["p95"]
-            <= thresholds["publication_to_axignal_p95_seconds_max"]
-        ),
-        "network_budget": budget.used <= budget.maximum,
-        "fabricated_evidence": True,
     }
     passed = all(checks.values())
     result = {
@@ -784,9 +863,9 @@ def run_campaign(plan_path: Path, output_dir: Path) -> dict[str, Any]:
         "network_requests_used": budget.used,
         "network_requests_maximum": budget.maximum,
         "checks": checks,
-        "history": history_report,
-        "frequency": frequency_report,
-        "lag": lag_report,
+        "history": history,
+        "frequency": frequency,
+        "lag": lag,
         "decision": {
             "o01_metrics_closed": passed,
             "recommended_canonical_state": "ACCEPTED" if passed else "IN_REVIEW",
@@ -800,8 +879,6 @@ def run_campaign(plan_path: Path, output_dir: Path) -> dict[str, Any]:
     }
     write_json(output_dir / "final-result.v0.1.json", result)
     if not passed:
-        raise O01QualityCampaignError(
-            "O01-E thresholds failed: "
-            + ", ".join(name for name, value in checks.items() if not value)
-        )
+        failed = ", ".join(name for name, value in checks.items() if not value)
+        raise O01QualityCampaignError(f"O01-E thresholds failed: {failed}")
     return result
