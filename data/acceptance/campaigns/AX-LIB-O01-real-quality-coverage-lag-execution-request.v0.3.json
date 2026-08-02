@@ -1,0 +1,18 @@
+{
+  "authority_boundary": {
+    "product_admitted": false,
+    "public_claims_authorised": false,
+    "public_launch": "NO_GO",
+    "source_state": "CANDIDATE"
+  },
+  "campaign_id": "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.3",
+  "controller_parent_sha": "79a7f8f2862b234ff2e2c1654382cb22af527276",
+  "execute": true,
+  "execution_mode": "REAL_BOUNDED_PRIVATE_EVIDENCE",
+  "manifest_reference": "sha256:74ed362c8b856d586139062095c57a6d9a8944012bb9429dc4bb121ed6960d6d",
+  "one_shot": true,
+  "requested_at": "2026-08-02T17:42:48Z",
+  "requested_by": "LowToHi",
+  "schema_version": "axignal.o01-real-campaign-execution-request/v0.3",
+  "target_head_sha": "e9621735c75b51372a6e8f6864cd18a6f42a687c"
+}
