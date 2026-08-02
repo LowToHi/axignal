@@ -15,7 +15,7 @@ DELTA = (
     / "data/acceptance/campaigns/"
     "AX-LIB-O01-quality-coverage-lag-execution-contract.v0.6.delta.json"
 )
-DELTA_SHA = "sha256:a741e56ef7057ba29bf7c51b70b681e9e9ed47dfdce4003260a3abd7a04398c0"
+DELTA_SHA = "sha256:31b808da4a95a6510882154addcb87d3ceb7af9fd79227b5cd77e26b1e5c4310"
 BASE_CANONICAL_SHA = (
     "sha256:1be51417eeb95dbac8d68e39ed73cfe03202732688e3e5180a714ab2a2762387"
 )
