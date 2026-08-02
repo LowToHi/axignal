@@ -22,7 +22,6 @@ ACTIVE_PATHS = (
     ROOT / "apps/api/src/axignal_api/o01_history_frequency_lag_v6.py",
     ROOT / "scripts/run_gate7_o01_history_frequency_lag_v6.py",
     ROOT / "scripts/verify_gate7_o01_history_frequency_lag_v6.py",
-    ROOT / "scripts/verify_gate7_o01_history_authority_coherence.py",
     ROOT / ".github/workflows/o01-history-frequency-lag-v0.6.yml",
 )
 STALE_DIGESTS = (
