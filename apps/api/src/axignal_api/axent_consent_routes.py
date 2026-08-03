@@ -28,8 +28,11 @@ class ConfirmationPreview(BaseModel):
     parameters: dict[str, Any] = Field(default_factory=dict)
 
 
-def _before_state(command: ConfirmationPreview, context: dict[str, Any]) -> dict[str, Any]:
-    if command.action_type == "archive_workspace":
+def _before_state(
+    command: ConfirmationPreview,
+    context: dict[str, Any],
+) -> dict[str, Any]:
+    if command.action_type in {"archive_workspace", "restore_workspace"}:
         workspace = context.get("workspace")
         if workspace is None:
             raise HTTPException(status_code=404, detail="workspace_not_found")
