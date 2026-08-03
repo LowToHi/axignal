@@ -93,7 +93,7 @@ async function initialiseOwnerSeat(page: Page) {
   });
   await panel.getByRole("button", { name: "Close" }).click();
   await expect(panel).toBeHidden();
-  await page.reload();
+  await page.reload({ waitUntil: "domcontentloaded", timeout: 45_000 });
 }
 
 test("executes the no-fixture subscriber happy path", async ({ page, context }) => {
@@ -162,7 +162,7 @@ test("executes the no-fixture subscriber happy path", async ({ page, context }) 
     expect(markdown).toContain("Pursuit note");
     expect(markdown).toContain("src_ted_search_api_v3");
 
-    await page.reload();
+    await page.reload({ waitUntil: "domcontentloaded", timeout: 45_000 });
     await expect(
       page.locator(
         '[data-e2e-no-fixtures="true"][data-adapter="persistent-real"]'
