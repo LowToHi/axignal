@@ -22,6 +22,13 @@ function identitySessionCookie(
   );
 }
 
+async function expectPersistentWorkspace(page: Page) {
+  await expect(
+    page.getByRole("heading", { name: "Persistent opportunity intelligence" })
+  ).toBeVisible();
+  await expect(page.locator('main[data-adapter="persistent-real"]')).toBeVisible();
+}
+
 async function loginWithPasskey(page: Page, context: BrowserContext) {
   await page.setExtraHTTPHeaders({
     origin: "http://localhost:18080",
@@ -85,7 +92,7 @@ async function loginWithPasskey(page: Page, context: BrowserContext) {
   const codes = await recovery.locator("pre").innerText();
   expect(codes.split("\n")).toHaveLength(8);
   await recovery.getByRole("button", { name: "He guardado los códigos" }).click();
-  await expect(page.locator("main.shell")).toBeVisible();
+  await expectPersistentWorkspace(page);
 
   const credentials = await cdp.send("WebAuthn.getCredentials", {
     authenticatorId: authenticator.authenticatorId
@@ -109,7 +116,7 @@ async function confirmCheckout(page: Page) {
   await expect(page).toHaveURL(/\/billing\/test-checkout/);
   await page.getByRole("button", { name: "Confirmar pago de prueba" }).click();
   await expect(page).toHaveURL(/billing=success/);
-  await expect(page.locator("main.shell")).toBeVisible();
+  await expectPersistentWorkspace(page);
   await expect(page.getByText(/Plan: Professional · acceso ACTIVE/)).toBeVisible();
   await page
     .getByRole("complementary", { name: "Plan y facturación" })
