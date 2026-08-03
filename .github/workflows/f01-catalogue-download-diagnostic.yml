@@ -18,27 +18,46 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      - name: Enumerate catalogue download distributions
+      - name: Reconcile versioned RDF and live SPARQL
         env:
           CATALOGUE_URL: >-
             https://op.europa.eu/en/web/eu-vocabularies/at-dataset/-/resource/dataset/country
+          SPARQL_ENDPOINT: https://publications.europa.eu/webapi/rdf/sparql
         run: |
           set -euo pipefail
+          mkdir -p diagnostic
           curl --fail --silent --show-error --location \
             --header 'User-Agent: AXIGNAL-F01-diagnostic/0.1' \
             "$CATALOGUE_URL" \
-            --output catalogue.html
+            --output diagnostic/catalogue.html
           python - <<'PY'
           from __future__ import annotations
 
           import html
+          import json
           import re
           import urllib.parse
           import urllib.request
+          import xml.etree.ElementTree as ET
+          from collections import Counter
           from html.parser import HTMLParser
           from pathlib import Path
 
-          PAGE = Path("catalogue.html").read_text(errors="replace")
+          CATALOGUE_URL = (
+              "https://op.europa.eu/en/web/eu-vocabularies/at-dataset/"
+              "-/resource/dataset/country"
+          )
+          SPARQL_ENDPOINT = (
+              "https://publications.europa.eu/webapi/rdf/sparql"
+          )
+          PAGE = Path("diagnostic/catalogue.html").read_text(errors="replace")
+          RDF_NS = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+          SKOS_NS = "http://www.w3.org/2004/02/skos/core#"
+          COUNTRY_PREFIX = (
+              "http://publications.europa.eu/resource/authority/country/"
+          )
+          CONCEPT_URI = f"{SKOS_NS}Concept"
+          XML_LANG = "{http://www.w3.org/XML/1998/namespace}lang"
 
           def extract(patterns: tuple[str, ...], name: str) -> str:
               for pattern in patterns:
@@ -68,10 +87,10 @@ jobs:
               headers={"User-Agent": "AXIGNAL-F01-diagnostic/0.1"},
           )
           with urllib.request.urlopen(request, timeout=60) as response:
-              payload = response.read(5_000_001)
-              if len(payload) > 5_000_000:
+              tab_payload = response.read(5_000_001)
+              if len(tab_payload) > 5_000_000:
                   raise SystemExit("Downloads tab exceeded byte budget")
-          Path("downloads-tab.html").write_bytes(payload)
+          Path("diagnostic/downloads-tab.html").write_bytes(tab_payload)
 
           class LinkParser(HTMLParser):
               def __init__(self) -> None:
@@ -84,12 +103,10 @@ jobs:
                   tag: str,
                   attrs: list[tuple[str, str | None]],
               ) -> None:
-                  if tag != "a":
-                      return
-                  values = dict(attrs)
-                  href = values.get("href")
-                  if href:
-                      self.current = {"href": href, "text": ""}
+                  if tag == "a":
+                      href = dict(attrs).get("href")
+                      if href:
+                          self.current = {"href": href, "text": ""}
 
               def handle_data(self, data: str) -> None:
                   if self.current is not None:
@@ -104,13 +121,137 @@ jobs:
                       self.current = None
 
           parser = LinkParser()
-          parser.feed(payload.decode("utf-8", errors="replace"))
-          print(f"NAMESPACE={namespace}")
-          print(f"DOWNLOADS_URL={downloads_url}")
-          print(f"DOWNLOADS_BYTES={len(payload)}")
-          print(f"LINK_COUNT={len(parser.links)}")
-          for index, link in enumerate(parser.links, start=1):
-              absolute = urllib.parse.urljoin(downloads_url, link["href"])
-              print(f"LINK_{index}_TEXT={link['text']}")
-              print(f"LINK_{index}_URL={absolute}")
+          parser.feed(tab_payload.decode("utf-8", errors="replace"))
+          distributions = [
+              {
+                  "name": link["text"],
+                  "url": urllib.parse.urljoin(downloads_url, link["href"]),
+              }
+              for link in parser.links
+          ]
+          rdf_distribution = next(
+              item for item in distributions
+              if item["name"] == "countries-skos.rdf"
+          )
+          rdf_request = urllib.request.Request(
+              rdf_distribution["url"],
+              headers={"User-Agent": "AXIGNAL-F01-diagnostic/0.1"},
+          )
+          with urllib.request.urlopen(rdf_request, timeout=60) as response:
+              rdf_payload = response.read(25_000_001)
+              if len(rdf_payload) > 25_000_000:
+                  raise SystemExit("RDF distribution exceeded byte budget")
+          Path("diagnostic/countries-skos.rdf").write_bytes(rdf_payload)
+
+          root = ET.fromstring(rdf_payload)
+          rdf_concepts: dict[str, dict[str, object]] = {}
+          root_tags = Counter()
+          for resource in root:
+              root_tags[resource.tag] += 1
+              uri = resource.attrib.get(f"{{{RDF_NS}}}about")
+              if not uri or not uri.startswith(COUNTRY_PREFIX):
+                  continue
+              is_concept = resource.tag == f"{{{SKOS_NS}}}Concept"
+              if not is_concept:
+                  is_concept = any(
+                      child.tag == f"{{{RDF_NS}}}type"
+                      and child.attrib.get(f"{{{RDF_NS}}}resource")
+                      == CONCEPT_URI
+                      for child in resource
+                  )
+              labels = {
+                  (child.attrib.get(XML_LANG) or ""): child.text or ""
+                  for child in resource
+                  if child.tag == f"{{{SKOS_NS}}}prefLabel"
+              }
+              rdf_concepts[uri] = {
+                  "uri": uri,
+                  "is_skos_concept": is_concept,
+                  "label_en": labels.get("en"),
+                  "label_languages": sorted(labels),
+                  "root_tag": resource.tag,
+              }
+
+          query = f"""
+          PREFIX skos: <{SKOS_NS}>
+          SELECT ?country_uri ?country_en
+          FROM <http://publications.europa.eu/resource/authority/country>
+          WHERE {{
+            ?country_uri a skos:Concept .
+            ?country_uri skos:prefLabel ?label .
+            FILTER(lang(?label) = "en")
+            FILTER(?country_uri != <{COUNTRY_PREFIX}OP_DATPRO>)
+            BIND(str(?label) AS ?country_en)
+          }}
+          ORDER BY ?country_uri
+          """.strip()
+          query_url = (
+              f"{SPARQL_ENDPOINT}?"
+              + urllib.parse.urlencode(
+                  {
+                      "query": query,
+                      "format": "application/sparql-results+json",
+                  }
+              )
+          )
+          query_request = urllib.request.Request(
+              query_url,
+              headers={
+                  "Accept": "application/sparql-results+json",
+                  "User-Agent": "AXIGNAL-F01-diagnostic/0.1",
+              },
+          )
+          with urllib.request.urlopen(query_request, timeout=60) as response:
+              sparql_payload = response.read(5_000_001)
+              if len(sparql_payload) > 5_000_000:
+                  raise SystemExit("SPARQL result exceeded byte budget")
+          Path("diagnostic/sparql-full-list.json").write_bytes(sparql_payload)
+          sparql_document = json.loads(sparql_payload)
+          sparql_concepts = {
+              row["country_uri"]["value"]: row["country_en"]["value"]
+              for row in sparql_document["results"]["bindings"]
+          }
+
+          rdf_set = set(rdf_concepts).difference({f"{COUNTRY_PREFIX}OP_DATPRO"})
+          sparql_set = set(sparql_concepts)
+          rdf_only = sorted(rdf_set - sparql_set)
+          sparql_only = sorted(sparql_set - rdf_set)
+          diagnosis = {
+              "catalogue_url": CATALOGUE_URL,
+              "downloads_url": downloads_url,
+              "distributions": distributions,
+              "rdf_bytes": len(rdf_payload),
+              "rdf_country_resource_count_excluding_reserved": len(rdf_set),
+              "rdf_skos_concept_count_excluding_reserved": sum(
+                  bool(rdf_concepts[uri]["is_skos_concept"])
+                  for uri in rdf_set
+              ),
+              "rdf_english_label_count_excluding_reserved": sum(
+                  bool(rdf_concepts[uri]["label_en"])
+                  for uri in rdf_set
+              ),
+              "sparql_count": len(sparql_set),
+              "rdf_only_count": len(rdf_only),
+              "sparql_only_count": len(sparql_only),
+              "rdf_only": [rdf_concepts[uri] for uri in rdf_only],
+              "sparql_only": [
+                  {"uri": uri, "label_en": sparql_concepts[uri]}
+                  for uri in sparql_only
+              ],
+              "rdf_root_tags": dict(sorted(root_tags.items())),
+          }
+          Path("diagnostic/diagnosis.json").write_text(
+              json.dumps(diagnosis, indent=2, ensure_ascii=False, sort_keys=True)
+              + "\n"
+          )
+          print(json.dumps(diagnosis, ensure_ascii=False, sort_keys=True))
           PY
+
+      - name: Upload diagnosis
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: f01-catalogue-download-diagnostic
+          path: diagnostic
+          if-no-files-found: error
+          retention-days: 7
