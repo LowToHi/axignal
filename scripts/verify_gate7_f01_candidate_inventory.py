@@ -78,10 +78,11 @@ def verify(inventory_path: Path, dossier_path: Path) -> dict[str, Any]:
         == "https://publications.europa.eu/webapi/rdf/sparql",
         "SPARQL endpoint drift",
     )
-    require(
-        all(value.startswith("https://") or value.startswith("http://") for value in identifiers.values()),
-        "Candidate identifiers must be absolute URLs",
+    absolute_identifiers = all(
+        value.startswith("https://") or value.startswith("http://")
+        for value in identifiers.values()
     )
+    require(absolute_identifiers, "Candidate identifiers must be absolute URLs")
 
     publication = inventory["observed_publication"]
     require(publication["catalogue_version"] == "20260318-0", "Version drift")
@@ -90,7 +91,10 @@ def verify(inventory_path: Path, dossier_path: Path) -> dict[str, Any]:
     require(publication["regular_updates_foreseen"] is True, "Update declaration drift")
 
     scope = inventory["semantic_scope"]
-    require(scope["current_and_deprecated_countries_and_territories"] is True, "Core scope missing")
+    require(
+        scope["current_and_deprecated_countries_and_territories"] is True,
+        "Core scope missing",
+    )
     require(scope["disputed_territories"] is True, "Disputed entities hidden")
     require(scope["marine_areas"] is True, "Marine entities hidden")
     require(scope["geographical_aggregations"] is False, "Aggregations falsely claimed")
@@ -106,11 +110,17 @@ def verify(inventory_path: Path, dossier_path: Path) -> dict[str, Any]:
 
     rights = inventory["rights"]
     require(rights["status"] == "REVIEW_REQUIRED", "Rights falsely approved")
-    require(rights["specific_dataset_reuse_confirmed"] is False, "Reuse falsely confirmed")
+    require(
+        rights["specific_dataset_reuse_confirmed"] is False,
+        "Reuse falsely confirmed",
+    )
     require(rights["redistribution_confirmed"] is False, "Redistribution falsely confirmed")
     require(rights["derived_data_confirmed"] is False, "Derived rights falsely confirmed")
     require(rights["retention_confirmed"] is False, "Retention falsely confirmed")
-    require(rights["third_party_standard_components_present"] is True, "Third-party standards hidden")
+    require(
+        rights["third_party_standard_components_present"] is True,
+        "Third-party standards hidden",
+    )
 
     admission = inventory["admission"]
     require(
