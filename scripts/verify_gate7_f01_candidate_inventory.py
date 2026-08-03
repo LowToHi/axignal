@@ -12,6 +12,13 @@ DEFAULT_INVENTORY = ROOT / (
     "AX-LIB-F01-eu-countries-territories-candidate.v0.1.json"
 )
 DEFAULT_DOSSIER = ROOT / "data/acceptance/library-coverage/AX-LIB-F01.json"
+BASELINE_REFERENCE = (
+    "data/acceptance/source-baselines/"
+    "AX-LIB-F01-eu-countries-territories-baseline-contract.v0.1.json"
+)
+BASELINE_SHA256 = (
+    "29abbb31ecbfc040438c02f107362303d2eacd677cce5867d06e548228941edb"
+)
 
 
 class ContractError(ValueError):
@@ -31,6 +38,15 @@ def load_json(path: Path) -> dict[str, Any]:
 
 def digest(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def evidence_matches(item: dict[str, Any]) -> bool:
+    return item == {
+        "kind": "SOURCE_SNAPSHOT",
+        "reference": BASELINE_REFERENCE,
+        "sha256": BASELINE_SHA256,
+        "expires_at": "2026-08-31T23:59:59Z",
+    }
 
 
 def verify(inventory_path: Path, dossier_path: Path) -> dict[str, Any]:
@@ -88,7 +104,10 @@ def verify(inventory_path: Path, dossier_path: Path) -> dict[str, Any]:
     require(publication["catalogue_version"] == "20260318-0", "Version drift")
     require(publication["entry_count_declared"] == 375, "Entry declaration drift")
     require(publication["historical_versions_listed"] is True, "History hidden")
-    require(publication["regular_updates_foreseen"] is True, "Update declaration drift")
+    require(
+        publication["regular_updates_foreseen"] is True,
+        "Update declaration drift",
+    )
 
     scope = inventory["semantic_scope"]
     require(
@@ -97,7 +116,10 @@ def verify(inventory_path: Path, dossier_path: Path) -> dict[str, Any]:
     )
     require(scope["disputed_territories"] is True, "Disputed entities hidden")
     require(scope["marine_areas"] is True, "Marine entities hidden")
-    require(scope["geographical_aggregations"] is False, "Aggregations falsely claimed")
+    require(
+        scope["geographical_aggregations"] is False,
+        "Aggregations falsely claimed",
+    )
     require(scope["map_geometry"] is False, "Map geometry falsely claimed")
 
     language_scope = inventory["language_scope"]
@@ -106,7 +128,10 @@ def verify(inventory_path: Path, dossier_path: Path) -> dict[str, Any]:
         == ["en", "es", "fr", "de", "pt", "it"],
         "Required language set drift",
     )
-    require(language_scope["journeys_verified"] is False, "Journeys falsely verified")
+    require(
+        language_scope["journeys_verified"] is False,
+        "Journeys falsely verified",
+    )
 
     rights = inventory["rights"]
     require(rights["status"] == "REVIEW_REQUIRED", "Rights falsely approved")
@@ -114,9 +139,18 @@ def verify(inventory_path: Path, dossier_path: Path) -> dict[str, Any]:
         rights["specific_dataset_reuse_confirmed"] is False,
         "Reuse falsely confirmed",
     )
-    require(rights["redistribution_confirmed"] is False, "Redistribution falsely confirmed")
-    require(rights["derived_data_confirmed"] is False, "Derived rights falsely confirmed")
-    require(rights["retention_confirmed"] is False, "Retention falsely confirmed")
+    require(
+        rights["redistribution_confirmed"] is False,
+        "Redistribution falsely confirmed",
+    )
+    require(
+        rights["derived_data_confirmed"] is False,
+        "Derived rights falsely confirmed",
+    )
+    require(
+        rights["retention_confirmed"] is False,
+        "Retention falsely confirmed",
+    )
     require(
         rights["third_party_standard_components_present"] is True,
         "Third-party standards hidden",
@@ -138,19 +172,51 @@ def verify(inventory_path: Path, dossier_path: Path) -> dict[str, Any]:
         },
         "Candidate admission boundary drift",
     )
+    require(
+        inventory["next_required_transition"]
+        == "F01_B_RIGHTS_TECHNICAL_BASELINE_AND_HUMAN_AUTHORITY",
+        "F01-A transition target drift",
+    )
 
     require(dossier["library_id"] == "AX-LIB-F01", "Dossier library drift")
     require(dossier["canonical_state"] == "BLOCKED", "F01 was accepted")
     require(dossier["countries_covered"] == [], "Coverage was asserted")
     require(dossier["sources"]["active"] == [], "Candidate was activated")
     require(dossier["sources"]["suspended"] == [], "Unexpected suspended source")
-    require(len(dossier["sources"]["candidate"]) == 1, "Candidate cardinality drift")
+    require(
+        len(dossier["sources"]["candidate"]) == 1,
+        "Candidate cardinality drift",
+    )
     candidate = dossier["sources"]["candidate"][0]
     require(candidate["source_id"] == inventory["source_id"], "Candidate link drift")
     require(candidate["state"] == "CANDIDATE", "Dossier candidate state drift")
-    require(candidate["product_admitted"] is False, "Dossier source admitted")
-    require(candidate["claim_contribution"] is False, "Dossier claim enabled")
-    require(dossier["rights"]["status"] == "REVIEW_REQUIRED", "Dossier rights drift")
+    require(
+        candidate["admission"]
+        == {
+            "technical": "PASS",
+            "legal": "MISSING",
+            "rights": "MISSING",
+            "quality": "MISSING",
+            "human_authority": "MISSING",
+        },
+        "Candidate admission progression drift",
+    )
+    require(candidate["rights_expiry"] is None, "Rights expiry falsely asserted")
+    require(
+        candidate["contributes_to_public_claim"] is False,
+        "Dossier claim enabled",
+    )
+    require(
+        len(candidate["evidence"]) == 1
+        and evidence_matches(candidate["evidence"][0]),
+        "Candidate baseline evidence drift",
+    )
+    require(dossier["rights"]["status"] == "MISSING", "Dossier rights drift")
+    require(
+        len(dossier["rights"]["evidence"]) == 1
+        and evidence_matches(dossier["rights"]["evidence"][0]),
+        "Dossier rights evidence drift",
+    )
     require(dossier["claim_decision"] == "DENIED", "F01 claim enabled")
     require(dossier["kill_switch"]["tested"] is False, "Kill switch falsely tested")
     require(dossier["rollback"]["tested"] is False, "Rollback falsely tested")
