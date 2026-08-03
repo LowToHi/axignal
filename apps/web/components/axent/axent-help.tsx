@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 
 type StoredMessage = {
   message_id: string;
@@ -15,13 +15,50 @@ type Citation = {
   authority_version: string;
 };
 
+type Notification = {
+  notification_id: string;
+  notification_type: string;
+  payload_redacted: { resolution?: string };
+  delivery_state: "PENDING" | "DELIVERED" | "FAILED";
+  created_at: string;
+};
+
 export function AxentHelp() {
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<StoredMessage[]>([]);
   const [citations, setCitations] = useState<Citation[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [draft, setDraft] = useState("");
   const [state, setState] = useState<"ready" | "sending" | "error">("ready");
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    async function loadNotifications() {
+      const response = await fetch("/api/axent/notifications", { cache: "no-store" });
+      const payload = await response.json();
+      if (active && response.ok) setNotifications(payload.notifications ?? []);
+    }
+    void loadNotifications();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  async function acknowledge(notificationId: string) {
+    const response = await fetch(
+      `/api/axent/notifications/${notificationId}/acknowledge`,
+      { method: "POST" }
+    );
+    if (!response.ok) return;
+    setNotifications((current) =>
+      current.map((item) =>
+        item.notification_id === notificationId
+          ? { ...item, delivery_state: "DELIVERED" }
+          : item
+      )
+    );
+  }
 
   async function ensureConversation(): Promise<string> {
     if (conversationId) return conversationId;
@@ -100,6 +137,22 @@ export function AxentHelp() {
             tomar decisiones reservadas a una persona.
           </p>
         </header>
+
+        {notifications.map((notification) => (
+          <aside
+            key={notification.notification_id}
+            role="status"
+            style={{ border: "1px solid #76d7c4", borderRadius: 12, padding: "1rem" }}
+          >
+            <strong>{notification.notification_type}</strong>
+            <p>{notification.payload_redacted.resolution ?? "Tu caso de soporte ha cambiado de estado."}</p>
+            {notification.delivery_state === "PENDING" && (
+              <button type="button" onClick={() => void acknowledge(notification.notification_id)}>
+                Marcar como leído
+              </button>
+            )}
+          </aside>
+        ))}
 
         <div
           aria-live="polite"
