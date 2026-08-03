@@ -1,0 +1,108 @@
+name: Gate 7 F01 EU Vocabulary Candidate
+
+on:
+  pull_request:
+    paths:
+      - "data/acceptance/source-inventory/AX-LIB-F01-eu-countries-territories-candidate.v0.1.json"
+      - "data/acceptance/library-coverage/AX-LIB-F01.json"
+      - "scripts/verify_gate7_f01_candidate_inventory.py"
+      - ".github/workflows/gate7-f01-eu-vocab-candidate.yml"
+  push:
+    branches:
+      - "agent/**"
+    paths:
+      - "data/acceptance/source-inventory/AX-LIB-F01-eu-countries-territories-candidate.v0.1.json"
+      - "data/acceptance/library-coverage/AX-LIB-F01.json"
+      - "scripts/verify_gate7_f01_candidate_inventory.py"
+      - ".github/workflows/gate7-f01-eu-vocab-candidate.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gate7-f01-eu-vocab-candidate-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  AXIGNAL_EXACT_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+  RESULT_DIR: artifacts/gate7-f01-eu-vocab-candidate/current
+
+jobs:
+  validate:
+    name: Validate fail-closed F01 candidate inventory
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Freeze exact identity
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$AXIGNAL_EXACT_SHA"
+          mkdir -p "$RESULT_DIR"
+          {
+            printf 'head_sha=%s\n' "$(git rev-parse HEAD)"
+            printf 'tree_sha=%s\n' "$(git rev-parse 'HEAD^{tree}')"
+          } > "$RESULT_DIR/exact-head.txt"
+
+      - name: Set up frozen Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.13.14"
+          check-latest: false
+
+      - name: Install frozen development graph
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade "pip==26.1.2"
+          python -m pip install \
+            --require-hashes \
+            --only-binary=:all: \
+            --requirement requirements/python-dev.lock
+          python -m pip check
+
+      - name: Validate syntax, style and candidate contract
+        run: |
+          set -euo pipefail
+          python -m compileall -q scripts/verify_gate7_f01_candidate_inventory.py
+          python -m ruff check scripts/verify_gate7_f01_candidate_inventory.py
+          python scripts/verify_gate7_f01_candidate_inventory.py \
+            --output "$RESULT_DIR/result.json"
+          jq -e \
+            '.status == "PASS" and .output == "F01_EU_VOCAB_CANDIDATE_INVENTORY_PASS" and .source_state == "CANDIDATE" and .product_admitted == false and .canonical_library_state == "BLOCKED" and .claim_decision == "DENIED" and .gate7_decision == "IN_PROGRESS" and .public_launch == "NO_GO"' \
+            "$RESULT_DIR/result.json"
+
+      - name: Reject sensitive or active-source material
+        run: |
+          set -euo pipefail
+          ! grep -R -E \
+            'sk_(live|test)_|rk_(live|test)_|whsec_|BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY' \
+            "$RESULT_DIR" \
+            data/acceptance/source-inventory/AX-LIB-F01-eu-countries-territories-candidate.v0.1.json \
+            data/acceptance/library-coverage/AX-LIB-F01.json
+          jq -e '.sources.active == [] and .canonical_state == "BLOCKED" and .claim_decision == "DENIED"' \
+            data/acceptance/library-coverage/AX-LIB-F01.json
+
+      - name: Record exact provenance
+        run: |
+          set -euo pipefail
+          {
+            sha256sum data/acceptance/source-inventory/AX-LIB-F01-eu-countries-territories-candidate.v0.1.json
+            sha256sum data/acceptance/library-coverage/AX-LIB-F01.json
+            sha256sum scripts/verify_gate7_f01_candidate_inventory.py
+            sha256sum "$RESULT_DIR/result.json"
+          } > "$RESULT_DIR/exact-provenance.txt"
+
+      - name: Upload retained candidate evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: gate7-f01-eu-vocab-candidate-${{ env.AXIGNAL_EXACT_SHA }}
+          path: artifacts/gate7-f01-eu-vocab-candidate
+          if-no-files-found: error
+          retention-days: 30
