@@ -13,6 +13,13 @@ REQUIRED_FILES = {
     "apps/api/src/axignal_api/axent_routes.py",
     "apps/api/tests/test_axent_policy.py",
     "apps/api/tests/test_axent_knowledge.py",
+    "apps/web/lib/axent-server.ts",
+    "apps/web/app/help/page.tsx",
+    "apps/web/app/api/axent/conversations/route.ts",
+    "apps/web/app/api/axent/conversations/[conversationId]/route.ts",
+    "apps/web/app/api/axent/conversations/[conversationId]/messages/route.ts",
+    "apps/web/components/axent/axent-help-entry.tsx",
+    "apps/web/components/axent/axent-help.tsx",
 }
 
 
@@ -33,6 +40,9 @@ def main() -> None:
     knowledge = Path("apps/api/src/axignal_api/axent_knowledge.py").read_text()
     application = Path("apps/api/src/axignal_api/application.py").read_text()
     dockerfile = Path("infra/postgres/Dockerfile").read_text()
+    help_page = Path("apps/web/app/help/page.tsx").read_text()
+    help_component = Path("apps/web/components/axent/axent-help.tsx").read_text()
+    web_proxy = Path("apps/web/lib/axent-server.ts").read_text()
 
     for marker in (
         "AXENT_SUPPORT_CONTRACT_PASS",
@@ -72,6 +82,11 @@ def main() -> None:
     assert "AX-CONTRACT-AXENT-SUPPORT-E2E-v1.0" in knowledge_seed
     assert "require_identity" in routes
     assert "axent_router" in application
+    assert "AxentHelpEntry" in help_page
+    assert "/api/axent/conversations" in help_component
+    assert "Autoridades consultadas" in help_component
+    assert "getAuthenticatedIdentity" in web_proxy
+    assert "X-AXIGNAL-Identity-Assertion" in web_proxy
     for migration in (
         "149-axent-support-parent-keys.sql",
         "150-axent-customer-support.sql",
@@ -85,6 +100,7 @@ def main() -> None:
     print("AXENT_GROUNDED_KNOWLEDGE_IMPLEMENTED")
     print("AXENT_SERVER_AUTHORITY_CONTEXT_IMPLEMENTED")
     print("AXENT_READ_ONLY_SUPPORT_IMPLEMENTED")
+    print("AXENT_HELP_SURFACE_IMPLEMENTED")
     print("AXENT_FINAL_E2E_NOT_YET_CLAIMED")
 
 
