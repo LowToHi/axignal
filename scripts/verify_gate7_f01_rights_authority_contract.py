@@ -119,6 +119,7 @@ def verify(
             "category_xml_records": 378,
             "non_retired_duplicate_record_surplus": 33,
             "non_retired_unique_authority_codes": 342,
+            "rdf_concept_schemes_including_root": 11,
             "rdf_sparql_exact_parity": True,
             "retired_entries": 3,
             "sparql_concepts": 345,
@@ -131,7 +132,10 @@ def verify(
     require(scope["request_budget"] == 6, "Request budget drift")
     require(scope["retention_days"] == 30, "Retention budget drift")
     require(scope["paid_budget_eur"] == 0, "Paid budget drift")
-    require(scope["source_state_during_campaign"] == "CANDIDATE", "Source state drift")
+    require(
+        scope["source_state_during_campaign"] == "CANDIDATE",
+        "Source state drift",
+    )
     for field in (
         "product_admission",
         "active_source",
@@ -174,11 +178,26 @@ def verify(
         decision["signature_scheme"] == "github-identity-v1",
         "Signature scheme drift",
     )
-    require(decision["comment_author_must_be_human"] is True, "Human check disabled")
-    require(decision["technical_head_match_required"] is True, "Head check disabled")
-    require(decision["manifest_match_required"] is True, "Manifest check disabled")
-    require(decision["assertions_exact_match_required"] is True, "Assertion check disabled")
-    require(decision["expiry_strictly_before_evidence"] is True, "Expiry check disabled")
+    require(
+        decision["comment_author_must_be_human"] is True,
+        "Human check disabled",
+    )
+    require(
+        decision["technical_head_match_required"] is True,
+        "Head check disabled",
+    )
+    require(
+        decision["manifest_match_required"] is True,
+        "Manifest check disabled",
+    )
+    require(
+        decision["assertions_exact_match_required"] is True,
+        "Assertion check disabled",
+    )
+    require(
+        decision["expiry_strictly_before_evidence"] is True,
+        "Expiry check disabled",
+    )
     require(
         decision["decision_max_expires_at"] == "2026-08-30T23:59:59Z",
         "Decision maximum expiry drift",
@@ -200,7 +219,10 @@ def verify(
     require(dossier["canonical_state"] == "BLOCKED", "Dossier state drift")
     require(dossier["countries_covered"] == [], "Coverage claimed early")
     require(dossier["sources"]["active"] == [], "Active source exists")
-    require(dossier["rights"]["status"] == "HUMAN_LEGAL_DECISION_REQUIRED", "Legal state drift")
+    require(
+        dossier["rights"]["status"] == "HUMAN_LEGAL_DECISION_REQUIRED",
+        "Legal state drift",
+    )
     require(
         dossier["privacy_data_rights"]["status"] == "HUMAN_DECISION_REQUIRED",
         "Privacy state drift",
