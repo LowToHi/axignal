@@ -1,0 +1,55 @@
+{
+  "schema_version": "axignal.e2e-phase/v1",
+  "phase_id": "E2E-2",
+  "title": "Happy path without fixtures",
+  "parent_authority": {
+    "phase_id": "E2E-1",
+    "branch": "release/axignal-e2e-final",
+    "sha": "9bbc60b9cfd46f52eef544eb8f91f4d5ddf21878",
+    "tree": "db28fdea036c04980d0b33b77c756288bc9b4066",
+    "result": "AX_E2E_SINGLE_CANDIDATE_PASS"
+  },
+  "candidate_branch": "agent/e2e-2-happy-path-no-fixtures",
+  "status": "IMPLEMENTED_VALIDATION_PENDING",
+  "closure_output": "AX_E2E_HAPPY_PATH_NO_FIXTURES_PASS",
+  "required_capabilities": [
+    "passwordless_identity",
+    "revocable_server_session",
+    "server_resolved_tenant",
+    "role_and_capability_enforcement",
+    "cross_tenant_isolation",
+    "real_plan_and_entitlement",
+    "persistent_research_run",
+    "polling_progress",
+    "real_ted_acquisition",
+    "persistent_evidence",
+    "persistent_candidate_claims",
+    "deterministic_admission",
+    "persistent_canonical_claims",
+    "persistent_dossier",
+    "live_investigation_context",
+    "persistent_subscriber_workspace",
+    "explicit_error_states",
+    "append_only_workspace_audit",
+    "persistent_document",
+    "content_addressed_markdown_export"
+  ],
+  "forbidden_main_path_behaviours": [
+    "fixture_import",
+    "fixture_mode",
+    "silent_legacy_fallback",
+    "browser_tenant_authority",
+    "direct_entitlement_grant",
+    "synthetic_research_projection",
+    "in_memory_document_authority",
+    "non_persistent_export"
+  ],
+  "excluded_scope": [
+    "secondary_module_completion",
+    "complete_founder_admin",
+    "all_enterprise_workflows",
+    "perfect_variant_parity",
+    "external_user_ux_validation",
+    "public_launch"
+  ]
+}
