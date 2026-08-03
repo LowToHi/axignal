@@ -154,13 +154,26 @@ test("executes the no-fixture subscriber happy path", async ({ page, context }) 
     await expect(download).toBeVisible();
     const href = await download.getAttribute("href");
     expect(href).toBeTruthy();
-    const response = await page.request.get(href as string);
-    expect(response.ok()).toBeTruthy();
-    expect(response.headers()["content-type"]).toContain("text/markdown");
-    const markdown = await response.text();
-    expect(markdown).toContain("# ");
-    expect(markdown).toContain("Pursuit note");
-    expect(markdown).toContain("src_ted_search_api_v3");
+    const exportResult = await page.evaluate(async (downloadHref) => {
+      const response = await fetch(downloadHref, {
+        credentials: "same-origin",
+        cache: "no-store"
+      });
+      return {
+        ok: response.ok,
+        status: response.status,
+        contentType: response.headers.get("content-type") ?? "",
+        markdown: await response.text()
+      };
+    }, href as string);
+    expect(
+      exportResult.ok,
+      `${exportResult.status}: ${exportResult.markdown}`
+    ).toBeTruthy();
+    expect(exportResult.contentType).toContain("text/markdown");
+    expect(exportResult.markdown).toContain("# ");
+    expect(exportResult.markdown).toContain("Pursuit note");
+    expect(exportResult.markdown).toContain("src_ted_search_api_v3");
 
     await page.reload({ waitUntil: "domcontentloaded", timeout: 45_000 });
     await expect(
