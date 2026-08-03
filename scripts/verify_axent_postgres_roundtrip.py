@@ -130,38 +130,43 @@ def verify_after_restart(database_url: str, state_path: Path) -> None:
     )
     assert persisted["delivery_state"] == "DELIVERED"
 
-    with psycopg.connect(database_url) as connection:
-        with connection.cursor() as cursor:
-            cursor.execute("SET ROLE axignal_app")
-            cursor.execute("SELECT set_config('app.tenant_id', %s, true)", (str(tenant_id),))
-            cursor.execute(
-                """
-                SELECT status, resolution
-                FROM tenant_private.support_cases
-                WHERE tenant_id = %s AND case_id = %s
-                """,
-                (tenant_id, case_id),
-            )
-            row = cursor.fetchone()
-            assert row == (
-                "RESOLVED",
-                "The export was regenerated and verified against its checksum.",
-            )
-            cursor.execute(
-                """
-                SELECT event_type
-                FROM tenant_private.support_case_events
-                WHERE tenant_id = %s AND case_id = %s
-                ORDER BY created_at, event_id
-                """,
-                (tenant_id, case_id),
-            )
-            assert [item[0] for item in cursor.fetchall()] == [
-                "OPENED",
-                "ACKNOWLEDGED",
-                "ASSIGNED",
-                "RESOLVED",
-            ]
+    with (
+        psycopg.connect(database_url) as connection,
+        connection.cursor() as cursor,
+    ):
+        cursor.execute("SET ROLE axignal_app")
+        cursor.execute(
+            "SELECT set_config('app.tenant_id', %s, true)",
+            (str(tenant_id),),
+        )
+        cursor.execute(
+            """
+            SELECT status, resolution
+            FROM tenant_private.support_cases
+            WHERE tenant_id = %s AND case_id = %s
+            """,
+            (tenant_id, case_id),
+        )
+        row = cursor.fetchone()
+        assert row == (
+            "RESOLVED",
+            "The export was regenerated and verified against its checksum.",
+        )
+        cursor.execute(
+            """
+            SELECT event_type
+            FROM tenant_private.support_case_events
+            WHERE tenant_id = %s AND case_id = %s
+            ORDER BY created_at, event_id
+            """,
+            (tenant_id, case_id),
+        )
+        assert [item[0] for item in cursor.fetchall()] == [
+            "OPENED",
+            "ACKNOWLEDGED",
+            "ASSIGNED",
+            "RESOLVED",
+        ]
 
     print("AXENT_RESTART_PERSISTENCE_PASS")
     print("AXENT_FRESH_PROCESS_VERIFICATION_PASS")
