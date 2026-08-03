@@ -14,7 +14,8 @@ export default defineConfig({
   workers: 1,
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
-  retries: process.env.CI ? 1 : 0,
+  // Critical E2E must pass on its first execution; retries may not conceal flakiness.
+  retries: 0,
   reporter: process.env.CI ? [["html", { open: "never" }], ["list"]] : "list",
   use: {
     baseURL,
@@ -48,6 +49,14 @@ export default defineConfig({
           AXIGNAL_LEGACY_PASSWORD_LOGIN_ENABLED: useDevelopmentServer
             ? "true"
             : "false",
+          // The subscriber candidate must be explicitly enabled in browser acceptance.
+          // Fixture mode remains fail-closed and is admitted only in this non-production test runtime.
+          AXIGNAL_SUBSCRIBER_WORKSPACE_ENABLED: "true",
+          AXIGNAL_SUBSCRIBER_WORKSPACE_FIXTURE_MODE: "explicit",
+          AXIGNAL_SUBSCRIBER_WORKSPACE_ENVIRONMENT: process.env.CI
+            ? "test"
+            : "development",
+          AXIGNAL_AXENT_ASSISTANT_DEEPSEEK_ENABLED: "false",
         },
       },
 });
