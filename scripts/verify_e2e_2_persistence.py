@@ -335,8 +335,15 @@ def verify(*, dsn: str, subject: str) -> dict[str, Any]:
                     (tenant_id,),
                 )
             except psycopg.Error as exc:
-                audit_immutable = "append-only" in str(exc)
+                audit_immutable = (
+                    exc.sqlstate == "42501"
+                    or "append-only" in str(exc).lower()
+                )
                 cursor.execute("ROLLBACK TO SAVEPOINT audit_mutation_probe")
+                if not audit_immutable:
+                    raise AssertionError(
+                        "Subscriber audit mutation failed for an unexpected reason"
+                    ) from exc
             else:
                 raise AssertionError(
                     "Subscriber audit mutation unexpectedly succeeded"
