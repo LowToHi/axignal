@@ -17,6 +17,13 @@ function identitySessionCookie(
   );
 }
 
+async function expectPersistentWorkspace(page: import("@playwright/test").Page) {
+  await expect(
+    page.getByRole("heading", { name: "Persistent opportunity intelligence" })
+  ).toBeVisible();
+  await expect(page.locator('main[data-adapter="persistent-real"]')).toBeVisible();
+}
+
 test("registers, revokes and reauthenticates with a real WebAuthn boundary", async ({
   page,
   context
@@ -65,7 +72,7 @@ test("registers, revokes and reauthenticates with a real WebAuthn boundary", asy
   expect(codes).toMatch(/^AX-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}/m);
 
   await recovery.getByRole("button", { name: "He guardado los códigos" }).click();
-  await expect(page.locator("main.shell")).toBeVisible();
+  await expectPersistentWorkspace(page);
 
   const credentials = await cdp.send("WebAuthn.getCredentials", {
     authenticatorId: authenticator.authenticatorId
@@ -113,7 +120,7 @@ test("registers, revokes and reauthenticates with a real WebAuthn boundary", asy
     page.getByRole("region", { name: "Acceso seguro a AXIGNAL" })
   ).toBeVisible();
   await page.getByRole("button", { name: "Usar passkey" }).click();
-  await expect(page.locator("main.shell")).toBeVisible();
+  await expectPersistentWorkspace(page);
 
   const renewed = identitySessionCookie(await context.cookies());
   expect(renewed).toBeDefined();
