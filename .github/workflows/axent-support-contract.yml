@@ -33,16 +33,16 @@ jobs:
           node-version: '22'
       - name: Enable pinned pnpm
         run: corepack enable
+      - name: Install API test dependencies
+        run: python -m pip install -e '.[dev]'
       - name: Verify executable contract
         run: python scripts/verify_axent_support_contract.py
       - name: Compile Axent modules
-        run: |
-          python -m compileall -q \
-            apps/api/src/axignal_api/axent_policy.py \
-            apps/api/src/axignal_api/axent_repository.py \
-            apps/api/src/axignal_api/axent_context.py \
-            apps/api/src/axignal_api/axent_knowledge.py \
-            apps/api/src/axignal_api/axent_routes.py
+        run: python -m compileall -q apps/api/src/axignal_api/axent_*.py
+      - name: Lint Axent modules
+        run: ruff check apps/api/src/axignal_api/axent_*.py apps/api/tests/test_axent_*.py
+      - name: Run focused Axent tests
+        run: pytest -q apps/api/tests/test_axent_*.py
       - name: Verify no direct entitlement mutation
         run: |
           ! grep -R "UPDATE tenant_private.*entitlement\|INSERT INTO tenant_private.*entitlement" apps/api/src/axignal_api/axent_*.py
