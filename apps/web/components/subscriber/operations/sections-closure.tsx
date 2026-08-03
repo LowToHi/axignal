@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import styles from "./operations.module.css";
 import type {
+  AuditRecord,
   Capability,
   TenderOperationsWorkspaceProps,
   TenderWorkspaceData
@@ -25,6 +26,22 @@ type SectionProps = Pick<
   TenderOperationsWorkspaceProps,
   "capabilities" | "mutationFeedback" | "onAction" | "state"
 > & { data: TenderWorkspaceData };
+
+type AuditApiEvent = {
+  id: string;
+  workspace_id: string | null;
+  actor_id: string;
+  type: string;
+  object_type: string;
+  object_id: string;
+  occurred_at: string;
+  details: Record<string, string | number | boolean | null>;
+};
+
+type AuditApiResponse = {
+  events?: AuditApiEvent[];
+  next_cursor?: number;
+};
 
 function can(capabilities: ReadonlySet<Capability>, capability: Capability): boolean {
   return capabilities.has(capability);
@@ -179,11 +196,61 @@ export function TeamSection(props: SectionProps) {
   );
 }
 
+function auditDetail(event: AuditApiEvent): string {
+  const entries = Object.entries(event.details);
+  const detail = entries.length > 0
+    ? entries.map(([key, value]) => `${key}=${String(value)}`).join(" · ")
+    : "No additional detail disclosed";
+  return `${event.object_type}:${event.object_id} · ${detail}`;
+}
+
+function auditRecord(event: AuditApiEvent): AuditRecord {
+  return {
+    id: event.id,
+    event: event.type,
+    actor: event.actor_id,
+    occurredAt: event.occurred_at,
+    detail: auditDetail(event),
+    outcome: event.type === "mutation.denied" ? "denied" : "recorded"
+  };
+}
+
 export function AuditSection(props: SectionProps) {
-  if (!can(props.capabilities, "audit:view")) {
+  const permitted = can(props.capabilities, "audit:view");
+  const [records, setRecords] = useState<AuditRecord[]>(() => [...(props.data.audit ?? [])]);
+  const [auditState, setAuditState] = useState<"loading" | "ready" | "error">(permitted ? "loading" : "ready");
+
+  useEffect(() => {
+    if (!permitted) return;
+    const controller = new AbortController();
+    setAuditState("loading");
+    void fetch("/api/subscriber-workspace/events?after=0", {
+      cache: "no-store",
+      signal: controller.signal
+    })
+      .then(async (response) => {
+        const body = await response.json().catch(() => null) as AuditApiResponse | null;
+        if (!response.ok || !body || !Array.isArray(body.events)) {
+          throw new Error("Audit ledger unavailable.");
+        }
+        const workspaceRecords = body.events
+          .filter((event) => event.workspace_id === props.data.workspaceId)
+          .map(auditRecord)
+          .sort((left, right) => right.occurredAt.localeCompare(left.occurredAt));
+        setRecords(workspaceRecords);
+        setAuditState("ready");
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        setAuditState("error");
+      });
+    return () => controller.abort();
+  }, [permitted, props.data.workspaceId]);
+
+  if (!permitted) {
     return <AuthorityNotice critical>Audit access is restricted by a server-resolved capability.</AuthorityNotice>;
   }
-  const records = props.data.audit ?? [];
+
   return (
     <>
       <Heading
@@ -194,7 +261,10 @@ export function AuditSection(props: SectionProps) {
       <AuthorityNotice>
         Audit export remains disabled until export rights, retention, content filtering and a persistent export receipt are implemented. The visible ledger is read-only.
       </AuthorityNotice>
-      {records.length === 0 ? <p className={styles.feedback} role="status">No workspace audit records were included in this bootstrap revision.</p> : (
+      {auditState === "loading" ? <p className={styles.feedback} role="status">Loading the append-only workspace ledger…</p> : null}
+      {auditState === "error" ? <p className={styles.feedback} role="alert">The audit ledger could not be loaded. No empty-state claim was substituted.</p> : null}
+      {auditState === "ready" && records.length === 0 ? <p className={styles.feedback} role="status">No audit events are recorded for this workspace.</p> : null}
+      {auditState === "ready" && records.length > 0 ? (
         <div className={styles.tableWrap}>
           <table className={styles.table}>
             <caption>Audit events for this workspace revision</caption>
@@ -204,7 +274,7 @@ export function AuditSection(props: SectionProps) {
             </tr>)}</tbody>
           </table>
         </div>
-      )}
+      ) : null}
     </>
   );
 }
