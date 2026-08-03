@@ -3,31 +3,33 @@ from __future__ import annotations
 import argparse
 import csv
 import hashlib
+import html
 import io
 import json
 import os
 import re
 import urllib.parse
 import urllib.request
+import xml.etree.ElementTree as ET
 from collections import Counter
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any
 
 SKOS = "http://www.w3.org/2004/02/skos/core#"
 RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 OWL = "http://www.w3.org/2002/07/owl#"
-DCT = "http://purl.org/dc/terms/"
-EUVOC = "http://publications.europa.eu/ontology/euvoc#"
+AUTH = "http://publications.europa.eu/ontology/authority/"
 COUNTRY = "http://publications.europa.eu/resource/authority/country/"
 GRAPH = "http://publications.europa.eu/resource/authority/country"
+XML_LANG = "{http://www.w3.org/XML/1998/namespace}lang"
 
 CLASSIFICATION_QUERY = f"""
 PREFIX skos: <{SKOS}>
 PREFIX owl: <{OWL}>
-PREFIX euvoc: <{EUVOC}>
-SELECT ?country_uri ?country_en ?scheme ?deprecated ?status
+SELECT ?country_uri ?country_en ?scheme ?deprecated
 FROM <{GRAPH}>
 WHERE {{
   ?country_uri a skos:Concept .
@@ -37,7 +39,6 @@ WHERE {{
   BIND(str(?label) AS ?country_en)
   OPTIONAL {{ ?country_uri skos:inScheme ?scheme }}
   OPTIONAL {{ ?country_uri owl:deprecated ?deprecated }}
-  OPTIONAL {{ ?country_uri euvoc:status ?status }}
 }}
 ORDER BY ?country_uri ?scheme
 """.strip()
@@ -54,25 +55,6 @@ WHERE {{
   BIND(str(?label) AS ?country_en)
 }}
 ORDER BY ?country_uri
-""".strip()
-
-NOTATIONS_QUERY = f"""
-PREFIX skos: <{SKOS}>
-PREFIX euvoc: <{EUVOC}>
-PREFIX rdf: <{RDF}>
-PREFIX dct: <{DCT}>
-SELECT ?country_uri ?notation_type ?notation_value
-FROM <{GRAPH}>
-WHERE {{
-  ?country_uri a skos:Concept .
-  FILTER(?country_uri != <{COUNTRY}OP_DATPRO>)
-  OPTIONAL {{
-    ?country_uri euvoc:xlNotation ?notation .
-    ?notation rdf:value ?notation_value .
-    ?notation dct:type ?notation_type .
-  }}
-}}
-ORDER BY ?country_uri ?notation_type ?notation_value
 """.strip()
 
 
@@ -116,16 +98,19 @@ class BudgetedHttpClient:
         body = None
         headers = {
             "Accept": accept,
-            "User-Agent": "AXIGNAL-F01-evidence/0.1",
+            "User-Agent": "AXIGNAL-F01-evidence/0.2",
         }
         request_url = url
         if form is not None:
             encoded = urllib.parse.urlencode(form)
             if method == "GET":
-                request_url = f"{url}?{encoded}"
+                separator = "&" if "?" in url else "?"
+                request_url = f"{url}{separator}{encoded}"
             elif method == "POST":
                 body = encoded.encode("utf-8")
-                headers["Content-Type"] = "application/x-www-form-urlencoded"
+                headers["Content-Type"] = (
+                    "application/x-www-form-urlencoded"
+                )
             else:
                 raise BaselineError(f"Unsupported HTTP method: {method}")
         request = urllib.request.Request(
@@ -141,10 +126,14 @@ class BudgetedHttpClient:
             ) as response:
                 payload = response.read(self.maximum_response_bytes + 1)
                 if len(payload) > self.maximum_response_bytes:
-                    raise BaselineError("Response exceeded frozen byte budget")
+                    raise BaselineError(
+                        "Response exceeded frozen byte budget"
+                    )
                 status = int(response.status)
                 if status < 200 or status >= 300:
-                    raise BaselineError(f"Unexpected HTTP status: {status}")
+                    raise BaselineError(
+                        f"Unexpected HTTP status: {status}"
+                    )
                 metadata = {
                     "request_number": self.requests_made,
                     "method": method,
@@ -163,23 +152,179 @@ class BudgetedHttpClient:
             ) from exc
 
 
-def _normalise_status(deprecated: str, status: str) -> str:
-    lowered = deprecated.strip().casefold()
-    if lowered in {"true", "1"}:
-        return "DEPRECATED"
-    if status.rstrip("/").endswith("RETIRED"):
-        return "RETIRED"
-    return "CURRENT"
-
-
-def _merge_status(left: str, right: str) -> str:
-    order = {"CURRENT": 0, "RETIRED": 1, "DEPRECATED": 2}
-    return left if order[left] >= order[right] else right
-
-
 def _scheme_id(uri: str, allowed: set[str]) -> str | None:
     value = uri.rstrip("/").rsplit("/", 1)[-1]
     return value if value in allowed else None
+
+
+def _datatype_name(uri: str) -> str:
+    return uri.rsplit("#", 1)[-1].rstrip("/").rsplit("/", 1)[-1]
+
+
+def _text(element: ET.Element | None) -> str | None:
+    if element is None or element.text is None:
+        return None
+    value = element.text.strip()
+    return value or None
+
+
+def _bool_text(value: str | None) -> bool:
+    return (value or "").strip().casefold() in {"true", "1"}
+
+
+def extract_latest_version(payload: bytes, expected: str) -> str:
+    text = payload.decode("utf-8", errors="replace")
+    pattern = rf"\b{re.escape(expected)}\b[^\n]{{0,80}}\bLATEST\b"
+    if re.search(pattern, text) or (expected in text and "LATEST" in text):
+        return expected
+    matches = re.findall(r"\b(20\d{6}-\d)\b", text)
+    observed = ", ".join(sorted(set(matches))[-8:])
+    raise BaselineError(
+        "Expected latest catalogue version not proven; observed versions: "
+        + observed
+    )
+
+
+def extract_downloads_url(catalogue_payload: bytes) -> str:
+    text = catalogue_payload.decode("utf-8", errors="replace")
+
+    def extract(patterns: tuple[str, ...], name: str) -> str:
+        for pattern in patterns:
+            match = re.search(pattern, text, re.DOTALL)
+            if match:
+                return html.unescape(match.group(1))
+        raise BaselineError(f"Unable to extract {name}")
+
+    namespace = extract(
+        (
+            r"conceptDisplayPortletNamespace\s*=\s*['\"]([^'\"]+)['\"]",
+            r"portletNamespace\s*=\s*['\"]([^'\"]+)['\"]",
+        ),
+        "concept display namespace",
+    )
+    render_url = extract(
+        (r"tabPageRenderUrl\s*=\s*['\"]([^'\"]+)['\"]",),
+        "tab page render URL",
+    )
+    separator = "&" if "?" in render_url else "?"
+    parameter = urllib.parse.quote(namespace, safe="_") + "tabPageId=14"
+    return f"{render_url}{separator}{parameter}"
+
+
+class _LinkParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.links: list[dict[str, str]] = []
+        self.current: dict[str, str] | None = None
+
+    def handle_starttag(
+        self,
+        tag: str,
+        attrs: list[tuple[str, str | None]],
+    ) -> None:
+        if tag != "a":
+            return
+        href = dict(attrs).get("href")
+        if href:
+            self.current = {"href": href, "text": ""}
+
+    def handle_data(self, data: str) -> None:
+        if self.current is not None:
+            self.current["text"] += data
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag == "a" and self.current is not None:
+            self.current["text"] = " ".join(
+                self.current["text"].split()
+            )
+            self.links.append(self.current)
+            self.current = None
+
+
+def parse_distributions(payload: bytes, base_url: str) -> dict[str, str]:
+    parser = _LinkParser()
+    parser.feed(payload.decode("utf-8", errors="replace"))
+    distributions: dict[str, str] = {}
+    for link in parser.links:
+        name = link["text"]
+        if not name:
+            continue
+        if name in distributions:
+            raise BaselineError(f"Duplicate distribution name: {name}")
+        distributions[name] = urllib.parse.urljoin(
+            base_url,
+            link["href"],
+        )
+    return distributions
+
+
+def parse_rdf_concepts(
+    payload: bytes,
+    *,
+    allowed_schemes: set[str],
+) -> tuple[dict[str, dict[str, Any]], int]:
+    try:
+        root = ET.fromstring(payload)
+    except ET.ParseError as exc:
+        raise BaselineError("Canonical RDF distribution is invalid") from exc
+    concepts: dict[str, dict[str, Any]] = {}
+    concept_scheme_count = 0
+    for resource in root:
+        if resource.tag == f"{{{SKOS}}}ConceptScheme":
+            concept_scheme_count += 1
+            continue
+        if resource.tag != f"{{{SKOS}}}Concept":
+            continue
+        uri = resource.attrib.get(f"{{{RDF}}}about", "")
+        if not uri.startswith(COUNTRY):
+            continue
+        if uri == f"{COUNTRY}OP_DATPRO":
+            continue
+        if uri in concepts:
+            raise BaselineError(f"Duplicate RDF concept: {uri}")
+        labels: dict[str, str] = {}
+        schemes: set[str] = set()
+        notations: dict[str, set[str]] = {}
+        deprecated = False
+        start_use = None
+        end_use = None
+        for child in resource:
+            if child.tag == f"{{{SKOS}}}prefLabel":
+                language = child.attrib.get(XML_LANG, "")
+                value = _text(child)
+                if language and value:
+                    labels[language] = value
+            elif child.tag == f"{{{SKOS}}}inScheme":
+                scheme_uri = child.attrib.get(f"{{{RDF}}}resource", "")
+                scheme = _scheme_id(scheme_uri, allowed_schemes)
+                if scheme is not None:
+                    schemes.add(scheme)
+            elif child.tag == f"{{{SKOS}}}notation":
+                datatype = child.attrib.get(f"{{{RDF}}}datatype", "")
+                value = _text(child)
+                if datatype and value:
+                    name = _datatype_name(datatype)
+                    notations.setdefault(name, set()).add(value)
+            elif child.tag == f"{{{OWL}}}deprecated":
+                deprecated = _bool_text(_text(child))
+            elif child.tag == f"{{{AUTH}}}start.use":
+                start_use = _text(child)
+            elif child.tag == f"{{{AUTH}}}end.use":
+                end_use = _text(child)
+        if "en" not in labels:
+            raise BaselineError(f"RDF concept lacks English label: {uri}")
+        concepts[uri] = {
+            "uri": uri,
+            "authority_code": uri.rsplit("/", 1)[-1],
+            "label_en": labels["en"],
+            "label_languages": sorted(labels),
+            "official_status": "DEPRECATED" if deprecated else "CURRENT",
+            "official_scheme_ids": schemes,
+            "notations": notations,
+            "start_use": start_use,
+            "end_use": end_use,
+        }
+    return concepts, concept_scheme_count
 
 
 def parse_classification_csv(
@@ -194,7 +339,6 @@ def parse_classification_csv(
         "country_en",
         "scheme",
         "deprecated",
-        "status",
     }
     if reader.fieldnames is None or not required.issubset(reader.fieldnames):
         raise BaselineError("SPARQL CSV columns do not match contract")
@@ -203,31 +347,24 @@ def parse_classification_csv(
         uri = (row.get("country_uri") or "").strip()
         label = (row.get("country_en") or "").strip()
         if not uri.startswith(COUNTRY) or not label:
-            raise BaselineError("Invalid concept URI or English label")
+            raise BaselineError("Invalid SPARQL concept URI or English label")
         concept = concepts.setdefault(
             uri,
             {
                 "uri": uri,
-                "authority_code": uri.rsplit("/", 1)[-1],
                 "label_en": label,
-                "official_scheme_ids": set(),
                 "official_status": "CURRENT",
-                "notations": {},
+                "official_scheme_ids": set(),
             },
         )
         if concept["label_en"] != label:
-            raise BaselineError(f"Conflicting English label for {uri}")
-        scheme = _scheme_id((row.get("scheme") or "").strip(), allowed_schemes)
+            raise BaselineError(f"Conflicting SPARQL label for {uri}")
+        scheme_uri = (row.get("scheme") or "").strip()
+        scheme = _scheme_id(scheme_uri, allowed_schemes)
         if scheme is not None:
             concept["official_scheme_ids"].add(scheme)
-        observed_status = _normalise_status(
-            row.get("deprecated") or "",
-            row.get("status") or "",
-        )
-        concept["official_status"] = _merge_status(
-            concept["official_status"],
-            observed_status,
-        )
+        if _bool_text(row.get("deprecated")):
+            concept["official_status"] = "DEPRECATED"
     return concepts
 
 
@@ -247,28 +384,57 @@ def parse_full_list_json(payload: bytes) -> dict[str, str]:
     return concepts
 
 
-def apply_notations_csv(
+def parse_category_entries(
     payload: bytes,
-    concepts: dict[str, dict[str, Any]],
-) -> None:
-    text = payload.decode("utf-8-sig")
-    reader = csv.DictReader(io.StringIO(text))
-    required = {"country_uri", "notation_type", "notation_value"}
-    if reader.fieldnames is None or not required.issubset(reader.fieldnames):
-        raise BaselineError("Notation CSV columns do not match contract")
-    for row in reader:
-        uri = (row.get("country_uri") or "").strip()
-        if uri not in concepts:
-            raise BaselineError(f"Notation references unknown concept: {uri}")
-        type_uri = (row.get("notation_type") or "").strip()
-        value = (row.get("notation_value") or "").strip()
-        if not type_uri and not value:
-            continue
-        if not type_uri or not value:
-            raise BaselineError(f"Incomplete notation for {uri}")
-        notation_type = type_uri.rstrip("/").rsplit("/", 1)[-1]
-        bucket = concepts[uri]["notations"].setdefault(notation_type, set())
-        bucket.add(value)
+) -> tuple[str, list[dict[str, Any]]]:
+    try:
+        root = ET.fromstring(payload)
+    except ET.ParseError as exc:
+        raise BaselineError("Canonical category XML is invalid") from exc
+    if root.tag != "countries":
+        raise BaselineError(f"Unexpected category root tag: {root.tag}")
+    version = root.attrib.get("version", "")
+    entries: list[dict[str, Any]] = []
+    seen_record_ids: set[str] = set()
+    for record in root.findall("record"):
+        record_id = record.attrib.get("id", "")
+        if not record_id or record_id in seen_record_ids:
+            raise BaselineError("Missing or duplicate category record ID")
+        seen_record_ids.add(record_id)
+        authority_code = _text(record.find("authority-code"))
+        label_en = _text(record.find("label/lg.version[@lg='eng']"))
+        status = record.attrib.get("adm.status", "").upper()
+        if not authority_code or not label_en:
+            raise BaselineError(f"Incomplete category record: {record_id}")
+        if status not in {"CURRENT", "DEPRECATED", "RETIRED"}:
+            raise BaselineError(
+                f"Unsupported category status for {record_id}: {status}"
+            )
+        deprecated_flag = record.attrib.get("deprecated", "").casefold()
+        expected_flag = "false" if status == "CURRENT" else "true"
+        if deprecated_flag != expected_flag:
+            raise BaselineError(
+                f"Status/deprecated mismatch for category record {record_id}"
+            )
+        membership = record.find("country.membership")
+        entries.append(
+            {
+                "record_id": record_id,
+                "authority_code": authority_code,
+                "concept_uri": f"{COUNTRY}{authority_code}",
+                "label_en": label_en,
+                "entry_status": status,
+                "start_use": _text(record.find("start.use")),
+                "end_use": _text(record.find("end.use")),
+                "parent_record_id": _text(record.find("parent.id")),
+                "country_classification": (
+                    membership.attrib.get("country.classification")
+                    if membership is not None
+                    else None
+                ),
+            }
+        )
+    return version, entries
 
 
 def derived_bucket(status: str, schemes: set[str]) -> str:
@@ -303,12 +469,15 @@ def finalise_concepts(
                 "uri": item["uri"],
                 "authority_code": item["authority_code"],
                 "label_en": item["label_en"],
+                "label_languages": item["label_languages"],
                 "official_status": item["official_status"],
                 "official_scheme_ids": sorted(schemes),
                 "derived_bucket": derived_bucket(
                     item["official_status"],
                     schemes,
                 ),
+                "start_use": item["start_use"],
+                "end_use": item["end_use"],
                 "notations": notations,
                 "standard_component_boundary": {
                     "iso_mappings_present": any(
@@ -322,17 +491,65 @@ def finalise_concepts(
     return result
 
 
-def extract_latest_version(payload: bytes, expected: str) -> str:
-    text = payload.decode("utf-8", errors="replace")
-    if re.search(rf"\b{re.escape(expected)}\b[^\n]{{0,80}}\bLATEST\b", text):
-        return expected
-    if expected in text and "LATEST" in text:
-        return expected
-    matches = re.findall(r"\b(20\d{6}-\d)\b", text)
-    raise BaselineError(
-        "Expected latest catalogue version not proven; observed versions: "
-        + ", ".join(sorted(set(matches))[-8:])
-    )
+def finalise_entries(
+    entries: list[dict[str, Any]],
+    concepts: dict[str, dict[str, Any]],
+) -> list[dict[str, Any]]:
+    result: list[dict[str, Any]] = []
+    for entry in sorted(entries, key=lambda item: item["record_id"]):
+        uri = entry["concept_uri"]
+        concept = concepts.get(uri)
+        if concept is None:
+            raise BaselineError(
+                f"Category record references unknown concept: {uri}"
+            )
+        schemes = set(concept["official_scheme_ids"])
+        result.append(
+            {
+                **entry,
+                "concept_label_en": concept["label_en"],
+                "concept_status": concept["official_status"],
+                "official_scheme_ids": sorted(schemes),
+                "derived_bucket": derived_bucket(
+                    entry["entry_status"],
+                    schemes,
+                ),
+            }
+        )
+    return result
+
+
+def verify_sparql_parity(
+    rdf_concepts: dict[str, dict[str, Any]],
+    sparql_concepts: dict[str, dict[str, Any]],
+    json_labels: dict[str, str],
+) -> None:
+    rdf_uris = set(rdf_concepts)
+    if set(sparql_concepts) != rdf_uris:
+        raise BaselineError("RDF and SPARQL classification sets differ")
+    if set(json_labels) != rdf_uris:
+        raise BaselineError("RDF and SPARQL JSON sets differ")
+    for uri in sorted(rdf_uris):
+        rdf_item = rdf_concepts[uri]
+        sparql_item = sparql_concepts[uri]
+        if rdf_item["label_en"] != sparql_item["label_en"]:
+            raise BaselineError(f"RDF/SPARQL label mismatch for {uri}")
+        if rdf_item["label_en"] != json_labels[uri]:
+            raise BaselineError(f"RDF/JSON label mismatch for {uri}")
+        if rdf_item["official_status"] != sparql_item["official_status"]:
+            raise BaselineError(f"RDF/SPARQL status mismatch for {uri}")
+        if (
+            set(rdf_item["official_scheme_ids"])
+            != set(sparql_item["official_scheme_ids"])
+        ):
+            raise BaselineError(f"RDF/SPARQL scheme mismatch for {uri}")
+
+
+def require_count(actual: int, expected: int, label: str) -> None:
+    if actual != expected:
+        raise BaselineError(
+            f"Expected {expected} {label}, observed {actual}"
+        )
 
 
 def build_baseline(
@@ -353,32 +570,76 @@ def build_baseline(
     raw_dir.mkdir(parents=True, exist_ok=True)
     access_records: list[dict[str, Any]] = []
 
-    catalogue, metadata = client.fetch(
+    def fetch_raw(
+        name: str,
+        url: str,
+        *,
+        method: str,
+        accept: str,
+        form: dict[str, str] | None = None,
+    ) -> bytes:
+        payload, metadata = client.fetch(
+            url,
+            method=method,
+            accept=accept,
+            form=form,
+        )
+        access_records.append(metadata)
+        (raw_dir / name).write_bytes(payload)
+        return payload
+
+    catalogue = fetch_raw(
+        "catalogue.html",
         publication["catalogue_url"],
         method="GET",
         accept="text/html",
     )
-    access_records.append(metadata)
-    (raw_dir / "catalogue.html").write_bytes(catalogue)
     latest_version = extract_latest_version(
         catalogue,
         publication["expected_latest_version"],
     )
+    downloads_url = extract_downloads_url(catalogue)
+    downloads_tab = fetch_raw(
+        "downloads-tab.html",
+        downloads_url,
+        method="GET",
+        accept="text/html",
+    )
+    distributions = parse_distributions(downloads_tab, downloads_url)
+    required_distributions = set(publication["required_distributions"])
+    if set(distributions) != required_distributions:
+        raise BaselineError("Official distribution inventory drift")
+    rdf_name = publication["canonical_concept_distribution"]
+    xml_name = publication["canonical_entry_distribution"]
+    rdf_url = distributions[rdf_name]
+    xml_url = distributions[xml_name]
+    version_token = f"/{latest_version}/"
+    if version_token not in urllib.parse.unquote(rdf_url):
+        raise BaselineError("RDF distribution is not bound to latest version")
+    if version_token not in urllib.parse.unquote(xml_url):
+        raise BaselineError("Category XML is not bound to latest version")
 
-    classification_csv, metadata = client.fetch(
+    rdf_payload = fetch_raw(
+        rdf_name,
+        rdf_url,
+        method="GET",
+        accept="application/rdf+xml",
+    )
+    xml_payload = fetch_raw(
+        xml_name,
+        xml_url,
+        method="GET",
+        accept="application/xml",
+    )
+    classification_csv = fetch_raw(
+        "classification.csv",
         publication["sparql_endpoint"],
         method="POST",
         accept="text/csv",
         form={"query": CLASSIFICATION_QUERY, "format": "text/csv"},
     )
-    access_records.append(metadata)
-    (raw_dir / "classification.csv").write_bytes(classification_csv)
-    concepts = parse_classification_csv(
-        classification_csv,
-        allowed_schemes=schemes,
-    )
-
-    full_list_json, metadata = client.fetch(
+    full_list_json = fetch_raw(
+        "full-list.json",
         publication["sparql_endpoint"],
         method="GET",
         accept="application/sparql-results+json",
@@ -387,31 +648,98 @@ def build_baseline(
             "format": "application/sparql-results+json",
         },
     )
-    access_records.append(metadata)
-    (raw_dir / "full-list.json").write_bytes(full_list_json)
-    json_concepts = parse_full_list_json(full_list_json)
-    csv_labels = {uri: item["label_en"] for uri, item in concepts.items()}
-    if json_concepts != csv_labels:
-        raise BaselineError("CSV and JSON concept surfaces are not identical")
 
-    notations_csv, metadata = client.fetch(
-        publication["sparql_endpoint"],
-        method="POST",
-        accept="text/csv",
-        form={"query": NOTATIONS_QUERY, "format": "text/csv"},
+    rdf_concepts, concept_scheme_count = parse_rdf_concepts(
+        rdf_payload,
+        allowed_schemes=schemes,
     )
-    access_records.append(metadata)
-    (raw_dir / "notations.csv").write_bytes(notations_csv)
-    apply_notations_csv(notations_csv, concepts)
+    category_version, raw_entries = parse_category_entries(xml_payload)
+    if category_version != latest_version:
+        raise BaselineError("Category XML version does not match catalogue")
+    sparql_concepts = parse_classification_csv(
+        classification_csv,
+        allowed_schemes=schemes,
+    )
+    json_labels = parse_full_list_json(full_list_json)
+    verify_sparql_parity(rdf_concepts, sparql_concepts, json_labels)
 
-    expected_count = int(publication["expected_concept_count"])
-    if len(concepts) != expected_count:
-        raise BaselineError(
-            f"Expected {expected_count} concepts, observed {len(concepts)}"
-        )
-    final_concepts = finalise_concepts(concepts)
-    bucket_counts = Counter(item["derived_bucket"] for item in final_concepts)
-    status_counts = Counter(item["official_status"] for item in final_concepts)
+    expected = publication
+    require_count(
+        len(rdf_concepts),
+        expected["expected_canonical_concept_count"],
+        "canonical concepts",
+    )
+    require_count(
+        concept_scheme_count,
+        len(schemes) + 1,
+        "RDF concept schemes including the root scheme",
+    )
+    require_count(
+        len(raw_entries),
+        expected["expected_category_xml_record_count"],
+        "category XML records",
+    )
+    retired_entries = [
+        entry for entry in raw_entries
+        if entry["entry_status"] == "RETIRED"
+    ]
+    published_entries = [
+        entry for entry in raw_entries
+        if entry["entry_status"] != "RETIRED"
+    ]
+    require_count(
+        len(retired_entries),
+        expected["expected_retired_record_count"],
+        "retired category records",
+    )
+    require_count(
+        len(published_entries),
+        expected["expected_catalogue_entry_count"],
+        "non-retired catalogue entries",
+    )
+    published_codes = {
+        entry["authority_code"] for entry in published_entries
+    }
+    require_count(
+        len(published_codes),
+        expected["expected_non_retired_unique_concept_count"],
+        "non-retired unique authority codes",
+    )
+    duplicate_surplus = len(published_entries) - len(published_codes)
+    require_count(
+        duplicate_surplus,
+        expected["expected_non_retired_duplicate_record_surplus"],
+        "duplicate historical record instances",
+    )
+    all_entry_codes = {entry["authority_code"] for entry in raw_entries}
+    rdf_codes = {
+        concept["authority_code"] for concept in rdf_concepts.values()
+    }
+    if all_entry_codes != rdf_codes:
+        raise BaselineError("Category XML and RDF authority-code sets differ")
+
+    final_concepts = finalise_concepts(rdf_concepts)
+    final_entries = finalise_entries(raw_entries, rdf_concepts)
+    final_published_entries = [
+        entry for entry in final_entries
+        if entry["entry_status"] != "RETIRED"
+    ]
+    final_retired_entries = [
+        entry for entry in final_entries
+        if entry["entry_status"] == "RETIRED"
+    ]
+    concept_bucket_counts = Counter(
+        item["derived_bucket"] for item in final_concepts
+    )
+    entry_bucket_counts = Counter(
+        item["derived_bucket"] for item in final_published_entries
+    )
+    concept_status_counts = Counter(
+        item["official_status"] for item in final_concepts
+    )
+    entry_status_counts = Counter(
+        item["entry_status"] for item in final_published_entries
+    )
     scheme_subsets = {
         scheme: [
             item["authority_code"]
@@ -420,7 +748,7 @@ def build_baseline(
         ]
         for scheme in sorted(schemes)
     }
-    derived_subsets = {
+    concept_subsets = {
         bucket: [
             item["authority_code"]
             for item in final_concepts
@@ -428,28 +756,73 @@ def build_baseline(
         ]
         for bucket in contract["derived_bucket_precedence"]
     }
+    entry_subsets = {
+        bucket: [
+            item["record_id"]
+            for item in final_published_entries
+            if item["derived_bucket"] == bucket
+        ]
+        for bucket in contract["derived_bucket_precedence"]
+    }
+    records_by_code: dict[str, list[str]] = {}
+    for entry in final_published_entries:
+        records_by_code.setdefault(entry["authority_code"], []).append(
+            entry["record_id"]
+        )
+    duplicate_groups = {
+        code: sorted(record_ids)
+        for code, record_ids in sorted(records_by_code.items())
+        if len(record_ids) > 1
+    }
     raw_evidence = {
         path.name: sha256_prefixed(path.read_bytes())
         for path in sorted(raw_dir.iterdir())
         if path.is_file()
     }
     payload = {
-        "schema_version": "axignal.f01-official-baseline/v0.1",
+        "schema_version": "axignal.f01-official-baseline/v0.2",
         "library_id": contract["library_id"],
         "source_id": contract["source_id"],
         "source_state": "CANDIDATE",
         "lineage": contract["lineage"],
         "official_publication_version": latest_version,
         "authority_graph_uri": publication["authority_graph_uri"],
+        "distribution_inventory": [
+            {"name": name, "url": distributions[name]}
+            for name in sorted(distributions)
+        ],
         "access_contract": access,
         "access_proof": access_records,
         "raw_evidence_digests": raw_evidence,
-        "concept_count": len(final_concepts),
-        "status_counts": dict(sorted(status_counts.items())),
-        "derived_bucket_counts": dict(sorted(bucket_counts.items())),
+        "count_semantics": contract["count_semantics"],
+        "count_reconciliation": {
+            "category_xml_records": len(final_entries),
+            "catalogue_non_retired_entries": len(final_published_entries),
+            "retired_entries": len(final_retired_entries),
+            "non_retired_unique_authority_codes": len(published_codes),
+            "non_retired_duplicate_record_surplus": duplicate_surplus,
+            "canonical_concepts": len(final_concepts),
+            "rdf_concept_schemes_including_root": concept_scheme_count,
+            "sparql_concepts": len(sparql_concepts),
+            "rdf_sparql_exact_parity": True,
+        },
+        "concept_status_counts": dict(sorted(concept_status_counts.items())),
+        "published_entry_status_counts": dict(
+            sorted(entry_status_counts.items())
+        ),
+        "concept_derived_bucket_counts": dict(
+            sorted(concept_bucket_counts.items())
+        ),
+        "published_entry_derived_bucket_counts": dict(
+            sorted(entry_bucket_counts.items())
+        ),
         "official_scheme_subsets": scheme_subsets,
-        "derived_subsets": derived_subsets,
-        "concepts": final_concepts,
+        "canonical_concept_subsets": concept_subsets,
+        "published_entry_subsets": entry_subsets,
+        "duplicate_historical_record_groups": duplicate_groups,
+        "canonical_concepts": final_concepts,
+        "published_entries": final_published_entries,
+        "retired_entries": final_retired_entries,
         "rights_boundary": contract["rights_boundary"],
         "privacy_boundary": contract["privacy_boundary"],
         "campaign_plan": contract["campaign_plan"],
@@ -477,9 +850,10 @@ def build_baseline(
         "baseline_payload": payload,
     }
     output_dir.mkdir(parents=True, exist_ok=True)
-    baseline_path = output_dir / "official-online-baseline.v0.1.json"
+    baseline_path = output_dir / "official-online-baseline.v0.2.json"
     baseline_path.write_text(
-        json.dumps(baseline, indent=2, ensure_ascii=False, sort_keys=True) + "\n",
+        json.dumps(baseline, indent=2, ensure_ascii=False, sort_keys=True)
+        + "\n",
         encoding="utf-8",
     )
     result = {
@@ -487,7 +861,12 @@ def build_baseline(
         "output": baseline["output"],
         "exact_head_sha": exact_head_sha,
         "official_publication_version": latest_version,
-        "concept_count": len(final_concepts),
+        "catalogue_entry_count": len(final_published_entries),
+        "category_xml_record_count": len(final_entries),
+        "retired_record_count": len(final_retired_entries),
+        "canonical_concept_count": len(final_concepts),
+        "non_retired_unique_concept_count": len(published_codes),
+        "duplicate_record_surplus": duplicate_surplus,
         "baseline_payload_digest": payload_digest,
         "baseline_file_digest": sha256_prefixed(baseline_path.read_bytes()),
         "http_requests_used": client.requests_made,
