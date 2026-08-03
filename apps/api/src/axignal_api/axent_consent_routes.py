@@ -28,6 +28,29 @@ class ConfirmationPreview(BaseModel):
     parameters: dict[str, Any] = Field(default_factory=dict)
 
 
+def _before_state(command: ConfirmationPreview, context: dict[str, Any]) -> dict[str, Any]:
+    if command.action_type == "archive_workspace":
+        workspace = context.get("workspace")
+        if workspace is None:
+            raise HTTPException(status_code=404, detail="workspace_not_found")
+        requested_workspace = str(command.parameters.get("workspace_id") or "")
+        if requested_workspace != str(workspace["workspace_id"]):
+            raise HTTPException(status_code=409, detail="workspace_context_mismatch")
+        return {
+            "workspace_id": str(workspace["workspace_id"]),
+            "state": workspace["state"],
+            "revision": workspace["revision"],
+            "owner_subject": workspace["owner_subject"],
+            "research_run_id": str(workspace["research_run_id"]),
+            "updated_at": workspace["updated_at"],
+        }
+    return {
+        "commercial": context["commercial"],
+        "workspace": context.get("workspace"),
+        "research_run": context.get("research_run"),
+    }
+
+
 @router.post(
     "/conversations/{conversation_id}/confirmations",
     status_code=status.HTTP_201_CREATED,
@@ -77,11 +100,7 @@ def create_confirmation(
         )
 
     parameters_hash = canonical_hash(command.parameters)
-    before_state = {
-        "commercial": context["commercial"],
-        "workspace": context.get("workspace"),
-        "research_run": context.get("research_run"),
-    }
+    before_state = _before_state(command, context)
     before_state_hash = canonical_hash(before_state)
     confirmation_id = uuid4()
     token, claims = issue_confirmation_token(
