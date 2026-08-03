@@ -93,7 +93,8 @@ CREATE TRIGGER support_incident_links_immutable
 BEFORE UPDATE OR DELETE ON tenant_private.support_incident_links
 FOR EACH ROW EXECUTE FUNCTION tenant_private.reject_axent_evidence_mutation();
 
-CREATE OR REPLACE VIEW tenant_private.axent_support_metrics AS
+CREATE OR REPLACE VIEW tenant_private.axent_support_metrics
+WITH (security_invoker = true) AS
 SELECT
   tenant_id,
   count(DISTINCT conversation_id) AS conversations_total,
