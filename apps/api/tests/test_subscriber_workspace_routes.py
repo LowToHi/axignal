@@ -5,9 +5,9 @@ from uuid import UUID
 
 from fastapi.testclient import TestClient
 
+from axignal_api import subscriber_workspace_routes as routes
 from axignal_api.application import app
 from axignal_api.identity import AuthenticatedIdentity, require_identity
-from axignal_api import subscriber_workspace_routes as routes
 
 TENANT_ID = UUID("55555555-5555-4555-8555-555555555555")
 USER_ID = UUID("55555555-5555-4555-8555-555555555556")
@@ -42,7 +42,9 @@ class _Repository:
         }
 
 
-def _identity(*, roles: tuple[str, ...], seat_state: str = "ACTIVE") -> AuthenticatedIdentity:
+def _identity(
+    *, roles: tuple[str, ...], seat_state: str = "ACTIVE"
+) -> AuthenticatedIdentity:
     now = datetime.now(UTC)
     return AuthenticatedIdentity(
         subject="usr_workspace_test",
@@ -130,4 +132,6 @@ def test_write_capability_is_denied_to_viewer(monkeypatch) -> None:
         app.dependency_overrides.pop(require_identity, None)
 
     assert response.status_code == 403
-    assert response.json()["detail"] == "subscriber_capability_required:document:create"
+    assert response.json()["detail"] == (
+        "subscriber_capability_required:document:create"
+    )
