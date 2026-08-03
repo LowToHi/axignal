@@ -44,7 +44,7 @@ def make_decision(
         technical_head_sha=HEAD,
         reviewed_at=REVIEWED,
         expires_at=expires_at,
-        signature="unsigned-placeholder",
+        signature="unsigned-placeholder-that-is-long-enough",
         conditions=("Preserve all fail-closed boundaries.",),
         assertions=dict(required if assertions is None else assertions),
     )
