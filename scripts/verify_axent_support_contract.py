@@ -13,8 +13,14 @@ REQUIRED_FILES = {
     "apps/api/src/axignal_api/axent_context.py",
     "apps/api/src/axignal_api/axent_knowledge.py",
     "apps/api/src/axignal_api/axent_consent.py",
+    "apps/api/src/axignal_api/axent_action_repository.py",
+    "apps/api/src/axignal_api/axent_restore_repository.py",
+    "apps/api/src/axignal_api/axent_notification_repository.py",
     "apps/api/src/axignal_api/axent_routes.py",
     "apps/api/src/axignal_api/axent_consent_routes.py",
+    "apps/api/src/axignal_api/axent_action_routes.py",
+    "apps/api/src/axignal_api/axent_material_action_routes.py",
+    "apps/api/src/axignal_api/axent_notification_routes.py",
     "apps/api/src/axignal_api/axent_admin_routes.py",
     "apps/api/tests/test_axent_policy.py",
     "apps/api/tests/test_axent_knowledge.py",
@@ -22,11 +28,17 @@ REQUIRED_FILES = {
     "apps/api/tests/test_axent_consent.py",
     "apps/web/lib/axent-server.ts",
     "apps/web/app/help/page.tsx",
+    "apps/web/app/support-admin/page.tsx",
     "apps/web/app/api/axent/conversations/route.ts",
     "apps/web/app/api/axent/conversations/[conversationId]/route.ts",
     "apps/web/app/api/axent/conversations/[conversationId]/messages/route.ts",
+    "apps/web/app/api/axent/notifications/route.ts",
+    "apps/web/app/api/axent/notifications/[notificationId]/acknowledge/route.ts",
+    "apps/web/app/api/axent-admin/cases/route.ts",
+    "apps/web/app/api/axent-admin/cases/[caseId]/transition/route.ts",
     "apps/web/components/axent/axent-help-entry.tsx",
     "apps/web/components/axent/axent-help.tsx",
+    "apps/web/components/axent/axent-admin-console.tsx",
 }
 
 
@@ -51,6 +63,15 @@ def main() -> None:
     consent_routes = Path(
         "apps/api/src/axignal_api/axent_consent_routes.py"
     ).read_text()
+    action_routes = Path(
+        "apps/api/src/axignal_api/axent_material_action_routes.py"
+    ).read_text()
+    action_repository = Path(
+        "apps/api/src/axignal_api/axent_action_repository.py"
+    ).read_text()
+    restore_repository = Path(
+        "apps/api/src/axignal_api/axent_restore_repository.py"
+    ).read_text()
     admin_routes = Path("apps/api/src/axignal_api/axent_admin_routes.py").read_text()
     route_tests = Path("apps/api/tests/test_axent_routes.py").read_text()
     knowledge = Path("apps/api/src/axignal_api/axent_knowledge.py").read_text()
@@ -58,6 +79,9 @@ def main() -> None:
     dockerfile = Path("infra/postgres/Dockerfile").read_text()
     help_page = Path("apps/web/app/help/page.tsx").read_text()
     help_component = Path("apps/web/components/axent/axent-help.tsx").read_text()
+    admin_component = Path(
+        "apps/web/components/axent/axent-admin-console.tsx"
+    ).read_text()
     web_proxy = Path("apps/web/lib/axent-server.ts").read_text()
 
     for marker in (
@@ -94,6 +118,7 @@ def main() -> None:
     assert "FORCE ROW LEVEL SECURITY" in consent_sql
     assert "current_tenant_id()" in sql
     assert "ALLOW_WITH_CONFIRMATION" in policy
+    assert "restore_workspace" in policy
     assert "tool_not_allowlisted" in policy
     assert "modify_entitlement" in policy
     assert "AxentContextBuilder" in routes
@@ -107,6 +132,11 @@ def main() -> None:
     assert "hmac.compare_digest" in consent
     assert "expected_before_state_hash" in consent
     assert "expires_at" in consent_routes
+    assert "archive_workspace" in action_routes
+    assert "restore_workspace" in action_routes
+    assert "FOR UPDATE" in action_repository
+    assert "support_actions" in action_repository
+    assert "rollback_of" in restore_repository
     assert "human_reviewer_subjects" in admin_routes
     assert "transition_case" in admin_routes
     assert "require_identity" in routes
@@ -114,10 +144,15 @@ def main() -> None:
     assert "KNOWLEDGE_REVISION" in route_tests
     assert "axent_router" in application
     assert "axent_consent_router" in application
+    assert "axent_action_router" in application
+    assert "axent_material_action_router" in application
+    assert "axent_notification_router" in application
     assert "axent_admin_router" in application
     assert "AxentHelpEntry" in help_page
     assert "/api/axent/conversations" in help_component
+    assert "/api/axent/notifications" in help_component
     assert "Autoridades consultadas" in help_component
+    assert "/api/axent-admin/cases" in admin_component
     assert "getAuthenticatedIdentity" in web_proxy
     assert "X-AXIGNAL-Identity-Assertion" in web_proxy
     for migration in (
@@ -136,8 +171,10 @@ def main() -> None:
     print("AXENT_SERVER_AUTHORITY_CONTEXT_IMPLEMENTED")
     print("AXENT_READ_ONLY_SUPPORT_IMPLEMENTED")
     print("AXENT_HELP_SURFACE_IMPLEMENTED")
-    print("AXENT_CONSENT_BOUNDARY_IMPLEMENTED")
+    print("AXENT_BOUNDED_ACTIONS_IMPLEMENTED")
+    print("AXENT_CONSENTED_ACTION_AND_ROLLBACK_IMPLEMENTED")
     print("AXENT_HUMAN_ESCALATION_LIFECYCLE_IMPLEMENTED")
+    print("AXENT_CUSTOMER_NOTIFICATION_ROUND_TRIP_IMPLEMENTED")
     print("AXENT_FINAL_E2E_NOT_YET_CLAIMED")
 
 
