@@ -46,3 +46,6 @@ src = ["apps/api/src", "apps/api/tests", "scripts"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "SIM"]
+
+[tool.ruff.lint.per-file-ignores]
+"scripts/verify_gate7_o01_retained_evidence_v8.py" = ["E501"]
