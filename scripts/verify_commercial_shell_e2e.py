@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from __future__ import annotations
 
 import argparse
@@ -10,8 +11,6 @@ import psycopg
 from psycopg import sql
 from psycopg.rows import dict_row
 
-TENANT_A = UUID("11111111-1111-4111-8111-111111111111")
-TENANT_B = UUID("22222222-2222-4222-8222-222222222222")
 PENDING_STATES = (
     "SELECTED",
     "CHECKOUT_CREATED",
@@ -30,12 +29,30 @@ EXPECTED_STATES = {
     "CANCELLED",
     "ROLLED_BACK",
 }
+VALID_RECEIPT_DISPOSITIONS = {"APPLIED", "STALE", "IGNORED"}
+USER_LEDGER_EVENTS = {
+    "PAID_PLAN_EXPLICITLY_SELECTED",
+    "PAID_UPGRADE_EXPLICITLY_REQUESTED",
+    "PAID_CANCELLATION_AT_PERIOD_END_REQUESTED",
+}
+PROVIDER_LEDGER_EVENTS = {
+    "STRIPE_CHECKOUT_SESSION_COMPLETED",
+    "STRIPE_CUSTOMER_SUBSCRIPTION_CREATED",
+    "STRIPE_CUSTOMER_SUBSCRIPTION_UPDATED",
+    "STRIPE_CUSTOMER_SUBSCRIPTION_DELETED",
+}
+ROLLBACK_LEDGER_EVENTS = {"PAID_LIFECYCLE_ROLLED_BACK"}
+EXPECTED_LEDGER_EVENTS = (
+    USER_LEDGER_EVENTS | PROVIDER_LEDGER_EVENTS | ROLLBACK_LEDGER_EVENTS
+)
+PROVIDER_ACTOR = "stripe-signed-webhook"
+ROLLBACK_ACTOR = "deterministic-test-rollback"
 
 
 def _scalar(cursor: psycopg.Cursor, query: str, params: tuple[object, ...]) -> int:
     cursor.execute(query, params)
     row = cursor.fetchone()
-    assert row is not None
+    assert row is not None, "Scalar billing audit query returned no row"
     if isinstance(row, dict):
         return int(next(iter(row.values())))
     return int(row[0])
@@ -43,16 +60,64 @@ def _scalar(cursor: psycopg.Cursor, query: str, params: tuple[object, ...]) -> i
 
 def _tenant_visible_count(dsn: str, tenant_id: UUID) -> int:
     with psycopg.connect(dsn) as connection, connection.cursor() as cursor:
-        cursor.execute(sql.SQL("SET LOCAL ROLE {}").format(sql.Identifier("axignal_app")))
-        cursor.execute("SELECT set_config('app.tenant_id', %s, true)", (str(tenant_id),))
+        cursor.execute(
+            sql.SQL("SET LOCAL ROLE {}").format(sql.Identifier("axignal_app"))
+        )
+        cursor.execute(
+            "SELECT set_config('app.tenant_id', %s, true)",
+            (str(tenant_id),),
+        )
         cursor.execute("SELECT count(*) FROM tenant_private.billing_plan_selections")
         row = cursor.fetchone()
-        assert row is not None
+        assert row is not None, "Tenant visibility query returned no row"
         return int(row[0])
+
+
+def _isolation_tenant(tenant_id: UUID) -> UUID:
+    return UUID(int=tenant_id.int ^ 1)
+
+
+def _verify_ledger_authority(
+    ledger: list[dict[str, object]], expected_subject: str
+) -> None:
+    observed_event_types = {str(row["ledger_event_type"]) for row in ledger}
+    unexpected_event_types = observed_event_types - EXPECTED_LEDGER_EVENTS
+    assert not unexpected_event_types, {
+        "unexpected_ledger_event_types": sorted(unexpected_event_types),
+        "observed_ledger_event_types": sorted(observed_event_types),
+    }
+    assert EXPECTED_LEDGER_EVENTS.issubset(observed_event_types), {
+        "missing_ledger_event_types": sorted(
+            EXPECTED_LEDGER_EVENTS - observed_event_types
+        ),
+        "observed_ledger_event_types": sorted(observed_event_types),
+    }
+
+    for row in ledger:
+        event_type = str(row["ledger_event_type"])
+        actor_subject = str(row["actor_subject"])
+        provider_event_id = row["provider_event_id"]
+        payload_digest = row["payload_digest"]
+
+        if event_type in USER_LEDGER_EVENTS:
+            assert actor_subject == expected_subject, row
+            assert provider_event_id is None, row
+            assert payload_digest is None, row
+        elif event_type in PROVIDER_LEDGER_EVENTS:
+            assert actor_subject == PROVIDER_ACTOR, row
+            assert provider_event_id, row
+            assert payload_digest and len(str(payload_digest)) == 64, row
+        elif event_type in ROLLBACK_LEDGER_EVENTS:
+            assert actor_subject == ROLLBACK_ACTOR, row
+            assert provider_event_id is None, row
+            assert payload_digest is None, row
+        else:  # pragma: no cover - guarded by the exact event taxonomy above.
+            raise AssertionError(row)
 
 
 def run(
     dsn: str,
+    expected_subject: str,
 ) -> tuple[
     dict[str, object],
     dict[str, object],
@@ -66,13 +131,26 @@ def run(
         cursor.execute(
             """
             SELECT * FROM tenant_private.billing_plan_selections
-            WHERE tenant_id = %s
-            ORDER BY updated_at DESC LIMIT 1
+            WHERE selected_by = %s
+            ORDER BY updated_at DESC
+            LIMIT 2
             """,
-            (TENANT_A,),
+            (expected_subject,),
         )
-        selection = cursor.fetchone()
-        assert selection is not None, "Commercial browser E2E created no selection"
+        selections = list(cursor.fetchall())
+        assert selections, (
+            "Commercial browser E2E created no selection for authenticated subject "
+            f"{expected_subject!r}"
+        )
+        assert len(selections) == 1, (
+            "Commercial browser E2E must create exactly one selection for the "
+            f"authenticated subject; observed {len(selections)}"
+        )
+        selection = selections[0]
+        tenant_id = UUID(str(selection["tenant_id"]))
+        isolation_tenant_id = _isolation_tenant(tenant_id)
+
+        assert selection["selected_by"] == expected_subject, selection
         assert selection["state"] == "ROLLED_BACK", selection
 
         cursor.execute(
@@ -80,14 +158,14 @@ def run(
             SELECT * FROM tenant_private.organisation_entitlements
             WHERE tenant_id = %s AND billing_selection_id = %s
             """,
-            (TENANT_A, selection["selection_id"]),
+            (tenant_id, selection["selection_id"]),
         )
         entitlement = cursor.fetchone()
         assert entitlement is not None, "Paid entitlement was not created"
-        assert entitlement["entitlement_kind"] == "PAID_MONTHLY"
-        assert entitlement["state"] == "CANCELLED"
-        assert entitlement["unlimited_ai_tokens"] is True
-        assert entitlement["token_budget_total"] is None
+        assert entitlement["entitlement_kind"] == "PAID_MONTHLY", entitlement
+        assert entitlement["state"] == "CANCELLED", entitlement
+        assert entitlement["unlimited_ai_tokens"] is True, entitlement
+        assert entitlement["token_budget_total"] is None, entitlement
 
         active_entitlements = _scalar(
             cursor,
@@ -95,7 +173,7 @@ def run(
             SELECT count(*) FROM tenant_private.organisation_entitlements
             WHERE tenant_id = %s AND state = 'ACTIVE'
             """,
-            (TENANT_A,),
+            (tenant_id,),
         )
         open_reservations = _scalar(
             cursor,
@@ -103,7 +181,7 @@ def run(
             SELECT count(*) FROM tenant_private.ai_token_reservations
             WHERE tenant_id = %s AND state = 'RESERVED'
             """,
-            (TENANT_A,),
+            (tenant_id,),
         )
         pending_selections = _scalar(
             cursor,
@@ -111,7 +189,7 @@ def run(
             SELECT count(*) FROM tenant_private.billing_plan_selections
             WHERE tenant_id = %s AND state = ANY(%s)
             """,
-            (TENANT_A, list(PENDING_STATES)),
+            (tenant_id, list(PENDING_STATES)),
         )
         active_capabilities = active_entitlements
 
@@ -123,7 +201,7 @@ def run(
             WHERE tenant_id = %s
             ORDER BY occurred_at, created_at, ledger_entry_id
             """,
-            (TENANT_A,),
+            (tenant_id,),
         )
         ledger = list(cursor.fetchall())
         assert len(ledger) >= 9, ledger
@@ -134,6 +212,7 @@ def run(
             if state is not None
         }
         assert EXPECTED_STATES.issubset(observed_states), observed_states
+        _verify_ledger_authority(ledger, expected_subject)
         assert all("raw" not in row for row in ledger)
 
         cursor.execute(
@@ -143,20 +222,19 @@ def run(
             WHERE tenant_id = %s
             ORDER BY received_at, provider_event_id
             """,
-            (TENANT_A,),
+            (tenant_id,),
         )
         receipts = list(cursor.fetchall())
         assert len(receipts) >= 5, receipts
         assert all(
-            row["disposition"] in {"APPLIED", "DUPLICATE", "STALE"}
-            for row in receipts
-        )
-        assert all(len(str(row["payload_digest"])) == 64 for row in receipts)
+            row["disposition"] in VALID_RECEIPT_DISPOSITIONS for row in receipts
+        ), receipts
+        assert all(len(str(row["payload_digest"])) == 64 for row in receipts), receipts
 
-    tenant_a_visible = _tenant_visible_count(dsn, TENANT_A)
-    tenant_b_visible = _tenant_visible_count(dsn, TENANT_B)
-    assert tenant_a_visible >= 1
-    assert tenant_b_visible == 0
+    tenant_visible = _tenant_visible_count(dsn, tenant_id)
+    cross_tenant_visible = _tenant_visible_count(dsn, isolation_tenant_id)
+    assert tenant_visible >= 1
+    assert cross_tenant_visible == 0
     assert active_entitlements == 0
     assert open_reservations == 0
     assert pending_selections == 0
@@ -168,6 +246,8 @@ def run(
         "provider": "DETERMINISTIC_TEST_PROVIDER",
         "external_stripe_verified": False,
         "commercial_payment_evidence": False,
+        "authenticated_subject": expected_subject,
+        "tenant_id": str(tenant_id),
         "selection_state": selection["state"],
         "entitlement_kind": entitlement["entitlement_kind"],
         "entitlement_state": entitlement["state"],
@@ -176,6 +256,11 @@ def run(
         "token_overage_billing": False,
         "signed_provider_receipts": len(receipts),
         "ledger_entries": len(ledger),
+        "ledger_authority_taxonomy": {
+            "authenticated_subject": expected_subject,
+            "provider_actor": PROVIDER_ACTOR,
+            "rollback_actor": ROLLBACK_ACTOR,
+        },
         "external_stripe_calls": 0,
         "model_calls": 0,
     }
@@ -184,6 +269,9 @@ def run(
         "status": "PASS",
         "states_observed": sorted(observed_states),
         "required_states": sorted(EXPECTED_STATES),
+        "ledger_events_observed": sorted(
+            {str(row["ledger_event_type"]) for row in ledger}
+        ),
         "checkout_return_grants_entitlement": False,
         "signed_event_required": True,
         "refresh_persistence": True,
@@ -191,18 +279,21 @@ def run(
     isolation = {
         "schema": "axignal.billing-tenant-isolation.v0.1",
         "status": "PASS",
-        "tenant_a_visible_selections": tenant_a_visible,
-        "tenant_b_cross_tenant_visible_selections": tenant_b_visible,
+        "tenant_id": str(tenant_id),
+        "isolation_tenant_id": str(isolation_tenant_id),
+        "tenant_visible_selections": tenant_visible,
+        "cross_tenant_visible_selections": cross_tenant_visible,
         "rls": "PASS",
     }
     residue = {
         "schema": "axignal.billing-rollback-residue.v0.1",
         "status": "PASS",
+        "tenant_id": str(tenant_id),
         "active_test_entitlements": active_entitlements,
         "open_reservations": open_reservations,
         "active_capabilities": active_capabilities,
         "pending_test_selections": pending_selections,
-        "cross_tenant_effects": tenant_b_visible,
+        "cross_tenant_effects": cross_tenant_visible,
         "external_stripe_calls": 0,
         "selection_state": selection["state"],
     }
@@ -216,7 +307,10 @@ def main() -> int:
     dsn = os.environ.get("AXIGNAL_DATABASE_URL")
     if not dsn:
         raise SystemExit("AXIGNAL_DATABASE_URL is required")
-    outputs = run(dsn)
+    expected_subject = os.environ.get("AXIGNAL_AUTH_SUBJECT", "").strip()
+    if not expected_subject:
+        raise SystemExit("AXIGNAL_AUTH_SUBJECT is required")
+    outputs = run(dsn, expected_subject)
     args.output_dir.mkdir(parents=True, exist_ok=True)
     names = (
         "commercial-shell-e2e.json",

@@ -6,7 +6,7 @@
   "scope_frozen": true,
   "objective": "Consolidate the complete pre-production E2E engineering line into one release branch, exact head, Git tree, configuration, CI matrix and artifact set without expanding product scope.",
   "active_release_branch": "release/axignal-e2e-final",
-  "controller_parent_sha": "891436c463fc4fdc5b79cccd07b48a28a9f0369f",
+  "controller_parent_sha": "3a8f0433284ed1eac2430b5435bccaaa2e9dea9c",
   "lineage": {
     "dominant_engineering_head": "ca17c4756e4bbbfee72b4547d281df0379e91cfa",
     "dominant_engineering_tree": "ac7ca65ecc67b3327a13829da9c82ba750ebf709",
@@ -104,6 +104,12 @@
       "evidence": "The exact-head E2E-1 verifier and Subscriber Workspace contract passed on 891436c463fc4fdc5b79cccd07b48a28a9f0369f, then the inherited P21 commercial validator failed to import jsonschema.",
       "resolution": "Install jsonschema together with PyYAML before invoking inherited bounded validators.",
       "scope_expanded": false
+    },
+    {
+      "repair": "COMMERCIAL_PASSWORDLESS_SEED_RECEIVES_EMAIL_IDENTITY",
+      "evidence": "The commercial topology on 3a8f0433284ed1eac2430b5435bccaaa2e9dea9c stopped before Uvicorn because seat_identity_test_seed requires AXIGNAL_AUTH_EMAIL but the API service inherited only AXIGNAL_AUTH_SUBJECT; the email existed only in the web service.",
+      "resolution": "Pass the already-required synthetic AXIGNAL_AUTH_EMAIL into the API test service so the fail-closed passwordless seed can materialise before Uvicorn starts.",
+      "scope_expanded": false
     }
   ],
   "authority": {
@@ -128,6 +134,7 @@
     "authentication_precedes_shell_selection": true,
     "legacy_password_login_remains_disabled": true,
     "commercial_e2e_uses_passwordless_passkey": true,
+    "passwordless_seed_configuration_complete": true,
     "subscriber_workspace_feature_flag_required": true,
     "fixture_mode_must_be_explicit": true,
     "legacy_shell_fallback_preserved": true,
