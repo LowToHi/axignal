@@ -1,0 +1,85 @@
+{
+  "task_id": "AX-GE2E-P08-T02",
+  "goal_id": "AXIGNAL-GOAL-001",
+  "phase": "P08",
+  "state": "IN_PROGRESS",
+  "objective": "Implement the evidence-governed authenticated subscriber workspace and complete tender operations journey on the exact subscriber UX architecture head.",
+  "outcome": "A route-addressable Intelligence Shell and Operations Shell with server-authoritative capabilities, persistent bounded mutations, six-locale semantic parity, accessible interaction and exact-head test evidence, without autonomous external action or canonical UX acceptance claims.",
+  "contracts": ["GOAL_LOCK", "AGENTS", "00", "02", "05", "06", "07", "08", "12", "13", "14", "16", "18", "31"],
+  "skills": [
+    {"skill_id":"goal-keeper","version":"0.1.0","activation_reason":"Prevent drift from Global Opportunity Intelligence and the subscriber-authority boundary."},
+    {"skill_id":"contract-router","version":"0.1.0","activation_reason":"Resolve the governing product, epistemic, security, API, interaction and multilingual contracts."},
+    {"skill_id":"task-orchestrator","version":"0.1.0","activation_reason":"Keep P08-T02 typed, dependency-aware and evidence-scoped."},
+    {"skill_id":"gate-evaluator","version":"0.1.0","activation_reason":"Separate engineering evidence from canonical and human UX acceptance."},
+    {"skill_id":"naming-guardian","version":"0.1.0","activation_reason":"Enforce AXIGNAL, axignal.com and AXIGNAL-GOAL-001."},
+    {"skill_id":"security-reviewer","version":"0.1.0","activation_reason":"Review tenant isolation, role authority, mutations, exports and external handoffs."},
+    {"skill_id":"privacy-reviewer","version":"0.1.0","activation_reason":"Minimise contact, document and private workspace exposure."},
+    {"skill_id":"observability-engineer","version":"0.1.0","activation_reason":"Define route, mutation, denial, recovery and performance evidence."},
+    {"skill_id":"frontend-architect","version":"0.1.0","activation_reason":"Refactor the monolithic shell into route-level product surfaces."},
+    {"skill_id":"backend-architect","version":"0.1.0","activation_reason":"Define typed server-authoritative workspace APIs and persistence boundaries."},
+    {"skill_id":"identity-engineer","version":"0.1.0","activation_reason":"Resolve tenant, role, seat and capability state on the server."},
+    {"skill_id":"accessibility-auditor","version":"0.1.0","activation_reason":"Enforce WCAG 2.2 AA and nonvisual equivalents."},
+    {"skill_id":"multilingual-localiser","version":"0.1.0","activation_reason":"Preserve semantic parity for en, es, fr, de, pt and it."},
+    {"skill_id":"interaction-architect","version":"0.1.0","activation_reason":"Preserve context, URL state, browser history and explicit user control."},
+    {"skill_id":"visualisation-designer","version":"0.1.0","activation_reason":"Keep Globe, Graph and Timeline meaningful, bounded and accessible."},
+    {"skill_id":"test-engineer","version":"0.1.0","activation_reason":"Produce contract, permission, browser, visual and regression evidence."},
+    {"skill_id":"performance-engineer","version":"0.1.0","activation_reason":"Enforce product-shell rendering and interaction budgets."},
+    {"skill_id":"billing-engineer","version":"0.1.0","activation_reason":"Integrate the existing candidate billing surface without enabling live activation."},
+    {"skill_id":"consent-ux-reviewer","version":"0.1.0","activation_reason":"Make private memory, approvals and external handoffs explicit and reversible."}
+  ],
+  "dependencies": {
+    "phases": ["P07", "P08"],
+    "tasks": ["AX-GE2E-P07-T01", "AX-GE2E-P08-T01"],
+    "external": ["PR #128 subscriber UX architecture head", "qualified-user usability evidence remains external and pending"]
+  },
+  "allowed_scope": [
+    "Authenticated product shell and route contracts",
+    "Intelligence Shell and Tender Workspace UI",
+    "Server-authoritative tenant, role, entitlement and bounded mutations",
+    "Explicit engineering fixtures with no silent fallback",
+    "Accessibility, multilingual, visual, performance and regression evidence"
+  ],
+  "prohibited_scope": [
+    "Autonomous bid or tender submission",
+    "Autonomous external communication or signature",
+    "Client-authoritative tenant, role, entitlement or approval decisions",
+    "Silent fixture fallback or fake persisted success",
+    "Live Stripe activation, source admission, public launch or canonical UX acceptance",
+    "Changing the DeepSeek transport alias or governed checkpoint label"
+  ],
+  "acceptance_evidence": [
+    {"evidence_type":"DOCUMENT","description":"Capability, route, permission, state, token, event and fixture boundaries are frozen before parallel implementation.","required":true,"location":"docs/experience/subscriber-workspace-implementation-contract-v1.md","status":"PRESENT"},
+    {"evidence_type":"TEST","description":"Type, component, API and permission suites pass on the exact head.","required":true,"location":"artifacts/subscriber-workspace/test-evidence.json","status":"PRESENT"},
+    {"evidence_type":"SCREENSHOT","description":"Reviewed desktop, tablet and mobile screenshots for dark and light themes.","required":true,"location":"artifacts/subscriber-workspace/visual/","status":"PRESENT"},
+    {"evidence_type":"SECURITY_REVIEW","description":"Tenant, role, entitlement, export and handoff negative cases pass.","required":true,"location":"artifacts/subscriber-workspace/security-review.md","status":"PRESENT"},
+    {"evidence_type":"USER_RESEARCH","description":"Qualified-user study meets the normative UX thresholds.","required":true,"location":null,"status":"MISSING"}
+  ],
+  "impacts": {"security":"MATERIAL","privacy":"MATERIAL","data_rights":"MATERIAL","regulatory":"MATERIAL","multilingual":"MATERIAL","epistemic":"MATERIAL","billing":"MATERIAL"},
+  "observability": {
+    "metrics": ["subscriber_route_load_ms", "workspace_mutation_total", "workspace_mutation_denied_total", "workspace_recovery_total", "visual_regression_diff_ratio"],
+    "logs": ["server-resolved capability snapshot", "workspace mutation audit event", "external handoff boundary event"],
+    "traces": ["opportunity-to-workspace journey", "clarification approval and handoff", "submission preflight and confirmation"],
+    "alerts": ["cross-tenant workspace access", "client authority escalation", "silent fixture fallback", "external action without approval", "critical accessibility regression"]
+  },
+  "rollback": {
+    "strategy": "Revert the P08-T02 branch or disable the subscriber workspace feature flag; retain pre-existing InvestigationShell and backend ledgers.",
+    "kill_switch": "AXIGNAL_SUBSCRIBER_WORKSPACE_ENABLED=false",
+    "tested": false
+  },
+  "goal_lock_checks": [
+    {"check_id":1,"answer":"YES","evidence":"The workspace preserves geographic, relational and temporal investigation before tender operations."},
+    {"check_id":2,"answer":"YES","evidence":"Official, normalised, inferred, subscriber-provided, unknown and contradictory states remain distinct."},
+    {"check_id":3,"answer":"YES","evidence":"Globe and Graph remain equal lenses over one InvestigationContext and explicit user choice prevails."},
+    {"check_id":4,"answer":"YES","evidence":"Subscriber interest may prioritise investigation but cannot create evidence or an opportunity claim."},
+    {"check_id":5,"answer":"YES","evidence":"The frozen locale contract covers en, es, fr, de, pt and it with original-language evidence retained."},
+    {"check_id":6,"answer":"YES","evidence":"Workspace decisions, evidence anchors, amendments and audit state create durable product memory."},
+    {"check_id":7,"answer":"YES","evidence":"The scope excludes autonomous submission, communication, signature and client-side authority."},
+    {"check_id":8,"answer":"YES","evidence":"Rights, contact, export, privacy and tenant boundaries fail closed."},
+    {"check_id":9,"answer":"YES","evidence":"A feature flag and branch revert provide bounded rollback without deleting canonical ledgers."},
+    {"check_id":10,"answer":"YES","evidence":"This implements the authorised P08-T02 subscriber workspace engineering candidate only."}
+  ],
+  "owner": "Staff Product Engineering / Product Design",
+  "reviewer": null,
+  "created_at": "2026-08-02T00:00:00Z",
+  "updated_at": "2026-08-02T00:00:00Z"
+}

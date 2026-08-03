@@ -1,0 +1,91 @@
+{
+  "record_id": "AX-SUBSCRIBER-GLOBE-ASSET-ADMISSION-001",
+  "goal_id": "AXIGNAL-GOAL-001",
+  "scope": "P08 subscriber workspace engineering candidate only",
+  "status": "ENGINEERING_ADMITTED_RELEASE_REVIEW_REQUIRED",
+  "reviewed_at": "2026-08-02",
+  "usage_constraints": [
+    "Assets are served from AXIGNAL-controlled local paths; the runtime makes no request to external source hosts.",
+    "NASA imagery is credited as NASA Earth Observatory and must not imply NASA endorsement or sponsorship.",
+    "No NASA insignia, logotype, identifier or Data Insignia is included in the product.",
+    "Natural Earth geography is used only as cartographic context, never as a political or coverage claim.",
+    "Production release requires an independent rights review and a replacement/kill-switch check."
+  ],
+  "attribution": [
+    "Earth imagery: NASA Earth Observatory, Blue Marble: Next Generation.",
+    "Country boundaries: Made with Natural Earth."
+  ],
+  "owned_assets": [
+    {
+      "id": "axignal-favicon",
+      "local_path": "apps/web/app/icon.svg",
+      "canonical_source": "apps/landing/public/favicon.svg",
+      "sha256": "8A9280FB7C7E85A83EC95D33F4C0FEA006967BFF401B98F9ECDB273CF051592F",
+      "rights_basis": "AXIGNAL-owned SVG branding, synchronised byte-for-byte from the landing asset."
+    }
+  ],
+  "assets": [
+    {
+      "id": "earth-albedo-desktop",
+      "local_path": "apps/web/public/globe/earth-albedo.webp",
+      "sha256": "07A42518D93D1577F5DB4D809A2201A3D9A3367DFE9E8138536CC937FE24CDD7",
+      "source_page": "https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/base-map/",
+      "acquisition_url": "https://assets.science.nasa.gov/content/dam/science/esd/eo/images/bmng/bmng-base/february/world.200402.3x5400x2700.jpg",
+      "rights_basis": "NASA imagery reproduction subject to NASA media-use guidance; credit required; no endorsement implied.",
+      "derivation": "Versioned WebP derivative, copied unchanged into the subscriber workspace asset pack."
+    },
+    {
+      "id": "earth-albedo-mobile",
+      "local_path": "apps/web/public/globe/earth-albedo-mobile.webp",
+      "sha256": "86A4E2F1E9DD460C0BF83AF8E5DF5513A7AC392E0561FA328480E49914F219FD",
+      "source_page": "https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/base-map/",
+      "acquisition_url": "https://assets.science.nasa.gov/content/dam/science/esd/eo/images/bmng/bmng-base/february/world.200402.3x5400x2700.jpg",
+      "rights_basis": "NASA imagery reproduction subject to NASA media-use guidance; credit required; no endorsement implied.",
+      "derivation": "Versioned mobile WebP derivative, copied unchanged into the subscriber workspace asset pack."
+    },
+    {
+      "id": "earth-clouds-desktop",
+      "local_path": "apps/web/public/globe/earth-clouds.webp",
+      "sha256": "2A7BE3081B38F18BE29636B703E9810D727B3C032B5EADA7D7CFCD4011B68C7C",
+      "source_page": "https://visibleearth.nasa.gov/images/57747/blue-marble-clouds/77558l",
+      "acquisition_url": "https://eoimages.gsfc.nasa.gov/images/imagerecords/57000/57747/cloud_combined_2048.jpg",
+      "rights_basis": "NASA imagery reproduction subject to NASA media-use guidance; credit required; no endorsement implied.",
+      "derivation": "Versioned WebP derivative, copied unchanged into the subscriber workspace asset pack."
+    },
+    {
+      "id": "earth-clouds-mobile",
+      "local_path": "apps/web/public/globe/earth-clouds-mobile.webp",
+      "sha256": "0B6FBF0E61FFE00347655461D04DB2F791BED9D274F753A811D903936C3FD2E0",
+      "source_page": "https://visibleearth.nasa.gov/images/57747/blue-marble-clouds/77558l",
+      "acquisition_url": "https://eoimages.gsfc.nasa.gov/images/imagerecords/57000/57747/cloud_combined_2048.jpg",
+      "rights_basis": "NASA imagery reproduction subject to NASA media-use guidance; credit required; no endorsement implied.",
+      "derivation": "Versioned mobile WebP derivative, copied unchanged into the subscriber workspace asset pack."
+    },
+    {
+      "id": "europe-boundaries-50m",
+      "local_path": "apps/web/public/globe/europe-boundaries-50m.geojson",
+      "sha256": "941FB190A40CF6E04C14CCDD8B291C000A759066C1AEB959BF9388431F2D80E2",
+      "source_page": "https://www.naturalearthdata.com/downloads/50m-cultural-vectors/50m-admin-0-boundary-lines/",
+      "acquisition_url": "https://naturalearth.s3.amazonaws.com/50m_cultural/ne_50m_admin_0_boundary_lines_land.zip",
+      "rights_basis": "Natural Earth raster and vector map data are public domain.",
+      "derivation": "Europe, North Africa and Western Asia 1:50m boundary derivative copied unchanged from the AXIGNAL landing asset pack and rendered as line segments on the sphere."
+    },
+    {
+      "id": "globe-fallback-poster",
+      "local_path": "apps/web/public/globe/globe-poster.webp",
+      "sha256": "1D2443A5BB0F6E3B651FCC9D180045063A7B239F0027C06BDC2F89FB3AB616DA",
+      "source_page": "https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/base-map/",
+      "rights_basis": "NASA imagery reproduction subject to NASA media-use guidance; credit required; no endorsement implied.",
+      "derivation": "Static fallback poster derived from the same local engineering asset pack."
+    }
+  ],
+  "retention_and_replacement": {
+    "retention": "Keep the versioned local derivatives only while this engineering candidate is active.",
+    "replacement": "Replace only with a source-admitted, hash-pinned derivative and update this record.",
+    "kill_switch": "AXIGNAL_SUBSCRIBER_WORKSPACE_ENABLED=false"
+  },
+  "evidence": {
+    "nasa_media_guidance": "https://heasarc.gsfc.nasa.gov/docs/www_info/credit/nasa.html",
+    "natural_earth_terms": "https://www.naturalearthdata.com/about/terms-of-use/"
+  }
+}
