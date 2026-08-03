@@ -37,5 +37,6 @@ COPY 130-organic-discovery-founder-admin.sql /docker-entrypoint-initdb.d/130-axi
 COPY 131-organic-discovery-alert-lifecycle.sql /docker-entrypoint-initdb.d/131-axignal-organic-alerts.sql
 COPY 140-subscriber-workspace-live.sql /docker-entrypoint-initdb.d/140-axignal-subscriber-workspace.sql
 COPY 141-commercial-paid-invoice-recovery.sql /docker-entrypoint-initdb.d/141-axignal-paid-invoice-recovery.sql
+COPY 149-axent-support-parent-keys.sql /docker-entrypoint-initdb.d/149-axignal-axent-parent-keys.sql
 COPY 150-axent-customer-support.sql /docker-entrypoint-initdb.d/150-axignal-axent-support.sql
 COPY 151-axent-support-hardening.sql /docker-entrypoint-initdb.d/151-axignal-axent-support-hardening.sql
