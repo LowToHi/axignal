@@ -103,6 +103,21 @@ The workflow independently:
 7. accepts only the latest valid signed decision for each authority;
 8. emits an authority envelope only when both authorities pass.
 
+## Human decision receipt
+
+The repository principal explicitly authorised the bounded decisions and they were published by the authenticated GitHub user `LowToHi` on `2026-08-03T08:03:54Z`:
+
+```text
+Legal decision comment                5163805262
+Privacy/Data Rights decision comment  5163807344
+decision                              APPROVE_WITH_CONDITIONS
+manifest                              sha256:bd69acf72b4af14bfaeb1421664883763556d767ce0a70bb876aa92486cb7ac6
+technical head                        db7758a2e250a80ba992b2ff28b0574b01393c82
+expires                               2026-08-30T23:00:00Z
+```
+
+The decisions authorise only private access, derived classification and bounded evidence retention under their stated conditions. They do not authorise product admission, source activation, public redistribution, public claims, ISO publication copying, standard-text ingestion, profiling, marketing, model training or a launch transition.
+
 ## Permanent boundary
 
 Even when the private campaign becomes authorised:
