@@ -1,0 +1,32 @@
+name: Axent Customer Support Contract
+
+on:
+  pull_request:
+    paths:
+      - 'apps/api/src/axignal_api/axent_*.py'
+      - 'apps/api/tests/test_axent_*.py'
+      - 'infra/postgres/15*-axent-*.sql'
+      - 'infra/postgres/Dockerfile'
+      - 'docs/contracts/31-axent-customer-support-e2e-contract-v1.0.md'
+      - 'scripts/verify_axent_support_contract.py'
+      - '.github/workflows/axent-support-contract.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify executable contract
+        run: python scripts/verify_axent_support_contract.py
+      - name: Compile Axent modules
+        run: python -m compileall -q apps/api/src/axignal_api/axent_policy.py apps/api/src/axignal_api/axent_repository.py apps/api/src/axignal_api/axent_context.py apps/api/src/axignal_api/axent_routes.py
+      - name: Verify no direct entitlement mutation
+        run: |
+          ! grep -R "UPDATE tenant_private.*entitlement\|INSERT INTO tenant_private.*entitlement" apps/api/src/axignal_api/axent_*.py
