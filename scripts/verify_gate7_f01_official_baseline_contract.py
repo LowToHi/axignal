@@ -97,7 +97,10 @@ def verify(
     require(access["fail_closed"] is True, "Fail-closed disabled")
 
     schemes = contract["concept_schemes"]
-    require(set(schemes) == {f"{value:04d}" for value in range(1, 11)}, "Scheme set drift")
+    require(
+        set(schemes) == {f"{value:04d}" for value in range(1, 11)},
+        "Scheme set drift",
+    )
     require(
         schemes["0004"] == "DISPUTED_TERRITORIES",
         "Disputed entities are not explicit",
@@ -127,18 +130,33 @@ def verify(
             rights[field] == "HUMAN_LEGAL_DECISION_REQUIRED",
             f"{field} was approved without Legal authority",
         )
-    require(rights["iso_codes_free_use_observed"] is True, "ISO code observation hidden")
+    require(
+        rights["iso_codes_free_use_observed"] is True,
+        "ISO code observation hidden",
+    )
     require(
         rights["iso_publications_and_collections_redistribution"]
         == "NOT_AUTHORISED_BY_THIS_CONTRACT",
         "ISO redistribution was overclaimed",
     )
-    require(rights["iso_or_other_standard_text_ingestion"] is False, "Standard text ingestion enabled")
-    require(rights["model_training_or_fine_tuning"] is False, "Training enabled")
+    require(
+        rights["iso_or_other_standard_text_ingestion"] is False,
+        "Standard text ingestion enabled",
+    )
+    require(
+        rights["model_training_or_fine_tuning"] is False,
+        "Training enabled",
+    )
 
     privacy = contract["privacy_boundary"]
-    require(privacy["personal_data_expected"] is False, "Personal data expectation drift")
-    require(privacy["contact_values_ingested"] is False, "Contact ingestion enabled")
+    require(
+        privacy["personal_data_expected"] is False,
+        "Personal data expectation drift",
+    )
+    require(
+        privacy["contact_values_ingested"] is False,
+        "Contact ingestion enabled",
+    )
     require(
         privacy["human_privacy_data_rights_decision_required"] is True,
         "Privacy authority bypassed",
@@ -148,7 +166,10 @@ def verify(
     require(campaign["request_budget"] == 4, "Campaign request budget drift")
     require(campaign["paid_budget_eur"] == 0, "Campaign paid budget drift")
     require(campaign["product_ingestion"] is False, "Product ingestion enabled")
-    require(campaign["public_redistribution"] is False, "Redistribution enabled")
+    require(
+        campaign["public_redistribution"] is False,
+        "Redistribution enabled",
+    )
     require(campaign["public_claims"] is False, "Public claims enabled")
     require(campaign["launch_transition"] is False, "Launch transition enabled")
 
