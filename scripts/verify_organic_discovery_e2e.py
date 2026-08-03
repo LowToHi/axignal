@@ -318,23 +318,26 @@ def main() -> None:
         "alert_confirmed_state": "ACTIVE",
         "alert_created_tenant": False,
         "alert_created_trial": False,
-        "identity_organisations_delta": 0,
-        "trial_grants_delta": 0,
-        "ai_citation_provider": "CHATGPT",
-        "ai_citation_surface": "SEARCH",
-        "direct_private_table_access": direct_table_access,
-        "append_only_indexability_decisions": append_only_decisions,
-        "append_only_ai_citations": append_only_citations,
-        "append_only_founder_audit": append_only_audit,
-        "browser_e2e_required": True,
-        "commercial_evidence": False,
-        "public_launch": "NO_GO",
-        "output": "AX_P26_ORGANIC_DISCOVERY_FOUNDER_ADMIN_E2E_PASS",
+        "identity_organisations_before": identity_organisations_before,
+        "identity_organisations_after": identity_organisations_after,
+        "trial_grants_before": trial_grants_before,
+        "trial_grants_after": trial_grants_after,
+        "direct_table_access": direct_table_access,
+        "append_only_decisions": append_only_decisions,
+        "append_only_citations": append_only_citations,
+        "append_only_audit": append_only_audit,
+        "citation_event_id": str(citation["citation_event_id"]),
+        "external_model_calls": 0,
+        "external_email_sends": 0,
     }
     EVIDENCE_DIR.mkdir(parents=True, exist_ok=True)
-    output = EVIDENCE_DIR / "p26-organic-discovery-founder-admin-e2e.json"
-    output.write_text(json.dumps(evidence, indent=2, sort_keys=True) + "\n")
+    evidence_path = EVIDENCE_DIR / "organic-discovery-e2e.json"
+    evidence_path.write_text(
+        json.dumps(evidence, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
     print(json.dumps(evidence, indent=2, sort_keys=True))
+    print("AX_P26_ORGANIC_DISCOVERY_FOUNDER_ADMIN_E2E_PASS")
 
 
 if __name__ == "__main__":
