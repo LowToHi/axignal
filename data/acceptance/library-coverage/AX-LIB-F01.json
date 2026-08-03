@@ -18,6 +18,15 @@
     "earliest_date": null,
     "latest_date": null,
     "status": "TECHNICAL_BASELINE_IN_PROGRESS",
+    "record_model": {
+      "catalogue_non_retired_entries": 375,
+      "category_xml_records": 378,
+      "retired_records": 3,
+      "canonical_skos_concepts": 345,
+      "non_retired_unique_authority_codes": 342,
+      "duplicate_historical_record_surplus": 33,
+      "authority_state": "TECHNICAL_EVIDENCE_PENDING_EXACT_HEAD_PASS"
+    },
     "evidence": [
       "data/acceptance/source-baselines/AX-LIB-F01-eu-countries-territories-baseline-contract.v0.1.json"
     ]
@@ -53,9 +62,23 @@
     "retention": "UNDECIDED",
     "redistribution": "UNDECIDED",
     "derived_data": "UNDECIDED",
+    "attribution": "REQUIRED_IF_AUTHORISED",
+    "source_and_version_disclosure": "REQUIRED_IF_AUTHORISED",
+    "no_distortion_or_misleading_attribution": "REQUIRED_IF_AUTHORISED",
+    "third_party_components": "EXCLUDED_UNLESS_SEPARATELY_AUTHORISED",
     "iso_and_other_standards_boundary": "EXPLICIT_REVIEW_REQUIRED",
     "evidence": [
       "data/acceptance/source-inventory/AX-LIB-F01-eu-countries-territories-candidate.v0.1.json",
+      "data/acceptance/source-baselines/AX-LIB-F01-eu-countries-territories-baseline-contract.v0.1.json"
+    ]
+  },
+  "privacy_data_rights": {
+    "status": "HUMAN_DECISION_REQUIRED",
+    "personal_data_expected": false,
+    "contact_values_ingested": false,
+    "profiling_or_marketing_use": false,
+    "decision": "MISSING",
+    "evidence": [
       "data/acceptance/source-baselines/AX-LIB-F01-eu-countries-territories-baseline-contract.v0.1.json"
     ]
   },
@@ -78,12 +101,16 @@
   "limitations": [
     "One official candidate source is inventoried but is not product-admitted.",
     "F01-A observed publication 20260318-0; F01-B records official version 20260617-0 as the technical baseline target without rewriting historical evidence.",
-    "The 375 concepts must be classified from retained official responses before any AXIGNAL subset is accepted.",
-    "Countries, territories, disputed entities, marine areas, special-status entities and historical concepts require explicit non-overlapping derived buckets while preserving official scheme memberships.",
+    "The catalogue count of 375 denotes non-retired entries, not 375 unique concepts.",
+    "The canonical category XML contains 378 records: 375 current or deprecated entries plus 3 retired records.",
+    "The 375 non-retired entries collapse to 342 unique authority codes because historical revisions create a surplus of 33 record instances.",
+    "Adding the 3 retired authority codes yields 345 canonical non-reserved SKOS concepts, matching both the versioned RDF distribution and the live SPARQL graph.",
+    "Entries and concepts must remain separately classified and content-addressed; collapsing historical records or inflating concept counts is prohibited.",
+    "Countries, territories, disputed entities, marine areas, special-status entities and historical records require explicit derived buckets while preserving official scheme memberships.",
     "The vocabulary does not represent an official EU position on the legal status or policy of listed entities.",
     "Dataset-specific reuse, retention, redistribution and derived-data rights require current human Legal authority.",
     "ISO country-code use does not authorise copying ISO publications, collections or standard text; those components remain excluded pending Legal review.",
-    "Privacy/Data Rights authority is required even though personal data and contact-value ingestion are not expected.",
+    "Privacy/Data Rights authority is required even though personal data, contact-value ingestion, profiling and marketing use are excluded.",
     "Coverage, six multilingual journeys, quality, lag, kill switch and rollback remain unaccepted.",
     "This library cannot contribute to a public global-coverage claim."
   ],
