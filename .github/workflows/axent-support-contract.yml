@@ -16,6 +16,7 @@ on:
       - 'infra/postgres/Dockerfile'
       - 'docs/contracts/31-axent-customer-support-e2e-contract-v1.0.md'
       - 'scripts/verify_axent_support_contract.py'
+      - 'scripts/verify_axent_postgres_roundtrip.py'
       - '.github/workflows/axent-support-contract.yml'
   workflow_dispatch:
 
@@ -41,8 +42,12 @@ jobs:
         run: python scripts/verify_axent_support_contract.py
       - name: Compile Axent modules
         run: python -m compileall -q apps/api/src/axignal_api/axent_*.py
-      - name: Lint Axent modules
-        run: ruff check apps/api/src/axignal_api/axent_*.py apps/api/tests/test_axent_*.py
+      - name: Lint Axent modules and tests
+        run: |
+          ruff check \
+            apps/api/src/axignal_api/axent_*.py \
+            apps/api/tests/test_axent_*.py \
+            scripts/verify_axent_postgres_roundtrip.py
       - name: Run focused Axent tests
         run: pytest -q apps/api/tests/test_axent_*.py
       - name: Verify no direct entitlement mutation
@@ -52,3 +57,37 @@ jobs:
         run: |
           pnpm install --frozen-lockfile
           pnpm --filter @axignal/web typecheck
+      - name: Start clean PostgreSQL authority
+        run: |
+          docker compose down -v --remove-orphans || true
+          docker compose up -d --build postgres
+          for attempt in $(seq 1 60); do
+            if docker compose exec -T postgres pg_isready -U axignal -d axignal; then
+              exit 0
+            fi
+            sleep 2
+          done
+          docker compose logs postgres
+          exit 1
+      - name: Execute real support round trip
+        env:
+          AXIGNAL_DATABASE_URL: postgresql://axignal:axignal@127.0.0.1:5432/axignal
+        run: python scripts/verify_axent_postgres_roundtrip.py create
+      - name: Restart PostgreSQL authority
+        run: |
+          docker compose restart postgres
+          for attempt in $(seq 1 60); do
+            if docker compose exec -T postgres pg_isready -U axignal -d axignal; then
+              exit 0
+            fi
+            sleep 2
+          done
+          docker compose logs postgres
+          exit 1
+      - name: Verify persistence from fresh process
+        env:
+          AXIGNAL_DATABASE_URL: postgresql://axignal:axignal@127.0.0.1:5432/axignal
+        run: python scripts/verify_axent_postgres_roundtrip.py verify
+      - name: Destroy PostgreSQL authority
+        if: always()
+        run: docker compose down -v --remove-orphans
