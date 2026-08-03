@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from hashlib import sha256
 from typing import Annotated, Any, Literal
 from uuid import UUID, uuid4
@@ -86,15 +87,40 @@ def _seat_summary(identity: AuthenticatedIdentity, database_url: str) -> dict[st
         return None
 
 
-def _capabilities(identity: AuthenticatedIdentity, entitlement: dict[str, Any] | None) -> list[str]:
+def _capabilities(
+    identity: AuthenticatedIdentity,
+    entitlement: dict[str, Any] | None,
+) -> list[str]:
     roles = set(identity.role_ids)
     state = str((entitlement or {}).get("state") or identity.seat_state or "READ_ONLY")
     capabilities = ["workspace:view", "audit:view"]
-    if state in {"ACTIVE", "TRIAL"}:
-        capabilities.extend(["research:create", "workspace:create", "document:create", "export:create"])
-    if roles.intersection({"ORGANISATION_OWNER", "ORGANISATION_ADMIN", "B2G_MANAGER", "RESEARCH_OPERATOR"}):
+    if state == "ACTIVE":
+        capabilities.extend(
+            ["research:create", "workspace:create", "document:create", "export:create"]
+        )
+    write_roles = {"ORG_OWNER", "ORG_ADMIN", "B2G_MANAGER", "RESEARCH_OPERATOR"}
+    if roles.intersection(write_roles):
         return capabilities
-    return [capability for capability in capabilities if capability in {"workspace:view", "audit:view"}]
+    return [
+        capability
+        for capability in capabilities
+        if capability in {"workspace:view", "audit:view"}
+    ]
+
+
+def _require_capability(
+    identity: AuthenticatedIdentity,
+    capability: str,
+) -> Settings:
+    settings = _settings()
+    assert settings.database_url is not None
+    entitlement = _entitlement(identity, settings.database_url)
+    if capability not in _capabilities(identity, entitlement):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"subscriber_capability_required:{capability}",
+        )
+    return settings
 
 
 @router.get("/bootstrap")
@@ -108,9 +134,7 @@ def bootstrap(identity: Authenticated) -> dict[str, Any]:
     return {
         "schema_version": "axignal.subscriber-live-workspace/v1",
         "state": "READY",
-        "generated_at": __import__("datetime").datetime.now(
-            __import__("datetime").UTC
-        ).isoformat(),
+        "generated_at": datetime.now(UTC).isoformat(),
         "identity": {
             "subject": identity.subject,
             "email": identity.email,
@@ -143,7 +167,7 @@ def create_research_run(
     identity: Authenticated,
     response: Response,
 ) -> dict[str, Any]:
-    settings = _settings()
+    settings = _require_capability(identity, "research:create")
     if not settings.ted_procurement_enabled:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -192,6 +216,7 @@ def create_research_run(
 
 @router.post("/workspaces", status_code=status.HTTP_201_CREATED)
 def create_workspace(command: WorkspaceCreate, identity: Authenticated) -> dict[str, Any]:
+    _require_capability(identity, "workspace:create")
     try:
         workspace = _repository().ensure_workspace(
             tenant_id=identity.tenant_id,
@@ -207,6 +232,7 @@ def create_workspace(command: WorkspaceCreate, identity: Authenticated) -> dict[
 
 @router.post("/documents", status_code=status.HTTP_201_CREATED)
 def create_document(command: DocumentCreate, identity: Authenticated) -> dict[str, Any]:
+    _require_capability(identity, "document:create")
     try:
         document = _repository().create_document(
             tenant_id=identity.tenant_id,
@@ -222,6 +248,7 @@ def create_document(command: DocumentCreate, identity: Authenticated) -> dict[st
 
 @router.post("/exports", status_code=status.HTTP_201_CREATED)
 def create_export(command: ExportCreate, identity: Authenticated) -> dict[str, Any]:
+    _require_capability(identity, "export:create")
     try:
         export = _repository().create_markdown_export(
             tenant_id=identity.tenant_id,
