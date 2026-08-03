@@ -248,7 +248,9 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
+
           evidence = json.loads(Path("artifacts/organic-discovery-e2e.json").read_text())
+          assert evidence["task"] == "AX-GE2E-P26-T01"
           assert evidence["status"] == "PASS"
           assert evidence["high_quality_candidate"] == "INDEX"
           assert evidence["synthetic_candidate"] == "NOINDEX"
@@ -259,16 +261,20 @@ jobs:
           assert evidence["alert_confirmed_state"] == "ACTIVE"
           assert evidence["alert_created_tenant"] is False
           assert evidence["alert_created_trial"] is False
-          assert evidence["identity_organisation_delta"] == 0
-          assert evidence["trial_grant_delta"] == 0
-          assert evidence["citation_recorded"] is True
-          assert evidence["direct_growth_table_access"] == "permission denied"
-          assert evidence["indexability_ledger"] == "append_only_relation"
-          assert evidence["citation_ledger"] == "append_only_relation"
-          assert evidence["founder_audit_ledger"] == "append_only_relation"
-          assert evidence["external_search_provider_calls"] == 0
-          assert evidence["model_calls"] == 0
-          assert evidence["public_indexing_authorised_by_ci"] is False
+          assert (
+              evidence["identity_organisations_after"]
+              - evidence["identity_organisations_before"]
+          ) == 0
+          assert evidence["trial_grants_after"] - evidence["trial_grants_before"] == 0
+          assert evidence["citation_event_id"]
+          assert evidence["direct_table_access"] == "permission denied"
+          assert evidence["append_only_decisions"] == "append_only_relation"
+          assert evidence["append_only_citations"] == "append_only_relation"
+          assert evidence["append_only_audit"] == "append_only_relation"
+          assert evidence["external_email_sends"] == 0
+          assert evidence["external_model_calls"] == 0
+          assert evidence["indexability_policy"] == "indexability-gate@1.0.0"
+          assert evidence["unauthorized_founder"] == "founder_admin_required"
           PY
 
       - name: Upload P26 evidence
