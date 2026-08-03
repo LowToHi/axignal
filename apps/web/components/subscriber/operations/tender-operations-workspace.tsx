@@ -15,7 +15,7 @@ import {
   SubmissionSection,
   TeamSection,
   WorkplanSection
-} from "./sections";
+} from "./sections-closure";
 import { tenderSections, type ActionType, type TenderOperationAction, type TenderOperationsWorkspaceProps, type TenderRouteState, type TenderSection } from "./types";
 
 const labels: Record<TenderSection, string> = {
