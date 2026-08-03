@@ -1,0 +1,294 @@
+name: F01 Rights Human Authority
+
+on:
+  workflow_dispatch:
+    inputs:
+      require_authorised:
+        description: Fail unless both current human decisions authorise the private campaign
+        required: true
+        type: boolean
+        default: false
+  issue_comment:
+    types: [created, edited]
+  pull_request:
+    paths:
+      - "apps/api/src/axignal_api/f01_rights_authority.py"
+      - "apps/api/tests/test_f01_rights_authority.py"
+      - "data/acceptance/approvals/AX-LIB-F01-rights-authority-manifest.v0.1.json"
+      - "data/acceptance/source-baselines/AX-LIB-F01-eu-countries-territories-baseline-contract.v0.1.json"
+      - "data/acceptance/library-coverage/AX-LIB-F01.json"
+      - "scripts/extract_gate7_f01_rights_authority.py"
+      - "scripts/sign_gate7_f01_rights_decision.py"
+      - "scripts/verify_gate7_f01_rights_authority_contract.py"
+      - "docs/runbooks/f01-rights-human-authority.md"
+      - ".github/workflows/f01-rights-authority.yml"
+  push:
+    branches:
+      - main
+      - "agent/**"
+    paths:
+      - "apps/api/src/axignal_api/f01_rights_authority.py"
+      - "apps/api/tests/test_f01_rights_authority.py"
+      - "data/acceptance/approvals/AX-LIB-F01-rights-authority-manifest.v0.1.json"
+      - "data/acceptance/source-baselines/AX-LIB-F01-eu-countries-territories-baseline-contract.v0.1.json"
+      - "data/acceptance/library-coverage/AX-LIB-F01.json"
+      - "scripts/extract_gate7_f01_rights_authority.py"
+      - "scripts/sign_gate7_f01_rights_decision.py"
+      - "scripts/verify_gate7_f01_rights_authority_contract.py"
+      - "docs/runbooks/f01-rights-human-authority.md"
+      - ".github/workflows/f01-rights-authority.yml"
+
+permissions:
+  contents: read
+  actions: read
+  issues: read
+
+concurrency:
+  group: f01-rights-authority-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  AXIGNAL_EXACT_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+  GH_TOKEN: ${{ github.token }}
+  MANIFEST_PATH: data/acceptance/approvals/AX-LIB-F01-rights-authority-manifest.v0.1.json
+  RESULT_DIR: artifacts/f01-rights-authority
+
+jobs:
+  rights-authority:
+    if: >-
+      github.event_name != 'issue_comment' ||
+      github.event.issue.number == 160 ||
+      github.event.issue.number == 161
+    name: Evaluate Legal and Privacy/Data Rights authority
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact evaluator head
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Freeze evaluator and technical target
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$AXIGNAL_EXACT_SHA"
+          mkdir -p "$RESULT_DIR"
+          target_head="$(jq -r '.target.head_sha' "$MANIFEST_PATH")"
+          target_tree="$(jq -r '.target.git_tree_sha' "$MANIFEST_PATH")"
+          test "$(git rev-parse "${target_head}^{tree}")" = "$target_tree"
+          git merge-base --is-ancestor "$target_head" HEAD
+          {
+            printf 'evaluator_head_sha=%s\n' "$(git rev-parse HEAD)"
+            printf 'evaluator_tree_sha=%s\n' "$(git rev-parse 'HEAD^{tree}')"
+            printf 'technical_head_sha=%s\n' "$target_head"
+            printf 'technical_tree_sha=%s\n' "$target_tree"
+          } | tee "$RESULT_DIR/exact-head.txt"
+
+      - name: Set up frozen Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.13.14"
+          check-latest: false
+
+      - name: Install frozen development graph
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade "pip==26.1.2"
+          python -m pip install \
+            --require-hashes \
+            --only-binary=:all: \
+            --requirement requirements/python-dev.lock
+          python -m pip check
+          python -m pip install --no-deps --no-build-isolation .
+
+      - name: Validate implementation and manifest contract
+        run: |
+          set -euo pipefail
+          python -m compileall -q \
+            apps/api/src/axignal_api/f01_rights_authority.py \
+            apps/api/tests/test_f01_rights_authority.py \
+            scripts/extract_gate7_f01_rights_authority.py \
+            scripts/sign_gate7_f01_rights_decision.py \
+            scripts/verify_gate7_f01_rights_authority_contract.py
+          python -m ruff check \
+            apps/api/src/axignal_api/f01_rights_authority.py \
+            apps/api/tests/test_f01_rights_authority.py \
+            scripts/extract_gate7_f01_rights_authority.py \
+            scripts/sign_gate7_f01_rights_decision.py \
+            scripts/verify_gate7_f01_rights_authority_contract.py
+          python -m pytest -q apps/api/tests/test_f01_rights_authority.py
+          python scripts/verify_gate7_f01_rights_authority_contract.py \
+            --output "$RESULT_DIR/contract-result.json"
+
+      - name: Verify retained F01 technical evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          artifact_id="$(jq -r '.official_evidence.artifact_id' "$MANIFEST_PATH")"
+          expected_artifact_digest="$(jq -r '.official_evidence.artifact_digest' "$MANIFEST_PATH")"
+          expected_baseline_digest="$(jq -r '.official_evidence.baseline_file_digest' "$MANIFEST_PATH")"
+          expected_result_digest="$(jq -r '.official_evidence.result_digest' "$MANIFEST_PATH")"
+          gh api \
+            -H 'Accept: application/vnd.github+json' \
+            "/repos/${GITHUB_REPOSITORY}/actions/artifacts/${artifact_id}" \
+            > "$RESULT_DIR/technical-artifact-metadata.json"
+          jq -e --arg digest "$expected_artifact_digest" \
+            '.expired == false and .digest == $digest' \
+            "$RESULT_DIR/technical-artifact-metadata.json"
+          gh api \
+            -H 'Accept: application/vnd.github+json' \
+            "/repos/${GITHUB_REPOSITORY}/actions/artifacts/${artifact_id}/zip" \
+            > /tmp/f01-technical-baseline.zip
+          mkdir -p "$RESULT_DIR/technical-baseline"
+          unzip -q /tmp/f01-technical-baseline.zip \
+            -d "$RESULT_DIR/technical-baseline"
+          baseline="$(find "$RESULT_DIR/technical-baseline" \
+            -name 'official-online-baseline.v0.2.json' -type f | head -n 1)"
+          result="$(find "$RESULT_DIR/technical-baseline" \
+            -name 'result.json' -type f | head -n 1)"
+          test -n "$baseline"
+          test -n "$result"
+          actual_baseline_digest="sha256:$(sha256sum "$baseline" | awk '{print $1}')"
+          actual_result_digest="sha256:$(sha256sum "$result" | awk '{print $1}')"
+          test "$actual_baseline_digest" = "$expected_baseline_digest"
+          test "$actual_result_digest" = "$expected_result_digest"
+          BASELINE_PATH="$baseline" RESULT_PATH="$result" python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          manifest = json.loads(Path(os.environ["MANIFEST_PATH"]).read_text())
+          baseline = json.loads(Path(os.environ["BASELINE_PATH"]).read_text())
+          result = json.loads(Path(os.environ["RESULT_PATH"]).read_text())
+          evidence = manifest["official_evidence"]
+          target = manifest["target"]
+          counts = baseline["baseline_payload"]["count_reconciliation"]
+          assert baseline["status"] == "PASS"
+          assert baseline["exact_head_sha"] == target["head_sha"]
+          assert baseline["baseline_payload_digest"] == evidence["baseline_payload_digest"]
+          assert baseline["evidence_expires_at"] == evidence["evidence_expires_at"]
+          assert counts == evidence["count_reconciliation"]
+          assert result["exact_head_sha"] == target["head_sha"]
+          assert result["technical_baseline"] == "PRESENT"
+          assert result["legal"] == "MISSING"
+          assert result["privacy_data_rights"] == "MISSING"
+          assert result["campaign_authorised"] is False
+          assert result["f01_state"] == "BLOCKED"
+          assert result["public_launch"] == "NO_GO"
+          boundary = baseline["baseline_payload"]["authority_boundary"]
+          assert boundary["product_admitted"] is False
+          assert boundary["active_source"] is False
+          assert boundary["f01_state"] == "BLOCKED"
+          assert boundary["public_launch"] == "NO_GO"
+          PY
+
+      - name: Fetch current human decision surfaces
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api --paginate \
+            -H 'Accept: application/vnd.github+json' \
+            "/repos/${GITHUB_REPOSITORY}/issues/160/comments?per_page=100" \
+            --slurp > "$RESULT_DIR/legal-comments-pages.json"
+          gh api --paginate \
+            -H 'Accept: application/vnd.github+json' \
+            "/repos/${GITHUB_REPOSITORY}/issues/161/comments?per_page=100" \
+            --slurp > "$RESULT_DIR/privacy-comments-pages.json"
+          jq '[.[][]]' "$RESULT_DIR/legal-comments-pages.json" \
+            > "$RESULT_DIR/legal-comments.json"
+          jq '[.[][]]' "$RESULT_DIR/privacy-comments-pages.json" \
+            > "$RESULT_DIR/privacy-comments.json"
+
+      - name: Evaluate current typed human authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=(
+            --manifest "$MANIFEST_PATH"
+            --legal-comments "$RESULT_DIR/legal-comments.json"
+            --privacy-comments "$RESULT_DIR/privacy-comments.json"
+            --output-dir "$RESULT_DIR/current"
+          )
+          if [ "${{ github.event_name }}" = 'workflow_dispatch' ] \
+            && [ "${{ inputs.require_authorised }}" = 'true' ]; then
+            args+=(--require-authorised)
+          fi
+          python scripts/extract_gate7_f01_rights_authority.py "${args[@]}" \
+            | tee "$RESULT_DIR/result.json"
+
+      - name: Enforce permanent authority boundary
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f "$RESULT_DIR/current/result.v0.1.json"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path("artifacts/f01-rights-authority/current/result.v0.1.json")
+          result = json.loads(path.read_text())
+          boundary = result["authority_boundary"]
+          assert boundary == {
+              "active_source": False,
+              "claim_decision": "DENIED",
+              "f01_state": "BLOCKED",
+              "gate7": "IN_PROGRESS",
+              "iso_publication_redistribution_authorised": False,
+              "iso_standard_text_ingestion_authorised": False,
+              "model_training_authorised": False,
+              "product_admitted": False,
+              "profiling_or_marketing_authorised": False,
+              "public_claims_authorised": False,
+              "public_launch": "NO_GO",
+              "public_redistribution_authorised": False,
+              "source_state": "CANDIDATE",
+          }
+          envelope = Path(
+              "artifacts/f01-rights-authority/current/"
+              "rights-authority-envelope.v0.1.json"
+          )
+          if result["campaign_authorised"]:
+              assert result["output"] == "F01_PRIVATE_CAMPAIGN_AUTHORISED"
+              assert result["legal"] == "APPROVED_CURRENT"
+              assert result["privacy_data_rights"] == "APPROVED_CURRENT"
+              assert result["technical_head_match"] is True
+              assert result["manifest_match"] is True
+              assert result["assertions_match"] is True
+              assert result["signatures_human"] is True
+              assert result["expiry_within_evidence"] is True
+              assert envelope.is_file()
+          else:
+              assert result["output"] == "F01_RIGHTS_AUTHORITY_BLOCKED"
+              assert not envelope.exists()
+          PY
+          ! grep -R -E \
+            'sk_(live|test)_|rk_(live|test)_|whsec_|BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY' \
+            "$RESULT_DIR"
+
+      - name: Publish authority status
+        if: always()
+        shell: bash
+        run: |
+          if [ -f "$RESULT_DIR/current/result.v0.1.json" ]; then
+            {
+              echo '## F01-B rights authority'
+              echo
+              echo '```json'
+              jq '{output, legal, privacy_data_rights, technical_head_match, manifest_match, assertions_match, signatures_human, expiry_within_evidence, campaign_authorised, effective_expiry}' \
+                "$RESULT_DIR/current/result.v0.1.json"
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload F01 rights authority evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: f01-rights-authority-${{ env.AXIGNAL_EXACT_SHA }}
+          path: artifacts/f01-rights-authority
+          if-no-files-found: error
+          retention-days: 30
