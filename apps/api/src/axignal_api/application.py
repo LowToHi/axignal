@@ -5,6 +5,7 @@ from axignal_api.axent_material_action_routes import (
     router as axent_material_action_router,
 )
 from axignal_api.axent_notification_routes import router as axent_notification_router
+from axignal_api.axent_read_routes import router as axent_read_router
 from axignal_api.axent_routes import router as axent_router
 from axignal_api.axent_telemetry_routes import admin_router as axent_metrics_router
 from axignal_api.axent_telemetry_routes import router as axent_telemetry_router
@@ -42,6 +43,7 @@ app.include_router(persistent_research_router)
 app.include_router(ted_research_router)
 app.include_router(subscriber_workspace_router)
 app.include_router(axent_router)
+app.include_router(axent_read_router)
 app.include_router(axent_consent_router)
 app.include_router(axent_action_router)
 app.include_router(axent_material_action_router)
