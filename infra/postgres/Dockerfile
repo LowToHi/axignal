@@ -41,3 +41,4 @@ COPY 149-axent-support-parent-keys.sql /docker-entrypoint-initdb.d/149-axignal-a
 COPY 150-axent-customer-support.sql /docker-entrypoint-initdb.d/150-axignal-axent-support.sql
 COPY 151-axent-support-hardening.sql /docker-entrypoint-initdb.d/151-axignal-axent-support-hardening.sql
 COPY 152-axent-governed-knowledge-seed.sql /docker-entrypoint-initdb.d/152-axignal-axent-knowledge.sql
+COPY 153-axent-consent-escalation-roundtrip.sql /docker-entrypoint-initdb.d/153-axignal-axent-consent-escalation.sql
