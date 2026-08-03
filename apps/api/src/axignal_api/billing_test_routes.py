@@ -21,6 +21,11 @@ TestAction = Literal[
     "COMPLETE_CHECKOUT",
     "CONFIRM_UPGRADE",
     "CONFIRM_CANCELLATION",
+    "RENEWAL",
+    "PAYMENT_FAILED",
+    "REACTIVATE",
+    "REPLAY_RENEWAL",
+    "OUT_OF_ORDER",
     "ROLLBACK",
 ]
 
@@ -72,6 +77,33 @@ def _subscription_object(
         "items": {"data": [{"id": item_id, "price": {"id": price_id}}]},
         "current_period_end": int((event_time + timedelta(days=30)).timestamp()),
         "cancel_at_period_end": cancel_at_period_end,
+    }
+
+
+def _invoice_object(
+    *,
+    selection_id: UUID,
+    subscription_id: str,
+    item_id: str,
+    price_id: str,
+    amount_minor: int,
+    event_time: datetime,
+) -> dict[str, object]:
+    return {
+        "id": f"in_test_axignal_{selection_id.hex}_{int(event_time.timestamp())}",
+        "object": "invoice",
+        "customer": f"cus_test_axignal_{selection_id.hex}",
+        "currency": "eur",
+        "amount_paid": amount_minor,
+        "amount_due": amount_minor,
+        "metadata": {"axignal_selection_id": str(selection_id)},
+        "parent": {
+            "subscription_details": {
+                "subscription": subscription_id,
+                "metadata": {"axignal_selection_id": str(selection_id)},
+            }
+        },
+        "lines": {"data": [{"id": item_id, "price": {"id": price_id}}]},
     }
 
 
@@ -265,6 +297,81 @@ async def deterministic_provider_event(
                 cancel_at_period_end=cancel_at_period_end,
                 event_time=event_time,
                 status_value=status_value,
+            ),
+        )
+        events.append(
+            await _deliver_signed_event(
+                payload=payload,
+                secret=settings.stripe_webhook_secret,
+            )
+        )
+    elif command.action in {
+        "RENEWAL",
+        "PAYMENT_FAILED",
+        "REACTIVATE",
+        "REPLAY_RENEWAL",
+    }:
+        if command.action == "PAYMENT_FAILED" and current["state"] != "ACTIVE":
+            raise HTTPException(status_code=409, detail="Active subscription required")
+        if command.action == "REACTIVATE" and current["state"] != "SUSPENDED":
+            raise HTTPException(status_code=409, detail="Suspended subscription required")
+        if command.action in {"RENEWAL", "REPLAY_RENEWAL"} and current["state"] != "ACTIVE":
+            raise HTTPException(status_code=409, detail="Active subscription required")
+        event_type = (
+            "invoice.payment_failed"
+            if command.action == "PAYMENT_FAILED"
+            else "invoice.paid"
+        )
+        plan_code = str(current["plan_code"])
+        amount_minor = 14900 if plan_code == "PROFESSIONAL_MONTHLY" else 39900
+        suffix = {
+            "RENEWAL": "renewal",
+            "PAYMENT_FAILED": "payment_failed",
+            "REACTIVATE": "reactivate",
+            "REPLAY_RENEWAL": "replay_renewal",
+        }[command.action]
+        payload = _event(
+            event_id=f"evt_test_{suffix}_{selection_id.hex}_{int(event_time.timestamp())}",
+            event_type=event_type,
+            created_at=event_time,
+            obj=_invoice_object(
+                selection_id=selection_id,
+                subscription_id=subscription_id,
+                item_id=item_id,
+                price_id=settings.price_for_plan(plan_code),
+                amount_minor=amount_minor,
+                event_time=event_time,
+            ),
+        )
+        events.append(
+            await _deliver_signed_event(
+                payload=payload,
+                secret=settings.stripe_webhook_secret,
+            )
+        )
+        if command.action == "REPLAY_RENEWAL":
+            events.append(
+                await _deliver_signed_event(
+                    payload=payload,
+                    secret=settings.stripe_webhook_secret,
+                )
+            )
+    elif command.action == "OUT_OF_ORDER":
+        previous = current.get("last_provider_event_created_at")
+        if not isinstance(previous, datetime):
+            raise HTTPException(status_code=409, detail="Provider history required")
+        stale_time = previous.astimezone(UTC) - timedelta(seconds=1)
+        payload = _event(
+            event_id=f"evt_test_stale_{selection_id.hex}_{int(now.timestamp())}",
+            event_type="customer.subscription.updated",
+            created_at=stale_time,
+            obj=_subscription_object(
+                selection_id=selection_id,
+                subscription_id=subscription_id,
+                item_id=item_id,
+                price_id=settings.price_for_plan(str(current["plan_code"])),
+                cancel_at_period_end=False,
+                event_time=stale_time,
             ),
         )
         events.append(
