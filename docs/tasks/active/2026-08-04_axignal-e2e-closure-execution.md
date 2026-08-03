@@ -1,16 +1,16 @@
-# AX-GE2E-CLOSE-C0-C17 — AXIGNAL global E2E closure execution
+# AX-GE2E-P08-T03 — Subscriber Shell closure under the AXIGNAL global E2E programme
 
 Goal ID: `AXIGNAL-GOAL-001`
 Governing authority: Contract `31`, ADR-016 and `AX-GE2E-CLOSURE-CONTRACT-001`
 Execution branch: `codex/axignal-e2e-contract-execution`
 Starting head: `50eda82e263f80dac8274f59bebbad4a8eade5bc`
-State: `ENGINEERING_IN_PROGRESS / CANONICAL_ACCEPTANCE_BLOCKED / NO_PUBLIC_LAUNCH`
+State: `IN_PROGRESS / CANONICAL_ACCEPTANCE_BLOCKED / NO_PUBLIC_LAUNCH`
 
 ## Objective
 
-Execute the complete AXIGNAL closure programme without reducing the contracted product, substituting fixtures for production authority, or treating partial engineering evidence as canonical acceptance.
+Close the authenticated subscriber Shell and Bid Workspace as the first bounded execution slice of the complete AXIGNAL closure programme, without reducing the contracted product, substituting fixtures for production authority, or treating partial engineering evidence as canonical acceptance.
 
-The authorised execution chain is:
+The superior execution chain remains:
 
 ```text
 C0 canonical reconciliation
@@ -35,7 +35,7 @@ C0 canonical reconciliation
 
 ## Current execution slice
 
-Active slice: `C0–C1`.
+Active slice: `C0–C1`, represented as typed task `AX-GE2E-P08-T03` because the active typed-task schema governs P00–P24 task identifiers.
 
 Implemented on this branch:
 
@@ -43,28 +43,37 @@ Implemented on this branch:
 - `Continue review` is explicitly non-mutating and cannot be mapped to `pursue`;
 - a decision requires explicit `pursue` or `do_not_pursue` plus a rationale;
 - `document.create`, `approval.record` and `export.create` no longer appear as operationally available actions;
+- the BFF rejects requirement completion without linked verified evidence;
+- the BFF rejects submission preparation with blockers, pending amendments or missing commercial approval;
+- the BFF rejects submission approval without a ready preflight;
+- AXENT visibly discloses deterministic fallback mode and emits a response-mode header;
+- synthetic Intelligence projections are withheld in real-adapter mode instead of being presented as live data;
 - Playwright launches the subscriber candidate with explicit non-production fixture authority;
 - critical browser tests use zero retries;
 - web and landing security-boundary implementations are identical again;
-- browser tests cover the new fail-closed UI boundaries.
+- browser tests cover authority, degraded-mode and server-precondition boundaries.
 
-## C1 blockers still open
+## C1 blockers and disposition
 
 ```text
-AX-SW-BLK-001 exact-head CI matrix is not yet proven green on this head
-AX-SW-BLK-004 operational synthetic data remains mixed into client transforms
-AX-SW-BLK-005 Navigator does not yet execute the complete persistent ResearchRun journey
-AX-SW-BLK-006 server does not yet enforce evidence sufficiency before requirement met
-AX-SW-BLK-007 submission readiness enforcement remains incomplete on the server
-AX-SW-BLK-008 audit events remain too generic for several action types
-AX-SW-BLK-009 deadlines_next_30_days is still calculated incorrectly
-AX-SW-BLK-010 AXENT history remains localStorage-only without final retention contract
-AX-SW-BLK-011 assistant degraded mode requires stronger visible provenance
-AX-SW-BLK-012 six-locale functional parity remains incomplete
-AX-SW-BLK-013 formal accessibility acceptance remains missing
-AX-SW-BLK-014 global desktop/tablet/mobile exact-head evidence remains pending
-AX-SW-BLK-015 real adapter and real-data journey remain unproven
+AX-SW-BLK-001 exact-head CI matrix                      OPEN
+AX-SW-BLK-002 unsupported enabled actions               FIXED_BY_FAIL_CLOSED_UI
+AX-SW-BLK-003 continue_review mapped to pursue           FIXED
+AX-SW-BLK-004 synthetic operational data                 PARTIAL_FIX
+AX-SW-BLK-005 Navigator persistent ResearchRun           OPEN
+AX-SW-BLK-006 evidence sufficiency enforcement           PARTIAL_FIX_AT_BFF
+AX-SW-BLK-007 submission readiness enforcement           PARTIAL_FIX_AT_BFF
+AX-SW-BLK-008 precise audit events                       OPEN
+AX-SW-BLK-009 deadlines_next_30_days calculation         OPEN
+AX-SW-BLK-010 AXENT retention/persistence contract       OPEN
+AX-SW-BLK-011 assistant degraded-mode provenance         FIXED_FOR_CURRENT_BFF
+AX-SW-BLK-012 six-locale functional parity               OPEN
+AX-SW-BLK-013 formal accessibility acceptance            OPEN
+AX-SW-BLK-014 global desktop/tablet/mobile evidence      OPEN
+AX-SW-BLK-015 real adapter and real-data journey         OPEN
 ```
+
+`PARTIAL_FIX_AT_BFF` does not close the persistent upstream contract. Equivalent enforcement, audit and reconciliation must exist in the authoritative service.
 
 ## Non-negotiable execution rules
 
@@ -97,25 +106,24 @@ exact-head evidence bundle
 ## Current disposition
 
 ```text
-C0  IN_PROGRESS
-C1  IN_PROGRESS
-C2  BLOCKED_BY_C0_C1
-C3  BLOCKED_BY_C0_C2
-C4  BLOCKED_BY_C2_C3
-C5  BLOCKED_BY_C3_C4
-C6  BLOCKED_BY_RIGHTS_AND_FOUNDATIONS
-C7  BLOCKED_BY_C3_C5_C6
-C8  BLOCKED_BY_SHARED_CONTRACTS_AND_LIBRARY_GATES
-C9  BLOCKED_BY_C8
-C10 BLOCKED_BY_C9
-C11 BLOCKED_BY_C10
-C12 BLOCKED_BY_C11_AND_P26_DEPENDENCIES
-C13 BLOCKED_BY_INTEGRATED_HEAD
-C14 BLOCKED_BY_FUNCTIONAL_COMPLETENESS
-C15 BLOCKED_BY_C13_C14
-C16 BLOCKED_BY_FINISHED_PRIVATE_ACCEPTANCE_PRODUCT
-C17 NOT_STARTED
-PUBLIC_LAUNCH NO_GO
+P08-T03 / C0-C1  IN_PROGRESS
+C2               BLOCKED_BY_C0_C1
+C3               BLOCKED_BY_C0_C2
+C4               BLOCKED_BY_C2_C3
+C5               BLOCKED_BY_C3_C4
+C6               BLOCKED_BY_RIGHTS_AND_FOUNDATIONS
+C7               BLOCKED_BY_C3_C5_C6
+C8               BLOCKED_BY_SHARED_CONTRACTS_AND_LIBRARY_GATES
+C9               BLOCKED_BY_C8
+C10              BLOCKED_BY_C9
+C11              BLOCKED_BY_C10
+C12              BLOCKED_BY_C11_AND_P26_DEPENDENCIES
+C13              BLOCKED_BY_INTEGRATED_HEAD
+C14              BLOCKED_BY_FUNCTIONAL_COMPLETENESS
+C15              BLOCKED_BY_C13_C14
+C16              BLOCKED_BY_FINISHED_PRIVATE_ACCEPTANCE_PRODUCT
+C17 / P27        NOT_STARTED
+PUBLIC_LAUNCH    NO_GO
 ```
 
 ## Allowed markers
