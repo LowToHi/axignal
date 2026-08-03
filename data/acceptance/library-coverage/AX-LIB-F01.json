@@ -17,27 +17,27 @@
   "historical_depth": {
     "earliest_date": null,
     "latest_date": null,
-    "status": "TECHNICAL_BASELINE_IN_PROGRESS",
-    "record_model": {
-      "catalogue_non_retired_entries": 375,
-      "category_xml_records": 378,
-      "retired_records": 3,
-      "canonical_skos_concepts": 345,
-      "non_retired_unique_authority_codes": 342,
-      "duplicate_historical_record_surplus": 33,
-      "authority_state": "TECHNICAL_EVIDENCE_PENDING_EXACT_HEAD_PASS"
-    },
+    "status": "MISSING",
     "evidence": [
-      "data/acceptance/source-baselines/AX-LIB-F01-eu-countries-territories-baseline-contract.v0.1.json"
+      {
+        "kind": "SOURCE_SNAPSHOT",
+        "reference": "data/acceptance/source-baselines/AX-LIB-F01-eu-countries-territories-baseline-contract.v0.1.json",
+        "sha256": "29abbb31ecbfc040438c02f107362303d2eacd677cce5867d06e548228941edb",
+        "expires_at": "2026-08-31T23:59:59Z"
+      }
     ]
   },
   "update_frequency": {
     "declared": "REGULAR_UPDATES_FORESEEN",
-    "observed": "CANDIDATE_20260318-0_TO_OFFICIAL_20260617-0",
-    "status": "VERSION_DRIFT_RECORDED_BASELINE_PENDING",
+    "observed": "20260318-0_TO_20260617-0",
+    "status": "MISSING",
     "evidence": [
-      "data/acceptance/source-inventory/AX-LIB-F01-eu-countries-territories-candidate.v0.1.json",
-      "data/acceptance/source-baselines/AX-LIB-F01-eu-countries-territories-baseline-contract.v0.1.json"
+      {
+        "kind": "SOURCE_SNAPSHOT",
+        "reference": "data/acceptance/source-baselines/AX-LIB-F01-eu-countries-territories-baseline-contract.v0.1.json",
+        "sha256": "29abbb31ecbfc040438c02f107362303d2eacd677cce5867d06e548228941edb",
+        "expires_at": "2026-08-31T23:59:59Z"
+      }
     ]
   },
   "sources": {
@@ -47,39 +47,36 @@
       {
         "source_id": "src_eu_vocab_countries_territories",
         "name": "EU Vocabularies — Countries and territories",
-        "authority": "Eurostat / Publications Office of the European Union",
         "state": "CANDIDATE",
-        "inventory": "data/acceptance/source-inventory/AX-LIB-F01-eu-countries-territories-candidate.v0.1.json",
-        "baseline_contract": "data/acceptance/source-baselines/AX-LIB-F01-eu-countries-territories-baseline-contract.v0.1.json",
-        "product_admitted": false,
-        "claim_contribution": false
+        "admission": {
+          "technical": "PASS",
+          "legal": "MISSING",
+          "rights": "MISSING",
+          "quality": "MISSING",
+          "human_authority": "MISSING"
+        },
+        "rights_expiry": null,
+        "contributes_to_public_claim": false,
+        "evidence": [
+          {
+            "kind": "SOURCE_SNAPSHOT",
+            "reference": "data/acceptance/source-baselines/AX-LIB-F01-eu-countries-territories-baseline-contract.v0.1.json",
+            "sha256": "29abbb31ecbfc040438c02f107362303d2eacd677cce5867d06e548228941edb",
+            "expires_at": "2026-08-31T23:59:59Z"
+          }
+        ]
       }
     ]
   },
   "rights": {
-    "status": "HUMAN_LEGAL_DECISION_REQUIRED",
-    "reuse": "UNDECIDED",
-    "retention": "UNDECIDED",
-    "redistribution": "UNDECIDED",
-    "derived_data": "UNDECIDED",
-    "attribution": "REQUIRED_IF_AUTHORISED",
-    "source_and_version_disclosure": "REQUIRED_IF_AUTHORISED",
-    "no_distortion_or_misleading_attribution": "REQUIRED_IF_AUTHORISED",
-    "third_party_components": "EXCLUDED_UNLESS_SEPARATELY_AUTHORISED",
-    "iso_and_other_standards_boundary": "EXPLICIT_REVIEW_REQUIRED",
+    "status": "MISSING",
     "evidence": [
-      "data/acceptance/source-inventory/AX-LIB-F01-eu-countries-territories-candidate.v0.1.json",
-      "data/acceptance/source-baselines/AX-LIB-F01-eu-countries-territories-baseline-contract.v0.1.json"
-    ]
-  },
-  "privacy_data_rights": {
-    "status": "HUMAN_DECISION_REQUIRED",
-    "personal_data_expected": false,
-    "contact_values_ingested": false,
-    "profiling_or_marketing_use": false,
-    "decision": "MISSING",
-    "evidence": [
-      "data/acceptance/source-baselines/AX-LIB-F01-eu-countries-territories-baseline-contract.v0.1.json"
+      {
+        "kind": "SOURCE_SNAPSHOT",
+        "reference": "data/acceptance/source-baselines/AX-LIB-F01-eu-countries-territories-baseline-contract.v0.1.json",
+        "sha256": "29abbb31ecbfc040438c02f107362303d2eacd677cce5867d06e548228941edb",
+        "expires_at": "2026-08-31T23:59:59Z"
+      }
     ]
   },
   "quality": {
@@ -99,20 +96,22 @@
   },
   "reviews": [],
   "limitations": [
-    "One official candidate source is inventoried but is not product-admitted.",
-    "F01-A observed publication 20260318-0; F01-B records official version 20260617-0 as the technical baseline target without rewriting historical evidence.",
+    "One official candidate source is inventoried and technically baselined but is not product-admitted or active.",
+    "F01-A observed publication 20260318-0; F01-B froze official publication 20260617-0 without rewriting the historical F01-A evidence.",
     "The catalogue count of 375 denotes non-retired entries, not 375 unique concepts.",
     "The canonical category XML contains 378 records: 375 current or deprecated entries plus 3 retired records.",
     "The 375 non-retired entries collapse to 342 unique authority codes because historical revisions create a surplus of 33 record instances.",
-    "Adding the 3 retired authority codes yields 345 canonical non-reserved SKOS concepts, matching both the versioned RDF distribution and the live SPARQL graph.",
-    "Entries and concepts must remain separately classified and content-addressed; collapsing historical records or inflating concept counts is prohibited.",
-    "Countries, territories, disputed entities, marine areas, special-status entities and historical records require explicit derived buckets while preserving official scheme memberships.",
+    "Adding the 3 retired authority codes yields 345 canonical non-reserved SKOS concepts; versioned RDF and live SPARQL match exactly.",
+    "The RDF distribution contains 11 concept schemes including the root scheme and ten official subset schemes.",
+    "Entries and concepts remain separately classified and content-addressed; collapsing historical records or inflating concept counts is prohibited.",
+    "Countries, territories, disputed entities, marine areas, special-status entities and historical records have explicit derived buckets while official scheme memberships are preserved.",
     "The vocabulary does not represent an official EU position on the legal status or policy of listed entities.",
-    "Dataset-specific reuse, retention, redistribution and derived-data rights require current human Legal authority.",
-    "ISO country-code use does not authorise copying ISO publications, collections or standard text; those components remain excluded pending Legal review.",
-    "Privacy/Data Rights authority is required even though personal data, contact-value ingestion, profiling and marketing use are excluded.",
+    "Reuse, retention, redistribution and derived-data rights remain MISSING until a current human Legal decision passes.",
+    "ISO country-code use does not authorise copying ISO publications, collections or standard text; those components remain excluded.",
+    "Privacy/Data Rights authority remains MISSING even though personal data, contact-value ingestion, profiling and marketing use are excluded by contract.",
+    "The frozen technical campaign budget is six requests, zero retries, concurrency one, zero euros and 30-day evidence retention.",
     "Coverage, six multilingual journeys, quality, lag, kill switch and rollback remain unaccepted.",
-    "This library cannot contribute to a public global-coverage claim."
+    "This library cannot contribute to a public global-coverage or multilingual claim."
   ],
   "synthetic_data": {
     "present": false,
