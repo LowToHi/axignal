@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from hashlib import sha256
 from typing import Any
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from psycopg.types.json import Jsonb
 
@@ -23,17 +23,29 @@ class AxentRepository(ResearchRepository):
             cursor.execute(
                 """
                 INSERT INTO tenant_private.support_conversations (
-                  tenant_id, workspace_id, research_run_id, opened_by_subject, language
+                  tenant_id, workspace_id, research_run_id,
+                  opened_by_subject, language
                 ) VALUES (%s, %s, %s, %s, %s)
                 RETURNING *
                 """,
-                (tenant_id, workspace_id, research_run_id, opened_by_subject, language),
+                (
+                    tenant_id,
+                    workspace_id,
+                    research_run_id,
+                    opened_by_subject,
+                    language,
+                ),
             )
             row = cursor.fetchone()
             assert row is not None
             return row
 
-    def get_conversation(self, *, tenant_id: UUID, conversation_id: UUID) -> dict[str, Any] | None:
+    def get_conversation(
+        self,
+        *,
+        tenant_id: UUID,
+        conversation_id: UUID,
+    ) -> dict[str, Any] | None:
         with self._cursor(role="axignal_app", tenant_id=tenant_id) as cursor:
             cursor.execute(
                 """
@@ -79,8 +91,8 @@ class AxentRepository(ResearchRepository):
             cursor.execute(
                 """
                 INSERT INTO tenant_private.support_messages (
-                  tenant_id, conversation_id, author_type, author_subject, content,
-                  model_id, prompt_policy_version
+                  tenant_id, conversation_id, author_type, author_subject,
+                  content, model_id, prompt_policy_version
                 ) VALUES (%s, %s, %s, %s, %s, %s, %s)
                 RETURNING *
                 """,
@@ -102,7 +114,12 @@ class AxentRepository(ResearchRepository):
                 SET last_message_at = %s, updated_at = %s
                 WHERE tenant_id = %s AND conversation_id = %s
                 """,
-                (message["created_at"], message["created_at"], tenant_id, conversation_id),
+                (
+                    message["created_at"],
+                    message["created_at"],
+                    tenant_id,
+                    conversation_id,
+                ),
             )
             return message
 
@@ -126,7 +143,14 @@ class AxentRepository(ResearchRepository):
                 ) VALUES (%s, %s, %s, %s, %s, %s)
                 RETURNING *
                 """,
-                (tenant_id, message_id, authority_type, authority_id, authority_version, digest),
+                (
+                    tenant_id,
+                    message_id,
+                    authority_type,
+                    authority_id,
+                    authority_version,
+                    digest,
+                ),
             )
             row = cursor.fetchone()
             assert row is not None
@@ -151,7 +175,14 @@ class AxentRepository(ResearchRepository):
                 ) VALUES (%s, %s, %s, %s, %s, %s)
                 RETURNING *
                 """,
-                (tenant_id, conversation_id, case_type, severity, service_area, customer_impact),
+                (
+                    tenant_id,
+                    conversation_id,
+                    case_type,
+                    severity,
+                    service_area,
+                    customer_impact,
+                ),
             )
             case = cursor.fetchone()
             assert case is not None
@@ -180,7 +211,8 @@ class AxentRepository(ResearchRepository):
         idempotency_key: str | None,
         correlation_id: str,
     ) -> dict[str, Any]:
-        input_hash = f"sha256:{sha256(repr(sorted(input_payload.items())).encode('utf-8')).hexdigest()}"
+        serialized_input = repr(sorted(input_payload.items())).encode("utf-8")
+        input_hash = f"sha256:{sha256(serialized_input).hexdigest()}"
         with self._cursor(role="axignal_app", tenant_id=tenant_id) as cursor:
             cursor.execute(
                 """
@@ -189,9 +221,12 @@ class AxentRepository(ResearchRepository):
                   requested_by_subject, input_redacted, input_hash, decision,
                   decision_reason, result_status, result_redacted,
                   idempotency_key, correlation_id, finished_at
-                ) VALUES (%s, %s, %s, 'v1', %s, %s, %s, %s, %s, %s, %s, %s, %s, now())
+                ) VALUES (
+                  %s, %s, %s, 'v1', %s, %s, %s, %s,
+                  %s, %s, %s, %s, %s, now()
+                )
                 ON CONFLICT (tenant_id, tool_name, idempotency_key)
-                DO UPDATE SET idempotency_key = EXCLUDED.idempotency_key
+                DO NOTHING
                 RETURNING *
                 """,
                 (
@@ -210,5 +245,18 @@ class AxentRepository(ResearchRepository):
                 ),
             )
             row = cursor.fetchone()
-            assert row is not None
-            return row
+            if row is not None:
+                return row
+            cursor.execute(
+                """
+                SELECT *
+                FROM tenant_private.support_tool_invocations
+                WHERE tenant_id = %s
+                  AND tool_name = %s
+                  AND idempotency_key = %s
+                """,
+                (tenant_id, tool_name, idempotency_key),
+            )
+            existing = cursor.fetchone()
+            assert existing is not None
+            return existing
