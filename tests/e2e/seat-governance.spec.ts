@@ -29,6 +29,16 @@ async function expectPersistentWorkspace(page: Page) {
   await expect(page.locator('main[data-adapter="persistent-real"]')).toBeVisible();
 }
 
+async function expectAuthenticatedCommercialState(page: Page) {
+  await expect(
+    page.getByRole("button", { name: "PLAN · Sin plan", exact: true })
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Persistent opportunity intelligence" })
+  ).not.toBeVisible();
+  await expect(page.locator('main[data-adapter="persistent-real"]')).not.toBeVisible();
+}
+
 async function loginWithPasskey(page: Page, context: BrowserContext) {
   await page.setExtraHTTPHeaders({
     origin: "http://localhost:18080",
@@ -92,7 +102,7 @@ async function loginWithPasskey(page: Page, context: BrowserContext) {
   const codes = await recovery.locator("pre").innerText();
   expect(codes.split("\n")).toHaveLength(8);
   await recovery.getByRole("button", { name: "He guardado los códigos" }).click();
-  await expectPersistentWorkspace(page);
+  await expectAuthenticatedCommercialState(page);
 
   const credentials = await cdp.send("WebAuthn.getCredentials", {
     authenticatorId: authenticator.authenticatorId
