@@ -1,13 +1,116 @@
 import { NextResponse } from "next/server";
 
+import type {
+  SubscriberWorkspaceActionType,
+  SubscriberWorkspaceBootstrap
+} from "@/lib/subscriber-workspace-contract";
 import {
   subscriberWorkspaceActionResult,
+  subscriberWorkspaceBootstrapResult,
   subscriberWorkspaceEnabled
 } from "@/lib/subscriber-workspace-server";
 
 export const dynamic = "force-dynamic";
 
 const MAX_ACTION_BYTES = 256 * 1024;
+const GUARDED_ACTIONS = new Set<SubscriberWorkspaceActionType>([
+  "requirement.update",
+  "submission.prepare",
+  "submission.approve"
+]);
+
+function rejected(error: string, code: "invalid_request" | "state_conflict", status: 400 | 409) {
+  return NextResponse.json(
+    {
+      error,
+      code,
+      state: "rejected",
+      recoverable: false
+    },
+    { status, headers: { "cache-control": "no-store" } }
+  );
+}
+
+function recordValue(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : null;
+}
+
+async function enforceServerPreconditions(input: unknown): Promise<NextResponse | null> {
+  const action = recordValue(input);
+  if (!action || typeof action.action_type !== "string" || !GUARDED_ACTIONS.has(action.action_type as SubscriberWorkspaceActionType)) {
+    return null;
+  }
+  const payload = recordValue(action.payload);
+  if (!payload || typeof payload.workspace_id !== "string") {
+    return rejected("A workspace-scoped action requires workspace_id.", "invalid_request", 400);
+  }
+
+  const bootstrapResult = await subscriberWorkspaceBootstrapResult();
+  if (bootstrapResult.status < 200 || bootstrapResult.status >= 300) {
+    return NextResponse.json(bootstrapResult.body, {
+      status: bootstrapResult.status,
+      headers: { "cache-control": "no-store" }
+    });
+  }
+  const bootstrap = bootstrapResult.body as SubscriberWorkspaceBootstrap;
+  const workspace = bootstrap.route_data.workspaces.find((item) => item.id === payload.workspace_id);
+  if (!workspace) {
+    return rejected("Subscriber workspace not found.", "state_conflict", 409);
+  }
+
+  if (action.action_type === "requirement.update" && payload.status === "met") {
+    if (typeof payload.requirement_id !== "string") {
+      return rejected("requirement_id is required.", "invalid_request", 400);
+    }
+    const requirement = workspace.requirements.find((item) => item.id === payload.requirement_id);
+    if (!requirement) {
+      return rejected("Requirement not found.", "state_conflict", 409);
+    }
+    const verifiedEvidence = workspace.evidence.some(
+      (item) => requirement.evidence_ids.includes(item.id) && item.status === "verified"
+    );
+    if (!verifiedEvidence) {
+      return rejected(
+        "A requirement cannot be marked met without linked verified evidence.",
+        "state_conflict",
+        409
+      );
+    }
+  }
+
+  if (action.action_type === "submission.prepare") {
+    const blockingRequirement = workspace.requirements.some(
+      (item) => item.blocking && !["met", "not_applicable"].includes(item.status)
+    );
+    const unacknowledgedAmendment = workspace.amendments.some((item) => !item.acknowledged);
+    if (blockingRequirement || unacknowledgedAmendment) {
+      return rejected(
+        "Submission preparation is blocked until mandatory requirements and amendments are revalidated.",
+        "state_conflict",
+        409
+      );
+    }
+    if (!workspace.commercial.approved_by) {
+      return rejected(
+        "Submission preparation requires an approved commercial baseline.",
+        "state_conflict",
+        409
+      );
+    }
+  }
+
+  if (action.action_type === "submission.approve" && workspace.submission.preflight_status !== "ready") {
+    return rejected(
+      "Submission approval requires a completed ready preflight.",
+      "state_conflict",
+      409
+    );
+  }
+
+  return null;
+}
 
 export async function POST(request: Request) {
   if (!subscriberWorkspaceEnabled()) {
@@ -62,6 +165,9 @@ export async function POST(request: Request) {
       { status: 400, headers: { "cache-control": "no-store" } }
     );
   }
+
+  const preconditionFailure = await enforceServerPreconditions(input);
+  if (preconditionFailure) return preconditionFailure;
 
   const result = await subscriberWorkspaceActionResult(input);
   return NextResponse.json(result.body, {
