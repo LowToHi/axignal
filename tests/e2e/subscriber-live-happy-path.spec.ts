@@ -182,7 +182,12 @@ test("executes the no-fixture subscriber happy path", async ({ page, context }) 
       )
     ).toBeVisible({ timeout: 20_000 });
     await expect(page.getByText(question, { exact: true }).first()).toBeVisible();
-    await expect(page.getByText("Pursuit note", { exact: true })).toBeVisible();
+    const persistedOperations = page.getByRole("region", {
+      name: "Persistent workspace, document and export"
+    });
+    await expect(
+      persistedOperations.getByRole("strong").filter({ hasText: /^Pursuit note$/ })
+    ).toBeVisible();
     await expect(page.getByText("EXPORT_CREATED", { exact: true })).toBeVisible();
   } finally {
     await passkey.cdp.send("WebAuthn.removeVirtualAuthenticator", {
