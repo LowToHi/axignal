@@ -14,12 +14,22 @@
     {"language": "it", "ingestion": "MISSING", "normalisation": "MISSING", "search": "MISSING", "presentation": "MISSING", "evidence": []}
   ],
   "sectors": [],
-  "historical_depth": {"earliest_date": null, "latest_date": null, "status": "MISSING", "evidence": []},
+  "historical_depth": {
+    "earliest_date": null,
+    "latest_date": null,
+    "status": "TECHNICAL_BASELINE_IN_PROGRESS",
+    "evidence": [
+      "data/acceptance/source-baselines/AX-LIB-F01-eu-countries-territories-baseline-contract.v0.1.json"
+    ]
+  },
   "update_frequency": {
     "declared": "REGULAR_UPDATES_FORESEEN",
-    "observed": null,
-    "status": "CANDIDATE_DECLARATION_ONLY",
-    "evidence": ["data/acceptance/source-inventory/AX-LIB-F01-eu-countries-territories-candidate.v0.1.json"]
+    "observed": "CANDIDATE_20260318-0_TO_OFFICIAL_20260617-0",
+    "status": "VERSION_DRIFT_RECORDED_BASELINE_PENDING",
+    "evidence": [
+      "data/acceptance/source-inventory/AX-LIB-F01-eu-countries-territories-candidate.v0.1.json",
+      "data/acceptance/source-baselines/AX-LIB-F01-eu-countries-territories-baseline-contract.v0.1.json"
+    ]
   },
   "sources": {
     "active": [],
@@ -31,27 +41,58 @@
         "authority": "Eurostat / Publications Office of the European Union",
         "state": "CANDIDATE",
         "inventory": "data/acceptance/source-inventory/AX-LIB-F01-eu-countries-territories-candidate.v0.1.json",
+        "baseline_contract": "data/acceptance/source-baselines/AX-LIB-F01-eu-countries-territories-baseline-contract.v0.1.json",
         "product_admitted": false,
         "claim_contribution": false
       }
     ]
   },
   "rights": {
-    "status": "REVIEW_REQUIRED",
-    "evidence": ["data/acceptance/source-inventory/AX-LIB-F01-eu-countries-territories-candidate.v0.1.json"]
+    "status": "HUMAN_LEGAL_DECISION_REQUIRED",
+    "reuse": "UNDECIDED",
+    "retention": "UNDECIDED",
+    "redistribution": "UNDECIDED",
+    "derived_data": "UNDECIDED",
+    "iso_and_other_standards_boundary": "EXPLICIT_REVIEW_REQUIRED",
+    "evidence": [
+      "data/acceptance/source-inventory/AX-LIB-F01-eu-countries-territories-candidate.v0.1.json",
+      "data/acceptance/source-baselines/AX-LIB-F01-eu-countries-territories-baseline-contract.v0.1.json"
+    ]
   },
-  "quality": {"status": "MISSING", "completeness": null, "accuracy": null, "freshness": null, "duplicate_rate": null, "evidence": []},
-  "lag": {"status": "MISSING", "p50_seconds": null, "p95_seconds": null, "max_seconds": null, "evidence": []},
+  "quality": {
+    "status": "MISSING",
+    "completeness": null,
+    "accuracy": null,
+    "freshness": null,
+    "duplicate_rate": null,
+    "evidence": []
+  },
+  "lag": {
+    "status": "MISSING",
+    "p50_seconds": null,
+    "p95_seconds": null,
+    "max_seconds": null,
+    "evidence": []
+  },
   "reviews": [],
   "limitations": [
-    "One official candidate source has been inventoried but is not product-admitted.",
-    "The candidate includes current, deprecated, disputed, maritime and special-status entities; no AXIGNAL business subset is approved.",
+    "One official candidate source is inventoried but is not product-admitted.",
+    "F01-A observed publication 20260318-0; F01-B records official version 20260617-0 as the technical baseline target without rewriting historical evidence.",
+    "The 375 concepts must be classified from retained official responses before any AXIGNAL subset is accepted.",
+    "Countries, territories, disputed entities, marine areas, special-status entities and historical concepts require explicit non-overlapping derived buckets while preserving official scheme memberships.",
     "The vocabulary does not represent an official EU position on the legal status or policy of listed entities.",
-    "Specific dataset reuse, derived-data, redistribution and retention rights remain under review.",
+    "Dataset-specific reuse, retention, redistribution and derived-data rights require current human Legal authority.",
+    "ISO country-code use does not authorise copying ISO publications, collections or standard text; those components remain excluded pending Legal review.",
+    "Privacy/Data Rights authority is required even though personal data and contact-value ingestion are not expected.",
     "Coverage, six multilingual journeys, quality, lag, kill switch and rollback remain unaccepted.",
     "This library cannot contribute to a public global-coverage claim."
   ],
-  "synthetic_data": {"present": false, "disclosed": true, "contributes_to_public_claim": false, "evidence": []},
+  "synthetic_data": {
+    "present": false,
+    "disclosed": true,
+    "contributes_to_public_claim": false,
+    "evidence": []
+  },
   "kill_switch": {"implemented": false, "tested": false, "evidence": []},
   "rollback": {"implemented": false, "tested": false, "evidence": []},
   "claim_decision": "DENIED"
