@@ -27,6 +27,7 @@ EXPECTED_LEDGER_EVENTS = {
     "STRIPE_CUSTOMER_SUBSCRIPTION_UPDATED",
     "STRIPE_CUSTOMER_SUBSCRIPTION_DELETED",
     "STRIPE_INVOICE_PAID",
+    "STRIPE_INVOICE_PAID_RECOVERY",
     "STRIPE_INVOICE_PAYMENT_FAILED",
     "PAID_LIFECYCLE_ROLLED_BACK",
 }
@@ -165,6 +166,19 @@ def run(dsn: str, expected_subject: str) -> dict[str, object]:
             "observed": sorted(observed_states),
         }
 
+        recovery_rows = [
+            row
+            for row in ledger
+            if row["ledger_event_type"] == "STRIPE_INVOICE_PAID_RECOVERY"
+        ]
+        assert len(recovery_rows) == 1, recovery_rows
+        recovery = recovery_rows[0]
+        assert recovery["previous_state"] == "SUSPENDED", recovery
+        assert recovery["new_state"] == "ACTIVE", recovery
+        assert recovery["actor_subject"] == "stripe-signed-webhook", recovery
+        assert recovery["provider_event_id"], recovery
+        assert len(str(recovery["payload_digest"])) == 64, recovery
+
         provider_rows = [
             row for row in ledger if str(row["ledger_event_type"]).startswith("STRIPE_")
         ]
@@ -211,6 +225,7 @@ def run(dsn: str, expected_subject: str) -> dict[str, object]:
         "receipt_dispositions": sorted(dispositions),
         "ledger_entries": len(ledger),
         "states_observed": sorted(observed_states),
+        "paid_invoice_recovery": "SUSPENDED_TO_ACTIVE_PASS",
         "professional_seat_capacity": 3,
         "team_seat_capacity": 15,
         "final_selection_state": selection["state"],
