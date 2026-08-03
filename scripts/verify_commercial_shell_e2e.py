@@ -49,7 +49,9 @@ ROLLBACK_LEDGER_EVENTS = {"PAID_LIFECYCLE_ROLLED_BACK"}
 EXPECTED_LEDGER_EVENTS = (
     USER_LEDGER_EVENTS | PROVIDER_LEDGER_EVENTS | ROLLBACK_LEDGER_EVENTS
 )
-PROVIDER_ACTOR = "stripe-signed-webhook"
+SIGNED_PROVIDER_ACTOR = "stripe-signed-webhook"
+RECONCILIATION_PROVIDER_ACTOR = "stripe-reconciliation"
+PROVIDER_ACTORS = {SIGNED_PROVIDER_ACTOR, RECONCILIATION_PROVIDER_ACTOR}
 ROLLBACK_ACTOR = "deterministic-test-rollback"
 RECOVERY_LEDGER_EVENT = "STRIPE_INVOICE_PAID_RECOVERY"
 
@@ -108,10 +110,18 @@ def _verify_ledger_authority(
     recovery = recovery_rows[0]
     assert recovery["previous_state"] == "SUSPENDED", recovery
     assert recovery["new_state"] == "ACTIVE", recovery
-    assert recovery["actor_subject"] == PROVIDER_ACTOR, recovery
+    assert recovery["actor_subject"] == SIGNED_PROVIDER_ACTOR, recovery
     assert recovery["provider_event_id"], recovery
     assert recovery["payload_digest"], recovery
     assert len(str(recovery["payload_digest"])) == 64, recovery
+
+    reconciliation_rows = [
+        row
+        for row in ledger
+        if row["ledger_event_type"] in PROVIDER_LEDGER_EVENTS
+        and row["actor_subject"] == RECONCILIATION_PROVIDER_ACTOR
+    ]
+    assert reconciliation_rows, "No provider reconciliation ledger entry was observed"
 
     for row in ledger:
         event_type = str(row["ledger_event_type"])
@@ -124,7 +134,7 @@ def _verify_ledger_authority(
             assert provider_event_id is None, row
             assert payload_digest is None, row
         elif event_type in PROVIDER_LEDGER_EVENTS:
-            assert actor_subject == PROVIDER_ACTOR, row
+            assert actor_subject in PROVIDER_ACTORS, row
             assert provider_event_id, row
             assert payload_digest and len(str(payload_digest)) == 64, row
         elif event_type in ROLLBACK_LEDGER_EVENTS:
@@ -279,7 +289,8 @@ def run(
         "paid_invoice_recovery": "SUSPENDED_TO_ACTIVE_PASS",
         "ledger_authority_taxonomy": {
             "authenticated_subject": expected_subject,
-            "provider_actor": PROVIDER_ACTOR,
+            "provider_actors": sorted(PROVIDER_ACTORS),
+            "recovery_actor": SIGNED_PROVIDER_ACTOR,
             "rollback_actor": ROLLBACK_ACTOR,
         },
         "external_stripe_calls": 0,
