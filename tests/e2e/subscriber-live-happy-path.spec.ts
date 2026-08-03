@@ -149,13 +149,13 @@ test("executes the no-fixture subscriber happy path", async ({ page, context }) 
       createdResponse.ok(),
       `ResearchRun creation failed with HTTP ${createdResponse.status()}`
     ).toBeTruthy();
-    await expect(page.getByText("COMPLETED", { exact: true })).toBeVisible({
-      timeout: 120_000
-    });
 
     const investigation = page.getByRole("region", {
       name: "InvestigationContext"
     });
+    await expect(
+      investigation.locator('[data-state="COMPLETED"]')
+    ).toBeVisible({ timeout: 120_000 });
     await expect(investigation).toContainText("src_ted_search_api_v3");
     await expect(investigation.getByText("Persistent evidence")).toBeVisible();
     await expect(
