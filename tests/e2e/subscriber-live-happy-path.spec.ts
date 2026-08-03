@@ -96,11 +96,32 @@ async function initialiseOwnerSeat(page: Page) {
   await page.reload({ waitUntil: "domcontentloaded", timeout: 45_000 });
 }
 
+async function closeConsumedBillingResult(page: Page) {
+  const panel = page.getByRole("complementary", {
+    name: "Plan y facturación"
+  });
+  if (await panel.isVisible()) {
+    await panel.getByRole("button", { name: "Cerrar" }).click();
+    await expect(panel).toBeHidden();
+  }
+  await page.evaluate(() => {
+    const url = new URL(window.location.href);
+    url.searchParams.delete("billing");
+    window.history.replaceState(
+      window.history.state,
+      "",
+      `${url.pathname}${url.search}${url.hash}`
+    );
+  });
+  await expect(page).not.toHaveURL(/billing=success/);
+}
+
 test("executes the no-fixture subscriber happy path", async ({ page, context }) => {
   const passkey = await registerPasskey(page, context);
   try {
     await activateProfessional(page);
     await initialiseOwnerSeat(page);
+    await closeConsumedBillingResult(page);
 
     const live = page.locator(
       '[data-e2e-no-fixtures="true"][data-adapter="persistent-real"]'
@@ -114,7 +135,20 @@ test("executes the no-fixture subscriber happy path", async ({ page, context }) 
     const question =
       "Find active European public procurement opportunities for governed data platforms.";
     await page.getByLabel("Research question").fill(question);
-    await page.getByRole("button", { name: "Start ResearchRun" }).click();
+    const created = page.waitForResponse(
+      (response) =>
+        response.url().includes("/api/subscriber-workspace/live/research-runs") &&
+        response.request().method() === "POST",
+      { timeout: 20_000 }
+    );
+    await page
+      .getByRole("button", { name: "Start ResearchRun" })
+      .click({ timeout: 15_000 });
+    const createdResponse = await created;
+    expect(
+      createdResponse.ok(),
+      `ResearchRun creation failed with HTTP ${createdResponse.status()}`
+    ).toBeTruthy();
     await expect(page.getByText("COMPLETED", { exact: true })).toBeVisible({
       timeout: 120_000
     });
@@ -190,8 +224,12 @@ test("executes the no-fixture subscriber happy path", async ({ page, context }) 
     ).toBeVisible();
     await expect(page.getByText("EXPORT_CREATED", { exact: true })).toBeVisible();
   } finally {
-    await passkey.cdp.send("WebAuthn.removeVirtualAuthenticator", {
-      authenticatorId: passkey.authenticatorId
-    });
+    try {
+      await passkey.cdp.send("WebAuthn.removeVirtualAuthenticator", {
+        authenticatorId: passkey.authenticatorId
+      });
+    } catch (cause) {
+      if (!page.isClosed()) throw cause;
+    }
   }
 });
