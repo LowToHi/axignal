@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 type Bootstrap = {
   tenant: { revision: number };
@@ -10,14 +10,14 @@ type Bootstrap = {
   };
 };
 
-async function bootstrap(page: Parameters<typeof test>[0] extends never ? never : any): Promise<Bootstrap> {
+async function loadBootstrap(page: Page): Promise<Bootstrap> {
   const response = await page.request.get("/api/subscriber-workspace/bootstrap");
   expect(response.status()).toBe(200);
   return response.json() as Promise<Bootstrap>;
 }
 
 test("rejects requirement completion without linked verified evidence", async ({ page }) => {
-  const state = await bootstrap(page);
+  const state = await loadBootstrap(page);
   const workspace = state.route_data.workspaces[0]!;
   const requirement = workspace.requirements.find((item) => item.evidence_ids.length === 0)!;
 
@@ -43,7 +43,7 @@ test("rejects requirement completion without linked verified evidence", async ({
 });
 
 test("rejects submission preparation while readiness blockers remain", async ({ page }) => {
-  const state = await bootstrap(page);
+  const state = await loadBootstrap(page);
   const workspace = state.route_data.workspaces[0]!;
 
   const response = await page.request.post("/api/subscriber-workspace/actions", {
