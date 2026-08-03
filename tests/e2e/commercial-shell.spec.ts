@@ -75,7 +75,7 @@ async function loginWithPasskey(page: Page, context: BrowserContext) {
   const codes = await recovery.locator("pre").innerText();
   expect(codes.split("\n")).toHaveLength(8);
   await recovery.getByRole("button", { name: "He guardado los códigos" }).click();
-  await expect(page.locator("main.shell")).toBeVisible();
+  await expect(page.getByRole("button", { name: /PLAN ·/ })).toBeVisible();
 
   return { cdp, authenticatorId: authenticator.authenticatorId };
 }
@@ -132,7 +132,7 @@ test("executes the authenticated commercial shell without external Stripe", asyn
     ).toBeVisible();
 
     await page.getByRole("link", { name: "Cancelar y volver" }).click();
-    await expect(page.locator("main.shell")).toBeVisible();
+    await expect(page.getByRole("button", { name: /PLAN ·/ })).toBeVisible();
     await page.getByRole("button", { name: /PLAN ·/ }).click();
     await expect(page.getByText(/PAYMENT_CONFIRMATION_PENDING/)).toBeVisible();
     await expect(page.getByText(/acceso NO_ENTITLEMENT/)).toBeVisible();
@@ -140,7 +140,7 @@ test("executes the authenticated commercial shell without external Stripe", asyn
     await page.goto(checkoutUrl);
     await page.getByRole("button", { name: "Confirmar pago de prueba" }).click();
     await expect(page).toHaveURL(/billing=success/);
-    await expect(page.locator("main.shell")).toBeVisible();
+    await expect(page.getByRole("button", { name: /PLAN ·/ })).toBeVisible();
     await expect(page.getByText("ACTIVE", { exact: true }).first()).toBeVisible();
     await expect(page.getByText(/Plan: Professional · acceso ACTIVE/)).toBeVisible();
     await expect(page.getByText(/IA mensual sin cuota de tokens: sí/)).toBeVisible();
