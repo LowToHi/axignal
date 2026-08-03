@@ -23,7 +23,20 @@ The authority manifest is:
 
 ```text
 data/acceptance/approvals/AX-LIB-F01-rights-authority-manifest.v0.1.json
-sha256:1cb8612a47d6ff8a20728ed996ca2d83cc454fedde361ceae473b3a083287f86
+sha256:bd69acf72b4af14bfaeb1421664883763556d767ce0a70bb876aa92486cb7ac6
+```
+
+The frozen count reconciliation is:
+
+```text
+378 category XML records
+= 375 non-retired catalogue entries + 3 retired records
+375 non-retired entries
+= 342 unique authority codes + 33 duplicate historical record instances
+342 non-retired codes + 3 retired codes
+= 345 canonical non-reserved SKOS concepts
+RDF concept schemes including root = 11
+RDF canonical concepts = live SPARQL concepts = 345
 ```
 
 Any change to the manifest, target SHA, target tree, required assertions or evidence digest invalidates prior decisions.
@@ -85,7 +98,7 @@ The workflow independently:
 2. proves the technical target is an ancestor with the expected Git tree;
 3. retrieves the retained Actions artifact by immutable ID;
 4. verifies artifact, baseline, payload and result digests;
-5. revalidates all entry/concept counts and authority boundaries;
+5. revalidates every entry, concept, scheme and authority boundary count;
 6. reads current comments from issues `#160` and `#161`;
 7. accepts only the latest valid signed decision for each authority;
 8. emits an authority envelope only when both authorities pass.
