@@ -1,0 +1,120 @@
+name: E2E-1 Single Candidate Authority
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "release/axignal-e2e-final"
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  AXIGNAL_EXACT_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+
+concurrency:
+  group: e2e-single-candidate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-single-candidate:
+    name: Exact-head consolidated candidate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Prove exact-head checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual_sha="$(git rev-parse HEAD)"
+          tree_sha="$(git rev-parse 'HEAD^{tree}')"
+          test "$actual_sha" = "$AXIGNAL_EXACT_SHA"
+          {
+            printf 'exact_head_sha=%s\n' "$actual_sha"
+            printf 'git_tree_sha=%s\n' "$tree_sha"
+            printf 'parent_sha=%s\n' "$(git rev-parse HEAD^)"
+          } | tee e2e-single-candidate-exact-head.txt
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.13"
+
+      - name: Validate consolidation authority
+        run: |
+          set -euo pipefail
+          python -m json.tool \
+            data/acceptance/e2e/AX-E2E-single-candidate.v1.json \
+            >/dev/null
+          python -m py_compile scripts/verify_e2e_single_candidate.py
+          python scripts/verify_e2e_single_candidate.py \
+            | tee e2e-single-candidate-result.json
+
+      - name: Validate inherited bounded contracts
+        run: |
+          set -euo pipefail
+          python scripts/verify_subscriber_workspace_ux_contract.py \
+            | tee subscriber-workspace-contract-result.json
+          python scripts/verify_p21_commercial_runtime.py \
+            | tee p21-commercial-runtime-result.json
+          python scripts/verify_p21_t02_seat_governance.py \
+            | tee p21-seat-governance-result.json
+          python scripts/verify_gate7_consolidation.py \
+            | tee gate7-consolidation-result.json
+
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "22.14.0"
+
+      - name: Install frozen dependencies
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile
+
+      - name: Validate consolidated web runtime
+        run: |
+          set -euo pipefail
+          pnpm --filter @axignal/web test
+          pnpm --filter @axignal/web typecheck
+          pnpm --filter @axignal/web build
+
+      - name: Record consolidation inventory
+        if: always()
+        run: |
+          set -euo pipefail
+          {
+            echo '## Merge lineage'
+            git show -s --format='head=%H%nparents=%P%ntree=%T' HEAD
+            echo
+            echo '## Dominant-head delta'
+            git diff --name-status \
+              ca17c4756e4bbbfee72b4547d281df0379e91cfa HEAD
+            echo
+            echo '## Recent graph'
+            git log --graph --oneline --decorate -20
+          } > e2e-single-candidate-inventory.txt
+
+      - name: Upload single-candidate evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: e2e-single-candidate-${{ env.AXIGNAL_EXACT_SHA }}
+          path: |
+            e2e-single-candidate-exact-head.txt
+            e2e-single-candidate-result.json
+            e2e-single-candidate-inventory.txt
+            subscriber-workspace-contract-result.json
+            p21-commercial-runtime-result.json
+            p21-seat-governance-result.json
+            gate7-consolidation-result.json
+          if-no-files-found: error
+          retention-days: 30

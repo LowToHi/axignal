@@ -1,0 +1,108 @@
+{
+  "schema_version": "axignal.e2e-single-candidate/v1.0",
+  "task_id": "AX-E2E-1",
+  "goal_id": "AXIGNAL-GOAL-001",
+  "state": "CANDIDATE_PENDING_EXACT_HEAD_CI",
+  "scope_frozen": true,
+  "objective": "Consolidate the complete pre-production E2E engineering line into one release branch, exact head, Git tree, configuration, CI matrix and artifact set without expanding product scope.",
+  "active_release_branch": "release/axignal-e2e-final",
+  "controller_parent_sha": "8c57286b67258d016ba2f23bc4daf68b194dc41f",
+  "lineage": {
+    "dominant_engineering_head": "ca17c4756e4bbbfee72b4547d281df0379e91cfa",
+    "dominant_engineering_tree": "ac7ca65ecc67b3327a13829da9c82ba750ebf709",
+    "subscriber_workspace_head": "d3e2dbd2cc6e44374cb4442c7083db7bffe8c153",
+    "consolidation_merge_commit": "8c57286b67258d016ba2f23bc4daf68b194dc41f",
+    "consolidation_merge_tree": "83ad858454e972c7084d7449e697c61b3e6f8e72",
+    "merge_parents": [
+      "ca17c4756e4bbbfee72b4547d281df0379e91cfa",
+      "d3e2dbd2cc6e44374cb4442c7083db7bffe8c153"
+    ]
+  },
+  "required_capability_bindings": [
+    {
+      "capability": "PASSWORDLESS_IDENTITY_TENANT_TRIAL",
+      "path": "infra/postgres/120-identity-passwordless-core.sql",
+      "blob": "b3b4afae7c2871a615fd1d06e254e4de1c42097f"
+    },
+    {
+      "capability": "SEAT_GOVERNANCE",
+      "path": "infra/postgres/110-seat-governance.sql",
+      "blob": "67a3632aca81f46a7a52223ec96357814ea90f0c"
+    },
+    {
+      "capability": "STRIPE_PRICING_ENTITLEMENT_CONTRACT",
+      "path": "data/commercial/commercial-runtime-pricing-stripe-runtime.v0.1.json",
+      "blob": "42f18af0f99b4806cc6f341625774fd5d46b7296"
+    },
+    {
+      "capability": "REAL_TED_SOURCE_ADMISSION",
+      "path": "data/acceptance/source-admission/AX-LIB-O01-TED-source-admission-closure.v0.2.json",
+      "blob": "be3b2f4161078a0c8ea75ba37b1cb6c7ca7be30e"
+    },
+    {
+      "capability": "SUBSCRIBER_WORKSPACE_ENTRY",
+      "path": "apps/web/components/subscriber/subscriber-entry.tsx",
+      "blob": "e50f15e44e560cce3cbf4dcbecba3805861f1cdf"
+    },
+    {
+      "capability": "SUBSCRIBER_WORKSPACE_SERVER",
+      "path": "apps/web/lib/subscriber-workspace-server.ts",
+      "blob": "cd79152ee2ba45bd28db615f1344fe156f6e11b5"
+    }
+  ],
+  "frozen_subscriber_bindings": [
+    {
+      "path": "apps/web/app/page.tsx",
+      "blob": "9a3a5383c2f4c791a6acb4db4ce0c0a3f5565fb6"
+    },
+    {
+      "path": "apps/web/app/layout.tsx",
+      "blob": "018d003b9981a7f1776dc9ccfd20a749f5243689"
+    },
+    {
+      "path": "apps/web/lib/security-boundaries.ts",
+      "blob": "3d1ab1ea86424553758333baca89a04209c7b561"
+    },
+    {
+      "path": "apps/web/proxy.ts",
+      "blob": "27b0ba2aeb633ae229610635e9c4e5346c39043f"
+    },
+    {
+      "path": "apps/web/package.json",
+      "blob": "5543d6333f06c61acbea64b27a338ca7d539d359"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "blob": "d8415a2c7e945d9cb380b6af0118a5c484ad2273"
+    },
+    {
+      "path": "packages/design-tokens/src/tokens.css",
+      "blob": "a9e4684c93422468e69d13e4f6f95d7c0df22ed5"
+    }
+  ],
+  "authority": {
+    "active": "release/axignal-e2e-final@EXACT_HEAD",
+    "superseded_direct_prs": [128, 130, 158, 159, 162],
+    "historical_gate7_prs": [132, 133, 134, 136, 138, 139, 140, 141, 142, 144, 145, 146, 147, 155, 156],
+    "superseded_refs_are_lineage_only": true,
+    "main_activation_authorised": false,
+    "production_activation_authorised": false
+  },
+  "scope_exclusions": [
+    "No additional libraries",
+    "No new coverage campaign",
+    "No expanded global claim",
+    "No programme rewrite",
+    "No new pre-production phase",
+    "No business or market validation",
+    "No E2E-2 fixture-removal closure claim",
+    "No live production activation"
+  ],
+  "safe_defaults": {
+    "subscriber_workspace_feature_flag_required": true,
+    "fixture_mode_must_be_explicit": true,
+    "legacy_shell_fallback_preserved": true,
+    "public_launch": false
+  },
+  "required_output": "AX_E2E_SINGLE_CANDIDATE_PASS"
+}
