@@ -5,6 +5,11 @@ on:
     paths:
       - 'apps/api/src/axignal_api/axent_*.py'
       - 'apps/api/tests/test_axent_*.py'
+      - 'apps/web/app/help/**'
+      - 'apps/web/app/api/axent/**'
+      - 'apps/web/components/axent/**'
+      - 'apps/web/lib/axent-server.ts'
+      - 'infra/postgres/14*-axent-*.sql'
       - 'infra/postgres/15*-axent-*.sql'
       - 'infra/postgres/Dockerfile'
       - 'docs/contracts/31-axent-customer-support-e2e-contract-v1.0.md'
@@ -22,11 +27,26 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.13'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Enable pinned pnpm
+        run: corepack enable
       - name: Verify executable contract
         run: python scripts/verify_axent_support_contract.py
       - name: Compile Axent modules
-        run: python -m compileall -q apps/api/src/axignal_api/axent_policy.py apps/api/src/axignal_api/axent_repository.py apps/api/src/axignal_api/axent_context.py apps/api/src/axignal_api/axent_routes.py
+        run: |
+          python -m compileall -q \
+            apps/api/src/axignal_api/axent_policy.py \
+            apps/api/src/axignal_api/axent_repository.py \
+            apps/api/src/axignal_api/axent_context.py \
+            apps/api/src/axignal_api/axent_knowledge.py \
+            apps/api/src/axignal_api/axent_routes.py
       - name: Verify no direct entitlement mutation
         run: |
           ! grep -R "UPDATE tenant_private.*entitlement\|INSERT INTO tenant_private.*entitlement" apps/api/src/axignal_api/axent_*.py
+      - name: Typecheck Help surface
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm --filter @axignal/web typecheck
