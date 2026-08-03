@@ -88,6 +88,26 @@ jobs:
         env:
           AXIGNAL_DATABASE_URL: postgresql://axignal:axignal@127.0.0.1:5432/axignal
         run: python scripts/verify_axent_postgres_roundtrip.py verify
+      - name: Backup authority and mutate source
+        run: |
+          docker compose exec -T postgres \
+            pg_dump -U axignal -d axignal -Fc > axent-authority.dump
+          docker compose exec -T postgres \
+            psql -U axignal -d axignal -v ON_ERROR_STOP=1 -c \
+            "UPDATE tenant_private.support_conversations SET status='OPEN', resolution_code=NULL;"
+          test "$(docker compose exec -T postgres psql -U axignal -d axignal -Atc \
+            "SELECT count(*) FROM tenant_private.support_conversations WHERE status='OPEN'")" -gt 0
+      - name: Restore into clean database
+        run: |
+          docker compose exec -T postgres createdb -U axignal axignal_restore
+          cat axent-authority.dump | docker compose exec -T postgres \
+            pg_restore -U axignal -d axignal_restore --no-owner --no-privileges
+      - name: Verify restored authority from fresh process
+        env:
+          AXIGNAL_DATABASE_URL: postgresql://axignal:axignal@127.0.0.1:5432/axignal_restore
+        run: |
+          python scripts/verify_axent_postgres_roundtrip.py verify
+          echo AXENT_BACKUP_MUTATION_RESTORE_PASS
       - name: Destroy PostgreSQL authority
         if: always()
         run: docker compose down -v --remove-orphans
