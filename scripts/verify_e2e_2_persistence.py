@@ -4,7 +4,7 @@ import argparse
 import hashlib
 import json
 from typing import Any
-from uuid import UUID, uuid5, NAMESPACE_URL
+from uuid import NAMESPACE_URL, UUID, uuid5
 
 import psycopg
 from psycopg.rows import dict_row
@@ -17,16 +17,25 @@ REQUIRED_AUDIT_EVENTS = {
 }
 
 
-def _one(cursor: psycopg.Cursor[dict[str, Any]], query: str, params: tuple[Any, ...]) -> dict[str, Any]:
+def _one(
+    cursor: psycopg.Cursor[dict[str, Any]],
+    query: str,
+    params: tuple[Any, ...],
+) -> dict[str, Any]:
     cursor.execute(query, params)
     row = cursor.fetchone()
     if row is None:
-        raise AssertionError(f"Required row missing for query: {query.strip()[:100]}")
+        raise AssertionError(
+            f"Required row missing for query: {query.strip()[:100]}"
+        )
     return row
 
 
 def verify(*, dsn: str, subject: str) -> dict[str, Any]:
-    with psycopg.connect(dsn, row_factory=dict_row) as connection, connection.cursor() as cursor:
+    with (
+        psycopg.connect(dsn, row_factory=dict_row) as connection,
+        connection.cursor() as cursor,
+    ):
         identity = _one(
             cursor,
             """
@@ -57,7 +66,11 @@ def verify(*, dsn: str, subject: str) -> dict[str, Any]:
         assert session["auth_method"] == "PASSKEY", session
         assert session["assurance_level"] == "AAL2", session
         cursor.execute(
-            "SELECT to_regprocedure('identity_private.revoke_identity_session(text,text,timestamptz)') AS fn"
+            """
+            SELECT to_regprocedure(
+              'identity_private.revoke_identity_session(text,text,timestamptz)'
+            ) AS fn
+            """
         )
         assert cursor.fetchone()["fn"] is not None
 
@@ -112,7 +125,8 @@ def verify(*, dsn: str, subject: str) -> dict[str, Any]:
             cursor,
             """
             SELECT m.membership_id, m.status,
-                   array_agg(rb.role_id ORDER BY rb.role_id) FILTER (WHERE rb.state = 'ACTIVE') AS roles
+                   array_agg(rb.role_id ORDER BY rb.role_id)
+                     FILTER (WHERE rb.state = 'ACTIVE') AS roles
             FROM tenant_private.organisation_memberships m
             LEFT JOIN tenant_private.membership_role_bindings rb
               ON rb.tenant_id = m.tenant_id AND rb.membership_id = m.membership_id
@@ -143,7 +157,9 @@ def verify(*, dsn: str, subject: str) -> dict[str, Any]:
         assert len(run["evidence_ids"] or []) > 0, run
         assert len(run["candidate_claim_ids"] or []) > 0, run
         assert len(run["canonical_claim_ids"] or []) > 0, run
-        assert len(run["candidate_claim_ids"]) == len(run["canonical_claim_ids"]), run
+        assert len(run["candidate_claim_ids"]) == len(
+            run["canonical_claim_ids"]
+        ), run
         assert run["actual_usage"]["api_requests"] == 1, run
         assert run["actual_usage"]["model_calls"] == 0, run
         assert any(
@@ -239,7 +255,8 @@ def verify(*, dsn: str, subject: str) -> dict[str, Any]:
         assert export["document_id"] == document["document_id"], export
         assert export["format"] == "MARKDOWN", export
         assert export["created_by"] == subject, export
-        expected_hash = f"sha256:{hashlib.sha256(export['content'].encode('utf-8')).hexdigest()}"
+        digest = hashlib.sha256(export["content"].encode("utf-8")).hexdigest()
+        expected_hash = f"sha256:{digest}"
         assert export["content_hash"] == expected_hash, export
         assert "Pursuit note" in export["content"], export
         assert EXPECTED_SOURCE in export["content"], export
@@ -290,7 +307,9 @@ def verify(*, dsn: str, subject: str) -> dict[str, Any]:
                 "subscriber_workspace_exports",
                 "subscriber_workspace_audit_events",
             ):
-                cursor.execute(f"SELECT count(*) AS count FROM tenant_private.{table}")
+                cursor.execute(
+                    f"SELECT count(*) AS count FROM tenant_private.{table}"
+                )
                 assert cursor.fetchone()["count"] == 0, table
 
         audit_immutable = False
@@ -319,7 +338,9 @@ def verify(*, dsn: str, subject: str) -> dict[str, Any]:
                 audit_immutable = "append-only" in str(exc)
                 cursor.execute("ROLLBACK TO SAVEPOINT audit_mutation_probe")
             else:
-                raise AssertionError("Subscriber audit mutation unexpectedly succeeded")
+                raise AssertionError(
+                    "Subscriber audit mutation unexpectedly succeeded"
+                )
         assert audit_immutable
 
     return {
