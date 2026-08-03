@@ -1,6 +1,9 @@
 name: F01 Catalogue Download Diagnostic
 
 on:
+  pull_request:
+    paths:
+      - ".github/workflows/f01-catalogue-download-diagnostic.yml"
   push:
     branches:
       - "agent/ax-gate7-f01-rights-technical-baseline-authority-v1"
