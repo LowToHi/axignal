@@ -33,7 +33,7 @@ test("renders a persisted workspace event from the append-only audit endpoint", 
 
   await page.goto(`/workspaces/${workspace.id}/audit`);
   await expect(page.getByRole("heading", { name: "Audit" })).toBeVisible();
-  await expect(page.getByRole("cell", { name: "task assigned" }).first()).toBeVisible();
+  await expect(page.getByRole("cell", { name: "task.assigned" }).first()).toBeVisible();
   await expect(page.getByText(`task:${task.id}`).first()).toBeVisible();
   await expect(page.getByRole("button", { name: "Create export unavailable" })).toBeDisabled();
 });
