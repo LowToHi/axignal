@@ -16,6 +16,7 @@ from axignal_api.pilot_health import router as pilot_health_router
 from axignal_api.research import router as prototype_research_router
 from axignal_api.retention_routes import router as retention_router
 from axignal_api.seat_routes import router as seat_router
+from axignal_api.subscriber_workspace_routes import router as subscriber_workspace_router
 from axignal_api.validation import router as validation_router
 
 app.include_router(pilot_health_router)
@@ -26,6 +27,7 @@ app.include_router(prototype_research_router)
 app.include_router(document_research_router)
 app.include_router(persistent_research_router)
 app.include_router(ted_research_router)
+app.include_router(subscriber_workspace_router)
 app.include_router(entitlement_router)
 app.include_router(billing_router)
 app.include_router(billing_read_router)
