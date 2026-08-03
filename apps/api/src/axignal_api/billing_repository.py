@@ -183,7 +183,28 @@ class BillingRepository(ResearchRepository):
             row = cursor.fetchone()
             if row is None or not isinstance(row.get("result"), dict):
                 raise RuntimeError("Stripe event returned no result")
-            return row["result"]
+            result = row["result"]
+            result_selection_id = result.get("selection_id")
+            if (
+                event_type == "invoice.paid"
+                and result.get("disposition") == "APPLIED"
+                and result.get("state") == "SUSPENDED"
+                and result_selection_id is not None
+            ):
+                cursor.execute(
+                    """
+                    SELECT *
+                    FROM tenant_private.recover_paid_lifecycle_from_invoice(
+                      %s, %s, %s, %s
+                    )
+                    """,
+                    (result_selection_id, event_id, actor_subject, current),
+                )
+                recovered = cursor.fetchone()
+                if recovered is None:
+                    raise RuntimeError("Paid invoice recovery returned no selection")
+                result = {**result, "state": recovered["state"], "recovered": True}
+            return result
 
     def rollback(
         self,
