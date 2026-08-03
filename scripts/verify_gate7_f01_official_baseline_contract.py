@@ -67,7 +67,16 @@ def verify(
         publication["expected_latest_version"] == "20260617-0",
         "Official publication target drift",
     )
-    require(publication["expected_concept_count"] == 375, "Concept count drift")
+    expected_counts = {
+        "expected_catalogue_entry_count": 375,
+        "expected_category_xml_record_count": 378,
+        "expected_retired_record_count": 3,
+        "expected_canonical_concept_count": 345,
+        "expected_non_retired_unique_concept_count": 342,
+        "expected_non_retired_duplicate_record_surplus": 33,
+    }
+    for field, expected in expected_counts.items():
+        require(publication[field] == expected, f"{field} drift")
     require(
         publication["sparql_endpoint"]
         == "https://publications.europa.eu/webapi/rdf/sparql",
@@ -77,6 +86,52 @@ def verify(
         publication["reserved_concept_uri"].endswith("/OP_DATPRO"),
         "Reserved concept exclusion missing",
     )
+    required_distributions = {
+        "countries-skos.rdf",
+        "countries-skos-ap-act.rdf",
+        "at-country-v3.xsd",
+        "at-countries-v2.xsd",
+        "Country.gc",
+        "countries.xml",
+        "ATTO_XML_Countries-and-territories.zip",
+    }
+    require(
+        set(publication["required_distributions"]) == required_distributions,
+        "Distribution inventory drift",
+    )
+    require(
+        publication["canonical_concept_distribution"]
+        == "countries-skos.rdf",
+        "Canonical concept distribution drift",
+    )
+    require(
+        publication["canonical_entry_distribution"] == "countries.xml",
+        "Canonical entry distribution drift",
+    )
+
+    semantics = contract["count_semantics"]
+    require(
+        "non-retired record" in semantics["catalogue_entry"],
+        "Catalogue entry semantics missing",
+    )
+    require(
+        "unique non-reserved skos:Concept"
+        in semantics["canonical_concept"],
+        "Canonical concept semantics missing",
+    )
+    require(
+        "378 XML records = 375 non-retired catalogue entries + 3 retired"
+        in semantics["required_reconciliation"],
+        "Count reconciliation is not explicit",
+    )
+    require(
+        semantics["prohibited_claim"]
+        == (
+            "The catalogue count of 375 must not be represented as 375 "
+            "unique SKOS concepts."
+        ),
+        "Prohibited count claim drift",
+    )
 
     access = contract["access_contract"]
     require(access["authentication"] == "NONE", "Authentication drift")
@@ -84,10 +139,20 @@ def verify(
     require(access["methods"] == ["GET", "POST"], "Access methods drift")
     require(
         access["required_formats"]
-        == ["text/csv", "application/sparql-results+json"],
+        == [
+            "text/html",
+            "application/rdf+xml",
+            "application/xml",
+            "text/csv",
+            "application/sparql-results+json",
+        ],
         "Machine-readable format drift",
     )
-    require(access["maximum_http_requests"] == 4, "Request budget drift")
+    require(access["maximum_http_requests"] == 6, "Request budget drift")
+    require(
+        access["maximum_response_bytes_per_request"] == 50_000_000,
+        "Response byte budget drift",
+    )
     require(access["maximum_retries"] == 0, "Retries are not frozen to zero")
     require(access["concurrency"] == 1, "Concurrency budget drift")
     require(
@@ -131,6 +196,25 @@ def verify(
             f"{field} was approved without Legal authority",
         )
     require(
+        rights["attribution"] == "REQUIRED_IF_AUTHORISED",
+        "Attribution boundary drift",
+    )
+    require(
+        rights["source_changes_and_version_disclosure"]
+        == "REQUIRED_IF_AUTHORISED",
+        "Source/version disclosure boundary drift",
+    )
+    require(
+        rights["no_distortion_or_misleading_attribution"]
+        == "REQUIRED_IF_AUTHORISED",
+        "No-distortion boundary drift",
+    )
+    require(
+        rights["third_party_components"]
+        == "EXCLUDED_UNLESS_SEPARATELY_AUTHORISED",
+        "Third-party boundary drift",
+    )
+    require(
         rights["iso_codes_free_use_observed"] is True,
         "ISO code observation hidden",
     )
@@ -158,13 +242,18 @@ def verify(
         "Contact ingestion enabled",
     )
     require(
+        privacy["profiling_or_marketing_use"] is False,
+        "Profiling or marketing use enabled",
+    )
+    require(
         privacy["human_privacy_data_rights_decision_required"] is True,
         "Privacy authority bypassed",
     )
 
     campaign = contract["campaign_plan"]
-    require(campaign["request_budget"] == 4, "Campaign request budget drift")
+    require(campaign["request_budget"] == 6, "Campaign request budget drift")
     require(campaign["paid_budget_eur"] == 0, "Campaign paid budget drift")
+    require(campaign["retention_days"] == 30, "Retention budget drift")
     require(campaign["product_ingestion"] is False, "Product ingestion enabled")
     require(
         campaign["public_redistribution"] is False,
@@ -195,7 +284,8 @@ def verify(
         "output": "F01_OFFICIAL_BASELINE_CONTRACT_PASS",
         "manifest_reference": canonical_digest(contract),
         "target_publication_version": publication["expected_latest_version"],
-        "expected_concept_count": publication["expected_concept_count"],
+        "expected_catalogue_entry_count": 375,
+        "expected_canonical_concept_count": 345,
         "request_budget": access["maximum_http_requests"],
         "paid_budget_eur": access["external_monetary_budget_eur"],
         "legal": "MISSING",
