@@ -6,7 +6,9 @@ on:
       - 'apps/api/src/axignal_api/axent_*.py'
       - 'apps/api/tests/test_axent_*.py'
       - 'apps/web/app/help/**'
+      - 'apps/web/app/support-admin/**'
       - 'apps/web/app/api/axent/**'
+      - 'apps/web/app/api/axent-admin/**'
       - 'apps/web/components/axent/**'
       - 'apps/web/lib/axent-server.ts'
       - 'infra/postgres/14*-axent-*.sql'
@@ -46,7 +48,7 @@ jobs:
       - name: Verify no direct entitlement mutation
         run: |
           ! grep -R "UPDATE tenant_private.*entitlement\|INSERT INTO tenant_private.*entitlement" apps/api/src/axignal_api/axent_*.py
-      - name: Typecheck Help surface
+      - name: Typecheck Axent web surfaces
         run: |
           pnpm install --frozen-lockfile
           pnpm --filter @axignal/web typecheck
