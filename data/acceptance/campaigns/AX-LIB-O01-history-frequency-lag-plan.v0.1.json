@@ -1,0 +1,167 @@
+{
+  "schema_version": "axignal.o01-history-frequency-lag-plan/v0.1",
+  "task_id": "AX-GE2E-G7-O01-E",
+  "campaign_id": "AX-LIB-O01-TED-HISTORY-FREQUENCY-LAG-v0.1",
+  "library_id": "AX-LIB-O01",
+  "frozen_before_execution": true,
+  "baseline": {
+    "exact_head_sha": "97a61f79f5c709ed25af2dcaf960236b711deb4f",
+    "admission_output": "O01_TED_SOURCE_ADMISSION_PASS",
+    "admission_artifact_id": 8838855002,
+    "admission_artifact_digest": "sha256:870261e24767ab170b191ee4a5e8fca27b9c406aec7113237cc41220eb80f74a",
+    "source_state": "PRODUCT_ADMITTED",
+    "o01_canonical_state": "IN_REVIEW",
+    "o01_claim_decision": "PENDING"
+  },
+  "source": {
+    "source_id": "src_ted_search_api_v3",
+    "name": "TED Search API v3.0",
+    "state": "PRODUCT_ADMITTED",
+    "endpoint": "https://api.ted.europa.eu/v3/notices/search",
+    "scope": "ALL",
+    "authentication": "NONE"
+  },
+  "official_sources": [
+    {
+      "purpose": "PUBLIC_SEARCH_DEPTH",
+      "url": "https://ted.europa.eu/en/help/search-browse",
+      "anchors": [
+        "All notices",
+        "last 10 years from today"
+      ]
+    },
+    {
+      "purpose": "PUBLICATION_SCHEDULE_AND_PACKAGES",
+      "url": "https://ted.europa.eu/en/help/data-reuse",
+      "anchors": [
+        "daily package: file containing all the notices in xml format for each day.",
+        "Daily edition (published every Monday to Friday)",
+        "On the day of the publication at 9:30 at the latest"
+      ]
+    },
+    {
+      "purpose": "PUBLIC_RETENTION_BOUNDARY",
+      "url": "https://ted.europa.eu/en/legal-notice",
+      "anchors": [
+        "for ten years in the TED website",
+        "non-public internal archive"
+      ]
+    },
+    {
+      "purpose": "SEARCH_API_OPERATION",
+      "url": "https://docs.ted.europa.eu/api/latest/search.html",
+      "anchors": [
+        "The Search API allows access to published procurement notices for analysis and reuse",
+        "POST /v3/notices/search"
+      ]
+    },
+    {
+      "purpose": "RELEASE_CALENDAR_DOWNLOAD_CONTRACT",
+      "url": "https://docs.ted.europa.eu/ODS/latest/reuse/calendar.html",
+      "anchors": [
+        "https://ted.europa.eu/{lang}/release-calendar/-/download/file/{format}/{year}",
+        "{format} can be: XLS, PDF, CSV"
+      ]
+    }
+  ],
+  "release_calendar_years": [
+    2025,
+    2026
+  ],
+  "frequency_reference_year": 2025,
+  "release_calendar_url_template": "https://ted.europa.eu/en/release-calendar/-/download/file/CSV/{year}",
+  "daily_package_url_template": "https://ted.europa.eu/packages/daily/{package_id}",
+  "publication_timezone": "Europe/Luxembourg",
+  "history": {
+    "declared_public_years": 10,
+    "search_years": 11,
+    "query_mode": "COUNT_ONLY_CANONICAL_BOUNDED_INTERVAL_BINARY_SEARCH",
+    "day_before_boundary_must_be_empty": true,
+    "full_internal_archive_claimed": false
+  },
+  "frequency": {
+    "declared": "DAILY_EDITION_MONDAY_TO_FRIDAY_EXCEPT_RELEASE_CALENDAR_EXCEPTIONS",
+    "website_availability": "PUBLICATION_DAY_00:01_TO_09:00_EUROPE_LUXEMBOURG",
+    "daily_package_availability": "PUBLICATION_DAY_BY_09:30_EUROPE_LUXEMBOURG",
+    "website_deadline_seconds": 32400,
+    "package_deadline_seconds": 34200
+  },
+  "sampling": {
+    "release_dates": 20,
+    "package_probes": 10,
+    "search_limit": 1,
+    "search_pagination_mode": "PAGE_NUMBER",
+    "check_query_syntax": false,
+    "notice_fields": [
+      "publication-number",
+      "publication-date"
+    ],
+    "raw_notice_payloads_persisted": false,
+    "daily_package_bodies_persisted": false
+  },
+  "network": {
+    "allowed_hosts": [
+      "api.ted.europa.eu",
+      "docs.ted.europa.eu",
+      "ted.europa.eu"
+    ],
+    "maximum_requests": 60,
+    "maximum_attempts_per_request": 2,
+    "minimum_delay_seconds": 0.25,
+    "timeout_seconds": 30,
+    "maximum_document_bytes": 5242880,
+    "maximum_calendar_bytes": 2097152,
+    "maximum_search_response_bytes": 2097152
+  },
+  "thresholds": {
+    "history_boundary_slack_days_max": 7,
+    "latest_publication_age_days_max": 4,
+    "reference_year_editions_min": 240,
+    "reference_year_weekend_editions_max": 0,
+    "search_presence_ratio_min": 1.0,
+    "package_presence_ratio_min": 0.9,
+    "publication_to_axignal_p95_seconds_max": 32430,
+    "package_deadline_seconds": 34200,
+    "fabricated_evidence_max": 0,
+    "synthetic_evidence_max": 0
+  },
+  "evidence_retention_days": 20,
+  "non_authorisations": {
+    "full_internal_archive_access": false,
+    "exhaustive_notice_ingestion": false,
+    "exact_first_seen_timestamp_claim": false,
+    "public_claim_contribution": false,
+    "global_coverage_claim": false,
+    "public_redistribution": false,
+    "contact_marketing": false,
+    "model_training": false,
+    "bid_submission": false,
+    "external_notification_delivery": false,
+    "gate7_closed": false,
+    "public_launch": "NO_GO"
+  },
+  "recommended_success_transition": {
+    "o01_canonical_state": "ACCEPTED",
+    "o01_claim_decision": "DENIED",
+    "source_state": "PRODUCT_ADMITTED",
+    "source_contributes_to_public_claim": false,
+    "gate7_decision": "IN_PROGRESS",
+    "public_launch": "NO_GO"
+  },
+  "stop_conditions": [
+    "baseline source admission is absent, expired or no longer PRODUCT_ADMITTED",
+    "plan or one-shot request digest mismatch",
+    "execution checkout is not the exact authorised request head",
+    "DNS resolves to a non-global address",
+    "redirect leaves the exact HTTPS host allowlist",
+    "network request budget is exceeded",
+    "official source anchors are missing or changed",
+    "release calendar response is HTML, malformed or not a deterministic CSV download",
+    "Search API query is not a canonical bounded publication-date interval",
+    "Search API omits total notice count",
+    "history boundary cannot be proven with a zero-result preceding day",
+    "raw notice payload, daily package body or contact value is persisted",
+    "a metric threshold fails",
+    "a public, global, exhaustive or exact-first-seen claim is enabled"
+  ]
+}

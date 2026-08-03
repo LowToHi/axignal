@@ -1,0 +1,10 @@
+{
+  "schema_version": "axignal.o01-history-frequency-lag-dispatch-request/v0.5",
+  "task_id": "AX-GE2E-G7-O01-E",
+  "execute_real_campaign": true,
+  "authority_phrase": "O01_E_V0_5_EXECUTE_WITHOUT_CLAIMS",
+  "maximum_network_requests": 60,
+  "claim_contribution": false,
+  "gate7_closed": false,
+  "public_launch": "NO_GO"
+}

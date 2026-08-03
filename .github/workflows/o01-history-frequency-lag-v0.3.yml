@@ -1,0 +1,300 @@
+name: O01 Historical Depth Frequency and Lag v0.3 Final
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "apps/api/src/axignal_api/o01_history_frequency_lag_v4.py"
+      - "apps/api/tests/test_o01_history_frequency_lag.py"
+      - "data/acceptance/campaigns/AX-LIB-O01-history-frequency-lag-plan.v0.3.json"
+      - "data/acceptance/campaigns/AX-LIB-O01-history-frequency-lag-execution-request.v0.3.json"
+      - "requirements/o01-xls.lock"
+      - "scripts/run_gate7_o01_history_frequency_lag.py"
+      - "scripts/verify_gate7_o01_history_frequency_lag_v4.py"
+      - ".github/workflows/o01-history-frequency-lag-v0.3.yml"
+  push:
+    branches:
+      - "agent/**"
+    paths:
+      - "apps/api/src/axignal_api/o01_history_frequency_lag_v4.py"
+      - "apps/api/tests/test_o01_history_frequency_lag.py"
+      - "data/acceptance/campaigns/AX-LIB-O01-history-frequency-lag-plan.v0.3.json"
+      - "data/acceptance/campaigns/AX-LIB-O01-history-frequency-lag-execution-request.v0.3.json"
+      - "requirements/o01-xls.lock"
+      - "scripts/run_gate7_o01_history_frequency_lag.py"
+      - "scripts/verify_gate7_o01_history_frequency_lag_v4.py"
+      - ".github/workflows/o01-history-frequency-lag-v0.3.yml"
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: o01-history-frequency-lag-v0-3-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  AXIGNAL_EXACT_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+  AXIGNAL_SOURCE_BRANCH: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name }}
+  AXIGNAL_SOURCE_REPOSITORY: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name || github.repository }}
+  PLAN_PATH: data/acceptance/campaigns/AX-LIB-O01-history-frequency-lag-plan.v0.3.json
+  REQUEST_PATH: data/acceptance/campaigns/AX-LIB-O01-history-frequency-lag-execution-request.v0.3.json
+  RESULT_DIR: artifacts/o01-history-frequency-lag-v0.3/current
+
+jobs:
+  validate:
+    name: Validate final frozen O01-E controller
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    outputs:
+      execute_real_campaign: ${{ steps.request.outputs.execute }}
+    steps:
+      - name: Checkout exact controller head
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Retain exact static provenance
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$AXIGNAL_EXACT_SHA"
+          mkdir -p "$RESULT_DIR"
+          {
+            printf 'exact_head_sha=%s\n' "$(git rev-parse HEAD)"
+            printf 'git_tree_sha=%s\n' "$(git rev-parse 'HEAD^{tree}')"
+            printf 'network_requests_emitted=0\n'
+          } > "$RESULT_DIR/exact-head.txt"
+
+      - name: Set up frozen Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.13.14"
+          check-latest: false
+
+      - name: Install frozen graphs
+        run: |
+          python -m pip install --upgrade "pip==26.1.2"
+          python -m pip install --require-hashes --only-binary=:all: \
+            --requirement requirements/python-dev.lock
+          python -m pip install --require-hashes --only-binary=:all: \
+            --requirement requirements/o01-xls.lock
+          python -m pip check
+          python -m pip install --no-deps --no-build-isolation .
+
+      - name: Validate implementation, tests and plan
+        env:
+          PYTHONPATH: apps/api/src:scripts
+        run: |
+          set -euo pipefail
+          python -m compileall -q \
+            apps/api/src/axignal_api/o01_history_frequency_lag.py \
+            apps/api/src/axignal_api/o01_history_frequency_lag_v3.py \
+            apps/api/src/axignal_api/o01_history_frequency_lag_v4.py \
+            apps/api/tests/test_o01_history_frequency_lag.py \
+            scripts/run_gate7_o01_history_frequency_lag.py \
+            scripts/verify_gate7_o01_history_frequency_lag.py \
+            scripts/verify_gate7_o01_history_frequency_lag_v4.py
+          python -m ruff check \
+            apps/api/src/axignal_api/o01_history_frequency_lag.py \
+            apps/api/src/axignal_api/o01_history_frequency_lag_v3.py \
+            apps/api/src/axignal_api/o01_history_frequency_lag_v4.py \
+            apps/api/tests/test_o01_history_frequency_lag.py \
+            scripts/run_gate7_o01_history_frequency_lag.py \
+            scripts/verify_gate7_o01_history_frequency_lag.py \
+            scripts/verify_gate7_o01_history_frequency_lag_v4.py
+          python -m pytest -q apps/api/tests/test_o01_history_frequency_lag.py
+          python scripts/verify_gate7_o01_history_frequency_lag_v4.py \
+            --plan "$PLAN_PATH" \
+            --output "$RESULT_DIR/plan-contract-result.json"
+
+      - name: Determine exact one-shot request
+        id: request
+        run: |
+          set -euo pipefail
+          execute=false
+          parent_sha="$(git rev-parse HEAD^)"
+          plan_sha="sha256:$(sha256sum "$PLAN_PATH" | awk '{print $1}')"
+          parser_sha="sha256:$(sha256sum requirements/o01-xls.lock | awk '{print $1}')"
+          if [[ -f "$REQUEST_PATH" ]]; then
+            mapfile -t changed < <(git diff --name-only HEAD^ HEAD)
+            test "${#changed[@]}" -eq 1
+            test "${changed[0]}" = "$REQUEST_PATH"
+            if git cat-file -e "HEAD^:$REQUEST_PATH" 2>/dev/null; then
+              echo "One-shot request already existed in parent" >&2
+              exit 1
+            fi
+            jq -e \
+              --arg parent "$parent_sha" \
+              --arg plan "$plan_sha" \
+              --arg parser "$parser_sha" \
+              --arg branch "$AXIGNAL_SOURCE_BRANCH" \
+              --arg repository "$GITHUB_REPOSITORY" \
+              '.schema_version == "axignal.o01-history-frequency-lag-execution-request/v0.3" and .execute == true and .one_shot == true and .controller_parent_sha == $parent and .plan_sha256 == $plan and .parser_lock_sha256 == $parser and .source_branch == $branch and .repository == $repository and .maximum_network_requests == 60 and .raw_notice_payloads_persisted == false and .release_calendar_bodies_persisted == false and .daily_package_bodies_persisted == false' \
+              "$REQUEST_PATH" >/dev/null
+            test "$AXIGNAL_SOURCE_REPOSITORY" = "$GITHUB_REPOSITORY"
+            test "$AXIGNAL_SOURCE_BRANCH" = "agent/ax-gate7-o01-e-history-frequency-lag"
+            execute=true
+          fi
+          echo "execute=$execute" >> "$GITHUB_OUTPUT"
+          jq -n \
+            --argjson execute "$execute" \
+            --arg parent "$parent_sha" \
+            --arg plan "$plan_sha" \
+            --arg parser "$parser_sha" \
+            '{execute_real_campaign: $execute, parent_sha: $parent, plan_sha256: $plan, parser_lock_sha256: $parser, network_requests_before_campaign: 0}' \
+            > "$RESULT_DIR/execution-selection.json"
+
+      - name: Upload static final O01-E evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: o01-history-frequency-lag-v0-3-static-${{ env.AXIGNAL_EXACT_SHA }}
+          path: artifacts/o01-history-frequency-lag-v0.3
+          if-no-files-found: error
+          retention-days: 30
+
+  real-campaign:
+    name: Execute final one-shot O01-E campaign
+    needs: validate
+    if: needs.validate.outputs.execute_real_campaign == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout exact request head
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Initialize fail-closed provenance
+        run: |
+          set -euo pipefail
+          mkdir -p "$RESULT_DIR"
+          {
+            printf 'head_sha=%s\n' "$(git rev-parse HEAD)"
+            printf 'tree_sha=%s\n' "$(git rev-parse 'HEAD^{tree}')"
+            printf 'parent_sha=%s\n' "$(git rev-parse HEAD^)"
+            printf 'plan_sha256=sha256:%s\n' "$(sha256sum "$PLAN_PATH" | awk '{print $1}')"
+            printf 'parser_lock_sha256=sha256:%s\n' "$(sha256sum requirements/o01-xls.lock | awk '{print $1}')"
+            printf 'request_sha256=sha256:%s\n' "$(sha256sum "$REQUEST_PATH" | awk '{print $1}')"
+            printf 'stage=PRE_NETWORK_PREFLIGHT\n'
+            printf 'network_requests_emitted=0\n'
+          } > "$RESULT_DIR/preflight-provenance.txt"
+
+      - name: Set up frozen Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.13.14"
+          check-latest: false
+
+      - name: Install frozen graphs
+        run: |
+          python -m pip install --upgrade "pip==26.1.2"
+          python -m pip install --require-hashes --only-binary=:all: \
+            --requirement requirements/python-dev.lock
+          python -m pip install --require-hashes --only-binary=:all: \
+            --requirement requirements/o01-xls.lock
+          python -m pip check
+          python -m pip install --no-deps --no-build-isolation .
+
+      - name: Revalidate request and all retained authorities
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PYTHONPATH: apps/api/src:scripts
+        run: |
+          set -euo pipefail
+          parent_sha="$(git rev-parse HEAD^)"
+          plan_sha="sha256:$(sha256sum "$PLAN_PATH" | awk '{print $1}')"
+          parser_sha="sha256:$(sha256sum requirements/o01-xls.lock | awk '{print $1}')"
+          jq -e \
+            --arg parent "$parent_sha" \
+            --arg plan "$plan_sha" \
+            --arg parser "$parser_sha" \
+            '.execute == true and .one_shot == true and .controller_parent_sha == $parent and .plan_sha256 == $plan and .parser_lock_sha256 == $parser' \
+            "$REQUEST_PATH" >/dev/null
+          gh api "/repos/${GITHUB_REPOSITORY}/actions/artifacts/8838855002" \
+            > "$RESULT_DIR/admission-artifact-metadata.json"
+          jq -e '.expired == false and .digest == "sha256:870261e24767ab170b191ee4a5e8fca27b9c406aec7113237cc41220eb80f74a"' \
+            "$RESULT_DIR/admission-artifact-metadata.json"
+          gh api "/repos/${GITHUB_REPOSITORY}/actions/artifacts/8839697337" \
+            > "$RESULT_DIR/calendar-probe-artifact-metadata.json"
+          jq -e '.expired == false and .digest == "sha256:5b77b1a6975443ad9f9cb2af4668821aa508a2b2d72749ff4aa546aae25016f8"' \
+            "$RESULT_DIR/calendar-probe-artifact-metadata.json"
+          gh api "/repos/${GITHUB_REPOSITORY}/actions/artifacts/8839903336" \
+            > "$RESULT_DIR/history-diagnostic-artifact-metadata.json"
+          jq -e '.expired == false and .digest == "sha256:f6a75224324c5e1e0d1edec277286ee167c8992e72c40dc12bb98373abf8b7e2"' \
+            "$RESULT_DIR/history-diagnostic-artifact-metadata.json"
+          python scripts/verify_gate7_o01_history_frequency_lag_v4.py \
+            --plan "$PLAN_PATH" \
+            --output "$RESULT_DIR/preflight-result.json"
+          python - <<'PY'
+          import json
+          from datetime import UTC, datetime
+          from pathlib import Path
+
+          closure = json.loads(Path(
+              "data/acceptance/source-admission/"
+              "AX-LIB-O01-TED-source-admission-closure.v0.2.json"
+          ).read_text())
+          expiry = datetime.fromisoformat(
+              closure["authority"]["effective_expiry"].replace("Z", "+00:00")
+          )
+          assert datetime.now(UTC) < expiry
+          assert closure["status"] == "PASS"
+          assert closure["phase_closed"] is True
+          assert closure["source_state"] == "PRODUCT_ADMITTED"
+          assert closure["permanent_boundary"]["bounded_claim_contribution"] is False
+          assert closure["permanent_boundary"]["public_launch"] == "NO_GO"
+          PY
+          sed -i 's/stage=PRE_NETWORK_PREFLIGHT/stage=PRE_NETWORK_PREFLIGHT_PASS/' \
+            "$RESULT_DIR/preflight-provenance.txt"
+
+      - name: Execute bounded final O01-E campaign
+        env:
+          PYTHONPATH: apps/api/src:scripts
+        run: |
+          set -euo pipefail
+          python scripts/run_gate7_o01_history_frequency_lag.py \
+            --plan "$PLAN_PATH" \
+            --output-dir "$RESULT_DIR" \
+            | tee "$RESULT_DIR/campaign-console.json"
+
+      - name: Verify evidence and permanent boundary
+        env:
+          PYTHONPATH: apps/api/src:scripts
+        run: |
+          set -euo pipefail
+          python scripts/verify_gate7_o01_history_frequency_lag_v4.py \
+            --plan "$PLAN_PATH" \
+            --result-dir "$RESULT_DIR" \
+            --output "$RESULT_DIR/evidence-verification.json"
+          jq -e \
+            '.status == "PASS" and .output == "O01_HISTORY_FREQUENCY_LAG_PASS" and .release_calendar_bodies_persisted == false and .decision.recommended_canonical_state == "ACCEPTED" and .decision.recommended_claim_decision == "DENIED" and .decision.claim_contribution == false and .decision.gate7_closed == false and .decision.public_launch == "NO_GO"' \
+            "$RESULT_DIR/final-result.v0.1.json"
+          ! find "$RESULT_DIR" -type f \( -iname '*.xls' -o -iname '*.xlsx' -o -iname '*.xml' -o -iname '*.zip' -o -iname '*.gz' -o -iname '*raw*' \) -print -quit | grep -q .
+          ! grep -R -E \
+            '"(buyer-email|buyer-tel|organisation-tel-buyer|buyer-contact-point)"[[:space:]]*:|sk_(live|test)_|rk_(live|test)_|whsec_|BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY' \
+            "$RESULT_DIR"
+
+      - name: Record exact provenance
+        run: |
+          {
+            printf 'head_sha=%s\n' "$(git rev-parse HEAD)"
+            printf 'tree_sha=%s\n' "$(git rev-parse 'HEAD^{tree}')"
+            sha256sum "$PLAN_PATH"
+            sha256sum requirements/o01-xls.lock
+            sha256sum "$REQUEST_PATH"
+            sha256sum "$RESULT_DIR"/*.json
+          } > "$RESULT_DIR/exact-provenance.txt"
+
+      - name: Upload retained final O01-E evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: o01-history-frequency-lag-v0-3-${{ env.AXIGNAL_EXACT_SHA }}
+          path: artifacts/o01-history-frequency-lag-v0.3
+          if-no-files-found: error
+          retention-days: 30

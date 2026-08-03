@@ -23,7 +23,8 @@ dev = [
   "pytest>=9.0.3,<10",
   "pytest-cov>=6.2,<7",
   "ruff>=0.12,<1",
-  "pyyaml>=6,<7"
+  "pyyaml>=6,<7",
+  "xlrd==2.0.2"
 ]
 
 [build-system]
@@ -34,7 +35,7 @@ build-backend = "hatchling.build"
 packages = ["apps/api/src/axignal_api"]
 
 [tool.pytest.ini_options]
-pythonpath = [".", "apps/api/src"]
+pythonpath = [".", "apps/api/src", "scripts"]
 testpaths = ["apps/api/tests"]
 addopts = "-q --strict-markers --disable-warnings"
 
@@ -45,3 +46,6 @@ src = ["apps/api/src", "apps/api/tests", "scripts"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "SIM"]
+
+[tool.ruff.lint.per-file-ignores]
+"scripts/verify_gate7_o01_retained_evidence_v8.py" = ["E501"]
