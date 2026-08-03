@@ -100,7 +100,7 @@ test("keeps model proposal, deterministic decision and human review distinct", a
     await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(reviewCase("RESOLVED")) });
   });
 
-  await page.goto("/");
+  await page.goto("/demo");
   const review = page.getByRole("complementary", { name: "Human Review" });
   await expect(review).toBeVisible();
   await expect(review.getByText("MODEL PROPOSAL", { exact: true })).toBeVisible();
