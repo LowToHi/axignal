@@ -104,8 +104,14 @@ jobs:
              .output == "F01_OFFICIAL_CONTENT_ADDRESSED_BASELINE_PASS" and
              .exact_head_sha == env.AXIGNAL_EXACT_SHA and
              .official_publication_version == "20260617-0" and
-             .concept_count == 375 and
-             .http_requests_used <= .http_request_budget and
+             .catalogue_entry_count == 375 and
+             .category_xml_record_count == 378 and
+             .retired_record_count == 3 and
+             .canonical_concept_count == 345 and
+             .non_retired_unique_concept_count == 342 and
+             .duplicate_record_surplus == 33 and
+             .http_requests_used == 6 and
+             .http_requests_used == .http_request_budget and
              .external_monetary_spend_eur == 0 and
              .technical_baseline == "PRESENT" and
              .legal == "MISSING" and
@@ -117,12 +123,21 @@ jobs:
              .public_launch == "NO_GO"' \
             "$RESULT_DIR/result.json"
           jq -e \
-            '.baseline_payload.concept_count == 375 and
-             (.baseline_payload.concepts | length) == 375 and
+            '.baseline_payload.count_reconciliation.category_xml_records == 378 and
+             .baseline_payload.count_reconciliation.catalogue_non_retired_entries == 375 and
+             .baseline_payload.count_reconciliation.retired_entries == 3 and
+             .baseline_payload.count_reconciliation.non_retired_unique_authority_codes == 342 and
+             .baseline_payload.count_reconciliation.non_retired_duplicate_record_surplus == 33 and
+             .baseline_payload.count_reconciliation.canonical_concepts == 345 and
+             .baseline_payload.count_reconciliation.sparql_concepts == 345 and
+             .baseline_payload.count_reconciliation.rdf_sparql_exact_parity == true and
+             (.baseline_payload.canonical_concepts | length) == 345 and
+             (.baseline_payload.published_entries | length) == 375 and
+             (.baseline_payload.retired_entries | length) == 3 and
              .baseline_payload.authority_boundary.f01_state == "BLOCKED" and
              .baseline_payload.authority_boundary.campaign_authorised == false and
              .baseline_payload.rights_boundary.iso_or_other_standard_text_ingestion == false' \
-            "$RESULT_DIR/official-online-baseline.v0.1.json"
+            "$RESULT_DIR/official-online-baseline.v0.2.json"
           jq -e \
             '.canonical_state == "BLOCKED" and
              .countries_covered == [] and
@@ -149,7 +164,7 @@ jobs:
             sha256sum scripts/verify_gate7_f01_official_baseline_contract.py
             sha256sum apps/api/tests/test_f01_official_baseline.py
             sha256sum "$RESULT_DIR/contract-result.json"
-            sha256sum "$RESULT_DIR/official-online-baseline.v0.1.json"
+            sha256sum "$RESULT_DIR/official-online-baseline.v0.2.json"
             sha256sum "$RESULT_DIR/result.json"
           } > "$RESULT_DIR/exact-provenance.txt"
 
