@@ -29,6 +29,18 @@ async function expectPersistentWorkspace(page: Page) {
   await expect(page.locator('main[data-adapter="persistent-real"]')).toBeVisible();
 }
 
+async function expectWorkspaceDeniedWithoutSeat(page: Page) {
+  const unavailable = page.getByRole("alert").filter({
+    hasText: "Persistent workspace unavailable"
+  });
+  await expect(unavailable).toBeVisible();
+  await expect(unavailable.getByText("seat_membership_required")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Persistent opportunity intelligence" })
+  ).not.toBeVisible();
+  await expect(page.locator('main[data-adapter="persistent-real"]')).not.toBeVisible();
+}
+
 async function expectAuthenticatedCommercialState(page: Page) {
   await expect(
     page.getByRole("button", { name: "PLAN · Sin plan", exact: true })
@@ -126,8 +138,8 @@ async function confirmCheckout(page: Page) {
   await expect(page).toHaveURL(/\/billing\/test-checkout/);
   await page.getByRole("button", { name: "Confirmar pago de prueba" }).click();
   await expect(page).toHaveURL(/billing=success/);
-  await expectPersistentWorkspace(page);
   await expect(page.getByText(/Plan: Professional · acceso ACTIVE/)).toBeVisible();
+  await expectWorkspaceDeniedWithoutSeat(page);
   await page
     .getByRole("complementary", { name: "Plan y facturación" })
     .getByRole("button", { name: "Cerrar" })
@@ -171,6 +183,12 @@ test("governs seats through a passwordless AAL2 session", async ({
     await expect(page.getByRole("button", { name: "SEATS · 1/3" })).toBeVisible();
     await expect(seatPanel.getByText("Professional")).toBeVisible();
     await expect(seatPanel.getByText("FLAT_TIER")).toBeVisible();
+
+    const workspaceUnavailable = page.getByRole("alert").filter({
+      hasText: "Persistent workspace unavailable"
+    });
+    await workspaceUnavailable.getByRole("button", { name: "Retry" }).click();
+    await expectPersistentWorkspace(page);
 
     await seatPanel.getByLabel("Work email").fill("member2@example.test");
     await seatPanel.getByLabel("Initial role").selectOption("BID_REVIEWER");
