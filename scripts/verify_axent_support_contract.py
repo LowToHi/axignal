@@ -13,6 +13,7 @@ REQUIRED_FILES = {
     "apps/api/src/axignal_api/axent_routes.py",
     "apps/api/tests/test_axent_policy.py",
     "apps/api/tests/test_axent_knowledge.py",
+    "apps/api/tests/test_axent_routes.py",
     "apps/web/lib/axent-server.ts",
     "apps/web/app/help/page.tsx",
     "apps/web/app/api/axent/conversations/route.ts",
@@ -37,6 +38,7 @@ def main() -> None:
     ).read_text()
     policy = Path("apps/api/src/axignal_api/axent_policy.py").read_text()
     routes = Path("apps/api/src/axignal_api/axent_routes.py").read_text()
+    route_tests = Path("apps/api/tests/test_axent_routes.py").read_text()
     knowledge = Path("apps/api/src/axignal_api/axent_knowledge.py").read_text()
     application = Path("apps/api/src/axignal_api/application.py").read_text()
     dockerfile = Path("infra/postgres/Dockerfile").read_text()
@@ -81,6 +83,8 @@ def main() -> None:
     assert "review_status = 'APPROVED'" in knowledge
     assert "AX-CONTRACT-AXENT-SUPPORT-E2E-v1.0" in knowledge_seed
     assert "require_identity" in routes
+    assert "dependency_overrides[require_identity]" in route_tests
+    assert "KNOWLEDGE_REVISION" in route_tests
     assert "axent_router" in application
     assert "AxentHelpEntry" in help_page
     assert "/api/axent/conversations" in help_component
