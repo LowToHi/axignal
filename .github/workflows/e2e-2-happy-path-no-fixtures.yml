@@ -174,7 +174,8 @@ jobs:
             -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE" \
             -f "$AXIGNAL_BILLING_TEST_COMPOSE_FILE" \
             --profile workers up --build --detach research-worker
-          curl --fail --silent http://127.0.0.1:18080/api/health | tee artifacts/web-health.json
+          curl --fail --silent http://127.0.0.1:18080/api/health \
+            | tee artifacts/web-health.json
 
       - name: Install Chromium
         run: pnpm exec playwright install --with-deps chromium
@@ -193,14 +194,21 @@ jobs:
             --dsn "$AXIGNAL_DATABASE_URL" \
             --subject usr_pilot_ci \
             | tee artifacts/e2e-2-persistence.txt
-          grep -qx 'AX_E2E_HAPPY_PATH_NO_FIXTURES_PASS' artifacts/e2e-2-persistence.txt
+          grep -qx 'AX_E2E_HAPPY_PATH_NO_FIXTURES_PASS' \
+            artifacts/e2e-2-persistence.txt
 
       - name: Verify evidence sanitation and exact output
         shell: bash
         run: |
           set -euo pipefail
-          ! grep -R -E 'sk_(live|test)_|rk_(live|test)_|whsec_|card_number|credential_public_key|session_token|recovery_code' artifacts playwright-report test-results || false
-          test "$(grep -R -h -c '^AX_E2E_HAPPY_PATH_NO_FIXTURES_PASS$' artifacts | awk '{s+=$1} END {print s+0}')" = "1"
+          ! grep -R -E \
+            'sk_(live|test)_|rk_(live|test)_|whsec_|card_number|credential_public_key|session_token|recovery_code' \
+            artifacts playwright-report test-results || false
+          marker_count="$(
+            grep -R -h -c '^AX_E2E_HAPPY_PATH_NO_FIXTURES_PASS$' artifacts \
+              | awk '{s+=$1} END {print s+0}'
+          )"
+          test "$marker_count" = "1"
           python - <<'PY'
           import json
           from pathlib import Path
@@ -208,9 +216,14 @@ jobs:
           static = json.loads(Path("artifacts/static-contract.json").read_text())
           assert static["status"] == "PASS", static
           health = json.loads(Path("artifacts/web-health.json").read_text())
-          assert health["buildSha"] == Path("artifacts/exact-head.txt").read_text().split("exact_head_sha=", 1)[1].splitlines()[0]
+          exact = Path("artifacts/exact-head.txt").read_text()
+          expected_sha = exact.split("exact_head_sha=", 1)[1].splitlines()[0]
+          assert health["buildSha"] == expected_sha, health
           text = Path("artifacts/e2e-2-persistence.txt").read_text()
-          payload = json.loads(text.rsplit("\nAX_E2E_HAPPY_PATH_NO_FIXTURES_PASS", 1)[0])
+          payload_text = text.rsplit(
+              "\nAX_E2E_HAPPY_PATH_NO_FIXTURES_PASS", 1
+          )[0]
+          payload = json.loads(payload_text)
           assert payload["status"] == "PASS", payload
           assert payload["cross_tenant_visible_rows"] == 0, payload
           assert payload["fixture_identifiers"] == 0, payload
@@ -232,17 +245,27 @@ jobs:
 
       - name: Dump diagnostics on failure
         if: failure()
+        shell: bash
         run: |
-          docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" \
-            -f "$AXIGNAL_PILOT_COMPOSE_FILE" \
-            -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE" \
-            -f "$AXIGNAL_BILLING_TEST_COMPOSE_FILE" logs --no-color
+          if [[ -f "$AXIGNAL_PILOT_ENV_FILE" ]]; then
+            docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" \
+              -f "$AXIGNAL_PILOT_COMPOSE_FILE" \
+              -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE" \
+              -f "$AXIGNAL_BILLING_TEST_COMPOSE_FILE" logs --no-color
+          else
+            echo "Topology environment was not created; no service logs exist."
+          fi
 
       - name: Stop disposable services
         if: always()
+        shell: bash
         run: |
-          docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" \
-            -f "$AXIGNAL_PILOT_COMPOSE_FILE" \
-            -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE" \
-            -f "$AXIGNAL_BILLING_TEST_COMPOSE_FILE" \
-            --profile workers down --volumes --remove-orphans
+          if [[ -f "$AXIGNAL_PILOT_ENV_FILE" ]]; then
+            docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" \
+              -f "$AXIGNAL_PILOT_COMPOSE_FILE" \
+              -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE" \
+              -f "$AXIGNAL_BILLING_TEST_COMPOSE_FILE" \
+              --profile workers down --volumes --remove-orphans
+          else
+            echo "Topology environment was not created; teardown is a no-op."
+          fi
