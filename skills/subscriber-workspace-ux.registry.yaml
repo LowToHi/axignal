@@ -1,0 +1,150 @@
+version: 1.0.0
+goal_id: AXIGNAL-GOAL-001
+status: NORMATIVE_CANDIDATE
+canonical_brand: AXIGNAL
+canonical_domain: axignal.com
+routing:
+  scope: subscriber workspace, authenticated product shell and tender operations UX/UI
+  required_for:
+  - product navigation changes
+  - subscriber-facing workspace implementation
+  - design-system changes
+  - data-dense tables or grids
+  - tender workflow UX
+  - responsive or accessibility changes
+  mandatory_skill_ids:
+  - subscriber-workspace-product-architect
+  - procurement-workflow-ux-researcher
+  - information-architecture-navigation-designer
+  - axignal-design-system-brand-guardian
+  - enterprise-interaction-designer
+  - bid-workspace-ux-engineer
+  - requirements-evidence-matrix-designer
+  - document-collaboration-ux-engineer
+  - accessibility-inclusive-interaction-auditor
+  - ux-content-multilingual-designer
+  - frontend-component-system-engineer
+  - visual-regression-usability-test-engineer
+  fail_when_required_skill_missing: true
+  implementing_skill_may_self_approve_gate: false
+skills:
+- skill_id: subscriber-workspace-product-architect
+  version: 1.0.0
+  state: ACTIVE
+  category: product
+  phases: [P07, P08, P17, P20, P23, P25, P26, P27]
+  contracts: ['00', '05', '12', '14', '31']
+  triggers: [subscriber-workspace, product-shell, capability-map, operational-workflow]
+  purpose: Keep the complete subscriber toolset, authority boundaries and end-to-end product loop coherent.
+  required_outputs: [capability inventory, route map, functional status matrix, acceptance journey map]
+  fail_conditions: [dead control, orphan capability, contract-only feature presented as operational, incomplete tender lifecycle]
+- skill_id: procurement-workflow-ux-researcher
+  version: 1.0.0
+  state: ACTIVE
+  category: research
+  phases: [P01, P08, P23, P27]
+  contracts: ['01', '05', '11', '12', '31']
+  triggers: [bid-manager, proposal-manager, go-no-go, requirements, submission]
+  purpose: Research qualified B2G users and convert observed work, failure costs and terminology into falsifiable UX decisions.
+  required_outputs: [research protocol, task analysis, evidence log, falsification criteria]
+  fail_conditions: [desk research represented as user validation, unqualified participant evidence, unsupported persona assumption]
+- skill_id: information-architecture-navigation-designer
+  version: 1.0.0
+  state: ACTIVE
+  category: experience
+  phases: [P08, P17, P20, P23]
+  contracts: ['05', '12', '14', '31']
+  triggers: [sidebar, navigation, menu, route, breadcrumb, command-palette]
+  purpose: Design global and contextual navigation with stable labels, maximum two-level hierarchy and reproducible context.
+  required_outputs: [global IA, workspace IA, route contract, responsive navigation behavior]
+  fail_conditions: [three-level sidebar, icon-only primary navigation, hidden critical destination, context loss]
+- skill_id: axignal-design-system-brand-guardian
+  version: 1.0.0
+  state: ACTIVE
+  category: design-system
+  phases: [P08, P17, P23, P27]
+  contracts: ['05', '13', '20', '21', '31']
+  triggers: [design-token, component-style, theme, landing-parity, visual-language]
+  purpose: Translate the landing's Signal Teal mineral identity into a calm, dense and unmistakably AXIGNAL product system.
+  required_outputs: [token map, component anatomy, theme parity, brand deviation review]
+  fail_conditions: [generic template appearance, semantic colour collision, landing token duplication, decorative motion]
+- skill_id: enterprise-interaction-designer
+  version: 1.0.0
+  state: ACTIVE
+  category: experience
+  phases: [P07, P08, P17, P20, P23]
+  contracts: ['05', '12', '13', '14']
+  triggers: [workflow, drawer, dialog, bulk-action, undo, error-recovery]
+  purpose: Design reversible, high-density professional interactions with explicit state, consequence and recovery.
+  required_outputs: [interaction statechart, empty/error/recovery states, keyboard model, mutation feedback contract]
+  fail_conditions: [irreversible hidden mutation, false success, modal focus failure, pointer-only interaction]
+- skill_id: bid-workspace-ux-engineer
+  version: 1.0.0
+  state: ACTIVE
+  category: procurement
+  phases: [P07, P08, P23]
+  contracts: ['07', '08', '11', '12', '31']
+  triggers: [tender-workspace, qualification, readiness, clarification, submission-handoff]
+  purpose: Materialise the complete tender lifecycle as an operational subscriber workspace without granting AXIGNAL representation authority.
+  required_outputs: [workspace routes, readiness model, next-action model, external-handoff UX]
+  fail_conditions: [submission authority ambiguity, readiness without gates, missing amendment impact, workflow ends at dossier]
+- skill_id: requirements-evidence-matrix-designer
+  version: 1.0.0
+  state: ACTIVE
+  category: procurement
+  phases: [P06, P08, P23]
+  contracts: ['02', '08', '12', '13', '16']
+  triggers: [requirement-matrix, eligibility, evidence-gap, response-status, data-grid]
+  purpose: Design the atomic requirement-to-evidence-to-response matrix with accessible high-density interaction and exact source anchors.
+  required_outputs: [column contract, filter and saved-view contract, row detail model, accessible reading mode]
+  fail_conditions: [missing source anchor, unknown treated as pass, grid without keyboard model, stale evidence hidden]
+- skill_id: document-collaboration-ux-engineer
+  version: 1.0.0
+  state: ACTIVE
+  category: documents
+  phases: [P06, P08, P20, P23]
+  contracts: ['06', '08', '16', '26', '27']
+  triggers: [document-pack, version, translation, review, comment, approval]
+  purpose: Unify source documents, subscriber documents, response sections, versions, anchors, translations, reviews and signatures.
+  required_outputs: [document state model, version comparison, review workflow, rights-aware export contract]
+  fail_conditions: [draft overwrites source, translation loses provenance, approval survives invalidating change, restricted export]
+- skill_id: accessibility-inclusive-interaction-auditor
+  version: 1.0.0
+  state: ACTIVE
+  category: accessibility
+  phases: [P08, P17, P20, P23, P25, P27]
+  contracts: ['05', '12', '13', '16', '31']
+  triggers: [wcag, keyboard, screen-reader, zoom, reduced-motion, data-grid]
+  purpose: Enforce WCAG 2.2 AA, non-visual equivalents and manual inclusive testing across every primary subscriber workflow.
+  required_outputs: [a11y test plan, keyboard map, screen-reader findings, manual acceptance record]
+  fail_conditions: [critical a11y defect, focus obscured, drag-only operation, colour-only meaning, automated-only acceptance]
+- skill_id: ux-content-multilingual-designer
+  version: 1.0.0
+  state: ACTIVE
+  category: content
+  phases: [P06, P08, P23, P27]
+  contracts: ['05', '14', '16', '21', '31']
+  triggers: [microcopy, status, error, locale, terminology, authority-copy]
+  purpose: Produce concise, domain-correct, localisable interface language that preserves legal, temporal and authority distinctions.
+  required_outputs: [terminology map, status copy, error and recovery copy, locale parity evidence]
+  fail_conditions: [hard-coded visible string, authority ambiguity, uppercase status overload, semantic locale drift]
+- skill_id: frontend-component-system-engineer
+  version: 1.0.0
+  state: ACTIVE
+  category: frontend
+  phases: [P08, P17, P20, P23, P25]
+  contracts: ['04', '05', '07', '12', '20', '31']
+  triggers: [component, storybook, primitive, responsive, server-state, design-system]
+  purpose: Build typed reusable accessible components, route-level state and capability-derived navigation without recreating product authority in the client.
+  required_outputs: [component API, state stories, bundle and dependency review, server/client boundary]
+  fail_conditions: [client authority, one-off component drift, unreviewed dependency, missing component states]
+- skill_id: visual-regression-usability-test-engineer
+  version: 1.0.0
+  state: ACTIVE
+  category: quality
+  phases: [P08, P23, P27]
+  contracts: ['08', '09', '13', '18', '31']
+  triggers: [playwright, visual-regression, usability, axe, browser-matrix]
+  purpose: Turn component, browser, accessibility and qualified-user evidence into reproducible UX release gates.
+  required_outputs: [component interaction tests, visual baselines, E2E journeys, usability scorecard]
+  fail_conditions: [snapshot update without review, fixture-only E2E, unmeasured core journey, implementer self-approval]

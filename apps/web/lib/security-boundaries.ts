@@ -46,6 +46,30 @@ export function normaliseOrigin(value: string): string | null {
   }
 }
 
+export function resolveRequestAuthorityOrigin(input: {
+  host: string | null;
+  forwardedProtocol: string | null;
+  requestOrigin: string;
+}): string {
+  const host = input.host?.trim();
+  if (!host) return input.requestOrigin;
+
+  const forwardedProtocol = input.forwardedProtocol
+    ?.split(",")[0]
+    ?.trim()
+    .toLowerCase();
+  const requestProtocol = normaliseOrigin(input.requestOrigin)
+    ? new URL(input.requestOrigin).protocol.replace(":", "")
+    : null;
+  const protocol = forwardedProtocol || requestProtocol;
+
+  if (protocol !== "http" && protocol !== "https") {
+    return input.requestOrigin;
+  }
+
+  return `${protocol}://${host}`;
+}
+
 export function legacyPasswordLoginAllowed(input: {
   environment: string | undefined;
   enabled: string | undefined;

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import "@axignal/design-tokens/tokens.css";
 import "./globals.css";
 import "./context.css";
@@ -11,11 +12,16 @@ export const metadata: Metadata = {
   description: "Authenticated investigation shell for AXIGNAL."
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children
 }: Readonly<{ children: React.ReactNode }>) {
+  const cookieStore = await cookies();
+  const storedTheme = cookieStore.get("axignal_theme")?.value;
+  const storedLocale = cookieStore.get("axignal_locale")?.value;
+  const theme = storedTheme === "light" ? "light" : "dark";
+  const locale = ["en", "es", "fr", "de", "pt", "it"].includes(storedLocale ?? "") ? storedLocale! : "en";
   return (
-    <html lang="es" data-theme="dark">
+    <html lang={locale} data-theme={theme} suppressHydrationWarning>
       <body>{children}</body>
     </html>
   );

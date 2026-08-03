@@ -1,0 +1,70 @@
+{
+  "schema_version": "axignal.subscriber-workspace-ux-contract/v1",
+  "goal_id": "AXIGNAL-GOAL-001",
+  "status": "NORMATIVE_CANDIDATE",
+  "observed_head": "abd37a5844c79288858e94ec308e85abe26822fe",
+  "public_launch_authorised": false,
+  "perfect_ux_claim_authorised": false,
+  "design_target": "WCAG_2_2_AA",
+  "architecture": {
+    "shells": ["INTELLIGENCE_SHELL", "OPERATIONS_SHELL"],
+    "sidebar_max_depth": 2,
+    "global_destinations": ["COMMAND_CENTER", "OPPORTUNITIES", "INVESTIGATIONS", "WORKSPACES", "LIBRARIES", "ALERTS", "REPORTS", "TEAM", "PLAN_BILLING", "SETTINGS", "METHODOLOGY", "HELP"],
+    "workspace_destinations": ["OVERVIEW", "QUALIFICATION", "REQUIREMENTS", "EVIDENCE", "DOCUMENTS", "WORKPLAN", "CLARIFICATIONS", "CHANGES", "COMMERCIAL", "TEAM_APPROVALS", "SUBMISSION", "OUTCOME_LEARNING", "AUDIT"]
+  },
+  "current_capability_inventory": [
+    {"capability":"AUTHENTICATION","status":"OPERATIONAL_BOUNDED","surface":"AuthGate and passwordless identity"},
+    {"capability":"INVESTIGATION_CONTEXT","status":"OPERATIONAL_BOUNDED","surface":"InvestigationShell"},
+    {"capability":"RESEARCH_RUN_PROGRESS","status":"OPERATIONAL_BOUNDED","surface":"ResearchProgressBridge"},
+    {"capability":"HUMAN_REVIEW","status":"OPERATIONAL_BOUNDED","surface":"HumanReviewBridge"},
+    {"capability":"SEAT_GOVERNANCE","status":"OPERATIONAL_BOUNDED","surface":"SeatGovernanceBridge"},
+    {"capability":"BILLING","status":"OPERATIONAL_CANDIDATE","surface":"BillingBridge"},
+    {"capability":"GLOBAL_PRODUCT_NAVIGATION","status":"PARTIAL","surface":"icon rail and shell"},
+    {"capability":"OPPORTUNITY_DISCOVERY","status":"PARTIAL_SYNTHETIC_UI","surface":"InvestigationShell"},
+    {"capability":"TENDER_WORKSPACE_DOMAIN","status":"CONTRACT_IMPLEMENTED","surface":"procurement domain and P08 contracts"},
+    {"capability":"TENDER_WORKSPACE_UI","status":"MISSING","surface":null},
+    {"capability":"CONTACT_CHANNELS","status":"DOMAIN_CONTRACT_ONLY","surface":null},
+    {"capability":"CLARIFICATIONS","status":"DOMAIN_CONTRACT_ONLY","surface":null},
+    {"capability":"REQUIREMENTS_MATRIX","status":"MISSING","surface":null},
+    {"capability":"DOCUMENT_WORKSPACE","status":"BACKEND_PARTIAL_UI_MISSING","surface":null},
+    {"capability":"WORKPLAN","status":"CONTRACT_ONLY","surface":null},
+    {"capability":"CHANGE_IMPACT_CENTER","status":"MISSING","surface":null},
+    {"capability":"COMMERCIAL_REVIEW","status":"CONTRACT_ONLY","surface":null},
+    {"capability":"SUBMISSION_HANDOFF","status":"DOMAIN_CONTRACT_ONLY","surface":null},
+    {"capability":"OUTCOME_LEARNING_UI","status":"MISSING","surface":null},
+    {"capability":"AUDIT_UI","status":"PARTIAL","surface":"billing and human-review evidence"}
+  ],
+  "functional_integrity": {
+    "dead_controls_allowed": 0,
+    "silent_fixture_fallback_allowed": false,
+    "client_authority_allowed": false,
+    "false_success_allowed": false,
+    "external_action_without_subscriber_approval_allowed": false,
+    "required_states": ["LOADING", "EMPTY", "READY", "PARTIAL", "STALE", "RESTRICTED", "READ_ONLY", "SOURCE_UNAVAILABLE", "RECOVERABLE_ERROR", "TERMINAL_ERROR"]
+  },
+  "brand": {
+    "shared_token_package_required": true,
+    "primary_accent": "SIGNAL_TEAL",
+    "dark_first": true,
+    "light_theme_required": true,
+    "generic_dashboard_prohibited": true,
+    "continuous_ambient_motion_prohibited": true,
+    "semantic_colour_independent_from_brand": true
+  },
+  "acceptance": {
+    "minimum_qualified_participants": 8,
+    "minimum_non_english_sessions": 2,
+    "navigation_success_min": 0.9,
+    "opportunity_to_evidence_success_min": 0.9,
+    "blocking_requirement_detection_min": 0.9,
+    "source_inference_distinction_min": 0.95,
+    "context_retention_min": 0.95,
+    "external_authority_comprehension": 1.0,
+    "critical_accessibility_defects_max": 0,
+    "destructive_action_errors_max": 0,
+    "sus_median_min": 85,
+    "current_shell_preference_min": 0.75
+  },
+  "required_skill_registry": "skills/subscriber-workspace-ux.registry.yaml",
+  "required_documents": ["docs/research/2026-08-01-subscriber-workspace-tooling-ux-study.md", "docs/experience/subscriber-workspace-information-architecture-v1.md", "skills/subscriber-workspace-ux/README.md"]
+}

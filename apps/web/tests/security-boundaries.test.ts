@@ -7,6 +7,7 @@ import {
   legacyPasswordLoginAllowed,
   MUTATION_ORIGIN_EXEMPT_PATHS,
   normaliseOrigin,
+  resolveRequestAuthorityOrigin,
   securityHeaders,
 } from "../lib/security-boundaries";
 
@@ -97,6 +98,44 @@ test("normalises only authority-only HTTP origins", () => {
   assert.equal(normaliseOrigin("https://axignal.com/path"), null);
   assert.equal(normaliseOrigin("https://user:pass@axignal.com"), null);
   assert.equal(normaliseOrigin("javascript:alert(1)"), null);
+});
+
+test("derives the development request origin from the browser-facing authority", () => {
+  assert.equal(
+    resolveRequestAuthorityOrigin({
+      host: "127.0.0.1:3000",
+      forwardedProtocol: null,
+      requestOrigin: "http://localhost:3000",
+    }),
+    "http://127.0.0.1:3000",
+  );
+  assert.equal(
+    resolveRequestAuthorityOrigin({
+      host: "preview.axignal.test",
+      forwardedProtocol: "https, http",
+      requestOrigin: "http://127.0.0.1:3000",
+    }),
+    "https://preview.axignal.test",
+  );
+});
+
+test("falls back to the parsed request origin when authority metadata is absent or unsafe", () => {
+  assert.equal(
+    resolveRequestAuthorityOrigin({
+      host: null,
+      forwardedProtocol: null,
+      requestOrigin: "http://localhost:3000",
+    }),
+    "http://localhost:3000",
+  );
+  assert.equal(
+    resolveRequestAuthorityOrigin({
+      host: "localhost:3000",
+      forwardedProtocol: "javascript",
+      requestOrigin: "invalid-origin",
+    }),
+    "invalid-origin",
+  );
 });
 
 test("disables legacy password login in production and by default", () => {
