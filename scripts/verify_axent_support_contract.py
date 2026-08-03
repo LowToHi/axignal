@@ -5,15 +5,21 @@ REQUIRED_FILES = {
     "infra/postgres/149-axent-support-parent-keys.sql",
     "infra/postgres/150-axent-customer-support.sql",
     "infra/postgres/151-axent-support-hardening.sql",
+    "infra/postgres/1515-axent-knowledge-document-timestamps.sql",
     "infra/postgres/152-axent-governed-knowledge-seed.sql",
+    "infra/postgres/153-axent-consent-escalation-roundtrip.sql",
     "apps/api/src/axignal_api/axent_policy.py",
     "apps/api/src/axignal_api/axent_repository.py",
     "apps/api/src/axignal_api/axent_context.py",
     "apps/api/src/axignal_api/axent_knowledge.py",
+    "apps/api/src/axignal_api/axent_consent.py",
     "apps/api/src/axignal_api/axent_routes.py",
+    "apps/api/src/axignal_api/axent_consent_routes.py",
+    "apps/api/src/axignal_api/axent_admin_routes.py",
     "apps/api/tests/test_axent_policy.py",
     "apps/api/tests/test_axent_knowledge.py",
     "apps/api/tests/test_axent_routes.py",
+    "apps/api/tests/test_axent_consent.py",
     "apps/web/lib/axent-server.ts",
     "apps/web/app/help/page.tsx",
     "apps/web/app/api/axent/conversations/route.ts",
@@ -33,11 +39,19 @@ def main() -> None:
     ).read_text()
     sql = Path("infra/postgres/150-axent-customer-support.sql").read_text()
     parent_keys = Path("infra/postgres/149-axent-support-parent-keys.sql").read_text()
+    consent_sql = Path(
+        "infra/postgres/153-axent-consent-escalation-roundtrip.sql"
+    ).read_text()
     knowledge_seed = Path(
         "infra/postgres/152-axent-governed-knowledge-seed.sql"
     ).read_text()
     policy = Path("apps/api/src/axignal_api/axent_policy.py").read_text()
     routes = Path("apps/api/src/axignal_api/axent_routes.py").read_text()
+    consent = Path("apps/api/src/axignal_api/axent_consent.py").read_text()
+    consent_routes = Path(
+        "apps/api/src/axignal_api/axent_consent_routes.py"
+    ).read_text()
+    admin_routes = Path("apps/api/src/axignal_api/axent_admin_routes.py").read_text()
     route_tests = Path("apps/api/tests/test_axent_routes.py").read_text()
     knowledge = Path("apps/api/src/axignal_api/axent_knowledge.py").read_text()
     application = Path("apps/api/src/axignal_api/application.py").read_text()
@@ -67,9 +81,17 @@ def main() -> None:
     ):
         assert table in sql or table in parent_keys
 
+    for table in (
+        "support_confirmations",
+        "support_case_events",
+        "support_notifications",
+    ):
+        assert table in consent_sql
+
     assert "UNIQUE (tenant_id, message_id)" in parent_keys
     assert "UNIQUE (tenant_id, invocation_id)" in parent_keys
     assert "FORCE ROW LEVEL SECURITY" in sql
+    assert "FORCE ROW LEVEL SECURITY" in consent_sql
     assert "current_tenant_id()" in sql
     assert "ALLOW_WITH_CONFIRMATION" in policy
     assert "tool_not_allowlisted" in policy
@@ -82,10 +104,17 @@ def main() -> None:
     assert "document.tenant_id = %s" in knowledge
     assert "review_status = 'APPROVED'" in knowledge
     assert "AX-CONTRACT-AXENT-SUPPORT-E2E-v1.0" in knowledge_seed
+    assert "hmac.compare_digest" in consent
+    assert "expected_before_state_hash" in consent
+    assert "expires_at" in consent_routes
+    assert "human_reviewer_subjects" in admin_routes
+    assert "transition_case" in admin_routes
     assert "require_identity" in routes
     assert "dependency_overrides[require_identity]" in route_tests
     assert "KNOWLEDGE_REVISION" in route_tests
     assert "axent_router" in application
+    assert "axent_consent_router" in application
+    assert "axent_admin_router" in application
     assert "AxentHelpEntry" in help_page
     assert "/api/axent/conversations" in help_component
     assert "Autoridades consultadas" in help_component
@@ -95,7 +124,9 @@ def main() -> None:
         "149-axent-support-parent-keys.sql",
         "150-axent-customer-support.sql",
         "151-axent-support-hardening.sql",
+        "1515-axent-knowledge-document-timestamps.sql",
         "152-axent-governed-knowledge-seed.sql",
+        "153-axent-consent-escalation-roundtrip.sql",
     ):
         assert migration in dockerfile
 
@@ -105,6 +136,8 @@ def main() -> None:
     print("AXENT_SERVER_AUTHORITY_CONTEXT_IMPLEMENTED")
     print("AXENT_READ_ONLY_SUPPORT_IMPLEMENTED")
     print("AXENT_HELP_SURFACE_IMPLEMENTED")
+    print("AXENT_CONSENT_BOUNDARY_IMPLEMENTED")
+    print("AXENT_HUMAN_ESCALATION_LIFECYCLE_IMPLEMENTED")
     print("AXENT_FINAL_E2E_NOT_YET_CLAIMED")
 
 
