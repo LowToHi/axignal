@@ -5,7 +5,6 @@ import io
 import json
 
 import pytest
-
 from scripts.build_gate7_f01_official_baseline import (
     BaselineError,
     apply_notations_csv,
