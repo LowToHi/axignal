@@ -83,7 +83,9 @@ class AxentContextBuilder:
                 "authority": asdict(
                     AuthorityEnvelope(
                         authority="commercial_ledger",
-                        version=str((entitlement or {}).get("provider_event_id") or "current"),
+                        version=str(
+                            (entitlement or {}).get("provider_event_id") or "current"
+                        ),
                         obtained_at=now,
                         freshness="TRANSACTIONAL_READ",
                         sensitivity="CONFIDENTIAL",
@@ -92,6 +94,22 @@ class AxentContextBuilder:
             },
             "workspace": workspace,
             "research_run": run,
+            "account_projection": {
+                "workspaces": projection.get("workspaces", []),
+                "research_runs": projection.get("research_runs", []),
+                "documents": projection.get("documents", []),
+                "exports": projection.get("exports", []),
+                "audit": projection.get("audit", []),
+                "authority": asdict(
+                    AuthorityEnvelope(
+                        authority="subscriber_workspace_repository",
+                        version="bootstrap/v1",
+                        obtained_at=now,
+                        freshness="TRANSACTIONAL_READ",
+                        sensitivity="TENANT_PRIVATE",
+                    )
+                ),
+            },
             "operational": {
                 "source": "persistent_runtime",
                 "workspace_found": workspace is not None if workspace_id else None,
