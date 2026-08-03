@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      - name: Reconcile versioned RDF and live SPARQL
+      - name: Reconcile all official distributions
         env:
           CATALOGUE_URL: >-
             https://op.europa.eu/en/web/eu-vocabularies/at-dataset/-/resource/dataset/country
@@ -34,11 +34,13 @@ jobs:
           from __future__ import annotations
 
           import html
+          import io
           import json
           import re
           import urllib.parse
           import urllib.request
           import xml.etree.ElementTree as ET
+          import zipfile
           from collections import Counter
           from html.parser import HTMLParser
           from pathlib import Path
@@ -66,6 +68,18 @@ jobs:
                       return html.unescape(match.group(1))
               raise SystemExit(f"Unable to extract {name}")
 
+          def fetch(url: str, name: str, limit: int) -> bytes:
+              request = urllib.request.Request(
+                  url,
+                  headers={"User-Agent": "AXIGNAL-F01-diagnostic/0.1"},
+              )
+              with urllib.request.urlopen(request, timeout=60) as response:
+                  payload = response.read(limit + 1)
+                  if len(payload) > limit:
+                      raise SystemExit(f"{name} exceeded byte budget")
+              Path("diagnostic", name).write_bytes(payload)
+              return payload
+
           namespace = extract(
               (
                   r"conceptDisplayPortletNamespace\s*=\s*['\"]([^'\"]+)['\"]",
@@ -82,15 +96,7 @@ jobs:
               f"{render_url}{separator}"
               f"{urllib.parse.quote(namespace, safe='_')}tabPageId=14"
           )
-          request = urllib.request.Request(
-              downloads_url,
-              headers={"User-Agent": "AXIGNAL-F01-diagnostic/0.1"},
-          )
-          with urllib.request.urlopen(request, timeout=60) as response:
-              tab_payload = response.read(5_000_001)
-              if len(tab_payload) > 5_000_000:
-                  raise SystemExit("Downloads tab exceeded byte budget")
-          Path("diagnostic/downloads-tab.html").write_bytes(tab_payload)
+          tab_payload = fetch(downloads_url, "downloads-tab.html", 5_000_000)
 
           class LinkParser(HTMLParser):
               def __init__(self) -> None:
@@ -122,32 +128,21 @@ jobs:
 
           parser = LinkParser()
           parser.feed(tab_payload.decode("utf-8", errors="replace"))
-          distributions = [
-              {
-                  "name": link["text"],
-                  "url": urllib.parse.urljoin(downloads_url, link["href"]),
-              }
+          distributions = {
+              link["text"]: urllib.parse.urljoin(downloads_url, link["href"])
               for link in parser.links
-          ]
-          rdf_distribution = next(
-              item for item in distributions
-              if item["name"] == "countries-skos.rdf"
-          )
-          rdf_request = urllib.request.Request(
-              rdf_distribution["url"],
-              headers={"User-Agent": "AXIGNAL-F01-diagnostic/0.1"},
-          )
-          with urllib.request.urlopen(rdf_request, timeout=60) as response:
-              rdf_payload = response.read(25_000_001)
-              if len(rdf_payload) > 25_000_000:
-                  raise SystemExit("RDF distribution exceeded byte budget")
-          Path("diagnostic/countries-skos.rdf").write_bytes(rdf_payload)
+          }
 
+          rdf_payload = fetch(
+              distributions["countries-skos.rdf"],
+              "countries-skos.rdf",
+              25_000_000,
+          )
           root = ET.fromstring(rdf_payload)
           rdf_concepts: dict[str, dict[str, object]] = {}
-          root_tags = Counter()
+          rdf_root_tags = Counter()
           for resource in root:
-              root_tags[resource.tag] += 1
+              rdf_root_tags[resource.tag] += 1
               uri = resource.attrib.get(f"{{{RDF_NS}}}about")
               if not uri or not uri.startswith(COUNTRY_PREFIX):
                   continue
@@ -168,7 +163,6 @@ jobs:
                   "uri": uri,
                   "is_skos_concept": is_concept,
                   "label_en": labels.get("en"),
-                  "label_languages": sorted(labels),
                   "root_tag": resource.tag,
               }
 
@@ -194,34 +188,81 @@ jobs:
                   }
               )
           )
-          query_request = urllib.request.Request(
+          sparql_payload = fetch(
               query_url,
-              headers={
-                  "Accept": "application/sparql-results+json",
-                  "User-Agent": "AXIGNAL-F01-diagnostic/0.1",
-              },
+              "sparql-full-list.json",
+              5_000_000,
           )
-          with urllib.request.urlopen(query_request, timeout=60) as response:
-              sparql_payload = response.read(5_000_001)
-              if len(sparql_payload) > 5_000_000:
-                  raise SystemExit("SPARQL result exceeded byte budget")
-          Path("diagnostic/sparql-full-list.json").write_bytes(sparql_payload)
           sparql_document = json.loads(sparql_payload)
           sparql_concepts = {
               row["country_uri"]["value"]: row["country_en"]["value"]
               for row in sparql_document["results"]["bindings"]
           }
 
+          def xml_profile(name: str, payload: bytes) -> dict[str, object]:
+              xml_root = ET.fromstring(payload)
+              tags = Counter(element.tag for element in xml_root.iter())
+              attributes = Counter(
+                  key
+                  for element in xml_root.iter()
+                  for key in element.attrib
+              )
+              country_uri_values = sorted(
+                  {
+                      value
+                      for element in xml_root.iter()
+                      for value in element.attrib.values()
+                      if value.startswith(COUNTRY_PREFIX)
+                  }
+              )
+              likely_country_elements = [
+                  element
+                  for element in xml_root.iter()
+                  if "countr" in element.tag.casefold()
+              ]
+              return {
+                  "name": name,
+                  "bytes": len(payload),
+                  "root_tag": xml_root.tag,
+                  "total_elements": sum(tags.values()),
+                  "top_tags": tags.most_common(30),
+                  "top_attributes": attributes.most_common(30),
+                  "country_uri_value_count": len(country_uri_values),
+                  "likely_country_element_count": len(likely_country_elements),
+              }
+
+          gc_payload = fetch(
+              distributions["Country.gc"],
+              "Country.gc",
+              25_000_000,
+          )
+          cat_payload = fetch(
+              distributions["countries.xml"],
+              "countries.xml",
+              25_000_000,
+          )
+          atto_payload = fetch(
+              distributions["ATTO_XML_Countries-and-territories.zip"],
+              "ATTO_XML_Countries-and-territories.zip",
+              50_000_000,
+          )
+          with zipfile.ZipFile(io.BytesIO(atto_payload)) as archive:
+              atto_members = [
+                  {
+                      "name": item.filename,
+                      "size": item.file_size,
+                      "compressed_size": item.compress_size,
+                  }
+                  for item in archive.infolist()
+              ]
+
           rdf_set = set(rdf_concepts).difference({f"{COUNTRY_PREFIX}OP_DATPRO"})
           sparql_set = set(sparql_concepts)
-          rdf_only = sorted(rdf_set - sparql_set)
-          sparql_only = sorted(sparql_set - rdf_set)
           diagnosis = {
-              "catalogue_url": CATALOGUE_URL,
-              "downloads_url": downloads_url,
-              "distributions": distributions,
+              "declared_catalogue_entry_count": 375,
+              "distributions": sorted(distributions),
               "rdf_bytes": len(rdf_payload),
-              "rdf_country_resource_count_excluding_reserved": len(rdf_set),
+              "rdf_resource_count_excluding_reserved": len(rdf_set),
               "rdf_skos_concept_count_excluding_reserved": sum(
                   bool(rdf_concepts[uri]["is_skos_concept"])
                   for uri in rdf_set
@@ -230,15 +271,14 @@ jobs:
                   bool(rdf_concepts[uri]["label_en"])
                   for uri in rdf_set
               ),
+              "rdf_root_tags": dict(sorted(rdf_root_tags.items())),
               "sparql_count": len(sparql_set),
-              "rdf_only_count": len(rdf_only),
-              "sparql_only_count": len(sparql_only),
-              "rdf_only": [rdf_concepts[uri] for uri in rdf_only],
-              "sparql_only": [
-                  {"uri": uri, "label_en": sparql_concepts[uri]}
-                  for uri in sparql_only
-              ],
-              "rdf_root_tags": dict(sorted(root_tags.items())),
+              "rdf_only": sorted(rdf_set - sparql_set),
+              "sparql_only": sorted(sparql_set - rdf_set),
+              "country_gc": xml_profile("Country.gc", gc_payload),
+              "countries_xml": xml_profile("countries.xml", cat_payload),
+              "atto_zip_bytes": len(atto_payload),
+              "atto_members": atto_members,
           }
           Path("diagnostic/diagnosis.json").write_text(
               json.dumps(diagnosis, indent=2, ensure_ascii=False, sort_keys=True)
