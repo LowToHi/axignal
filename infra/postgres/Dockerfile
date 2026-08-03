@@ -35,3 +35,4 @@ COPY 123-trial-abuse-runtime.sql /docker-entrypoint-initdb.d/123-axignal-trial-a
 COPY 124-identity-clone-detection-hardening.sql /docker-entrypoint-initdb.d/124-axignal-identity-clone-hardening.sql
 COPY 130-organic-discovery-founder-admin.sql /docker-entrypoint-initdb.d/130-axignal-organic-discovery.sql
 COPY 131-organic-discovery-alert-lifecycle.sql /docker-entrypoint-initdb.d/131-axignal-organic-alerts.sql
+COPY 140-subscriber-workspace-live.sql /docker-entrypoint-initdb.d/140-axignal-subscriber-workspace.sql
