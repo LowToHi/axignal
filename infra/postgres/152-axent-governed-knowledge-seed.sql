@@ -1,5 +1,7 @@
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
+-- Insert document authorities without a current revision first. The current-revision
+-- foreign key is immediate, so the revision must exist before the pointer is set.
 INSERT INTO axignal_global.knowledge_documents (
   knowledge_document_id,
   scope,
@@ -19,7 +21,7 @@ INSERT INTO axignal_global.knowledge_documents (
   'Límites y autoridad de Axent',
   'ACTIVE',
   'AXIGNAL_SUPPORT_AUTHORITY',
-  '4a1f2ae1-0000-4000-8000-000000000101'
+  NULL
 )
 ON CONFLICT (knowledge_document_id) DO NOTHING;
 
@@ -90,6 +92,13 @@ INSERT INTO axignal_global.knowledge_chunks (
 )
 ON CONFLICT (chunk_id) DO NOTHING;
 
+UPDATE axignal_global.knowledge_documents
+SET current_revision_id = '4a1f2ae1-0000-4000-8000-000000000101',
+    updated_at = now()
+WHERE knowledge_document_id = '4a1f2ae1-0000-4000-8000-000000000001'
+  AND current_revision_id IS DISTINCT FROM
+      '4a1f2ae1-0000-4000-8000-000000000101';
+
 INSERT INTO axignal_global.knowledge_documents (
   knowledge_document_id,
   scope,
@@ -109,7 +118,7 @@ INSERT INTO axignal_global.knowledge_documents (
   'Autoridad comercial, pagos y recuperación',
   'ACTIVE',
   'AXIGNAL_COMMERCIAL_AUTHORITY',
-  '4a1f2ae1-0000-4000-8000-000000000102'
+  NULL
 )
 ON CONFLICT (knowledge_document_id) DO NOTHING;
 
@@ -179,3 +188,10 @@ INSERT INTO axignal_global.knowledge_chunks (
   'es'
 )
 ON CONFLICT (chunk_id) DO NOTHING;
+
+UPDATE axignal_global.knowledge_documents
+SET current_revision_id = '4a1f2ae1-0000-4000-8000-000000000102',
+    updated_at = now()
+WHERE knowledge_document_id = '4a1f2ae1-0000-4000-8000-000000000002'
+  AND current_revision_id IS DISTINCT FROM
+      '4a1f2ae1-0000-4000-8000-000000000102';
