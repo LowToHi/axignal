@@ -18,26 +18,99 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      - name: Fetch catalogue client implementation
+      - name: Enumerate catalogue download distributions
+        env:
+          CATALOGUE_URL: >-
+            https://op.europa.eu/en/web/eu-vocabularies/at-dataset/-/resource/dataset/country
         run: |
           set -euo pipefail
           curl --fail --silent --show-error --location \
-            'https://op.europa.eu/o/opportal-conceptDisplay/js/conceptDisplay.js' \
-            --output conceptDisplay.js
+            --header 'User-Agent: AXIGNAL-F01-diagnostic/0.1' \
+            "$CATALOGUE_URL" \
+            --output catalogue.html
           python - <<'PY'
+          from __future__ import annotations
+
+          import html
+          import re
+          import urllib.parse
+          import urllib.request
+          from html.parser import HTMLParser
           from pathlib import Path
-          text = Path('conceptDisplay.js').read_text(errors='replace')
-          for needle in ('tabPageRenderUrl', 'tabPageId', 'tabPageName'):
-              print(f'### {needle}')
-              start = 0
-              found = False
-              while True:
-                  index = text.find(needle, start)
-                  if index < 0:
-                      break
-                  found = True
-                  print(text[max(0, index - 1200):index + 2200])
-                  start = index + len(needle)
-              if not found:
-                  print('NOT_FOUND')
+
+          PAGE = Path("catalogue.html").read_text(errors="replace")
+
+          def extract(patterns: tuple[str, ...], name: str) -> str:
+              for pattern in patterns:
+                  match = re.search(pattern, PAGE, re.DOTALL)
+                  if match:
+                      return html.unescape(match.group(1))
+              raise SystemExit(f"Unable to extract {name}")
+
+          namespace = extract(
+              (
+                  r"conceptDisplayPortletNamespace\s*=\s*['\"]([^'\"]+)['\"]",
+                  r"portletNamespace\s*=\s*['\"]([^'\"]+)['\"]",
+              ),
+              "concept display namespace",
+          )
+          render_url = extract(
+              (r"tabPageRenderUrl\s*=\s*['\"]([^'\"]+)['\"]",),
+              "tab page render URL",
+          )
+          separator = "&" if "?" in render_url else "?"
+          downloads_url = (
+              f"{render_url}{separator}"
+              f"{urllib.parse.quote(namespace, safe='_')}tabPageId=14"
+          )
+          request = urllib.request.Request(
+              downloads_url,
+              headers={"User-Agent": "AXIGNAL-F01-diagnostic/0.1"},
+          )
+          with urllib.request.urlopen(request, timeout=60) as response:
+              payload = response.read(5_000_001)
+              if len(payload) > 5_000_000:
+                  raise SystemExit("Downloads tab exceeded byte budget")
+          Path("downloads-tab.html").write_bytes(payload)
+
+          class LinkParser(HTMLParser):
+              def __init__(self) -> None:
+                  super().__init__()
+                  self.links: list[dict[str, str]] = []
+                  self.current: dict[str, str] | None = None
+
+              def handle_starttag(
+                  self,
+                  tag: str,
+                  attrs: list[tuple[str, str | None]],
+              ) -> None:
+                  if tag != "a":
+                      return
+                  values = dict(attrs)
+                  href = values.get("href")
+                  if href:
+                      self.current = {"href": href, "text": ""}
+
+              def handle_data(self, data: str) -> None:
+                  if self.current is not None:
+                      self.current["text"] += data
+
+              def handle_endtag(self, tag: str) -> None:
+                  if tag == "a" and self.current is not None:
+                      self.current["text"] = " ".join(
+                          self.current["text"].split()
+                      )
+                      self.links.append(self.current)
+                      self.current = None
+
+          parser = LinkParser()
+          parser.feed(payload.decode("utf-8", errors="replace"))
+          print(f"NAMESPACE={namespace}")
+          print(f"DOWNLOADS_URL={downloads_url}")
+          print(f"DOWNLOADS_BYTES={len(payload)}")
+          print(f"LINK_COUNT={len(parser.links)}")
+          for index, link in enumerate(parser.links, start=1):
+              absolute = urllib.parse.urljoin(downloads_url, link["href"])
+              print(f"LINK_{index}_TEXT={link['text']}")
+              print(f"LINK_{index}_URL={absolute}")
           PY
