@@ -201,9 +201,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ! grep -R -E \
-            'sk_(live|test)_|rk_(live|test)_|whsec_|card_number|credential_public_key|session_token|recovery_code' \
-            artifacts playwright-report test-results || false
+          sensitive_pattern='sk_(live|test)_|rk_(live|test)_|whsec_|card_number|credential_public_key|session_token|recovery_code'
+          if grep -R -E "$sensitive_pattern" \
+            artifacts playwright-report test-results; then
+            echo "Sensitive evidence pattern detected." >&2
+            exit 1
+          fi
           marker_count="$(
             grep -R -h -c '^AX_E2E_HAPPY_PATH_NO_FIXTURES_PASS$' artifacts \
               | awk '{s+=$1} END {print s+0}'
