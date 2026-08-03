@@ -6,7 +6,6 @@ from uuid import UUID, uuid4
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
 
-from axignal_api.axent_action_repository import AxentActionRepository
 from axignal_api.axent_consent import (
     ConsentError,
     canonical_hash,
@@ -15,6 +14,7 @@ from axignal_api.axent_consent import (
 )
 from axignal_api.axent_context import AxentContextBuilder
 from axignal_api.axent_policy import AxentDecision, decide_tool
+from axignal_api.axent_restore_repository import AxentRestoreRepository
 from axignal_api.identity import AuthenticatedIdentity, require_identity
 from axignal_api.settings import Settings
 
@@ -24,7 +24,7 @@ Authenticated = Annotated[AuthenticatedIdentity, Depends(require_identity)]
 
 class MaterialAction(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    action_type: Literal["archive_workspace"]
+    action_type: Literal["archive_workspace", "restore_workspace"]
     parameters: dict[str, Any]
     confirmation_token: str = Field(min_length=80, max_length=4096)
     idempotency_key: str = Field(min_length=16, max_length=200)
@@ -53,7 +53,7 @@ def execute_material_action(
     if not settings.identity_assertion_secret:
         raise HTTPException(status_code=503, detail="axent_consent_secret_unavailable")
 
-    repository = AxentActionRepository(settings.database_url)
+    repository = AxentRestoreRepository(settings.database_url)
     conversation = repository.get_conversation(
         tenant_id=identity.tenant_id,
         conversation_id=conversation_id,
@@ -106,8 +106,13 @@ def execute_material_action(
     if workspace_id != workspace["workspace_id"]:
         raise HTTPException(status_code=409, detail="workspace_context_mismatch")
 
+    execute = (
+        repository.archive_workspace
+        if command.action_type == "archive_workspace"
+        else repository.restore_workspace
+    )
     try:
-        receipt = repository.archive_workspace(
+        receipt = execute(
             tenant_id=identity.tenant_id,
             conversation_id=conversation_id,
             workspace_id=workspace_id,
