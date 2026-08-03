@@ -90,6 +90,11 @@ async function loginWithPasskey(page: Page, context: BrowserContext) {
   return { cdp, authenticatorId: authenticator.authenticatorId };
 }
 
+async function refreshBillingPanel(page: Page) {
+  const refresh = page.getByRole("button", { name: "Actualizar" });
+  if (await refresh.isVisible().catch(() => false)) await refresh.click();
+}
+
 async function emitProviderEvent(page: Page, action: ProviderAction) {
   const result = await page.evaluate(async (requestedAction) => {
     const response = await fetch("/api/billing/test/provider-event", {
@@ -100,12 +105,39 @@ async function emitProviderEvent(page: Page, action: ProviderAction) {
     return {
       ok: response.ok,
       status: response.status,
-      text: await response.text()
+      body: await response.json()
     };
   }, action);
-  expect(result.ok, `${action} ${result.status}: ${result.text}`).toBeTruthy();
-  const refresh = page.getByRole("button", { name: "Actualizar" });
-  if (await refresh.isVisible().catch(() => false)) await refresh.click();
+  expect(result.ok, `${action} ${result.status}: ${JSON.stringify(result.body)}`).toBeTruthy();
+  await refreshBillingPanel(page);
+  return result.body as {
+    events?: Array<{ disposition?: string }>;
+    state?: string;
+  };
+}
+
+async function reconcileBilling(page: Page) {
+  const result = await page.evaluate(async () => {
+    const response = await fetch("/api/billing/reconcile", { method: "POST" });
+    return {
+      ok: response.ok,
+      status: response.status,
+      body: await response.json()
+    };
+  });
+  expect(
+    result.ok,
+    `RECONCILE ${result.status}: ${JSON.stringify(result.body)}`
+  ).toBeTruthy();
+  await refreshBillingPanel(page);
+  return result.body as {
+    result: "MATCH" | "REPAIRED";
+    drift_fields: string[];
+    local_state: string;
+    provider_state: string;
+    seat_capacity: number;
+    browser_entitlement_authority: boolean;
+  };
 }
 
 test("executes the complete authenticated commercial round trip", async ({
@@ -158,10 +190,13 @@ test("executes the complete authenticated commercial round trip", async ({
       page.getByText("STRIPE_INVOICE_PAID", { exact: true }).first()
     ).toBeVisible();
 
-    await emitProviderEvent(page, "REPLAY_RENEWAL");
+    const replay = await emitProviderEvent(page, "REPLAY_RENEWAL");
+    expect(replay.events).toHaveLength(2);
+    expect(replay.events?.[1]?.disposition).toBe("DUPLICATE");
     await expect(page.getByText(/Plan: Professional · acceso ACTIVE/)).toBeVisible();
 
-    await emitProviderEvent(page, "OUT_OF_ORDER");
+    const stale = await emitProviderEvent(page, "OUT_OF_ORDER");
+    expect(stale.events?.[0]?.disposition).toBe("STALE");
     await expect(page.getByText(/Plan: Professional · acceso ACTIVE/)).toBeVisible();
 
     await emitProviderEvent(page, "PAYMENT_FAILED");
@@ -171,6 +206,21 @@ test("executes the complete authenticated commercial round trip", async ({
       page.getByText("STRIPE_INVOICE_PAYMENT_FAILED", { exact: true }).first()
     ).toBeVisible();
 
+    const repaired = await reconcileBilling(page);
+    expect(repaired.result).toBe("REPAIRED");
+    expect(repaired.drift_fields).toContain("state");
+    expect(repaired.local_state).toBe("ACTIVE");
+    expect(repaired.provider_state).toBe("ACTIVE");
+    expect(repaired.seat_capacity).toBe(3);
+    expect(repaired.browser_entitlement_authority).toBe(false);
+    await expect(page.getByText(/Plan: Professional · acceso ACTIVE/)).toBeVisible();
+
+    const matched = await reconcileBilling(page);
+    expect(matched.result).toBe("MATCH");
+    expect(matched.drift_fields).toEqual([]);
+
+    await emitProviderEvent(page, "PAYMENT_FAILED");
+    await expect(page.getByText(/acceso SUSPENDED/)).toBeVisible();
     await emitProviderEvent(page, "REACTIVATE");
     await expect(page.getByText(/Plan: Professional · acceso ACTIVE/)).toBeVisible();
 
