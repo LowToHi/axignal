@@ -36,3 +36,4 @@ COPY 124-identity-clone-detection-hardening.sql /docker-entrypoint-initdb.d/124-
 COPY 130-organic-discovery-founder-admin.sql /docker-entrypoint-initdb.d/130-axignal-organic-discovery.sql
 COPY 131-organic-discovery-alert-lifecycle.sql /docker-entrypoint-initdb.d/131-axignal-organic-alerts.sql
 COPY 140-subscriber-workspace-live.sql /docker-entrypoint-initdb.d/140-axignal-subscriber-workspace.sql
+COPY 141-commercial-paid-invoice-recovery.sql /docker-entrypoint-initdb.d/141-axignal-paid-invoice-recovery.sql
