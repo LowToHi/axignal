@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, ConfigDict, Field
 
 from axignal_api.axent_context import AxentContextBuilder
+from axignal_api.axent_knowledge import AxentKnowledgeRepository, knowledge_coverage
 from axignal_api.axent_policy import AxentDecision, decide_tool
 from axignal_api.axent_repository import AxentRepository
 from axignal_api.identity import AuthenticatedIdentity, require_identity
@@ -201,6 +202,25 @@ def _answer_from_context(
     )
 
 
+def _answer_from_knowledge(
+    hits: list[dict[str, Any]],
+) -> tuple[str, list[dict[str, str]], str]:
+    coverage = knowledge_coverage(hits)
+    if not hits:
+        return "", [], coverage
+    selected = hits[:2]
+    body = "\n\n".join(str(hit["content"]) for hit in selected)
+    citations = [
+        _citation(
+            authority_type="KNOWLEDGE_REVISION",
+            authority_id=hit["revision_id"],
+            authority_version=f"v{hit['version']}:{hit['content_hash']}",
+        )
+        for hit in selected
+    ]
+    return body, citations, coverage
+
+
 @router.post("/conversations", status_code=status.HTTP_201_CREATED)
 def create_conversation(
     command: ConversationCreate,
@@ -273,6 +293,18 @@ def create_message(
         research_run_id=conversation.get("research_run_id"),
     )
     answer, citations = _answer_from_context(command.content, context)
+    uncertainty: str | None = None if citations else "GENERAL_GUIDANCE_ONLY"
+    if not citations:
+        hits = AxentKnowledgeRepository(settings.database_url).search(
+            tenant_id=identity.tenant_id,
+            query=command.content,
+            language=str(conversation.get("language") or "es"),
+        )
+        grounded_answer, knowledge_citations, coverage = _answer_from_knowledge(hits)
+        if grounded_answer:
+            answer = grounded_answer
+            citations = knowledge_citations
+            uncertainty = None if coverage == "SUFFICIENT" else "PARTIAL_KNOWLEDGE"
     axent_message = repository.append_message(
         tenant_id=identity.tenant_id,
         conversation_id=conversation_id,
@@ -299,7 +331,7 @@ def create_message(
         "user_message": user_message,
         "message": axent_message,
         "citations": stored_citations,
-        "uncertainty": None if citations else "GENERAL_GUIDANCE_ONLY",
+        "uncertainty": uncertainty,
         "needs_human": False,
     }
 
@@ -349,10 +381,15 @@ def invoke_tool(
             "get_research_run_status": context["research_run"],
             "get_workspace_status": context["workspace"],
         }
-        result = {
-            "value": allowlisted.get(command.tool_name),
-            "authority": "server",
-        }
+        value = allowlisted.get(command.tool_name)
+        if command.tool_name == "search_help_knowledge":
+            query = str(command.input.get("query") or "").strip()
+            value = AxentKnowledgeRepository(settings.database_url).search(
+                tenant_id=identity.tenant_id,
+                query=query,
+                language=str(conversation.get("language") or "es"),
+            )
+        result = {"value": value, "authority": "server"}
         result_status = "SUCCEEDED"
     invocation = repository.record_tool_invocation(
         tenant_id=identity.tenant_id,
