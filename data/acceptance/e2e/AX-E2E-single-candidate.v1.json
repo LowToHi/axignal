@@ -6,7 +6,7 @@
   "scope_frozen": true,
   "objective": "Consolidate the complete pre-production E2E engineering line into one release branch, exact head, Git tree, configuration, CI matrix and artifact set without expanding product scope.",
   "active_release_branch": "release/axignal-e2e-final",
-  "controller_parent_sha": "cf0cd02763c23bc60364107f3d752e38de92b21a",
+  "controller_parent_sha": "16eb716e3609e4cc9777be50adea295e0b44156c",
   "lineage": {
     "dominant_engineering_head": "ca17c4756e4bbbfee72b4547d281df0379e91cfa",
     "dominant_engineering_tree": "ac7ca65ecc67b3327a13829da9c82ba750ebf709",
@@ -86,6 +86,18 @@
       "evidence": "Commercial Shell E2E on cf0cd02763c23bc60364107f3d752e38de92b21a exposed a 401 billing summary because the disabled-workspace legacy fallback bypassed AuthGate.",
       "resolution": "Resolve required authentication and identity before choosing either the legacy shell or Subscriber Workspace.",
       "scope_expanded": false
+    },
+    {
+      "repair": "DEDICATED_GATE_INSTALLS_INHERITED_VALIDATOR_DEPENDENCY",
+      "evidence": "The E2E-1 verifier passed on 16eb716e3609e4cc9777be50adea295e0b44156c, then the inherited Subscriber Workspace validator failed to import yaml.",
+      "resolution": "Install PyYAML before invoking inherited bounded validators, matching the original Subscriber Workspace contract workflow.",
+      "scope_expanded": false
+    },
+    {
+      "repair": "COMMERCIAL_E2E_USES_CURRENT_PASSWORDLESS_AUTHORITY",
+      "evidence": "After restoring AuthGate, the commercial browser test attempted the deliberately disabled legacy password route and received legacy_password_login_disabled.",
+      "resolution": "Use the verified test-email bootstrap and resident WebAuthn passkey flow already proven by P21-T02, while retaining a negative assertion that legacy password login stays disabled.",
+      "scope_expanded": false
     }
   ],
   "authority": {
@@ -108,6 +120,8 @@
   ],
   "safe_defaults": {
     "authentication_precedes_shell_selection": true,
+    "legacy_password_login_remains_disabled": true,
+    "commercial_e2e_uses_passwordless_passkey": true,
     "subscriber_workspace_feature_flag_required": true,
     "fixture_mode_must_be_explicit": true,
     "legacy_shell_fallback_preserved": true,
