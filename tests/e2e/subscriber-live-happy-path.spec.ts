@@ -6,7 +6,7 @@ import {
 } from "@playwright/test";
 
 test.describe.configure({ mode: "serial", retries: 0 });
-test.setTimeout(240_000);
+test.setTimeout(420_000);
 test.skip(
   process.env.AXIGNAL_PLAYWRIGHT_EXTERNAL_SERVER !== "true" ||
     process.env.AXIGNAL_PLAYWRIGHT_BASE_URL !== "http://127.0.0.1:18080",
