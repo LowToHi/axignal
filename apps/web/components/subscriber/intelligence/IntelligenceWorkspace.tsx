@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useCallback, useMemo, useRef, useState } from "react";
 
 import { GraphSurface } from "./GraphSurface";
 import { SemanticGlobe } from "./SemanticGlobe";
@@ -104,6 +104,11 @@ export function IntelligenceWorkspace({
   const selectedOpportunity = data.opportunities.find((item) => item.id === data.context.selectedOpportunityId) ?? data.opportunities[0];
   const visibleClaims = useMemo(() => claimFilter === "all" ? data.claims : data.claims.filter((claim) => claim.kind === claimFilter), [claimFilter, data.claims]);
   const effectiveLens = lens === "AUTO" ? "GLOBE" : lens;
+  const opportunitySelectRef = useRef(onOpportunitySelect);
+  opportunitySelectRef.current = onOpportunitySelect;
+  const selectOpportunity = useCallback((id: string) => {
+    opportunitySelectRef.current(id);
+  }, []);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -156,9 +161,9 @@ export function IntelligenceWorkspace({
 
       <main className={styles.primary}>
         <div className={styles.canvasArea} data-lens={effectiveLens}>
-          {effectiveLens === "GLOBE" ? <SemanticGlobe opportunities={data.opportunities} selectedOpportunityId={data.context.selectedOpportunityId} label={data.context.geography} onSelect={onOpportunitySelect} /> : null}
+          {effectiveLens === "GLOBE" ? <SemanticGlobe opportunities={data.opportunities} selectedOpportunityId={data.context.selectedOpportunityId} label={data.context.geography} onSelect={selectOpportunity} /> : null}
           {effectiveLens === "GRAPH" ? <GraphSurface entities={data.graphEntities} relationships={data.graphRelationships} selectedOpportunityId={data.context.selectedOpportunityId} /> : null}
-          {effectiveLens === "DUAL" ? <div className={styles.dual}><SemanticGlobe opportunities={data.opportunities} selectedOpportunityId={data.context.selectedOpportunityId} label={data.context.geography} onSelect={onOpportunitySelect} /><GraphSurface entities={data.graphEntities} relationships={data.graphRelationships} selectedOpportunityId={data.context.selectedOpportunityId} /></div> : null}
+          {effectiveLens === "DUAL" ? <div className={styles.dual}><SemanticGlobe opportunities={data.opportunities} selectedOpportunityId={data.context.selectedOpportunityId} label={data.context.geography} onSelect={selectOpportunity} /><GraphSurface entities={data.graphEntities} relationships={data.graphRelationships} selectedOpportunityId={data.context.selectedOpportunityId} /></div> : null}
         </div>
         <Timeline points={data.timeline} selectedId={selectedTimelineId} onSelect={(id) => { setSelectedTimelineId(id); onTimelineSelect?.(id); }} />
         <section className={styles.metrics} aria-label="Investigation metrics">

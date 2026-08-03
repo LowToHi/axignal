@@ -10,6 +10,8 @@ const publicOrigin = new URL(baseURL).origin;
 
 export default defineConfig({
   testDir: "./tests/e2e",
+  // AXIGNAL Globe uses shared WebGL resources; one worker keeps candidate E2E deterministic.
+  workers: 1,
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,

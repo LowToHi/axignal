@@ -49,9 +49,9 @@
   ],
   "acceptance_evidence": [
     {"evidence_type":"DOCUMENT","description":"Capability, route, permission, state, token, event and fixture boundaries are frozen before parallel implementation.","required":true,"location":"docs/experience/subscriber-workspace-implementation-contract-v1.md","status":"PRESENT"},
-    {"evidence_type":"TEST","description":"Type, component, API and permission suites pass on the exact head.","required":true,"location":"artifacts/subscriber-workspace/test-evidence.json","status":"MISSING"},
-    {"evidence_type":"SCREENSHOT","description":"Reviewed desktop, tablet and mobile screenshots for dark and light themes.","required":true,"location":"artifacts/subscriber-workspace/visual/","status":"MISSING"},
-    {"evidence_type":"SECURITY_REVIEW","description":"Tenant, role, entitlement, export and handoff negative cases pass.","required":true,"location":"artifacts/subscriber-workspace/security-review.md","status":"MISSING"},
+    {"evidence_type":"TEST","description":"Type, component, API and permission suites pass on the exact head.","required":true,"location":"artifacts/subscriber-workspace/test-evidence.json","status":"PRESENT"},
+    {"evidence_type":"SCREENSHOT","description":"Reviewed desktop, tablet and mobile screenshots for dark and light themes.","required":true,"location":"artifacts/subscriber-workspace/visual/","status":"PRESENT"},
+    {"evidence_type":"SECURITY_REVIEW","description":"Tenant, role, entitlement, export and handoff negative cases pass.","required":true,"location":"artifacts/subscriber-workspace/security-review.md","status":"PRESENT"},
     {"evidence_type":"USER_RESEARCH","description":"Qualified-user study meets the normative UX thresholds.","required":true,"location":null,"status":"MISSING"}
   ],
   "impacts": {"security":"MATERIAL","privacy":"MATERIAL","data_rights":"MATERIAL","regulatory":"MATERIAL","multilingual":"MATERIAL","epistemic":"MATERIAL","billing":"MATERIAL"},

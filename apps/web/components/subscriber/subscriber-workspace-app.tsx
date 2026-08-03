@@ -20,6 +20,7 @@ import {
 import { GlobalDestination } from "./global-destinations";
 import { PageState } from "./page-state";
 import { ProductShell, type ShellIdentity, type ShellLocale, type ShellWorkspaceContext } from "./product-shell";
+import { AxentHome } from "./axent-home";
 import type {
   SubscriberWorkspaceActionRequest,
   SubscriberWorkspaceActionResult,
@@ -224,7 +225,9 @@ export function SubscriberWorkspaceApp({ serverIdentity }: AppProps) {
       const nextLocale = ["en", "es", "fr", "de", "pt", "it"].includes(savedLocale ?? "") ? savedLocale as ShellLocale : (body as SubscriberWorkspaceBootstrap).locale;
       const savedTheme = cookiePreferences.axignal_theme ?? window.localStorage.getItem("axignal:subscriber:theme");
       setLocale(nextLocale);
-      document.documentElement.dataset.theme = savedTheme === "light" || savedTheme === "dark" ? savedTheme : (body as SubscriberWorkspaceBootstrap).theme === "light" ? "light" : "dark";
+      const resolvedTheme = savedTheme === "light" || savedTheme === "dark" ? savedTheme : (body as SubscriberWorkspaceBootstrap).theme === "light" ? "light" : "dark";
+      document.documentElement.dataset.theme = resolvedTheme;
+      document.documentElement.style.colorScheme = resolvedTheme;
       setSelectedOpportunity((body as SubscriberWorkspaceBootstrap).route_data.opportunities[0]?.id ?? null);
     } catch (cause) {
       setViewState("source_unavailable");
@@ -239,6 +242,7 @@ export function SubscriberWorkspaceApp({ serverIdentity }: AppProps) {
     window.localStorage.setItem("axignal:subscriber:theme", nextTheme);
     document.cookie = `axignal_theme=${encodeURIComponent(nextTheme)}; Path=/; Max-Age=31536000; SameSite=Lax`;
     document.documentElement.dataset.theme = nextTheme;
+    document.documentElement.style.colorScheme = nextTheme;
   }
 
   function changeLocale(nextLocale: ShellLocale) {
@@ -306,6 +310,12 @@ export function SubscriberWorkspaceApp({ serverIdentity }: AppProps) {
     content = <PageState state="source_unavailable" {...(error ? { detail: error } : {})} onRetry={() => void load()} />;
   } else if (!bootstrap) {
     content = <PageState state="loading" />;
+  } else if (pathname === "/" || pathname === "/axent") {
+    content = <AxentHome
+      bootstrap={bootstrap}
+      onOpenWorkspace={(workspaceId) => router.push(`/workspaces/${workspaceId}/overview`)}
+      onHelp={() => router.push("/help")}
+    />;
   } else if (pathname === "/investigations") {
     content = <IntelligenceWorkspace
       data={intelligenceData(bootstrap, selectedOpportunity)}

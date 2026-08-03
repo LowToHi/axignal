@@ -80,7 +80,7 @@ function GenericDestination({ kind, onThemeChange }: { kind: string; onThemeChan
 }
 
 export function GlobalDestination({ pathname, onThemeChange, bootstrap }: { pathname: string; onThemeChange: (theme: "dark" | "light") => void; bootstrap: SubscriberWorkspaceBootstrap }) {
-  if (pathname === "/") return <CommandCenter bootstrap={bootstrap} />;
+  if (pathname === "/" || pathname === "/command-center") return <CommandCenter bootstrap={bootstrap} />;
   if (pathname.startsWith("/opportunities")) return <Opportunities bootstrap={bootstrap} />;
   if (pathname === "/workspaces") return <Workspaces bootstrap={bootstrap} />;
   if (pathname === "/team") return <div className={styles.page}><PageHeader eyebrow="Organisation governance" title="Team" description="Members, invitations, roles, capacity and approvals are resolved by the server. Visible roles do not grant authority by themselves."/><SeatGovernanceBridge/><HumanReviewBridge/></div>;

@@ -59,12 +59,14 @@ export type ShellWorkspaceContext = {
 type NavItem = {
   href: string;
   label: string;
-  icon: ComponentType<{ size?: number; strokeWidth?: number }>;
+  icon?: ComponentType<{ size?: number; strokeWidth?: number }>;
+  asset?: string;
   capability?: string;
 };
 
 const primary: NavItem[] = [
-  { href: "/", label: "Command Center", icon: Zap },
+  { href: "/axent", label: "AXENT", asset: "/axent.svg" },
+  { href: "/command-center", label: "Command Center", icon: Zap },
   { href: "/opportunities", label: "Opportunities", icon: Search },
   { href: "/investigations", label: "Investigations", icon: Globe2 },
   { href: "/workspaces", label: "Workspaces", icon: BriefcaseBusiness },
@@ -135,7 +137,7 @@ function GlobalNavigation({
             aria-current={current(item.href, pathname) ? "page" : undefined}
             title={collapsed ? item.label : undefined}
           >
-            <item.icon size={18} strokeWidth={1.65} />
+            {item.asset ? <img className={styles.navAsset} src={item.asset} alt="" width={18} height={18} /> : item.icon ? <item.icon size={18} strokeWidth={1.65} /> : null}
             {!collapsed && <span>{item.label}</span>}
           </Link>
         ))}
@@ -161,7 +163,7 @@ function GlobalNavigation({
             aria-current={current(item.href, pathname) ? "page" : undefined}
             title={collapsed ? item.label : undefined}
           >
-            <item.icon size={17} strokeWidth={1.65} />
+            {item.asset ? <img className={styles.navAsset} src={item.asset} alt="" width={17} height={17} /> : item.icon ? <item.icon size={17} strokeWidth={1.65} /> : null}
             {!collapsed && <span>{item.label}</span>}
           </Link>
         ))}
@@ -253,7 +255,7 @@ export function ProductShell({
       {fixtureMode && <div className={styles.fixtureBanner} role="status">ENGINEERING FIXTURE · NOT LIVE DATA</div>}
       <aside className={styles.sidebar} data-open={mobileOpen}>
         <div className={styles.brandRow}>
-          <Link href="/" className={styles.brand} aria-label="AXIGNAL Command Center">
+          <Link href="/axent" className={styles.brand} aria-label="AXIGNAL AXENT">
             <img src="/brand/axignal-isotipo.svg" alt="" width="26" height="26" />
             {!collapsed && <strong>AXIGNAL</strong>}
           </Link>
@@ -302,7 +304,7 @@ export function ProductShell({
             </div>
             <h2 id="command-title">Navigate</h2>
             <div className={styles.commandResults}>
-              {[...primary, ...secondary].filter((item) => item.label.toLowerCase().includes(query.toLowerCase())).map((item) => <button type="button" key={item.href} onClick={() => { router.push(item.href); setSearchOpen(false); }}><item.icon size={17} /><span>{item.label}</span></button>)}
+              {[...primary, ...secondary].filter((item) => item.label.toLowerCase().includes(query.toLowerCase())).map((item) => <button type="button" key={item.href} onClick={() => { router.push(item.href); setSearchOpen(false); }}>{item.asset ? <img className={styles.navAsset} src={item.asset} alt="" width={17} height={17} /> : item.icon ? <item.icon size={17} /> : null}<span>{item.label}</span></button>)}
             </div>
             <footer><span><kbd>Enter</kbd> open</span><span><kbd>Esc</kbd> close</span></footer>
           </section>
