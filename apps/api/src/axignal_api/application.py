@@ -1,6 +1,9 @@
 from axignal_api.axent_action_routes import router as axent_action_router
 from axignal_api.axent_admin_routes import router as axent_admin_router
 from axignal_api.axent_consent_routes import router as axent_consent_router
+from axignal_api.axent_material_action_routes import (
+    router as axent_material_action_router,
+)
 from axignal_api.axent_routes import router as axent_router
 from axignal_api.billing_read_routes import router as billing_read_router
 from axignal_api.billing_reconciliation_routes import (
@@ -38,6 +41,7 @@ app.include_router(subscriber_workspace_router)
 app.include_router(axent_router)
 app.include_router(axent_consent_router)
 app.include_router(axent_action_router)
+app.include_router(axent_material_action_router)
 app.include_router(axent_admin_router)
 app.include_router(entitlement_router)
 app.include_router(billing_router)
