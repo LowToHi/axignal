@@ -160,12 +160,16 @@ def main() -> None:
         "registerPasskey",
         "activateProfessional",
         "initialiseOwnerSeat",
+        "closeConsumedBillingResult",
         "Start ResearchRun",
+        "waitForResponse",
+        "ResearchRun creation failed",
         "src_ted_search_api_v3",
         "Persist document",
         "Create Markdown export",
         "EXPORT_CREATED",
-        'locator(\'[data-e2e-no-fixtures="true"][data-adapter="persistent-real"]\')',
+        "data-e2e-no-fixtures",
+        "persistent-real",
     )
 
     persistence = read("scripts/verify_e2e_2_persistence.py")
