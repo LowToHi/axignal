@@ -225,14 +225,14 @@ jobs:
           round_trip = json.loads(
               Path('artifacts/e2e-3-commercial-round-trip.json').read_text()
           )
-          assert round_trip['output'] == 'AX_E2E_COMMERCIAL_DETERMINISTIC_PASS'
+          assert round_trip['output'] == 'AX_E2E_COMMERCIAL_DETERMINISTIC_ROUND_TRIP_PASS'
           assert round_trip['external_stripe_verified'] is False
           assert round_trip['browser_entitlement_authority'] is False
-          assert round_trip['reconciliation'] == 'DETERMINISTIC_PROVIDER_VERIFIED'
+          assert round_trip['reconciliation'] == 'DETERMINISTIC_REPAIR_PASS'
           assert 'APPLIED' in round_trip['receipt_dispositions']
           assert 'STALE' in round_trip['receipt_dispositions']
           PY
-          printf '%s\n' AX_E2E_COMMERCIAL_DETERMINISTIC_PASS
+          printf '%s\n' AX_E2E_COMMERCIAL_DETERMINISTIC_ROUND_TRIP_PASS
 
       - name: Upload deterministic commercial evidence
         if: always()
