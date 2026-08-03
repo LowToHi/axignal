@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 import io
 import json
+from collections import Counter
 
 import pytest
 from scripts.build_gate7_f01_official_baseline import (
