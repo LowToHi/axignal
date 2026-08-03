@@ -6,7 +6,7 @@
   "scope_frozen": true,
   "objective": "Consolidate the complete pre-production E2E engineering line into one release branch, exact head, Git tree, configuration, CI matrix and artifact set without expanding product scope.",
   "active_release_branch": "release/axignal-e2e-final",
-  "controller_parent_sha": "16eb716e3609e4cc9777be50adea295e0b44156c",
+  "controller_parent_sha": "891436c463fc4fdc5b79cccd07b48a28a9f0369f",
   "lineage": {
     "dominant_engineering_head": "ca17c4756e4bbbfee72b4547d281df0379e91cfa",
     "dominant_engineering_tree": "ac7ca65ecc67b3327a13829da9c82ba750ebf709",
@@ -97,6 +97,12 @@
       "repair": "COMMERCIAL_E2E_USES_CURRENT_PASSWORDLESS_AUTHORITY",
       "evidence": "After restoring AuthGate, the commercial browser test attempted the deliberately disabled legacy password route and received legacy_password_login_disabled.",
       "resolution": "Use the verified test-email bootstrap and resident WebAuthn passkey flow already proven by P21-T02, while retaining a negative assertion that legacy password login stays disabled.",
+      "scope_expanded": false
+    },
+    {
+      "repair": "DEDICATED_GATE_INSTALLS_JSON_SCHEMA_VALIDATOR",
+      "evidence": "The exact-head E2E-1 verifier and Subscriber Workspace contract passed on 891436c463fc4fdc5b79cccd07b48a28a9f0369f, then the inherited P21 commercial validator failed to import jsonschema.",
+      "resolution": "Install jsonschema together with PyYAML before invoking inherited bounded validators.",
       "scope_expanded": false
     }
   ],
