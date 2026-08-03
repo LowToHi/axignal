@@ -128,6 +128,7 @@ services:
       AXIGNAL_DOCUMENT_PROPOSAL_UI_ENABLED: "true"
       AXIGNAL_HUMAN_REVIEW_UI_ENABLED: "true"
       AXIGNAL_VALIDATION_UI_ENABLED: "false"
+      AXIGNAL_SUBSCRIBER_WORKSPACE_ENABLED: "true"
     expose:
       - "3000"
     depends_on:
