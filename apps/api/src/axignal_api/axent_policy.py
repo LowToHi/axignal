@@ -56,6 +56,7 @@ CONFIRMATION_TOOLS = frozenset(
         "change_billing_contact",
         "disable_alert",
         "archive_workspace",
+        "restore_workspace",
         "revoke_integration",
     }
 )
