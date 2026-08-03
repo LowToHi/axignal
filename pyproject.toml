@@ -35,7 +35,7 @@ build-backend = "hatchling.build"
 packages = ["apps/api/src/axignal_api"]
 
 [tool.pytest.ini_options]
-pythonpath = [".", "apps/api/src"]
+pythonpath = [".", "apps/api/src", "scripts"]
 testpaths = ["apps/api/tests"]
 addopts = "-q --strict-markers --disable-warnings"
 
