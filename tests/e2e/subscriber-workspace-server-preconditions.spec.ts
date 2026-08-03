@@ -3,8 +3,10 @@ import { expect, test, type Page } from "@playwright/test";
 type Bootstrap = {
   tenant: { revision: number };
   route_data: {
+    summary: { deadlines_next_30_days: number };
     workspaces: Array<{
       id: string;
+      deadline: string;
       requirements: Array<{ id: string; evidence_ids: string[] }>;
     }>;
   };
@@ -15,6 +17,18 @@ async function loadBootstrap(page: Page): Promise<Bootstrap> {
   expect(response.status()).toBe(200);
   return response.json() as Promise<Bootstrap>;
 }
+
+test("derives the thirty-day deadline summary from actual workspace deadlines", async ({ page }) => {
+  const state = await loadBootstrap(page);
+  const now = Date.now();
+  const horizon = now + 30 * 24 * 60 * 60 * 1_000;
+  const expected = state.route_data.workspaces.filter((workspace) => {
+    const deadline = Date.parse(workspace.deadline);
+    return Number.isFinite(deadline) && deadline >= now && deadline <= horizon;
+  }).length;
+
+  expect(state.route_data.summary.deadlines_next_30_days).toBe(expected);
+});
 
 test("rejects requirement completion without linked verified evidence", async ({ page }) => {
   const state = await loadBootstrap(page);
