@@ -1,0 +1,126 @@
+{
+  "authorised_scope": {
+    "active_source": false,
+    "model_training_or_fine_tuning": false,
+    "paid_budget_eur": 0,
+    "private_campaign_only": true,
+    "product_admission": false,
+    "profiling_or_marketing": false,
+    "public_claim_contribution": false,
+    "public_redistribution": false,
+    "purpose": "Authorise only the private, bounded F01 evidence campaign and the legal/privacy handling of the exact retained technical baseline.",
+    "request_budget": 6,
+    "retention_days": 30,
+    "source_state_during_campaign": "CANDIDATE"
+  },
+  "binding": {
+    "automatic_human_approval": false,
+    "automatic_human_signature": false,
+    "permissions_generated_automatically": false,
+    "survives_assertion_change": false,
+    "survives_evidence_expiry": false,
+    "survives_manifest_change": false,
+    "survives_target_head_change": false
+  },
+  "decision_contract": {
+    "admitted_decisions": [
+      "APPROVE",
+      "APPROVE_WITH_CONDITIONS",
+      "REJECT"
+    ],
+    "assertions_exact_match_required": true,
+    "authorising_decisions": [
+      "APPROVE",
+      "APPROVE_WITH_CONDITIONS"
+    ],
+    "comment_author_must_be_human": true,
+    "decision_max_expires_at": "2026-08-30T23:59:59Z",
+    "expiry_strictly_before_evidence": true,
+    "manifest_match_required": true,
+    "required_authorities": [
+      "LEGAL",
+      "PRIVACY_DATA_RIGHTS"
+    ],
+    "required_fields": [
+      "authority",
+      "decision",
+      "scope",
+      "manifest_reference",
+      "technical_head_sha",
+      "reviewed_at",
+      "expires_at",
+      "signature",
+      "conditions",
+      "assertions"
+    ],
+    "signature_scheme": "github-identity-v1",
+    "technical_head_match_required": true
+  },
+  "legal_required_assertions": {
+    "attribution_required": true,
+    "derived_classification_permitted": true,
+    "iso_publication_redistribution_permitted": false,
+    "iso_standard_text_ingestion_permitted": false,
+    "no_distortion_required": true,
+    "private_access_permitted": true,
+    "public_claims_permitted": false,
+    "public_redistribution_permitted": false,
+    "source_version_disclosure_required": true,
+    "temporary_evidence_retention_permitted": true,
+    "third_party_components_separately_authorised": false
+  },
+  "library_id": "AX-LIB-F01",
+  "official_evidence": {
+    "artifact_digest": "sha256:16a21241a43a0f6d4e7994179723110d7b227d719264d1dd8cdbb02608389e74",
+    "artifact_expires_at": "2026-09-02T01:44:49Z",
+    "artifact_id": 8842563273,
+    "baseline_file_digest": "sha256:67e4e7c4d18261fbd087427b4a1a6f179ed5b32a29956a2c8637f566fff744b9",
+    "baseline_payload_digest": "sha256:190d3a1c61b14b6b4600d99ad45519a68a86c79c77aa22ef088efc2655b3f6a4",
+    "count_reconciliation": {
+      "canonical_concepts": 345,
+      "catalogue_non_retired_entries": 375,
+      "category_xml_records": 378,
+      "non_retired_duplicate_record_surplus": 33,
+      "non_retired_unique_authority_codes": 342,
+      "rdf_concept_schemes_including_root": 11,
+      "rdf_sparql_exact_parity": true,
+      "retired_entries": 3,
+      "sparql_concepts": 345
+    },
+    "evidence_expires_at": "2026-08-31T23:59:59Z",
+    "observed_at": "2026-08-03T01:44:49.130920Z",
+    "official_publication_version": "20260617-0",
+    "result_digest": "sha256:f172dc2a0adae2aec479deaf00df19da4ebb68d7162746cf19e86f9c5c54f6ba",
+    "workflow_run_id": 30777549236
+  },
+  "privacy_required_assertions": {
+    "contact_values_ingested": false,
+    "personal_data_expected": false,
+    "private_reference_data_processing_permitted": true,
+    "profiling_or_marketing_use": false,
+    "public_claims_permitted": false,
+    "public_redistribution_permitted": false,
+    "temporary_evidence_retention_permitted": true
+  },
+  "required_state_until_both_authorities_pass": {
+    "active_source": false,
+    "campaign_authorised": false,
+    "claim_decision": "DENIED",
+    "f01_state": "BLOCKED",
+    "gate7": "IN_PROGRESS",
+    "legal": "MISSING_OR_CURRENT_HUMAN_DECISION",
+    "privacy_data_rights": "MISSING_OR_CURRENT_HUMAN_DECISION",
+    "product_admitted": false,
+    "public_launch": "NO_GO",
+    "technical_baseline": "PRESENT"
+  },
+  "schema_version": "axignal.f01-rights-authority-manifest/v0.1",
+  "source_id": "src_eu_vocab_countries_territories",
+  "target": {
+    "baseline_contract_path": "data/acceptance/source-baselines/AX-LIB-F01-eu-countries-territories-baseline-contract.v0.1.json",
+    "baseline_contract_sha256": "sha256:29abbb31ecbfc040438c02f107362303d2eacd677cce5867d06e548228941edb",
+    "git_tree_sha": "f631a3efdc0199a1468bd96e3a2947ec7e32c3ec",
+    "head_sha": "db7758a2e250a80ba992b2ff28b0574b01393c82"
+  },
+  "task_id": "AX-GE2E-G7-F01-B"
+}
