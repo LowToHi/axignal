@@ -1,0 +1,70 @@
+{
+  "task_id": "AX-GE2E-CLOSE-C0-C17",
+  "goal_id": "AXIGNAL-GOAL-001",
+  "programme": "C0-C17",
+  "governing_programme": "P00-P27",
+  "governing_contracts": [
+    "GOAL_LOCK",
+    "18",
+    "31",
+    "ADR-016",
+    "AX-GE2E-CLOSURE-CONTRACT-001"
+  ],
+  "state": "ENGINEERING_IN_PROGRESS",
+  "canonical_state": "CANONICAL_ACCEPTANCE_BLOCKED",
+  "public_launch_authorised": false,
+  "starting_head": "50eda82e263f80dac8274f59bebbad4a8eade5bc",
+  "execution_branch": "codex/axignal-e2e-contract-execution",
+  "active_gates": ["C0", "C1"],
+  "objective": "Execute the complete AXIGNAL E2E closure contract without reducing scope or treating fixtures, routes, UI controls or partial CI as finished-product evidence.",
+  "implemented_changes": [
+    "Continue review is non-mutating and cannot persist pursue",
+    "Qualification requires an explicit decision and rationale",
+    "Unsupported document, approval and audit export actions are disabled and disclosed",
+    "Subscriber Playwright runtime is explicitly enabled in non-production fixture mode",
+    "Critical browser tests have zero retries",
+    "Web and landing security-boundary implementations are identical",
+    "Browser coverage exists for the new fail-closed boundaries"
+  ],
+  "open_blockers": [
+    "AX-SW-BLK-001",
+    "AX-SW-BLK-004",
+    "AX-SW-BLK-005",
+    "AX-SW-BLK-006",
+    "AX-SW-BLK-007",
+    "AX-SW-BLK-008",
+    "AX-SW-BLK-009",
+    "AX-SW-BLK-010",
+    "AX-SW-BLK-011",
+    "AX-SW-BLK-012",
+    "AX-SW-BLK-013",
+    "AX-SW-BLK-014",
+    "AX-SW-BLK-015"
+  ],
+  "required_evidence": [
+    "exact-head typecheck",
+    "exact-head unit tests",
+    "exact-head production build",
+    "subscriber browser matrix first-run PASS",
+    "G5 security boundary PASS",
+    "Executable Spine PASS",
+    "E2E Technical Audit PASS",
+    "rollback rehearsal",
+    "canonical-head reconciliation"
+  ],
+  "rollback": {
+    "strategy": "Disable the subscriber workspace candidate or revert the execution branch while retaining ledgers and evidence.",
+    "kill_switch": "AXIGNAL_SUBSCRIBER_WORKSPACE_ENABLED=false",
+    "tested": false
+  },
+  "allowed_final_states": [
+    "ENGINEERING_IN_PROGRESS",
+    "ENGINEERING_EVIDENCE_READY",
+    "ENGINEERING_E2E_PASS",
+    "ENGINEERING_REJECTED"
+  ],
+  "prohibited_claims": [
+    "AXIGNAL_GLOBAL_E2E_100_PERCENT_COMPLETE",
+    "AXIGNAL_ACCEPTED_FOR_PUBLIC_LAUNCH"
+  ]
+}
