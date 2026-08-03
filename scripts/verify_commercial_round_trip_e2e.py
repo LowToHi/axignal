@@ -42,6 +42,7 @@ EXPECTED_STATES = {
     "CANCELLED",
     "ROLLED_BACK",
 }
+PROVIDER_ACTORS = {"stripe-signed-webhook", "stripe-reconciliation"}
 
 
 def _one(cursor: psycopg.Cursor, query: str, params: tuple[object, ...]) -> dict:
@@ -135,6 +136,7 @@ def run(dsn: str, expected_subject: str) -> dict[str, object]:
         assert "APPLIED" in dispositions, dispositions
         assert "STALE" in dispositions, dispositions
         assert all(len(str(row["payload_digest"])) == 64 for row in receipts)
+        assert any(str(row["provider_event_id"]).startswith("reconcile_") for row in receipts)
 
         cursor.execute(
             """
@@ -167,7 +169,8 @@ def run(dsn: str, expected_subject: str) -> dict[str, object]:
             row for row in ledger if str(row["ledger_event_type"]).startswith("STRIPE_")
         ]
         assert provider_rows, ledger
-        assert all(row["actor_subject"] == "stripe-signed-webhook" for row in provider_rows)
+        assert all(row["actor_subject"] in PROVIDER_ACTORS for row in provider_rows)
+        assert any(row["actor_subject"] == "stripe-reconciliation" for row in provider_rows)
         assert all(row["provider_event_id"] for row in provider_rows)
         assert all(len(str(row["payload_digest"])) == 64 for row in provider_rows)
 
@@ -198,7 +201,7 @@ def run(dsn: str, expected_subject: str) -> dict[str, object]:
     return {
         "schema": "axignal.e2e-3-commercial-round-trip.v0.1",
         "status": "PASS",
-        "output": "AX_E2E_COMMERCIAL_ROUND_TRIP_PASS",
+        "output": "AX_E2E_COMMERCIAL_DETERMINISTIC_ROUND_TRIP_PASS",
         "tenant_id": str(tenant_id),
         "selection_id": str(selection["selection_id"]),
         "provider": "DETERMINISTIC_TEST_PROVIDER",
@@ -212,13 +215,18 @@ def run(dsn: str, expected_subject: str) -> dict[str, object]:
         "team_seat_capacity": 15,
         "final_selection_state": selection["state"],
         "final_entitlement_state": entitlement["state"],
-        "reconciliation": "PENDING_EXTERNAL_STRIPE_SANDBOX",
+        "reconciliation": "DETERMINISTIC_REPAIR_PASS",
+        "final_marker_reserved_for_external_sandbox": True,
     }
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--output", type=Path, default=Path("artifacts/e2e-3-commercial-round-trip.json"))
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=Path("artifacts/e2e-3-commercial-round-trip.json"),
+    )
     args = parser.parse_args()
     dsn = os.environ.get("AXIGNAL_DATABASE_URL", "").strip()
     subject = os.environ.get("AXIGNAL_AUTH_SUBJECT", "").strip()
