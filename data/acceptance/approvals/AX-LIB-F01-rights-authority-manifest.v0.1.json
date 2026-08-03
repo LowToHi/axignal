@@ -82,6 +82,7 @@
       "category_xml_records": 378,
       "non_retired_duplicate_record_surplus": 33,
       "non_retired_unique_authority_codes": 342,
+      "rdf_concept_schemes_including_root": 11,
       "rdf_sparql_exact_parity": true,
       "retired_entries": 3,
       "sparql_concepts": 345
