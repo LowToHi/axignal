@@ -39,7 +39,7 @@ test("keeps contextual workspace navigation available across desktop and tablet"
     await expect(drawer).toBeHidden();
     await expect(trigger).toBeFocused();
   } else {
-    await expect(page.getByRole("navigation", { name: "Tender workspace navigation" })).toBeVisible();
+    await expect(page.getByRole("navigation", { name: "Workspace sections" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Open navigation" })).toBeHidden();
   }
 });
