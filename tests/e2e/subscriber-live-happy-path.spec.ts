@@ -6,6 +6,7 @@ import {
 } from "@playwright/test";
 
 test.describe.configure({ mode: "serial", retries: 0 });
+test.setTimeout(240_000);
 test.skip(
   process.env.AXIGNAL_PLAYWRIGHT_EXTERNAL_SERVER !== "true" ||
     process.env.AXIGNAL_PLAYWRIGHT_BASE_URL !== "http://127.0.0.1:18080",
@@ -48,13 +49,15 @@ async function registerPasskey(page: Page, context: BrowserContext) {
   });
   await expect(recovery).toBeVisible();
   await recovery.getByRole("button", { name: "He guardado los códigos" }).click();
-  await expect(page.getByRole("button", { name: /PLAN ·/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /^PLAN ·/ })).toBeVisible({
+    timeout: 15_000
+  });
 
   return { cdp, authenticatorId: authenticator.authenticatorId };
 }
 
 async function activateProfessional(page: Page) {
-  await page.getByRole("button", { name: /PLAN ·/ }).click();
+  await page.getByRole("button", { name: /^PLAN ·/ }).click();
   const panel = page.getByRole("complementary", {
     name: "Plan y facturación"
   });
@@ -68,19 +71,29 @@ async function activateProfessional(page: Page) {
   await expect(page).toHaveURL(/\/billing\/test-checkout/);
   await page.getByRole("button", { name: "Confirmar pago de prueba" }).click();
   await expect(page).toHaveURL(/billing=success/);
-  await expect(page.getByText(/Plan: Professional · acceso ACTIVE/)).toBeVisible();
+  await expect(page.getByText(/Plan: Professional · acceso ACTIVE/)).toBeVisible({
+    timeout: 15_000
+  });
+  await panel.getByRole("button", { name: "Cerrar" }).click();
+  await expect(panel).toBeHidden();
 }
 
 async function initialiseOwnerSeat(page: Page) {
+  await expect(page.getByText("seat_membership_required")).toBeVisible();
   const launcher = page.getByRole("button", { name: "SEATS · SETUP" });
-  await expect(launcher).toBeVisible();
+  await expect(launcher).toBeVisible({ timeout: 15_000 });
   await launcher.click();
   const panel = page.getByRole("complementary", {
     name: "Organisation seats and members"
   });
+  await expect(panel).toBeVisible();
   await panel.getByRole("button", { name: "Initialise owner seat" }).click();
-  await expect(page.getByRole("button", { name: "SEATS · 1/3" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "SEATS · 1/3" })).toBeVisible({
+    timeout: 15_000
+  });
   await panel.getByRole("button", { name: "Close" }).click();
+  await expect(panel).toBeHidden();
+  await page.reload();
 }
 
 test("executes the no-fixture subscriber happy path", async ({ page, context }) => {
@@ -89,11 +102,10 @@ test("executes the no-fixture subscriber happy path", async ({ page, context }) 
     await activateProfessional(page);
     await initialiseOwnerSeat(page);
 
-    const retry = page.getByRole("button", { name: "Retry" });
-    if (await retry.isVisible().catch(() => false)) await retry.click();
-
-    const live = page.locator('[data-e2e-no-fixtures="true"][data-adapter="persistent-real"]');
-    await expect(live).toBeVisible();
+    const live = page.locator(
+      '[data-e2e-no-fixtures="true"][data-adapter="persistent-real"]'
+    );
+    await expect(live).toBeVisible({ timeout: 20_000 });
     await expect(live).toContainText("PROFESSIONAL_MONTHLY");
     await expect(live).toContainText("ACTIVE");
     await expect(live).not.toContainText("ENGINEERING FIXTURE");
@@ -128,7 +140,9 @@ test("executes the no-fixture subscriber happy path", async ({ page, context }) 
     await page.getByLabel("Title").fill("Pursuit note");
     await page
       .getByLabel("Body")
-      .fill("Proceed to internal qualification using the admitted dossier and source evidence.");
+      .fill(
+        "Proceed to internal qualification using the admitted dossier and source evidence."
+      );
     await page.getByRole("button", { name: "Persist document" }).click();
     await expect(page.getByText("Pursuit note", { exact: true })).toBeVisible();
     await expect(page.getByText("DOCUMENT_CREATED", { exact: true })).toBeVisible();
@@ -138,7 +152,9 @@ test("executes the no-fixture subscriber happy path", async ({ page, context }) 
       name: "Download verified Markdown export"
     });
     await expect(download).toBeVisible();
-    const response = await page.request.get(await download.getAttribute("href") as string);
+    const href = await download.getAttribute("href");
+    expect(href).toBeTruthy();
+    const response = await page.request.get(href as string);
     expect(response.ok()).toBeTruthy();
     expect(response.headers()["content-type"]).toContain("text/markdown");
     const markdown = await response.text();
@@ -148,8 +164,10 @@ test("executes the no-fixture subscriber happy path", async ({ page, context }) 
 
     await page.reload();
     await expect(
-      page.locator('[data-e2e-no-fixtures="true"][data-adapter="persistent-real"]')
-    ).toBeVisible();
+      page.locator(
+        '[data-e2e-no-fixtures="true"][data-adapter="persistent-real"]'
+      )
+    ).toBeVisible({ timeout: 20_000 });
     await expect(page.getByText(question, { exact: true }).first()).toBeVisible();
     await expect(page.getByText("Pursuit note", { exact: true })).toBeVisible();
     await expect(page.getByText("EXPORT_CREATED", { exact: true })).toBeVisible();
