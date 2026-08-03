@@ -107,7 +107,11 @@ jobs:
           python -m pip install -e ".[dev]"
 
       - name: Validate fail-closed phase contract
-        run: python scripts/verify_e2e_2_contract.py | tee artifacts/static-contract.json
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/verify_e2e_2_contract.py \
+            | tee artifacts/static-contract.json
 
       - name: Enforce focused Python quality and authority tests
         run: |
