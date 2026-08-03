@@ -7,6 +7,18 @@ test.skip(
   "P26 E2E requires the isolated organic-discovery topology."
 );
 
+async function expectAuthenticatedCommercialState(
+  page: import("@playwright/test").Page
+) {
+  await expect(
+    page.getByRole("button", { name: "PLAN · Sin plan", exact: true })
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Persistent opportunity intelligence" })
+  ).not.toBeVisible();
+  await expect(page.locator('main[data-adapter="persistent-real"]')).not.toBeVisible();
+}
+
 test("publishes only admitted intelligence and exposes a governed founder OS", async ({
   page,
   context
@@ -116,7 +128,7 @@ test("publishes only admitted intelligence and exposes a governed founder OS", a
   await recovery
     .getByRole("button", { name: "He guardado los códigos" })
     .click();
-  await expect(page.locator("main.shell")).toBeVisible();
+  await expectAuthenticatedCommercialState(page);
 
   await page.goto("http://localhost:18080/admin");
   await expect(page.getByTestId("founder-bootstrap")).toBeVisible();

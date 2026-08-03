@@ -22,6 +22,35 @@ function identitySessionCookie(
   );
 }
 
+async function expectPersistentWorkspace(page: Page) {
+  await expect(
+    page.getByRole("heading", { name: "Persistent opportunity intelligence" })
+  ).toBeVisible();
+  await expect(page.locator('main[data-adapter="persistent-real"]')).toBeVisible();
+}
+
+async function expectWorkspaceDeniedWithoutSeat(page: Page) {
+  const unavailable = page.getByRole("alert").filter({
+    hasText: "Persistent workspace unavailable"
+  });
+  await expect(unavailable).toBeVisible();
+  await expect(unavailable.getByText("seat_membership_required")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Persistent opportunity intelligence" })
+  ).not.toBeVisible();
+  await expect(page.locator('main[data-adapter="persistent-real"]')).not.toBeVisible();
+}
+
+async function expectAuthenticatedCommercialState(page: Page) {
+  await expect(
+    page.getByRole("button", { name: "PLAN · Sin plan", exact: true })
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Persistent opportunity intelligence" })
+  ).not.toBeVisible();
+  await expect(page.locator('main[data-adapter="persistent-real"]')).not.toBeVisible();
+}
+
 async function loginWithPasskey(page: Page, context: BrowserContext) {
   await page.setExtraHTTPHeaders({
     origin: "http://localhost:18080",
@@ -85,7 +114,7 @@ async function loginWithPasskey(page: Page, context: BrowserContext) {
   const codes = await recovery.locator("pre").innerText();
   expect(codes.split("\n")).toHaveLength(8);
   await recovery.getByRole("button", { name: "He guardado los códigos" }).click();
-  await expect(page.locator("main.shell")).toBeVisible();
+  await expectAuthenticatedCommercialState(page);
 
   const credentials = await cdp.send("WebAuthn.getCredentials", {
     authenticatorId: authenticator.authenticatorId
@@ -109,8 +138,8 @@ async function confirmCheckout(page: Page) {
   await expect(page).toHaveURL(/\/billing\/test-checkout/);
   await page.getByRole("button", { name: "Confirmar pago de prueba" }).click();
   await expect(page).toHaveURL(/billing=success/);
-  await expect(page.locator("main.shell")).toBeVisible();
   await expect(page.getByText(/Plan: Professional · acceso ACTIVE/)).toBeVisible();
+  await expectWorkspaceDeniedWithoutSeat(page);
   await page
     .getByRole("complementary", { name: "Plan y facturación" })
     .getByRole("button", { name: "Cerrar" })
@@ -154,6 +183,12 @@ test("governs seats through a passwordless AAL2 session", async ({
     await expect(page.getByRole("button", { name: "SEATS · 1/3" })).toBeVisible();
     await expect(seatPanel.getByText("Professional")).toBeVisible();
     await expect(seatPanel.getByText("FLAT_TIER")).toBeVisible();
+
+    const workspaceUnavailable = page.getByRole("alert").filter({
+      hasText: "Persistent workspace unavailable"
+    });
+    await workspaceUnavailable.getByRole("button", { name: "Retry" }).click();
+    await expectPersistentWorkspace(page);
 
     await seatPanel.getByLabel("Work email").fill("member2@example.test");
     await seatPanel.getByLabel("Initial role").selectOption("BID_REVIEWER");

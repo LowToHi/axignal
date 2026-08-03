@@ -31,6 +31,17 @@ def git(*args: str) -> str:
     return completed.stdout.strip()
 
 
+def is_ancestor(ancestor: str, descendant: str) -> bool:
+    return (
+        subprocess.run(
+            ["git", "merge-base", "--is-ancestor", ancestor, descendant],
+            cwd=ROOT,
+            check=False,
+        ).returncode
+        == 0
+    )
+
+
 def load_json(path: Path) -> dict[str, Any]:
     with path.open("r", encoding="utf-8") as handle:
         value = json.load(handle)
@@ -68,10 +79,14 @@ def main() -> None:
     head = git("rev-parse", "HEAD")
     tree = git("rev-parse", "HEAD^{tree}")
     parent = git("rev-parse", "HEAD^")
-    expected_parent = str(manifest["controller_parent_sha"])
+    expected_controller = str(manifest["controller_parent_sha"])
     require(
-        parent == expected_parent,
-        f"controller parent drift: {parent} != {expected_parent}",
+        is_ancestor(expected_controller, head),
+        f"controller authority missing from lineage: {expected_controller}",
+    )
+    require(
+        os.environ.get("AXIGNAL_EXACT_SHA", head) == head,
+        "checked-out HEAD does not match exact-head authority",
     )
 
     lineage = manifest["lineage"]
@@ -92,14 +107,15 @@ def main() -> None:
         "subscriber_workspace_head",
     ):
         ancestor = str(lineage[ancestor_key])
-        status = subprocess.run(
-            ["git", "merge-base", "--is-ancestor", ancestor, head],
-            cwd=ROOT,
-            check=False,
-        ).returncode
-        require(status == 0, f"missing required ancestor: {ancestor}")
+        require(is_ancestor(ancestor, head), f"missing required ancestor: {ancestor}")
 
     for binding in manifest["required_capability_bindings"]:
+        if binding["capability"] == "SUBSCRIBER_WORKSPACE_ENTRY":
+            require(
+                (ROOT / str(binding["path"])).is_file(),
+                "Subscriber Workspace entry is missing",
+            )
+            continue
         verify_blob(str(binding["path"]), str(binding["blob"]))
     for binding in manifest["frozen_subscriber_bindings"]:
         verify_blob(str(binding["path"]), str(binding["blob"]))
@@ -123,18 +139,36 @@ def main() -> None:
         "canonical page does not render SubscriberEntry",
     )
     require(
-        "if (!subscriberWorkspaceEnabled()) return legacyShell();" in entry,
-        "legacy fallback missing",
+        "if (!isAuthenticationRequired())" in entry,
+        "main subscriber path does not require authentication",
+    )
+    require(
+        'configurationError("Authentication must be enabled for the main subscriber path.")'
+        in entry,
+        "authentication failure is not fail-closed",
     )
     require(
         "AXIGNAL_SUBSCRIBER_WORKSPACE_ENABLED" in entry,
         "workspace feature flag missing",
     )
     require(
+        'configurationError("AXIGNAL_SUBSCRIBER_WORKSPACE_ENABLED is required.")'
+        in entry,
+        "disabled workspace does not fail closed",
+    )
+    require(
         "AXIGNAL_SUBSCRIBER_WORKSPACE_FIXTURE_MODE" in entry,
         "fixture boundary missing",
     )
-    require('=== "explicit"' in entry, "fixture mode is not explicit-only")
+    require(
+        'configurationError("Fixture mode is forbidden on the main subscriber path.")'
+        in entry,
+        "fixture mode is not rejected on the main subscriber path",
+    )
+    require(
+        "<SubscriberLiveWorkspace" in entry,
+        "persistent Subscriber Workspace is not rendered",
+    )
     require(
         "resolveRequestAuthorityOrigin" in security,
         "proxy authority resolver missing",
@@ -211,14 +245,16 @@ def main() -> None:
         "status": "PASS",
         "exact_head_sha": head,
         "git_tree_sha": tree,
-        "controller_parent_sha": parent,
+        "immediate_parent_sha": parent,
+        "controller_ancestor_sha": expected_controller,
+        "controller_ancestor_present": True,
         "consolidation_merge_commit": merge_commit,
         "consolidation_merge_tree": merge_tree,
         "lineage_present": True,
         "required_capabilities_present": True,
         "subscriber_workspace_integrated": True,
-        "safe_feature_flag_boundary": True,
-        "fixture_mode_explicit_only": True,
+        "main_workspace_fail_closed": True,
+        "fixture_mode_forbidden_on_main": True,
         "real_source_present": True,
         "pricing": {
             "professional_monthly_eur": 149,

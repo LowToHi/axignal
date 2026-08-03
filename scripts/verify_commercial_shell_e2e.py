@@ -23,6 +23,7 @@ EXPECTED_STATES = {
     "CHECKOUT_CREATED",
     "CHECKOUT_COMPLETED",
     "ACTIVE",
+    "SUSPENDED",
     "UPGRADE_PENDING",
     "CANCEL_PENDING",
     "CANCEL_AT_PERIOD_END",
@@ -40,13 +41,19 @@ PROVIDER_LEDGER_EVENTS = {
     "STRIPE_CUSTOMER_SUBSCRIPTION_CREATED",
     "STRIPE_CUSTOMER_SUBSCRIPTION_UPDATED",
     "STRIPE_CUSTOMER_SUBSCRIPTION_DELETED",
+    "STRIPE_INVOICE_PAID",
+    "STRIPE_INVOICE_PAYMENT_FAILED",
+    "STRIPE_INVOICE_PAID_RECOVERY",
 }
 ROLLBACK_LEDGER_EVENTS = {"PAID_LIFECYCLE_ROLLED_BACK"}
 EXPECTED_LEDGER_EVENTS = (
     USER_LEDGER_EVENTS | PROVIDER_LEDGER_EVENTS | ROLLBACK_LEDGER_EVENTS
 )
-PROVIDER_ACTOR = "stripe-signed-webhook"
+SIGNED_PROVIDER_ACTOR = "stripe-signed-webhook"
+RECONCILIATION_PROVIDER_ACTOR = "stripe-reconciliation"
+PROVIDER_ACTORS = {SIGNED_PROVIDER_ACTOR, RECONCILIATION_PROVIDER_ACTOR}
 ROLLBACK_ACTOR = "deterministic-test-rollback"
+RECOVERY_LEDGER_EVENT = "STRIPE_INVOICE_PAID_RECOVERY"
 
 
 def _scalar(cursor: psycopg.Cursor, query: str, params: tuple[object, ...]) -> int:
@@ -93,6 +100,29 @@ def _verify_ledger_authority(
         "observed_ledger_event_types": sorted(observed_event_types),
     }
 
+    recovery_rows = [
+        row for row in ledger if row["ledger_event_type"] == RECOVERY_LEDGER_EVENT
+    ]
+    assert len(recovery_rows) == 1, {
+        "expected_recovery_rows": 1,
+        "observed_recovery_rows": len(recovery_rows),
+    }
+    recovery = recovery_rows[0]
+    assert recovery["previous_state"] == "SUSPENDED", recovery
+    assert recovery["new_state"] == "ACTIVE", recovery
+    assert recovery["actor_subject"] == SIGNED_PROVIDER_ACTOR, recovery
+    assert recovery["provider_event_id"], recovery
+    assert recovery["payload_digest"], recovery
+    assert len(str(recovery["payload_digest"])) == 64, recovery
+
+    reconciliation_rows = [
+        row
+        for row in ledger
+        if row["ledger_event_type"] in PROVIDER_LEDGER_EVENTS
+        and row["actor_subject"] == RECONCILIATION_PROVIDER_ACTOR
+    ]
+    assert reconciliation_rows, "No provider reconciliation ledger entry was observed"
+
     for row in ledger:
         event_type = str(row["ledger_event_type"])
         actor_subject = str(row["actor_subject"])
@@ -104,7 +134,7 @@ def _verify_ledger_authority(
             assert provider_event_id is None, row
             assert payload_digest is None, row
         elif event_type in PROVIDER_LEDGER_EVENTS:
-            assert actor_subject == PROVIDER_ACTOR, row
+            assert actor_subject in PROVIDER_ACTORS, row
             assert provider_event_id, row
             assert payload_digest and len(str(payload_digest)) == 64, row
         elif event_type in ROLLBACK_LEDGER_EVENTS:
@@ -204,7 +234,7 @@ def run(
             (tenant_id,),
         )
         ledger = list(cursor.fetchall())
-        assert len(ledger) >= 9, ledger
+        assert len(ledger) >= 12, ledger
         observed_states = {
             str(state)
             for row in ledger
@@ -256,9 +286,11 @@ def run(
         "token_overage_billing": False,
         "signed_provider_receipts": len(receipts),
         "ledger_entries": len(ledger),
+        "paid_invoice_recovery": "SUSPENDED_TO_ACTIVE_PASS",
         "ledger_authority_taxonomy": {
             "authenticated_subject": expected_subject,
-            "provider_actor": PROVIDER_ACTOR,
+            "provider_actors": sorted(PROVIDER_ACTORS),
+            "recovery_actor": SIGNED_PROVIDER_ACTOR,
             "rollback_actor": ROLLBACK_ACTOR,
         },
         "external_stripe_calls": 0,
@@ -272,6 +304,7 @@ def run(
         "ledger_events_observed": sorted(
             {str(row["ledger_event_type"]) for row in ledger}
         ),
+        "paid_invoice_recovery": "SUSPENDED_TO_ACTIVE_PASS",
         "checkout_return_grants_entitlement": False,
         "signed_event_required": True,
         "refresh_persistence": True,

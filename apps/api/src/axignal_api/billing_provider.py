@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from typing import Any, Protocol
 from urllib.parse import urlencode
 from uuid import UUID
@@ -22,6 +23,18 @@ class SubscriptionCommandResult:
     subscription_id: str
     status: str
     cancel_at_period_end: bool
+
+
+@dataclass(frozen=True)
+class ProviderSubscriptionSnapshot:
+    subscription_id: str
+    customer_id: str
+    subscription_item_id: str
+    price_id: str
+    status: str
+    current_period_end: datetime | None
+    cancel_at_period_end: bool
+    updated_at: datetime
 
 
 class BillingProvider(Protocol):
@@ -50,6 +63,16 @@ class BillingProvider(Protocol):
         cancel_at_period_end: bool,
         operation_id: str,
     ) -> SubscriptionCommandResult: ...
+
+    def retrieve_subscription_snapshot(
+        self,
+        *,
+        subscription_id: str,
+        expected_plan_code: str,
+        expected_customer_id: str | None,
+        expected_item_id: str | None,
+        expected_period_end: datetime | None,
+    ) -> ProviderSubscriptionSnapshot: ...
 
 
 class StripeBillingProvider:
@@ -210,6 +233,59 @@ class StripeBillingProvider:
             ),
         )
 
+    def retrieve_subscription_snapshot(
+        self,
+        *,
+        subscription_id: str,
+        expected_plan_code: str,
+        expected_customer_id: str | None,
+        expected_item_id: str | None,
+        expected_period_end: datetime | None,
+    ) -> ProviderSubscriptionSnapshot:
+        del expected_plan_code, expected_customer_id, expected_item_id, expected_period_end
+        self.settings.require_lifecycle()
+        with self._client() as client:
+            self.verify_account(client)
+            response = client.get(
+                f"/v1/subscriptions/{subscription_id}",
+                headers=self._headers(),
+            )
+            response.raise_for_status()
+            payload = self._json(response)
+        items = payload.get("items")
+        data = items.get("data") if isinstance(items, dict) else None
+        if not isinstance(data, list) or len(data) != 1 or not isinstance(data[0], dict):
+            raise RuntimeError("Stripe subscription must contain exactly one item")
+        item = data[0]
+        price = item.get("price")
+        if not isinstance(price, dict):
+            raise RuntimeError("Stripe subscription item price is missing")
+        customer_id = payload.get("customer")
+        item_id = item.get("id")
+        price_id = price.get("id")
+        status_value = payload.get("status")
+        updated = payload.get("created")
+        period_end = payload.get("current_period_end")
+        snapshot_values = (customer_id, item_id, price_id, status_value)
+        if not all(isinstance(value, str) for value in snapshot_values):
+            raise RuntimeError("Stripe subscription snapshot is incomplete")
+        if not isinstance(updated, int):
+            raise RuntimeError("Stripe subscription creation timestamp is missing")
+        return ProviderSubscriptionSnapshot(
+            subscription_id=str(payload.get("id") or subscription_id),
+            customer_id=customer_id,
+            subscription_item_id=item_id,
+            price_id=price_id,
+            status=status_value,
+            current_period_end=(
+                datetime.fromtimestamp(period_end, tz=UTC)
+                if isinstance(period_end, int)
+                else None
+            ),
+            cancel_at_period_end=bool(payload.get("cancel_at_period_end", False)),
+            updated_at=datetime.fromtimestamp(updated, tz=UTC),
+        )
+
 
 class DeterministicTestBillingProvider:
     """Provider contract for browser E2E only.
@@ -269,6 +345,26 @@ class DeterministicTestBillingProvider:
             subscription_id=subscription_id,
             status="pending_signed_event",
             cancel_at_period_end=cancel_at_period_end,
+        )
+
+    def retrieve_subscription_snapshot(
+        self,
+        *,
+        subscription_id: str,
+        expected_plan_code: str,
+        expected_customer_id: str | None,
+        expected_item_id: str | None,
+        expected_period_end: datetime | None,
+    ) -> ProviderSubscriptionSnapshot:
+        return ProviderSubscriptionSnapshot(
+            subscription_id=subscription_id,
+            customer_id=expected_customer_id or f"cus_test_{subscription_id}",
+            subscription_item_id=expected_item_id or f"si_test_{subscription_id}",
+            price_id=self.settings.price_for_plan(expected_plan_code),
+            status="active",
+            current_period_end=expected_period_end,
+            cancel_at_period_end=False,
+            updated_at=datetime.now(UTC).replace(microsecond=0),
         )
 
 

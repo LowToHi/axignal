@@ -12,6 +12,16 @@ test.skip(
   "Commercial billing E2E requires the isolated deterministic-provider topology."
 );
 
+type ProviderAction =
+  | "CONFIRM_UPGRADE"
+  | "CONFIRM_CANCELLATION"
+  | "RENEWAL"
+  | "PAYMENT_FAILED"
+  | "REACTIVATE"
+  | "REPLAY_RENEWAL"
+  | "OUT_OF_ORDER"
+  | "ROLLBACK";
+
 async function loginWithPasskey(page: Page, context: BrowserContext) {
   await page.setExtraHTTPHeaders({
     origin: "http://localhost:18080",
@@ -80,10 +90,12 @@ async function loginWithPasskey(page: Page, context: BrowserContext) {
   return { cdp, authenticatorId: authenticator.authenticatorId };
 }
 
-async function emitProviderEvent(
-  page: Page,
-  action: "CONFIRM_UPGRADE" | "CONFIRM_CANCELLATION" | "ROLLBACK"
-) {
+async function refreshBillingPanel(page: Page) {
+  const refresh = page.getByRole("button", { name: "Actualizar" });
+  if (await refresh.isVisible().catch(() => false)) await refresh.click();
+}
+
+async function emitProviderEvent(page: Page, action: ProviderAction) {
   const result = await page.evaluate(async (requestedAction) => {
     const response = await fetch("/api/billing/test/provider-event", {
       method: "POST",
@@ -93,15 +105,42 @@ async function emitProviderEvent(
     return {
       ok: response.ok,
       status: response.status,
-      text: await response.text()
+      body: await response.json()
     };
   }, action);
-  expect(result.ok, `${result.status}: ${result.text}`).toBeTruthy();
-  const refresh = page.getByRole("button", { name: "Actualizar" });
-  if (await refresh.isVisible().catch(() => false)) await refresh.click();
+  expect(result.ok, `${action} ${result.status}: ${JSON.stringify(result.body)}`).toBeTruthy();
+  await refreshBillingPanel(page);
+  return result.body as {
+    events?: Array<{ disposition?: string }>;
+    state?: string;
+  };
 }
 
-test("executes the authenticated commercial shell without external Stripe", async ({
+async function reconcileBilling(page: Page) {
+  const result = await page.evaluate(async () => {
+    const response = await fetch("/api/billing/reconcile", { method: "POST" });
+    return {
+      ok: response.ok,
+      status: response.status,
+      body: await response.json()
+    };
+  });
+  expect(
+    result.ok,
+    `RECONCILE ${result.status}: ${JSON.stringify(result.body)}`
+  ).toBeTruthy();
+  await refreshBillingPanel(page);
+  return result.body as {
+    result: "MATCH" | "REPAIRED";
+    drift_fields: string[];
+    local_state: string;
+    provider_state: string;
+    seat_capacity: number;
+    browser_entitlement_authority: boolean;
+  };
+}
+
+test("executes the complete authenticated commercial round trip", async ({
   page,
   context
 }) => {
@@ -144,6 +183,46 @@ test("executes the authenticated commercial shell without external Stripe", asyn
     await expect(page.getByText("ACTIVE", { exact: true }).first()).toBeVisible();
     await expect(page.getByText(/Plan: Professional · acceso ACTIVE/)).toBeVisible();
     await expect(page.getByText(/IA mensual sin cuota de tokens: sí/)).toBeVisible();
+
+    await emitProviderEvent(page, "RENEWAL");
+    await expect(page.getByText(/Plan: Professional · acceso ACTIVE/)).toBeVisible();
+    await expect(
+      page.getByText("STRIPE_INVOICE_PAID", { exact: true }).first()
+    ).toBeVisible();
+
+    const replay = await emitProviderEvent(page, "REPLAY_RENEWAL");
+    expect(replay.events).toHaveLength(2);
+    expect(replay.events?.[1]?.disposition).toBe("DUPLICATE");
+    await expect(page.getByText(/Plan: Professional · acceso ACTIVE/)).toBeVisible();
+
+    const stale = await emitProviderEvent(page, "OUT_OF_ORDER");
+    expect(stale.events?.[0]?.disposition).toBe("STALE");
+    await expect(page.getByText(/Plan: Professional · acceso ACTIVE/)).toBeVisible();
+
+    await emitProviderEvent(page, "PAYMENT_FAILED");
+    await expect(page.getByText("SUSPENDED", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText(/acceso SUSPENDED/)).toBeVisible();
+    await expect(
+      page.getByText("STRIPE_INVOICE_PAYMENT_FAILED", { exact: true }).first()
+    ).toBeVisible();
+
+    const repaired = await reconcileBilling(page);
+    expect(repaired.result).toBe("REPAIRED");
+    expect(repaired.drift_fields).toContain("state");
+    expect(repaired.local_state).toBe("ACTIVE");
+    expect(repaired.provider_state).toBe("ACTIVE");
+    expect(repaired.seat_capacity).toBe(3);
+    expect(repaired.browser_entitlement_authority).toBe(false);
+    await expect(page.getByText(/Plan: Professional · acceso ACTIVE/)).toBeVisible();
+
+    const matched = await reconcileBilling(page);
+    expect(matched.result).toBe("MATCH");
+    expect(matched.drift_fields).toEqual([]);
+
+    await emitProviderEvent(page, "PAYMENT_FAILED");
+    await expect(page.getByText(/acceso SUSPENDED/)).toBeVisible();
+    await emitProviderEvent(page, "REACTIVATE");
+    await expect(page.getByText(/Plan: Professional · acceso ACTIVE/)).toBeVisible();
 
     await page.getByRole("button", { name: "Upgrade explícito a Team" }).click();
     await expect(page.getByText("UPGRADE_PENDING", { exact: true })).toBeVisible();

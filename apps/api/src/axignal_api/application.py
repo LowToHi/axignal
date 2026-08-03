@@ -1,4 +1,7 @@
 from axignal_api.billing_read_routes import router as billing_read_router
+from axignal_api.billing_reconciliation_routes import (
+    router as billing_reconciliation_router,
+)
 from axignal_api.billing_routes import router as billing_router
 from axignal_api.billing_test_routes import router as billing_test_router
 from axignal_api.entitlements import router as entitlement_router
@@ -31,6 +34,7 @@ app.include_router(subscriber_workspace_router)
 app.include_router(entitlement_router)
 app.include_router(billing_router)
 app.include_router(billing_read_router)
+app.include_router(billing_reconciliation_router)
 app.include_router(billing_test_router)
 app.include_router(seat_router)
 app.include_router(retention_router)

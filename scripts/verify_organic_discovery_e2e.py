@@ -14,7 +14,7 @@ from psycopg.types.json import Jsonb
 
 DSN = os.environ["AXIGNAL_DATABASE_URL"]
 EVIDENCE_DIR = Path(os.environ.get("AXIGNAL_ORGANIC_EVIDENCE_DIR", "artifacts"))
-NOW = datetime(2026, 7, 31, 18, 0, tzinfo=UTC)
+NOW = datetime.now(UTC).replace(microsecond=0)
 FOUNDER = "usr_p26_founder_e2e"
 
 
@@ -318,26 +318,26 @@ def main() -> None:
         "alert_confirmed_state": "ACTIVE",
         "alert_created_tenant": False,
         "alert_created_trial": False,
-        "identity_organisation_delta": (
-            identity_organisations_after - identity_organisations_before
-        ),
-        "trial_grant_delta": trial_grants_after - trial_grants_before,
-        "citation_recorded": True,
-        "direct_growth_table_access": direct_table_access,
-        "indexability_ledger": append_only_decisions,
-        "citation_ledger": append_only_citations,
-        "founder_audit_ledger": append_only_audit,
-        "external_search_provider_calls": 0,
-        "model_calls": 0,
-        "public_indexing_authorised_by_ci": False,
+        "identity_organisations_before": identity_organisations_before,
+        "identity_organisations_after": identity_organisations_after,
+        "trial_grants_before": trial_grants_before,
+        "trial_grants_after": trial_grants_after,
+        "direct_table_access": direct_table_access,
+        "append_only_decisions": append_only_decisions,
+        "append_only_citations": append_only_citations,
+        "append_only_audit": append_only_audit,
+        "citation_event_id": str(citation["citation_event_id"]),
+        "external_model_calls": 0,
+        "external_email_sends": 0,
     }
     EVIDENCE_DIR.mkdir(parents=True, exist_ok=True)
-    output = EVIDENCE_DIR / "organic-discovery-e2e.json"
-    output.write_text(
-        json.dumps(evidence, indent=2, sort_keys=True),
+    evidence_path = EVIDENCE_DIR / "organic-discovery-e2e.json"
+    evidence_path.write_text(
+        json.dumps(evidence, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
     print(json.dumps(evidence, indent=2, sort_keys=True))
+    print("AX_P26_ORGANIC_DISCOVERY_FOUNDER_ADMIN_E2E_PASS")
 
 
 if __name__ == "__main__":

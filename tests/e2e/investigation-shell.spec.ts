@@ -1,7 +1,9 @@
 import { expect, test } from "@playwright/test";
 
+const demoPath = "/demo";
+
 test("persists Navigator, lens, opportunity and evidence context", async ({ page }) => {
-  await page.goto("/");
+  await page.goto(demoPath);
 
   const shell = page.locator("main.shell");
   await expect(page.getByText("AXIGNAL NAVIGATOR")).toBeVisible();
@@ -45,7 +47,7 @@ test("persists Navigator, lens, opportunity and evidence context", async ({ page
 });
 
 test("persists theme, horizon and saved Investigation Trail", async ({ page }) => {
-  await page.goto("/");
+  await page.goto(demoPath);
 
   await page.getByRole("button", { name: "Cambiar tema" }).click();
   await page.getByLabel("Horizonte").selectOption("36M");
@@ -62,7 +64,7 @@ test("persists theme, horizon and saved Investigation Trail", async ({ page }) =
 });
 
 test("creates a traceable ResearchRun without admitting canonical claims", async ({ page }) => {
-  await page.goto("/");
+  await page.goto(demoPath);
 
   const shell = page.locator("main.shell");
   await page.getByRole("button", { name: "Investigar oportunidad" }).click();
@@ -87,7 +89,7 @@ test("creates a traceable ResearchRun without admitting canonical claims", async
 });
 
 test("uses tenant-private fixture only after explicit authorisation", async ({ page }) => {
-  await page.goto("/");
+  await page.goto(demoPath);
 
   await page.getByLabel("Memoria privada sintética para ResearchRun").check();
   await page.getByRole("button", { name: "Investigar oportunidad" }).click();
@@ -105,7 +107,7 @@ test("uses tenant-private fixture only after explicit authorisation", async ({ p
 
 test("fails without mutating context when the Navigator route is unavailable", async ({ page }) => {
   await page.route("**/api/navigator/interpret", (route) => route.abort());
-  await page.goto("/");
+  await page.goto(demoPath);
 
   const shell = page.locator("main.shell");
   await expect(shell).toHaveAttribute("data-context-version", "1");
@@ -122,7 +124,7 @@ test("fails without mutating context when the Navigator route is unavailable", a
 
 test("fails closed when the ResearchRun route is unavailable", async ({ page }) => {
   await page.route("**/api/research/runs", (route) => route.abort());
-  await page.goto("/");
+  await page.goto(demoPath);
 
   const shell = page.locator("main.shell");
   await expect(shell).toHaveAttribute("data-context-version", "1");
