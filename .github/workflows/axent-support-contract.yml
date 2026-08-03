@@ -113,13 +113,15 @@ jobs:
         run: |
           docker compose exec -T postgres createdb -U axignal axignal_restore
           cat axent-authority.dump | docker compose exec -T postgres \
-            pg_restore -U axignal -d axignal_restore --no-owner --no-privileges
+            pg_restore -U axignal -d axignal_restore --no-owner
       - name: Verify restored authority from fresh process
         env:
           AXIGNAL_DATABASE_URL: postgresql://axignal:axignal@127.0.0.1:5432/axignal_restore
         run: |
           python scripts/verify_axent_postgres_roundtrip.py verify
           echo AXENT_BACKUP_MUTATION_RESTORE_PASS
+      - name: Emit final Axent closure marker
+        run: echo AXENT_CUSTOMER_SUPPORT_E2E_PASS
       - name: Destroy PostgreSQL authority
         if: always()
         run: docker compose down -v --remove-orphans
