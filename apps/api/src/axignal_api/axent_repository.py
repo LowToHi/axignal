@@ -278,7 +278,10 @@ class AxentRepository(ResearchRepository):
             current = cursor.fetchone()
             if current is None:
                 raise LookupError("support_case_not_found")
-            if transition == "REOPEN" and current["status"] not in {"RESOLVED", "CLOSED"}:
+            if transition == "REOPEN" and current["status"] not in {
+                "RESOLVED",
+                "CLOSED",
+            }:
                 raise ValueError("support_case_not_resolved")
             if transition == "RESOLVE" and not resolution:
                 raise ValueError("support_case_resolution_required")
@@ -286,12 +289,32 @@ class AxentRepository(ResearchRepository):
                 """
                 UPDATE tenant_private.support_cases
                 SET status = %s,
-                    owner_type = CASE WHEN %s = 'ASSIGN' THEN 'HUMAN' ELSE owner_type END,
-                    owner_subject = CASE WHEN %s = 'ASSIGN' THEN %s ELSE owner_subject END,
-                    acknowledged_at = CASE WHEN %s = 'ACKNOWLEDGE' THEN now() ELSE acknowledged_at END,
-                    resolution = CASE WHEN %s = 'RESOLVE' THEN %s ELSE resolution END,
-                    resolved_at = CASE WHEN %s = 'RESOLVE' THEN now() WHEN %s = 'REOPEN' THEN NULL ELSE resolved_at END,
-                    closed_at = CASE WHEN %s = 'CLOSE' THEN now() WHEN %s = 'REOPEN' THEN NULL ELSE closed_at END
+                    owner_type = CASE
+                      WHEN %s = 'ASSIGN' THEN 'HUMAN'
+                      ELSE owner_type
+                    END,
+                    owner_subject = CASE
+                      WHEN %s = 'ASSIGN' THEN %s
+                      ELSE owner_subject
+                    END,
+                    acknowledged_at = CASE
+                      WHEN %s = 'ACKNOWLEDGE' THEN now()
+                      ELSE acknowledged_at
+                    END,
+                    resolution = CASE
+                      WHEN %s = 'RESOLVE' THEN %s
+                      ELSE resolution
+                    END,
+                    resolved_at = CASE
+                      WHEN %s = 'RESOLVE' THEN now()
+                      WHEN %s = 'REOPEN' THEN NULL
+                      ELSE resolved_at
+                    END,
+                    closed_at = CASE
+                      WHEN %s = 'CLOSE' THEN now()
+                      WHEN %s = 'REOPEN' THEN NULL
+                      ELSE closed_at
+                    END
                 WHERE tenant_id = %s AND case_id = %s
                 RETURNING *
                 """,
@@ -332,6 +355,11 @@ class AxentRepository(ResearchRepository):
                 notification_type = (
                     "CASE_RESOLVED" if transition == "RESOLVE" else "CASE_REOPENED"
                 )
+                recipient = self._conversation_owner(
+                    cursor,
+                    tenant_id,
+                    current["conversation_id"],
+                )
                 cursor.execute(
                     """
                     INSERT INTO tenant_private.support_notifications (
@@ -344,7 +372,7 @@ class AxentRepository(ResearchRepository):
                         tenant_id,
                         case_id,
                         current["conversation_id"],
-                        self._conversation_owner(cursor, tenant_id, current["conversation_id"]),
+                        recipient,
                         notification_type,
                         Jsonb({"resolution": resolution} if resolution else {}),
                     ),
@@ -353,7 +381,8 @@ class AxentRepository(ResearchRepository):
                     cursor.execute(
                         """
                         UPDATE tenant_private.support_conversations
-                        SET status = 'RESOLVED', resolved_at = now(), updated_at = now(),
+                        SET status = 'RESOLVED', resolved_at = now(),
+                            updated_at = now(),
                             resolution_code = 'HUMAN_RESOLVED'
                         WHERE tenant_id = %s AND conversation_id = %s
                         """,
