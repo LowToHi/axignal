@@ -266,7 +266,8 @@ class StripeBillingProvider:
         status_value = payload.get("status")
         updated = payload.get("created")
         period_end = payload.get("current_period_end")
-        if not all(isinstance(value, str) for value in (customer_id, item_id, price_id, status_value)):
+        snapshot_values = (customer_id, item_id, price_id, status_value)
+        if not all(isinstance(value, str) for value in snapshot_values):
             raise RuntimeError("Stripe subscription snapshot is incomplete")
         if not isinstance(updated, int):
             raise RuntimeError("Stripe subscription creation timestamp is missing")
