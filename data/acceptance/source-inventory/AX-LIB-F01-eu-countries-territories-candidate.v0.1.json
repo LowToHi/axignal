@@ -1,0 +1,114 @@
+{
+  "schema_version": "axignal.source-candidate-inventory/v0.1",
+  "task_id": "AX-GE2E-G7-F01-A",
+  "library_id": "AX-LIB-F01",
+  "source_id": "src_eu_vocab_countries_territories",
+  "source_name": "EU Vocabularies — Countries and territories",
+  "source_state": "CANDIDATE",
+  "authority": {
+    "data_owner": "Eurostat",
+    "data_steward": "Publications Office of the European Union",
+    "corporate_reference_asset": true,
+    "endorsed_by": "European Commission Information Management Steering Board",
+    "applicable_since": "2023-09-15"
+  },
+  "identifiers": {
+    "dataset_uri": "http://publications.europa.eu/resource/dataset/country",
+    "authority_graph_uri": "http://publications.europa.eu/resource/authority/country",
+    "sparql_endpoint": "https://publications.europa.eu/webapi/rdf/sparql",
+    "catalogue_url": "https://op.europa.eu/en/web/eu-vocabularies/at-dataset/-/resource/dataset/country",
+    "documentation_url": "https://op.europa.eu/en/web/eu-vocabularies/countries-and-territories",
+    "technical_repository": "https://code.europa.eu/eu-vocabularies/countries-and-territories"
+  },
+  "observed_publication": {
+    "catalogue_version": "20260318-0",
+    "latest_claimed_by_catalogue": true,
+    "historical_versions_listed": true,
+    "earliest_listed_version": "20150318-0",
+    "regular_updates_foreseen": true,
+    "entry_count_declared": 375
+  },
+  "semantic_scope": {
+    "current_and_deprecated_countries_and_territories": true,
+    "un_members": true,
+    "un_observer_states": true,
+    "dependent_territories": true,
+    "marine_areas": true,
+    "disputed_territories": true,
+    "special_status_territories": true,
+    "geographical_aggregations": false,
+    "political_or_economic_groupings_as_entities": false,
+    "map_geometry": false
+  },
+  "identifier_mappings_declared": [
+    "EU authority code",
+    "ISO 3166-1 alpha-2",
+    "ISO 3166-1 alpha-3",
+    "ISO 3166-1 numeric",
+    "UN M49",
+    "SDMX",
+    "Geonom",
+    "OECD"
+  ],
+  "language_scope": {
+    "all_official_eu_languages": true,
+    "translations_declared_more_than": 40,
+    "required_axignal_languages": ["en", "es", "fr", "de", "pt", "it"],
+    "required_languages_covered_by_source_declaration": true,
+    "journeys_verified": false
+  },
+  "technical_access": {
+    "human_browse": true,
+    "human_download_csv": true,
+    "human_download_html": true,
+    "sparql": true,
+    "machine_readable_formats_declared": true,
+    "authentication": "NONE_DECLARED",
+    "rate_limits": "UNVERIFIED",
+    "availability_slo": "UNVERIFIED"
+  },
+  "rights": {
+    "status": "REVIEW_REQUIRED",
+    "general_editorial_license": "CC-BY-4.0",
+    "specific_dataset_reuse_confirmed": false,
+    "attribution_required": true,
+    "redistribution_confirmed": false,
+    "derived_data_confirmed": false,
+    "retention_confirmed": false,
+    "third_party_standard_components_present": true,
+    "legal_contact": "op-copyright@publications.europa.eu",
+    "vocabulary_support_contact": "OP-EU-VOCABULARIES@publications.europa.eu"
+  },
+  "privacy": {
+    "personal_data_expected": false,
+    "contact_values_ingested": false,
+    "privacy_review_required": true
+  },
+  "known_limitations": [
+    "The vocabulary does not represent an official EU position on the legal status or policy of listed entities.",
+    "The asset includes disputed, maritime, deprecated and special-status entities; business subsets must be selected explicitly.",
+    "The asset does not contain map geometry, continents or general geographical aggregations.",
+    "ISO-derived identifiers may carry third-party intellectual-property constraints that require legal review.",
+    "Source declarations are not evidence that AXIGNAL ingestion, normalisation, search or presentation journeys pass.",
+    "No availability, rate-limit, quality, lag, kill-switch or rollback campaign has been executed."
+  ],
+  "official_evidence_urls": [
+    "https://op.europa.eu/en/web/eu-vocabularies/countries-and-territories",
+    "https://op.europa.eu/en/web/eu-vocabularies/at-dataset/-/resource/dataset/country",
+    "https://op.europa.eu/en/web/about-us/legal-notices/publications-office-of-the-european-union-copyright",
+    "https://op.europa.eu/en/web/cellar/cellar-data/metadata/knowledge-graph",
+    "https://code.europa.eu/eu-vocabularies/countries-and-territories"
+  ],
+  "admission": {
+    "product_admitted": false,
+    "active": false,
+    "claim_contribution": false,
+    "global_geography_claim": false,
+    "multilingual_claim": false,
+    "canonical_library_state": "BLOCKED",
+    "claim_decision": "DENIED",
+    "gate7_decision": "IN_PROGRESS",
+    "public_launch": "NO_GO"
+  },
+  "next_required_transition": "F01_B_RIGHTS_TECHNICAL_BASELINE_AND_HUMAN_AUTHORITY"
+}

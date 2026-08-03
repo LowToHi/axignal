@@ -15,15 +15,40 @@
   ],
   "sectors": [],
   "historical_depth": {"earliest_date": null, "latest_date": null, "status": "MISSING", "evidence": []},
-  "update_frequency": {"declared": null, "observed": null, "status": "MISSING", "evidence": []},
-  "sources": {"active": [], "suspended": [], "candidate": []},
-  "rights": {"status": "MISSING", "evidence": []},
+  "update_frequency": {
+    "declared": "REGULAR_UPDATES_FORESEEN",
+    "observed": null,
+    "status": "CANDIDATE_DECLARATION_ONLY",
+    "evidence": ["data/acceptance/source-inventory/AX-LIB-F01-eu-countries-territories-candidate.v0.1.json"]
+  },
+  "sources": {
+    "active": [],
+    "suspended": [],
+    "candidate": [
+      {
+        "source_id": "src_eu_vocab_countries_territories",
+        "name": "EU Vocabularies — Countries and territories",
+        "authority": "Eurostat / Publications Office of the European Union",
+        "state": "CANDIDATE",
+        "inventory": "data/acceptance/source-inventory/AX-LIB-F01-eu-countries-territories-candidate.v0.1.json",
+        "product_admitted": false,
+        "claim_contribution": false
+      }
+    ]
+  },
+  "rights": {
+    "status": "REVIEW_REQUIRED",
+    "evidence": ["data/acceptance/source-inventory/AX-LIB-F01-eu-countries-territories-candidate.v0.1.json"]
+  },
   "quality": {"status": "MISSING", "completeness": null, "accuracy": null, "freshness": null, "duplicate_rate": null, "evidence": []},
   "lag": {"status": "MISSING", "p50_seconds": null, "p95_seconds": null, "max_seconds": null, "evidence": []},
   "reviews": [],
   "limitations": [
-    "No product-admitted source evidence exists for this library.",
-    "Coverage, multilingual journeys, rights, quality and lag are unaccepted.",
+    "One official candidate source has been inventoried but is not product-admitted.",
+    "The candidate includes current, deprecated, disputed, maritime and special-status entities; no AXIGNAL business subset is approved.",
+    "The vocabulary does not represent an official EU position on the legal status or policy of listed entities.",
+    "Specific dataset reuse, derived-data, redistribution and retention rights remain under review.",
+    "Coverage, six multilingual journeys, quality, lag, kill switch and rollback remain unaccepted.",
     "This library cannot contribute to a public global-coverage claim."
   ],
   "synthetic_data": {"present": false, "disclosed": true, "contributes_to_public_claim": false, "evidence": []},
