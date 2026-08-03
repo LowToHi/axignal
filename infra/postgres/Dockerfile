@@ -43,3 +43,4 @@ COPY 151-axent-support-hardening.sql /docker-entrypoint-initdb.d/151-axignal-axe
 COPY 1515-axent-knowledge-document-timestamps.sql /docker-entrypoint-initdb.d/1515-axignal-axent-knowledge-timestamps.sql
 COPY 152-axent-governed-knowledge-seed.sql /docker-entrypoint-initdb.d/152-axignal-axent-knowledge.sql
 COPY 153-axent-consent-escalation-roundtrip.sql /docker-entrypoint-initdb.d/153-axignal-axent-consent-escalation.sql
+COPY 154-axent-feedback-evaluation-telemetry.sql /docker-entrypoint-initdb.d/154-axignal-axent-telemetry.sql
