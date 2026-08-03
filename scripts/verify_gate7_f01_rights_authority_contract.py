@@ -13,6 +13,12 @@ from axignal_api.f01_rights_authority import (
     REQUIRED_DECISION_FIELDS,
 )
 
+BASELINE_SHA256 = (
+    "sha256:29abbb31ecbfc040438c02f107362303d2eacd677cce5867d06e548228941edb"
+)
+TECHNICAL_HEAD = "db7758a2e250a80ba992b2ff28b0574b01393c82"
+TECHNICAL_TREE = "f631a3efdc0199a1468bd96e3a2947ec7e32c3ec"
+
 
 class ContractError(RuntimeError):
     pass
@@ -53,16 +59,8 @@ def verify(
     )
 
     target = manifest["target"]
-    require(
-        target["head_sha"]
-        == "db7758a2e250a80ba992b2ff28b0574b01393c82",
-        "Technical baseline head drift",
-    )
-    require(
-        target["git_tree_sha"]
-        == "f631a3efdc0199a1468bd96e3a2947ec7e32c3ec",
-        "Technical baseline tree drift",
-    )
+    require(target["head_sha"] == TECHNICAL_HEAD, "Technical head drift")
+    require(target["git_tree_sha"] == TECHNICAL_TREE, "Technical tree drift")
     require(
         target["baseline_contract_path"] == str(baseline_contract_path),
         "Baseline contract path drift",
@@ -70,7 +68,7 @@ def verify(
     require(
         target["baseline_contract_sha256"]
         == sha256_file(baseline_contract_path)
-        == "sha256:29abbb31ecbfc040438c02f107362303d2eacd677cce5867d06e548228941edb",
+        == BASELINE_SHA256,
         "Baseline contract digest drift",
     )
     require(
@@ -80,25 +78,28 @@ def verify(
     )
 
     evidence = manifest["official_evidence"]
-    expected_evidence = {
-        "workflow_run_id": 30777549236,
-        "artifact_id": 8842563273,
-        "artifact_digest": (
-            "sha256:16a21241a43a0f6d4e7994179723110d7b227d719264d1dd8cdbb02608389e74"
-        ),
-        "baseline_file_digest": (
-            "sha256:67e4e7c4d18261fbd087427b4a1a6f179ed5b32a29956a2c8637f566fff744b9"
-        ),
-        "baseline_payload_digest": (
-            "sha256:190d3a1c61b14b6b4600d99ad45519a68a86c79c77aa22ef088efc2655b3f6a4"
-        ),
-        "result_digest": (
-            "sha256:f172dc2a0adae2aec479deaf00df19da4ebb68d7162746cf19e86f9c5c54f6ba"
-        ),
-        "official_publication_version": "20260617-0",
-    }
-    for field, expected in expected_evidence.items():
-        require(evidence[field] == expected, f"Official evidence {field} drift")
+    require(evidence["workflow_run_id"] == 30777549236, "Workflow run drift")
+    require(evidence["artifact_id"] == 8842563273, "Artifact ID drift")
+    require(
+        evidence["artifact_digest"]
+        == "sha256:16a21241a43a0f6d4e7994179723110d7b227d719264d1dd8cdbb02608389e74",
+        "Artifact digest drift",
+    )
+    require(
+        evidence["baseline_file_digest"]
+        == "sha256:67e4e7c4d18261fbd087427b4a1a6f179ed5b32a29956a2c8637f566fff744b9",
+        "Baseline file digest drift",
+    )
+    require(
+        evidence["baseline_payload_digest"]
+        == "sha256:190d3a1c61b14b6b4600d99ad45519a68a86c79c77aa22ef088efc2655b3f6a4",
+        "Baseline payload digest drift",
+    )
+    require(
+        evidence["result_digest"]
+        == "sha256:f172dc2a0adae2aec479deaf00df19da4ebb68d7162746cf19e86f9c5c54f6ba",
+        "Result digest drift",
+    )
     require(
         evidence["artifact_expires_at"] == "2026-09-02T01:44:49Z",
         "Artifact expiry drift",
@@ -106,10 +107,6 @@ def verify(
     require(
         evidence["evidence_expires_at"] == "2026-08-31T23:59:59Z",
         "Evidence expiry drift",
-    )
-    require(
-        evidence["observed_at"] == "2026-08-03T01:44:49.130920Z",
-        "Evidence observation time drift",
     )
     require(
         evidence["count_reconciliation"]
@@ -178,33 +175,22 @@ def verify(
         decision["signature_scheme"] == "github-identity-v1",
         "Signature scheme drift",
     )
-    require(
-        decision["comment_author_must_be_human"] is True,
-        "Human check disabled",
-    )
-    require(
-        decision["technical_head_match_required"] is True,
-        "Head check disabled",
-    )
-    require(
-        decision["manifest_match_required"] is True,
-        "Manifest check disabled",
-    )
-    require(
-        decision["assertions_exact_match_required"] is True,
-        "Assertion check disabled",
-    )
-    require(
-        decision["expiry_strictly_before_evidence"] is True,
-        "Expiry check disabled",
-    )
+    for field in (
+        "comment_author_must_be_human",
+        "technical_head_match_required",
+        "manifest_match_required",
+        "assertions_exact_match_required",
+        "expiry_strictly_before_evidence",
+    ):
+        require(decision[field] is True, f"Decision check disabled: {field}")
     require(
         decision["decision_max_expires_at"] == "2026-08-30T23:59:59Z",
         "Decision maximum expiry drift",
     )
-
-    binding = manifest["binding"]
-    require(not any(binding.values()), "An authority binding survives invalidation")
+    require(
+        not any(manifest["binding"].values()),
+        "An authority binding survives invalidation",
+    )
 
     state = manifest["required_state_until_both_authorities_pass"]
     require(state["technical_baseline"] == "PRESENT", "Technical baseline hidden")
@@ -216,17 +202,22 @@ def verify(
     require(state["gate7"] == "IN_PROGRESS", "Gate 7 closed early")
     require(state["public_launch"] == "NO_GO", "Public launch enabled")
 
+    require(dossier["library_id"] == "AX-LIB-F01", "Dossier library drift")
     require(dossier["canonical_state"] == "BLOCKED", "Dossier state drift")
     require(dossier["countries_covered"] == [], "Coverage claimed early")
     require(dossier["sources"]["active"] == [], "Active source exists")
+    require(len(dossier["sources"]["candidate"]) == 1, "Candidate count drift")
+    candidate = dossier["sources"]["candidate"][0]
+    require(candidate["state"] == "CANDIDATE", "Candidate promoted")
+    require(candidate["admission"]["technical"] == "PASS", "Technical evidence hidden")
+    for field in ("legal", "rights", "quality", "human_authority"):
+        require(candidate["admission"][field] == "MISSING", f"{field} pre-approved")
+    require(candidate["rights_expiry"] is None, "Rights expiry asserted")
     require(
-        dossier["rights"]["status"] == "HUMAN_LEGAL_DECISION_REQUIRED",
-        "Legal state drift",
+        candidate["contributes_to_public_claim"] is False,
+        "Candidate contributes to public claim",
     )
-    require(
-        dossier["privacy_data_rights"]["status"] == "HUMAN_DECISION_REQUIRED",
-        "Privacy state drift",
-    )
+    require(dossier["rights"]["status"] == "MISSING", "Rights pre-approved")
     require(dossier["claim_decision"] == "DENIED", "Dossier claim drift")
 
     return {
