@@ -1,8 +1,11 @@
 import { AuthGate } from "@/components/auth-gate";
+import { BillingBridge } from "@/components/billing-bridge";
+import { SeatGovernanceBridge } from "@/components/seat-governance-bridge";
 import {
   getAuthenticatedIdentity,
   isAuthenticationRequired,
-  isPasswordlessIdentityEnabled
+  isPasswordlessIdentityEnabled,
+  isSeatGovernanceUiEnabled
 } from "@/lib/server-auth";
 
 import { SubscriberLiveWorkspace } from "./subscriber-live-workspace";
@@ -63,12 +66,16 @@ export async function SubscriberEntry() {
   }
 
   return (
-    <SubscriberLiveWorkspace
-      initialIdentity={{
-        email: identity.email,
-        subject: identity.subject,
-        tenantId: identity.tenantId
-      }}
-    />
+    <>
+      <BillingBridge />
+      {isSeatGovernanceUiEnabled() && <SeatGovernanceBridge />}
+      <SubscriberLiveWorkspace
+        initialIdentity={{
+          email: identity.email,
+          subject: identity.subject,
+          tenantId: identity.tenantId
+        }}
+      />
+    </>
   );
 }
