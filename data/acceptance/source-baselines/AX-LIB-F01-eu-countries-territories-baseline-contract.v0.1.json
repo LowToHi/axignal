@@ -12,23 +12,51 @@
   },
   "official_publication": {
     "expected_latest_version": "20260617-0",
-    "expected_concept_count": 375,
+    "expected_catalogue_entry_count": 375,
+    "expected_category_xml_record_count": 378,
+    "expected_retired_record_count": 3,
+    "expected_canonical_concept_count": 345,
+    "expected_non_retired_unique_concept_count": 342,
+    "expected_non_retired_duplicate_record_surplus": 33,
     "dataset_uri": "http://publications.europa.eu/resource/dataset/country",
     "authority_graph_uri": "http://publications.europa.eu/resource/authority/country",
     "catalogue_url": "https://op.europa.eu/en/web/eu-vocabularies/at-dataset/-/resource/dataset/country",
     "documentation_url": "https://op.europa.eu/en/web/eu-vocabularies/countries-and-territories",
     "samples_url": "https://op.europa.eu/en/web/eu-vocabularies/samples",
     "sparql_endpoint": "https://publications.europa.eu/webapi/rdf/sparql",
-    "reserved_concept_uri": "http://publications.europa.eu/resource/authority/country/OP_DATPRO"
+    "reserved_concept_uri": "http://publications.europa.eu/resource/authority/country/OP_DATPRO",
+    "required_distributions": [
+      "countries-skos.rdf",
+      "countries-skos-ap-act.rdf",
+      "at-country-v3.xsd",
+      "at-countries-v2.xsd",
+      "Country.gc",
+      "countries.xml",
+      "ATTO_XML_Countries-and-territories.zip"
+    ],
+    "canonical_concept_distribution": "countries-skos.rdf",
+    "canonical_entry_distribution": "countries.xml"
+  },
+  "count_semantics": {
+    "catalogue_entry": "A non-retired record in countries.xml; current and deprecated records are counted independently even when they share one authority code.",
+    "canonical_concept": "A unique non-reserved skos:Concept identified by one authority URI in countries-skos.rdf and the live authority graph.",
+    "required_reconciliation": "378 XML records = 375 non-retired catalogue entries + 3 retired records; the 375 non-retired entries collapse to 342 unique authority codes with 33 duplicate historical record instances; adding the 3 retired authority codes yields 345 canonical concepts.",
+    "prohibited_claim": "The catalogue count of 375 must not be represented as 375 unique SKOS concepts."
   },
   "access_contract": {
     "authentication": "NONE",
     "transport": "HTTPS",
     "methods": ["GET", "POST"],
-    "required_formats": ["text/csv", "application/sparql-results+json"],
+    "required_formats": [
+      "text/html",
+      "application/rdf+xml",
+      "application/xml",
+      "text/csv",
+      "application/sparql-results+json"
+    ],
     "timeout_seconds_per_request": 60,
-    "maximum_http_requests": 4,
-    "maximum_response_bytes_per_request": 25000000,
+    "maximum_http_requests": 6,
+    "maximum_response_bytes_per_request": 50000000,
     "maximum_retries": 0,
     "concurrency": 1,
     "external_monetary_budget_eur": 0,
@@ -61,6 +89,9 @@
     "redistribution": "HUMAN_LEGAL_DECISION_REQUIRED",
     "derived_data": "HUMAN_LEGAL_DECISION_REQUIRED",
     "attribution": "REQUIRED_IF_AUTHORISED",
+    "source_changes_and_version_disclosure": "REQUIRED_IF_AUTHORISED",
+    "no_distortion_or_misleading_attribution": "REQUIRED_IF_AUTHORISED",
+    "third_party_components": "EXCLUDED_UNLESS_SEPARATELY_AUTHORISED",
     "iso_codes_free_use_observed": true,
     "iso_publications_and_collections_redistribution": "NOT_AUTHORISED_BY_THIS_CONTRACT",
     "iso_or_other_standard_text_ingestion": false,
@@ -69,11 +100,12 @@
   "privacy_boundary": {
     "personal_data_expected": false,
     "contact_values_ingested": false,
+    "profiling_or_marketing_use": false,
     "human_privacy_data_rights_decision_required": true
   },
   "campaign_plan": {
     "mode": "PRIVATE_TECHNICAL_EVIDENCE_ONLY",
-    "request_budget": 4,
+    "request_budget": 6,
     "paid_budget_eur": 0,
     "retention_days": 30,
     "product_ingestion": false,
