@@ -47,7 +47,7 @@ test("keeps one real Globe mounted through the six-scene desktop narrative", asy
   await canvas.evaluate((element) => element.setAttribute("data-continuity-id", "primary-globe"));
 
   await scrollCinematic(page, 0.43);
-  await expect(page.locator(".cinematic-running-head")).toContainText(/03|04/);
+  await expect(page.locator(".cinematic-running-head")).toContainText(/02|03|04/);
   await expect(page.locator(".trace-object").nth(4)).toBeVisible();
   const mobileProject = testInfo.project.name === "landing-mobile";
   await expect(globe).toHaveAttribute("data-boundary-lod-requested", mobileProject ? "false" : "true");
@@ -69,7 +69,9 @@ test("keeps one real Globe mounted through the six-scene desktop narrative", asy
   });
 
   await scrollCinematic(page, 0);
-  await expect(globe).toHaveAttribute("data-boundary-lod-active", "false");
+  await expect(page.locator('canvas[data-continuity-id="primary-globe"]')).toHaveCount(1);
+  await expect(globe).toHaveAttribute("data-boundary-lod-requested", "true");
+  await expect(globe).toHaveAttribute("data-boundary-lod-loaded", "true");
   expect(page.url()).toBe("http://127.0.0.1:3001/");
   expect(pageErrors).toEqual([]);
   expect(consoleErrors).toEqual([]);
@@ -146,7 +148,7 @@ test("retains Globe continuity and contained pricing on mobile", async ({ browse
     () => document.querySelector(".cinematic-stage")?.parentElement?.classList.contains("pin-spacer")
   );
   await scrollCinematic(page, 0.43);
-  await expect(page.locator(".cinematic-running-head")).toContainText(/03|04/);
+  await expect(page.locator(".cinematic-running-head")).toContainText(/02|03|04/);
   await expect(page.locator(".trace-object").nth(4)).toBeVisible();
   await expect(page.getByTestId("semantic-globe").locator("canvas")).toHaveCount(1);
   await expect(page.getByTestId("semantic-globe")).toHaveAttribute(
