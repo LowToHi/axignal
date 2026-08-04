@@ -91,9 +91,14 @@ jobs:
           set -euo pipefail
           rm -rf scripts/ci/bootstrap
           rm -f .github/workflows/ci-architecture-migration.yml
-          git diff --name-only --diff-filter=ACMRT HEAD | LC_ALL=C sort > ci-architecture-files.txt
+          {
+            git diff --name-only --diff-filter=ACMRT HEAD
+            git ls-files --others --exclude-standard
+          } | LC_ALL=C sort -u > ci-architecture-files.txt
           git diff --name-only --diff-filter=D HEAD | LC_ALL=C sort > ci-architecture-deletions.txt
           test -s ci-architecture-files.txt
+          test "$(wc -l < ci-architecture-files.txt)" -eq 64
+          test "$(wc -l < ci-architecture-deletions.txt)" -eq 13
           tar --sort=name --mtime='UTC 1970-01-01' --owner=0 --group=0 --numeric-owner \
             -czf ci-architecture-tree.tar.gz -T ci-architecture-files.txt
           {
