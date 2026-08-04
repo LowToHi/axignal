@@ -15,6 +15,13 @@ export type CandidatePlan = {
   ctaLabel: string;
 };
 
+type OfferPresentation = {
+  name: string;
+  description: string;
+  activationState: "CONTROLLED_TRIAL_ONLY" | "CONTROLLED_ACCESS_ONLY";
+  ctaLabel: string;
+};
+
 export type CommercialRuntime = {
   pricing_contract?: {
     status?: string;
@@ -33,13 +40,13 @@ export type CommercialRuntime = {
   };
 };
 
-const supportedOffers = new Map([
+const supportedOffers: ReadonlyMap<string, OfferPresentation> = new Map([
   [
     AXIGNAL_PRICE_BOOK.plans.controlledTrial.code,
     {
       name: "7-day B2G trial",
       description: "Test one public-procurement market and qualification workflow",
-      activationState: "CONTROLLED_TRIAL_ONLY" as const,
+      activationState: "CONTROLLED_TRIAL_ONLY",
       ctaLabel: "Request 7-day trial"
     }
   ],
@@ -48,7 +55,7 @@ const supportedOffers = new Map([
     {
       name: "Professional",
       description: "For focused B2G and tender-intelligence teams",
-      activationState: "CONTROLLED_ACCESS_ONLY" as const,
+      activationState: "CONTROLLED_ACCESS_ONLY",
       ctaLabel: "Discuss Professional"
     }
   ],
@@ -57,7 +64,7 @@ const supportedOffers = new Map([
     {
       name: "Team",
       description: "For shared public-sector pipeline qualification and review",
-      activationState: "CONTROLLED_ACCESS_ONLY" as const,
+      activationState: "CONTROLLED_ACCESS_ONLY",
       ctaLabel: "Discuss Team"
     }
   ]
