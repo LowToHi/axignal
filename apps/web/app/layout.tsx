@@ -7,6 +7,7 @@ import "./context.css";
 import "./auth.css";
 import "./human-review.css";
 import "./alert-confirm.css";
+import "./reduced-motion.css";
 
 export const metadata: Metadata = {
   title: "AXIGNAL — Global Opportunity Intelligence",
