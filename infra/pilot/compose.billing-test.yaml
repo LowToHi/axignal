@@ -18,7 +18,7 @@ services:
       AXIGNAL_STRIPE_WEBHOOK_SECRET: whsec_axignal_deterministic_test_only
       AXIGNAL_STRIPE_PRICE_PROFESSIONAL_MONTHLY: price_test_axignal_professional
       AXIGNAL_STRIPE_PRICE_TEAM_MONTHLY: price_test_axignal_team
-      AXIGNAL_TEST_CHECKOUT_BASE_URL: http://localhost:18080/billing/test-checkout
+      AXIGNAL_TEST_CHECKOUT_BASE_URL: http://127.0.0.1:18080/billing/test-checkout
 
   web:
     environment:
