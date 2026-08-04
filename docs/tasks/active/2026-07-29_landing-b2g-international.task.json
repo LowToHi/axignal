@@ -1,0 +1,120 @@
+{
+  "task_id": "AX-F2-T18",
+  "goal_id": "AXIGNAL-GOAL-001",
+  "phase": "F2",
+  "state": "IN_PROGRESS",
+  "objective": "Rebuild the public AXIGNAL landing around the B2G Public Procurement Intelligence wedge without weakening source-admission or commercial-state boundaries.",
+  "outcome": "A production-buildable six-locale landing explains the procurement workflow, visualises source states honestly, captures qualified Design Partner requests safely and emits no unsupported coverage, customer or performance claims.",
+  "contracts": [
+    "GOAL_LOCK",
+    "AGENTS",
+    "01",
+    "02",
+    "03",
+    "04",
+    "05",
+    "06",
+    "08",
+    "12",
+    "13",
+    "16",
+    "18",
+    "20",
+    "21",
+    "23",
+    "28",
+    "ADR-013",
+    "ADR-014"
+  ],
+  "skills": [
+    {"skill_id": "goal-keeper", "version": "0.1.0", "activation_reason": "Keep the B2G wedge inside AXIGNAL-GOAL-001."},
+    {"skill_id": "contract-router", "version": "0.1.0", "activation_reason": "Resolve landing, epistemic, privacy and commercial contracts."},
+    {"skill_id": "task-orchestrator", "version": "0.1.0", "activation_reason": "Register material runtime and public-claim scope before implementation."},
+    {"skill_id": "gate-evaluator", "version": "0.1.0", "activation_reason": "Prevent implementation evidence from self-approving product or source gates."},
+    {"skill_id": "naming-guardian", "version": "0.1.0", "activation_reason": "Enforce AXIGNAL, axignal.com and canonical identifiers."},
+    {"skill_id": "security-reviewer", "version": "0.1.0", "activation_reason": "Review public intake abuse, validation and secret boundaries."},
+    {"skill_id": "privacy-reviewer", "version": "0.1.0", "activation_reason": "Minimise lead data and prevent PII analytics."},
+    {"skill_id": "observability-engineer", "version": "0.1.0", "activation_reason": "Define non-sensitive funnel and intake diagnostics."},
+    {"skill_id": "frontend-architect", "version": "0.1.0", "activation_reason": "Build SSR-first localized routes and deferred product demonstrations."},
+    {"skill_id": "axignal-gsap-ui-ux", "version": "0.1.0", "activation_reason": "Implement bounded named motion timelines with reduced-motion parity."},
+    {"skill_id": "axignal-cinematic-webgl-scroll", "version": "0.1.0", "activation_reason": "Enforce texture tiers, adaptive Canvas resolution, regional Europe LOD, asset rights and measurable R3F sharpness without changing the GSAP narrative."},
+    {"skill_id": "globe-engineer", "version": "0.1.0", "activation_reason": "Replace procedural geography with attributable Earth imagery and semantic states."},
+    {"skill_id": "visualisation-designer", "version": "0.1.0", "activation_reason": "Keep map colour, state and density encodings meaningful."},
+    {"skill_id": "interaction-architect", "version": "0.1.0", "activation_reason": "Preserve coherent investigation state across the scroll narrative."},
+    {"skill_id": "accessibility-auditor", "version": "0.1.0", "activation_reason": "Provide WCAG 2.2 AA structure and non-WebGL equivalents."},
+    {"skill_id": "performance-engineer", "version": "0.1.0", "activation_reason": "Protect LCP, INP, CLS and low-capability fallback budgets."},
+    {"skill_id": "analytics-engineer", "version": "0.1.0", "activation_reason": "Implement a consent-aware no-PII event adapter."},
+    {"skill_id": "hypothesis-curator", "version": "0.1.0", "activation_reason": "Label packaging, prices and impact calculations as candidates."},
+    {"skill_id": "source-admission", "version": "0.1.0", "activation_reason": "Project the bounded TED private-pilot admission without rewriting historical technical-probe evidence or admitting discovery systems."},
+    {"skill_id": "multilingual-localiser", "version": "0.1.0", "activation_reason": "Provide equivalent English, Spanish, French, Portuguese, German and Italian routes."},
+    {"skill_id": "test-engineer", "version": "0.1.0", "activation_reason": "Produce unit, route, browser, accessibility and visual evidence."}
+  ],
+  "dependencies": {
+    "phases": ["F1", "F2", "F8"],
+    "tasks": ["AX-F1-T16", "AX-F1-T17", "AX-F1-T18", "AX-F1-T19", "AX-F1-T20", "AX-F2-T10", "AX-F2-T11", "AX-F2-T12", "AX-F2-T17"],
+    "external": [
+      "NASA Blue Marble source and current media-use guidance",
+      "Natural Earth public-domain country geometry",
+      "Independent visual and gate review after implementation"
+    ]
+  },
+  "allowed_scope": [
+    "apps/landing and its public assets",
+    "landing tests, CI and validation scripts",
+    "landing, roadmap, ADR, task and evidence documentation",
+    "local derivatives of approved geographic and owned brand assets"
+  ],
+  "prohibited_scope": [
+    "Presenting TED beyond the bounded private authenticated pilot profile or admitting discovery systems",
+    "Claiming live global procurement coverage",
+    "Enabling public trial activation, automatic conversion, billing, trading or personally suitable recommendations",
+    "Sending PII to analytics",
+    "Hotlinking production globe assets",
+    "Declaring the task or phase independently accepted"
+  ],
+  "acceptance_evidence": [
+    {"evidence_type": "TEST", "description": "Strict typecheck and production build", "required": true, "location": "apps/landing", "status": "MISSING"},
+    {"evidence_type": "TEST", "description": "Unit tests for source states, intake validation and impact calculation", "required": true, "location": "apps/landing/lib", "status": "MISSING"},
+    {"evidence_type": "TEST", "description": "Six-locale Playwright route and interaction contract", "required": true, "location": "tests/landing/landing.spec.ts", "status": "MISSING"},
+    {"evidence_type": "SCREENSHOT", "description": "Desktop and mobile landing captures", "required": true, "location": "artifacts/landing-b2g", "status": "MISSING"},
+    {"evidence_type": "RIGHTS_RECORD", "description": "Globe source, derivative hash and attribution record", "required": true, "location": "docs/landing/assets-manifest.json", "status": "MISSING"},
+    {"evidence_type": "SECURITY_REVIEW", "description": "Negative intake abuse and no-PII analytics review", "required": true, "location": "docs/landing/b2g-implementation-report.md", "status": "MISSING"},
+    {"evidence_type": "DOCUMENT", "description": "Architecture, motion, SEO, analytics, rollback and known-limitations report", "required": true, "location": "docs/landing/b2g-implementation-report.md", "status": "MISSING"}
+  ],
+  "impacts": {
+    "security": "MATERIAL",
+    "privacy": "MATERIAL",
+    "data_rights": "MATERIAL",
+    "regulatory": "LOW",
+    "multilingual": "MATERIAL",
+    "epistemic": "MATERIAL",
+    "billing": "LOW"
+  },
+  "observability": {
+    "metrics": ["consented CTA funnel by locale and origin", "intake accepted, rejected, rate-limited and delivery-failed counts", "WebGL fallback rate", "Globe texture tier, regional LOD state, effective DPR, frame time and estimated texture memory"],
+    "logs": ["redacted intake outcome with submission identifier and reason code", "asset provenance and build verification"],
+    "traces": ["intake request to configured persistence boundary without payload capture"],
+    "alerts": ["sustained intake delivery failures", "abuse-control saturation", "public landing health failure"]
+  },
+  "rollback": {
+    "strategy": "Revert AX-F2-T18 files and restore the previous landing bundle; no database or product-source state migration is introduced.",
+    "kill_switch": "Disable or roll back the landing deployment while leaving the incumbent private intake configuration unchanged.",
+    "tested": false
+  },
+  "goal_lock_checks": [
+    {"check_id": 1, "answer": "YES", "evidence": "The page sells evidence-governed opportunity investigation, not a generic tender list."},
+    {"check_id": 2, "answer": "YES", "evidence": "Claims, evidence, contradictions, unknowns and source states remain separate."},
+    {"check_id": 3, "answer": "YES", "evidence": "Navigator, Globe, dossier and evidence rail share one demonstrated InvestigationContext."},
+    {"check_id": 4, "answer": "YES", "evidence": "Buyer intent and synthetic fit never become admitted economic evidence."},
+    {"check_id": 5, "answer": "YES", "evidence": "Six explicitly authorised landing locales have route and metadata parity."},
+    {"check_id": 6, "answer": "YES", "evidence": "The public narrative foregrounds traceability and deterministic admission."},
+    {"check_id": 7, "answer": "YES", "evidence": "Prices, demo data, trial and source availability are labelled with their real state."},
+    {"check_id": 8, "answer": "YES", "evidence": "Intake data is purpose-limited; analytics allowlists exclude lead fields."},
+    {"check_id": 9, "answer": "YES", "evidence": "The change is stateless and can be rolled back as one landing deployment."},
+    {"check_id": 10, "answer": "YES", "evidence": "Automated and visual evidence directly tests the landing objective without advancing source gates."}
+  ],
+  "owner": "Product Engineering",
+  "reviewer": null,
+  "created_at": "2026-07-29T00:00:00Z",
+  "updated_at": "2026-07-29T00:00:00Z"
+}

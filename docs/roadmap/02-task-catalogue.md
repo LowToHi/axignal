@@ -98,6 +98,14 @@ P27 approval is invalidated by any final-head change.
 
 `AX-F0`–`AX-F12` and v1.4 P00–P24 task instances remain immutable audit and implementation evidence. They are not deleted or rewritten to appear v1.5-native.
 
+## Legacy implementation task additions
+
+| Task | Purpose | Governing scope | Required skills |
+|---|---|---|---|
+| `AX-F2-T18` | Rebuild the public landing for the B2G procurement wedge with six-locale parity, evidence-state truth and controlled B2G trial intake | 01–06, 08, 12–13, 16, 18, 20–21, 23, 28, ADR-013, ADR-014 | frontend-architect, axignal-gsap-ui-ux, axignal-cinematic-webgl-scroll, globe-engineer, multilingual-localiser, analytics-engineer, accessibility-auditor, performance-engineer, test-engineer |
+
+This row preserves the immutable F2 implementation authority without representing it as a v1.5-native P25–P27 task or as canonical acceptance.
+
 ## Closure rule
 
 A task reaches canonical acceptance only when:

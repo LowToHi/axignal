@@ -123,6 +123,8 @@ identity-engineer
 | `ux-researcher` | workflow or validation | evidence-backed findings |
 | `interaction-architect` | navigation or direct manipulation | state and recovery model |
 | `visualisation-designer` | chart, map, graph or timeline | semantic encodings and QA |
+| `axignal-gsap-ui-ux` | GSAP, motion, animation or cinematic interaction | semantic choreography, implementation, reduced-motion fallback and validation evidence |
+| `axignal-cinematic-webgl-scroll` | Globe texture, Canvas, GPU, LOD or sharpness work | capability tiers, regional blending, rights, fallback and measurable R3F quality gates |
 | `globe-engineer` | geographic surfaces | projection, layer and semantic zoom contract |
 | `graph-engineer` | relational surfaces | typed traversal and layout |
 | `timeline-engineer` | historical state | as-of and revision integrity |

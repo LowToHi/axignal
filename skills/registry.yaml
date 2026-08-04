@@ -1,4 +1,4 @@
-version: 0.3.1
+version: 0.4.0
 goal_id: AXIGNAL-GOAL-001
 status: CANDIDATE
 canonical_brand: AXIGNAL
@@ -117,6 +117,24 @@ skills:
     contracts: ["05", "13"]
     triggers: [map, graph, timeline, chart, visualisation]
     purpose: Define meaningful visual encodings and perceptual safeguards.
+
+  - skill_id: axignal-gsap-ui-ux
+    version: 0.1.0
+    state: CONTRACTED
+    category: experience
+    phases: [F1, F2, F4, F5, F6, F8, F9, F12]
+    contracts: [GOAL_LOCK, "05", "08", "12", "13", "16", "18", "20", "21"]
+    triggers: [ui, ux, gsap, greensock, motion, animation, interaction, scroll, transition, morph, svg, prototype, cinematic]
+    purpose: Design, implement and audit ambitious AXIGNAL motion systems with GSAP while preserving semantic truth, accessibility, performance and user control.
+
+  - skill_id: axignal-cinematic-webgl-scroll
+    version: 0.1.0
+    state: CONTRACTED
+    category: experience
+    phases: [F1, F2, F5, F8]
+    contracts: [GOAL_LOCK, "03", "05", "08", "12", "13", "18", "20", "21"]
+    triggers: [webgl, globe, texture, ktx2, dpr, drawing-buffer, anisotropy, gpu, lod, sharpness, r3f]
+    purpose: Enforce texture, Canvas, regional LOD, rights, fallback and R3F performance gates without duplicating GSAP choreography.
 
   - skill_id: globe-engineer
     version: 0.1.0

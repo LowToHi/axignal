@@ -1,0 +1,243 @@
+{
+  "meta": {
+    "title": "AXIGNAL — Public Procurement Intelligence",
+    "description": "Evidence-governed intelligence for organisations that sell to government. Find, qualify and investigate public opportunities with every material conclusion linked to its evidence."
+  },
+  "nav": {
+    "product": "Product",
+    "method": "Method",
+    "pricing": "Pricing",
+    "faq": "FAQ",
+    "language": "Language",
+    "cta": "Design Partner access"
+  },
+  "hero": {
+    "eyebrow": "GLOBAL OPPORTUNITY INTELLIGENCE · FIRST COMMERCIAL EXPRESSION",
+    "title": "Win the right public opportunities.",
+    "accent": "Defend every conclusion.",
+    "descriptor": "Evidence-governed intelligence for organisations that sell to government.",
+    "summary": "Find, qualify and investigate public opportunities with every material conclusion linked to its evidence.",
+    "primary": "Apply for Design Partner access",
+    "secondary": "Explore the product demo",
+    "proof": ["Source-linked evidence", "Contradictions visible", "Human authority preserved"],
+    "status": "Synthetic product demonstration · live procurement sources disabled"
+  },
+  "problem": {
+    "eyebrow": "THE PROCUREMENT FRAGMENTATION PROBLEM",
+    "title": "Public demand is visible. Decision-ready context is not.",
+    "body": "Opportunities sit across portals, languages, amendments, documents and deadlines. Teams rebuild the same context by hand, then make a bid/no-bid call before they can test every assumption.",
+    "items": [
+      ["Fragmented discovery", "Different portals, formats, taxonomies and update rhythms."],
+      ["Expensive qualification", "Eligibility, fit, timing and evidence are reviewed repeatedly."],
+      ["Context loss", "Source changes and contradictions disappear into tabs and spreadsheets."]
+    ]
+  },
+  "storyIntro": {
+    "eyebrow": "ONE PERSISTENT INVESTIGATION",
+    "title": "From a procurement question to an evidence-linked dossier.",
+    "body": "Scroll through one synthetic product demonstration. Source states reflect the repository catalogue, not marketed coverage."
+  },
+  "acts": [
+    {
+      "eyebrow": "01 · FRAGMENTATION",
+      "title": "Start with the scattered public record.",
+      "body": "AXIGNAL keeps portals, notices, documents and updates separate until their provenance and lifecycle can be tested.",
+      "signal": "146",
+      "metric": "catalogued source families",
+      "detail": "Catalogue inventory, not product availability"
+    },
+    {
+      "eyebrow": "02 · NAVIGATOR",
+      "title": "Ask a commercial question, not a keyword query.",
+      "body": "Describe the capability, countries, buyer profile and constraints. Navigator creates a typed, reversible investigation context.",
+      "signal": "1",
+      "metric": "persistent ResearchRun",
+      "detail": "Synthetic organisation fit profile"
+    },
+    {
+      "eyebrow": "03 · GLOBE",
+      "title": "See where demand, fit and evidence intersect.",
+      "body": "The Globe separates the admitted TED pilot profile from discovery systems and unavailable coverage. Visual intensity never changes admission state.",
+      "signal": "1",
+      "metric": "product-admitted sources",
+      "detail": "TED bounded profile · private authenticated pilot"
+    },
+    {
+      "eyebrow": "04 · OPPORTUNITY DOSSIER",
+      "title": "Qualify the opportunity before committing bid resources.",
+      "body": "A dossier keeps scope, buyer, deadlines, eligibility, documents, amendments and unknowns in one reviewable object.",
+      "signal": "7",
+      "metric": "material decision fields",
+      "detail": "Synthetic tender dossier"
+    },
+    {
+      "eyebrow": "05 · CLAIMS",
+      "title": "Separate what is observed from what is inferred.",
+      "body": "Every material conclusion carries a type, source reference, freshness, transformation and counter-evidence state.",
+      "signal": "5",
+      "metric": "epistemic claim states",
+      "detail": "Observed ≠ calculated ≠ inferred"
+    },
+    {
+      "eyebrow": "06 · ADMISSION",
+      "title": "AI can propose. The runtime decides what enters the ledger.",
+      "body": "Deterministic validators reject malformed or unsupported candidates. Contradictions and unknowns remain visible.",
+      "signal": "FAIL CLOSED",
+      "metric": "admission policy",
+      "detail": "Proposal is not admission"
+    },
+    {
+      "eyebrow": "07 · OPERATIONS",
+      "title": "Move from search effort to governed bid decisions.",
+      "body": "Reuse the investigation, assign review, monitor material changes and preserve the reasoning behind a bid/no-bid decision.",
+      "signal": "TRACEABLE",
+      "metric": "decision history",
+      "detail": "No automated procurement submission"
+    },
+    {
+      "eyebrow": "08 · DESIGN PARTNER",
+      "title": "Validate the workflow with one expensive procurement problem.",
+      "body": "Design Partner access is reviewed for organisations willing to test a bounded workflow and provide structured evidence.",
+      "signal": "CANDIDATE",
+      "metric": "commercial offer",
+      "detail": "Applications only · no billing or subscription enabled"
+    }
+  ],
+  "navigator": {
+    "label": "NAVIGATOR · SYNTHETIC DEMO",
+    "prompt": "Find public infrastructure opportunities in Western Europe that fit our delivery capacity and require evidence-backed qualification.",
+    "response": "I created a bounded investigation. The TED profile is admitted for the private authenticated pilot; the other visible systems remain discovery candidates.",
+    "context": ["Western Europe", "Infrastructure services", "12–24 month horizon", "Evidence required"]
+  },
+  "globe": {
+    "label": "SOURCE PROGRAM VIEW",
+    "title": "Catalogue state across jurisdictions",
+    "legend": {
+      "ADMITTED": "Admitted",
+      "TECHNICAL_PROBE": "Technical probe",
+      "DISCOVERED": "Discovered",
+      "CANDIDATE": "Candidate",
+      "BLOCKED": "Blocked",
+      "RIGHTS_REVIEW": "Rights review",
+      "UNAVAILABLE": "Unavailable"
+    },
+    "layers": "Layers",
+    "recenter": "Recenter",
+    "instructions": "Drag to rotate, pinch or scroll to zoom. Select a marker for its source state.",
+    "fallback": "Interactive globe unavailable. The source-state table below contains the same information.",
+    "activeRule": "Only ADMITTED sources are active product coverage. Current bounded pilot count: 1.",
+    "tableCaption": "Procurement source-state alternative to the globe",
+    "source": "Source",
+    "jurisdiction": "Jurisdiction",
+    "state": "State"
+  },
+  "dossier": {
+    "eyebrow": "SYNTHETIC OPPORTUNITY DOSSIER",
+    "title": "Regional energy-efficiency framework",
+    "buyer": "Regional public works authority",
+    "location": "Southern Europe",
+    "deadline": "42 days · synthetic",
+    "fields": [
+      ["Fit", "Strong capability overlap · calculated from demo inputs"],
+      ["Eligibility", "Consortium rule unresolved"],
+      ["Value", "€8–12m synthetic range"],
+      ["Documents", "14 demo records · 2 amendments"],
+      ["Contradiction", "Delivery window conflicts with one annex"],
+      ["Next action", "Human review of eligibility evidence"]
+    ],
+    "disclaimer": "All dossier entities, values and documents are synthetic and do not describe a live procurement."
+  },
+  "evidence": {
+    "eyebrow": "CLAIMS, EVIDENCE AND ADMISSION",
+    "title": "Trust is a visible system state.",
+    "body": "The vector discovers; the graph contextualises; the runtime admits. Models never become authoritative by presentation.",
+    "claims": [
+      ["OBSERVED", "The notice states a two-stage procedure.", "Synthetic source extract · T−2d"],
+      ["CALCULATED", "The deadline is 42 days away.", "Versioned date transformation"],
+      ["INFERRED", "A consortium may improve capability fit.", "Explicit demo inference"],
+      ["CONTRADICTED", "The delivery window differs across annexes.", "Material counter-evidence"],
+      ["UNKNOWN", "Subcontracting limit not located.", "Coverage gap remains open"]
+    ],
+    "pipeline": ["Candidate", "Structural validation", "Admissibility policy", "Canonical ledger"]
+  },
+  "outcomes": {
+    "eyebrow": "OPERATIONAL VALUE",
+    "title": "Measure saved research effort without inventing ROI.",
+    "body": "The calculator uses only the values you enter. It is a planning aid, not a performance claim.",
+    "inputs": {
+      "opportunities": "Opportunities reviewed each month",
+      "hours": "Current hours per opportunity",
+      "reduction": "Assumed research-time reduction",
+      "rate": "Loaded hourly cost"
+    },
+    "result": {
+      "hours": "Potential hours redirected",
+      "value": "Illustrative monthly capacity value"
+    },
+    "note": "Illustrative estimate = opportunities × hours × assumed reduction × hourly cost. It excludes win rate, revenue, implementation cost and quality effects."
+  },
+  "pricing": {
+    "eyebrow": "CANDIDATE PACKAGING",
+    "title": "Professional pricing, tested before it is frozen.",
+    "body": "Design Partner is a special validation programme. Controlled trial and paid-plan applications are visible; public activation, checkout and automatic conversion remain disabled.",
+    "candidate": "Indicative candidate packaging",
+    "current": "Current validation path",
+    "cta": "Select and apply",
+    "plans": [
+      ["Design Partner", "€300–600", "organisation / month", "Bounded workflow validation, direct product feedback and preferential candidate terms."],
+      ["Professional", "€349–499", "month", "Individual investigation, dossiers, monitoring and evidence exports."],
+      ["Team / Growth", "€899–1,499", "month", "Shared investigations, review workflow, governance and expanded usage."],
+      ["Enterprise", "€18k–45k", "year", "Security, integration, support, data and API obligations scoped by contract."]
+    ]
+  },
+  "faq": {
+    "eyebrow": "QUESTIONS BEFORE ACCESS",
+    "title": "What the current landing does—and does not—promise.",
+    "items": [
+      ["Does AXIGNAL cover procurement globally today?", "No. The repository contains a worldwide research catalogue, but no global coverage claim is authorised. Sources advance independently through admission."],
+      ["Is TED available in the product?", "The bounded TED Search API product profile is admitted for the private authenticated pilot. Public access and unrestricted source use remain disabled."],
+      ["Does AXIGNAL write or submit bids?", "No. AXIGNAL supports research, qualification and investigation. It does not submit procurement responses or make final decisions."],
+      ["Are the prices final?", "No. Design Partner and plan ranges are candidate commercial hypotheses that require paid evidence."],
+      ["Is there a free trial?", "A controlled 7-day trial is application-only while public trial access remains disabled. Approved organisations receive 1,000,000 cumulative tokens, no card, no renewal or overage, and read-only access at expiry."]
+    ]
+  },
+  "form": {
+    "eyebrow": "DESIGN PARTNER INTAKE",
+    "title": "Bring one costly procurement workflow.",
+    "body": "Two short steps help us assess fit. Submitting does not create a subscription, trial or guarantee of access.",
+    "step": "Step",
+    "of": "of",
+    "identity": "Your organisation",
+    "fit": "Workflow fit",
+    "email": "Work email",
+    "organisation": "Organisation",
+    "role": "Role",
+    "rolePlaceholder": "Select a role",
+    "roles": ["Bid / proposal lead", "Business development", "Public-sector sales", "Procurement intelligence", "Executive / founder", "Consultant", "Other"],
+    "countries": "Priority countries or jurisdictions",
+    "volume": "Opportunities reviewed per month",
+    "process": "Current process or tools",
+    "useCase": "Primary use case",
+    "problem": "Most expensive problem in the workflow",
+    "timeframe": "Evaluation timeframe",
+    "timeframes": ["Now", "Within 30 days", "This quarter", "Exploring"],
+    "consent": "I agree that AXIGNAL may use this information only to assess and respond to this Design Partner request. No lead details are sent to analytics.",
+    "next": "Continue",
+    "back": "Back",
+    "submit": "Apply for Design Partner access",
+    "sending": "Sending…",
+    "success": "Request received. AXIGNAL will review the fit for the Design Partner programme.",
+    "error": "The intake channel is unavailable. No success was recorded.",
+    "required": "Complete the required fields before continuing.",
+    "privacy": "Purpose-limited review · no subscription created · no PII analytics"
+  },
+  "footer": {
+    "descriptor": "The standard for B2G intelligence in global public opportunities.",
+    "methodology": "Methodology",
+    "trust": "Trust centre",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "accessibility": "Accessibility",
+    "rights": "Sources & demonstration data"
+  }
+}

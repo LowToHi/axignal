@@ -1,20 +1,23 @@
-# AXIGNAL Landing Scroll Storyboard v1
+# AXIGNAL Landing Scroll Storyboard v2
+
+Goal ID: `AXIGNAL-GOAL-001`
+Task: `AX-F2-T18`
 
 ## Story thesis
 
-**From signal noise to decision confidence.** The visitor experiences a bounded investigation rather than reading a list of features.
+**One public record becomes one defensible investigation.** The visitor follows the same objects from geography to evidence and dossier instead of reading disconnected feature panels.
 
-| Act | Buyer question | Stable visual state | Conversion purpose |
+| Scene label | Buyer question | Continuous visual state | Comprehension purpose |
 |---|---|---|---|
-| 1. The Signal Field | What is AXIGNAL? | Europe-facing Globe and primary promise | Category comprehension |
-| 2. Too Much Noise | Why is this needed? | Fragmented signals collapse into structure | Problem identification |
-| 3. Ask Anything | Is it difficult to use? | Navigator creates a typed investigation | Reduce adoption friction |
-| 4. Globe Intelligence | What can I discover? | Madrid, London, Paris and Berlin activated | Product desire |
-| 5. Claim & Evidence Rail | Why should I trust it? | Fact/inference/prediction/contradiction/unknown separated | Trust formation |
-| 6. Human Review | Who governs edge cases? | Proposal → policy → admission → review | Objection handling |
-| 7. Outcomes | What changes operationally? | Reproducible, explicitly synthetic outcome indicators | Value rationalisation |
-| 8. Take Action | What happens next? | Globe resolves into AXIGNAL mark and stable CTA | Qualified request access |
+| `SCENE_GLOBAL` | What is AXIGNAL? | One active 3D Globe with subtle global arcs and the commercial promise | Category and product comprehension |
+| `SCENE_EUROPE` | Where does relevant demand appear? | The same Globe focuses on Europe; territorial opportunities and bounded TED pilot state appear | Scope and current product boundary |
+| `SCENE_FRAGMENTATION` | Why is qualification expensive? | Portals, notices, documents and updates separate around the Globe | Fragmentation recognition |
+| `SCENE_EVIDENCE` | How is source material governed? | The same fragments reorganize into Evidence Objects, Candidate Claims, admitted claims and unknowns | Epistemic comprehension |
+| `SCENE_INVESTIGATION` | How do the product lenses work together? | Globe and graph share one `InvestigationContext`; relationships remain traceable | System-model comprehension |
+| `SCENE_DOSSIER` | What usable result is produced? | Graph objects assemble into a reviewable synthetic dossier; the pin then releases into pricing | Outcome and access comprehension |
 
 ## ScrollTrigger contract
 
-Each act owns a labelled GSAP timeline. The Globe consumes a typed `LandingSceneState`; ScrollTrigger never mutates Three.js objects directly. Mobile uses shorter non-pinned chapters. Reduced-motion mode uses discrete crossfades and static diagrams.
+One labelled GSAP timeline owns pinning, scrub and all coordinated HTML transforms. It writes a normalized progress ref consumed by the same Three.js Canvas throughout. The transition to pricing is part of the final scene release.
+
+Mobile retains the real Globe and six-scene continuity with shorter geometry and pin distance. Reduced motion removes prolonged scrub and continuous movement while preserving every scene as static ordered content.

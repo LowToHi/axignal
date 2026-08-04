@@ -1,0 +1,98 @@
+{
+  "skill_id": "axignal-gsap-ui-ux",
+  "version": "0.1.0",
+  "state": "CONTRACTED",
+  "purpose": "Design, implement, reconstruct, and audit ambitious AXIGNAL UI and UX motion with GSAP while preserving product truth, accessibility, performance, lifecycle safety, and user control.",
+  "triggers": {
+    "task_types": [
+      "ui-design",
+      "ux-design",
+      "frontend-implementation",
+      "interaction-prototype",
+      "motion-audit"
+    ],
+    "impact_levels": ["UX", "EPISTEMIC", "MULTILINGUAL"],
+    "keywords": [
+      "animation",
+      "cinematic",
+      "draggable",
+      "flip",
+      "globe",
+      "graph",
+      "gsap",
+      "greensock",
+      "interaction",
+      "microinteraction",
+      "motion",
+      "morph",
+      "scrolltrigger",
+      "svg",
+      "timeline",
+      "ui",
+      "ux"
+    ],
+    "always_on": false
+  },
+  "contracts": ["GOAL_LOCK", "05", "08", "12", "13", "16", "18", "20", "21"],
+  "inputs": [
+    "A user request, interaction brief, reference, or existing AXIGNAL interface to audit.",
+    "The active AXIGNAL task, phase, Goal Lock, and governing contracts.",
+    "Current UI source, design tokens, framework, package manager, and dependency state.",
+    "Target device, accessibility, multilingual, and performance constraints."
+  ],
+  "outputs": [
+    "A semantic motion brief with interruption, reduced-motion, and fallback behavior.",
+    "A scoped GSAP implementation or implementation-ready interaction specification.",
+    "Automated and browser acceptance evidence covering lifecycle, accessibility, semantics, and performance.",
+    "Known limitations, rollback instructions, and an independent-gate handoff."
+  ],
+  "prohibited_actions": [
+    "Override AXIGNAL-GOAL-001, canonical identity, repository contracts, or explicit user direction.",
+    "Use motion to imply financial certainty, urgency, suitability, truth, coverage, freshness, or expected return without a declared canonical variable.",
+    "Hide evidence, contradictions, unknowns, provenance, as-of state, or critical interaction behind animation.",
+    "Override reduced-motion, keyboard, focus, high-contrast, screen-reader, or multilingual requirements.",
+    "Ship unscoped selectors, stale ScrollTriggers, leaked listeners, SSR browser calls, production markers, or GSDevTools.",
+    "Add a private GreenSock registry, an auth token, a secret, or an unpinned runtime dependency.",
+    "Freeze provisional design or motion tokens without the required evidence and accepted ADR.",
+    "Self-approve a material design direction or phase gate."
+  ],
+  "tests": [
+    {
+      "test_id": "AX-GSAP-SKILL-STRUCTURE",
+      "description": "The Skill passes the Codex Skill structure and frontmatter validator.",
+      "required": true,
+      "fixture": "skills/axignal-gsap-ui-ux"
+    },
+    {
+      "test_id": "AX-GSAP-AUDITOR-SELF-TEST",
+      "description": "The deterministic motion auditor accepts a compliant React fixture and rejects unsafe GSAP patterns.",
+      "required": true,
+      "fixture": "skills/axignal-gsap-ui-ux/scripts/audit-gsap-motion.mjs --self-test"
+    },
+    {
+      "test_id": "AX-GSAP-CONTRACT-SCHEMA",
+      "description": "The typed Skill contract validates against schemas/skill.schema.json.",
+      "required": true,
+      "fixture": "skills/axignal-gsap-ui-ux/skill.contract.json"
+    },
+    {
+      "test_id": "AX-GSAP-CANONICAL-NAMING",
+      "description": "All active Skill artifacts pass the canonical AXIGNAL naming validator.",
+      "required": true,
+      "fixture": "scripts/validate_canonical_naming.py"
+    }
+  ],
+  "telemetry": {
+    "record_activation": true,
+    "record_version": true,
+    "record_outputs": true,
+    "record_failures": true
+  },
+  "owner": "AXIGNAL Platform and Product Engineering",
+  "conflict_precedence": 500,
+  "supersedes": null,
+  "deactivation": {
+    "kill_switch": "Set the registry state to REVOKED or remove the Skill from task routing before the next agent run.",
+    "rollback": "Revert the Skill directory and its registry/map entries; no runtime GSAP dependency is introduced by this Skill contract."
+  }
+}

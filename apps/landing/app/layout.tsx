@@ -1,44 +1,41 @@
 import type { Metadata, Viewport } from "next";
-
+import { headers } from "next/headers";
 import "@axignal/design-tokens/tokens.css";
 import "./globals.css";
-import "./responsive-polish.css";
-import "./message-copy.css";
+import "./contract-overrides.css";
+
+import { htmlLanguages, isLocale } from "@/lib/i18n";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://axignal.com"),
-  title: "AXIGNAL — Business-to-Government (B2G) Opportunity Intelligence",
-  description:
-    "Find and qualify public contracts and global tenders. AXIGNAL connects procurement notices, government buyers, awards, companies and evidence for disciplined B2G decisions.",
-  applicationName: "AXIGNAL",
-  alternates: { canonical: "/" },
-  openGraph: {
-    title: "AXIGNAL — Find the public contracts your business is built to pursue",
-    description:
-      "Business-to-Government opportunity intelligence for discovering, qualifying and investigating public contracts with a traceable evidence trail.",
-    type: "website",
-    siteName: "AXIGNAL"
+  title: {
+    default: "AXIGNAL — B2G Opportunity Intelligence",
+    template: "%s · AXIGNAL"
   },
-  robots: {
-    index: false,
-    follow: false,
-    nocache: true,
-    googleBot: {
-      index: false,
-      follow: false,
-      noimageindex: true
-    }
-  }
+  description:
+    "Find, qualify and investigate public contracts with traceable evidence and human authority.",
+  icons: {
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/favicon.svg", type: "image/svg+xml" }]
+  },
+  manifest: "/manifest.webmanifest"
 };
 
 export const viewport: Viewport = {
   colorScheme: "dark",
-  themeColor: "#050a0d"
+  themeColor: "#030d12",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover"
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const requestHeaders = await headers();
+  const requestedLocale = requestHeaders.get("x-axignal-locale") ?? "en";
+  const locale = isLocale(requestedLocale) ? requestedLocale : "en";
+
   return (
-    <html lang="en" data-theme="dark">
+    <html lang={htmlLanguages[locale]} data-theme="dark">
       <body>{children}</body>
     </html>
   );

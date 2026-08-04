@@ -1,31 +1,25 @@
 {
-  "version": "1.1.0",
-  "status": "SOURCES_APPROVED_DIGESTS_NOT_PINNED",
+  "version": "1.0.0",
+  "status": "SOURCES_APPROVED_DERIVATIVES_NOT_PRODUCTION_LOCKED",
   "external_assets": [
     {
       "id": "earth-albedo-february",
       "source": "NASA Blue Marble: Next Generation",
       "source_page": "https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/base-map/",
-      "acquisition_url": "https://assets.science.nasa.gov/content/dam/science/esd/eo/images/bmng/bmng-base/february/world.200402.3x21600x10800.jpg",
-      "filename": "world.200402.3x21600x10800.jpg",
-      "allowed_hosts": [
-        "assets.science.nasa.gov"
-      ],
-      "allowed_content_types": [
-        "image/jpeg"
-      ],
-      "max_bytes": 268435456,
-      "max_redirects": 2,
-      "expected_sha256": null,
+      "acquisition_url": "https://assets.science.nasa.gov/content/dam/science/esd/eo/images/bmng/bmng-base/february/world.200402.3x5400x2700.jpg",
       "rights_basis": "NASA media resource; verify current NASA media-use guidance before public release",
-      "original_dimensions": [
-        21600,
-        10800
-      ],
-      "derivatives": [
-        "earth-albedo-desktop.ktx2",
-        "earth-albedo-mobile.ktx2"
-      ],
+      "original_dimensions": [5400, 2700],
+      "derivatives": ["earth-albedo.webp", "earth-albedo-mobile.webp"],
+      "hotlink": false
+    },
+    {
+      "id": "earth-clouds-2002",
+      "source": "NASA Blue Marble: Clouds",
+      "source_page": "https://visibleearth.nasa.gov/images/57747/blue-marble-clouds/77558l",
+      "acquisition_url": "https://eoimages.gsfc.nasa.gov/images/imagerecords/57000/57747/cloud_combined_2048.jpg",
+      "rights_basis": "NASA media resource; NASA Earth Observatory credit required and no endorsement implied",
+      "original_dimensions": [2048, 1024],
+      "derivatives": ["earth-clouds.webp"],
       "hotlink": false
     },
     {
@@ -33,48 +27,18 @@
       "source": "NASA Black Marble 2016 Color",
       "source_page": "https://science.nasa.gov/earth/earth-observatory/earth-at-night/maps/",
       "acquisition_url": "https://assets.science.nasa.gov/content/dam/science/esd/eo/images/imagerecords/144000/144898/BlackMarble_2016_3km.jpg",
-      "filename": "BlackMarble_2016_3km.jpg",
-      "allowed_hosts": [
-        "assets.science.nasa.gov"
-      ],
-      "allowed_content_types": [
-        "image/jpeg"
-      ],
-      "max_bytes": 134217728,
-      "max_redirects": 2,
-      "expected_sha256": null,
       "rights_basis": "NASA media resource; verify current NASA media-use guidance before public release",
-      "original_dimensions": [
-        13500,
-        6750
-      ],
-      "derivatives": [
-        "earth-night-desktop.ktx2",
-        "earth-night-mobile.ktx2"
-      ],
+      "original_dimensions": [13500, 6750],
+      "derivatives": ["earth-night-desktop.ktx2", "earth-night-mobile.ktx2"],
       "hotlink": false
     },
     {
       "id": "countries-110m",
       "source": "Natural Earth",
       "source_page": "https://www.naturalearthdata.com/downloads/110m-cultural-vectors/110m-admin-0-countries/",
-      "acquisition_url": "https://naturalearth.s3.amazonaws.com/110m_cultural/ne_110m_admin_0_countries.zip",
-      "filename": "ne_110m_admin_0_countries.zip",
-      "allowed_hosts": [
-        "naturalearth.s3.amazonaws.com"
-      ],
-      "allowed_content_types": [
-        "application/zip",
-        "application/x-zip-compressed",
-        "application/octet-stream"
-      ],
-      "max_bytes": 33554432,
-      "max_redirects": 2,
-      "expected_sha256": null,
+      "acquisition_url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson",
       "rights_basis": "public domain",
-      "derivatives": [
-        "countries-110m.simplified.geojson"
-      ],
+      "derivatives": ["countries-110m.simplified.geojson"],
       "hotlink": false
     },
     {
@@ -82,22 +46,8 @@
       "source": "Natural Earth",
       "source_page": "https://www.naturalearthdata.com/downloads/50m-cultural-vectors/50m-admin-0-boundary-lines/",
       "acquisition_url": "https://naturalearth.s3.amazonaws.com/50m_cultural/ne_50m_admin_0_boundary_lines_land.zip",
-      "filename": "ne_50m_admin_0_boundary_lines_land.zip",
-      "allowed_hosts": [
-        "naturalearth.s3.amazonaws.com"
-      ],
-      "allowed_content_types": [
-        "application/zip",
-        "application/x-zip-compressed",
-        "application/octet-stream"
-      ],
-      "max_bytes": 33554432,
-      "max_redirects": 2,
-      "expected_sha256": null,
       "rights_basis": "public domain",
-      "derivatives": [
-        "boundaries-50m.simplified.geojson"
-      ],
+      "derivatives": ["europe-boundaries-50m.geojson"],
       "hotlink": false
     },
     {
@@ -105,29 +55,16 @@
       "source": "Natural Earth",
       "source_page": "https://www.naturalearthdata.com/downloads/50m-physical-vectors/50m-coastline/",
       "acquisition_url": "https://naturalearth.s3.amazonaws.com/50m_physical/ne_50m_coastline.zip",
-      "filename": "ne_50m_coastline.zip",
-      "allowed_hosts": [
-        "naturalearth.s3.amazonaws.com"
-      ],
-      "allowed_content_types": [
-        "application/zip",
-        "application/x-zip-compressed",
-        "application/octet-stream"
-      ],
-      "max_bytes": 33554432,
-      "max_redirects": 2,
-      "expected_sha256": null,
       "rights_basis": "public domain",
-      "derivatives": [
-        "coastline-50m.simplified.geojson"
-      ],
+      "derivatives": ["europe-boundaries-50m.geojson"],
       "hotlink": false
     }
   ],
   "owned_assets": [
     "apps/web/public/brand/axignal-logo.svg",
     "apps/web/public/brand/axignal-logo-dark.svg",
-    "apps/web/public/brand/axignal-isotipo.svg"
+    "apps/web/public/brand/axignal-isotipo.svg",
+    "apps/landing/public/brand/axignal-aura.svg"
   ],
   "required_fallbacks": [
     "opengraph-image.jpg",
@@ -141,5 +78,5 @@
     "icon-192.png",
     "icon-512.png"
   ],
-  "production_rule": "Remote acquisition is denied until each exact source artifact has an independently reviewed SHA-256 pin. External originals remain outside Git; only optimised derivatives and provenance may ship."
+  "production_rule": "External originals are cached outside Git; only optimised derivatives and recorded provenance may ship."
 }
