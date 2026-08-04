@@ -76,7 +76,7 @@ CREATE OR REPLACE FUNCTION tenant_private.purge_claimed_workspace(
 RETURNS axignal_global.deletion_tombstones
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path TO pg_catalog
+SET search_path TO pg_catalog, public
 AS $$
 DECLARE
   v_lifecycle tenant_private.workspace_lifecycle%ROWTYPE;
@@ -204,7 +204,7 @@ CREATE OR REPLACE FUNCTION tenant_private.reapply_deletion_tombstone(
 RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path TO pg_catalog
+SET search_path TO pg_catalog, public
 AS $$
 DECLARE
   v_tenant_hash text;
