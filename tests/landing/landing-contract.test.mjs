@@ -82,19 +82,27 @@ test("price book is versioned and reconciled to the contractual catalogue", asyn
   assert.match(contract, /amountMinor: 39_900/);
   assert.match(pricing, /AXIGNAL_PRICE_BOOK\.plans\.professional/);
   assert.match(pricing, /AXIGNAL_PRICE_BOOK\.plans\.team/);
-  assert.doesNotMatch(pricing, /€349|€899|€1,499|€18k|Design Partner/);
+  assert.doesNotMatch(pricing, /€349|€899|€1,499|€18k|Design Partner|name: "Enterprise"/);
 });
 
 test("public landing removes source-brand identity while retaining bounded authority", async () => {
-  const [profile, data] = await Promise.all([
+  const [profile, data, overrides, layout, browserTests] = await Promise.all([
     readFile(resolve(landingRoot, "lib/product-profile.ts"), "utf8"),
     readFile(resolve(landingRoot, "lib/landing-data.ts"), "utf8"),
+    readFile(resolve(landingRoot, "app/contract-overrides.css"), "utf8"),
+    readFile(resolve(landingRoot, "app/layout.tsx"), "utf8"),
+    readFile(resolve(repoRoot, "tests/landing/landing.spec.ts"), "utf8"),
   ]);
   const publicSourceText = `${profile}\n${data}`;
 
   assert.doesNotMatch(publicSourceText, /Tenders Electronic Daily|EU_TED|TED bounded|perfil acotado de TED|profil TED/i);
   assert.match(publicSourceText, /ADMITTED_PUBLIC_SOURCE_PROFILE_01/);
   assert.match(publicSourceText, /Admitted European public-source profile/);
+  assert.match(overrides, /\.status-ribbon span:first-child/);
+  assert.match(overrides, /display: none/);
+  assert.match(overrides, /ADMITTED PUBLIC-SOURCE PROFILE · PRIVATE AUTHENTICATED PILOT/);
+  assert.match(layout, /contract-overrides\.css/);
+  assert.match(browserTests, /does not expose the admitted source brand as public landing identity/);
 });
 
 test("B2G trial intake persists canonical schema, source and message version", async () => {
@@ -122,6 +130,19 @@ test("B2G trial intake persists canonical schema, source and message version", a
   assert.match(route, /allowedPlans/);
 });
 
+test("browser assertions reject superseded copy and assert canonical commercial authority", async () => {
+  const browserTests = await readFile(resolve(repoRoot, "tests/landing/landing.spec.ts"), "utf8");
+
+  assert.match(browserTests, /Find the public contracts your business is built to pursue/);
+  assert.match(browserTests, /Controlled Trial/);
+  assert.match(browserTests, /€149/);
+  assert.match(browserTests, /€399/);
+  assert.match(browserTests, /Canonical price book · 2026-08-04/);
+  assert.doesNotMatch(browserTests, /Win the right public opportunities/);
+  assert.doesNotMatch(browserTests, /Indicative candidate pricing/);
+  assert.doesNotMatch(browserTests, /name: "Design Partner" \}\)\.toBeVisible/);
+});
+
 test("landing stays fail-closed for indexing before launch authority", async () => {
   const [metadata, robots] = await Promise.all([
     readFile(resolve(landingRoot, "lib/metadata.ts"), "utf8"),
@@ -144,6 +165,7 @@ test("landing metadata and fallback assets stay local and coherent", async () =>
 
   assert.equal(existsSync(resolve(landingRoot, "public/favicon.svg")), true);
   assert.match(layout, /url: "\/favicon\.svg"/);
+  assert.match(layout, /B2G Opportunity Intelligence/);
   assert.match(manifest, /src: "\/favicon\.svg"/);
   assert.match(globe, /globe-canvas-fallback-text/);
   assert.match(globe, /onContextFailure/);
