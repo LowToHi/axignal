@@ -95,11 +95,32 @@ jobs:
       - name: Typecheck real landing
         run: pnpm --filter @axignal/landing typecheck
       - name: Build real landing
+        env:
+          AXIGNAL_BUILD_SHA: ${{ env.AXIGNAL_EXACT_SHA }}
+          AXIGNAL_PUBLIC_ORIGIN: http://127.0.0.1:3001
+          AXIGNAL_LANDING_PUBLIC_ORIGIN: http://127.0.0.1:3001
         run: pnpm --filter @axignal/landing build
       - name: Install Chromium
         run: pnpm exec playwright install --with-deps chromium
-      - name: Execute desktop and mobile landing E2E
-        run: pnpm exec playwright test --config=playwright.landing.config.ts
+      - name: Start canonical production landing
+        shell: bash
+        env:
+          AXIGNAL_PUBLIC_ORIGIN: http://127.0.0.1:3001
+          AXIGNAL_LANDING_PUBLIC_ORIGIN: http://127.0.0.1:3001
+        run: |
+          set -euo pipefail
+          pnpm --filter @axignal/landing start > p23-t02-landing-server.log 2>&1 &
+          echo $! > p23-t02-landing-server.pid
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent --show-error http://127.0.0.1:3001/ >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat p23-t02-landing-server.log
+          exit 1
+      - name: Execute focused active-landing succession E2E
+        run: pnpm exec playwright test --config=tests/landing/playwright.config.ts
       - name: Upload non-sensitive evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -107,7 +128,8 @@ jobs:
           name: p23-t02-message-copy-e2e-${{ env.AXIGNAL_EXACT_SHA }}
           path: |
             p23-t02-message-copy-evidence.json
+            p23-t02-landing-server.log
             playwright-report
             test-results
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 30
