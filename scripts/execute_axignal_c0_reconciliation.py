@@ -35,14 +35,14 @@ SHARED_PATHS = (
     "skills/registry.yaml",
 )
 
-TASK_ROW = (
-    "| `AX-F2-T18` | Rebuild the public landing for the B2G procurement wedge "
-    "with six-locale parity, evidence-state truth and qualified Design Partner intake "
-    "| 01–06, 08, 12–13, 16, 18, 20–21, 23, 28, ADR-013, ADR-014 | "
-    "frontend-architect, axignal-gsap-ui-ux, axignal-cinematic-webgl-scroll, "
-    "globe-engineer, multilingual-localiser, analytics-engineer, accessibility-auditor, "
-    "performance-engineer, test-engineer |"
-)
+TASK_SECTION = """## Legacy implementation task additions
+
+| Task | Purpose | Governing scope | Required skills |
+|---|---|---|---|
+| `AX-F2-T18` | Rebuild the public landing for the B2G procurement wedge with six-locale parity, evidence-state truth and controlled B2G trial intake | 01–06, 08, 12–13, 16, 18, 20–21, 23, 28, ADR-013, ADR-014 | frontend-architect, axignal-gsap-ui-ux, axignal-cinematic-webgl-scroll, globe-engineer, multilingual-localiser, analytics-engineer, accessibility-auditor, performance-engineer, test-engineer |
+
+This row preserves the immutable F2 implementation authority without representing it as a v1.5-native P25–P27 task or as canonical acceptance.
+"""
 
 SKILL_MAP_ROWS = (
     "| `axignal-gsap-ui-ux` | GSAP, motion, animation or cinematic interaction | "
@@ -120,19 +120,31 @@ def insert_after(path: Path, anchor: str, additions: tuple[str, ...]) -> None:
         return
     assert anchor in content, f"anchor missing in {path}: {anchor}"
     replacement = anchor + "\n" + "\n".join(missing)
-    path.write_text(content.replace(anchor, replacement, 1), encoding="utf-8")
+    updated = content.replace(anchor, replacement, 1)
+    assert updated.count(missing[0]) == 1
+    path.write_text(updated, encoding="utf-8")
+
+
+def insert_before(path: Path, anchor: str, addition: str) -> None:
+    content = path.read_text(encoding="utf-8")
+    if addition in content:
+        return
+    assert anchor in content, f"anchor missing in {path}: {anchor}"
+    updated = content.replace(anchor, addition.rstrip() + "\n\n" + anchor, 1)
+    assert updated.count(addition.splitlines()[0]) == 1
+    path.write_text(updated, encoding="utf-8")
 
 
 def reconcile_shared_files() -> None:
     task_catalogue = ROOT / "docs/roadmap/02-task-catalogue.md"
     task_content = task_catalogue.read_text(encoding="utf-8")
     if "`AX-F2-T18`" not in task_content:
-        anchor = next(
-            line
-            for line in task_content.splitlines()
-            if line.startswith("| `AX-F2-T17` |")
-        )
-        insert_after(task_catalogue, anchor, (TASK_ROW,))
+        insert_before(task_catalogue, "## Closure rule", TASK_SECTION)
+    task_content = task_catalogue.read_text(encoding="utf-8")
+    assert task_content.count("`AX-F2-T18`") == 1
+    assert task_content.index("## Legacy implementation task additions") < task_content.index(
+        "## Closure rule"
+    )
 
     skill_map = ROOT / "docs/roadmap/04-dynamic-skill-map.md"
     skill_content = skill_map.read_text(encoding="utf-8")
@@ -143,6 +155,9 @@ def reconcile_shared_files() -> None:
             if line.startswith("| `visualisation-designer` |")
         )
         insert_after(skill_map, anchor, SKILL_MAP_ROWS)
+    skill_content = skill_map.read_text(encoding="utf-8")
+    assert skill_content.count("`axignal-gsap-ui-ux`") == 1
+    assert skill_content.count("`axignal-cinematic-webgl-scroll`") == 1
 
     registry = ROOT / "skills/registry.yaml"
     registry_content = registry.read_text(encoding="utf-8")
