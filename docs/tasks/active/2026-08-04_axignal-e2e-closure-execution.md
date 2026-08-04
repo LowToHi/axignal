@@ -47,23 +47,27 @@ Implemented on this branch:
 - the BFF rejects submission preparation with blockers, pending amendments or missing commercial approval;
 - the BFF rejects submission approval without a ready preflight;
 - the BFF projects legacy fixture mutations into precise clarification, commercial and submission audit event types;
+- subscriber Navigator requests are bound to a server-validated opportunity and require the persistent ResearchRun API;
+- subscriber Navigator requests fail closed instead of falling back to synthetic execution;
+- accepted ResearchRuns redirect to `/research-runs/{runId}` and expose canonical worker, source, evidence, Candidate Claim, admitted-claim and dossier state;
+- the ResearchRun route repeats the authentication boundary and is explicitly non-indexable;
 - AXENT visibly discloses deterministic fallback mode and emits a response-mode header;
 - synthetic Intelligence projections are withheld in real-adapter mode instead of being presented as live data;
 - Playwright launches the subscriber candidate with explicit non-production fixture authority;
 - critical browser tests use zero retries;
 - web and landing security-boundary implementations are identical again;
-- browser tests cover authority, degraded-mode, server-precondition and precise audit-projection boundaries.
+- browser tests cover authority, degraded-mode, server preconditions, precise audit projection and the Navigator-to-ResearchRun route transition.
 
 ## Exact-head evidence boundary
 
 The immediately preceding exact head
-`060b97f95e5c3d504367441432b06702e4b5fe67` passed the complete triggered
+`941722b5f4d9aa13c65ff32e37536f640c679392` passed the complete triggered
 matrix, including Contract Validation, Frontend Unit Contracts, G5, G6,
 Executable Spine, E2E Technical Audit, P21-T02, P25-T01 and P26-T01.
 
 That evidence is immutable evidence for that predecessor only. The subsequent
-precise-audit implementation changes the head and therefore requires a fresh
-complete matrix before it can contribute to C0–C1 acceptance.
+Navigator-to-ResearchRun implementation changes the head and therefore requires
+a fresh complete matrix before it can contribute to C0–C1 acceptance.
 
 ## C1 blockers and disposition
 
@@ -72,7 +76,7 @@ AX-SW-BLK-001 exact-head CI matrix                      OPEN
 AX-SW-BLK-002 unsupported enabled actions               FIXED_BY_FAIL_CLOSED_UI
 AX-SW-BLK-003 continue_review mapped to pursue           FIXED
 AX-SW-BLK-004 synthetic operational data                 PARTIAL_FIX
-AX-SW-BLK-005 Navigator persistent ResearchRun           OPEN
+AX-SW-BLK-005 Navigator persistent ResearchRun           PARTIAL_FIX_AT_BFF_AND_UI
 AX-SW-BLK-006 evidence sufficiency enforcement           PARTIAL_FIX_AT_BFF
 AX-SW-BLK-007 submission readiness enforcement           PARTIAL_FIX_AT_BFF
 AX-SW-BLK-008 precise audit events                       PARTIAL_FIX_AT_BFF
@@ -85,13 +89,24 @@ AX-SW-BLK-014 global desktop/tablet/mobile evidence      OPEN
 AX-SW-BLK-015 real adapter and real-data journey         OPEN
 ```
 
-`PARTIAL_FIX_AT_BFF` does not close the persistent upstream contract.
-Equivalent enforcement, native event typing, audit, reconciliation and metric
-calculation must exist in the authoritative service. For `AX-SW-BLK-008`, the
-BFF now exposes one precise canonical event vocabulary for action responses and
-the append-only event endpoint, while the engineering fixture store retains its
-legacy generic records. C3 must migrate authoritative persistence to write the
-precise types natively before this blocker can be closed.
+`PARTIAL_FIX_AT_BFF` and `PARTIAL_FIX_AT_BFF_AND_UI` do not close the
+persistent upstream contract. Equivalent enforcement, native event typing,
+audit, reconciliation and metric calculation must exist in the authoritative
+service.
+
+For `AX-SW-BLK-005`, the subscriber Shell now creates only persistent
+ResearchRuns, validates the selected opportunity against the server-resolved
+tenant bootstrap, rejects synthetic fallback, redirects to the canonical run
+route and polls the persistent BFF. The browser contract uses controlled API
+responses to prove routing and rendering. C4 must still prove the same journey
+against a disposable integrated topology with the real API, queue, worker,
+admission runtime and dossier persistence before this blocker can be closed.
+
+For `AX-SW-BLK-008`, the BFF exposes one precise canonical event vocabulary for
+action responses and the append-only event endpoint, while the engineering
+fixture store retains its legacy generic records. C3 must migrate authoritative
+persistence to write the precise types natively before this blocker can be
+closed.
 
 ## Non-negotiable execution rules
 
