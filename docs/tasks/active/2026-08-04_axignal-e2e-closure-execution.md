@@ -52,22 +52,25 @@ Implemented on this branch:
 - accepted ResearchRuns redirect to `/research-runs/{runId}` and expose canonical worker, source, evidence, Candidate Claim, admitted-claim and dossier state;
 - the ResearchRun route repeats the authentication boundary and is explicitly non-indexable;
 - AXENT visibly discloses deterministic fallback mode and emits a response-mode header;
+- AXENT local history is versioned, scoped by tenant and identity, bounded to 30 days, capped in volume and never represented as server-synchronised;
+- malformed, expired and tenant-only legacy AXENT history is purged fail closed;
+- the account avatar is a real menu and logout purges only AXENT local-history namespaces before redirecting;
 - synthetic Intelligence projections are withheld in real-adapter mode instead of being presented as live data;
 - Playwright launches the subscriber candidate with explicit non-production fixture authority;
 - critical browser tests use zero retries;
 - web and landing security-boundary implementations are identical again;
-- browser tests cover authority, degraded-mode, server preconditions, precise audit projection and the Navigator-to-ResearchRun route transition.
+- browser tests cover authority, degraded mode, server preconditions, precise audit projection, the Navigator-to-ResearchRun route transition and AXENT local-retention/logout boundaries.
 
 ## Exact-head evidence boundary
 
 The immediately preceding exact head
-`941722b5f4d9aa13c65ff32e37536f640c679392` passed the complete triggered
+`ccdacb44147a73734d314f156ae2fac225431eaf` passed the complete triggered
 matrix, including Contract Validation, Frontend Unit Contracts, G5, G6,
 Executable Spine, E2E Technical Audit, P21-T02, P25-T01 and P26-T01.
 
 That evidence is immutable evidence for that predecessor only. The subsequent
-Navigator-to-ResearchRun implementation changes the head and therefore requires
-a fresh complete matrix before it can contribute to C0–C1 acceptance.
+AXENT local-retention and logout implementation changes the head and therefore
+requires a fresh complete matrix before it can contribute to C0–C1 acceptance.
 
 ## C1 blockers and disposition
 
@@ -81,7 +84,7 @@ AX-SW-BLK-006 evidence sufficiency enforcement           PARTIAL_FIX_AT_BFF
 AX-SW-BLK-007 submission readiness enforcement           PARTIAL_FIX_AT_BFF
 AX-SW-BLK-008 precise audit events                       PARTIAL_FIX_AT_BFF
 AX-SW-BLK-009 deadlines_next_30_days calculation         PARTIAL_FIX_AT_BFF
-AX-SW-BLK-010 AXENT retention/persistence contract       OPEN
+AX-SW-BLK-010 AXENT retention/persistence contract       PARTIAL_FIX_AT_CLIENT
 AX-SW-BLK-011 assistant degraded-mode provenance         FIXED_FOR_CURRENT_BFF
 AX-SW-BLK-012 six-locale functional parity               OPEN
 AX-SW-BLK-013 formal accessibility acceptance            OPEN
@@ -89,10 +92,10 @@ AX-SW-BLK-014 global desktop/tablet/mobile evidence      OPEN
 AX-SW-BLK-015 real adapter and real-data journey         OPEN
 ```
 
-`PARTIAL_FIX_AT_BFF` and `PARTIAL_FIX_AT_BFF_AND_UI` do not close the
-persistent upstream contract. Equivalent enforcement, native event typing,
-audit, reconciliation and metric calculation must exist in the authoritative
-service.
+`PARTIAL_FIX_AT_BFF`, `PARTIAL_FIX_AT_BFF_AND_UI` and
+`PARTIAL_FIX_AT_CLIENT` do not close the persistent upstream contract.
+Equivalent enforcement, native event typing, audit, reconciliation, retention,
+export and deletion must exist in the authoritative service.
 
 For `AX-SW-BLK-005`, the subscriber Shell now creates only persistent
 ResearchRuns, validates the selected opportunity against the server-resolved
@@ -107,6 +110,13 @@ action responses and the append-only event endpoint, while the engineering
 fixture store retains its legacy generic records. C3 must migrate authoritative
 persistence to write the precise types natively before this blocker can be
 closed.
+
+For `AX-SW-BLK-010`, browser-local AXENT history is now explicitly temporary,
+identity-scoped and purged on logout. It is not an AXIGNAL system of record and
+is not synchronised across devices. C3/C4 must define the authoritative
+conversation schema, tenant isolation, encryption, retention classes, legal
+hold, export, user deletion, audit and backup/restore behaviour before this
+blocker can be closed.
 
 ## Non-negotiable execution rules
 
