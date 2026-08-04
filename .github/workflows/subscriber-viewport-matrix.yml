@@ -15,6 +15,55 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  blocker-ownership-contract:
+    name: WP2 blocker ownership contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact branch head
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Prove exact-head checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual_sha="$(git rev-parse HEAD)"
+          tree_sha="$(git rev-parse 'HEAD^{tree}')"
+          test "$actual_sha" = "$AXIGNAL_EXACT_SHA"
+          {
+            printf 'work_package=WP2_CLASSIFY_PR167_BLOCKERS_BY_CLOSURE_CLAUSE\n'
+            printf 'exact_head_sha=%s\n' "$actual_sha"
+            printf 'git_tree_sha=%s\n' "$tree_sha"
+          } | tee blocker-ownership-exact-head.txt
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.13"
+
+      - name: Verify exclusive blocker ownership
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/verify_axignal_e2e_blocker_ownership.py | tee blocker-ownership-result.json
+          grep -F 'AX_WP2_BLOCKER_OWNERSHIP_PASS' blocker-ownership-result.json
+
+      - name: Upload blocker ownership evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: wp2-blocker-ownership-${{ env.AXIGNAL_EXACT_SHA }}
+          path: |
+            blocker-ownership-exact-head.txt
+            blocker-ownership-result.json
+            docs/tasks/active/2026-08-04_axignal-e2e-blocker-ownership.v1.json
+          if-no-files-found: error
+          retention-days: 30
+
   subscriber-viewport-e2e:
     name: Subscriber E2E ${{ matrix.label }}
     runs-on: ubuntu-latest
