@@ -2,7 +2,7 @@
   "task_id": "AX-GE2E-P08-T03",
   "goal_id": "AXIGNAL-GOAL-001",
   "phase": "P08",
-  "state": "CLOSED",
+  "state": "ACCEPTED",
   "objective": "Close the authenticated subscriber Shell and Bid Workspace against the AXIGNAL global E2E closure contract without reducing product scope or weakening authority boundaries.",
   "outcome": "C1 is canonically closed on complete exact-head engineering, rollback, security, responsive and browser evidence. Qualified-user usability validation remains mandatory but is deferred to the post-launch gate tracked by GitHub issue #170 and does not block C2, P27 or launch.",
   "contracts": [
@@ -238,5 +238,5 @@
   "owner": "Staff Product Engineering",
   "reviewer": null,
   "created_at": "2026-08-04T00:00:00Z",
-  "updated_at": "2026-08-04T17:06:00Z"
+  "updated_at": "2026-08-04T17:10:00Z"
 }
