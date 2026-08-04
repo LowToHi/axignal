@@ -38,3 +38,4 @@ COPY 126-trial-cost-retention-purge-boundary.sql /docker-entrypoint-initdb.d/126
 COPY 130-organic-discovery-founder-admin.sql /docker-entrypoint-initdb.d/130-axignal-organic-discovery.sql
 COPY 131-organic-discovery-alert-lifecycle.sql /docker-entrypoint-initdb.d/131-axignal-organic-alerts.sql
 COPY 132-retention-late-domain-purge.sql /docker-entrypoint-initdb.d/132-axignal-retention-late-domain-purge.sql
+COPY 140-subscriber-persistent-authority.sql /docker-entrypoint-initdb.d/140-axignal-subscriber-persistent-authority.sql
