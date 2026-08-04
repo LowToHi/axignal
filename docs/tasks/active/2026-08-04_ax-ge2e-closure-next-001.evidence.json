@@ -4,29 +4,45 @@
   "contract_id": "AX-GE2E-CLOSURE-EXECUTION-002",
   "contract_sha256": "01d034f3a40ad0fa7e57675afec37ac39c67abcbad5f2b6e1e2c58a850ac34c8",
   "frozen_head_sha": "365ee7d4de6ef09668b941a896c609f827619087",
-  "implementation_commit_sha": "557fdcb66804e90433bf976ab4308f28ed1fb855",
+  "implementation_head_before_evidence_sha": "21fc424d6952c44ba31adec59c10f37628c3a9c3",
   "branch": "codex/landing-b2g-international",
   "pull_request": 168,
   "classification": "EVIDENCE_ONLY",
   "scope": "WP1_CANONICAL_B2G_LANDING_CONTRACT_RECONCILIATION",
   "implemented": [
-    "six_locale_canonical_b2g_copy",
-    "public_source_brand_identity_removed",
-    "versioned_price_book_trial_professional_team",
+    "six_locale_effective_canonical_b2g_copy",
+    "rendered_public_source_brand_identity_suppressed",
+    "versioned_price_book_controlled_trial_professional_team",
     "b2g_trial_intake_v1",
     "durable_source_and_message_version",
-    "fail_closed_noindex",
-    "positive_and_negative_contract_verifiers"
+    "fail_closed_noindex_no_sitemap",
+    "positive_and_negative_contract_verifiers",
+    "exact_head_static_and_browser_workflow_definition"
   ],
   "preserved": [
-    "globe_engineering",
+    "single_globe_canvas",
     "webgl_contract",
     "reduced_motion_contract",
+    "desktop_and_mobile_contract",
     "intake_idempotency",
     "rate_limit",
     "honeypot",
     "no_pii_analytics_boundary"
   ],
+  "material_corrections": [
+    "replaced_browser_assertions_for_rejected_copy",
+    "replaced_static_verifier_requirements_for_retired_globe_layers_and_superseded_commercial_copy",
+    "fixed_gsap_audit_invocation_to_include_scope",
+    "verified_generated_public_source_boundary_in_browser_contract",
+    "removed_sitemap_before_launch_authority"
+  ],
+  "execution_channel": {
+    "workflow": ".github/workflows/landing-canonical-b2g-contract.yml",
+    "exact_head_enforced": true,
+    "workflow_run_observed_through_connector": false,
+    "combined_status_observed_through_connector": false,
+    "reason": "The available GitHub connector returned no pull-request workflow runs or commit statuses for the implementation SHAs and exposes no workflow-dispatch action. No PASS marker is inferred."
+  },
   "not_authorized": [
     "merge",
     "publication",
@@ -35,12 +51,13 @@
     "public_launch"
   ],
   "required_markers": {
-    "LANDING_CANONICAL_B2G_COPY_PASS": "PENDING_EXACT_HEAD_MATRIX",
-    "LANDING_PUBLIC_TED_ABSENT_PASS": "PENDING_EXACT_HEAD_MATRIX",
-    "LANDING_PRICE_BOOK_RECONCILIATION_PASS": "PENDING_EXACT_HEAD_MATRIX",
-    "LANDING_B2G_TRIAL_INTAKE_PASS": "PENDING_EXACT_HEAD_MATRIX",
-    "LANDING_EXACT_HEAD_MATRIX_PASS": "PENDING"
+    "LANDING_CANONICAL_B2G_COPY_PASS": "PENDING_EXECUTION",
+    "LANDING_PUBLIC_TED_ABSENT_PASS": "PENDING_EXECUTION",
+    "LANDING_PRICE_BOOK_RECONCILIATION_PASS": "PENDING_EXECUTION",
+    "LANDING_B2G_TRIAL_INTAKE_PASS": "PENDING_EXECUTION",
+    "LANDING_EXACT_HEAD_MATRIX_PASS": "PENDING_EXECUTION"
   },
-  "state": "IMPLEMENTED_AWAITING_EXACT_HEAD_MATRIX",
-  "recorded_at": "2026-08-04T00:00:00Z"
+  "gate_decision": "HOLD_FAIL_CLOSED",
+  "state": "IMPLEMENTED_EXACT_HEAD_MATRIX_NOT_OBSERVED",
+  "recorded_at": "2026-08-04T10:00:00+02:00"
 }
