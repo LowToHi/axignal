@@ -11,6 +11,7 @@ on:
       - "infra/postgres/090-trial-retention-lifecycle.sql"
       - "infra/postgres/091-retention-pgcrypto-boundary.sql"
       - "infra/postgres/Dockerfile"
+      - "scripts/trial_grant_fixture.py"
       - "scripts/verify_trial_retention_*.py"
       - "docs/security/AX-F9-T15-retention-deletion-boundary.md"
       - "docs/roadmap/tasks/AX-F9-T15.json"
@@ -24,6 +25,7 @@ on:
       - "infra/postgres/090-trial-retention-lifecycle.sql"
       - "infra/postgres/091-retention-pgcrypto-boundary.sql"
       - "infra/postgres/Dockerfile"
+      - "scripts/trial_grant_fixture.py"
       - "scripts/verify_trial_retention_*.py"
       - "docs/security/AX-F9-T15-retention-deletion-boundary.md"
       - "docs/roadmap/tasks/AX-F9-T15.json"
@@ -63,6 +65,7 @@ jobs:
             apps/api/src/axignal_api/retention_routes.py \
             apps/api/src/axignal_api/retention_worker.py \
             apps/api/tests/test_retention_runtime.py \
+            scripts/trial_grant_fixture.py \
             scripts/verify_trial_retention_contract.py \
             scripts/verify_trial_retention_e2e.py
       - name: Run identity, request and kill-switch tests
@@ -108,6 +111,25 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install -e ".[dev]"
+      - name: Seed canonical active trial grants
+        run: |
+          python - <<'PY'
+          import os
+          import sys
+          from datetime import UTC, datetime
+          from uuid import UUID
+
+          sys.path.insert(0, "scripts")
+          from trial_grant_fixture import ensure_active_trial_grant
+
+          dsn = os.environ["AXIGNAL_DATABASE_URL"]
+          started_at = datetime(2026, 7, 29, 20, 0, tzinfo=UTC)
+          for tenant_id in (
+              UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
+              UUID("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"),
+          ):
+              ensure_active_trial_grant(dsn, tenant_id=tenant_id, now=started_at)
+          PY
       - name: Execute terminal deletion circuit
         run: python scripts/verify_trial_retention_e2e.py
       - name: Upload non-sensitive E2E evidence
