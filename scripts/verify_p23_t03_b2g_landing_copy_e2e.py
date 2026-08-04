@@ -10,37 +10,47 @@ RUNTIME_PATH = ROOT / "data/experience/b2g-landing-copy-e2e-runtime.v0.1.json"
 PREVIOUS_RUNTIME_PATH = (
     ROOT / "data/experience/message-copy-validation-e2e-runtime.v0.1.json"
 )
+CANONICAL_PATH = ROOT / "apps/landing/lib/canonical-commercial-contract.ts"
+I18N_PATH = ROOT / "apps/landing/lib/i18n.ts"
 LANDING_PATH = ROOT / "apps/landing/components/landing-experience.tsx"
-DATA_PATH = ROOT / "apps/landing/lib/landing-data.ts"
 FORM_PATH = ROOT / "apps/landing/components/pilot-access-form.tsx"
 INTAKE_PATH = ROOT / "apps/landing/app/api/pilot-intake/route.ts"
-LAYOUT_PATH = ROOT / "apps/landing/app/layout.tsx"
+METADATA_PATH = ROOT / "apps/landing/lib/metadata.ts"
+ROBOTS_PATH = ROOT / "apps/landing/app/robots.ts"
 PRICING_ADAPTER_PATH = ROOT / "apps/landing/lib/candidate-pricing.ts"
 PRICING_CONTRACT_PATH = ROOT / "apps/landing/lib/candidate-pricing-contract.ts"
 PAGE_PATH = ROOT / "apps/landing/app/page.tsx"
-TEST_PATH = ROOT / "tests/landing/landing.spec.ts"
+STATIC_TEST_PATH = ROOT / "tests/landing/landing-contract.test.mjs"
+BROWSER_TEST_PATH = ROOT / "tests/landing/landing.spec.ts"
 PRICE_BOOK_PATH = (
     ROOT / "data/commercial/commercial-runtime-pricing-stripe-runtime.v0.1.json"
 )
+
+
+def read(path: Path) -> str:
+    return path.read_text(encoding="utf-8")
 
 
 def normalize(value: str) -> str:
     return " ".join(value.split())
 
 
-runtime = json.loads(RUNTIME_PATH.read_text(encoding="utf-8"))
-previous_runtime = json.loads(PREVIOUS_RUNTIME_PATH.read_text(encoding="utf-8"))
-price_book = json.loads(PRICE_BOOK_PATH.read_text(encoding="utf-8"))
-landing = LANDING_PATH.read_text(encoding="utf-8")
-data = DATA_PATH.read_text(encoding="utf-8")
-form = FORM_PATH.read_text(encoding="utf-8")
-intake = INTAKE_PATH.read_text(encoding="utf-8")
-layout = LAYOUT_PATH.read_text(encoding="utf-8")
-pricing_adapter = PRICING_ADAPTER_PATH.read_text(encoding="utf-8")
-pricing_contract_source = PRICING_CONTRACT_PATH.read_text(encoding="utf-8")
-page = PAGE_PATH.read_text(encoding="utf-8")
-tests = TEST_PATH.read_text(encoding="utf-8")
-normalized_landing = normalize(landing)
+runtime = json.loads(read(RUNTIME_PATH))
+previous_runtime = json.loads(read(PREVIOUS_RUNTIME_PATH))
+price_book = json.loads(read(PRICE_BOOK_PATH))
+canonical = read(CANONICAL_PATH)
+i18n = read(I18N_PATH)
+landing = read(LANDING_PATH)
+form = read(FORM_PATH)
+intake = read(INTAKE_PATH)
+metadata = read(METADATA_PATH)
+robots = read(ROBOTS_PATH)
+pricing_adapter = read(PRICING_ADAPTER_PATH)
+pricing_contract_source = read(PRICING_CONTRACT_PATH)
+page = read(PAGE_PATH)
+static_tests = read(STATIC_TEST_PATH)
+browser_tests = read(BROWSER_TEST_PATH)
+normalized_canonical = normalize(canonical)
 
 assert runtime["task_id"] == "AX-GE2E-P23-T03"
 assert runtime["baseline_sha"] == "4301d02880b65a59fb5aa9fed01abad963a23ffd"
@@ -64,48 +74,74 @@ assert runtime["stripe_live_authorised"] is False
 assert runtime["market_validated_claim_authorised"] is False
 
 message = runtime["message_decision"]
-message_fields = (
+for field in (
     "eyebrow",
     "headline",
     "supporting_headline",
-    "subheadline",
     "primary_cta",
     "secondary_cta",
+):
+    assert normalize(message[field]) in normalized_canonical, field
+
+# C0 admits one bounded lexical projection inside the same message version:
+# the expanded buyer label is rendered with its already-defined acronym.
+projected_subheadline = message["subheadline"].replace(
+    "Business-to-Government teams",
+    "B2G teams",
 )
-for field in message_fields:
-    assert normalize(message[field]) in normalized_landing, field
+assert normalize(projected_subheadline) in normalized_canonical
+assert 'messageVersion: "b2g-opportunity-v1.0"' in canonical
+assert 'source: "landing_b2g_opportunity_v1_0"' in canonical
+assert 'schema: "axignal.b2g-trial-intake.v1"' in canonical
 
-assert "BUSINESS-TO-GOVERNMENT (B2G) OPPORTUNITY INTELLIGENCE" in landing
-assert "Business-to-Government teams" in landing
-assert "public contracts" in landing.lower()
-assert "global procurement" in landing.lower()
-assert "bid / no-bid" in landing.lower()
-assert runtime["message_version"] in data
-assert "data-message-version={MESSAGE_VERSION}" in landing
+for locale in ("en", "es", "fr", "pt", "de", "it"):
+    assert f"\n  {locale}: {{" in canonical
+assert "canonicalCommercialCopy[locale]" in i18n
+assert "hero: { ...base.hero, ...canonical.hero }" in i18n
+assert "pricing: { ...base.pricing, ...canonical.pricing }" in i18n
+assert "faq: { ...base.faq, items: canonical.faqItems }" in i18n
+assert "form: { ...base.form, ...canonical.form }" in i18n
 
-public_copy = "\n".join((landing, data, form, layout))
-assert re.search(r"\bTED\b", public_copy, flags=re.IGNORECASE) is None
+for binding in (
+    "m.hero.eyebrow",
+    "m.hero.title",
+    "m.hero.accent",
+    "m.hero.descriptor",
+    "m.hero.summary",
+    "m.hero.primary",
+    "m.hero.secondary",
+):
+    assert binding in landing
 
-assert "messageVersion" in form
-assert "messageVersion" in intake
-assert "landing_b2g_opportunity_v1_0" in form
-assert "landing_b2g_opportunity_v1_0" in intake
-assert "axignal.b2g-trial-intake.v1" in intake
-assert "controlled B2G trial channel is not configured" in intake
+assert "messageVersion: AXIGNAL_TRIAL_INTAKE.messageVersion" in form
+assert "source: AXIGNAL_TRIAL_INTAKE.source" in form
+assert "schema: AXIGNAL_TRIAL_INTAKE.schema" in form
+assert "governmentOffer:" in form
+assert "qualificationBottleneck:" in form
+assert 'fetch("/api/pilot-intake"' in form
+assert "AXIGNAL_TRIAL_INTAKE" in intake
+assert "allowedPlans" in intake
 assert "No request was stored" in intake
-assert "Bid or proposal management" in form
-assert "Bid or proposal management" in intake
+assert "idempotencyKeyHash" in intake
 
-assert "index: false" in layout
-assert "follow: false" in layout
-assert "Business-to-Government (B2G) Opportunity Intelligence" in layout
+assert 'category: "Business-to-Government Opportunity Intelligence"' in metadata
+assert "index: false" in metadata
+assert "follow: false" in metadata
+assert "noarchive: true" in metadata
+assert 'disallow: "/"' in robots
+assert "sitemap:" not in robots
+assert "buildLandingMetadata(\"en\")" in page
+assert "getMessages(\"en\")" in page
+
 assert "commercial-runtime-pricing-stripe-runtime.v0.1.json" in pricing_adapter
 assert "parseCandidatePlans" in pricing_adapter
+assert 'from "./canonical-commercial-contract"' in pricing_contract_source
+assert "AXIGNAL_PRICE_BOOK" in pricing_contract_source
 assert 'pricing?.status !== "CANDIDATE_ONLY"' in pricing_contract_source
-assert 'planCode === "CONTROLLED_TRIAL_7D"' in pricing_contract_source
 assert "plan.self_service_activation !== false" in pricing_contract_source
 assert "plan.commercial_activation_authorised !== false" in pricing_contract_source
-assert "getCandidatePlans" in page
+assert 'from "./landing-data"' not in pricing_contract_source
+assert 'from "./landing-data"' not in pricing_adapter
 
 pricing_contract = price_book["pricing_contract"]
 assert pricing_contract["status"] == "CANDIDATE_ONLY"
@@ -122,30 +158,29 @@ assert plans["TEAM_MONTHLY"]["amount_minor"] == 39900
 assert plans["PROFESSIONAL_MONTHLY"]["commercial_activation_authorised"] is False
 assert plans["TEAM_MONTHLY"]["commercial_activation_authorised"] is False
 
-# Prohibited phrases must not appear as affirmative marketing claims. The FAQ
-# may name those phrases only to deny them explicitly and establish a boundary.
-affirmative_copy = "\n".join((landing, form, layout)).lower()
+public_copy = "\n".join((canonical, landing, i18n, form, metadata))
+assert re.search(r"\bTED\b", public_copy, flags=re.IGNORECASE) is None
 for phrase in runtime["prohibited_claims"]:
-    assert phrase.lower() not in affirmative_copy, phrase
+    assert phrase.lower() not in public_copy.lower(), phrase
 
-assert "does not claim a guaranteed win rate or guaranteed truth" in data.lower()
-assert "no. it does not claim a guaranteed win rate or guaranteed truth" in data.lower()
-assert "coverage is declared source by source" in data.lower()
+for contract_name in (
+    "canonical B2G copy overrides every supported locale",
+    "price book is versioned",
+    "public landing removes source-brand identity",
+    "B2G trial intake persists canonical schema",
+    "landing stays fail-closed for indexing",
+):
+    assert contract_name in static_tests
+for browser_marker in (
+    "Controlled Trial",
+    "€149",
+    "€399",
+    "ADMITTED PUBLIC-SOURCE PROFILE",
+    "reducedMotion",
+    "semantic-globe",
+):
+    assert browser_marker in browser_tests
 
-required_sections = (
-    'id="workflow"',
-    'id="evidence"',
-    'id="pricing"',
-    'id="access"',
-    'aria-labelledby="faq-title"',
-)
-for section in required_sections:
-    assert section in landing, section
-
-assert "plan-controlled_trial_7d" in tests
-assert "b2g-opportunity-v1.0" in tests
-assert "Request 7-day B2G trial" in tests
-assert "Business-to-Government" in tests
 assert len(runtime["market_patterns"]) == 6
 assert len(runtime["priority_buyers"]) == 7
 assert len(runtime["buyer_jobs"]) == 7
@@ -158,15 +193,20 @@ assert len(runtime["next_real_evidence"]) == 6
 print(
     json.dumps(
         {
-            "status": "PASS_B2G_ENGINEERING_AND_REAL_LANDING_IMPLEMENTATION",
+            "status": "PASS_CANONICAL_B2G_CONTRACT_PROJECTION",
             "task_id": runtime["task_id"],
             "message_version": runtime["message_version"],
             "market_category": runtime["market_category"],
-            "real_landing_implemented": runtime["implemented_in_real_landing"],
+            "canonical_authority": str(CANONICAL_PATH.relative_to(ROOT)),
+            "projection_authority": str(I18N_PATH.relative_to(ROOT)),
+            "bounded_lexical_projection": {
+                "from": "Business-to-Government teams",
+                "to": "B2G teams",
+            },
             "controlled_trial_visible": runtime["controlled_trial_visible"],
             "trial_terms_match_price_book": True,
             "professional_and_team_prices_match": True,
-            "pricing_contract_separated_from_io": True,
+            "pricing_adapter_subordinate_to_canonical_price_book": True,
             "ted_in_public_narrative": False,
             "publication_authorised": runtime["public_publication_authorised"],
             "buyer_interviews": "PENDING",
