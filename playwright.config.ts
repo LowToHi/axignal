@@ -14,7 +14,8 @@ export default defineConfig({
   workers: 1,
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
-  retries: process.env.CI ? 1 : 0,
+  // Critical E2E must pass on its first execution; retries may not conceal flakiness.
+  retries: 0,
   reporter: process.env.CI ? [["html", { open: "never" }], ["list"]] : "list",
   use: {
     baseURL,
@@ -30,6 +31,11 @@ export default defineConfig({
     {
       name: "chromium-tablet",
       use: { ...devices["iPad Pro 11"], browserName: "chromium" },
+    },
+    {
+      name: "chromium-mobile",
+      testMatch: /subscriber-.*\.spec\.ts/,
+      use: { ...devices["iPhone 13"], browserName: "chromium" },
     },
   ],
   webServer: useExternalServer
@@ -48,6 +54,16 @@ export default defineConfig({
           AXIGNAL_LEGACY_PASSWORD_LOGIN_ENABLED: useDevelopmentServer
             ? "true"
             : "false",
+          AXIGNAL_TEST_RUNTIME_ENABLED: "true",
+          // Only this internal aggregate suite keeps the canonical InvestigationShell
+          // at `/`; external P21/P25/P26 topologies must exercise their real auth root.
+          AXIGNAL_CANONICAL_LEGACY_ROOT_TEST_ENABLED: "true",
+          AXIGNAL_SUBSCRIBER_WORKSPACE_ENABLED: "true",
+          AXIGNAL_SUBSCRIBER_WORKSPACE_FIXTURE_MODE: "explicit",
+          AXIGNAL_SUBSCRIBER_WORKSPACE_ENVIRONMENT: process.env.CI
+            ? "test"
+            : "development",
+          AXIGNAL_AXENT_ASSISTANT_DEEPSEEK_ENABLED: "false",
         },
       },
 });

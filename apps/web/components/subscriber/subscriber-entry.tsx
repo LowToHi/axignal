@@ -25,16 +25,26 @@ function legacyShell() {
   return <><ResearchProgressBridge /><HumanReviewBridge /><BillingBridge />{isSeatGovernanceUiEnabled() && <SeatGovernanceBridge />}<InvestigationShell /></>;
 }
 
-export async function SubscriberEntry() {
-  if (!subscriberWorkspaceEnabled()) return legacyShell();
+export async function SubscriberEntry({ legacyRootInTestRuntime = false }: { legacyRootInTestRuntime?: boolean }) {
+  const testRuntime = boolEnv("AXIGNAL_TEST_RUNTIME_ENABLED");
+  const canonicalLegacyRoot =
+    testRuntime &&
+    legacyRootInTestRuntime &&
+    boolEnv("AXIGNAL_CANONICAL_LEGACY_ROOT_TEST_ENABLED");
+
+  if (canonicalLegacyRoot) return legacyShell();
+
   const authRequired = isAuthenticationRequired();
   const identity = authRequired ? await getAuthenticatedIdentity() : null;
-  const explicitFixture = (process.env.AXIGNAL_SUBSCRIBER_WORKSPACE_FIXTURE_MODE ?? "").trim().toLowerCase() === "explicit";
 
   if (authRequired && !identity) {
     const turnstileSiteKey = process.env.NEXT_PUBLIC_AXIGNAL_TURNSTILE_SITE_KEY;
-    return <AuthGate passwordless={isPasswordlessIdentityEnabled()} testRuntime={boolEnv("AXIGNAL_TEST_RUNTIME_ENABLED")} {...(turnstileSiteKey ? { turnstileSiteKey } : {})} />;
+    return <AuthGate passwordless={isPasswordlessIdentityEnabled()} testRuntime={testRuntime} {...(turnstileSiteKey ? { turnstileSiteKey } : {})} />;
   }
+
+  if (!subscriberWorkspaceEnabled()) return legacyShell();
+
+  const explicitFixture = (process.env.AXIGNAL_SUBSCRIBER_WORKSPACE_FIXTURE_MODE ?? "").trim().toLowerCase() === "explicit";
 
   return <SubscriberWorkspaceApp
     serverIdentity={identity ? {

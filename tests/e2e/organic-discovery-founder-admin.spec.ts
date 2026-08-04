@@ -7,12 +7,23 @@ test.skip(
   "P26 E2E requires the isolated organic-discovery topology."
 );
 
+function canonicalBrowserOrigin(baseURL: string): string {
+  const url = new URL(baseURL);
+  if (url.hostname === "127.0.0.1" || url.hostname === "::1") {
+    url.hostname = "localhost";
+  }
+  return url.origin;
+}
+
 test("publishes only admitted intelligence and exposes a governed founder OS", async ({
   page,
-  context
+  context,
+  baseURL
 }) => {
   test.setTimeout(120_000);
-  const publicUrl = "http://localhost:18080/tenders/germany/cybersecurity";
+  if (!baseURL) throw new Error("P26_PLAYWRIGHT_BASE_URL_REQUIRED");
+  const origin = canonicalBrowserOrigin(baseURL);
+  const publicUrl = `${origin}/tenders/germany/cybersecurity`;
   const publicResponse = await page.goto(publicUrl);
   expect(publicResponse?.status()).toBe(200);
   await expect(
@@ -34,18 +45,18 @@ test("publishes only admitted intelligence and exposes a governed founder OS", a
   expect(structuredData).toContain('"isBasedOn"');
 
   const rejected = await page.goto(
-    "http://localhost:18080/tenders/germany/synthetic-cybersecurity"
+    `${origin}/tenders/germany/synthetic-cybersecurity`
   );
   expect(rejected?.status()).toBe(404);
 
-  const robots = await page.request.get("http://localhost:18080/robots.txt");
+  const robots = await page.request.get(`${origin}/robots.txt`);
   expect(robots.status()).toBe(200);
   const robotsBody = await robots.text();
   expect(robotsBody).toContain("User-Agent: OAI-SearchBot");
   expect(robotsBody).toContain("User-Agent: GPTBot");
   expect(robotsBody).toContain("Disallow: /admin/");
 
-  const sitemap = await page.request.get("http://localhost:18080/sitemap.xml");
+  const sitemap = await page.request.get(`${origin}/sitemap.xml`);
   expect(sitemap.status()).toBe(200);
   const sitemapBody = await sitemap.text();
   expect(sitemapBody).toContain("/tenders/germany/cybersecurity");
@@ -76,7 +87,7 @@ test("publishes only admitted intelligence and exposes a governed founder OS", a
 
   const token = String(alertBody.test_confirmation_token);
   await page.goto(
-    `http://localhost:18080/alerts/confirm?token=${encodeURIComponent(token)}`
+    `${origin}/alerts/confirm?token=${encodeURIComponent(token)}`
   );
   await page.getByRole("button", { name: "Confirm tender alert" }).click();
   await expect(
@@ -97,7 +108,7 @@ test("publishes only admitted intelligence and exposes a governed founder OS", a
     }
   });
 
-  await page.goto("http://localhost:18080/");
+  await page.goto(`${origin}/`);
   await expect(
     page.getByRole("region", { name: "Acceso seguro a AXIGNAL" })
   ).toBeVisible();
@@ -118,7 +129,7 @@ test("publishes only admitted intelligence and exposes a governed founder OS", a
     .click();
   await expect(page.locator("main.shell")).toBeVisible();
 
-  await page.goto("http://localhost:18080/admin");
+  await page.goto(`${origin}/admin`);
   await expect(page.getByTestId("founder-bootstrap")).toBeVisible();
   await page
     .getByRole("button", { name: "Provision test founder principal" })

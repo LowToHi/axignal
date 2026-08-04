@@ -1,0 +1,234 @@
+{
+  "task_id": "AX-GE2E-P08-T03",
+  "goal_id": "AXIGNAL-GOAL-001",
+  "phase": "P08",
+  "state": "IN_PROGRESS",
+  "objective": "Close the authenticated subscriber Shell and Bid Workspace against the AXIGNAL global E2E closure contract without reducing product scope or weakening authority boundaries.",
+  "outcome": "The subscriber Shell reaches exact-head engineering E2E acceptance with server-authoritative actions, honest fixture and degraded states, no enabled dead controls, complete recovery evidence and no unsupported launch claims.",
+  "contracts": [
+    "GOAL_LOCK",
+    "AGENTS",
+    "05",
+    "06",
+    "08",
+    "12",
+    "13",
+    "14",
+    "16",
+    "18",
+    "20",
+    "25",
+    "26",
+    "29",
+    "31",
+    "ADR-016"
+  ],
+  "skills": [
+    {
+      "skill_id": "goal-keeper",
+      "version": "0.1.0",
+      "activation_reason": "Prevent silent reduction of the contracted global product and unsupported completion claims."
+    },
+    {
+      "skill_id": "frontend-architect",
+      "version": "0.1.0",
+      "activation_reason": "Close route, state, responsive and interaction contracts in the subscriber Shell."
+    },
+    {
+      "skill_id": "backend-architect",
+      "version": "0.1.0",
+      "activation_reason": "Enforce server-authoritative mutations, persistence, preconditions and reconciliation."
+    },
+    {
+      "skill_id": "security-reviewer",
+      "version": "0.1.0",
+      "activation_reason": "Preserve tenant isolation, least privilege and external-action boundaries."
+    },
+    {
+      "skill_id": "accessibility-auditor",
+      "version": "0.1.0",
+      "activation_reason": "Validate keyboard, nonvisual, focus, reflow and reduced-motion acceptance."
+    },
+    {
+      "skill_id": "test-engineer",
+      "version": "0.1.0",
+      "activation_reason": "Produce first-run exact-head unit, integration and browser evidence."
+    }
+  ],
+  "dependencies": {
+    "phases": ["P07", "P08"],
+    "tasks": ["AX-GE2E-P07-T01", "AX-GE2E-P08-T01", "AX-GE2E-P08-T02"],
+    "external": [
+      "Contract 31 and ADR-016 remain the superior programme authority",
+      "Qualified-user UX acceptance remains external and pending",
+      "Real source and production-provider admission remain independently gated"
+    ]
+  },
+  "allowed_scope": [
+    "Reconcile the subscriber Shell candidate with its exact base head",
+    "Correct semantic, authority, persistence, accessibility and browser acceptance defects",
+    "Disable controls whose persistent server contract is not implemented",
+    "Add server-side preconditions and negative tests for requirement and submission workflows",
+    "Make AXENT fixture and degraded response provenance explicit",
+    "Withhold synthetic intelligence projections from real-adapter sessions",
+    "Produce exact-head evidence and rollback records"
+  ],
+  "prohibited_scope": [
+    "No autonomous bid decision, external communication, signature or submission",
+    "No browser-authoritative tenant, role, entitlement, approval or source admission",
+    "No silent fixture fallback or synthetic data presented as live evidence",
+    "No enabled control that can only terminate in an unavailable-operation rejection",
+    "No CI retry used to convert critical browser flakiness into acceptance",
+    "No canonical product, commercial availability or public-launch claim"
+  ],
+  "acceptance_evidence": [
+    {
+      "evidence_type": "DOCUMENT",
+      "description": "Human-readable execution record with blockers, authority and transition state.",
+      "required": true,
+      "location": "docs/tasks/active/2026-08-04_axignal-e2e-closure-execution.md",
+      "status": "PRESENT"
+    },
+    {
+      "evidence_type": "TEST",
+      "description": "Exact-head typecheck, frontend unit contracts and production build pass.",
+      "required": true,
+      "location": null,
+      "status": "MISSING"
+    },
+    {
+      "evidence_type": "TEST",
+      "description": "Subscriber desktop and tablet browser matrix passes on the first run with no retries.",
+      "required": true,
+      "location": null,
+      "status": "MISSING"
+    },
+    {
+      "evidence_type": "SECURITY_REVIEW",
+      "description": "G5 security boundaries, tenant denial and external-authority negative cases pass.",
+      "required": true,
+      "location": null,
+      "status": "MISSING"
+    },
+    {
+      "evidence_type": "TRACE",
+      "description": "Qualification, evidence, submission, AXENT degradation and recovery journeys are traceable.",
+      "required": true,
+      "location": null,
+      "status": "MISSING"
+    },
+    {
+      "evidence_type": "RESTORE_TEST",
+      "description": "Feature-flag rollback and persisted-workspace recovery are rehearsed without deleting ledgers.",
+      "required": true,
+      "location": null,
+      "status": "MISSING"
+    },
+    {
+      "evidence_type": "USER_RESEARCH",
+      "description": "Qualified users meet the normative usability thresholds for the subscriber workflow.",
+      "required": true,
+      "location": null,
+      "status": "MISSING"
+    }
+  ],
+  "impacts": {
+    "security": "CRITICAL",
+    "privacy": "MATERIAL",
+    "data_rights": "MATERIAL",
+    "regulatory": "MATERIAL",
+    "multilingual": "CRITICAL",
+    "epistemic": "CRITICAL",
+    "billing": "MATERIAL"
+  },
+  "observability": {
+    "metrics": [
+      "subscriber_route_load_ms",
+      "workspace_mutation_total",
+      "workspace_mutation_denied_total",
+      "workspace_recovery_total",
+      "axent_assistant_mode_total",
+      "subscriber_browser_first_run_failure_total"
+    ],
+    "logs": [
+      "server-resolved capability snapshot",
+      "workspace mutation receipt",
+      "submission precondition denial",
+      "assistant degraded-mode selection"
+    ],
+    "traces": [
+      "qualification decision",
+      "requirement evidence transition",
+      "submission preflight and approval",
+      "AXENT response and workspace navigation"
+    ],
+    "alerts": [
+      "cross-tenant workspace access",
+      "client authority escalation",
+      "synthetic data in real-adapter mode",
+      "external action without approval",
+      "critical accessibility regression"
+    ]
+  },
+  "rollback": {
+    "strategy": "Disable the subscriber workspace feature flag or revert this bounded execution branch while preserving identity, workspace, claim, billing and audit ledgers.",
+    "kill_switch": "AXIGNAL_SUBSCRIBER_WORKSPACE_ENABLED=false",
+    "tested": false
+  },
+  "goal_lock_checks": [
+    {
+      "check_id": 1,
+      "answer": "YES",
+      "evidence": "The Shell preserves AXIGNAL as Global Opportunity Intelligence and Operations rather than a standalone chat or dashboard."
+    },
+    {
+      "check_id": 2,
+      "answer": "YES",
+      "evidence": "Facts, inferences, contradictions, unknowns, fixtures and degraded guidance remain explicitly distinct."
+    },
+    {
+      "check_id": 3,
+      "answer": "YES",
+      "evidence": "Globe, Graph and Timeline remain bounded lenses over one investigation context."
+    },
+    {
+      "check_id": 4,
+      "answer": "YES",
+      "evidence": "Subscriber interest and AXENT output cannot admit evidence or create product truth."
+    },
+    {
+      "check_id": 5,
+      "answer": "YES",
+      "evidence": "The required locale set remains en, es, fr, de, pt and it; parity is still an explicit blocker."
+    },
+    {
+      "check_id": 6,
+      "answer": "YES",
+      "evidence": "Workspace decisions, evidence, amendments, outcomes and audit state remain durable product memory targets."
+    },
+    {
+      "check_id": 7,
+      "answer": "YES",
+      "evidence": "The implementation prohibits autonomous decision, approval, communication, signature and submission."
+    },
+    {
+      "check_id": 8,
+      "answer": "YES",
+      "evidence": "Tenant, rights, export, privacy and source boundaries fail closed."
+    },
+    {
+      "check_id": 9,
+      "answer": "YES",
+      "evidence": "A feature flag and branch revert provide bounded rollback without deleting canonical ledgers."
+    },
+    {
+      "check_id": 10,
+      "answer": "YES",
+      "evidence": "This task closes only the subscriber P08 engineering slice and cannot issue P27 or public-launch authority."
+    }
+  ],
+  "owner": "Staff Product Engineering",
+  "reviewer": null,
+  "created_at": "2026-08-04T00:00:00Z",
+  "updated_at": "2026-08-04T00:00:00Z"
+}

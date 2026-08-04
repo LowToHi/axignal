@@ -14,7 +14,7 @@ from psycopg.types.json import Jsonb
 
 DSN = os.environ["AXIGNAL_DATABASE_URL"]
 EVIDENCE_DIR = Path(os.environ.get("AXIGNAL_ORGANIC_EVIDENCE_DIR", "artifacts"))
-NOW = datetime(2026, 7, 31, 18, 0, tzinfo=UTC)
+NOW = datetime.now(UTC).replace(microsecond=0)
 FOUNDER = "usr_p26_founder_e2e"
 
 

@@ -1,4 +1,4 @@
-export { IntelligenceWorkspace } from "./IntelligenceWorkspace";
+export { IntelligenceWorkspace } from "./IntelligenceWorkspaceClosure";
 export type {
   ClaimKind,
   EvidenceClaim,

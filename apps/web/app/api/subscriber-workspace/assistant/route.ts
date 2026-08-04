@@ -43,12 +43,14 @@ type AssistantContext = {
   framework: string;
 };
 
+type AssistantMode = "fixture" | "upstream";
+
 type AssistantResponse = {
   reply: string;
   context: AssistantContext;
   evidence: EvidenceCard[];
   action: { workspaceId: string; title: string; description: string } | null;
-  mode: "fixture" | "upstream";
+  mode: AssistantMode;
 };
 
 type AssistantHistoryItem = {
@@ -113,10 +115,15 @@ function fixtureReply(message: string, bootstrap: SubscriberWorkspaceBootstrap):
   return `I have scoped your question to ${bootstrap.route_data.opportunities[0]?.title ?? "the current AXIGNAL context"}. I will use the available source-pinned context, show what is known and unknown, and suggest a reversible next step rather than making a decision for you.`;
 }
 
-function assistantResponse(message: string, bootstrap: SubscriberWorkspaceBootstrap, mode: "fixture" | "upstream", reply: string): AssistantResponse {
+function discloseAssistantMode(mode: AssistantMode, reply: string): string {
+  if (mode === "upstream") return reply;
+  return `Deterministic guidance mode — no live model response was used. ${reply}`;
+}
+
+function assistantResponse(bootstrap: SubscriberWorkspaceBootstrap, mode: AssistantMode, reply: string): AssistantResponse {
   const workspace = bootstrap.route_data.workspaces[0];
   return {
-    reply,
+    reply: discloseAssistantMode(mode, reply),
     context: contextFor(bootstrap),
     evidence: evidenceFor(bootstrap),
     action: workspace ? {
@@ -182,6 +189,14 @@ export async function POST(request: Request) {
   if (bootstrapResult.status < 200 || bootstrapResult.status >= 300) return NextResponse.json(bootstrapResult.body, { status: bootstrapResult.status, headers: { "cache-control": "no-store" } });
   const bootstrap = bootstrapResult.body as SubscriberWorkspaceBootstrap;
   const liveReply = await deepSeekReply(message, bootstrap, history);
-  const response = assistantResponse(message, bootstrap, liveReply ? "upstream" : "fixture", liveReply ?? fixtureReply(message, bootstrap));
-  return NextResponse.json(response, { status: 200, headers: { "cache-control": "no-store", "x-axignal-ai-authority": "proposal-only" } });
+  const mode: AssistantMode = liveReply ? "upstream" : "fixture";
+  const response = assistantResponse(bootstrap, mode, liveReply ?? fixtureReply(message, bootstrap));
+  return NextResponse.json(response, {
+    status: 200,
+    headers: {
+      "cache-control": "no-store",
+      "x-axignal-ai-authority": "proposal-only",
+      "x-axignal-assistant-mode": mode
+    }
+  });
 }

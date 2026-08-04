@@ -1,0 +1,139 @@
+{
+  "schema": "axignal.e2e.blocker-ownership.v1",
+  "contract_id": "AX-GE2E-CLOSURE-EXECUTION-002",
+  "work_package": "WP2_CLASSIFY_PR167_BLOCKERS_BY_CLOSURE_CLAUSE",
+  "source_pull_request": 167,
+  "source_snapshot_sha": "213b4ebc068b79af508648ace98d5c2ff136298e",
+  "classification_rule": "Every blocker has exactly one closure-clause owner. A downstream dependency does not create co-ownership.",
+  "allowed_owner_clauses": ["C1", "C3", "C4", "C14"],
+  "summary": {
+    "total": 15,
+    "C1": 5,
+    "C3": 5,
+    "C4": 3,
+    "C14": 2,
+    "closed_on_source_snapshot": 5,
+    "deferred_to_owner_clause": 10
+  },
+  "blockers": [
+    {
+      "id": "AX-SW-BLK-001",
+      "title": "exact-head CI matrix",
+      "owner_clause": "C1",
+      "disposition": "CLOSED_ON_SOURCE_SNAPSHOT",
+      "rationale": "The complete exact-head matrix for 213b4ebc068b79af508648ace98d5c2ff136298e is recorded green in PR #167."
+    },
+    {
+      "id": "AX-SW-BLK-002",
+      "title": "unsupported enabled actions",
+      "owner_clause": "C1",
+      "disposition": "CLOSED_ON_SOURCE_SNAPSHOT",
+      "rationale": "Unsupported document, approval and export controls are disabled and visibly disclosed."
+    },
+    {
+      "id": "AX-SW-BLK-003",
+      "title": "continue_review mapped to pursue",
+      "owner_clause": "C1",
+      "disposition": "CLOSED_ON_SOURCE_SNAPSHOT",
+      "rationale": "Continue review is non-mutating and explicit pursue or do-not-pursue decisions require rationale."
+    },
+    {
+      "id": "AX-SW-BLK-004",
+      "title": "synthetic operational data",
+      "owner_clause": "C4",
+      "disposition": "DEFERRED_TO_OWNER_CLAUSE",
+      "rationale": "C4 must prove the Shell and AXENT against the real adapter and persistent research topology without synthetic operational projection.",
+      "downstream_dependencies": ["C5", "C7"]
+    },
+    {
+      "id": "AX-SW-BLK-005",
+      "title": "Navigator persistent ResearchRun",
+      "owner_clause": "C4",
+      "disposition": "DEFERRED_TO_OWNER_CLAUSE",
+      "rationale": "The BFF and UI route exist, but C4 owns the uninterrupted Shell to API to queue to worker to admission to dossier proof."
+    },
+    {
+      "id": "AX-SW-BLK-006",
+      "title": "evidence sufficiency enforcement",
+      "owner_clause": "C3",
+      "disposition": "DEFERRED_TO_OWNER_CLAUSE",
+      "rationale": "C3 owns server-authoritative persistence and invariant enforcement; C5 later consumes the authoritative evidence and admission model.",
+      "downstream_dependencies": ["C5"]
+    },
+    {
+      "id": "AX-SW-BLK-007",
+      "title": "submission readiness enforcement",
+      "owner_clause": "C3",
+      "disposition": "DEFERRED_TO_OWNER_CLAUSE",
+      "rationale": "C3 must persist and audit readiness, blockers, amendments and approval authority natively before C7 uses them.",
+      "downstream_dependencies": ["C7"]
+    },
+    {
+      "id": "AX-SW-BLK-008",
+      "title": "precise audit events",
+      "owner_clause": "C3",
+      "disposition": "DEFERRED_TO_OWNER_CLAUSE",
+      "rationale": "C3 owns native authoritative event typing and append-only audit persistence rather than BFF-only projection."
+    },
+    {
+      "id": "AX-SW-BLK-009",
+      "title": "deadlines_next_30_days calculation",
+      "owner_clause": "C3",
+      "disposition": "DEFERRED_TO_OWNER_CLAUSE",
+      "rationale": "C3 owns authoritative persisted deadline semantics, deterministic calculation and auditability."
+    },
+    {
+      "id": "AX-SW-BLK-010",
+      "title": "AXENT retention and persistence contract",
+      "owner_clause": "C3",
+      "disposition": "DEFERRED_TO_OWNER_CLAUSE",
+      "rationale": "C3 owns the authoritative conversation schema, tenant isolation, encryption, retention classes, legal hold, export, deletion, audit and backup or restore contract.",
+      "downstream_dependencies": ["C4"]
+    },
+    {
+      "id": "AX-SW-BLK-011",
+      "title": "assistant degraded-mode provenance",
+      "owner_clause": "C1",
+      "disposition": "CLOSED_ON_SOURCE_SNAPSHOT",
+      "rationale": "The current BFF visibly discloses deterministic fallback and emits response-mode and proposal-only provenance."
+    },
+    {
+      "id": "AX-SW-BLK-012",
+      "title": "six-locale functional parity",
+      "owner_clause": "C14",
+      "disposition": "DEFERRED_TO_OWNER_CLAUSE",
+      "rationale": "C14 owns product-wide functional, semantic, epistemic and action parity across all six contracted locales."
+    },
+    {
+      "id": "AX-SW-BLK-013",
+      "title": "formal accessibility acceptance",
+      "owner_clause": "C14",
+      "disposition": "DEFERRED_TO_OWNER_CLAUSE",
+      "rationale": "C14 owns locked automated rules, complete route and state coverage, assistive-technology sessions and human accessibility authority.",
+      "retained_external_authorities": ["HUMAN_ACCESSIBILITY_AUTHORITY"]
+    },
+    {
+      "id": "AX-SW-BLK-014",
+      "title": "global desktop tablet mobile evidence",
+      "owner_clause": "C1",
+      "disposition": "CLOSED_ON_SOURCE_SNAPSHOT",
+      "rationale": "Desktop, tablet and mobile passed as independent zero-retry exact-head jobs with retained evidence."
+    },
+    {
+      "id": "AX-SW-BLK-015",
+      "title": "real adapter and real-data journey",
+      "owner_clause": "C4",
+      "disposition": "DEFERRED_TO_OWNER_CLAUSE",
+      "rationale": "C4 owns the integrated real-adapter journey and must prove no fixture or synthetic fallback in one disposable topology.",
+      "downstream_dependencies": ["C16"]
+    }
+  ],
+  "invariants": {
+    "exactly_one_owner_per_blocker": true,
+    "partial_is_not_closed": true,
+    "downstream_dependency_is_not_coownership": true,
+    "human_authority_is_never_automatically_manufactured": true,
+    "public_launch_authorized": false
+  },
+  "output_marker": "AX_WP2_BLOCKER_OWNERSHIP_PASS"
+}
