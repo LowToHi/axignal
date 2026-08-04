@@ -89,13 +89,24 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          rm -rf scripts/ci/bootstrap
+          rm -rf scripts/ci/bootstrap scripts/ci/__pycache__
           rm -f .github/workflows/ci-architecture-migration.yml
           {
             git diff --name-only --diff-filter=ACMRT HEAD
-            git ls-files --others --exclude-standard
+            git ls-files --others --exclude-standard -- \
+              .github/ci/workflow-scope.json \
+              .github/workflows/ci-pr-core.yml \
+              .github/workflows/ci-pr-runtime.yml \
+              .github/workflows/ci-pr-domain.yml \
+              docs/engineering/ci-architecture-v1.md \
+              scripts/ci/compute_workflow_scope.py \
+              scripts/ci/test_compute_workflow_scope.py \
+              scripts/ci/verify_ci_architecture.py
           } | LC_ALL=C sort -u > ci-architecture-files.txt
           git diff --name-only --diff-filter=D HEAD | LC_ALL=C sort > ci-architecture-deletions.txt
+          printf 'generated_files=%s deleted_files=%s\n' \
+            "$(wc -l < ci-architecture-files.txt)" \
+            "$(wc -l < ci-architecture-deletions.txt)"
           test -s ci-architecture-files.txt
           test "$(wc -l < ci-architecture-files.txt)" -eq 64
           test "$(wc -l < ci-architecture-deletions.txt)" -eq 13
