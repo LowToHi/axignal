@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+import type { SubscriberWorkspaceAuditEvent } from "@/lib/subscriber-workspace-contract";
+import { projectSubscriberWorkspaceEventsResult } from "@/lib/subscriber-workspace-event-projection";
 import {
   subscriberWorkspaceEnabled,
   subscriberWorkspaceEventsResult
@@ -32,7 +34,13 @@ export async function GET(request: Request) {
     );
   }
   const result = await subscriberWorkspaceEventsResult(Number(raw));
-  return NextResponse.json(result.body, {
+  const body =
+    result.status >= 200 && result.status < 300
+      ? projectSubscriberWorkspaceEventsResult(
+          result.body as { events: SubscriberWorkspaceAuditEvent[] }
+        )
+      : result.body;
+  return NextResponse.json(body, {
     status: result.status,
     headers: { "cache-control": "no-store" }
   });
