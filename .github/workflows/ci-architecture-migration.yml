@@ -41,13 +41,19 @@ jobs:
         shell: bash
         run: python -m pip install --disable-pip-version-check 'ruamel.yaml==0.18.16'
 
-      - name: Reconstruct and diagnose migration generator
+      - name: Reconstruct and verify migration generator
         shell: bash
         run: |
           set -euo pipefail
-          cat scripts/ci/bootstrap/part-*.b64 | tr -d '\n' | base64 --decode > /tmp/apply_ci_architecture_v1.py
-          wc -c /tmp/apply_ci_architecture_v1.py
-          sha256sum /tmp/apply_ci_architecture_v1.py
+          cat scripts/ci/bootstrap/payload-*.gz.b64 \
+            | tr -d '\n' \
+            | base64 --decode \
+            | gzip --decompress \
+            > /tmp/apply_ci_architecture_v1.py
+          printf '%s  %s\n' \
+            '03027197de1989d9a11407bcfdf5bb65dd9f6fdc7c389a868702f153083cf893' \
+            '/tmp/apply_ci_architecture_v1.py' \
+            | sha256sum --check --strict
           python -m py_compile /tmp/apply_ci_architecture_v1.py
 
       - name: Generate incremental CI architecture
