@@ -9,7 +9,7 @@ export default defineConfig({
   globalTimeout: 50_000,
   reporter: "list",
   use: {
-    baseURL: "http://localhost:3001",
+    baseURL: "http://127.0.0.1:3001",
     viewport: { width: 1440, height: 1000 },
     actionTimeout: 10_000,
     navigationTimeout: 10_000,
