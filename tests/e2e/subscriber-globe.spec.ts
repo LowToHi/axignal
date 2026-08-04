@@ -179,7 +179,7 @@ test("does not rotate the globe autonomously while idle", async ({ page }) => {
 test("keeps the selected marker card at a fixed visual size while zooming", async ({
   page,
 }) => {
-  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.goto("/investigations");
 
   const globeRegion = page.getByRole("region", { name: "European Union" });
