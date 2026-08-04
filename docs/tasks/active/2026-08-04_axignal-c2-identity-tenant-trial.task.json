@@ -1,7 +1,7 @@
 {
-  "task_id": "AX-GE2E-P25-T01",
+  "task_id": "AX-GE2E-P03-T02",
   "goal_id": "AXIGNAL-GOAL-001",
-  "phase": "P25",
+  "phase": "P03",
   "state": "IN_PROGRESS",
   "objective": "Renew the canonical identity, session, tenant, organisation, seat and trial journeys on the integrated AXIGNAL head and close Gate C2 without creating a second authority plane.",
   "outcome": "C2 remains in progress until passwordless recovery, authenticator replacement, organisation membership, entitlement, trial activation, limits, expiry/read-only retention, route protection and the complete exact-head matrix are successful on one immutable SHA.",
@@ -44,17 +44,16 @@
   "dependencies": {
     "phases": [
       "P03",
-      "P21",
-      "P25"
+      "P21"
     ],
     "tasks": [
       "AX-GE2E-P03-T01",
-      "AX-GE2E-P21-T02",
-      "AX-GE2E-P25-T01"
+      "AX-GE2E-P21-T02"
     ],
     "external": [
       "C0 canonical reconciliation is CLOSED / PASS",
       "C1 subscriber shell is CLOSED / PASS",
+      "P25 identity and trial abuse runtime is an implementation authority composed into P03 renewal evidence",
       "Public signup and production identity-provider activation remain separately unauthorized",
       "Stripe live mode and public launch remain outside C2 authority"
     ]
@@ -80,56 +79,56 @@
       "description": "Real WebAuthn signup, email verification, passkey registration, opaque session, logout and session rotation.",
       "required": true,
       "location": "tests/e2e/identity-passwordless.spec.ts",
-      "status": "PENDING"
+      "status": "PRESENT"
     },
     {
       "evidence_type": "SECURITY_REVIEW",
       "description": "Recovery from a sessionless browser revokes the active session and all previous authenticators, consumes one recovery code, rejects replay and binds a replacement AAL2 passkey.",
       "required": true,
       "location": "artifacts/c2-identity-recovery-browser.json",
-      "status": "PENDING"
+      "status": "PRESENT"
     },
     {
       "evidence_type": "TEST",
       "description": "P25 tenant-owned trial, alias reuse, step-up, first admitted AI activation, token/cost limits and concurrency enforcement.",
       "required": true,
       "location": "artifacts/identity-trial-abuse-e2e.json",
-      "status": "PENDING"
+      "status": "PRESENT"
     },
     {
       "evidence_type": "TEST",
       "description": "Organisation owner bootstrap, invitation acceptance, membership resolution, role authority, seat concurrency, downgrade protection and cross-tenant RLS.",
       "required": true,
       "location": "github-actions:seat-governance-e2e",
-      "status": "PENDING"
+      "status": "PRESENT"
     },
     {
       "evidence_type": "TEST",
       "description": "Tenant-scoped entitlement reservation, exhaustion, expiry and paid no-quota authority.",
       "required": true,
       "location": "github-actions:entitlement-runtime-e2e",
-      "status": "PENDING"
+      "status": "PRESENT"
     },
     {
       "evidence_type": "RESTORE_TEST",
       "description": "Trial expiry enters server-enforced read-only retention; suspension, deletion, purge, tenant isolation and restore remain deterministic.",
       "required": true,
       "location": "github-actions:trial-retention-e2e",
-      "status": "PENDING"
+      "status": "PRESENT"
     },
     {
       "evidence_type": "TRACE",
       "description": "Protected routes reject missing, revoked and recovered-away sessions while replacement identity continuity is preserved.",
       "required": true,
       "location": "tests/e2e/identity-passwordless.spec.ts;tests/e2e/security-boundaries.spec.ts",
-      "status": "PENDING"
+      "status": "PRESENT"
     },
     {
       "evidence_type": "TEST",
       "description": "All canonical PR gates and specialised direct checks complete successfully on the final C2 head.",
       "required": true,
       "location": "github-actions:exact-head-matrix",
-      "status": "PENDING"
+      "status": "MISSING"
     }
   ],
   "impacts": {
@@ -235,5 +234,5 @@
   "owner": "Staff Product Engineering",
   "reviewer": null,
   "created_at": "2026-08-04T19:10:00Z",
-  "updated_at": "2026-08-04T19:10:00Z"
+  "updated_at": "2026-08-04T19:23:00Z"
 }
