@@ -1,0 +1,10 @@
+.status-ribbon span:first-child {
+  display: none;
+}
+
+.status-ribbon::before {
+  content: "ADMITTED PUBLIC-SOURCE PROFILE · PRIVATE AUTHENTICATED PILOT";
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+}
