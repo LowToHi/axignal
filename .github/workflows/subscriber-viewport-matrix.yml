@@ -1,0 +1,96 @@
+name: Subscriber Viewport Matrix
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  AXIGNAL_EXACT_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+
+concurrency:
+  group: subscriber-viewport-matrix-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  subscriber-viewport-e2e:
+    name: Subscriber E2E ${{ matrix.label }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - project: chromium-desktop
+            label: desktop
+          - project: chromium-tablet
+            label: tablet
+          - project: chromium-mobile
+            label: mobile
+
+    steps:
+      - name: Checkout exact branch head
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Prove exact-head checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual_sha="$(git rev-parse HEAD)"
+          tree_sha="$(git rev-parse 'HEAD^{tree}')"
+          test "$actual_sha" = "$AXIGNAL_EXACT_SHA"
+          {
+            printf 'viewport=%s\n' '${{ matrix.label }}'
+            printf 'playwright_project=%s\n' '${{ matrix.project }}'
+            printf 'exact_head_sha=%s\n' "$actual_sha"
+            printf 'git_tree_sha=%s\n' "$tree_sha"
+          } | tee subscriber-viewport-exact-head.txt
+
+      - name: Upload exact-head identity
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: subscriber-viewport-${{ matrix.label }}-exact-head-${{ env.AXIGNAL_EXACT_SHA }}
+          path: subscriber-viewport-exact-head.txt
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22.14.0"
+
+      - name: Enable pinned pnpm
+        run: corepack enable
+
+      - name: Clean install and build
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm build
+
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run subscriber viewport contract
+        shell: bash
+        run: |
+          set -o pipefail
+          pnpm test:e2e --project='${{ matrix.project }}' 2>&1 | tee subscriber-viewport-${{ matrix.label }}.log
+
+      - name: Upload viewport evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: subscriber-viewport-${{ matrix.label }}-${{ env.AXIGNAL_EXACT_SHA }}
+          path: |
+            subscriber-viewport-${{ matrix.label }}.log
+            playwright-report
+            test-results
+          if-no-files-found: warn
+          retention-days: 30
