@@ -1,4 +1,5 @@
 name: C0 Canonical Reconciliation Controller
+# Existing-workflow trigger: C0-2026-08-04-01
 
 on:
   push:
