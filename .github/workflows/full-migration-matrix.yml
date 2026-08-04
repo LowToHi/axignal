@@ -21,7 +21,7 @@ jobs:
   migration-matrix:
     name: Supported upgrades and snapshot restores
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 55
     steps:
       - name: Checkout exact branch head 1
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -50,23 +50,71 @@ jobs:
           path: full-migration-matrix-exact-head-1.txt
           if-no-files-found: error
           retention-days: 30
+
       - name: Validate rehearsal script syntax
-        run: bash -n scripts/verify_full_migration_matrix.sh
+        run: |
+          bash -n scripts/verify_full_migration_matrix.sh
+          bash -n scripts/verify_c3_persistent_authority_e2e.sh
+
       - name: Start isolated PostgreSQL topology
         run: docker compose up --build --detach --wait postgres
+
       - name: Execute full migration matrix
         shell: bash
         run: |
           set -o pipefail
           bash scripts/verify_full_migration_matrix.sh 2>&1 | tee full-migration-matrix.log
-      - name: Upload migration evidence
+
+      - name: Execute C3 persistent authority backup and restore
+        shell: bash
+        run: |
+          set -o pipefail
+          bash scripts/verify_c3_persistent_authority_e2e.sh \
+            2>&1 | tee c3-persistent-authority-e2e.json
+
+      - name: Verify C3 evidence boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -E 'password|secret|session_[A-Za-z0-9_-]{32,}|confidential procurement question|proposal-only governed answer|terminal purge sentinel payload' \
+            c3-persistent-authority-e2e.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          payload = json.loads(Path("c3-persistent-authority-e2e.json").read_text())
+          assert payload["schema"] == "axignal.c3-persistent-authority-e2e.v1"
+          assert payload["status"] == "PASS"
+          assert payload["evidence_sufficiency_enforced"] is True
+          assert payload["submission_readiness_enforced"] is True
+          assert payload["separation_of_duties_enforced"] is True
+          assert payload["submission_invalidation_audited"] is True
+          assert payload["deadlines_next_30_days_half_open"] is True
+          assert payload["cross_tenant_workspace_access"] == "DENIED"
+          assert payload["typed_audit_append_only"] is True
+          assert payload["axent_ciphertext_at_rest"] is True
+          assert payload["axent_export_tenant_scoped"] is True
+          assert payload["axent_legal_hold"] == "ENFORCED"
+          assert payload["axent_conversation_deletion"] == "PASS"
+          assert payload["terminal_workspace_purge"] == "PASS"
+          assert payload["c3_purge_receipt"] == "PASS"
+          assert payload["snapshot_restore"] == "PASS"
+          assert payload["external_calls"] == 0
+          assert payload["model_calls"] == 0
+          assert payload["public_launch_authorized"] is False
+          PY
+
+      - name: Upload migration and C3 persistence evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: full-migration-matrix-${{ env.AXIGNAL_EXACT_SHA }}
-          path: full-migration-matrix.log
+          path: |
+            full-migration-matrix.log
+            c3-persistent-authority-e2e.json
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 30
+
       - name: Destroy isolated topology
         if: always()
         run: docker compose down --volumes --remove-orphans
