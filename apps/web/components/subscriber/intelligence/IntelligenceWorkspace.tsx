@@ -3,7 +3,7 @@
 import { FormEvent, useCallback, useMemo, useRef, useState } from "react";
 
 import { GraphSurface } from "./GraphSurface";
-import { SemanticGlobe } from "./SemanticGlobe";
+import { SemanticGlobe } from "./ReducedMotionSemanticGlobe";
 import { Timeline } from "./Timeline";
 import type { ClaimKind, IntelligenceLens, IntelligenceViewState, IntelligenceWorkspaceCopy, IntelligenceWorkspaceProps } from "./types";
 import styles from "./intelligence-workspace.module.css";
