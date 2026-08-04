@@ -55,8 +55,9 @@ export default defineConfig({
             ? "true"
             : "false",
           AXIGNAL_TEST_RUNTIME_ENABLED: "true",
-          // Subscriber routes exercise the new Shell while the root route preserves
-          // the canonical InvestigationShell only inside this explicit test runtime.
+          // Only this internal aggregate suite keeps the canonical InvestigationShell
+          // at `/`; external P21/P25/P26 topologies must exercise their real auth root.
+          AXIGNAL_CANONICAL_LEGACY_ROOT_TEST_ENABLED: "true",
           AXIGNAL_SUBSCRIBER_WORKSPACE_ENABLED: "true",
           AXIGNAL_SUBSCRIBER_WORKSPACE_FIXTURE_MODE: "explicit",
           AXIGNAL_SUBSCRIBER_WORKSPACE_ENVIRONMENT: process.env.CI
