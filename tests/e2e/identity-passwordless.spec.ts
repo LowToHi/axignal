@@ -199,7 +199,7 @@ test("registers, rotates, recovers and replaces passkeys across a real WebAuthn 
   // The old virtual authenticator still owns its credential locally. The
   // server must reject it because recovery revoked all previous authenticators.
   await page.getByRole("button", { name: "Usar passkey" }).click();
-  await expect(page.getByRole("alert")).toContainText(
+  await expect(page.locator("p.auth-error")).toContainText(
     "The authentication request could not be completed"
   );
   await expect(page.locator("main.shell")).not.toBeVisible();
@@ -212,7 +212,7 @@ test("registers, rotates, recovers and replaces passkeys across a real WebAuthn 
   await page
     .getByRole("button", { name: "Crear una passkey nueva" })
     .click();
-  await expect(page.getByRole("alert")).toContainText(
+  await expect(page.locator("p.auth-error")).toContainText(
     "The authentication request could not be completed"
   );
 
