@@ -14,6 +14,7 @@ from psycopg import sql
 from psycopg.rows import dict_row
 
 from axignal_api.entitlement_repository import EntitlementRepository
+from trial_grant_fixture import ensure_active_trial_grant
 
 TENANT_A = UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa")
 TENANT_B = UUID("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb")
@@ -151,6 +152,7 @@ def run(dsn: str) -> dict[str, Any]:
     assert trial_a["token_budget_total"] == 1_000_000
     assert trial_a["unlimited_ai_tokens"] is False
     assert trial_a["expires_at"] - trial_a["starts_at"] == timedelta(days=7)
+    ensure_active_trial_grant(dsn, tenant_id=TENANT_A, now=START)
     _expect_failure(
         lambda: repository.activate_trial(
             tenant_id=TENANT_A,
@@ -220,6 +222,7 @@ def run(dsn: str) -> dict[str, Any]:
         actor_subject="usr_e2e_b",
         now=START,
     )
+    ensure_active_trial_grant(dsn, tenant_id=TENANT_B, now=START)
     released = repository.reserve(
         tenant_id=TENANT_B,
         operation_id="op_release_without_usage",
