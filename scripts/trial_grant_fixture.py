@@ -29,7 +29,7 @@ def ensure_active_trial_grant(
     email_hmac = _digest(f"email:{tenant_id}")
     email_identity_hmac = _digest(f"email-identity:{tenant_id}")
     domain_hmac = _digest(f"domain:{tenant_id}")
-    user_handle = hashlib.sha256(f"handle:{tenant_id}".encode("utf-8")).digest()
+    user_handle = hashlib.sha256(f"handle:{tenant_id}".encode()).digest()
     expires_at = now + timedelta(days=7)
 
     with psycopg.connect(dsn) as connection, connection.cursor() as cursor:
