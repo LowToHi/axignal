@@ -14,6 +14,7 @@ import {
   FolderKanban,
   Globe2,
   LibraryBig,
+  LogOut,
   Menu,
   PanelLeftClose,
   PanelLeftOpen,
@@ -34,6 +35,8 @@ import {
   useRef,
   useState
 } from "react";
+
+import { purgeAxentLocalHistory } from "@/lib/axent-local-history";
 
 import styles from "./product-shell.module.css";
 
@@ -268,6 +271,9 @@ export function ProductShell({
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
+  const [signOutError, setSignOutError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
   const searchTriggerRef = useRef<HTMLButtonElement>(null);
@@ -277,6 +283,8 @@ export function ProductShell({
   const mobileCloseRef = useRef<HTMLButtonElement>(null);
   const notificationsRef = useRef<HTMLDivElement>(null);
   const notificationsButtonRef = useRef<HTMLButtonElement>(null);
+  const accountRef = useRef<HTMLDivElement>(null);
+  const accountButtonRef = useRef<HTMLButtonElement>(null);
   const capabilitySet = useMemo(() => new Set(capabilities), [capabilities]);
   const workspaceMatch = pathname.match(/^\/workspaces\/([^/]+)(?:\/|$)/);
 
@@ -289,6 +297,7 @@ export function ProductShell({
       if (event.key === "Escape") {
         setSearchOpen(false);
         setNotificationsOpen(false);
+        setAccountOpen(false);
         setMobileOpen(false);
       }
     };
@@ -327,22 +336,50 @@ export function ProductShell({
   }, [mobileOpen]);
 
   useEffect(() => {
-    if (!notificationsOpen) return;
+    if (!notificationsOpen && !accountOpen) return;
     const closeOutside = (event: PointerEvent) => {
       const target = event.target as Node;
-      if (!notificationsRef.current?.contains(target) && !notificationsButtonRef.current?.contains(target)) {
+      if (
+        notificationsOpen &&
+        !notificationsRef.current?.contains(target) &&
+        !notificationsButtonRef.current?.contains(target)
+      ) {
         setNotificationsOpen(false);
+      }
+      if (
+        accountOpen &&
+        !accountRef.current?.contains(target) &&
+        !accountButtonRef.current?.contains(target)
+      ) {
+        setAccountOpen(false);
       }
     };
     window.addEventListener("pointerdown", closeOutside);
     return () => window.removeEventListener("pointerdown", closeOutside);
-  }, [notificationsOpen]);
+  }, [accountOpen, notificationsOpen]);
 
   function submitSearch() {
     const value = query.trim();
     if (!value) return;
     router.push(`/opportunities?q=${encodeURIComponent(value)}`);
     setSearchOpen(false);
+  }
+
+  async function signOut() {
+    if (signingOut) return;
+    setSigningOut(true);
+    setSignOutError(null);
+    try {
+      const response = await fetch("/api/auth/logout", { method: "POST" });
+      if (!response.ok) throw new Error(`Logout failed with ${response.status}.`);
+      purgeAxentLocalHistory(window.localStorage);
+      window.location.assign("/");
+    } catch (cause) {
+      setSignOutError(
+        cause instanceof Error ? cause.message : "Logout could not be completed."
+      );
+      setSigningOut(false);
+    }
   }
 
   return (
@@ -392,10 +429,28 @@ export function ProductShell({
             {(Object.keys(localeLabels) as ShellLocale[]).map((value) => <option key={value} value={value}>{value.toUpperCase()} · {localeLabels[value]}</option>)}
           </select>
         </label>
-        <button ref={notificationsButtonRef} type="button" className={styles.iconButton} onClick={() => setNotificationsOpen((value) => !value)} aria-expanded={notificationsOpen} aria-controls="subscriber-notifications" aria-haspopup="dialog" aria-label="Notifications"><Bell size={18} /></button>
+        <button ref={notificationsButtonRef} type="button" className={styles.iconButton} onClick={() => { setNotificationsOpen((value) => !value); setAccountOpen(false); }} aria-expanded={notificationsOpen} aria-controls="subscriber-notifications" aria-haspopup="dialog" aria-label="Notifications"><Bell size={18} /></button>
         <Link className={styles.iconButton} href="/help" aria-label="Help"><CircleHelp size={18} /></Link>
-        <span className={styles.headerAvatar} aria-label={`Signed in as ${identity.name}`}>{identity.name.slice(0, 1)}</span>
+        <button
+          ref={accountButtonRef}
+          type="button"
+          className={styles.headerAvatar}
+          aria-label={`Account menu for ${identity.name}`}
+          aria-expanded={accountOpen}
+          aria-controls="subscriber-account-menu"
+          aria-haspopup="menu"
+          onClick={() => { setAccountOpen((value) => !value); setNotificationsOpen(false); }}
+        >
+          {identity.name.slice(0, 1)}
+        </button>
         {notificationsOpen && <div ref={notificationsRef} id="subscriber-notifications" className={styles.popover} role="dialog" aria-modal="false" aria-label="Notifications"><strong>2 items require attention</strong><Link href="/workspaces" onClick={() => setNotificationsOpen(false)}>Blocking evidence expires in 4 days</Link><Link href="/workspaces" onClick={() => setNotificationsOpen(false)}>Amendment review is waiting</Link></div>}
+        {accountOpen && <div ref={accountRef} id="subscriber-account-menu" className={styles.popover} role="menu" aria-label="Account menu" style={{ right: 12 }}>
+          <strong>{identity.name}</strong>
+          <small>{identity.email}</small>
+          <Link className={styles.navLink} href="/settings" role="menuitem" onClick={() => setAccountOpen(false)}><Settings size={16} /><span>Account settings</span></Link>
+          <button className={styles.navLink} type="button" role="menuitem" disabled={signingOut} onClick={() => void signOut()}><LogOut size={16} /><span>{signingOut ? "Signing out…" : "Sign out and clear local AXENT history"}</span></button>
+          {signOutError ? <small role="alert">{signOutError}</small> : null}
+        </div>}
       </header>
 
       {workspaceMatch && workspaceContext && <WorkspaceNavigation workspace={workspaceContext} compact={collapsed} />}
