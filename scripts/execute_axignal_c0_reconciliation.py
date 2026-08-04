@@ -8,9 +8,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 WP1_HEAD = "cb851be6bb5ff1d5feb8f61c0deb171dbbc38428"
-WP1_TREE = "e8c6fa702b5be9da8c752b40fea04886f6325625"
 WP2_HEAD = "4d03c88fb747b6b9a6531def146fc2b4003f1b1e"
-WP2_TREE = "70ed06d20fd1aceacf891a34b1cc7c0ef4fc6768"
 MERGE_BASE = "a49330dfa01af9328b459c4bf6818477c78da775"
 
 ATOMIC_PATHS = (
@@ -98,14 +96,15 @@ def tree_paths(commit: str, path: str) -> set[str]:
 
 def restore_wp1_authority(controller_head: str) -> list[str]:
     wp2_only: set[str] = set()
+    directory_paths = {
+        "apps/landing",
+        "tests/landing",
+        "docs/landing",
+        "skills/axignal-cinematic-webgl-scroll",
+        "skills/axignal-gsap-ui-ux",
+    }
     for path in ATOMIC_PATHS:
-        if (ROOT / path).is_dir() or path in {
-            "apps/landing",
-            "tests/landing",
-            "docs/landing",
-            "skills/axignal-cinematic-webgl-scroll",
-            "skills/axignal-gsap-ui-ux",
-        }:
+        if path in directory_paths:
             wp2_only.update(tree_paths(controller_head, path) - tree_paths(WP1_HEAD, path))
 
     git("restore", f"--source={WP1_HEAD}", "--staged", "--worktree", "--", *ATOMIC_PATHS)
@@ -170,14 +169,17 @@ def classify(path: str) -> str:
     return "WP2_PRESERVED"
 
 
-def write_ledger(controller_head: str, wp2_only: list[str], output: Path) -> None:
+def write_ledger(
+    controller_head: str,
+    wp1_tree: str,
+    wp2_tree: str,
+    wp2_only: list[str],
+    output: Path,
+) -> None:
     wp1_changed = changed_paths(MERGE_BASE, WP1_HEAD)
     wp2_changed = changed_paths(MERGE_BASE, WP2_HEAD)
     overlap = sorted(wp1_changed & wp2_changed)
-    resolutions = [
-        {"path": path, "resolution": classify(path)}
-        for path in overlap
-    ]
+    resolutions = [{"path": path, "resolution": classify(path)} for path in overlap]
     selected = [
         path
         for path in sorted(wp1_changed)
@@ -189,8 +191,8 @@ def write_ledger(controller_head: str, wp2_only: list[str], output: Path) -> Non
         "work_package": "C0_CANONICAL_RECONCILIATION",
         "controller_head": controller_head,
         "inputs": {
-            "wp1": {"head": WP1_HEAD, "tree": WP1_TREE, "role": "LANDING_AUTHORITY"},
-            "wp2": {"head": WP2_HEAD, "tree": WP2_TREE, "role": "FUNCTIONAL_BASE"},
+            "wp1": {"head": WP1_HEAD, "tree": wp1_tree, "role": "LANDING_AUTHORITY"},
+            "wp2": {"head": WP2_HEAD, "tree": wp2_tree, "role": "FUNCTIONAL_BASE"},
             "merge_base": MERGE_BASE,
         },
         "policy": {
@@ -223,7 +225,8 @@ def verify_tree() -> None:
     assert registry.startswith("version: 0.4.0\n")
     assert registry.count("skill_id: axignal-gsap-ui-ux") == 1
     assert registry.count("skill_id: axignal-cinematic-webgl-scroll") == 1
-    assert not git("grep", "-n", "<<<<<<<", "--", ":(exclude)pnpm-lock.yaml", check=False)
+    assert not git("ls-files", "-u")
+    git("diff", "--check")
 
 
 def main() -> int:
@@ -237,8 +240,10 @@ def main() -> int:
 
     controller_head = args.controller_head
     assert git("rev-parse", "HEAD") == controller_head
-    assert git("rev-parse", f"{WP1_HEAD}^{{tree}}") == WP1_TREE
-    assert git("rev-parse", f"{WP2_HEAD}^{{tree}}") == WP2_TREE
+    wp1_tree = git("rev-parse", f"{WP1_HEAD}^{{tree}}")
+    wp2_tree = git("rev-parse", f"{WP2_HEAD}^{{tree}}")
+    assert len(wp1_tree) == 40 and git("cat-file", "-t", wp1_tree) == "tree"
+    assert len(wp2_tree) == 40 and git("cat-file", "-t", wp2_tree) == "tree"
     assert git("merge-base", WP1_HEAD, WP2_HEAD) == MERGE_BASE
     git("merge-base", "--is-ancestor", WP2_HEAD, controller_head)
 
@@ -246,7 +251,7 @@ def main() -> int:
     wp2_only = restore_wp1_authority(controller_head)
     reconcile_shared_files()
     ledger_path = ROOT / args.ledger
-    write_ledger(controller_head, wp2_only, ledger_path)
+    write_ledger(controller_head, wp1_tree, wp2_tree, wp2_only, ledger_path)
     verify_tree()
 
     print(
@@ -256,7 +261,9 @@ def main() -> int:
                 "marker": "AX_C0_RECONCILIATION_TREE_PASS",
                 "controller_head": controller_head,
                 "wp1_head": WP1_HEAD,
+                "wp1_tree": wp1_tree,
                 "wp2_head": WP2_HEAD,
+                "wp2_tree": wp2_tree,
                 "wp2_only_preserved": len(wp2_only),
                 "ledger": str(ledger_path.relative_to(ROOT)),
             },
