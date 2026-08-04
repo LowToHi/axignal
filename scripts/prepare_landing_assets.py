@@ -201,7 +201,10 @@ def overlay_boundaries(image: Image.Image, geojson_path: Path) -> Image.Image:
     draw = ImageDraw.Draw(overlay)
     for feature in document.get("features", []):
         for ring in geometry_lines(feature.get("geometry", {})):
-            points = [project(float(lon), float(lat), image.width, image.height) for lon, lat, *_ in ring]
+            points = [
+                project(float(lon), float(lat), image.width, image.height)
+                for lon, lat, *_ in ring
+            ]
             if len(points) > 1:
                 draw.line(points, fill=(155, 220, 215, 82), width=max(1, image.width // 1600))
     return Image.alpha_composite(image.convert("RGBA"), overlay).convert("RGB")
@@ -434,8 +437,14 @@ def main() -> int:
                 "transition": "runtime shader crossfade",
             },
             "boundaries": {
-                "global": "Natural Earth 110m countries retained as the initial independent runtime layer",
-                "europe_lod": "Natural Earth 50m land boundaries and coastline clipped to Europe and lazy-loaded on capable desktop tiers",
+                "global": (
+                    "Natural Earth 110m countries retained as the initial "
+                    "independent runtime layer"
+                ),
+                "europe_lod": (
+                    "Natural Earth 50m land boundaries and coastline clipped "
+                    "to Europe and lazy-loaded on capable desktop tiers"
+                ),
                 "bounds": {
                     "west": EUROPE_BOUNDS[0],
                     "south": EUROPE_BOUNDS[1],
