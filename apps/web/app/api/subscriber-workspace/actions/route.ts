@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 
 import type {
+  SubscriberWorkspaceActionResult,
   SubscriberWorkspaceActionType,
   SubscriberWorkspaceBootstrap
 } from "@/lib/subscriber-workspace-contract";
+import { projectSubscriberWorkspaceActionResult } from "@/lib/subscriber-workspace-event-projection";
 import {
   subscriberWorkspaceActionResult,
   subscriberWorkspaceBootstrapResult,
@@ -19,7 +21,11 @@ const GUARDED_ACTIONS = new Set<SubscriberWorkspaceActionType>([
   "submission.approve"
 ]);
 
-function rejected(error: string, code: "invalid_request" | "state_conflict", status: 400 | 409) {
+function rejected(
+  error: string,
+  code: "invalid_request" | "state_conflict",
+  status: 400 | 409
+) {
   return NextResponse.json(
     {
       error,
@@ -33,18 +39,26 @@ function rejected(error: string, code: "invalid_request" | "state_conflict", sta
 
 function recordValue(value: unknown): Record<string, unknown> | null {
   return value && typeof value === "object" && !Array.isArray(value)
-    ? value as Record<string, unknown>
+    ? (value as Record<string, unknown>)
     : null;
 }
 
 async function enforceServerPreconditions(input: unknown): Promise<NextResponse | null> {
   const action = recordValue(input);
-  if (!action || typeof action.action_type !== "string" || !GUARDED_ACTIONS.has(action.action_type as SubscriberWorkspaceActionType)) {
+  if (
+    !action ||
+    typeof action.action_type !== "string" ||
+    !GUARDED_ACTIONS.has(action.action_type as SubscriberWorkspaceActionType)
+  ) {
     return null;
   }
   const payload = recordValue(action.payload);
   if (!payload || typeof payload.workspace_id !== "string") {
-    return rejected("A workspace-scoped action requires workspace_id.", "invalid_request", 400);
+    return rejected(
+      "A workspace-scoped action requires workspace_id.",
+      "invalid_request",
+      400
+    );
   }
 
   const bootstrapResult = await subscriberWorkspaceBootstrapResult();
@@ -55,7 +69,9 @@ async function enforceServerPreconditions(input: unknown): Promise<NextResponse 
     });
   }
   const bootstrap = bootstrapResult.body as SubscriberWorkspaceBootstrap;
-  const workspace = bootstrap.route_data.workspaces.find((item) => item.id === payload.workspace_id);
+  const workspace = bootstrap.route_data.workspaces.find(
+    (item) => item.id === payload.workspace_id
+  );
   if (!workspace) {
     return rejected("Subscriber workspace not found.", "state_conflict", 409);
   }
@@ -64,12 +80,15 @@ async function enforceServerPreconditions(input: unknown): Promise<NextResponse 
     if (typeof payload.requirement_id !== "string") {
       return rejected("requirement_id is required.", "invalid_request", 400);
     }
-    const requirement = workspace.requirements.find((item) => item.id === payload.requirement_id);
+    const requirement = workspace.requirements.find(
+      (item) => item.id === payload.requirement_id
+    );
     if (!requirement) {
       return rejected("Requirement not found.", "state_conflict", 409);
     }
     const verifiedEvidence = workspace.evidence.some(
-      (item) => requirement.evidence_ids.includes(item.id) && item.status === "verified"
+      (item) =>
+        requirement.evidence_ids.includes(item.id) && item.status === "verified"
     );
     if (!verifiedEvidence) {
       return rejected(
@@ -82,9 +101,12 @@ async function enforceServerPreconditions(input: unknown): Promise<NextResponse 
 
   if (action.action_type === "submission.prepare") {
     const blockingRequirement = workspace.requirements.some(
-      (item) => item.blocking && !["met", "not_applicable"].includes(item.status)
+      (item) =>
+        item.blocking && !["met", "not_applicable"].includes(item.status)
     );
-    const unacknowledgedAmendment = workspace.amendments.some((item) => !item.acknowledged);
+    const unacknowledgedAmendment = workspace.amendments.some(
+      (item) => !item.acknowledged
+    );
     if (blockingRequirement || unacknowledgedAmendment) {
       return rejected(
         "Submission preparation is blocked until mandatory requirements and amendments are revalidated.",
@@ -101,7 +123,10 @@ async function enforceServerPreconditions(input: unknown): Promise<NextResponse 
     }
   }
 
-  if (action.action_type === "submission.approve" && workspace.submission.preflight_status !== "ready") {
+  if (
+    action.action_type === "submission.approve" &&
+    workspace.submission.preflight_status !== "ready"
+  ) {
     return rejected(
       "Submission approval requires a completed ready preflight.",
       "state_conflict",
@@ -170,7 +195,13 @@ export async function POST(request: Request) {
   if (preconditionFailure) return preconditionFailure;
 
   const result = await subscriberWorkspaceActionResult(input);
-  return NextResponse.json(result.body, {
+  const body =
+    result.status >= 200 && result.status < 300
+      ? projectSubscriberWorkspaceActionResult(
+          result.body as SubscriberWorkspaceActionResult
+        )
+      : result.body;
+  return NextResponse.json(body, {
     status: result.status,
     headers: { "cache-control": "no-store" }
   });
