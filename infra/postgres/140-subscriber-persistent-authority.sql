@@ -1048,8 +1048,8 @@ BEGIN
     p_conversation_id,
     v_ordinal,
     p_message_role,
-    pgp_sym_encrypt(p_content, p_encryption_key, 'cipher-algo=aes256,compress-algo=0'),
-    'sha256:' || encode(digest(convert_to(p_content, 'UTF8'), 'sha256'), 'hex'),
+    public.pgp_sym_encrypt(p_content, p_encryption_key, 'cipher-algo=aes256,compress-algo=0'),
+    'sha256:' || encode(public.digest(convert_to(p_content, 'UTF8'), 'sha256'), 'hex'),
     p_now
   )
   RETURNING * INTO v_message;
@@ -1102,7 +1102,7 @@ BEGIN
         'message_id', message_id,
         'ordinal', ordinal,
         'role', message_role,
-        'content', pgp_sym_decrypt(ciphertext, p_encryption_key),
+        'content', public.pgp_sym_decrypt(ciphertext, p_encryption_key),
         'content_hash', content_hash,
         'created_at', created_at
       ) ORDER BY ordinal
@@ -1314,9 +1314,9 @@ BEGIN
     'axent_audit_events', (SELECT count(*) FROM tenant_private.axent_audit_events WHERE tenant_id = OLD.tenant_id)
   ) INTO v_counts;
 
-  v_tenant_hash := 'sha256:' || encode(digest(OLD.tenant_id::text, 'sha256'), 'hex');
+  v_tenant_hash := 'sha256:' || encode(public.digest(OLD.tenant_id::text, 'sha256'), 'hex');
   v_digest := 'sha256:' || encode(
-    digest(v_tenant_hash || v_counts::text || clock_timestamp()::text, 'sha256'),
+    public.digest(v_tenant_hash || v_counts::text || clock_timestamp()::text, 'sha256'),
     'hex'
   );
   INSERT INTO axignal_global.c3_terminal_purge_receipts (
