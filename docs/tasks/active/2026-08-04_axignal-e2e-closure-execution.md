@@ -55,22 +55,23 @@ Implemented on this branch:
 - AXENT local history is versioned, scoped by tenant and identity, bounded to 30 days, capped in volume and never represented as server-synchronised;
 - malformed, expired and tenant-only legacy AXENT history is purged fail closed;
 - the account avatar is a real menu and logout purges only AXENT local-history namespaces before redirecting;
+- reduced-motion users receive a static cartographic equivalent; CSS animation and transition are suppressed while the accessible Globe table and controls remain available;
 - synthetic Intelligence projections are withheld in real-adapter mode instead of being presented as live data;
 - Playwright launches the subscriber candidate with explicit non-production fixture authority;
 - critical browser tests use zero retries;
 - web and landing security-boundary implementations are identical again;
-- browser tests cover authority, degraded mode, server preconditions, precise audit projection, the Navigator-to-ResearchRun route transition and AXENT local-retention/logout boundaries.
+- browser tests cover authority, degraded mode, server preconditions, precise audit projection, the Navigator-to-ResearchRun route transition, AXENT local-retention/logout boundaries and reduced-motion equivalence.
 
 ## Exact-head evidence boundary
 
 The immediately preceding exact head
-`ccdacb44147a73734d314f156ae2fac225431eaf` passed the complete triggered
+`3e8c880c8b1d5b90744c05bcb915096e51ff8c9f` passed the complete triggered
 matrix, including Contract Validation, Frontend Unit Contracts, G5, G6,
 Executable Spine, E2E Technical Audit, P21-T02, P25-T01 and P26-T01.
 
 That evidence is immutable evidence for that predecessor only. The subsequent
-AXENT local-retention and logout implementation changes the head and therefore
-requires a fresh complete matrix before it can contribute to C0–C1 acceptance.
+reduced-motion implementation changes the head and therefore requires a fresh
+complete matrix before it can contribute to C0–C1 acceptance.
 
 ## C1 blockers and disposition
 
@@ -117,6 +118,14 @@ is not synchronised across devices. C3/C4 must define the authoritative
 conversation schema, tenant isolation, encryption, retention classes, legal
 hold, export, user deletion, audit and backup/restore behaviour before this
 blocker can be closed.
+
+The reduced-motion boundary now suppresses CSS animation and transition and
+replaces the dynamic WebGL Globe with a static cartographic poster whenever the
+operating system requests reduced motion, while preserving the accessible
+opportunity table and actions. This does not close `AX-SW-BLK-013`: formal
+accessibility acceptance still requires the full C14 matrix, including
+axe/pa11y, keyboard, screen reader, zoom, reflow, forced colours and human
+approval.
 
 ## Non-negotiable execution rules
 
