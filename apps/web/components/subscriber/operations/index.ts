@@ -1,6 +1,6 @@
 export { OperationsWorkspace, TenderOperationsWorkspace } from "./operations-workspace-closure";
 export type { OperationsActionPayload, OperationsWorkspaceProps } from "./operations-workspace-closure";
-export { provenanceSafeOperationsData } from "./operations-workspace-closure";
+export { provenanceSafeOperationsData } from "./operations-provenance";
 export { tenderSections } from "./types";
 export type {
   ActionType,
