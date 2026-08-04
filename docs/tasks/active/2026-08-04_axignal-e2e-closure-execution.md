@@ -64,6 +64,8 @@ Implemented on this branch:
 - those critical routes reflow without page-level horizontal overflow at 320 CSS pixels;
 - critical AXENT controls remain available under 200 percent text scaling;
 - forced-colors mode preserves interactive borders, current/pressed states and a visible two-pixel focus outline;
+- desktop, tablet and mobile execute as independent exact-head Playwright jobs with `fail-fast: false`;
+- each viewport publishes its own exact-head identity, test log, Playwright report and failure artefacts;
 - synthetic Intelligence projections are withheld in real-adapter mode instead of being presented as live data;
 - Playwright launches the subscriber candidate with explicit non-production fixture authority;
 - critical browser tests use zero retries;
@@ -73,9 +75,10 @@ Implemented on this branch:
 ## Exact-head evidence boundary
 
 The immediately preceding exact head
-`b74c1b0728a065be6331d02455569670e5a48c9e` passed the complete triggered
+`61ee4e0e48f9383c7d94d4c3cf002a93ee487747` passed the complete triggered
 matrix, including Contract Validation, Frontend Unit Contracts, G5, G6,
-Executable Spine, E2E Technical Audit, P21-T02, P25-T01 and P26-T01.
+Executable Spine, E2E Technical Audit, the explicit desktop/tablet/mobile
+Subscriber Viewport Matrix, P21-T02, P25-T01 and P26-T01.
 
 That evidence is immutable evidence for that predecessor only. This documentary
 reconciliation changes the head and therefore requires a fresh complete matrix
@@ -97,7 +100,7 @@ AX-SW-BLK-010 AXENT retention/persistence contract       PARTIAL_FIX_AT_CLIENT
 AX-SW-BLK-011 assistant degraded-mode provenance         FIXED_FOR_CURRENT_BFF
 AX-SW-BLK-012 six-locale functional parity               PARTIAL_FIX_AT_SHELL_CHROME
 AX-SW-BLK-013 formal accessibility acceptance            PARTIAL_FIX_AUTOMATED_ACCESSIBILITY
-AX-SW-BLK-014 global desktop/tablet/mobile evidence      OPEN
+AX-SW-BLK-014 global desktop/tablet/mobile evidence      FIXED_BY_EXPLICIT_VIEWPORT_MATRIX
 AX-SW-BLK-015 real adapter and real-data journey         OPEN
 ```
 
@@ -146,6 +149,12 @@ axe/pa11y rule set, broader route and state coverage, real screen-reader and
 keyboard sessions, zoom and reflow review for every contracted surface,
 platform/browser assistive-technology coverage and explicit human accessibility
 authority.
+
+For `AX-SW-BLK-014`, desktop, tablet and mobile now run as three independent CI
+jobs against the same exact SHA. `fail-fast` is disabled; each viewport retains
+its own exact-head identity and browser evidence for 30 days. All three projects
+passed on the predecessor SHA without retries, so the prior implicit and
+misnamed aggregate coverage is replaced by explicit viewport authority.
 
 ## Non-negotiable execution rules
 
