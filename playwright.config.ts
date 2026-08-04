@@ -49,8 +49,9 @@ export default defineConfig({
           AXIGNAL_LEGACY_PASSWORD_LOGIN_ENABLED: useDevelopmentServer
             ? "true"
             : "false",
-          // The subscriber candidate must be explicitly enabled in browser acceptance.
-          // Fixture mode remains fail-closed and is admitted only in this non-production test runtime.
+          AXIGNAL_TEST_RUNTIME_ENABLED: "true",
+          // Subscriber routes exercise the new Shell while the root route preserves
+          // the canonical InvestigationShell only inside this explicit test runtime.
           AXIGNAL_SUBSCRIBER_WORKSPACE_ENABLED: "true",
           AXIGNAL_SUBSCRIBER_WORKSPACE_FIXTURE_MODE: "explicit",
           AXIGNAL_SUBSCRIBER_WORKSPACE_ENVIRONMENT: process.env.CI
