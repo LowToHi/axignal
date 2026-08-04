@@ -2,7 +2,7 @@
 
 Task: `AX-GE2E-P25-T01`
 
-Status: `IMPLEMENTED_NOT_PUBLIC`
+Status: `IMPLEMENTED_NOT_PUBLIC / C2_RENEWAL_IN_PROGRESS`
 
 ## Decision
 
@@ -65,7 +65,13 @@ Every registration produces eight one-time recovery codes. Recovery:
 3. places the identity in `RECOVERY_ONLY`;
 4. requires registration of a new passkey;
 5. revokes previous authenticators when the new passkey is bound;
-6. produces a new recovery-code set.
+6. produces a new recovery-code set;
+7. preserves the same user, tenant and prepared or active trial;
+8. rejects replay of the consumed recovery code;
+9. rejects authentication with every pre-recovery credential;
+10. creates a new opaque AAL2 session only after replacement registration succeeds.
+
+The recovery acceptance journey must start in a browser with no session while another browser still holds an active session. This proves that revocation is caused by the recovery authority and not by a preceding logout.
 
 ## Trial ownership
 
@@ -169,6 +175,20 @@ Global identity authority lives in `identity_private`:
 
 Security, risk and abuse-event ledgers are append-only.
 
+## C2 evidence composition
+
+C2 is not a second identity implementation. Its closure composes the existing canonical authorities:
+
+```text
+P25 identity/passwordless/trial abuse
++ P21-T02 organisation/membership/seat governance
++ entitlement runtime
++ trial retention lifecycle
++ route protection and exact-head matrix
+```
+
+The trial terminal branch is satisfied by either governed conversion to a paid entitlement or expiry into server-enforced read-only retention. The existing retention lifecycle is the authority for expiry, read-only access, deletion, purge and restore; P25 does not duplicate it.
+
 ## Evidence requirements
 
 The phase is not complete until exact-head CI proves:
@@ -176,7 +196,16 @@ The phase is not complete until exact-head CI proves:
 - passkey registration with real WebAuthn verification;
 - passkey authentication after logout;
 - opaque `HttpOnly` cookie;
+- session rotation after authentication;
 - session revocation;
+- recovery initiated from a sessionless browser while another session is active;
+- one-time recovery-code consumption and replay rejection;
+- immediate revocation of every pre-recovery session;
+- rejection of every pre-recovery authenticator;
+- replacement passkey registration with required user verification;
+- replacement set of eight recovery codes;
+- new AAL2 session after recovery;
+- user, tenant and trial continuity across recovery;
 - canonical alias trial reuse;
 - weak-signal step-up without independent blocking;
 - no entitlement before first AI request;
@@ -184,9 +213,20 @@ The phase is not complete until exact-head CI proves:
 - two-seat trial capacity;
 - token and cost budget enforcement;
 - one concurrent research run;
+- trial expiry into server-enforced read-only retention or governed paid conversion;
+- organisation creation or join, membership resolution and seat enforcement;
 - append-only ledgers;
 - direct identity-table access denied to the application role;
+- protected routes reject revoked or missing sessions;
 - public signup, external payment and commercial activation remain disabled.
+
+## Required C2 marker
+
+```text
+AX_C2_IDENTITY_TENANT_TRIAL_PASS
+```
+
+The marker is prohibited until all composed authorities are successful on one exact head and the C2 evidence record is accepted on that same SHA.
 
 ## Truth boundaries
 
@@ -197,5 +237,8 @@ account created ≠ new trial
 trial prepared ≠ trial started
 risk score ≠ proof of fraud
 step-up passed ≠ paid customer
+recovery started ≠ recovery completed
+new passkey UI ≠ old authenticator revoked
 CI pass ≠ production provider approval
+C2 pass ≠ C3 persistence closure
 ```
