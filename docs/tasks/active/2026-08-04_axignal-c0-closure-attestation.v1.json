@@ -1,0 +1,65 @@
+{
+  "schema": "axignal.c0.closure-attestation.v1",
+  "contract_id": "AX-GE2E-CLOSURE-EXECUTION-002",
+  "work_package": "C0_CANONICAL_RECONCILIATION",
+  "closure_decision": "PASS",
+  "output_marker": "AX_C0_CANONICAL_BASELINE_PASS",
+  "source_ledger": {
+    "path": "docs/tasks/active/2026-08-04_axignal-c0-canonical-reconciliation.v1.json",
+    "blob_sha": "4c9330f5305db6ba80d18ac9109e0426fa2db0e5",
+    "state_at_reconciliation": "TREE_RECONCILED_AWAITING_EXACT_HEAD_MATRIX"
+  },
+  "validated_predecessor": {
+    "exact_head_sha": "e758d34147153034a7ae724379577b74fb020d9e",
+    "matrix_status": "ALL_RETURNED_PULL_REQUEST_WORKFLOWS_COMPLETED_SUCCESS",
+    "failed_runs": 0,
+    "cancelled_runs": 0,
+    "non_terminal_runs": 0,
+    "material_correction": {
+      "path": "infra/pilot/compose.seat-test.yaml",
+      "decision": "KEEP_DETERMINISTIC_CHECKOUT_ON_WEBAUTHN_ORIGIN",
+      "production_runtime_changed": false,
+      "anti_abuse_boundary_weakened": false
+    }
+  },
+  "critical_exact_head_evidence": {
+    "contract_validation": 30925265167,
+    "rc6_exact_head_provenance": 30925265141,
+    "e2e_technical_audit": 30925265133,
+    "subscriber_viewport_matrix": 30925265099,
+    "p21_t02_seat_governance": 30925265251,
+    "p21_commercial_runtime": 30925265048,
+    "commercial_shell": 30925264922,
+    "stripe_paid_lifecycle": 30925264913,
+    "entitlement_runtime": 30925265163,
+    "p25_identity_trial_abuse": 30925265413,
+    "trial_retention_lifecycle": 30925265339,
+    "full_postgresql_migration_matrix": 30925265174,
+    "g5_web_security": 30925265047,
+    "g6_supply_chain_reproducibility": 30925266378,
+    "public_landing_release_candidate": 30925265649,
+    "landing_globe": 30925266377,
+    "pilot_deployment_candidate": 30925265149,
+    "human_review_acceptance": 30925265216
+  },
+  "attestation_head_rule": {
+    "binding": "GITHUB_PULL_REQUEST_HEAD_SHA",
+    "effective_only_when": "THE_COMPLETE_PULL_REQUEST_WORKFLOW_MATRIX_FOR_THE_COMMIT_CONTAINING_THIS_ATTESTATION_IS_TERMINAL_SUCCESS",
+    "head_change_invalidates_prior_evidence": true,
+    "retries_cannot_convert_a_CRITICAL_BROWSER_FAILURE_INTO_ACCEPTANCE": true
+  },
+  "preserved_boundaries": {
+    "source_prs_merged": false,
+    "pr_169_merge_authorized": false,
+    "public_launch_authorized": false,
+    "commercial_activation_authorized": false,
+    "source_admission_authorized": false,
+    "autonomous_external_actions_authorized": false
+  },
+  "next_transition": {
+    "from": "C0_CANONICAL_RECONCILIATION",
+    "to": "C1_SUBSCRIBER_SHELL_CLOSURE",
+    "status": "AUTHORIZED_ONLY_AFTER_ATTESTATION_HEAD_MATRIX_PASS"
+  },
+  "created_at": "2026-08-04T15:57:47Z"
+}
