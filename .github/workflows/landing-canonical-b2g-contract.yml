@@ -80,10 +80,14 @@ jobs:
         run: python3 scripts/verify_landing_implementation.py
 
       - name: Audit GSAP motion contract
-        run: node skills/axignal-gsap-ui-ux/scripts/audit-gsap-motion.mjs
+        run: |
+          node skills/axignal-gsap-ui-ux/scripts/audit-gsap-motion.mjs --self-test
+          node skills/axignal-gsap-ui-ux/scripts/audit-gsap-motion.mjs apps/landing
 
       - name: Audit WebGL Globe contract
-        run: node skills/axignal-cinematic-webgl-scroll/scripts/audit-webgl-globe.mjs
+        run: |
+          node skills/axignal-cinematic-webgl-scroll/scripts/audit-webgl-globe.mjs --self-test
+          node skills/axignal-cinematic-webgl-scroll/scripts/audit-webgl-globe.mjs
 
       - name: Emit contractual markers
         shell: bash
