@@ -10,21 +10,9 @@ on:
         required: true
         type: boolean
         default: true
-  pull_request:
-    paths:
-      - "apps/api/src/axignal_api/o01_approval_renewal.py"
-      - "apps/api/tests/test_o01_approval_renewal.py"
-      - "data/acceptance/approvals/AX-LIB-O01-approval-renewal-policy.v0.1.json"
-      - "data/acceptance/fixtures/o01-renewal/**"
-      - "scripts/extract_gate7_o01_typed_authority.py"
-      - "scripts/prepare_gate7_o01_renewal.py"
-      - "scripts/verify_gate7_o01_renewal.py"
-      - "scripts/materialize_gate7_o01_approval_manifest.py"
-      - ".github/workflows/o01-approval-renewal.yml"
   push:
     branches:
       - main
-      - "agent/**"
     paths:
       - "apps/api/src/axignal_api/o01_approval_renewal.py"
       - "apps/api/tests/test_o01_approval_renewal.py"
@@ -36,6 +24,12 @@ on:
       - "scripts/materialize_gate7_o01_approval_manifest.py"
       - ".github/workflows/o01-approval-renewal.yml"
 
+  workflow_call:
+    inputs:
+      online_terms_check:
+        required: false
+        type: boolean
+        default: false
 permissions:
   contents: read
   actions: read

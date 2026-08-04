@@ -1,15 +1,6 @@
 name: P14 Trade Supply Chain Validation
 
 on:
-  pull_request:
-    paths:
-      - ".github/workflows/p14-trade-supply-chain-validation.yml"
-      - "data/trade-supply-chain/**"
-      - "docs/trade-supply-chain/**"
-      - "schemas/trade-supply-chain-workspace-*.schema.json"
-      - "scripts/p14_trade_supply_reference.py"
-      - "scripts/verify_p14_trade_supply_chain_workspace.py"
-      - "scripts/verify_p14_rollback.py"
   push:
     branches:
       - "agent/ax-ge2e-p14-trade-supply-chain-workspace-v1.4"
@@ -22,6 +13,7 @@ on:
       - "scripts/verify_p14_trade_supply_chain_workspace.py"
       - "scripts/verify_p14_rollback.py"
 
+  workflow_call:
 permissions:
   contents: read
 

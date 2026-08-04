@@ -8,41 +8,9 @@ on:
         required: true
         type: boolean
         default: false
-  pull_request:
-    paths:
-      - "data/acceptance/**"
-      - "data/foundations/**"
-      - "data/procurement/**"
-      - "data/grants/**"
-      - "data/regulatory/**"
-      - "data/infrastructure/**"
-      - "data/corporate/**"
-      - "data/sovereign-macro/**"
-      - "data/trade-supply-chain/**"
-      - "data/energy-climate/**"
-      - "data/innovation-ip/**"
-      - "apps/api/src/axignal_api/o01_contact_policy.py"
-      - "apps/api/src/axignal_api/o01_approval_renewal.py"
-      - "apps/api/tests/test_o01_contact_policy.py"
-      - "apps/api/tests/test_o01_approval_renewal.py"
-      - "apps/api/tests/test_o01_typed_authority_extraction.py"
-      - "schemas/global-coverage-source-language-*.schema.json"
-      - "scripts/verify_gate7_global_coverage.py"
-      - "scripts/verify_gate7_source_snapshots.py"
-      - "scripts/verify_gate7_source_rights.py"
-      - "scripts/verify_gate7_o01_campaign_contract.py"
-      - "scripts/verify_gate7_o01_legal_privacy_reconciliation.py"
-      - "scripts/verify_gate7_o01_renewal.py"
-      - "scripts/extract_gate7_o01_typed_authority.py"
-      - "scripts/prepare_gate7_o01_renewal.py"
-      - "scripts/materialize_gate7_o01_approval_manifest.py"
-      - "docs/acceptance/Gate-7-global-coverage-sources-multilingual-v0.1.md"
-      - ".github/workflows/gate7-global-coverage-source-language.yml"
-      - ".github/workflows/o01-approval-renewal.yml"
   push:
     branches:
       - main
-      - "agent/**"
     paths:
       - "data/acceptance/**"
       - "data/foundations/**"
@@ -74,6 +42,12 @@ on:
       - ".github/workflows/gate7-global-coverage-source-language.yml"
       - ".github/workflows/o01-approval-renewal.yml"
 
+  workflow_call:
+    inputs:
+      require_gate_pass:
+        required: false
+        type: boolean
+        default: false
 permissions:
   contents: read
 

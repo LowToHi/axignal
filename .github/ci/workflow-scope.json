@@ -1,0 +1,987 @@
+{
+  "groups": {
+    "core": [
+      "bounded_ai_contract",
+      "contract_validation",
+      "e2e_technical_audit",
+      "executable_spine",
+      "frontend_unit_tests",
+      "g5_web_security",
+      "g6_next_preview_guard",
+      "g6_supply_chain_inventory",
+      "landing_foundation",
+      "p23_t02_message_copy_validation_e2e",
+      "p23_t03_b2g_landing_copy_e2e",
+      "public_landing_release_candidate",
+      "rc6_exact_head_provenance",
+      "subscriber_viewport_matrix",
+      "subscriber_workspace_ux_contract",
+      "ted_eforms_xml_parser",
+      "v15_canonical_contract_validation"
+    ],
+    "domain": [
+      "first_lawful_universe",
+      "gate7_global_coverage_source_language",
+      "global_procurement_catalogue",
+      "o01_approval_renewal",
+      "o01_domain_contracts",
+      "o01_legal_privacy_reconciliation",
+      "p13_sovereign_macro_validation",
+      "p14_trade_supply_chain_validation",
+      "p15_energy_climate_transition_validation",
+      "p16_innovation_ip_validation",
+      "p17_cross_library_intelligence_validation",
+      "p18_intent_intelligence_knowledge_tides_validation",
+      "p19_scenarios_calibration_outcomes_validation",
+      "p20_enterprise_api_private_data_validation",
+      "p21_commercial_runtime_pricing_stripe_validation",
+      "p22_production_slo_dr_security_validation",
+      "p23_final_ux_landing_copy_marketing_validation",
+      "p24_global_acceptance_paid_evidence_launch_validation"
+    ],
+    "runtime": [
+      "commercial_shell_e2e",
+      "critical_repository_coverage",
+      "critical_worker_coverage",
+      "deepseek_v4_flash_proposal",
+      "entitlement_runtime",
+      "f1_controlled_study",
+      "f1_qualified_user_validation",
+      "f2_runtime_closure",
+      "full_migration_matrix",
+      "human_review_acceptance",
+      "p21_t02_seat_governance_e2e",
+      "p25_t01_identity_trial_abuse_e2e",
+      "p26_t01_organic_discovery_e2e",
+      "pilot_deployment_candidate",
+      "stripe_paid_lifecycle",
+      "ted_product_runtime",
+      "trial_retention_lifecycle"
+    ]
+  },
+  "policy": {
+    "architecture_paths_force_full_matrix": [
+      ".github/ci/**",
+      ".github/workflows/ci-pr-*.yml",
+      "scripts/ci/**"
+    ],
+    "delta_source": "pull_request.synchronize.before_to_head_or_single_head_commit",
+    "direct_pull_request_workflows": [
+      ".github/workflows/ci-pr-core.yml",
+      ".github/workflows/ci-pr-runtime.yml",
+      ".github/workflows/ci-pr-domain.yml"
+    ],
+    "full_matrix_label": "ci:full-matrix",
+    "specialised_direct_pull_request_workflows": [
+      ".github/workflows/procurement-admission-rehearsal.yml",
+      ".github/workflows/public-landing-resolver-contract.yml",
+      ".github/workflows/public-landing-ssh-channel-preflight.yml",
+      ".github/workflows/rc5-security-inventory.yml",
+      ".github/workflows/remote-pilot-operations.yml",
+      ".github/workflows/world-bank-live-source-smoke.yml"
+    ]
+  },
+  "schema": "axignal.ci-workflow-scope.v1",
+  "workflows": {
+    "bounded_ai_contract": {
+      "file": "bounded-ai-contract.yml",
+      "group": "core",
+      "mode": "affected",
+      "paths": [
+        "config/ai-assistance-policy.v0.1.json",
+        "docs/contracts/29-bounded-ai-assistance-and-token-entitlements.md",
+        "docs/contracts/README.md",
+        "docs/adr/ADR-014-bounded-ai-and-token-entitlements.md",
+        "docs/adr/README.md",
+        "docs/roadmap/tasks/AX-F9-T15.json",
+        "scripts/verify_bounded_ai_contract.py",
+        ".github/workflows/bounded-ai-contract.yml"
+      ]
+    },
+    "commercial_shell_e2e": {
+      "file": "commercial-shell-e2e.yml",
+      "group": "runtime",
+      "mode": "affected",
+      "paths": [
+        "apps/api/src/axignal_api/billing_*.py",
+        "apps/api/src/axignal_api/stripe_*.py",
+        "apps/api/src/axignal_api/application.py",
+        "apps/api/tests/test_billing_*.py",
+        "apps/web/app/api/billing/**",
+        "apps/web/app/billing/**",
+        "apps/web/components/billing-bridge*",
+        "apps/web/lib/billing-server.ts",
+        "apps/web/app/page.tsx",
+        "infra/pilot/compose.billing-test.yaml",
+        "playwright.config.ts",
+        "tests/e2e/commercial-shell.spec.ts",
+        "scripts/verify_commercial_shell_e2e.py",
+        ".github/workflows/commercial-shell-e2e.yml"
+      ]
+    },
+    "contract_validation": {
+      "file": "contract-validation.yml",
+      "group": "core",
+      "mode": "always",
+      "paths": []
+    },
+    "critical_repository_coverage": {
+      "file": "critical-repository-coverage.yml",
+      "group": "runtime",
+      "mode": "affected",
+      "paths": [
+        "apps/api/src/axignal_api/*_repository.py",
+        "apps/api/tests/test_critical_repositories*.py",
+        "scripts/inventory_critical_repositories.py",
+        "scripts/verify_critical_repository_coverage.py",
+        "scripts/verify_critical_repository_transactions.py",
+        ".github/workflows/critical-repository-coverage.yml"
+      ]
+    },
+    "critical_worker_coverage": {
+      "file": "critical-worker-coverage.yml",
+      "group": "runtime",
+      "mode": "affected",
+      "paths": [
+        "apps/api/src/axignal_api/runtime_invariants.py",
+        "apps/api/src/axignal_api/research_worker.py",
+        "apps/api/src/axignal_api/worker.py",
+        "apps/api/src/axignal_api/retention_worker.py",
+        "apps/api/src/axignal_api/proposal_publisher.py",
+        "apps/api/src/axignal_api/proposal_worker.py",
+        "apps/api/src/axignal_api/admission_runtime.py",
+        "apps/api/src/axignal_api/scheduler_service.py",
+        "apps/api/tests/test_critical_worker_*.py",
+        "scripts/verify_critical_worker_coverage.py",
+        ".github/workflows/critical-worker-coverage.yml"
+      ]
+    },
+    "deepseek_v4_flash_proposal": {
+      "file": "deepseek-v4-flash-proposal.yml",
+      "group": "runtime",
+      "mode": "affected",
+      "paths": [
+        ".env.example",
+        "apps/api/src/axignal_api/deepseek_proposals.py",
+        "apps/api/src/axignal_api/proposal_worker.py",
+        "apps/api/src/axignal_api/settings.py",
+        "apps/api/tests/test_deepseek_v4_flash_proposals.py",
+        "scripts/verify_deepseek_v4_flash_preflight.py",
+        ".github/workflows/deepseek-v4-flash-proposal.yml"
+      ]
+    },
+    "e2e_technical_audit": {
+      "file": "e2e-technical-audit.yml",
+      "group": "core",
+      "mode": "full_only",
+      "paths": []
+    },
+    "entitlement_runtime": {
+      "file": "entitlement-runtime.yml",
+      "group": "runtime",
+      "mode": "affected",
+      "paths": [
+        "apps/api/src/axignal_api/ai_scope.py",
+        "apps/api/src/axignal_api/capability_tokens.py",
+        "apps/api/src/axignal_api/entitlement_*.py",
+        "apps/api/src/axignal_api/entitlements.py",
+        "apps/api/src/axignal_api/application.py",
+        "apps/api/tests/test_entitlement_runtime.py",
+        "config/ai-assistance-policy.v0.1.json",
+        "docs/roadmap/tasks/AX-F9-T15.json",
+        "infra/postgres/080-entitlement-token-ledger.sql",
+        "infra/postgres/081-entitlement-ledger-hardening.sql",
+        "infra/postgres/082-entitlement-expiry-sweep.sql",
+        "infra/postgres/Dockerfile",
+        "scripts/trial_grant_fixture.py",
+        "scripts/verify_entitlement_contract.py",
+        "scripts/verify_entitlement_runtime_e2e.py",
+        "scripts/verify_entitlement_authority_e2e.py",
+        ".github/workflows/entitlement-runtime.yml"
+      ]
+    },
+    "executable_spine": {
+      "file": "executable-spine.yml",
+      "group": "core",
+      "mode": "affected",
+      "paths": [
+        "apps/**",
+        "packages/**",
+        "infra/**",
+        "scripts/**",
+        "tests/**",
+        "docs/roadmap/**",
+        "package.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml",
+        "turbo.json",
+        "tsconfig.base.json",
+        "pyproject.toml",
+        "compose.yaml",
+        ".github/workflows/executable-spine.yml"
+      ]
+    },
+    "f1_controlled_study": {
+      "file": "f1-controlled-study.yml",
+      "group": "runtime",
+      "mode": "affected",
+      "paths": [
+        "studies/f1/controlled-study-v1/**",
+        "schemas/f1-controlled-study-manifest.schema.json",
+        "scripts/*f1_controlled_study*",
+        "infra/postgres/063-f1-controlled-study-export.sql",
+        "infra/postgres/Dockerfile",
+        "docs/studies/f1-controlled-study*",
+        "tests/fixtures/f1-controlled-study-*",
+        ".env.example",
+        ".github/workflows/f1-controlled-study.yml"
+      ]
+    },
+    "f1_qualified_user_validation": {
+      "file": "f1-qualified-user-validation.yml",
+      "group": "runtime",
+      "mode": "affected",
+      "paths": [
+        "apps/api/src/axignal_api/validation.py",
+        "apps/api/src/axignal_api/settings.py",
+        "apps/api/src/axignal_api/application.py",
+        "apps/api/tests/test_validation.py",
+        "apps/web/app/validation/**",
+        "apps/web/app/api/validation/**",
+        "apps/web/components/validation-harness*",
+        "apps/web/lib/server-auth.ts",
+        "infra/postgres/060-f1-qualified-user-validation.sql",
+        "infra/postgres/061-f1-validation-answer-key-boundary.sql",
+        "infra/postgres/062-f1-validation-pgcrypto-boundary.sql",
+        "infra/postgres/Dockerfile",
+        "schemas/validation-*.schema.json",
+        "scripts/verify_f1_validation_*",
+        "tests/e2e/qualified-user-validation.spec.ts",
+        ".github/workflows/f1-qualified-user-validation.yml"
+      ]
+    },
+    "f2_runtime_closure": {
+      "file": "f2-runtime-closure.yml",
+      "group": "runtime",
+      "mode": "affected",
+      "paths": [
+        "apps/api/src/axignal_api/object_store.py",
+        "apps/api/src/axignal_api/scheduler.py",
+        "apps/api/src/axignal_api/scheduler_service.py",
+        "apps/api/src/axignal_api/settings.py",
+        "apps/api/src/axignal_api/telemetry.py",
+        "apps/api/tests/test_f2_runtime.py",
+        "infra/otel/**",
+        "infra/runtime/**",
+        "infra/postgres/050-f2-runtime-spine.sql",
+        "infra/postgres/Dockerfile",
+        "scripts/verify_f2_*",
+        "scripts/verify_runtime_topology.py",
+        "compose.yaml",
+        "pyproject.toml",
+        ".github/workflows/f2-runtime-closure.yml"
+      ]
+    },
+    "first_lawful_universe": {
+      "file": "first-lawful-universe.yml",
+      "group": "domain",
+      "mode": "affected",
+      "paths": [
+        "data/sources/ted-search-api-v3.v0.1.json",
+        "data/universes/**",
+        "docs/adr/ADR-012-european-public-procurement-first-universe.md",
+        "docs/adr/README.md",
+        "docs/contracts/11-hypothesis-register.md",
+        "docs/research/first-lawful-universe-selection-v0.1.md",
+        "docs/roadmap/06-current-execution-state.md",
+        "docs/roadmap/tasks/AX-F8-*.json",
+        "docs/sources/ted-search-api-v3.md",
+        "apps/api/src/axignal_api/connectors/ted.py",
+        "apps/api/tests/fixtures/ted_search_probe.json",
+        "apps/api/tests/test_ted_connector.py",
+        "scripts/verify_first_lawful_universe.py",
+        "scripts/verify_ted_live_source.py",
+        ".github/workflows/first-lawful-universe.yml"
+      ]
+    },
+    "frontend_unit_tests": {
+      "file": "frontend-unit-tests.yml",
+      "group": "core",
+      "mode": "affected",
+      "paths": [
+        "apps/web/**",
+        "apps/landing/**",
+        "packages/design-tokens/**",
+        "package.json",
+        "pnpm-lock.yaml",
+        "turbo.json",
+        ".github/workflows/frontend-unit-tests.yml"
+      ]
+    },
+    "full_migration_matrix": {
+      "file": "full-migration-matrix.yml",
+      "group": "runtime",
+      "mode": "affected",
+      "paths": [
+        "infra/postgres/**",
+        "scripts/verify_full_migration_matrix.sh",
+        ".github/workflows/full-migration-matrix.yml"
+      ]
+    },
+    "g5_web_security": {
+      "file": "g5-web-security.yml",
+      "group": "core",
+      "mode": "affected",
+      "paths": [
+        "apps/web/proxy.ts",
+        "apps/landing/proxy.ts",
+        "apps/web/lib/security-boundaries.ts",
+        "apps/landing/lib/security-boundaries.ts",
+        "apps/web/next.config.ts",
+        "apps/landing/next.config.ts",
+        "apps/web/app/api/auth/login/route.ts",
+        "apps/web/tests/security-boundaries.test.ts",
+        "apps/landing/tests/security-boundaries.test.ts",
+        "apps/web/tsconfig.test.json",
+        "apps/landing/tsconfig.test.json",
+        "tests/e2e/security-boundaries.spec.ts",
+        "tests/landing/security-boundaries.spec.ts",
+        "playwright.config.ts",
+        "playwright.landing.config.ts",
+        ".github/workflows/g5-web-security.yml"
+      ]
+    },
+    "g6_next_preview_guard": {
+      "file": "g6-next-preview-guard.yml",
+      "group": "core",
+      "mode": "affected",
+      "paths": [
+        "apps/web/**",
+        "apps/landing/**",
+        "infra/pilot/Dockerfile.web",
+        "infra/landing/Dockerfile",
+        "scripts/verify_no_next_preview_mode.py",
+        ".github/workflows/g6-next-preview-guard.yml"
+      ]
+    },
+    "g6_supply_chain_inventory": {
+      "file": "g6-supply-chain-inventory.yml",
+      "group": "core",
+      "mode": "affected",
+      "paths": [
+        "pyproject.toml",
+        "requirements/**",
+        "data/supply-chain/**",
+        "package.json",
+        "pnpm-lock.yaml",
+        "infra/**/Dockerfile*",
+        "compose.yaml",
+        "infra/**/*.yml",
+        "infra/**/*.yaml",
+        ".github/workflows/**",
+        "scripts/verify_g6_supply_chain.py",
+        "scripts/image_filesystem_manifest.py"
+      ]
+    },
+    "gate7_global_coverage_source_language": {
+      "file": "gate7-global-coverage-source-language.yml",
+      "group": "domain",
+      "mode": "affected",
+      "paths": [
+        "data/acceptance/**",
+        "data/foundations/**",
+        "data/procurement/**",
+        "data/grants/**",
+        "data/regulatory/**",
+        "data/infrastructure/**",
+        "data/corporate/**",
+        "data/sovereign-macro/**",
+        "data/trade-supply-chain/**",
+        "data/energy-climate/**",
+        "data/innovation-ip/**",
+        "apps/api/src/axignal_api/o01_contact_policy.py",
+        "apps/api/src/axignal_api/o01_approval_renewal.py",
+        "apps/api/tests/test_o01_contact_policy.py",
+        "apps/api/tests/test_o01_approval_renewal.py",
+        "apps/api/tests/test_o01_typed_authority_extraction.py",
+        "schemas/global-coverage-source-language-*.schema.json",
+        "scripts/verify_gate7_global_coverage.py",
+        "scripts/verify_gate7_source_snapshots.py",
+        "scripts/verify_gate7_source_rights.py",
+        "scripts/verify_gate7_o01_campaign_contract.py",
+        "scripts/verify_gate7_o01_legal_privacy_reconciliation.py",
+        "scripts/verify_gate7_o01_renewal.py",
+        "scripts/extract_gate7_o01_typed_authority.py",
+        "scripts/prepare_gate7_o01_renewal.py",
+        "scripts/materialize_gate7_o01_approval_manifest.py",
+        "docs/acceptance/Gate-7-global-coverage-sources-multilingual-v0.1.md",
+        ".github/workflows/gate7-global-coverage-source-language.yml",
+        ".github/workflows/o01-approval-renewal.yml"
+      ]
+    },
+    "global_procurement_catalogue": {
+      "file": "global-procurement-catalogue.yml",
+      "group": "domain",
+      "mode": "affected",
+      "paths": [
+        "data/sources/global-public-procurement-catalogue.v0.2.json",
+        "data/sources/global-public-procurement-candidates-*.v0.2.csv",
+        "scripts/verify_global_procurement_catalogue.py",
+        ".github/workflows/global-procurement-catalogue.yml",
+        "docs/contracts/28-b2g-procurement-commercial-and-global-source-program.md",
+        "docs/roadmap/13-b2g-pricing-trial-and-global-procurement-source-program.md"
+      ]
+    },
+    "human_review_acceptance": {
+      "file": "human-review-acceptance.yml",
+      "group": "runtime",
+      "mode": "affected",
+      "paths": [
+        "apps/**",
+        "infra/postgres/**",
+        "scripts/verify_bounded_human_review.py",
+        "scripts/verify_human_review_migration_rehearsal.sh",
+        "tests/e2e/human-review.spec.ts",
+        "schemas/human-review-case.schema.json",
+        ".github/workflows/human-review-acceptance.yml"
+      ]
+    },
+    "landing_foundation": {
+      "file": "landing-foundation.yml",
+      "group": "core",
+      "mode": "affected",
+      "paths": [
+        "skills/**/SKILL.md",
+        "skills/axignal-cinematic-webgl-scroll/**",
+        "skills/axignal-gsap-ui-ux/**",
+        "docs/landing/**",
+        "docs/roadmap/16-landing-globe-foundation.md",
+        "docs/roadmap/17-landing-globe-production.md",
+        "apps/landing/**",
+        "tests/landing/**",
+        "package.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml",
+        "scripts/verify_landing_foundation.py",
+        "scripts/verify_landing_implementation.py",
+        "scripts/acquire_globe_assets.py",
+        ".github/workflows/landing-foundation.yml"
+      ]
+    },
+    "o01_approval_renewal": {
+      "file": "o01-approval-renewal.yml",
+      "group": "domain",
+      "mode": "affected",
+      "paths": [
+        "apps/api/src/axignal_api/o01_approval_renewal.py",
+        "apps/api/tests/test_o01_approval_renewal.py",
+        "data/acceptance/approvals/AX-LIB-O01-approval-renewal-policy.v0.1.json",
+        "data/acceptance/fixtures/o01-renewal/**",
+        "scripts/extract_gate7_o01_typed_authority.py",
+        "scripts/prepare_gate7_o01_renewal.py",
+        "scripts/verify_gate7_o01_renewal.py",
+        "scripts/materialize_gate7_o01_approval_manifest.py",
+        ".github/workflows/o01-approval-renewal.yml"
+      ]
+    },
+    "o01_domain_contracts": {
+      "file": "o01-domain-contracts.yml",
+      "group": "domain",
+      "mode": "affected",
+      "paths": [
+        "data/contracts/AX-GE2E-G7-O01-T02-domain-contracts.v0.1.json",
+        "apps/api/src/axignal_api/procurement_domain.py",
+        "apps/api/tests/test_procurement_domain_contracts.py",
+        "apps/api/src/axignal_api/deepseek_proposals.py",
+        "apps/api/src/axignal_api/settings.py",
+        "apps/api/src/axignal_api/proposal_worker.py",
+        "apps/api/tests/test_deepseek_v4_flash_proposals.py",
+        "scripts/verify_o01_domain_contracts.py",
+        ".github/workflows/o01-domain-contracts.yml"
+      ]
+    },
+    "o01_legal_privacy_reconciliation": {
+      "file": "o01-legal-privacy-reconciliation.yml",
+      "group": "domain",
+      "mode": "affected",
+      "paths": [
+        "apps/api/src/axignal_api/o01_contact_policy.py",
+        "apps/api/tests/test_o01_contact_policy.py",
+        "data/acceptance/legal/AX-LIB-O01-TED-contact-policy-reconciliation.v0.2.json",
+        "data/acceptance/approvals/AX-LIB-O01-legal-privacy-approval-request.v0.2.json",
+        "data/contracts/AX-GE2E-G7-O01-T02-domain-contracts.v0.1.json",
+        "scripts/verify_gate7_o01_legal_privacy_reconciliation.py",
+        "scripts/materialize_gate7_o01_approval_manifest.py",
+        ".github/workflows/o01-legal-privacy-reconciliation.yml"
+      ]
+    },
+    "p13_sovereign_macro_validation": {
+      "file": "p13-sovereign-macro-validation.yml",
+      "group": "domain",
+      "mode": "affected",
+      "paths": [
+        ".github/workflows/p13-sovereign-macro-validation.yml",
+        "data/sovereign-macro/**",
+        "docs/sovereign-macro/**",
+        "schemas/sovereign-macro-strategy-workspace-*.schema.json",
+        "scripts/p13_sovereign_macro_reference.py",
+        "scripts/verify_p13_sovereign_macro_strategy_workspace.py",
+        "scripts/verify_p13_rollback.py"
+      ]
+    },
+    "p14_trade_supply_chain_validation": {
+      "file": "p14-trade-supply-chain-validation.yml",
+      "group": "domain",
+      "mode": "affected",
+      "paths": [
+        ".github/workflows/p14-trade-supply-chain-validation.yml",
+        "data/trade-supply-chain/**",
+        "docs/trade-supply-chain/**",
+        "schemas/trade-supply-chain-workspace-*.schema.json",
+        "scripts/p14_trade_supply_reference.py",
+        "scripts/verify_p14_trade_supply_chain_workspace.py",
+        "scripts/verify_p14_rollback.py"
+      ]
+    },
+    "p15_energy_climate_transition_validation": {
+      "file": "p15-energy-climate-transition-validation.yml",
+      "group": "domain",
+      "mode": "affected",
+      "paths": [
+        ".github/workflows/p15-energy-climate-transition-validation.yml",
+        "data/energy-climate/**",
+        "docs/energy-climate/**",
+        "schemas/energy-climate-transition-workspace-*.schema.json",
+        "scripts/p15_energy_climate_reference.py",
+        "scripts/verify_p15_energy_climate_transition_workspace.py",
+        "scripts/verify_p15_rollback.py"
+      ]
+    },
+    "p16_innovation_ip_validation": {
+      "file": "p16-innovation-ip-validation.yml",
+      "group": "domain",
+      "mode": "affected",
+      "paths": [
+        ".github/workflows/p16-innovation-ip-validation.yml",
+        "data/innovation-ip/**",
+        "docs/innovation-ip/**",
+        "schemas/innovation-ip-workspace-*.schema.json",
+        "scripts/p16_innovation_ip_reference.py",
+        "scripts/verify_p16_innovation_ip_workspace.py",
+        "scripts/verify_p16_rollback.py"
+      ]
+    },
+    "p17_cross_library_intelligence_validation": {
+      "file": "p17-cross-library-intelligence-validation.yml",
+      "group": "domain",
+      "mode": "affected",
+      "paths": [
+        "data/libraries/**",
+        "data/cross-library/**",
+        "docs/contracts/**",
+        "docs/roadmap/**",
+        "scripts/p17_*.py",
+        "scripts/verify_p17_*.py",
+        ".github/workflows/p17-cross-library-intelligence-validation.yml"
+      ]
+    },
+    "p18_intent_intelligence_knowledge_tides_validation": {
+      "file": "p18-intent-intelligence-knowledge-tides-validation.yml",
+      "group": "domain",
+      "mode": "affected",
+      "paths": [
+        "data/intent/**",
+        "data/knowledge-tides/**",
+        "docs/contracts/**",
+        "docs/roadmap/**",
+        "scripts/p18_*.py",
+        "scripts/verify_p18_*.py",
+        ".github/workflows/p18-intent-intelligence-knowledge-tides-validation.yml"
+      ]
+    },
+    "p19_scenarios_calibration_outcomes_validation": {
+      "file": "p19-scenarios-calibration-outcomes-validation.yml",
+      "group": "domain",
+      "mode": "affected",
+      "paths": [
+        "data/scenarios/**",
+        "data/calibration/**",
+        "docs/contracts/**",
+        "docs/roadmap/**",
+        "scripts/p19_*.py",
+        "scripts/verify_p19_*.py",
+        ".github/workflows/p19-scenarios-calibration-outcomes-validation.yml"
+      ]
+    },
+    "p20_enterprise_api_private_data_validation": {
+      "file": "p20-enterprise-api-private-data-validation.yml",
+      "group": "domain",
+      "mode": "affected",
+      "paths": [
+        "apps/api/**",
+        "data/private/**",
+        "schemas/**",
+        "docs/contracts/**",
+        "docs/roadmap/**",
+        "scripts/p20_*.py",
+        "scripts/verify_p20_*.py",
+        ".github/workflows/p20-enterprise-api-private-data-validation.yml"
+      ]
+    },
+    "p21_commercial_runtime_pricing_stripe_validation": {
+      "file": "p21-commercial-runtime-pricing-stripe-validation.yml",
+      "group": "domain",
+      "mode": "affected",
+      "paths": [
+        "data/commercial/**",
+        "docs/commercial/**",
+        "schemas/commercial-runtime-pricing-stripe-*.json",
+        "scripts/p21_commercial_reference.py",
+        "scripts/verify_p21_commercial_runtime.py",
+        "scripts/verify_p21_rollback.py",
+        "scripts/verify_p20_rollback.py",
+        ".github/workflows/p21-commercial-runtime-pricing-stripe-validation.yml"
+      ]
+    },
+    "p21_t02_seat_governance_e2e": {
+      "file": "p21-t02-seat-governance-e2e.yml",
+      "group": "runtime",
+      "mode": "affected",
+      "paths": [
+        "data/commercial/seat-governance-runtime.v0.1.json",
+        "docs/commercial/P21-T02-seat-governance-e2e-v0.1.md",
+        "infra/postgres/110-seat-governance.sql",
+        "infra/postgres/Dockerfile",
+        "infra/pilot/compose.seat-test.yaml",
+        "apps/api/src/axignal_api/identity.py",
+        "apps/api/src/axignal_api/seat_*.py",
+        "apps/api/src/axignal_api/application.py",
+        "apps/api/tests/test_seat_*.py",
+        "apps/web/app/api/organisation/seats/**",
+        "apps/web/app/accept-invitation/**",
+        "apps/web/components/accept-invitation-client.tsx",
+        "apps/web/components/seat-governance-bridge*",
+        "apps/web/lib/seat-server.ts",
+        "apps/web/lib/server-auth.ts",
+        "apps/web/app/page.tsx",
+        "scripts/verify_p21_t02_seat_governance.py",
+        "scripts/verify_seat_governance_e2e.py",
+        "tests/e2e/seat-governance.spec.ts",
+        ".github/workflows/p21-t02-seat-governance-e2e.yml"
+      ]
+    },
+    "p22_production_slo_dr_security_validation": {
+      "file": "p22-production-slo-dr-security-validation.yml",
+      "group": "domain",
+      "mode": "affected",
+      "paths": [
+        "data/production/**",
+        "docs/production/**",
+        "scripts/p22_production_reference.py",
+        "scripts/verify_p22_production_slo_dr_security.py",
+        ".github/workflows/p22-production-slo-dr-security-validation.yml"
+      ]
+    },
+    "p23_final_ux_landing_copy_marketing_validation": {
+      "file": "p23-final-ux-landing-copy-marketing-validation.yml",
+      "group": "domain",
+      "mode": "affected",
+      "paths": [
+        "data/experience/**",
+        "docs/experience/**",
+        "scripts/p23_experience_reference.py",
+        "scripts/verify_p23_final_ux_landing_copy_marketing.py",
+        ".github/workflows/p23-final-ux-landing-copy-marketing-validation.yml"
+      ]
+    },
+    "p23_t02_message_copy_validation_e2e": {
+      "file": "p23-t02-message-copy-validation-e2e.yml",
+      "group": "core",
+      "mode": "affected",
+      "paths": [
+        "apps/landing/**",
+        "data/experience/message-copy-validation-e2e-runtime.v0.1.json",
+        "data/experience/b2g-landing-copy-e2e-runtime.v0.1.json",
+        "data/commercial/commercial-runtime-pricing-stripe-runtime.v0.1.json",
+        "docs/experience/P23-T02-message-copy-validation-e2e-v0.1.md",
+        "docs/experience/P23-T03-b2g-landing-copy-e2e-v0.1.md",
+        "scripts/verify_p23_t02_message_copy_validation_e2e.py",
+        "scripts/verify_p23_t03_b2g_landing_copy_e2e.py",
+        "tests/landing/**",
+        "playwright.landing.config.ts",
+        ".github/workflows/p23-t02-message-copy-validation-e2e.yml"
+      ]
+    },
+    "p23_t03_b2g_landing_copy_e2e": {
+      "file": "p23-t03-b2g-landing-copy-e2e.yml",
+      "group": "core",
+      "mode": "affected",
+      "paths": [
+        "apps/landing/**",
+        "data/experience/b2g-landing-copy-e2e-runtime.v0.1.json",
+        "data/experience/message-copy-validation-e2e-runtime.v0.1.json",
+        "data/commercial/commercial-runtime-pricing-stripe-runtime.v0.1.json",
+        "docs/experience/P23-T03-b2g-landing-copy-e2e-v0.1.md",
+        "scripts/verify_p23_t03_b2g_landing_copy_e2e.py",
+        "scripts/verify_p23_t02_message_copy_validation_e2e.py",
+        "scripts/verify_landing_implementation.py",
+        "tests/landing/**",
+        ".github/workflows/p23-t03-b2g-landing-copy-e2e.yml"
+      ]
+    },
+    "p24_global_acceptance_paid_evidence_launch_validation": {
+      "file": "p24-global-acceptance-paid-evidence-launch-validation.yml",
+      "group": "domain",
+      "mode": "affected",
+      "paths": [
+        "data/acceptance/**",
+        "docs/acceptance/**",
+        "scripts/p24_acceptance_reference.py",
+        "scripts/verify_p24_global_acceptance_paid_evidence_launch.py",
+        ".github/workflows/p24-global-acceptance-paid-evidence-launch-validation.yml"
+      ]
+    },
+    "p25_t01_identity_trial_abuse_e2e": {
+      "file": "p25-t01-identity-trial-abuse-e2e.yml",
+      "group": "runtime",
+      "mode": "affected",
+      "paths": [
+        "data/security/identity-passwordless-trial-abuse-runtime.v0.1.json",
+        "docs/security/P25-T01-identity-passwordless-trial-abuse-e2e-v0.1.md",
+        "infra/postgres/12*-identity-*.sql",
+        "infra/postgres/123-trial-abuse-runtime.sql",
+        "infra/postgres/Dockerfile",
+        "infra/pilot/compose.identity-test.yaml",
+        "apps/api/src/axignal_api/identity*.py",
+        "apps/api/src/axignal_api/application.py",
+        "apps/api/tests/test_identity*.py",
+        "apps/web/app/api/identity/**",
+        "apps/web/app/verify-email/**",
+        "apps/web/components/auth-gate.tsx",
+        "apps/web/lib/identity-server.ts",
+        "apps/web/lib/server-auth.ts",
+        "apps/web/types/webauthn-json.d.ts",
+        "apps/web/app/page.tsx",
+        "scripts/verify_p25_t01_identity_trial_abuse.py",
+        "scripts/verify_identity_trial_abuse_e2e.py",
+        "tests/e2e/identity-passwordless.spec.ts",
+        "pyproject.toml",
+        ".github/workflows/p25-t01-identity-trial-abuse-e2e.yml"
+      ]
+    },
+    "p26_t01_organic_discovery_e2e": {
+      "file": "p26-t01-organic-discovery-e2e.yml",
+      "group": "runtime",
+      "mode": "affected",
+      "paths": [
+        "data/growth/organic-discovery-runtime.v0.1.json",
+        "docs/growth/P26-T01-organic-discovery-founder-admin-e2e-v0.1.md",
+        "infra/postgres/13*-organic-*.sql",
+        "infra/postgres/Dockerfile",
+        "infra/pilot/compose.organic-test.yaml",
+        "apps/api/src/axignal_api/founder_identity.py",
+        "apps/api/src/axignal_api/organic_*.py",
+        "apps/api/src/axignal_api/application.py",
+        "apps/api/tests/test_organic_policy.py",
+        "apps/web/app/admin/**",
+        "apps/web/app/alerts/**",
+        "apps/web/app/api/admin/**",
+        "apps/web/app/api/public/**",
+        "apps/web/app/tenders/**",
+        "apps/web/app/market-intelligence/**",
+        "apps/web/app/robots.ts",
+        "apps/web/app/sitemap.ts",
+        "apps/web/app/llms.txt/**",
+        "apps/web/app/page.tsx",
+        "apps/web/app/layout.tsx",
+        "apps/web/app/discovery-page.module.css",
+        "apps/web/app/alert-confirm.css",
+        "apps/web/components/discovery-view.tsx",
+        "apps/web/components/tender-alert-form.tsx",
+        "apps/web/lib/organic-server.ts",
+        "scripts/verify_p26_t01_organic_discovery.py",
+        "scripts/verify_organic_discovery_e2e.py",
+        "tests/e2e/organic-discovery-founder-admin.spec.ts",
+        ".github/workflows/p26-t01-organic-discovery-e2e.yml"
+      ]
+    },
+    "pilot_deployment_candidate": {
+      "file": "pilot-deployment-candidate.yml",
+      "group": "runtime",
+      "mode": "affected",
+      "paths": [
+        "apps/api/src/axignal_api/application.py",
+        "apps/api/src/axignal_api/persistent_ted_research.py",
+        "apps/api/src/axignal_api/settings.py",
+        "apps/api/src/axignal_api/worker.py",
+        "apps/api/src/axignal_api/pilot_health.py",
+        "apps/api/tests/test_pilot_health.py",
+        "apps/web/app/api/health/**",
+        "apps/web/app/demo/**",
+        "apps/web/components/demo-guide*",
+        "infra/pilot/**",
+        "scripts/verify_pilot_candidate.py",
+        "scripts/verify_demo_contract.py",
+        "scripts/verify_ted_product_runtime.py",
+        "scripts/verify_ted_security_review.py",
+        "docs/roadmap/14-pilot-deployment-candidate.md",
+        "docs/runbooks/pilot-deployment.md",
+        ".github/workflows/pilot-deployment-candidate.yml"
+      ]
+    },
+    "public_landing_release_candidate": {
+      "file": "public-landing-release-candidate.yml",
+      "group": "core",
+      "mode": "affected",
+      "paths": [
+        "apps/landing/**",
+        "infra/landing/**",
+        "packages/design-tokens/**",
+        "package.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml",
+        ".github/workflows/public-landing-release-candidate.yml",
+        ".github/workflows/public-landing-release.yml"
+      ]
+    },
+    "rc6_exact_head_provenance": {
+      "file": "rc6-exact-head-provenance.yml",
+      "group": "core",
+      "mode": "affected",
+      "paths": [
+        ".github/workflows/**",
+        "scripts/verify_release_exact_head_provenance.py"
+      ]
+    },
+    "stripe_paid_lifecycle": {
+      "file": "stripe-paid-lifecycle.yml",
+      "group": "runtime",
+      "mode": "affected",
+      "paths": [
+        "apps/api/src/axignal_api/billing_*.py",
+        "apps/api/src/axignal_api/stripe_*.py",
+        "apps/api/src/axignal_api/application.py",
+        "apps/api/tests/test_billing_*.py",
+        "infra/postgres/100-stripe-paid-lifecycle.sql",
+        "infra/postgres/Dockerfile",
+        "scripts/verify_stripe_billing_contract.py",
+        "scripts/verify_stripe_paid_lifecycle_e2e.py",
+        "scripts/verify_stripe_billing_authority_e2e.py",
+        ".github/workflows/stripe-paid-lifecycle.yml",
+        "docs/security/AX-F9-T15-stripe-paid-lifecycle-boundary.md",
+        "docs/roadmap/tasks/AX-F9-T15.json"
+      ]
+    },
+    "subscriber_viewport_matrix": {
+      "file": "subscriber-viewport-matrix.yml",
+      "group": "core",
+      "mode": "affected",
+      "paths": [
+        "apps/web/**",
+        "packages/**",
+        "tests/e2e/**",
+        "playwright.config.ts",
+        "package.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml",
+        "tsconfig.base.json",
+        ".github/workflows/subscriber-viewport-matrix.yml"
+      ]
+    },
+    "subscriber_workspace_ux_contract": {
+      "file": "subscriber-workspace-ux-contract.yml",
+      "group": "core",
+      "mode": "affected",
+      "paths": [
+        "data/experience/subscriber-workspace-ux-contract.v1.json",
+        "docs/research/2026-08-01-subscriber-workspace-tooling-ux-study.md",
+        "docs/experience/subscriber-workspace-information-architecture-v1.md",
+        "skills/subscriber-workspace-ux.registry.yaml",
+        "skills/subscriber-workspace-ux/**",
+        "scripts/verify_subscriber_workspace_ux_contract.py",
+        ".github/workflows/subscriber-workspace-ux-contract.yml"
+      ]
+    },
+    "ted_eforms_xml_parser": {
+      "file": "ted-eforms-xml-parser.yml",
+      "group": "core",
+      "mode": "affected",
+      "paths": [
+        "pyproject.toml",
+        "apps/api/src/axignal_api/connectors/ted_eforms.py",
+        "apps/api/tests/fixtures/ted_eforms_cn16_synthetic.xml",
+        "apps/api/tests/test_ted_eforms_parser.py",
+        "data/universes/eu-public-procurement/xml-parser-profile.v0.1.json",
+        "docs/roadmap/02-task-catalogue.md",
+        "docs/roadmap/tasks/AX-F8-T11.json",
+        "docs/sources/ted-eforms-xml-parser-v0.1.md",
+        "scripts/verify_ted_eforms_parser_contract.py",
+        "scripts/verify_ted_eforms_sdk_example.py",
+        ".github/workflows/ted-eforms-xml-parser.yml"
+      ]
+    },
+    "ted_product_runtime": {
+      "file": "ted-product-runtime.yml",
+      "group": "runtime",
+      "mode": "affected",
+      "paths": [
+        "apps/api/src/axignal_api/ted_*.py",
+        "apps/api/src/axignal_api/persistent_ted_research.py",
+        "apps/api/src/axignal_api/worker.py",
+        "apps/api/src/axignal_api/settings.py",
+        "apps/api/tests/test_ted_product_runtime.py",
+        "apps/api/tests/fixtures/ted_search_probe.json",
+        "apps/web/app/api/research/runs/route.ts",
+        "apps/web/lib/navigator-client.ts",
+        "data/sources/ted-search-api-v3.v0.1.json",
+        "data/universes/eu-public-procurement/ted-product-admission-profile.v0.1.json",
+        "docs/security/AX-F8-T14-ted-runtime-security-review.md",
+        "docs/sources/ted-product-admission-v0.1.md",
+        "docs/roadmap/tasks/AX-F8-T14.json",
+        "infra/pilot/compose.yaml",
+        "infra/postgres/070-ted-product-runtime.sql",
+        "infra/postgres/Dockerfile",
+        "scripts/verify_ted_product_runtime.py",
+        "scripts/verify_ted_security_review.py",
+        "scripts/verify_ted_persistent_e2e.py",
+        "scripts/benchmark_ted_product_runtime.py",
+        ".github/workflows/ted-product-runtime.yml"
+      ]
+    },
+    "trial_retention_lifecycle": {
+      "file": "trial-retention-lifecycle.yml",
+      "group": "runtime",
+      "mode": "affected",
+      "paths": [
+        "apps/api/src/axignal_api/application.py",
+        "apps/api/src/axignal_api/retention_*.py",
+        "apps/api/tests/test_retention_runtime.py",
+        "infra/postgres/090-trial-retention-lifecycle.sql",
+        "infra/postgres/091-retention-pgcrypto-boundary.sql",
+        "infra/postgres/125-trial-cost-settlement-after-expiry.sql",
+        "infra/postgres/126-trial-cost-retention-purge-boundary.sql",
+        "infra/postgres/132-retention-late-domain-purge.sql",
+        "infra/postgres/Dockerfile",
+        "scripts/trial_grant_fixture.py",
+        "scripts/verify_trial_retention_*.py",
+        "docs/security/AX-F9-T15-retention-deletion-boundary.md",
+        "docs/roadmap/tasks/AX-F9-T15.json",
+        ".github/workflows/trial-retention-lifecycle.yml"
+      ]
+    },
+    "v15_canonical_contract_validation": {
+      "file": "v15-canonical-contract-validation.yml",
+      "group": "core",
+      "mode": "affected",
+      "paths": [
+        "docs/contracts/**",
+        "docs/roadmap/**",
+        "docs/adr/**",
+        "schemas/**",
+        "scripts/validate_*.py",
+        "scripts/verify_*contract*.py",
+        ".github/workflows/v15-canonical-contract-validation.yml"
+      ]
+    }
+  }
+}

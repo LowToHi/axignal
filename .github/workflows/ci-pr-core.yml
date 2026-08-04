@@ -1,0 +1,242 @@
+name: AXIGNAL PR Gate — Core
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+      - labeled
+      - unlabeled
+  workflow_dispatch:
+    inputs:
+      full_matrix:
+        description: Run every suite in this gate group
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  actions: read
+  issues: write
+
+concurrency:
+  group: axignal-pr-gate-core-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  scope:
+    name: Resolve exact-head delta scope
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      run_bounded_ai_contract: ${{ steps.scope.outputs.run_bounded_ai_contract }}
+      run_contract_validation: ${{ steps.scope.outputs.run_contract_validation }}
+      run_e2e_technical_audit: ${{ steps.scope.outputs.run_e2e_technical_audit }}
+      run_executable_spine: ${{ steps.scope.outputs.run_executable_spine }}
+      run_frontend_unit_tests: ${{ steps.scope.outputs.run_frontend_unit_tests }}
+      run_g5_web_security: ${{ steps.scope.outputs.run_g5_web_security }}
+      run_g6_next_preview_guard: ${{ steps.scope.outputs.run_g6_next_preview_guard }}
+      run_g6_supply_chain_inventory: ${{ steps.scope.outputs.run_g6_supply_chain_inventory }}
+      run_landing_foundation: ${{ steps.scope.outputs.run_landing_foundation }}
+      run_p23_t02_message_copy_validation_e2e: ${{ steps.scope.outputs.run_p23_t02_message_copy_validation_e2e }}
+      run_p23_t03_b2g_landing_copy_e2e: ${{ steps.scope.outputs.run_p23_t03_b2g_landing_copy_e2e }}
+      run_public_landing_release_candidate: ${{ steps.scope.outputs.run_public_landing_release_candidate }}
+      run_rc6_exact_head_provenance: ${{ steps.scope.outputs.run_rc6_exact_head_provenance }}
+      run_subscriber_viewport_matrix: ${{ steps.scope.outputs.run_subscriber_viewport_matrix }}
+      run_subscriber_workspace_ux_contract: ${{ steps.scope.outputs.run_subscriber_workspace_ux_contract }}
+      run_ted_eforms_xml_parser: ${{ steps.scope.outputs.run_ted_eforms_xml_parser }}
+      run_v15_canonical_contract_validation: ${{ steps.scope.outputs.run_v15_canonical_contract_validation }}
+      selected_count: ${{ steps.scope.outputs.selected_count }}
+      full_matrix: ${{ steps.scope.outputs.full_matrix }}
+    env:
+      AXIGNAL_EXACT_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Prove exact-head checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$AXIGNAL_EXACT_SHA"
+
+      - name: Compute commit delta
+        id: delta
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_ACTION: ${{ github.event.action || '' }}
+          EVENT_BEFORE: ${{ github.event.before || '' }}
+          BASE_REF: ${{ github.base_ref || '' }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT_NAME" = pull_request ] && [ "$EVENT_ACTION" = opened ]; then
+            git fetch --no-tags origin "$BASE_REF"
+            base_sha="$(git merge-base HEAD "origin/$BASE_REF")"
+          elif [ "$EVENT_NAME" = pull_request ] && [ "$EVENT_ACTION" = synchronize ]                && [ -n "$EVENT_BEFORE" ]                && git cat-file -e "$EVENT_BEFORE^{commit}" 2>/dev/null; then
+            base_sha="$EVENT_BEFORE"
+          elif git rev-parse HEAD^ >/dev/null 2>&1; then
+            base_sha="$(git rev-parse HEAD^)"
+          else
+            base_sha="$(git rev-list --max-parents=0 HEAD)"
+          fi
+          printf 'base_sha=%s\n' "$base_sha" >> "$GITHUB_OUTPUT"
+          git diff --name-only --diff-filter=ACMRD "$base_sha" HEAD             | LC_ALL=C sort -u             | tee ci-changed-files.txt
+
+      - name: Resolve affected suites
+        id: scope
+        shell: bash
+        env:
+          CI_GATE_GROUP: core
+          CI_FULL_MATRIX_INPUT: ${{ inputs.full_matrix || false }}
+          CI_PR_LABELS: ${{ github.event_name == 'pull_request' && toJSON(github.event.pull_request.labels.*.name) || '[]' }}
+        run: |
+          set -euo pipefail
+          args=(
+            --manifest .github/ci/workflow-scope.json
+            --group "$CI_GATE_GROUP"
+            --changed-files ci-changed-files.txt
+            --labels-json "$CI_PR_LABELS"
+          )
+          if [ "$CI_FULL_MATRIX_INPUT" = true ]; then
+            args+=(--full-matrix)
+          fi
+          python scripts/ci/compute_workflow_scope.py "${args[@]}"
+
+      - name: Upload scope evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: ci-core-scope-${{ env.AXIGNAL_EXACT_SHA }}
+          path: |
+            ci-changed-files.txt
+            ci-scope-core.json
+          if-no-files-found: error
+          retention-days: 14
+
+  bounded_ai_contract:
+    needs: scope
+    if: needs.scope.outputs.run_bounded_ai_contract == 'true'
+    uses: ./.github/workflows/bounded-ai-contract.yml
+    secrets: inherit
+  contract_validation:
+    needs: scope
+    if: needs.scope.outputs.run_contract_validation == 'true'
+    uses: ./.github/workflows/contract-validation.yml
+    secrets: inherit
+  e2e_technical_audit:
+    needs: scope
+    if: needs.scope.outputs.run_e2e_technical_audit == 'true'
+    uses: ./.github/workflows/e2e-technical-audit.yml
+    secrets: inherit
+  executable_spine:
+    needs: scope
+    if: needs.scope.outputs.run_executable_spine == 'true'
+    uses: ./.github/workflows/executable-spine.yml
+    secrets: inherit
+  frontend_unit_tests:
+    needs: scope
+    if: needs.scope.outputs.run_frontend_unit_tests == 'true'
+    uses: ./.github/workflows/frontend-unit-tests.yml
+    secrets: inherit
+  g5_web_security:
+    needs: scope
+    if: needs.scope.outputs.run_g5_web_security == 'true'
+    uses: ./.github/workflows/g5-web-security.yml
+    secrets: inherit
+  g6_next_preview_guard:
+    needs: scope
+    if: needs.scope.outputs.run_g6_next_preview_guard == 'true'
+    uses: ./.github/workflows/g6-next-preview-guard.yml
+    secrets: inherit
+  g6_supply_chain_inventory:
+    needs: scope
+    if: needs.scope.outputs.run_g6_supply_chain_inventory == 'true'
+    uses: ./.github/workflows/g6-supply-chain-inventory.yml
+    secrets: inherit
+  landing_foundation:
+    needs: scope
+    if: needs.scope.outputs.run_landing_foundation == 'true'
+    uses: ./.github/workflows/landing-foundation.yml
+    secrets: inherit
+  p23_t02_message_copy_validation_e2e:
+    needs: scope
+    if: needs.scope.outputs.run_p23_t02_message_copy_validation_e2e == 'true'
+    uses: ./.github/workflows/p23-t02-message-copy-validation-e2e.yml
+    secrets: inherit
+  p23_t03_b2g_landing_copy_e2e:
+    needs: scope
+    if: needs.scope.outputs.run_p23_t03_b2g_landing_copy_e2e == 'true'
+    uses: ./.github/workflows/p23-t03-b2g-landing-copy-e2e.yml
+    secrets: inherit
+  public_landing_release_candidate:
+    needs: scope
+    if: needs.scope.outputs.run_public_landing_release_candidate == 'true'
+    uses: ./.github/workflows/public-landing-release-candidate.yml
+    secrets: inherit
+  rc6_exact_head_provenance:
+    needs: scope
+    if: needs.scope.outputs.run_rc6_exact_head_provenance == 'true'
+    uses: ./.github/workflows/rc6-exact-head-provenance.yml
+    secrets: inherit
+  subscriber_viewport_matrix:
+    needs: scope
+    if: needs.scope.outputs.run_subscriber_viewport_matrix == 'true'
+    uses: ./.github/workflows/subscriber-viewport-matrix.yml
+    secrets: inherit
+  subscriber_workspace_ux_contract:
+    needs: scope
+    if: needs.scope.outputs.run_subscriber_workspace_ux_contract == 'true'
+    uses: ./.github/workflows/subscriber-workspace-ux-contract.yml
+    secrets: inherit
+  ted_eforms_xml_parser:
+    needs: scope
+    if: needs.scope.outputs.run_ted_eforms_xml_parser == 'true'
+    uses: ./.github/workflows/ted-eforms-xml-parser.yml
+    secrets: inherit
+  v15_canonical_contract_validation:
+    needs: scope
+    if: needs.scope.outputs.run_v15_canonical_contract_validation == 'true'
+    uses: ./.github/workflows/v15-canonical-contract-validation.yml
+    secrets: inherit
+
+  gate:
+    name: Core gate
+    if: always()
+    needs: [scope, bounded_ai_contract, contract_validation, e2e_technical_audit, executable_spine, frontend_unit_tests, g5_web_security, g6_next_preview_guard, g6_supply_chain_inventory, landing_foundation, p23_t02_message_copy_validation_e2e, p23_t03_b2g_landing_copy_e2e, public_landing_release_candidate, rc6_exact_head_provenance, subscriber_viewport_matrix, subscriber_workspace_ux_contract, ted_eforms_xml_parser, v15_canonical_contract_validation]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      NEEDS_JSON: ${{ toJSON(needs) }}
+    steps:
+      - name: Enforce selected-suite results
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+
+          needs = json.loads(os.environ['NEEDS_JSON'])
+          failures = {
+              name: payload.get('result')
+              for name, payload in needs.items()
+              if payload.get('result') not in {'success', 'skipped'}
+          }
+          if failures:
+              raise SystemExit(f"gate failures: {failures}")
+          print(json.dumps({
+              'status': 'PASS',
+              'gate': 'core',
+              'results': {name: payload.get('result') for name, payload in needs.items()},
+          }, sort_keys=True))
+          PY

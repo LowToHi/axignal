@@ -20,7 +20,8 @@ on:
       - "scripts/verify_procurement_lifecycle_rehearsal.py"
       - ".github/workflows/procurement-admission-rehearsal.yml"
   push:
-    branches: [main]
+    branches:
+      - main
     paths:
       - "apps/api/src/axignal_api/procurement_admission_rehearsal.py"
       - "apps/api/src/axignal_api/procurement_lifecycle_rehearsal.py"

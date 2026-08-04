@@ -1,25 +1,8 @@
 name: G5 Web Security Boundaries
 
 on:
-  pull_request:
-    paths:
-      - "apps/web/proxy.ts"
-      - "apps/landing/proxy.ts"
-      - "apps/web/lib/security-boundaries.ts"
-      - "apps/landing/lib/security-boundaries.ts"
-      - "apps/web/next.config.ts"
-      - "apps/landing/next.config.ts"
-      - "apps/web/app/api/auth/login/route.ts"
-      - "apps/web/tests/security-boundaries.test.ts"
-      - "apps/landing/tests/security-boundaries.test.ts"
-      - "apps/web/tsconfig.test.json"
-      - "apps/landing/tsconfig.test.json"
-      - "tests/e2e/security-boundaries.spec.ts"
-      - "tests/landing/security-boundaries.spec.ts"
-      - "playwright.config.ts"
-      - "playwright.landing.config.ts"
-      - ".github/workflows/g5-web-security.yml"
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read

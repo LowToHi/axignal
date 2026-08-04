@@ -1,22 +1,16 @@
 name: Global Procurement Catalogue
 
 on:
-  pull_request:
-    paths:
-      - "data/sources/global-public-procurement-catalogue.v0.2.json"
-      - "data/sources/global-public-procurement-candidates-*.v0.2.csv"
-      - "scripts/verify_global_procurement_catalogue.py"
-      - ".github/workflows/global-procurement-catalogue.yml"
-      - "docs/contracts/28-b2g-procurement-commercial-and-global-source-program.md"
-      - "docs/roadmap/13-b2g-pricing-trial-and-global-procurement-source-program.md"
   push:
-    branches: [main]
+    branches:
+      - main
     paths:
       - "data/sources/global-public-procurement-catalogue.v0.2.json"
       - "data/sources/global-public-procurement-candidates-*.v0.2.csv"
       - "scripts/verify_global_procurement_catalogue.py"
       - ".github/workflows/global-procurement-catalogue.yml"
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read

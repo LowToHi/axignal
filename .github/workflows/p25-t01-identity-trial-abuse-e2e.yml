@@ -2,31 +2,9 @@ name: P25-T01 Identity Passwordless and Trial Abuse E2E
 
 on:
   workflow_dispatch:
-  pull_request:
-    paths:
-      - "data/security/identity-passwordless-trial-abuse-runtime.v0.1.json"
-      - "docs/security/P25-T01-identity-passwordless-trial-abuse-e2e-v0.1.md"
-      - "infra/postgres/12*-identity-*.sql"
-      - "infra/postgres/123-trial-abuse-runtime.sql"
-      - "infra/postgres/Dockerfile"
-      - "infra/pilot/compose.identity-test.yaml"
-      - "apps/api/src/axignal_api/identity*.py"
-      - "apps/api/src/axignal_api/application.py"
-      - "apps/api/tests/test_identity*.py"
-      - "apps/web/app/api/identity/**"
-      - "apps/web/app/verify-email/**"
-      - "apps/web/components/auth-gate.tsx"
-      - "apps/web/lib/identity-server.ts"
-      - "apps/web/lib/server-auth.ts"
-      - "apps/web/types/webauthn-json.d.ts"
-      - "apps/web/app/page.tsx"
-      - "scripts/verify_p25_t01_identity_trial_abuse.py"
-      - "scripts/verify_identity_trial_abuse_e2e.py"
-      - "tests/e2e/identity-passwordless.spec.ts"
-      - "pyproject.toml"
-      - ".github/workflows/p25-t01-identity-trial-abuse-e2e.yml"
   push:
-    branches: [main, "agent/**"]
+    branches:
+      - main
     paths:
       - "data/security/identity-passwordless-trial-abuse-runtime.v0.1.json"
       - "docs/security/P25-T01-identity-passwordless-trial-abuse-e2e-v0.1.md"
@@ -50,6 +28,7 @@ on:
       - "pyproject.toml"
       - ".github/workflows/p25-t01-identity-trial-abuse-e2e.yml"
 
+  workflow_call:
 permissions:
   contents: read
 

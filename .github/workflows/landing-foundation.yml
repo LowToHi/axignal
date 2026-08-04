@@ -1,25 +1,10 @@
 name: Landing Globe
 
 on:
-  pull_request:
-    paths:
-      - "skills/**/SKILL.md"
-      - "skills/axignal-cinematic-webgl-scroll/**"
-      - "skills/axignal-gsap-ui-ux/**"
-      - "docs/landing/**"
-      - "docs/roadmap/16-landing-globe-foundation.md"
-      - "docs/roadmap/17-landing-globe-production.md"
-      - "apps/landing/**"
-      - "tests/landing/**"
-      - "package.json"
-      - "pnpm-lock.yaml"
-      - "pnpm-workspace.yaml"
-      - "scripts/verify_landing_foundation.py"
-      - "scripts/verify_landing_implementation.py"
-      - "scripts/acquire_globe_assets.py"
-      - ".github/workflows/landing-foundation.yml"
   push:
-    branches: [main, "agent/**", "codex/landing-b2g-international"]
+    branches:
+      - main
+      - "codex/landing-b2g-international"
     paths:
       - "skills/**/SKILL.md"
       - "skills/axignal-cinematic-webgl-scroll/**"
@@ -32,6 +17,7 @@ on:
       - "scripts/acquire_globe_assets.py"
       - ".github/workflows/landing-foundation.yml"
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read

@@ -1,25 +1,10 @@
 name: G6 Supply Chain Reproducibility
 
 on:
-  pull_request:
-    paths:
-      - "pyproject.toml"
-      - "requirements/**"
-      - "data/supply-chain/**"
-      - "package.json"
-      - "pnpm-lock.yaml"
-      - "infra/**/Dockerfile*"
-      - "compose.yaml"
-      - "infra/**/*.yml"
-      - "infra/**/*.yaml"
-      - ".github/workflows/**"
-      - "scripts/verify_g6_supply_chain.py"
-      - "scripts/image_filesystem_manifest.py"
   push:
     branches:
       - main
-      - "agent/**"
-
+  workflow_call:
 permissions:
   contents: read
 

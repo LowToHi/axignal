@@ -1,18 +1,11 @@
 name: Critical Repository Coverage
 
 on:
-  pull_request:
-    paths:
-      - "apps/api/src/axignal_api/*_repository.py"
-      - "apps/api/tests/test_critical_repositories*.py"
-      - "scripts/inventory_critical_repositories.py"
-      - "scripts/verify_critical_repository_coverage.py"
-      - "scripts/verify_critical_repository_transactions.py"
-      - ".github/workflows/critical-repository-coverage.yml"
   push:
     branches:
       - "agent/axignal-rc3b-critical-repository-coverage-v1"
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read

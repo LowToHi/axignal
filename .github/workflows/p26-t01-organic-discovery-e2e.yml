@@ -2,39 +2,9 @@ name: P26-T01 Organic Discovery and Founder Admin E2E
 
 on:
   workflow_dispatch:
-  pull_request:
-    paths:
-      - "data/growth/organic-discovery-runtime.v0.1.json"
-      - "docs/growth/P26-T01-organic-discovery-founder-admin-e2e-v0.1.md"
-      - "infra/postgres/13*-organic-*.sql"
-      - "infra/postgres/Dockerfile"
-      - "infra/pilot/compose.organic-test.yaml"
-      - "apps/api/src/axignal_api/founder_identity.py"
-      - "apps/api/src/axignal_api/organic_*.py"
-      - "apps/api/src/axignal_api/application.py"
-      - "apps/api/tests/test_organic_policy.py"
-      - "apps/web/app/admin/**"
-      - "apps/web/app/alerts/**"
-      - "apps/web/app/api/admin/**"
-      - "apps/web/app/api/public/**"
-      - "apps/web/app/tenders/**"
-      - "apps/web/app/market-intelligence/**"
-      - "apps/web/app/robots.ts"
-      - "apps/web/app/sitemap.ts"
-      - "apps/web/app/llms.txt/**"
-      - "apps/web/app/page.tsx"
-      - "apps/web/app/layout.tsx"
-      - "apps/web/app/discovery-page.module.css"
-      - "apps/web/app/alert-confirm.css"
-      - "apps/web/components/discovery-view.tsx"
-      - "apps/web/components/tender-alert-form.tsx"
-      - "apps/web/lib/organic-server.ts"
-      - "scripts/verify_p26_t01_organic_discovery.py"
-      - "scripts/verify_organic_discovery_e2e.py"
-      - "tests/e2e/organic-discovery-founder-admin.spec.ts"
-      - ".github/workflows/p26-t01-organic-discovery-e2e.yml"
   push:
-    branches: [main, "agent/**"]
+    branches:
+      - main
     paths:
       - "data/growth/organic-discovery-runtime.v0.1.json"
       - "docs/growth/P26-T01-organic-discovery-founder-admin-e2e-v0.1.md"
@@ -66,6 +36,7 @@ on:
       - "tests/e2e/organic-discovery-founder-admin.spec.ts"
       - ".github/workflows/p26-t01-organic-discovery-e2e.yml"
 
+  workflow_call:
 permissions:
   contents: read
 

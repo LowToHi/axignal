@@ -1,15 +1,6 @@
 name: P16 Innovation IP Validation
 
 on:
-  pull_request:
-    paths:
-      - ".github/workflows/p16-innovation-ip-validation.yml"
-      - "data/innovation-ip/**"
-      - "docs/innovation-ip/**"
-      - "schemas/innovation-ip-workspace-*.schema.json"
-      - "scripts/p16_innovation_ip_reference.py"
-      - "scripts/verify_p16_innovation_ip_workspace.py"
-      - "scripts/verify_p16_rollback.py"
   push:
     branches:
       - "agent/ax-ge2e-p16-innovation-ip-workspace-v1.4"
@@ -22,6 +13,7 @@ on:
       - "scripts/verify_p16_innovation_ip_workspace.py"
       - "scripts/verify_p16_rollback.py"
 
+  workflow_call:
 permissions:
   contents: read
 

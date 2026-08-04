@@ -1,30 +1,10 @@
 name: Pilot Deployment Candidate
 
 on:
-  pull_request:
-    paths:
-      - "apps/api/src/axignal_api/application.py"
-      - "apps/api/src/axignal_api/persistent_ted_research.py"
-      - "apps/api/src/axignal_api/settings.py"
-      - "apps/api/src/axignal_api/worker.py"
-      - "apps/api/src/axignal_api/pilot_health.py"
-      - "apps/api/tests/test_pilot_health.py"
-      - "apps/web/app/api/health/**"
-      - "apps/web/app/demo/**"
-      - "apps/web/components/demo-guide*"
-      - "infra/pilot/**"
-      - "scripts/verify_pilot_candidate.py"
-      - "scripts/verify_demo_contract.py"
-      - "scripts/verify_ted_product_runtime.py"
-      - "scripts/verify_ted_security_review.py"
-      - "docs/roadmap/14-pilot-deployment-candidate.md"
-      - "docs/runbooks/pilot-deployment.md"
-      - ".github/workflows/pilot-deployment-candidate.yml"
   push:
     branches:
       - main
-      - "agent/**"
-
+  workflow_call:
 permissions:
   contents: read
 

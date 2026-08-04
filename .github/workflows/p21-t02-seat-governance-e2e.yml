@@ -2,30 +2,9 @@ name: P21-T02 Seat Governance E2E
 
 on:
   workflow_dispatch:
-  pull_request:
-    paths:
-      - "data/commercial/seat-governance-runtime.v0.1.json"
-      - "docs/commercial/P21-T02-seat-governance-e2e-v0.1.md"
-      - "infra/postgres/110-seat-governance.sql"
-      - "infra/postgres/Dockerfile"
-      - "infra/pilot/compose.seat-test.yaml"
-      - "apps/api/src/axignal_api/identity.py"
-      - "apps/api/src/axignal_api/seat_*.py"
-      - "apps/api/src/axignal_api/application.py"
-      - "apps/api/tests/test_seat_*.py"
-      - "apps/web/app/api/organisation/seats/**"
-      - "apps/web/app/accept-invitation/**"
-      - "apps/web/components/accept-invitation-client.tsx"
-      - "apps/web/components/seat-governance-bridge*"
-      - "apps/web/lib/seat-server.ts"
-      - "apps/web/lib/server-auth.ts"
-      - "apps/web/app/page.tsx"
-      - "scripts/verify_p21_t02_seat_governance.py"
-      - "scripts/verify_seat_governance_e2e.py"
-      - "tests/e2e/seat-governance.spec.ts"
-      - ".github/workflows/p21-t02-seat-governance-e2e.yml"
   push:
-    branches: [main, "agent/**"]
+    branches:
+      - main
     paths:
       - "data/commercial/seat-governance-runtime.v0.1.json"
       - "docs/commercial/P21-T02-seat-governance-e2e-v0.1.md"
@@ -48,6 +27,7 @@ on:
       - "tests/e2e/seat-governance.spec.ts"
       - ".github/workflows/p21-t02-seat-governance-e2e.yml"
 
+  workflow_call:
 permissions:
   contents: read
 

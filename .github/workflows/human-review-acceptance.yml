@@ -1,20 +1,10 @@
 name: Human Review Acceptance
 
 on:
-  pull_request:
-    paths:
-      - "apps/**"
-      - "infra/postgres/**"
-      - "scripts/verify_bounded_human_review.py"
-      - "scripts/verify_human_review_migration_rehearsal.sh"
-      - "tests/e2e/human-review.spec.ts"
-      - "schemas/human-review-case.schema.json"
-      - ".github/workflows/human-review-acceptance.yml"
   push:
     branches:
       - main
-      - "agent/**"
-
+  workflow_call:
 permissions:
   contents: read
 

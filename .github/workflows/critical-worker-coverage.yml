@@ -1,23 +1,11 @@
 name: Critical Worker Coverage
 
 on:
-  pull_request:
-    paths:
-      - "apps/api/src/axignal_api/runtime_invariants.py"
-      - "apps/api/src/axignal_api/research_worker.py"
-      - "apps/api/src/axignal_api/worker.py"
-      - "apps/api/src/axignal_api/retention_worker.py"
-      - "apps/api/src/axignal_api/proposal_publisher.py"
-      - "apps/api/src/axignal_api/proposal_worker.py"
-      - "apps/api/src/axignal_api/admission_runtime.py"
-      - "apps/api/src/axignal_api/scheduler_service.py"
-      - "apps/api/tests/test_critical_worker_*.py"
-      - "scripts/verify_critical_worker_coverage.py"
-      - ".github/workflows/critical-worker-coverage.yml"
   push:
     branches:
       - "agent/axignal-rc3a-critical-worker-coverage-v1"
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read

@@ -2,22 +2,7 @@ name: P22 Production SLO DR and Security Validation
 
 on:
   workflow_dispatch:
-  pull_request:
-    paths:
-      - "data/production/**"
-      - "docs/production/**"
-      - "scripts/p22_production_reference.py"
-      - "scripts/verify_p22_production_slo_dr_security.py"
-      - ".github/workflows/p22-production-slo-dr-security-validation.yml"
-  push:
-    branches: ["agent/**"]
-    paths:
-      - "data/production/**"
-      - "docs/production/**"
-      - "scripts/p22_production_reference.py"
-      - "scripts/verify_p22_production_slo_dr_security.py"
-      - ".github/workflows/p22-production-slo-dr-security-validation.yml"
-
+  workflow_call:
 permissions:
   contents: read
 

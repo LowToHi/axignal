@@ -1,28 +1,10 @@
 name: F2 Runtime Closure
 
 on:
-  pull_request:
-    paths:
-      - "apps/api/src/axignal_api/object_store.py"
-      - "apps/api/src/axignal_api/scheduler.py"
-      - "apps/api/src/axignal_api/scheduler_service.py"
-      - "apps/api/src/axignal_api/settings.py"
-      - "apps/api/src/axignal_api/telemetry.py"
-      - "apps/api/tests/test_f2_runtime.py"
-      - "infra/otel/**"
-      - "infra/runtime/**"
-      - "infra/postgres/050-f2-runtime-spine.sql"
-      - "infra/postgres/Dockerfile"
-      - "scripts/verify_f2_*"
-      - "scripts/verify_runtime_topology.py"
-      - "compose.yaml"
-      - "pyproject.toml"
-      - ".github/workflows/f2-runtime-closure.yml"
   push:
     branches:
       - main
-      - "agent/**"
-
+  workflow_call:
 permissions:
   contents: read
 

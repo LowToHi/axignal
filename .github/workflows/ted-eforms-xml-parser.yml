@@ -2,21 +2,6 @@ name: TED eForms XML Parser
 
 on:
   workflow_dispatch:
-  pull_request:
-    branches:
-      - main
-    paths:
-      - "pyproject.toml"
-      - "apps/api/src/axignal_api/connectors/ted_eforms.py"
-      - "apps/api/tests/fixtures/ted_eforms_cn16_synthetic.xml"
-      - "apps/api/tests/test_ted_eforms_parser.py"
-      - "data/universes/eu-public-procurement/xml-parser-profile.v0.1.json"
-      - "docs/roadmap/02-task-catalogue.md"
-      - "docs/roadmap/tasks/AX-F8-T11.json"
-      - "docs/sources/ted-eforms-xml-parser-v0.1.md"
-      - "scripts/verify_ted_eforms_parser_contract.py"
-      - "scripts/verify_ted_eforms_sdk_example.py"
-      - ".github/workflows/ted-eforms-xml-parser.yml"
   push:
     branches:
       - main
@@ -33,6 +18,7 @@ on:
       - "scripts/verify_ted_eforms_sdk_example.py"
       - ".github/workflows/ted-eforms-xml-parser.yml"
 
+  workflow_call:
 permissions:
   contents: read
 

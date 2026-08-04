@@ -1,29 +1,10 @@
 name: F1 Qualified-User Validation
 
 on:
-  pull_request:
-    paths:
-      - "apps/api/src/axignal_api/validation.py"
-      - "apps/api/src/axignal_api/settings.py"
-      - "apps/api/src/axignal_api/application.py"
-      - "apps/api/tests/test_validation.py"
-      - "apps/web/app/validation/**"
-      - "apps/web/app/api/validation/**"
-      - "apps/web/components/validation-harness*"
-      - "apps/web/lib/server-auth.ts"
-      - "infra/postgres/060-f1-qualified-user-validation.sql"
-      - "infra/postgres/061-f1-validation-answer-key-boundary.sql"
-      - "infra/postgres/062-f1-validation-pgcrypto-boundary.sql"
-      - "infra/postgres/Dockerfile"
-      - "schemas/validation-*.schema.json"
-      - "scripts/verify_f1_validation_*"
-      - "tests/e2e/qualified-user-validation.spec.ts"
-      - ".github/workflows/f1-qualified-user-validation.yml"
   push:
     branches:
       - main
-      - "agent/**"
-
+  workflow_call:
 permissions:
   contents: read
 

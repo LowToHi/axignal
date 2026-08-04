@@ -1,20 +1,10 @@
 name: P21 Commercial Runtime Pricing Stripe Validation
 
 on:
-  pull_request:
-    paths:
-      - "data/commercial/**"
-      - "docs/commercial/**"
-      - "schemas/commercial-runtime-pricing-stripe-*.json"
-      - "scripts/p21_commercial_reference.py"
-      - "scripts/verify_p21_commercial_runtime.py"
-      - "scripts/verify_p21_rollback.py"
-      - "scripts/verify_p20_rollback.py"
-      - ".github/workflows/p21-commercial-runtime-pricing-stripe-validation.yml"
   push:
     branches:
       - "agent/ax-ge2e-p21-commercial-runtime-pricing-stripe-v1.4"
-
+  workflow_call:
 permissions:
   contents: read
 

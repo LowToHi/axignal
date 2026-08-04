@@ -1,15 +1,6 @@
 name: P13 Sovereign Macro Validation
 
 on:
-  pull_request:
-    paths:
-      - ".github/workflows/p13-sovereign-macro-validation.yml"
-      - "data/sovereign-macro/**"
-      - "docs/sovereign-macro/**"
-      - "schemas/sovereign-macro-strategy-workspace-*.schema.json"
-      - "scripts/p13_sovereign_macro_reference.py"
-      - "scripts/verify_p13_sovereign_macro_strategy_workspace.py"
-      - "scripts/verify_p13_rollback.py"
   push:
     branches:
       - "agent/ax-ge2e-p13-sovereign-macro-strategy-workspace-v1.4"
@@ -22,6 +13,7 @@ on:
       - "scripts/verify_p13_sovereign_macro_strategy_workspace.py"
       - "scripts/verify_p13_rollback.py"
 
+  workflow_call:
 permissions:
   contents: read
 

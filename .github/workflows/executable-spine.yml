@@ -1,27 +1,10 @@
 name: Executable Spine
 
 on:
-  pull_request:
-    paths:
-      - "apps/**"
-      - "packages/**"
-      - "infra/**"
-      - "scripts/**"
-      - "tests/**"
-      - "docs/roadmap/**"
-      - "package.json"
-      - "pnpm-lock.yaml"
-      - "pnpm-workspace.yaml"
-      - "turbo.json"
-      - "tsconfig.base.json"
-      - "pyproject.toml"
-      - "compose.yaml"
-      - ".github/workflows/executable-spine.yml"
   push:
     branches:
       - main
-      - "agent/**"
-
+  workflow_call:
 permissions:
   contents: read
 

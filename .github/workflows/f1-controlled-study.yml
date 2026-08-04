@@ -1,22 +1,10 @@
 name: F1 Controlled Study Protocol
 
 on:
-  pull_request:
-    paths:
-      - "studies/f1/controlled-study-v1/**"
-      - "schemas/f1-controlled-study-manifest.schema.json"
-      - "scripts/*f1_controlled_study*"
-      - "infra/postgres/063-f1-controlled-study-export.sql"
-      - "infra/postgres/Dockerfile"
-      - "docs/studies/f1-controlled-study*"
-      - "tests/fixtures/f1-controlled-study-*"
-      - ".env.example"
-      - ".github/workflows/f1-controlled-study.yml"
   push:
     branches:
       - main
-      - "agent/**"
-
+  workflow_call:
 permissions:
   contents: read
 

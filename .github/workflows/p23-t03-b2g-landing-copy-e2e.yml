@@ -2,32 +2,7 @@ name: P23-T03 B2G Landing Copy E2E
 
 on:
   workflow_dispatch:
-  pull_request:
-    paths:
-      - "apps/landing/**"
-      - "data/experience/b2g-landing-copy-e2e-runtime.v0.1.json"
-      - "data/experience/message-copy-validation-e2e-runtime.v0.1.json"
-      - "data/commercial/commercial-runtime-pricing-stripe-runtime.v0.1.json"
-      - "docs/experience/P23-T03-b2g-landing-copy-e2e-v0.1.md"
-      - "scripts/verify_p23_t03_b2g_landing_copy_e2e.py"
-      - "scripts/verify_p23_t02_message_copy_validation_e2e.py"
-      - "scripts/verify_landing_implementation.py"
-      - "tests/landing/**"
-      - ".github/workflows/p23-t03-b2g-landing-copy-e2e.yml"
-  push:
-    branches: ["agent/**"]
-    paths:
-      - "apps/landing/**"
-      - "data/experience/b2g-landing-copy-e2e-runtime.v0.1.json"
-      - "data/experience/message-copy-validation-e2e-runtime.v0.1.json"
-      - "data/commercial/commercial-runtime-pricing-stripe-runtime.v0.1.json"
-      - "docs/experience/P23-T03-b2g-landing-copy-e2e-v0.1.md"
-      - "scripts/verify_p23_t03_b2g_landing_copy_e2e.py"
-      - "scripts/verify_p23_t02_message_copy_validation_e2e.py"
-      - "scripts/verify_landing_implementation.py"
-      - "tests/landing/**"
-      - ".github/workflows/p23-t03-b2g-landing-copy-e2e.yml"
-
+  workflow_call:
 permissions:
   contents: read
 

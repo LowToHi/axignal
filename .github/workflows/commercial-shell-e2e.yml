@@ -2,25 +2,9 @@ name: Commercial Shell E2E
 
 on:
   workflow_dispatch:
-  pull_request:
-    branches: [main]
-    paths:
-      - "apps/api/src/axignal_api/billing_*.py"
-      - "apps/api/src/axignal_api/stripe_*.py"
-      - "apps/api/src/axignal_api/application.py"
-      - "apps/api/tests/test_billing_*.py"
-      - "apps/web/app/api/billing/**"
-      - "apps/web/app/billing/**"
-      - "apps/web/components/billing-bridge*"
-      - "apps/web/lib/billing-server.ts"
-      - "apps/web/app/page.tsx"
-      - "infra/pilot/compose.billing-test.yaml"
-      - "playwright.config.ts"
-      - "tests/e2e/commercial-shell.spec.ts"
-      - "scripts/verify_commercial_shell_e2e.py"
-      - ".github/workflows/commercial-shell-e2e.yml"
   push:
-    branches: [main, "agent/**"]
+    branches:
+      - main
     paths:
       - "apps/api/src/axignal_api/billing_*.py"
       - "apps/api/src/axignal_api/stripe_*.py"
@@ -37,6 +21,7 @@ on:
       - "scripts/verify_commercial_shell_e2e.py"
       - ".github/workflows/commercial-shell-e2e.yml"
 
+  workflow_call:
 permissions:
   contents: read
 

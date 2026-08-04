@@ -4,8 +4,8 @@ on:
   push:
     branches:
       - agent/e2e-technical-audit-v1
-  pull_request:
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read

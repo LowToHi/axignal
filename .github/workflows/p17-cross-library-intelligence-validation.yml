@@ -1,11 +1,10 @@
 name: P17 Cross-Library Intelligence Validation
 
 on:
-  pull_request:
   push:
     branches:
       - "agent/ax-ge2e-p17-cross-library-intelligence-v1.4"
-
+  workflow_call:
 permissions:
   contents: read
 

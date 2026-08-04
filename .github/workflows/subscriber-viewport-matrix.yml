@@ -1,8 +1,8 @@
 name: Subscriber Viewport Matrix
 
 on:
-  pull_request:
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read

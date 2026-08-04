@@ -1,11 +1,10 @@
 name: P20 Enterprise API Private Data Validation
 
 on:
-  pull_request:
   push:
     branches:
       - "agent/ax-ge2e-p20-enterprise-api-private-data-v1.4"
-
+  workflow_call:
 permissions:
   contents: read
 

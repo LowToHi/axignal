@@ -2,28 +2,9 @@ name: Entitlement Runtime
 
 on:
   workflow_dispatch:
-  pull_request:
-    branches: [main]
-    paths:
-      - "apps/api/src/axignal_api/ai_scope.py"
-      - "apps/api/src/axignal_api/capability_tokens.py"
-      - "apps/api/src/axignal_api/entitlement_*.py"
-      - "apps/api/src/axignal_api/entitlements.py"
-      - "apps/api/src/axignal_api/application.py"
-      - "apps/api/tests/test_entitlement_runtime.py"
-      - "config/ai-assistance-policy.v0.1.json"
-      - "docs/roadmap/tasks/AX-F9-T15.json"
-      - "infra/postgres/080-entitlement-token-ledger.sql"
-      - "infra/postgres/081-entitlement-ledger-hardening.sql"
-      - "infra/postgres/082-entitlement-expiry-sweep.sql"
-      - "infra/postgres/Dockerfile"
-      - "scripts/trial_grant_fixture.py"
-      - "scripts/verify_entitlement_contract.py"
-      - "scripts/verify_entitlement_runtime_e2e.py"
-      - "scripts/verify_entitlement_authority_e2e.py"
-      - ".github/workflows/entitlement-runtime.yml"
   push:
-    branches: [main, "agent/**"]
+    branches:
+      - main
     paths:
       - "apps/api/src/axignal_api/ai_scope.py"
       - "apps/api/src/axignal_api/capability_tokens.py"
@@ -43,6 +24,7 @@ on:
       - "scripts/verify_entitlement_authority_e2e.py"
       - ".github/workflows/entitlement-runtime.yml"
 
+  workflow_call:
 permissions:
   contents: read
 

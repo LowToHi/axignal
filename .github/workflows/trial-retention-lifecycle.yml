@@ -2,25 +2,9 @@ name: Trial Retention Lifecycle
 
 on:
   workflow_dispatch:
-  pull_request:
-    branches: [main]
-    paths:
-      - "apps/api/src/axignal_api/application.py"
-      - "apps/api/src/axignal_api/retention_*.py"
-      - "apps/api/tests/test_retention_runtime.py"
-      - "infra/postgres/090-trial-retention-lifecycle.sql"
-      - "infra/postgres/091-retention-pgcrypto-boundary.sql"
-      - "infra/postgres/125-trial-cost-settlement-after-expiry.sql"
-      - "infra/postgres/126-trial-cost-retention-purge-boundary.sql"
-      - "infra/postgres/132-retention-late-domain-purge.sql"
-      - "infra/postgres/Dockerfile"
-      - "scripts/trial_grant_fixture.py"
-      - "scripts/verify_trial_retention_*.py"
-      - "docs/security/AX-F9-T15-retention-deletion-boundary.md"
-      - "docs/roadmap/tasks/AX-F9-T15.json"
-      - ".github/workflows/trial-retention-lifecycle.yml"
   push:
-    branches: [main, "agent/**"]
+    branches:
+      - main
     paths:
       - "apps/api/src/axignal_api/application.py"
       - "apps/api/src/axignal_api/retention_*.py"
@@ -37,6 +21,7 @@ on:
       - "docs/roadmap/tasks/AX-F9-T15.json"
       - ".github/workflows/trial-retention-lifecycle.yml"
 
+  workflow_call:
 permissions:
   contents: read
 

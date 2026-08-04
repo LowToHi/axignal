@@ -1,12 +1,10 @@
 name: Contract Validation
 
 on:
-  pull_request:
   push:
     branches:
       - main
-      - "agent/**"
-
+  workflow_call:
 permissions:
   contents: read
 
@@ -54,6 +52,10 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install jsonschema pyyaml openapi-spec-validator
 
+      - name: Verify incremental CI architecture
+        run: python scripts/ci/verify_ci_architecture.py
+      - name: Test incremental CI scope router
+        run: python scripts/ci/test_compute_workflow_scope.py
       - name: Validate canonical naming
         run: python scripts/validate_canonical_naming.py .
 

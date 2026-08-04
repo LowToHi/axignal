@@ -1,0 +1,242 @@
+name: AXIGNAL PR Gate — Runtime
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+      - labeled
+      - unlabeled
+  workflow_dispatch:
+    inputs:
+      full_matrix:
+        description: Run every suite in this gate group
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  actions: read
+  issues: write
+
+concurrency:
+  group: axignal-pr-gate-runtime-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  scope:
+    name: Resolve exact-head delta scope
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      run_commercial_shell_e2e: ${{ steps.scope.outputs.run_commercial_shell_e2e }}
+      run_critical_repository_coverage: ${{ steps.scope.outputs.run_critical_repository_coverage }}
+      run_critical_worker_coverage: ${{ steps.scope.outputs.run_critical_worker_coverage }}
+      run_deepseek_v4_flash_proposal: ${{ steps.scope.outputs.run_deepseek_v4_flash_proposal }}
+      run_entitlement_runtime: ${{ steps.scope.outputs.run_entitlement_runtime }}
+      run_f1_controlled_study: ${{ steps.scope.outputs.run_f1_controlled_study }}
+      run_f1_qualified_user_validation: ${{ steps.scope.outputs.run_f1_qualified_user_validation }}
+      run_f2_runtime_closure: ${{ steps.scope.outputs.run_f2_runtime_closure }}
+      run_full_migration_matrix: ${{ steps.scope.outputs.run_full_migration_matrix }}
+      run_human_review_acceptance: ${{ steps.scope.outputs.run_human_review_acceptance }}
+      run_p21_t02_seat_governance_e2e: ${{ steps.scope.outputs.run_p21_t02_seat_governance_e2e }}
+      run_p25_t01_identity_trial_abuse_e2e: ${{ steps.scope.outputs.run_p25_t01_identity_trial_abuse_e2e }}
+      run_p26_t01_organic_discovery_e2e: ${{ steps.scope.outputs.run_p26_t01_organic_discovery_e2e }}
+      run_pilot_deployment_candidate: ${{ steps.scope.outputs.run_pilot_deployment_candidate }}
+      run_stripe_paid_lifecycle: ${{ steps.scope.outputs.run_stripe_paid_lifecycle }}
+      run_ted_product_runtime: ${{ steps.scope.outputs.run_ted_product_runtime }}
+      run_trial_retention_lifecycle: ${{ steps.scope.outputs.run_trial_retention_lifecycle }}
+      selected_count: ${{ steps.scope.outputs.selected_count }}
+      full_matrix: ${{ steps.scope.outputs.full_matrix }}
+    env:
+      AXIGNAL_EXACT_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Prove exact-head checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$AXIGNAL_EXACT_SHA"
+
+      - name: Compute commit delta
+        id: delta
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_ACTION: ${{ github.event.action || '' }}
+          EVENT_BEFORE: ${{ github.event.before || '' }}
+          BASE_REF: ${{ github.base_ref || '' }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT_NAME" = pull_request ] && [ "$EVENT_ACTION" = opened ]; then
+            git fetch --no-tags origin "$BASE_REF"
+            base_sha="$(git merge-base HEAD "origin/$BASE_REF")"
+          elif [ "$EVENT_NAME" = pull_request ] && [ "$EVENT_ACTION" = synchronize ]                && [ -n "$EVENT_BEFORE" ]                && git cat-file -e "$EVENT_BEFORE^{commit}" 2>/dev/null; then
+            base_sha="$EVENT_BEFORE"
+          elif git rev-parse HEAD^ >/dev/null 2>&1; then
+            base_sha="$(git rev-parse HEAD^)"
+          else
+            base_sha="$(git rev-list --max-parents=0 HEAD)"
+          fi
+          printf 'base_sha=%s\n' "$base_sha" >> "$GITHUB_OUTPUT"
+          git diff --name-only --diff-filter=ACMRD "$base_sha" HEAD             | LC_ALL=C sort -u             | tee ci-changed-files.txt
+
+      - name: Resolve affected suites
+        id: scope
+        shell: bash
+        env:
+          CI_GATE_GROUP: runtime
+          CI_FULL_MATRIX_INPUT: ${{ inputs.full_matrix || false }}
+          CI_PR_LABELS: ${{ github.event_name == 'pull_request' && toJSON(github.event.pull_request.labels.*.name) || '[]' }}
+        run: |
+          set -euo pipefail
+          args=(
+            --manifest .github/ci/workflow-scope.json
+            --group "$CI_GATE_GROUP"
+            --changed-files ci-changed-files.txt
+            --labels-json "$CI_PR_LABELS"
+          )
+          if [ "$CI_FULL_MATRIX_INPUT" = true ]; then
+            args+=(--full-matrix)
+          fi
+          python scripts/ci/compute_workflow_scope.py "${args[@]}"
+
+      - name: Upload scope evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: ci-runtime-scope-${{ env.AXIGNAL_EXACT_SHA }}
+          path: |
+            ci-changed-files.txt
+            ci-scope-runtime.json
+          if-no-files-found: error
+          retention-days: 14
+
+  commercial_shell_e2e:
+    needs: scope
+    if: needs.scope.outputs.run_commercial_shell_e2e == 'true'
+    uses: ./.github/workflows/commercial-shell-e2e.yml
+    secrets: inherit
+  critical_repository_coverage:
+    needs: scope
+    if: needs.scope.outputs.run_critical_repository_coverage == 'true'
+    uses: ./.github/workflows/critical-repository-coverage.yml
+    secrets: inherit
+  critical_worker_coverage:
+    needs: scope
+    if: needs.scope.outputs.run_critical_worker_coverage == 'true'
+    uses: ./.github/workflows/critical-worker-coverage.yml
+    secrets: inherit
+  deepseek_v4_flash_proposal:
+    needs: scope
+    if: needs.scope.outputs.run_deepseek_v4_flash_proposal == 'true'
+    uses: ./.github/workflows/deepseek-v4-flash-proposal.yml
+    secrets: inherit
+  entitlement_runtime:
+    needs: scope
+    if: needs.scope.outputs.run_entitlement_runtime == 'true'
+    uses: ./.github/workflows/entitlement-runtime.yml
+    secrets: inherit
+  f1_controlled_study:
+    needs: scope
+    if: needs.scope.outputs.run_f1_controlled_study == 'true'
+    uses: ./.github/workflows/f1-controlled-study.yml
+    secrets: inherit
+  f1_qualified_user_validation:
+    needs: scope
+    if: needs.scope.outputs.run_f1_qualified_user_validation == 'true'
+    uses: ./.github/workflows/f1-qualified-user-validation.yml
+    secrets: inherit
+  f2_runtime_closure:
+    needs: scope
+    if: needs.scope.outputs.run_f2_runtime_closure == 'true'
+    uses: ./.github/workflows/f2-runtime-closure.yml
+    secrets: inherit
+  full_migration_matrix:
+    needs: scope
+    if: needs.scope.outputs.run_full_migration_matrix == 'true'
+    uses: ./.github/workflows/full-migration-matrix.yml
+    secrets: inherit
+  human_review_acceptance:
+    needs: scope
+    if: needs.scope.outputs.run_human_review_acceptance == 'true'
+    uses: ./.github/workflows/human-review-acceptance.yml
+    secrets: inherit
+  p21_t02_seat_governance_e2e:
+    needs: scope
+    if: needs.scope.outputs.run_p21_t02_seat_governance_e2e == 'true'
+    uses: ./.github/workflows/p21-t02-seat-governance-e2e.yml
+    secrets: inherit
+  p25_t01_identity_trial_abuse_e2e:
+    needs: scope
+    if: needs.scope.outputs.run_p25_t01_identity_trial_abuse_e2e == 'true'
+    uses: ./.github/workflows/p25-t01-identity-trial-abuse-e2e.yml
+    secrets: inherit
+  p26_t01_organic_discovery_e2e:
+    needs: scope
+    if: needs.scope.outputs.run_p26_t01_organic_discovery_e2e == 'true'
+    uses: ./.github/workflows/p26-t01-organic-discovery-e2e.yml
+    secrets: inherit
+  pilot_deployment_candidate:
+    needs: scope
+    if: needs.scope.outputs.run_pilot_deployment_candidate == 'true'
+    uses: ./.github/workflows/pilot-deployment-candidate.yml
+    secrets: inherit
+  stripe_paid_lifecycle:
+    needs: scope
+    if: needs.scope.outputs.run_stripe_paid_lifecycle == 'true'
+    uses: ./.github/workflows/stripe-paid-lifecycle.yml
+    secrets: inherit
+  ted_product_runtime:
+    needs: scope
+    if: needs.scope.outputs.run_ted_product_runtime == 'true'
+    uses: ./.github/workflows/ted-product-runtime.yml
+    secrets: inherit
+  trial_retention_lifecycle:
+    needs: scope
+    if: needs.scope.outputs.run_trial_retention_lifecycle == 'true'
+    uses: ./.github/workflows/trial-retention-lifecycle.yml
+    secrets: inherit
+
+  gate:
+    name: Runtime gate
+    if: always()
+    needs: [scope, commercial_shell_e2e, critical_repository_coverage, critical_worker_coverage, deepseek_v4_flash_proposal, entitlement_runtime, f1_controlled_study, f1_qualified_user_validation, f2_runtime_closure, full_migration_matrix, human_review_acceptance, p21_t02_seat_governance_e2e, p25_t01_identity_trial_abuse_e2e, p26_t01_organic_discovery_e2e, pilot_deployment_candidate, stripe_paid_lifecycle, ted_product_runtime, trial_retention_lifecycle]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      NEEDS_JSON: ${{ toJSON(needs) }}
+    steps:
+      - name: Enforce selected-suite results
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+
+          needs = json.loads(os.environ['NEEDS_JSON'])
+          failures = {
+              name: payload.get('result')
+              for name, payload in needs.items()
+              if payload.get('result') not in {'success', 'skipped'}
+          }
+          if failures:
+              raise SystemExit(f"gate failures: {failures}")
+          print(json.dumps({
+              'status': 'PASS',
+              'gate': 'runtime',
+              'results': {name: payload.get('result') for name, payload in needs.items()},
+          }, sort_keys=True))
+          PY

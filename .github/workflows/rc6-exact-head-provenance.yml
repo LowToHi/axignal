@@ -2,18 +2,14 @@ name: RC6 Exact Head Provenance
 
 on:
   workflow_dispatch:
-  pull_request:
-    paths:
-      - ".github/workflows/**"
-      - "scripts/verify_release_exact_head_provenance.py"
   push:
     branches:
       - main
-      - "agent/**"
     paths:
       - ".github/workflows/**"
       - "scripts/verify_release_exact_head_provenance.py"
 
+  workflow_call:
 permissions:
   contents: read
 

@@ -2,26 +2,7 @@ name: Subscriber Workspace UX Contract
 
 on:
   workflow_dispatch:
-  pull_request:
-    paths:
-      - "data/experience/subscriber-workspace-ux-contract.v1.json"
-      - "docs/research/2026-08-01-subscriber-workspace-tooling-ux-study.md"
-      - "docs/experience/subscriber-workspace-information-architecture-v1.md"
-      - "skills/subscriber-workspace-ux.registry.yaml"
-      - "skills/subscriber-workspace-ux/**"
-      - "scripts/verify_subscriber_workspace_ux_contract.py"
-      - ".github/workflows/subscriber-workspace-ux-contract.yml"
-  push:
-    branches: ["agent/**"]
-    paths:
-      - "data/experience/subscriber-workspace-ux-contract.v1.json"
-      - "docs/research/2026-08-01-subscriber-workspace-tooling-ux-study.md"
-      - "docs/experience/subscriber-workspace-information-architecture-v1.md"
-      - "skills/subscriber-workspace-ux.registry.yaml"
-      - "skills/subscriber-workspace-ux/**"
-      - "scripts/verify_subscriber_workspace_ux_contract.py"
-      - ".github/workflows/subscriber-workspace-ux-contract.yml"
-
+  workflow_call:
 permissions:
   contents: read
 

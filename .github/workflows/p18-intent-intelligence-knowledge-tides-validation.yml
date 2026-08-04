@@ -1,11 +1,10 @@
 name: P18 Intent Intelligence and Knowledge Tides Validation
 
 on:
-  pull_request:
   push:
     branches:
       - "agent/ax-ge2e-p18-intent-intelligence-knowledge-tides-v1.4"
-
+  workflow_call:
 permissions:
   contents: read
 

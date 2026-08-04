@@ -1,11 +1,10 @@
 name: P19 Scenarios Calibration and Outcomes Validation
 
 on:
-  pull_request:
   push:
     branches:
       - "agent/ax-ge2e-p19-scenarios-calibration-outcomes-v1.4"
-
+  workflow_call:
 permissions:
   contents: read
 

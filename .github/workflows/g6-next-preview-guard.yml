@@ -1,19 +1,10 @@
 name: G6 Inactive Next Preview Guard
 
 on:
-  pull_request:
-    paths:
-      - "apps/web/**"
-      - "apps/landing/**"
-      - "infra/pilot/Dockerfile.web"
-      - "infra/landing/Dockerfile"
-      - "scripts/verify_no_next_preview_mode.py"
-      - ".github/workflows/g6-next-preview-guard.yml"
   push:
     branches:
       - main
-      - "agent/**"
-
+  workflow_call:
 permissions:
   contents: read
 

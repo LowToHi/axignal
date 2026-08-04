@@ -1,15 +1,11 @@
 name: Full PostgreSQL Migration Matrix
 
 on:
-  pull_request:
-    paths:
-      - "infra/postgres/**"
-      - "scripts/verify_full_migration_matrix.sh"
-      - ".github/workflows/full-migration-matrix.yml"
   push:
     branches:
       - "agent/axignal-rc1-migration-matrix-v1"
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
