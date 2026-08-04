@@ -195,14 +195,14 @@ jobs:
           fi
           exit "$status"
 
-      - name: Execute real WebAuthn registration, rotation and recovery lifecycle
+      - name: Execute real WebAuthn browser lifecycle
         run: |
           pnpm exec playwright install --with-deps chromium
           pnpm exec playwright test \
             tests/e2e/identity-passwordless.spec.ts \
             --project=chromium-desktop
 
-      - name: Verify C2 identity evidence boundary
+      - name: Verify evidence boundary
         shell: bash
         run: |
           ! grep -R -E 'sk_(live|test)_|rk_(live|test)_|whsec_|smtp_password|raw_ip|raw_installation|session_[A-Za-z0-9_-]{40,}' artifacts
@@ -268,16 +268,22 @@ jobs:
 
       - name: Dump diagnostics on failure
         if: failure()
+        shell: bash
         run: |
-          docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" \
-            -f "$AXIGNAL_PILOT_COMPOSE_FILE" \
-            -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE" \
-            -f "$AXIGNAL_IDENTITY_TEST_COMPOSE_FILE" logs --no-color
+          if [ -f "$AXIGNAL_PILOT_ENV_FILE" ]; then
+            docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" \
+              -f "$AXIGNAL_PILOT_COMPOSE_FILE" \
+              -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE" \
+              -f "$AXIGNAL_IDENTITY_TEST_COMPOSE_FILE" logs --no-color
+          fi
 
       - name: Stop disposable services
         if: always()
+        shell: bash
         run: |
-          docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" \
-            -f "$AXIGNAL_PILOT_COMPOSE_FILE" \
-            -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE" \
-            -f "$AXIGNAL_IDENTITY_TEST_COMPOSE_FILE" down -v
+          if [ -f "$AXIGNAL_PILOT_ENV_FILE" ]; then
+            docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" \
+              -f "$AXIGNAL_PILOT_COMPOSE_FILE" \
+              -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE" \
+              -f "$AXIGNAL_IDENTITY_TEST_COMPOSE_FILE" down -v
+          fi
