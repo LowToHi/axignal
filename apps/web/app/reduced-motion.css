@@ -14,17 +14,4 @@
     transition-delay: 0ms !important;
     transition-duration: 0.001ms !important;
   }
-
-  [data-testid="semantic-globe-webgl"] {
-    display: none !important;
-  }
-
-  [aria-describedby="axignal-globe-description"] {
-    background-image:
-      linear-gradient(180deg, rgb(3 12 18 / 18%), rgb(3 12 18 / 70%)),
-      url("/globe/globe-poster.webp") !important;
-    background-position: center !important;
-    background-repeat: no-repeat !important;
-    background-size: cover !important;
-  }
 }
