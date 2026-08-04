@@ -26,7 +26,8 @@ Generative AI may:
 - propose Candidate Claims;
 - propose Opportunity or workflow actions;
 - explain admitted state;
-- draft customer work for human review.
+- draft customer work for human review;
+- generate an AXIGNAL report in PDF form from admitted evidence.
 
 Generative AI may not:
 
