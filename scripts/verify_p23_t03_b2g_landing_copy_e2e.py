@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import json
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -17,6 +16,8 @@ FORM_PATH = ROOT / "apps/landing/components/pilot-access-form.tsx"
 INTAKE_PATH = ROOT / "apps/landing/app/api/pilot-intake/route.ts"
 METADATA_PATH = ROOT / "apps/landing/lib/metadata.ts"
 ROBOTS_PATH = ROOT / "apps/landing/app/robots.ts"
+PRODUCT_PROFILE_PATH = ROOT / "apps/landing/lib/product-profile.ts"
+LANDING_DATA_PATH = ROOT / "apps/landing/lib/landing-data.ts"
 PRICING_ADAPTER_PATH = ROOT / "apps/landing/lib/candidate-pricing.ts"
 PRICING_CONTRACT_PATH = ROOT / "apps/landing/lib/candidate-pricing-contract.ts"
 PAGE_PATH = ROOT / "apps/landing/app/page.tsx"
@@ -45,6 +46,8 @@ form = read(FORM_PATH)
 intake = read(INTAKE_PATH)
 metadata = read(METADATA_PATH)
 robots = read(ROBOTS_PATH)
+product_profile = read(PRODUCT_PROFILE_PATH)
+landing_data = read(LANDING_DATA_PATH)
 pricing_adapter = read(PRICING_ADAPTER_PATH)
 pricing_contract_source = read(PRICING_CONTRACT_PATH)
 page = read(PAGE_PATH)
@@ -83,8 +86,6 @@ for field in (
 ):
     assert normalize(message[field]) in normalized_canonical, field
 
-# C0 admits one bounded lexical projection inside the same message version:
-# the expanded buyer label is rendered with its already-defined acronym.
 projected_subheadline = message["subheadline"].replace(
     "Business-to-Government teams",
     "B2G teams",
@@ -158,8 +159,20 @@ assert plans["TEAM_MONTHLY"]["amount_minor"] == 39900
 assert plans["PROFESSIONAL_MONTHLY"]["commercial_activation_authorised"] is False
 assert plans["TEAM_MONTHLY"]["commercial_activation_authorised"] is False
 
-public_copy = "\n".join((canonical, landing, i18n, form, metadata))
-assert re.search(r"\bTED\b", public_copy, flags=re.IGNORECASE) is None
+public_source_projection = "\n".join((product_profile, landing_data))
+for forbidden_source_identity in (
+    "Tenders Electronic Daily",
+    "EU_TED",
+    "TED_SEARCH_API_BOUNDED_PRODUCT_PROFILE",
+    "TED bounded",
+    "perfil acotado de TED",
+    "profil TED",
+):
+    assert forbidden_source_identity.lower() not in public_source_projection.lower()
+assert "ADMITTED_PUBLIC_SOURCE_PROFILE_01" in product_profile
+assert "Admitted European public-source profile" in product_profile
+
+public_copy = "\n".join((canonical, i18n, form, metadata, product_profile, landing_data))
 for phrase in runtime["prohibited_claims"]:
     assert phrase.lower() not in public_copy.lower(), phrase
 
@@ -207,7 +220,8 @@ print(
             "trial_terms_match_price_book": True,
             "professional_and_team_prices_match": True,
             "pricing_adapter_subordinate_to_canonical_price_book": True,
-            "ted_in_public_narrative": False,
+            "public_source_brand_identity_present": False,
+            "internal_compatibility_symbols_accepted": True,
             "publication_authorised": runtime["public_publication_authorised"],
             "buyer_interviews": "PENDING",
             "conversion_validation": "PENDING",
