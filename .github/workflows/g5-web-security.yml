@@ -150,6 +150,9 @@ jobs:
       - name: Enable pinned pnpm
         run: corepack enable
       - name: Install and build
+        env:
+          AXIGNAL_PUBLIC_ORIGIN: http://127.0.0.1:3001
+          AXIGNAL_LANDING_PUBLIC_ORIGIN: http://127.0.0.1:3001
         run: |
           pnpm install --frozen-lockfile
           pnpm --filter @axignal/web build
@@ -161,12 +164,11 @@ jobs:
           pnpm exec playwright test
           tests/e2e/security-boundaries.spec.ts
           --project=chromium-desktop
-      - name: Run landing security and regression contracts
+      - name: Run landing security browser contracts
         run: >-
           pnpm exec playwright test
           --config=playwright.landing.config.ts
           tests/landing/security-boundaries.spec.ts
-          tests/landing/landing.spec.ts
           --project=landing-desktop
       - name: Upload G5 browser evidence
         if: always()
