@@ -1,8 +1,8 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 const workspaceId = "axfx_ws_eu_cloud_001";
 
-async function useEnglishShell(page: Parameters<typeof test>[0] extends never ? never : any) {
+async function useEnglishShell(page: Page) {
   const language = page.locator("header select");
   await language.selectOption("en");
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
