@@ -13,9 +13,18 @@ async function login(page: import("@playwright/test").Page) {
   if (await email.isVisible().catch(() => false)) {
     await email.fill("pilot@example.test");
     await page.getByLabel("Contraseña").fill("pilot-password");
+    const loginResponse = page.waitForResponse(
+      (response) => response.url().includes("/api/auth/login")
+    );
     await page.getByRole("button", { name: "Entrar" }).click();
+    const response = await loginResponse;
+    expect(
+      response.ok(),
+      `Login rejected (${response.status()}): ${await response.text()}`
+    ).toBeTruthy();
+    await expect(email).toBeHidden();
   }
-  await expect(page.locator("main").first()).toBeVisible();
+  await expect(page.getByRole("button", { name: /PLAN ·/ })).toBeVisible();
 }
 
 async function emitProviderEvent(
