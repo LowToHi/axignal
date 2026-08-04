@@ -56,6 +56,21 @@ export function IntelligenceWorkspace(props: IntelligenceWorkspaceProps) {
   const [navigatorError, setNavigatorError] = useState<string | null>(null);
   const data = props.fixtureMode === true ? props.data : provenanceSafeData(props.data);
   const selectedOpportunityId = data.context.selectedOpportunityId;
+  const effectiveState =
+    props.fixtureMode === true
+      ? props.state
+      : props.state === "ready"
+        ? "partial"
+        : props.state;
+  const effectiveReadOnlyReason =
+    props.fixtureMode === true
+      ? props.readOnlyReason
+      : props.readOnlyReason ?? REAL_ADAPTER_BOUNDARY;
+  const {
+    readOnlyReason: _readOnlyReason,
+    onNavigatorSubmit: _onNavigatorSubmit,
+    ...baseProps
+  } = props;
 
   async function submitPersistentResearch(message: string) {
     if (!selectedOpportunityId) {
@@ -108,23 +123,15 @@ export function IntelligenceWorkspace(props: IntelligenceWorkspaceProps) {
         </div>
       ) : null}
       <BaseIntelligenceWorkspace
-        {...props}
+        {...baseProps}
         data={data}
-        state={
-          props.fixtureMode === true
-            ? props.state
-            : props.state === "ready"
-              ? "partial"
-              : props.state
-        }
-        readOnlyReason={
-          props.fixtureMode === true
-            ? props.readOnlyReason
-            : props.readOnlyReason ?? REAL_ADAPTER_BOUNDARY
-        }
-        onNavigatorSubmit={
-          selectedOpportunityId ? submitPersistentResearch : undefined
-        }
+        state={effectiveState}
+        {...(effectiveReadOnlyReason
+          ? { readOnlyReason: effectiveReadOnlyReason }
+          : {})}
+        {...(selectedOpportunityId
+          ? { onNavigatorSubmit: submitPersistentResearch }
+          : {})}
       />
     </>
   );
