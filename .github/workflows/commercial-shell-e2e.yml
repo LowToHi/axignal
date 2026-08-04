@@ -116,6 +116,8 @@ jobs:
           AXIGNAL_PILOT_BIND_ADDRESS=127.0.0.1
           AXIGNAL_PILOT_HTTP_PORT=18080
           AXIGNAL_PILOT_HTTPS_PORT=18443
+          AXIGNAL_PUBLIC_ORIGIN=http://127.0.0.1:18080
+          AXIGNAL_LEGACY_PASSWORD_LOGIN_ENABLED=true
           AXIGNAL_POSTGRES_DB=axignal
           AXIGNAL_POSTGRES_USER=axignal
           AXIGNAL_POSTGRES_PASSWORD=ci-admin-password-not-for-deployment
