@@ -31,6 +31,10 @@ engineering E2E pass
 
 Any status report that collapses these states is incorrect.
 
+### Legacy F0–F12 implementation history
+
+The accepted F0–F12 typed tasks remain immutable implementation and audit evidence. The bounded admitted TED Search profile is engineering evidence only; it does not activate the full procurement claim policy, public access, commercial authority or launch.
+
 ## 2. Canonical main truth
 
 Canonical head:
