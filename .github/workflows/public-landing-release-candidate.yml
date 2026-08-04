@@ -104,12 +104,15 @@ jobs:
             -v "${intake_dir}:/var/lib/axignal/intake" \
             "axignal-landing:${EXPECTED_SHA}"
 
+          ready=false
           for _ in $(seq 1 48); do
             if curl -fsS --max-time 4 http://127.0.0.1:18181/api/health > /tmp/landing-health.json; then
+              ready=true
               break
             fi
             sleep 2
           done
+          test "${ready}" = "true"
 
           python3 - <<'PY'
           import json
@@ -130,7 +133,9 @@ jobs:
           {"schema":"axignal.b2g-trial-intake.v1","source":"landing_b2g_opportunity_v1_0","messageVersion":"b2g-opportunity-v1.0","idempotencyKey":"${idempotency_key}","email":"pilot@example.com","company":"Example B2G","role":"Bid / proposal lead","targetMarkets":"Spain and France","monthlyVolume":24,"currentProcess":"Manual portal review and spreadsheet qualification.","governmentOffer":"We provide resilient infrastructure services to public authorities.","qualificationBottleneck":"Evidence collection and cross-border qualification consume excessive analyst time.","timeframe":"Within 30 days","consent":true,"website":"","system":{"locale":"en","utmSource":"ci","utmMedium":"release-candidate","utmCampaign":"c0","landingVariant":"b2g_opportunity_v1_0","referrer":"http://127.0.0.1:18181/","selectedPlan":"Controlled Trial","ctaOrigin":"direct","clientTimestamp":"2026-08-04T12:00:00.000Z","consentVersion":"b2g-trial-intake-2026-08-04"}}
           JSON
           )"
-          status="$(curl -sS -o /tmp/intake-response.json -w '%{http_code}' \
+          status="$(curl --retry 5 --retry-all-errors --retry-delay 1 \
+            --connect-timeout 3 --max-time 20 -sS \
+            -o /tmp/intake-response.json -w '%{http_code}' \
             -H 'content-type: application/json' \
             -H 'origin: http://127.0.0.1:18181' \
             -H 'sec-fetch-site: same-origin' \
@@ -139,7 +144,9 @@ jobs:
             http://127.0.0.1:18181/api/pilot-intake)"
           test "${status}" = "202"
 
-          invalid_status="$(curl -sS -o /tmp/intake-invalid.json -w '%{http_code}' \
+          invalid_status="$(curl --retry 3 --retry-all-errors --retry-delay 1 \
+            --connect-timeout 3 --max-time 20 -sS \
+            -o /tmp/intake-invalid.json -w '%{http_code}' \
             -H 'content-type: application/json' \
             -H 'origin: http://127.0.0.1:18181' \
             -H 'sec-fetch-site: same-origin' \
