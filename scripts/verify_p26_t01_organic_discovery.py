@@ -128,9 +128,9 @@ def main() -> None:
 
     organic_compose = read("infra/pilot/compose.organic-test.yaml")
     canonical_origin = (
-        "${AXIGNAL_ORGANIC_PUBLIC_ORIGIN:-http://127.0.0.1:18080}"
+        "${AXIGNAL_ORGANIC_PUBLIC_ORIGIN:-http://localhost:18080}"
     )
-    canonical_rp_id = "${AXIGNAL_ORGANIC_WEBAUTHN_RP_ID:-127.0.0.1}"
+    canonical_rp_id = "${AXIGNAL_ORGANIC_WEBAUTHN_RP_ID:-localhost}"
     assert organic_compose.count(
         f"AXIGNAL_PUBLIC_SITE_URL: {canonical_origin}"
     ) == 2
@@ -138,8 +138,13 @@ def main() -> None:
     assert f"AXIGNAL_PUBLIC_ORIGIN: {canonical_origin}" in organic_compose
     assert f"AXIGNAL_WEBAUTHN_ORIGIN: {canonical_origin}" in organic_compose
     assert f"AXIGNAL_WEBAUTHN_RP_ID: {canonical_rp_id}" in organic_compose
-    assert "http://localhost:18080" not in organic_compose
-    assert "AXIGNAL_WEBAUTHN_RP_ID: localhost" not in organic_compose
+    assert "http://127.0.0.1:18080" not in organic_compose
+    assert "AXIGNAL_WEBAUTHN_RP_ID: 127.0.0.1" not in organic_compose
+
+    browser_e2e = read("tests/e2e/organic-discovery-founder-admin.spec.ts")
+    assert "function canonicalBrowserOrigin" in browser_e2e
+    assert 'url.hostname = "localhost"' in browser_e2e
+    assert "const origin = canonicalBrowserOrigin(baseURL);" in browser_e2e
 
     print("P26-T01 organic discovery contract: PASS")
 
