@@ -14,8 +14,8 @@ export const metadata: Metadata = {
   description:
     "Evidence-governed intelligence for organisations that sell to government.",
   icons: {
-    icon: [{ url: "/brand/axignal-isotipo.svg", type: "image/svg+xml" }],
-    apple: [{ url: "/brand/axignal-isotipo.svg", type: "image/svg+xml" }]
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/favicon.svg", type: "image/svg+xml" }]
   },
   manifest: "/manifest.webmanifest"
 };

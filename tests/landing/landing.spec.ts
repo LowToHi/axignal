@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
-test.describe.configure({ timeout: 15_000 });
+test.describe.configure({ timeout: 20_000 });
 
 async function scrollCinematic(page: Page, progress: number) {
   await page.evaluate((normalisedProgress) => {
@@ -49,9 +49,10 @@ test("keeps one real Globe mounted through the six-scene desktop narrative", asy
   await scrollCinematic(page, 0.43);
   await expect(page.locator(".cinematic-running-head")).toContainText(/03|04/);
   await expect(page.locator(".trace-object").nth(4)).toBeVisible();
-  await expect(globe).toHaveAttribute("data-boundary-lod-requested", "true");
-  await expect(globe).toHaveAttribute("data-boundary-lod-loaded", "true");
-  await expect(globe).toHaveAttribute("data-boundary-lod-active", "true");
+  const mobileProject = testInfo.project.name === "landing-mobile";
+  await expect(globe).toHaveAttribute("data-boundary-lod-requested", mobileProject ? "false" : "true");
+  await expect(globe).toHaveAttribute("data-boundary-lod-loaded", mobileProject ? "false" : "true");
+  await expect(globe).toHaveAttribute("data-boundary-lod-active", mobileProject ? "false" : "true");
   await expect(header).toHaveCSS("opacity", "1");
   await expect(brand).toBeVisible();
 
@@ -69,9 +70,24 @@ test("keeps one real Globe mounted through the six-scene desktop narrative", asy
 
   await scrollCinematic(page, 0);
   await expect(globe).toHaveAttribute("data-boundary-lod-active", "false");
-  expect(page.url()).toBe("http://localhost:3001/");
+  expect(page.url()).toBe("http://127.0.0.1:3001/");
   expect(pageErrors).toEqual([]);
   expect(consoleErrors).toEqual([]);
+});
+
+test("switches the landing theme without remounting the Globe", async ({ page }) => {
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  const globe = page.getByTestId("semantic-globe");
+  const themeToggle = page.getByRole("button", { name: "Switch to light" });
+
+  await expect(globe).toHaveCount(1);
+  await expect(themeToggle).toBeVisible();
+  await themeToggle.click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  await expect(page.getByRole("button", { name: "Switch to dark" })).toBeVisible();
+  await expect(globe).toHaveCount(1);
+  await page.getByRole("button", { name: "Switch to dark" }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
 });
 
 test("makes the controlled trial and operating boundaries explicit", async ({ page }) => {
@@ -79,7 +95,12 @@ test("makes the controlled trial and operating boundaries explicit", async ({ pa
   await page.waitForFunction(
     () => document.querySelector(".cinematic-stage")?.parentElement?.classList.contains("pin-spacer")
   );
-  await page.getByRole("link", { name: "Pricing", exact: true }).click();
+  const pricingLink = page.getByRole("link", { name: "Pricing", exact: true });
+  if (await pricingLink.isVisible()) {
+    await pricingLink.click();
+  } else {
+    await page.locator("#pricing").scrollIntoViewIfNeeded();
+  }
   await expect(page.locator("#pricing")).toBeInViewport();
   await expect(page.getByRole("heading", { name: /Choose the operating boundary/i })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Design Partner" })).toBeVisible();

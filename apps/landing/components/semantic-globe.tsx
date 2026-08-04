@@ -47,6 +47,7 @@ type ProgressRef = { current: number };
 type SemanticGlobeProps = {
   progressRef: ProgressRef;
   reducedMotion: boolean;
+  lightTheme: boolean;
   locale: Locale;
   labels: LandingMessages["globe"];
 };
@@ -379,10 +380,12 @@ type CompiledGlobeShader = {
 function EarthSurface({
   config,
   progressRef,
+  lightTheme,
   onRuntime
 }: {
   config: GlobeTierConfig;
   progressRef: ProgressRef;
+  lightTheme: boolean;
   onRuntime: (patch: RuntimePatch) => void;
 }) {
   const { gl } = useThree();
@@ -415,6 +418,11 @@ function EarthSurface({
   useEffect(() => {
     configureColourTexture(globalTexture, gl, config.albedoAnisotropy);
   }, [config.albedoAnisotropy, gl, globalTexture]);
+
+  useEffect(() => {
+    material.emissive.set(lightTheme ? "#9ddbd4" : "#020a0d");
+    material.emissiveIntensity = lightTheme ? 0.28 : 0.16;
+  }, [lightTheme, material]);
 
   useEffect(() => {
     material.onBeforeCompile = (compiled) => {
@@ -989,12 +997,14 @@ function AdaptiveRenderer({
 function GlobeScene({
   progressRef,
   reducedMotion,
+  lightTheme,
   onSelect,
   onRuntime,
   onContextFailure
 }: {
   progressRef: ProgressRef;
   reducedMotion: boolean;
+  lightTheme: boolean;
   onSelect: (source: SourcePoint) => void;
   onRuntime: (patch: RuntimePatch) => void;
   onContextFailure: () => void;
@@ -1112,10 +1122,12 @@ function GlobeScene({
     camera.lookAt(0, 0, 0);
 
     if (keyLight.current) {
-      keyLight.current.intensity = 2.15 + europe * 1.05 - dossier * 0.35;
+      keyLight.current.intensity = 2.15 + europe * 1.05 - dossier * 0.35 + (lightTheme ? 0.55 : 0);
       keyLight.current.position.x = 3 - investigation * 2;
     }
-    if (fillLight.current) fillLight.current.intensity = 1.05 + investigation * 1.25;
+    if (fillLight.current) {
+      fillLight.current.intensity = 1.05 + investigation * 1.25 + (lightTheme ? 0.35 : 0);
+    }
     state.gl.setClearColor("#000000", 0);
   });
 
@@ -1127,7 +1139,7 @@ function GlobeScene({
         onPerformancePressure={setPerformancePressure}
         onContextFailure={onContextFailure}
       />
-      <ambientLight intensity={0.46} />
+      <ambientLight intensity={lightTheme ? 0.72 : 0.46} />
       <directionalLight ref={keyLight} position={[3, 2.4, 4]} intensity={2.15} color="#f5fcff" />
       <pointLight ref={fillLight} position={[-3, -1.5, 2]} intensity={1.05} color="#00e1cf" />
       <Stars
@@ -1140,7 +1152,12 @@ function GlobeScene({
       />
 
       <group ref={globe} position={[0.78, -0.05, 0]} rotation={[-0.08, -0.34, 0.025]}>
-        <EarthSurface config={config} progressRef={progressRef} onRuntime={onRuntime} />
+        <EarthSurface
+          config={config}
+          progressRef={progressRef}
+          lightTheme={lightTheme}
+          onRuntime={onRuntime}
+        />
         <AtmosphereLayer progressRef={progressRef} />
         <BoundaryLayer config={config} progressRef={progressRef} onRuntime={onRuntime} />
         <CloudLayer
@@ -1210,7 +1227,13 @@ class GlobeErrorBoundary extends Component<
   }
 }
 
-export function SemanticGlobe({ progressRef, reducedMotion, locale, labels }: SemanticGlobeProps) {
+export function SemanticGlobe({
+  progressRef,
+  reducedMotion,
+  lightTheme,
+  locale,
+  labels
+}: SemanticGlobeProps) {
   const [selected, setSelected] = useState<SourcePoint>(
     sourcePoints.find((source) => source.id === "EU_TED") ?? sourcePoints[0]!
   );
@@ -1304,6 +1327,7 @@ export function SemanticGlobe({ progressRef, reducedMotion, locale, labels }: Se
                 <GlobeScene
                   progressRef={progressRef}
                   reducedMotion={reducedMotion}
+                  lightTheme={lightTheme}
                   onSelect={selectSource}
                   onRuntime={updateRuntime}
                   onContextFailure={failWebGl}

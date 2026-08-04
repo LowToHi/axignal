@@ -24,6 +24,16 @@ type LandingExperienceProps = {
 };
 
 type CtaOrigin = "header" | "hero" | "pricing" | "footer";
+type LandingTheme = "dark" | "light";
+
+const themeLabels: Record<Locale, { dark: string; light: string; switchTo: string }> = {
+  en: { dark: "Dark", light: "Light", switchTo: "Switch to" },
+  es: { dark: "Oscuro", light: "Claro", switchTo: "Cambiar a tema" },
+  fr: { dark: "Sombre", light: "Clair", switchTo: "Passer au thème" },
+  pt: { dark: "Escuro", light: "Claro", switchTo: "Mudar para tema" },
+  de: { dark: "Dunkel", light: "Hell", switchTo: "Zu Design wechseln" },
+  it: { dark: "Scuro", light: "Chiaro", switchTo: "Passa al tema" }
+};
 
 const sceneIds = [
   "SCENE_GLOBAL",
@@ -83,6 +93,32 @@ function LanguageMenu({ locale, label }: { locale: Locale; label: string }) {
   );
 }
 
+function ThemeToggle({
+  locale,
+  theme,
+  onToggle
+}: {
+  locale: Locale;
+  theme: LandingTheme;
+  onToggle: () => void;
+}) {
+  const labels = themeLabels[locale];
+  const nextTheme = theme === "dark" ? "light" : "dark";
+
+  return (
+    <button
+      className="theme-toggle"
+      type="button"
+      aria-label={`${labels.switchTo} ${labels[nextTheme].toLowerCase()}`}
+      aria-pressed={theme === "light"}
+      onClick={onToggle}
+    >
+      <span aria-hidden="true">{labels[theme]}</span>
+      <span className="theme-toggle-indicator" aria-hidden="true" />
+    </button>
+  );
+}
+
 export function LandingExperience({ locale, messages: m }: LandingExperienceProps) {
   const root = useRef<HTMLDivElement>(null);
   const cinematic = useRef<HTMLElement>(null);
@@ -91,6 +127,7 @@ export function LandingExperience({ locale, messages: m }: LandingExperienceProp
   const trackedScene = useRef(-1);
   const [activeScene, setActiveScene] = useState(0);
   const [selectedPlan, setSelectedPlan] = useState("Design Partner");
+  const [theme, setTheme] = useState<LandingTheme>("dark");
   const reducedMotion = useReducedMotion();
   const profileCopy = productProfileCopy[locale];
   const plans = pricingCopy[locale];
@@ -98,6 +135,23 @@ export function LandingExperience({ locale, messages: m }: LandingExperienceProp
   useEffect(() => {
     trackLandingEvent("landing_view", { locale, landing_variant: "b2g_v1" });
   }, [locale]);
+
+  useEffect(() => {
+    const stored = window.localStorage.getItem("axignal-theme");
+    if (stored === "light" || stored === "dark") {
+      setTheme(stored);
+      document.documentElement.dataset.theme = stored;
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    setTheme((current) => {
+      const next = current === "dark" ? "light" : "dark";
+      document.documentElement.dataset.theme = next;
+      window.localStorage.setItem("axignal-theme", next);
+      return next;
+    });
+  };
 
   useEffect(() => {
     if (!root.current || !cinematic.current || !cinematicStage.current) return;
@@ -422,7 +476,22 @@ export function LandingExperience({ locale, messages: m }: LandingExperienceProp
 
       <header className="site-header">
         <a className="brand-lockup" href={localePath(locale)} aria-label="AXIGNAL home">
-          <Image src="/brand/axignal-logo-dark.svg" alt="AXIGNAL" width={1895} height={406} priority />
+          <Image
+            className="brand-logo brand-logo-dark"
+            src="/brand/axignal-logo-dark.svg"
+            alt="AXIGNAL"
+            width={1895}
+            height={406}
+            priority
+          />
+          <Image
+            className="brand-logo brand-logo-light"
+            src="/brand/axignal-logo.svg"
+            alt=""
+            width={1895}
+            height={406}
+            aria-hidden="true"
+          />
         </a>
         <nav aria-label="Primary navigation">
           <a href="#product">{m.nav.product}</a>
@@ -431,6 +500,7 @@ export function LandingExperience({ locale, messages: m }: LandingExperienceProp
           <a href="#faq">{m.nav.faq}</a>
         </nav>
         <div className="header-actions">
+          <ThemeToggle locale={locale} theme={theme} onToggle={toggleTheme} />
           <LanguageMenu locale={locale} label={m.nav.language} />
           <a className="button button-small" href="#access" onClick={() => handleCta("header")}>
             {m.nav.cta}
@@ -444,6 +514,7 @@ export function LandingExperience({ locale, messages: m }: LandingExperienceProp
             <SemanticGlobe
               progressRef={cinematicProgress}
               reducedMotion={reducedMotion}
+              lightTheme={theme === "light"}
               locale={locale}
               labels={m.globe}
             />
@@ -789,7 +860,21 @@ export function LandingExperience({ locale, messages: m }: LandingExperienceProp
       <footer>
         <div className="footer-brand">
           <a className="brand-lockup" href={localePath(locale)} aria-label="AXIGNAL home">
-            <Image src="/brand/axignal-logo-dark.svg" alt="AXIGNAL" width={1895} height={406} />
+            <Image
+              className="brand-logo brand-logo-dark"
+              src="/brand/axignal-logo-dark.svg"
+              alt="AXIGNAL"
+              width={1895}
+              height={406}
+            />
+            <Image
+              className="brand-logo brand-logo-light"
+              src="/brand/axignal-logo.svg"
+              alt=""
+              width={1895}
+              height={406}
+              aria-hidden="true"
+            />
           </a>
           <p>{m.footer.descriptor}</p>
         </div>
