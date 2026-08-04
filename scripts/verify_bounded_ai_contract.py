@@ -16,6 +16,9 @@ CONTRACT_INDEX_PATH = ROOT / "docs" / "contracts" / "README.md"
 ADR_PATH = ROOT / "docs" / "adr" / "ADR-014-bounded-ai-and-token-entitlements.md"
 ADR_INDEX_PATH = ROOT / "docs" / "adr" / "README.md"
 TASK_PATH = ROOT / "docs" / "roadmap" / "tasks" / "AX-F9-T15.json"
+CANONICAL_PRICE_BOOK_PATH = (
+    ROOT / "apps" / "landing" / "lib" / "canonical-commercial-contract.ts"
+)
 
 EXPECTED_ALLOWED = {
     "NAVIGATE_AXIGNAL",
@@ -46,7 +49,6 @@ REQUIRED_PROHIBITED = {
 }
 
 REQUIRED_CONTRACT_MARKERS = (
-    "1,000,000 tokens maximum per trial organisation",
     "Unlimited monthly AI tokens",
     "act as a psychologist, therapist, counsellor",
     "generate, debug, review or execute software code",
@@ -85,6 +87,7 @@ def main() -> None:
     contract_index = CONTRACT_INDEX_PATH.read_text(encoding="utf-8")
     adr = ADR_PATH.read_text(encoding="utf-8")
     adr_index = ADR_INDEX_PATH.read_text(encoding="utf-8")
+    canonical_price_book = CANONICAL_PRICE_BOOK_PATH.read_text(encoding="utf-8")
 
     _require(
         policy.get("schema") == "axignal.ai-assistance-policy.v0.1",
@@ -169,6 +172,37 @@ def main() -> None:
     for marker in REQUIRED_ADR_MARKERS:
         _require(marker in adr, f"ADR marker missing: {marker}")
 
+    normalized_contract = " ".join(contract.split())
+    _require(
+        "token ceiling 1,000,000" in normalized_contract,
+        "Contract 29 must declare the exact 1,000,000 trial token ceiling",
+    )
+    _require(
+        "The trial belongs to a tenant or economic identity" in contract,
+        "Contract 29 must bind trial governance to an economic identity",
+    )
+    _require(
+        "Token and cost reservations are transactional" in contract,
+        "Contract 29 must require transactional trial reservations",
+    )
+
+    _require(
+        "durationDays: 7" in canonical_price_book,
+        "canonical price book must retain the seven-day trial",
+    )
+    _require(
+        "cumulativeTokens: 1_000_000" in canonical_price_book,
+        "canonical price book must retain the cumulative 1,000,000 token ceiling",
+    )
+    _require(
+        "automaticConversion: false" in canonical_price_book,
+        "canonical price book must prohibit automatic trial conversion",
+    )
+    _require(
+        "cardRequired: false" in canonical_price_book,
+        "canonical price book must retain the no-card trial boundary",
+    )
+
     _require(
         "29-bounded-ai-assistance-and-token-entitlements.md" in contract_index,
         "contract 29 is not indexed",
@@ -216,6 +250,8 @@ def main() -> None:
                 "allowed_capability_count": len(allowed),
                 "trial_duration_days": trial["duration_days"],
                 "trial_token_budget_total": trial["token_budget_total"],
+                "trial_budget_semantics": "CUMULATIVE_ORGANISATION_CEILING",
+                "canonical_price_book_aligned": True,
                 "paid_monthly_token_quota": paid["monthly_token_quota"],
                 "paid_token_overage_billing": paid["token_overage_billing"],
                 "general_assistant_enabled": False,
