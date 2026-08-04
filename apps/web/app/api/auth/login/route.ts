@@ -10,7 +10,7 @@ import {
 export async function POST(request: Request) {
   if (
     !legacyPasswordLoginAllowed({
-      environment: process.env.NODE_ENV,
+      environment: process.env.AXIGNAL_ENVIRONMENT ?? process.env.NODE_ENV,
       enabled: process.env.AXIGNAL_LEGACY_PASSWORD_LOGIN_ENABLED,
     })
   ) {
