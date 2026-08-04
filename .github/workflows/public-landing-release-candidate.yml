@@ -42,6 +42,8 @@ jobs:
 
       - name: Validate landing TypeScript and production build
         shell: bash
+        env:
+          AXIGNAL_BUILD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
           pnpm --filter @axignal/landing typecheck
@@ -54,8 +56,10 @@ jobs:
           bash -n infra/landing/deploy.sh
           grep -Fq 'StrictHostKeyChecking=yes' .github/workflows/public-landing-ssh-channel-preflight.yml
           ! grep -Fq 'StrictHostKeyChecking=no' infra/landing/deploy.sh
-          AXIGNAL_LANDING_IMAGE=axignal-landing:candidate \
-          AXIGNAL_BUILD_SHA="${GITHUB_SHA}" \
+          AXIGNAL_LANDING_IMAGE_REPOSITORY=axignal-landing \
+          AXIGNAL_LANDING_IMAGE_TAG=candidate \
+          AXIGNAL_LANDING_IMAGE_DIGEST=0000000000000000000000000000000000000000000000000000000000000000 \
+          AXIGNAL_BUILD_SHA="${{ github.event.pull_request.head.sha }}" \
           AXIGNAL_LANDING_PORT=18181 \
           AXIGNAL_LANDING_INTAKE_DIR=/tmp/axignal-intake \
             docker compose -p axignal-landing-candidate -f infra/landing/compose.yaml config -q
@@ -66,12 +70,15 @@ jobs:
           set -euo pipefail
           docker build \
             --pull \
+            --build-arg AXIGNAL_BUILD_SHA="${{ github.event.pull_request.head.sha }}" \
             --file infra/landing/Dockerfile \
-            --tag "axignal-landing:${GITHUB_SHA}" \
+            --tag "axignal-landing:${{ github.event.pull_request.head.sha }}" \
             .
 
       - name: Exercise health and private intake persistence
         shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -Eeuo pipefail
           intake_dir="$(mktemp -d)"
@@ -91,10 +98,11 @@ jobs:
             --cap-drop ALL \
             --security-opt no-new-privileges:true \
             -p 127.0.0.1:18181:3000 \
-            -e AXIGNAL_BUILD_SHA="${GITHUB_SHA}" \
+            -e AXIGNAL_BUILD_SHA="${EXPECTED_SHA}" \
+            -e AXIGNAL_PUBLIC_ORIGIN=http://127.0.0.1:18181 \
             -e AXIGNAL_PILOT_INTAKE_FILE=/var/lib/axignal/intake/requests.jsonl \
             -v "${intake_dir}:/var/lib/axignal/intake" \
-            "axignal-landing:${GITHUB_SHA}"
+            "axignal-landing:${EXPECTED_SHA}"
 
           for _ in $(seq 1 48); do
             if curl -fsS --max-time 4 http://127.0.0.1:18181/api/health > /tmp/landing-health.json; then
@@ -103,7 +111,7 @@ jobs:
             sleep 2
           done
 
-          EXPECTED_SHA="${GITHUB_SHA}" python3 - <<'PY'
+          python3 - <<'PY'
           import json
           import os
           from pathlib import Path
@@ -117,15 +125,26 @@ jobs:
           }
           PY
 
+          idempotency_key="landing-release-candidate-0001"
+          valid_payload="$(cat <<JSON
+          {"schema":"axignal.b2g-trial-intake.v1","source":"landing_b2g_opportunity_v1_0","messageVersion":"b2g-opportunity-v1.0","idempotencyKey":"${idempotency_key}","email":"pilot@example.com","company":"Example B2G","role":"Bid / proposal lead","targetMarkets":"Spain and France","monthlyVolume":24,"currentProcess":"Manual portal review and spreadsheet qualification.","governmentOffer":"We provide resilient infrastructure services to public authorities.","qualificationBottleneck":"Evidence collection and cross-border qualification consume excessive analyst time.","timeframe":"Within 30 days","consent":true,"website":"","system":{"locale":"en","utmSource":"ci","utmMedium":"release-candidate","utmCampaign":"c0","landingVariant":"b2g_opportunity_v1_0","referrer":"http://127.0.0.1:18181/","selectedPlan":"Controlled Trial","ctaOrigin":"direct","clientTimestamp":"2026-08-04T12:00:00.000Z","consentVersion":"b2g-trial-intake-2026-08-04"}}
+          JSON
+          )"
           status="$(curl -sS -o /tmp/intake-response.json -w '%{http_code}' \
             -H 'content-type: application/json' \
-            --data '{"email":"pilot@example.com","role":"Investor","company":"Example","useCase":"Evaluate a cross-border investment decision with explicit evidence limits.","consent":true,"website":""}' \
+            -H 'origin: http://127.0.0.1:18181' \
+            -H 'sec-fetch-site: same-origin' \
+            -H "idempotency-key: ${idempotency_key}" \
+            --data "${valid_payload}" \
             http://127.0.0.1:18181/api/pilot-intake)"
           test "${status}" = "202"
 
           invalid_status="$(curl -sS -o /tmp/intake-invalid.json -w '%{http_code}' \
             -H 'content-type: application/json' \
-            --data '{"email":"invalid","role":"Investor","company":"","useCase":"short","consent":false,"website":""}' \
+            -H 'origin: http://127.0.0.1:18181' \
+            -H 'sec-fetch-site: same-origin' \
+            -H 'idempotency-key: landing-release-invalid-0001' \
+            --data '{"schema":"axignal.b2g-trial-intake.v1","source":"landing_b2g_opportunity_v1_0","messageVersion":"b2g-opportunity-v1.0","idempotencyKey":"landing-release-invalid-0001","email":"invalid","company":"","role":"Unsupported","targetMarkets":"","monthlyVolume":0,"currentProcess":"short","governmentOffer":"short","qualificationBottleneck":"short","timeframe":"Never","consent":false,"website":"","system":{"locale":"en","landingVariant":"b2g_opportunity_v1_0","selectedPlan":"Controlled Trial","ctaOrigin":"direct","clientTimestamp":"2026-08-04T12:00:00.000Z","consentVersion":"b2g-trial-intake-2026-08-04"}}' \
             http://127.0.0.1:18181/api/pilot-intake)"
           test "${invalid_status}" = "422"
 
@@ -139,10 +158,18 @@ jobs:
           lines = path.read_text(encoding='utf-8').splitlines()
           assert len(lines) == 1
           record = json.loads(lines[0])
-          assert record['schema'] == 'axignal.pilot-intake.v1'
-          assert record['source'] == 'landing_globe_v0_1'
+          assert record['schema'] == 'axignal.b2g-trial-intake.v1'
+          assert record['source'] == 'landing_b2g_opportunity_v1_0'
+          assert record['messageVersion'] == 'b2g-opportunity-v1.0'
           assert record['email'] == 'pilot@example.com'
+          assert record['company'] == 'Example B2G'
+          assert record['role'] == 'Bid / proposal lead'
+          assert record['targetMarkets'] == 'Spain and France'
+          assert record['monthlyVolume'] == 24
           assert record['consent'] is True
+          assert record['system']['selectedPlan'] == 'Controlled Trial'
+          assert record['system']['consentVersion'] == 'b2g-trial-intake-2026-08-04'
+          assert len(record['idempotencyKeyHash']) == 64
           assert record['submissionId']
           assert stat.S_IMODE(path.stat().st_mode) == 0o600
           PY
