@@ -274,17 +274,27 @@ def validate_normative_links() -> None:
     h006 = hypothesis.split("## 8. H-006", 1)[1].split("## 9.", 1)[0]
     require("State: `TEST_DESIGNED`" in h006, "H-006 drifted")
 
-    # F0–F12 is now implementation history under Contract 30. The accepted F8
-    # evidence is validated from its immutable typed tasks above, while the active
-    # execution state must truthfully expose P00 and the bounded TED capability.
+    # F0–F12 remains immutable implementation history. The active v1.5 state is
+    # P00 accepted, P01 in progress and P08 retained only in its v1.4 shard.
     require(
         "Legacy F0–F12 implementation history" in execution,
         "legacy programme history is not preserved",
     )
     require("bounded admitted TED Search profile" in execution, "bounded TED evidence missing")
-    require("AX-GE2E-P00-T01" in execution, "active P00 task missing")
+    require("| P00 | `ACCEPTED` |" in execution, "accepted P00 state missing")
+    require(
+        "Canonical active task: `AX-GE2E-P01-T01`" in execution,
+        "active P01 task missing",
+    )
     require('"public_launch_authorised": false' in execution, "launch boundary missing")
-    require("AX-GE2E-P08-T01" in active_catalogue, "active Procurement phase missing")
+    require(
+        "Historical procurement task `AX-GE2E-P08-T01` remains present only" in active_catalogue,
+        "historical Procurement authority missing",
+    )
+    require(
+        "global-e2e-tasks-p05-p09.v1.4.json" in active_catalogue,
+        "historical Procurement shard is not indexed",
+    )
 
     require("Search API envelope — JSON" in source_doc, "JSON contract missing")
     require("Canonical notice — XML" in source_doc, "XML contract missing")
