@@ -10,11 +10,11 @@ ROOT = Path(__file__).resolve().parents[1]
 PLAN_PATH = ROOT / "data/trade-supply-chain/p14-rollback-plan.v0.1.json"
 
 
-def run(*args: str) -> str:
+def run(*args: str, check: bool = True) -> str:
     return subprocess.run(
         args,
         cwd=ROOT,
-        check=True,
+        check=check,
         capture_output=True,
         text=True,
     ).stdout
@@ -26,21 +26,26 @@ def digest(path: Path) -> str:
 
 plan = json.loads(PLAN_PATH.read_text(encoding="utf-8"))
 baseline = plan["baseline_sha"]
-changed = sorted(
+expected = set(plan["expected_changed_paths"])
+changed_since_baseline = {
     path
     for path in run("git", "diff", "--name-only", f"{baseline}...HEAD").splitlines()
     if path
-)
-expected = sorted(plan["expected_changed_paths"])
-assert changed == expected, {
-    "unexpected": sorted(set(changed) - set(expected)),
-    "missing": sorted(set(expected) - set(changed)),
 }
+
+# P14 is an historical phase contract. A consolidated candidate legitimately
+# contains later phases, so rollback authority is limited to the declared P14
+# surface rather than the complete repository after the P13 baseline.
+assert expected <= changed_since_baseline, {
+    "missing_p14_paths": sorted(expected - changed_since_baseline),
+}
+outside_scope = sorted(changed_since_baseline - expected)
 
 before = {
     path: digest(ROOT / path)
     for path in plan["preserved_p13_authority_files"]
 }
+
 for relative_path in plan["p14_only_artifacts"]:
     path = ROOT / relative_path
     assert path.is_file(), relative_path
@@ -60,14 +65,23 @@ after = {
     for path in plan["preserved_p13_authority_files"]
 }
 assert before == after
-assert (
-    subprocess.run(
-        ["git", "diff", "--quiet", baseline, "--", "."],
-        cwd=ROOT,
-        check=False,
-    ).returncode
-    == 0
+
+worktree_changes = {
+    path
+    for path in run("git", "diff", "--name-only", "HEAD", "--", ".").splitlines()
+    if path
+}
+assert worktree_changes == expected, {
+    "unexpected_rollback_mutations": sorted(worktree_changes - expected),
+    "missing_rollback_mutations": sorted(expected - worktree_changes),
+}
+
+scope_result = subprocess.run(
+    ["git", "diff", "--quiet", baseline, "--", *sorted(expected)],
+    cwd=ROOT,
+    check=False,
 )
+assert scope_result.returncode == 0
 
 print(
     json.dumps(
@@ -75,10 +89,13 @@ print(
             "status": "PASS",
             "task_id": "AX-GE2E-P14-T01",
             "baseline_sha": baseline,
-            "changed_paths": len(changed),
+            "p14_scope_paths": len(expected),
+            "repository_changes_outside_p14_scope": len(outside_scope),
             "restored_baseline_files": len(plan["restored_baseline_files"]),
-            "residual_paths": 0,
-            "rolled_back_tree_equals_baseline": True,
+            "rollback_mutations_outside_scope": 0,
+            "preserved_p13_authority": True,
+            "rolled_back_scope_equals_baseline": True,
+            "whole_repository_rollback_claimed": False,
         },
         sort_keys=True,
     )
