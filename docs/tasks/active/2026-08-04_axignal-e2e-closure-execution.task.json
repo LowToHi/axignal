@@ -2,9 +2,9 @@
   "task_id": "AX-GE2E-P08-T03",
   "goal_id": "AXIGNAL-GOAL-001",
   "phase": "P08",
-  "state": "IN_PROGRESS",
+  "state": "CLOSED",
   "objective": "Close the authenticated subscriber Shell and Bid Workspace against the AXIGNAL global E2E closure contract without reducing product scope or weakening authority boundaries.",
-  "outcome": "The subscriber Shell has complete exact-head engineering evidence, including rollback and recovery, but canonical C1 acceptance remains blocked until qualified-user usability evidence satisfies the normative cohort and threshold contract.",
+  "outcome": "C1 is canonically closed on complete exact-head engineering, rollback, security, responsive and browser evidence. Qualified-user usability validation remains mandatory but is deferred to the post-launch gate tracked by GitHub issue #170 and does not block C2, P27 or launch.",
   "contracts": [
     "GOAL_LOCK",
     "AGENTS",
@@ -67,7 +67,7 @@
     ],
     "external": [
       "Contract 31 and ADR-016 remain the superior programme authority",
-      "Qualified-user UX acceptance remains external and pending: minimum 8 qualified participants, required role mix, at least 2 non-English primary-locale sessions and all declared acceptance thresholds",
+      "Qualified-user usability validation is deferred until after launch and is governed by GitHub issue #170; it is not a C1, C2, P27 or launch dependency",
       "Real source and production-provider admission remain independently gated"
     ]
   },
@@ -86,13 +86,13 @@
     "No silent fixture fallback or synthetic data presented as live evidence",
     "No enabled control that can only terminate in an unavailable-operation rejection",
     "No CI retry used to convert critical browser flakiness into acceptance",
-    "No canonical product, commercial availability or public-launch claim",
-    "No AX_C1_SUBSCRIBER_SHELL_FULL_E2E_PASS marker before qualified-user usability authority exists"
+    "No claim that the post-launch qualified-user study has already been completed",
+    "No global product, commercial availability or public-launch claim from C1 alone"
   ],
   "acceptance_evidence": [
     {
       "evidence_type": "DOCUMENT",
-      "description": "Human-readable execution record with blockers, authority, exact-head engineering evidence and transition state.",
+      "description": "Human-readable execution record with blocker disposition, exact-head engineering evidence, post-launch usability deferral and C2 transition state.",
       "required": true,
       "location": "docs/tasks/active/2026-08-04_axignal-e2e-closure-execution.md",
       "status": "PRESENT"
@@ -101,42 +101,42 @@
       "evidence_type": "TEST",
       "description": "Exact-head typecheck, frontend unit contracts, kill-switch recovery rehearsal and production builds completed successfully.",
       "required": true,
-      "location": "github-actions-run:30928582204@30e21a6eabce9a2ff909e817bde94238db1560ae",
+      "location": "github-actions-run:30930380161@a739b41f6e36b7e2eb9d8dd6a317101055d79523",
       "status": "PRESENT"
     },
     {
       "evidence_type": "TEST",
-      "description": "Subscriber desktop, tablet and mobile browser matrix completed successfully on the first run with zero retries.",
+      "description": "Subscriber desktop, tablet and mobile browser matrix completed successfully with zero retries.",
       "required": true,
-      "location": "github-actions-run:30928582689@30e21a6eabce9a2ff909e817bde94238db1560ae",
+      "location": "github-actions-run:30930376877@a739b41f6e36b7e2eb9d8dd6a317101055d79523",
       "status": "PRESENT"
     },
     {
       "evidence_type": "SECURITY_REVIEW",
       "description": "G5 security boundaries, tenant denial, browser security and external-authority negative cases completed successfully.",
       "required": true,
-      "location": "github-actions-run:30928582229@30e21a6eabce9a2ff909e817bde94238db1560ae",
+      "location": "github-actions-run:30930380310@a739b41f6e36b7e2eb9d8dd6a317101055d79523",
       "status": "PRESENT"
     },
     {
       "evidence_type": "TRACE",
       "description": "Qualification, evidence, submission, AXENT degradation, navigation, persistence and recovery journeys are traceable across the exact-head audit and subscriber browser matrix.",
       "required": true,
-      "location": "github-actions-runs:30928582771,30928582689@30e21a6eabce9a2ff909e817bde94238db1560ae",
+      "location": "github-actions-runs:30930380286,30930376877@a739b41f6e36b7e2eb9d8dd6a317101055d79523",
       "status": "PRESENT"
     },
     {
       "evidence_type": "RESTORE_TEST",
       "description": "The subscriber feature flag was disabled after a persisted mutation, the ledger remained byte-identical, and reactivation restored the exact tenant revision, requirement state and audit event.",
       "required": true,
-      "location": "apps/web/tests/subscriber-workspace-server.test.ts#subscriber-kill-switch-preserves-the-tenant-ledger-and-restores-the-exact-workspace-context;github-actions-run:30928582204",
+      "location": "apps/web/tests/subscriber-workspace-server.test.ts#subscriber-kill-switch-preserves-the-tenant-ledger-and-restores-the-exact-workspace-context;github-actions-run:30930380161",
       "status": "PRESENT"
     },
     {
       "evidence_type": "USER_RESEARCH",
-      "description": "Qualified users meet the normative usability thresholds for the subscriber workflow. Required evidence remains absent.",
-      "required": true,
-      "location": "docs/research/2026-08-01-subscriber-workspace-tooling-ux-study.md#11-required-usability-research",
+      "description": "Qualified-user usability study deferred to the post-launch validation gate. It remains mandatory product evidence but is not required for C1, C2, P27 or launch acceptance.",
+      "required": false,
+      "location": "github-issue:170;docs/research/2026-08-01-subscriber-workspace-tooling-ux-study.md#11-required-usability-research",
       "status": "MISSING"
     }
   ],
@@ -207,7 +207,7 @@
     {
       "check_id": 5,
       "answer": "YES",
-      "evidence": "The required locale set remains en, es, fr, de, pt and it; human semantic acceptance remains explicitly pending."
+      "evidence": "The required locale set remains en, es, fr, de, pt and it; qualified-user semantic validation is retained as mandatory post-launch work."
     },
     {
       "check_id": 6,
@@ -232,11 +232,11 @@
     {
       "check_id": 10,
       "answer": "YES",
-      "evidence": "This task records only C1 engineering acceptance; human usability, C2, P27, merge and public-launch authority remain blocked."
+      "evidence": "C1 closes on complete exact-head engineering evidence; C2 is authorized to begin, while merge and public launch remain governed by the downstream C2-C17 and P27 authorities. Post-launch usability remains open in issue #170."
     }
   ],
   "owner": "Staff Product Engineering",
   "reviewer": null,
   "created_at": "2026-08-04T00:00:00Z",
-  "updated_at": "2026-08-04T16:36:00Z"
+  "updated_at": "2026-08-04T17:06:00Z"
 }
