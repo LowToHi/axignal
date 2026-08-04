@@ -18,10 +18,11 @@ async function login(page: import("@playwright/test").Page) {
     );
     await page.getByRole("button", { name: "Entrar" }).click();
     const response = await loginResponse;
-    expect(
-      response.ok(),
-      `Login rejected (${response.status()}): ${await response.text()}`
-    ).toBeTruthy();
+    if (!response.ok()) {
+      throw new Error(
+        `Login rejected (${response.status()}): ${await response.text()}`
+      );
+    }
     await expect(email).toBeHidden();
   }
   await expect(page.getByRole("button", { name: /PLAN ·/ })).toBeVisible();
