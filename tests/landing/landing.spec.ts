@@ -29,7 +29,7 @@ test("keeps one real Globe mounted through the six-scene desktop narrative", asy
   await expect(
     page.getByRole("heading", {
       level: 1,
-      name: /Win the right public opportunities.*Defend every conclusion/i
+      name: /Find the public contracts your business is built to pursue.*Turn global procurement into a qualified B2G pipeline/i
     })
   ).toBeVisible();
 
@@ -90,7 +90,7 @@ test("switches the landing theme without remounting the Globe", async ({ page })
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
 });
 
-test("makes the controlled trial and operating boundaries explicit", async ({ page }) => {
+test("makes the controlled trial and canonical monthly prices explicit", async ({ page }) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await page.waitForFunction(
     () => document.querySelector(".cinematic-stage")?.parentElement?.classList.contains("pin-spacer")
@@ -102,17 +102,29 @@ test("makes the controlled trial and operating boundaries explicit", async ({ pa
     await page.locator("#pricing").scrollIntoViewIfNeeded();
   }
   await expect(page.locator("#pricing")).toBeInViewport();
-  await expect(page.getByRole("heading", { name: /Choose the operating boundary/i })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Design Partner" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Controlled Free Trial" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Choose the contracted operating boundary/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Controlled Trial" }).first()).toBeVisible();
   await expect(page.getByText("1,000,000 cumulative tokens per organisation")).toBeVisible();
   await expect(page.getByText("No card", { exact: true })).toBeVisible();
   await expect(page.getByText("No automatic renewal", { exact: true })).toBeVisible();
   await expect(page.getByText("No overage", { exact: true })).toBeVisible();
   await expect(page.getByText("Read-only at expiry", { exact: true })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Apply for controlled trial" })).toBeVisible();
-  await expect(page.getByText(/PUBLIC TRIAL DISABLED · APPLICATION ONLY/)).toBeVisible();
-  await expect(page.getByText(/Indicative candidate pricing/).first()).toBeVisible();
+  await expect(page.getByRole("link", { name: "Request 7-day B2G trial" }).first()).toBeVisible();
+  await expect(page.getByText(/APPLICATION ONLY · NO CARD · NO AUTOMATIC CONVERSION/)).toBeVisible();
+  await expect(page.getByText(/Canonical price book · 2026-08-04/).first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Professional" })).toBeVisible();
+  await expect(page.getByText("€149", { exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Team" })).toBeVisible();
+  await expect(page.getByText("€399", { exact: true })).toBeVisible();
+  await expect(page.getByText("Design Partner", { exact: true })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Enterprise" })).toHaveCount(0);
+});
+
+test("does not expose the admitted source brand as public landing identity", async ({ page }) => {
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await expect(page.getByText(/Tenders Electronic Daily|TED bounded/i)).toHaveCount(0);
+  await expect(page.getByText(/^TED · PRODUCT_ADMITTED/i)).not.toBeVisible();
+  await expect(page.getByText(/ADMITTED PUBLIC-SOURCE PROFILE · PRIVATE AUTHENTICATED PILOT/i)).toBeVisible();
 });
 
 test("retains Globe continuity and contained pricing on mobile", async ({ browser }, testInfo) => {
