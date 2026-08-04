@@ -4,6 +4,7 @@ import es from "@/messages/es.json";
 import fr from "@/messages/fr.json";
 import it from "@/messages/it.json";
 import pt from "@/messages/pt.json";
+import { canonicalCommercialCopy } from "./canonical-commercial-contract";
 
 export const locales = ["en", "es", "fr", "pt", "de", "it"] as const;
 export type Locale = (typeof locales)[number];
@@ -41,7 +42,27 @@ export function isLocale(value: string): value is Locale {
 }
 
 export function getMessages(locale: Locale): LandingMessages {
-  return dictionaries[locale];
+  const base = dictionaries[locale];
+  const canonical = canonicalCommercialCopy[locale];
+  const acts = base.acts.map((act, index) => {
+    if (index === 2) return { ...act, ...canonical.sourceAct };
+    if (index === 7) return { ...act, ...canonical.trialAct };
+    return act;
+  });
+
+  return {
+    ...base,
+    meta: canonical.meta,
+    nav: { ...base.nav, cta: canonical.navCta },
+    hero: { ...base.hero, ...canonical.hero },
+    storyIntro: { ...base.storyIntro, body: canonical.storyIntroBody },
+    acts,
+    navigator: { ...base.navigator, response: canonical.navigatorResponse },
+    globe: { ...base.globe, activeRule: canonical.globeActiveRule },
+    pricing: { ...base.pricing, ...canonical.pricing },
+    faq: { ...base.faq, items: canonical.faqItems },
+    form: { ...base.form, ...canonical.form }
+  } as LandingMessages;
 }
 
 export function localePath(locale: Locale, fragment = "") {

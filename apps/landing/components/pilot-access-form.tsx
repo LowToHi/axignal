@@ -2,6 +2,7 @@
 
 import { FormEvent, useRef, useState } from "react";
 import { trackLandingEvent } from "@/lib/analytics";
+import { AXIGNAL_TRIAL_INTAKE } from "@/lib/canonical-commercial-contract";
 import type { LandingMessages, Locale } from "@/lib/i18n";
 
 type FormStatus =
@@ -22,6 +23,10 @@ function newIdempotencyKey() {
     : `landing-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
+function canonicalSelectedPlan(selectedPlan: string) {
+  return selectedPlan === "Design Partner" ? "Controlled Trial" : selectedPlan;
+}
+
 export function PilotAccessForm({ locale, messages: m, selectedPlan }: PilotAccessFormProps) {
   const [step, setStep] = useState<1 | 2>(1);
   const [status, setStatus] = useState<FormStatus>({ state: "idle" });
@@ -40,9 +45,7 @@ export function PilotAccessForm({ locale, messages: m, selectedPlan }: PilotAcce
     setValidationMessage("");
     setStep(2);
     trackLandingEvent("intake_step_complete", { locale });
-    requestAnimationFrame(() => {
-      document.getElementById("intake-fit-heading")?.focus();
-    });
+    requestAnimationFrame(() => document.getElementById("intake-fit-heading")?.focus());
   };
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -62,17 +65,20 @@ export function PilotAccessForm({ locale, messages: m, selectedPlan }: PilotAcce
     setStatus({ state: "submitting" });
     const formData = new FormData(form);
     const params = new URLSearchParams(window.location.search);
+    const plan = canonicalSelectedPlan(selectedPlan);
     const payload = {
-      schema: "axignal.design-partner-intake.v2",
+      schema: AXIGNAL_TRIAL_INTAKE.schema,
+      source: AXIGNAL_TRIAL_INTAKE.source,
+      messageVersion: AXIGNAL_TRIAL_INTAKE.messageVersion,
       idempotencyKey: idempotencyKey.current,
       email: String(formData.get("email") ?? ""),
-      organisation: String(formData.get("organisation") ?? ""),
+      company: String(formData.get("organisation") ?? ""),
       role: String(formData.get("role") ?? ""),
-      countries: String(formData.get("countries") ?? ""),
+      targetMarkets: String(formData.get("countries") ?? ""),
       monthlyVolume: Number(formData.get("monthlyVolume") ?? 0),
       currentProcess: String(formData.get("currentProcess") ?? ""),
-      useCase: String(formData.get("useCase") ?? ""),
-      expensiveProblem: String(formData.get("expensiveProblem") ?? ""),
+      governmentOffer: String(formData.get("useCase") ?? ""),
+      qualificationBottleneck: String(formData.get("expensiveProblem") ?? ""),
       timeframe: String(formData.get("timeframe") ?? ""),
       consent: formData.get("consent") === "on",
       website: String(formData.get("website") ?? ""),
@@ -81,12 +87,12 @@ export function PilotAccessForm({ locale, messages: m, selectedPlan }: PilotAcce
         utmSource: params.get("utm_source") ?? "",
         utmMedium: params.get("utm_medium") ?? "",
         utmCampaign: params.get("utm_campaign") ?? "",
-        landingVariant: "b2g_v1",
+        landingVariant: "b2g_opportunity_v1_0",
         referrer: document.referrer,
-        selectedPlan,
-        ctaOrigin: selectedPlan === "Design Partner" ? "direct" : "pricing",
+        selectedPlan: plan,
+        ctaOrigin: plan === "Controlled Trial" ? "direct" : "pricing",
         clientTimestamp: new Date().toISOString(),
-        consentVersion: "design-partner-intake-2026-07-29"
+        consentVersion: AXIGNAL_TRIAL_INTAKE.consentVersion
       }
     };
 
@@ -131,9 +137,7 @@ export function PilotAccessForm({ locale, messages: m, selectedPlan }: PilotAcce
   return (
     <form className="access-form" onSubmit={submit} noValidate>
       <div className="form-progress" aria-label={`${m.step} ${step} ${m.of} 2`}>
-        <span>
-          {m.step} {step} {m.of} 2
-        </span>
+        <span>{m.step} {step} {m.of} 2</span>
         <i style={{ transform: `scaleX(${step / 2})` }} />
       </div>
 
@@ -151,23 +155,15 @@ export function PilotAccessForm({ locale, messages: m, selectedPlan }: PilotAcce
           <label className="form-wide">
             <span>{m.role}</span>
             <select name="role" required defaultValue="">
-              <option value="" disabled>
-                {m.rolePlaceholder}
-              </option>
-              {m.roles.map((role) => (
-                <option key={role} value={role}>
-                  {role}
-                </option>
-              ))}
+              <option value="" disabled>{m.rolePlaceholder}</option>
+              {m.roles.map((role) => <option key={role} value={role}>{role}</option>)}
             </select>
           </label>
         </div>
       </fieldset>
 
       <fieldset hidden={step !== 2}>
-        <legend id="intake-fit-heading" tabIndex={-1}>
-          {m.fit}
-        </legend>
+        <legend id="intake-fit-heading" tabIndex={-1}>{m.fit}</legend>
         <div className="form-grid">
           <label>
             <span>{m.countries}</span>
@@ -192,14 +188,8 @@ export function PilotAccessForm({ locale, messages: m, selectedPlan }: PilotAcce
           <label className="form-wide">
             <span>{m.timeframe}</span>
             <select name="timeframe" required defaultValue="">
-              <option value="" disabled>
-                {m.rolePlaceholder}
-              </option>
-              {m.timeframes.map((timeframe) => (
-                <option key={timeframe} value={timeframe}>
-                  {timeframe}
-                </option>
-              ))}
+              <option value="" disabled>{m.rolePlaceholder}</option>
+              {m.timeframes.map((timeframe) => <option key={timeframe} value={timeframe}>{timeframe}</option>)}
             </select>
           </label>
         </div>
@@ -217,9 +207,7 @@ export function PilotAccessForm({ locale, messages: m, selectedPlan }: PilotAcce
 
       <div className="form-actions">
         {step === 2 ? (
-          <button className="button button-ghost" type="button" onClick={() => setStep(1)}>
-            {m.back}
-          </button>
+          <button className="button button-ghost" type="button" onClick={() => setStep(1)}>{m.back}</button>
         ) : null}
         <button className="button" type="submit" disabled={status.state === "submitting"}>
           {step === 1 ? m.next : status.state === "submitting" ? m.sending : m.submit}
@@ -233,12 +221,7 @@ export function PilotAccessForm({ locale, messages: m, selectedPlan }: PilotAcce
         {status.state === "error" ? (
           <p data-status="error">
             {status.message}
-            {status.contactEmail ? (
-              <>
-                {" "}
-                <a href={`mailto:${status.contactEmail}`}>{status.contactEmail}</a>
-              </>
-            ) : null}
+            {status.contactEmail ? <> <a href={`mailto:${status.contactEmail}`}>{status.contactEmail}</a></> : null}
           </p>
         ) : null}
       </div>

@@ -3,23 +3,25 @@ import { appendFile, chmod, mkdir } from "node:fs/promises";
 import { dirname } from "node:path";
 
 import { NextResponse } from "next/server";
+import { AXIGNAL_TRIAL_INTAKE } from "@/lib/canonical-commercial-contract";
 import { getMessages, isLocale, type Locale } from "@/lib/i18n";
 
 export const runtime = "nodejs";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const schema = "axignal.design-partner-intake.v2" as const;
 const allowedTopLevel = new Set([
   "schema",
+  "source",
+  "messageVersion",
   "idempotencyKey",
   "email",
-  "organisation",
+  "company",
   "role",
-  "countries",
+  "targetMarkets",
   "monthlyVolume",
   "currentProcess",
-  "useCase",
-  "expensiveProblem",
+  "governmentOffer",
+  "qualificationBottleneck",
   "timeframe",
   "consent",
   "website",
@@ -37,6 +39,7 @@ const allowedSystemFields = new Set([
   "clientTimestamp",
   "consentVersion"
 ]);
+const allowedPlans = new Set(["Controlled Trial", "Professional", "Team"]);
 const requestBuckets = new Map<string, { count: number; resetAt: number }>();
 const acceptedKeys = new Map<string, number>();
 const RATE_WINDOW_MS = 10 * 60 * 1000;
@@ -45,15 +48,17 @@ const DEDUPE_WINDOW_MS = 24 * 60 * 60 * 1000;
 
 type IntakePayload = {
   schema?: unknown;
+  source?: unknown;
+  messageVersion?: unknown;
   idempotencyKey?: unknown;
   email?: unknown;
-  organisation?: unknown;
+  company?: unknown;
   role?: unknown;
-  countries?: unknown;
+  targetMarkets?: unknown;
   monthlyVolume?: unknown;
   currentProcess?: unknown;
-  useCase?: unknown;
-  expensiveProblem?: unknown;
+  governmentOffer?: unknown;
+  qualificationBottleneck?: unknown;
   timeframe?: unknown;
   consent?: unknown;
   website?: unknown;
@@ -61,18 +66,20 @@ type IntakePayload = {
 };
 
 type IntakeRecord = {
-  schema: typeof schema;
+  schema: typeof AXIGNAL_TRIAL_INTAKE.schema;
+  source: typeof AXIGNAL_TRIAL_INTAKE.source;
+  messageVersion: typeof AXIGNAL_TRIAL_INTAKE.messageVersion;
   submissionId: string;
   submittedAt: string;
   idempotencyKeyHash: string;
   email: string;
-  organisation: string;
+  company: string;
   role: string;
-  countries: string;
+  targetMarkets: string;
   monthlyVolume: number;
   currentProcess: string;
-  useCase: string;
-  expensiveProblem: string;
+  governmentOffer: string;
+  qualificationBottleneck: string;
   timeframe: string;
   consent: true;
   system: {
@@ -80,12 +87,12 @@ type IntakeRecord = {
     utmSource: string | null;
     utmMedium: string | null;
     utmCampaign: string | null;
-    landingVariant: "b2g_v1";
+    landingVariant: "b2g_opportunity_v1_0";
     referrerOrigin: string | null;
-    selectedPlan: string;
+    selectedPlan: "Controlled Trial" | "Professional" | "Team";
     ctaOrigin: "direct" | "pricing";
     clientTimestamp: string;
-    consentVersion: "design-partner-intake-2026-07-29";
+    consentVersion: typeof AXIGNAL_TRIAL_INTAKE.consentVersion;
   };
 };
 
@@ -117,6 +124,16 @@ function referrerOrigin(value: unknown) {
     return new URL(referrer).origin.slice(0, 200);
   } catch {
     return null;
+  }
+}
+
+function sameOrigin(request: Request) {
+  const origin = request.headers.get("origin");
+  if (!origin) return true;
+  try {
+    return new URL(origin).host === new URL(request.url).host;
+  } catch {
+    return false;
   }
 }
 
@@ -157,9 +174,10 @@ function noStoreHeaders(extra: Record<string, string> = {}) {
 function logOutcome(result: string, submissionId: string | null, locale: string | null) {
   console.info(
     JSON.stringify({
-      event: "design_partner_intake",
+      event: "b2g_trial_intake",
       result,
       submission_id: submissionId,
+      message_version: AXIGNAL_TRIAL_INTAKE.messageVersion,
       locale,
       at: new Date().toISOString()
     })
@@ -193,9 +211,7 @@ export async function POST(request: Request) {
       { status: 413, headers: noStoreHeaders() }
     );
   }
-
-  const origin = request.headers.get("origin");
-  if (origin && new URL(origin).host !== new URL(request.url).host) {
+  if (!sameOrigin(request)) {
     logOutcome("origin_rejected", null, null);
     return NextResponse.json(
       { status: "rejected", message: "The request origin is not permitted." },
@@ -228,16 +244,14 @@ export async function POST(request: Request) {
       { status: 400, headers: noStoreHeaders() }
     );
   }
-  const topLevelKeys = Object.keys(payload);
-  if (topLevelKeys.some((key) => !allowedTopLevel.has(key))) {
+  if (Object.keys(payload).some((key) => !allowedTopLevel.has(key))) {
     return NextResponse.json(
       { status: "rejected", message: "The request contains unsupported fields." },
       { status: 422, headers: noStoreHeaders() }
     );
   }
 
-  const website = rawString(payload.website);
-  if (website) {
+  if (rawString(payload.website)) {
     logOutcome("honeypot", null, null);
     return NextResponse.json(
       { status: "received", message: "Request received." },
@@ -260,12 +274,18 @@ export async function POST(request: Request) {
 
   const email = boundedString(payload.email, 5, 254, "Work email", errors).toLowerCase();
   if (!emailPattern.test(email)) errors.push("A valid work email is required.");
-  const organisation = boundedString(payload.organisation, 2, 120, "Organisation", errors);
-  const role = boundedString(payload.role, 2, 80, "Role", errors);
-  const countries = boundedString(payload.countries, 2, 180, "Countries", errors);
+  const company = boundedString(payload.company, 2, 120, "Company", errors);
+  const role = boundedString(payload.role, 2, 80, "B2G role", errors);
+  const targetMarkets = boundedString(payload.targetMarkets, 2, 180, "Target markets", errors);
   const currentProcess = boundedString(payload.currentProcess, 10, 600, "Current process", errors);
-  const useCase = boundedString(payload.useCase, 20, 800, "Use case", errors);
-  const expensiveProblem = boundedString(payload.expensiveProblem, 20, 800, "Expensive problem", errors);
+  const governmentOffer = boundedString(payload.governmentOffer, 20, 800, "Government offer", errors);
+  const qualificationBottleneck = boundedString(
+    payload.qualificationBottleneck,
+    20,
+    800,
+    "Qualification bottleneck",
+    errors
+  );
   const timeframe = boundedString(payload.timeframe, 2, 80, "Timeframe", errors);
   const monthlyVolume =
     typeof payload.monthlyVolume === "number" && Number.isInteger(payload.monthlyVolume)
@@ -281,7 +301,11 @@ export async function POST(request: Request) {
     if (!formMessages.timeframes.includes(timeframe)) errors.push("Select a supported timeframe.");
   }
   if (payload.consent !== true) errors.push("Consent is required to process the request.");
-  if (payload.schema !== schema) errors.push("The intake schema is not supported.");
+  if (payload.schema !== AXIGNAL_TRIAL_INTAKE.schema) errors.push("The intake schema is not supported.");
+  if (payload.source !== AXIGNAL_TRIAL_INTAKE.source) errors.push("The intake source is not supported.");
+  if (payload.messageVersion !== AXIGNAL_TRIAL_INTAKE.messageVersion) {
+    errors.push("The message version is not supported.");
+  }
 
   const payloadKey = rawString(payload.idempotencyKey);
   const headerKey = rawString(request.headers.get("idempotency-key"));
@@ -298,11 +322,17 @@ export async function POST(request: Request) {
   if (!clientTimestamp || Number.isNaN(Date.parse(clientTimestamp))) {
     errors.push("A valid client timestamp is required.");
   }
-  if (system?.landingVariant !== "b2g_v1") errors.push("The landing variant is not supported.");
-  if (!["direct", "pricing"].includes(rawString(system?.ctaOrigin))) errors.push("CTA origin is invalid.");
-  if (system?.consentVersion !== "design-partner-intake-2026-07-29") {
+  if (system?.landingVariant !== "b2g_opportunity_v1_0") {
+    errors.push("The landing variant is not supported.");
+  }
+  if (!["direct", "pricing"].includes(rawString(system?.ctaOrigin))) {
+    errors.push("CTA origin is invalid.");
+  }
+  if (system?.consentVersion !== AXIGNAL_TRIAL_INTAKE.consentVersion) {
     errors.push("The consent version is not supported.");
   }
+  const selectedPlan = rawString(system?.selectedPlan);
+  if (!allowedPlans.has(selectedPlan)) errors.push("The selected plan is not supported.");
 
   if (errors.length) {
     logOutcome("validation_rejected", null, locale);
@@ -325,18 +355,20 @@ export async function POST(request: Request) {
 
   const submissionId = randomUUID();
   const record: IntakeRecord = {
-    schema,
+    schema: AXIGNAL_TRIAL_INTAKE.schema,
+    source: AXIGNAL_TRIAL_INTAKE.source,
+    messageVersion: AXIGNAL_TRIAL_INTAKE.messageVersion,
     submissionId,
     submittedAt: new Date().toISOString(),
     idempotencyKeyHash: keyHash,
     email,
-    organisation,
+    company,
     role,
-    countries,
+    targetMarkets,
     monthlyVolume,
     currentProcess,
-    useCase,
-    expensiveProblem,
+    governmentOffer,
+    qualificationBottleneck,
     timeframe,
     consent: true,
     system: {
@@ -344,12 +376,12 @@ export async function POST(request: Request) {
       utmSource: optionalString(system?.utmSource, 120),
       utmMedium: optionalString(system?.utmMedium, 120),
       utmCampaign: optionalString(system?.utmCampaign, 120),
-      landingVariant: "b2g_v1",
+      landingVariant: "b2g_opportunity_v1_0",
       referrerOrigin: referrerOrigin(system?.referrer),
-      selectedPlan: rawString(system?.selectedPlan).slice(0, 80),
+      selectedPlan: selectedPlan as "Controlled Trial" | "Professional" | "Team",
       ctaOrigin: rawString(system?.ctaOrigin) as "direct" | "pricing",
       clientTimestamp,
-      consentVersion: "design-partner-intake-2026-07-29"
+      consentVersion: AXIGNAL_TRIAL_INTAKE.consentVersion
     }
   };
 
@@ -377,7 +409,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           status: "unavailable",
-          message: "The Design Partner intake channel is not configured. No request was stored.",
+          message: "The B2G trial intake channel is not configured. No request was stored.",
           contactEmail
         },
         { status: 503, headers: noStoreHeaders() }
@@ -388,7 +420,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         status: "unavailable",
-        message: "The Design Partner intake channel could not persist the request. No success was recorded.",
+        message: "The B2G trial request could not be persisted. No success was recorded.",
         contactEmail
       },
       { status: 502, headers: noStoreHeaders() }
@@ -400,7 +432,7 @@ export async function POST(request: Request) {
   return NextResponse.json(
     {
       status: "received",
-      message: "Request received. AXIGNAL will review the fit for the Design Partner programme."
+      message: "Trial request received. AXIGNAL will review eligibility through the configured channel."
     },
     { status: 202, headers: noStoreHeaders() }
   );

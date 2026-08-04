@@ -18,7 +18,7 @@ export function buildLandingMetadata(locale: Locale): Metadata {
     title: messages.meta.title,
     description: messages.meta.description,
     applicationName: "AXIGNAL",
-    category: "Public Procurement Intelligence",
+    category: "Business-to-Government Opportunity Intelligence",
     alternates: {
       canonical: path,
       languages: languageAlternates
@@ -35,7 +35,7 @@ export function buildLandingMetadata(locale: Locale): Metadata {
           url: "/opengraph-image.jpg",
           width: 1200,
           height: 630,
-          alt: "AXIGNAL — evidence-governed public procurement intelligence"
+          alt: "AXIGNAL — B2G opportunity intelligence with traceable evidence"
         }
       ]
     },
@@ -46,13 +46,15 @@ export function buildLandingMetadata(locale: Locale): Metadata {
       images: ["/twitter-image.jpg"]
     },
     robots: {
-      index: true,
-      follow: true,
+      index: false,
+      follow: false,
+      noarchive: true,
       googleBot: {
-        index: true,
-        follow: true,
-        "max-image-preview": "large",
-        "max-snippet": -1
+        index: false,
+        follow: false,
+        noimageindex: true,
+        "max-image-preview": "none",
+        "max-snippet": 0
       }
     }
   };

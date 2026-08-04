@@ -20,8 +20,8 @@ export type SourcePoint = {
 
 export const sourcePoints: readonly SourcePoint[] = [
   {
-    id: "EU_TED",
-    name: "Tenders Electronic Daily",
+    id: "PUBLIC_SOURCE_PROFILE_01",
+    name: "Admitted European public-source profile",
     jurisdiction: "European Union",
     latitude: 50.8503,
     longitude: 4.3517,

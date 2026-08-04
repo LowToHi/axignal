@@ -1,6 +1,7 @@
 import type { Locale } from "./i18n";
+import { AXIGNAL_PRICE_BOOK } from "./canonical-commercial-contract";
 
-export type PricingPlanId = "controlled-trial" | "professional" | "team" | "enterprise";
+export type PricingPlanId = "controlled-trial" | "professional" | "team";
 
 type PlanDefinition = {
   id: PricingPlanId;
@@ -44,7 +45,7 @@ const sharedPlanValues = {
   trial: [
     "Up to 3 verified users",
     "3 active",
-    "TED bounded pilot profile",
+    "Admitted sources in controlled-trial scope",
     "3",
     "Watermarked PDF only",
     "Shared review",
@@ -53,7 +54,7 @@ const sharedPlanValues = {
     "Verified organisation",
     "None",
     "7 days · read-only at expiry",
-    "1,000,000 cumulative tokens / organisation · no overage"
+    "1,000,000 cumulative tokens · no overage"
   ],
   professional: [
     "1 user",
@@ -82,34 +83,50 @@ const sharedPlanValues = {
     "Workflow connectors",
     "Contracted processing and storage limits",
     "Unlimited monthly AI within AXIGNAL scope"
-  ],
-  enterprise: [
-    "Contracted",
-    "Contracted",
-    "Contracted jurisdiction packs",
-    "Contracted",
-    "Governed bulk and API rights",
-    "Advanced governance",
-    "Contracted",
-    "Named support",
-    "SSO/SCIM + controls",
-    "API + private connectors",
-    "SLA, throughput and retention by contract",
-    "Unlimited monthly AI within AXIGNAL scope"
   ]
 } as const;
 
+const canonicalPlans: readonly PlanDefinition[] = [
+  {
+    id: "controlled-trial",
+    name: "Controlled Trial",
+    price: `€${AXIGNAL_PRICE_BOOK.plans.controlledTrial.amountMinor / 100}`,
+    period: `${AXIGNAL_PRICE_BOOK.plans.controlledTrial.durationDays} days`,
+    cta: "Request 7-day B2G trial",
+    availability: "APPLICATION ONLY · NO CARD · NO AUTOMATIC CONVERSION",
+    values: sharedPlanValues.trial
+  },
+  {
+    id: "professional",
+    name: "Professional",
+    price: `€${AXIGNAL_PRICE_BOOK.plans.professional.amountMinor / 100}`,
+    period: "per month",
+    cta: "Request Professional access",
+    availability: "CANONICAL PRICE · ACTIVATION CONTROLLED",
+    values: sharedPlanValues.professional
+  },
+  {
+    id: "team",
+    name: "Team",
+    price: `€${AXIGNAL_PRICE_BOOK.plans.team.amountMinor / 100}`,
+    period: "per month",
+    cta: "Request Team access",
+    availability: "CANONICAL PRICE · ACTIVATION CONTROLLED",
+    values: sharedPlanValues.team
+  }
+];
+
 const english: PricingCopy = {
-  indicative: "Indicative candidate pricing",
-  designPartnerLabel: "SPECIAL VALIDATION PROGRAMME",
-  designPartnerTitle: "Design Partner",
+  indicative: `Canonical price book · ${AXIGNAL_PRICE_BOOK.version}`,
+  designPartnerLabel: "CONTROLLED 7-DAY TRIAL",
+  designPartnerTitle: "Controlled Trial",
   designPartnerBody:
-    "A bounded, paid programme for organisations prepared to validate one expensive procurement workflow and provide structured evidence.",
-  designPartnerPrice: "€300–600 / organisation / month",
-  designPartnerCta: "Apply for Design Partner access",
-  comparisonTitle: "Choose the operating boundary—not a token bundle.",
+    "Application-only access for one real B2G qualification workflow. No card, automatic conversion, renewal or overage.",
+  designPartnerPrice: "€0 · 7 days · 1,000,000 cumulative tokens",
+  designPartnerCta: "Request 7-day B2G trial",
+  comparisonTitle: "Choose the contracted operating boundary—not a token bundle.",
   comparisonBody:
-    "Paid monthly AI is unlimited within AXIGNAL scope. Processing, concurrency, exports, API access and source entitlements remain explicitly bounded.",
+    "Professional is €149/month and Team is €399/month. Checkout and paid activation remain disabled until the commercial round trip is authorised.",
   rowLabels: {
     users: "Users",
     investigations: "Investigations",
@@ -124,64 +141,29 @@ const english: PricingCopy = {
     operationalLimits: "Operational limits",
     aiSemantics: "AI semantics"
   },
-  plans: [
-    {
-      id: "controlled-trial",
-      name: "Controlled Free Trial",
-      price: "7 days",
-      period: "approval required",
-      cta: "Apply for controlled trial",
-      availability: "PUBLIC TRIAL DISABLED · APPLICATION ONLY",
-      values: sharedPlanValues.trial
-    },
-    {
-      id: "professional",
-      name: "Professional",
-      price: "€349–499",
-      period: "per month",
-      cta: "Apply for Professional",
-      availability: "INDICATIVE CANDIDATE PLAN",
-      values: sharedPlanValues.professional
-    },
-    {
-      id: "team",
-      name: "Team / Growth",
-      price: "€899–1,499",
-      period: "per month",
-      cta: "Apply for Team / Growth",
-      availability: "INDICATIVE CANDIDATE PLAN",
-      values: sharedPlanValues.team
-    },
-    {
-      id: "enterprise",
-      name: "Enterprise",
-      price: "€18k–45k",
-      period: "per year",
-      cta: "Discuss Enterprise",
-      availability: "INDICATIVE CANDIDATE PLAN",
-      values: sharedPlanValues.enterprise
-    }
-  ]
+  plans: canonicalPlans
 };
 
 export const pricingCopy: Record<Locale, PricingCopy> = {
   en: english,
   es: {
     ...english,
-    indicative: "Precios candidatos indicativos",
-    designPartnerLabel: "PROGRAMA ESPECIAL DE VALIDACIÓN",
+    indicative: `Libro de precios canónico · ${AXIGNAL_PRICE_BOOK.version}`,
+    designPartnerLabel: "PRUEBA CONTROLADA DE 7 DÍAS",
+    designPartnerTitle: "Prueba controlada",
     designPartnerBody:
-      "Programa acotado y de pago para organizaciones dispuestas a validar un flujo costoso de contratación y aportar evidencia estructurada.",
-    designPartnerCta: "Solicitar acceso Design Partner",
-    comparisonTitle: "Elige el límite operativo, no un paquete de tokens.",
+      "Acceso mediante solicitud para un flujo real de cualificación B2G. Sin tarjeta, conversión automática, renovación ni exceso.",
+    designPartnerPrice: "0 € · 7 días · 1.000.000 de tokens acumulados",
+    designPartnerCta: "Solicitar prueba B2G de 7 días",
+    comparisonTitle: "Elige el límite operativo contratado, no un paquete de tokens.",
     comparisonBody:
-      "La IA mensual de pago es ilimitada dentro del alcance AXIGNAL. Procesamiento, concurrencia, exports, API y fuentes siguen expresamente acotados.",
+      "Professional cuesta 149 €/mes y Team 399 €/mes. El checkout y la activación siguen deshabilitados hasta autorizar el round trip comercial.",
     rowLabels: {
       users: "Usuarios",
       investigations: "Investigaciones",
       sources: "Fuentes",
       dossiers: "Dossiers",
-      exports: "Exports",
+      exports: "Exportaciones",
       collaboration: "Colaboración",
       concurrency: "Concurrencia",
       support: "Soporte",
@@ -193,14 +175,16 @@ export const pricingCopy: Record<Locale, PricingCopy> = {
   },
   fr: {
     ...english,
-    indicative: "Tarification candidate indicative",
-    designPartnerLabel: "PROGRAMME SPÉCIAL DE VALIDATION",
+    indicative: `Catalogue tarifaire canonique · ${AXIGNAL_PRICE_BOOK.version}`,
+    designPartnerLabel: "ESSAI CONTRÔLÉ DE 7 JOURS",
+    designPartnerTitle: "Essai contrôlé",
     designPartnerBody:
-      "Programme payant et limité pour les organisations prêtes à valider un flux de marché public coûteux et à fournir des preuves structurées.",
-    designPartnerCta: "Demander l’accès Design Partner",
-    comparisonTitle: "Choisissez la limite opérationnelle, pas un lot de jetons.",
+      "Accès sur demande pour un vrai flux de qualification B2G. Sans carte, conversion automatique, renouvellement ni dépassement.",
+    designPartnerPrice: "0 € · 7 jours · 1 000 000 de jetons cumulés",
+    designPartnerCta: "Demander l’essai B2G de 7 jours",
+    comparisonTitle: "Choisissez la limite contractuelle, pas un lot de jetons.",
     comparisonBody:
-      "L’IA mensuelle payante est illimitée dans le périmètre AXIGNAL. Traitement, concurrence, exports, API et sources restent explicitement limités.",
+      "Professional coûte 149 €/mois et Team 399 €/mois. Checkout et activation restent désactivés jusqu’à autorisation.",
     rowLabels: {
       users: "Utilisateurs",
       investigations: "Investigations",
@@ -218,45 +202,49 @@ export const pricingCopy: Record<Locale, PricingCopy> = {
   },
   pt: {
     ...english,
-    indicative: "Preços candidatos indicativos",
-    designPartnerLabel: "PROGRAMA ESPECIAL DE VALIDAÇÃO",
+    indicative: `Livro de preços canónico · ${AXIGNAL_PRICE_BOOK.version}`,
+    designPartnerLabel: "TESTE CONTROLADO DE 7 DIAS",
+    designPartnerTitle: "Teste controlado",
     designPartnerBody:
-      "Programa pago e limitado para organizações dispostas a validar um fluxo dispendioso de contratação e fornecer evidências estruturadas.",
-    designPartnerCta: "Candidatar-se ao acesso Design Partner",
-    comparisonTitle: "Escolha o limite operacional, não um pacote de tokens.",
+      "Acesso por candidatura para um fluxo real de qualificação B2G. Sem cartão, conversão automática, renovação ou excesso.",
+    designPartnerPrice: "0 € · 7 dias · 1.000.000 de tokens acumulados",
+    designPartnerCta: "Solicitar teste B2G de 7 dias",
+    comparisonTitle: "Escolha o limite contratado, não um pacote de tokens.",
     comparisonBody:
-      "A IA mensal paga é ilimitada dentro do âmbito AXIGNAL. Processamento, concorrência, exports, API e fontes permanecem explicitamente limitados.",
+      "Professional custa 149 €/mês e Team 399 €/mês. Checkout e ativação permanecem desativados até autorização.",
     rowLabels: {
       users: "Utilizadores",
       investigations: "Investigações",
       sources: "Fontes",
       dossiers: "Dossiers",
-      exports: "Exports",
+      exports: "Exportações",
       collaboration: "Colaboração",
       concurrency: "Concorrência",
       support: "Suporte",
       security: "Segurança",
       integrations: "Integrações",
-      operationalLimits: "Limites operacionais",
+      operationalLimits: "Limites operativos",
       aiSemantics: "Semântica de IA"
     }
   },
   de: {
     ...english,
-    indicative: "Indikative Kandidatenpreise",
-    designPartnerLabel: "BESONDERES VALIDIERUNGSPROGRAMM",
+    indicative: `Kanonisches Preisbuch · ${AXIGNAL_PRICE_BOOK.version}`,
+    designPartnerLabel: "KONTROLLIERTER 7-TAGE-TEST",
+    designPartnerTitle: "Kontrollierter Test",
     designPartnerBody:
-      "Begrenztes, bezahltes Programm für Organisationen, die einen teuren Beschaffungsablauf validieren und strukturierte Evidenz liefern.",
-    designPartnerCta: "Design-Partner-Zugang beantragen",
-    comparisonTitle: "Wählen Sie die Betriebsgrenze, kein Token-Paket.",
+      "Antragsbasierter Zugang für einen realen B2G-Qualifizierungsprozess. Keine Karte, automatische Konvertierung, Verlängerung oder Mehrverbrauch.",
+    designPartnerPrice: "0 € · 7 Tage · 1.000.000 kumulierte Tokens",
+    designPartnerCta: "7-tägigen B2G-Test anfragen",
+    comparisonTitle: "Wählen Sie die Vertragsgrenze, kein Token-Paket.",
     comparisonBody:
-      "Bezahlte monatliche KI ist im AXIGNAL-Umfang unbegrenzt. Verarbeitung, Parallelität, Exports, API und Quellen bleiben ausdrücklich begrenzt.",
+      "Professional kostet 149 €/Monat und Team 399 €/Monat. Checkout und Aktivierung bleiben bis zur Freigabe deaktiviert.",
     rowLabels: {
       users: "Benutzer",
       investigations: "Untersuchungen",
       sources: "Quellen",
       dossiers: "Dossiers",
-      exports: "Exports",
+      exports: "Exporte",
       collaboration: "Zusammenarbeit",
       concurrency: "Parallelität",
       support: "Support",
@@ -268,20 +256,22 @@ export const pricingCopy: Record<Locale, PricingCopy> = {
   },
   it: {
     ...english,
-    indicative: "Prezzi candidati indicativi",
-    designPartnerLabel: "PROGRAMMA SPECIALE DI VALIDAZIONE",
+    indicative: `Listino canonico · ${AXIGNAL_PRICE_BOOK.version}`,
+    designPartnerLabel: "PROVA CONTROLLATA DI 7 GIORNI",
+    designPartnerTitle: "Prova controllata",
     designPartnerBody:
-      "Programma limitato e a pagamento per organizzazioni disposte a validare un flusso costoso di procurement e fornire evidenze strutturate.",
-    designPartnerCta: "Richiedi accesso Design Partner",
-    comparisonTitle: "Scegli il limite operativo, non un pacchetto di token.",
+      "Accesso su richiesta per un vero flusso di qualificazione B2G. Senza carta, conversione automatica, rinnovo o eccedenze.",
+    designPartnerPrice: "0 € · 7 giorni · 1.000.000 di token cumulativi",
+    designPartnerCta: "Richiedi la prova B2G di 7 giorni",
+    comparisonTitle: "Scegli il limite contrattuale, non un pacchetto di token.",
     comparisonBody:
-      "L’IA mensile a pagamento è illimitata nell’ambito AXIGNAL. Elaborazione, concorrenza, exports, API e fonti restano esplicitamente limitati.",
+      "Professional costa 149 €/mese e Team 399 €/mese. Checkout e attivazione restano disabilitati fino all’autorizzazione.",
     rowLabels: {
       users: "Utenti",
       investigations: "Indagini",
       sources: "Fonti",
       dossiers: "Dossier",
-      exports: "Exports",
+      exports: "Esportazioni",
       collaboration: "Collaborazione",
       concurrency: "Concorrenza",
       support: "Supporto",

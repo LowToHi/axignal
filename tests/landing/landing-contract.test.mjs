@@ -51,6 +51,90 @@ test("all landing locales are valid and structurally aligned", async () => {
   }
 });
 
+test("canonical B2G copy overrides every supported locale", async () => {
+  const [contract, i18n] = await Promise.all([
+    readFile(resolve(landingRoot, "lib/canonical-commercial-contract.ts"), "utf8"),
+    readFile(resolve(landingRoot, "lib/i18n.ts"), "utf8"),
+  ]);
+
+  assert.match(contract, /BUSINESS-TO-GOVERNMENT \(B2G\) OPPORTUNITY INTELLIGENCE/);
+  assert.match(contract, /Find the public contracts your business is built to pursue\./);
+  assert.match(contract, /Request your 7-day B2G trial/);
+  for (const locale of localeCodes) {
+    assert.match(contract, new RegExp(`\\n  ${locale}: \\{`), `${locale} must have canonical commercial copy`);
+  }
+  assert.match(i18n, /canonicalCommercialCopy\[locale\]/);
+  assert.match(i18n, /index === 2/);
+  assert.match(i18n, /index === 7/);
+});
+
+test("price book is versioned and reconciled to the contractual catalogue", async () => {
+  const [contract, pricing] = await Promise.all([
+    readFile(resolve(landingRoot, "lib/canonical-commercial-contract.ts"), "utf8"),
+    readFile(resolve(landingRoot, "lib/pricing-data.ts"), "utf8"),
+  ]);
+
+  assert.match(contract, /CONTROLLED_TRIAL_7D/);
+  assert.match(contract, /amountMinor: 0/);
+  assert.match(contract, /PROFESSIONAL_MONTHLY/);
+  assert.match(contract, /amountMinor: 14_900/);
+  assert.match(contract, /TEAM_MONTHLY/);
+  assert.match(contract, /amountMinor: 39_900/);
+  assert.match(pricing, /AXIGNAL_PRICE_BOOK\.plans\.professional/);
+  assert.match(pricing, /AXIGNAL_PRICE_BOOK\.plans\.team/);
+  assert.doesNotMatch(pricing, /€349|€899|€1,499|€18k|Design Partner/);
+});
+
+test("public landing removes source-brand identity while retaining bounded authority", async () => {
+  const [profile, data] = await Promise.all([
+    readFile(resolve(landingRoot, "lib/product-profile.ts"), "utf8"),
+    readFile(resolve(landingRoot, "lib/landing-data.ts"), "utf8"),
+  ]);
+  const publicSourceText = `${profile}\n${data}`;
+
+  assert.doesNotMatch(publicSourceText, /Tenders Electronic Daily|EU_TED|TED bounded|perfil acotado de TED|profil TED/i);
+  assert.match(publicSourceText, /ADMITTED_PUBLIC_SOURCE_PROFILE_01/);
+  assert.match(publicSourceText, /Admitted European public-source profile/);
+});
+
+test("B2G trial intake persists canonical schema, source and message version", async () => {
+  const [contract, form, route] = await Promise.all([
+    readFile(resolve(landingRoot, "lib/canonical-commercial-contract.ts"), "utf8"),
+    readFile(resolve(landingRoot, "components/pilot-access-form.tsx"), "utf8"),
+    readFile(resolve(landingRoot, "app/api/pilot-intake/route.ts"), "utf8"),
+  ]);
+
+  for (const marker of [
+    "axignal.b2g-trial-intake.v1",
+    "landing_b2g_opportunity_v1_0",
+    "b2g-opportunity-v1.0",
+  ]) {
+    assert.match(contract, new RegExp(marker.replaceAll(".", "\\.")));
+  }
+  assert.match(form, /source: AXIGNAL_TRIAL_INTAKE\.source/);
+  assert.match(form, /messageVersion: AXIGNAL_TRIAL_INTAKE\.messageVersion/);
+  assert.match(form, /company:/);
+  assert.match(form, /governmentOffer:/);
+  assert.match(form, /qualificationBottleneck:/);
+  assert.match(route, /messageVersion: typeof AXIGNAL_TRIAL_INTAKE\.messageVersion/);
+  assert.match(route, /idempotencyKeyHash/);
+  assert.match(route, /No success was recorded/);
+  assert.match(route, /allowedPlans/);
+});
+
+test("landing stays fail-closed for indexing before launch authority", async () => {
+  const [metadata, robots] = await Promise.all([
+    readFile(resolve(landingRoot, "lib/metadata.ts"), "utf8"),
+    readFile(resolve(landingRoot, "app/robots.ts"), "utf8"),
+  ]);
+
+  assert.match(metadata, /index: false/);
+  assert.match(metadata, /follow: false/);
+  assert.match(metadata, /noarchive: true/);
+  assert.match(robots, /disallow: "\/"/);
+  assert.doesNotMatch(robots, /sitemap:/);
+});
+
 test("landing metadata and fallback assets stay local and coherent", async () => {
   const [layout, manifest, globe] = await Promise.all([
     readFile(resolve(landingRoot, "app/layout.tsx"), "utf8"),
