@@ -131,7 +131,11 @@ def main() -> None:
         "canonical B2G commercial contract",
     )
     for locale in LOCALES:
-        require(canonical, [f"\n  {locale}: {{"], f"{locale}:"], f"canonical locale {locale}")
+        require(
+            canonical,
+            [f"\n  {locale}: {{", f"{locale}:"],
+            f"canonical locale {locale}",
+        )
     require(
         i18n,
         [
