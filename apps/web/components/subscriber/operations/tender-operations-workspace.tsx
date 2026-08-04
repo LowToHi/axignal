@@ -88,12 +88,12 @@ export function TenderOperationsWorkspace(props: TenderOperationsWorkspaceProps)
     : null;
 
   if (blockingState || !props.data) {
-    return <main className={styles.workspace} data-testid={`tender-workspace-${props.section}`}><RouteState state={blockingState ?? "empty"} message={props.stateMessage} onRetry={props.onRetry} /></main>;
+    return <section className={styles.workspace} data-testid={`tender-workspace-${props.section}`} aria-label="Tender workspace"><RouteState state={blockingState ?? "empty"} message={props.stateMessage} onRetry={props.onRetry} /></section>;
   }
 
   const { data } = props;
   return (
-    <main className={styles.workspace} data-testid={`tender-workspace-${props.section}`}>
+    <section className={styles.workspace} data-testid={`tender-workspace-${props.section}`} aria-label="Tender workspace">
       {data.fixtureMode ? <div className={styles.fixture} role="status">ENGINEERING FIXTURE · NOT LIVE DATA</div> : null}
       <header className={styles.header}>
         <div>
@@ -114,7 +114,7 @@ export function TenderOperationsWorkspace(props: TenderOperationsWorkspaceProps)
         {props.state !== "ready" ? <StateBanner state={props.state as "partial" | "stale" | "read_only"} message={props.stateMessage} /> : null}
         <SectionRenderer {...props} data={data} />
       </div>
-    </main>
+    </section>
   );
 }
 
