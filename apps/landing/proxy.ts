@@ -48,6 +48,14 @@ export function proxy(request: NextRequest) {
   const locale = firstSegment && isLocale(firstSegment) ? firstSegment : "en";
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-axignal-locale", locale);
+
+  // The proxy is the canonical mutation-origin boundary. Once it admits a
+  // request, remove the external Origin header before dispatching to route
+  // handlers whose internal URL may use a container hostname.
+  if (request.method !== "GET" && request.method !== "HEAD") {
+    requestHeaders.delete("origin");
+  }
+
   return NextResponse.next({ request: { headers: requestHeaders } });
 }
 
