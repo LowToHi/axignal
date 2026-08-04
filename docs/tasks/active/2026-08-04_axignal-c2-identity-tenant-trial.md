@@ -3,7 +3,8 @@
 ```text
 Contract                 AX-GE2E-CLOSURE-EXECUTION-002
 Gate                     C2
-Task authority           AX-GE2E-P25-T01 renewal
+Task authority           AX-GE2E-P03-T02
+Implementation renewal   P25-T01 identity/passwordless/trial abuse
 State                    IN_PROGRESS
 Required marker          AX_C2_IDENTITY_TENANT_TRIAL_PASS
 Previous canonical gate  C1 CLOSED / PASS
@@ -128,6 +129,7 @@ The P25 workflow fails closed unless that marker proves:
 ## Existing authorities to renew on the final head
 
 ```text
+P03 security, identity and rights
 P25 identity/passwordless/trial abuse
 P21-T02 organisation/membership/seat governance
 Entitlement Runtime
