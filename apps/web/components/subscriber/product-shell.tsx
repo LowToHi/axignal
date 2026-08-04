@@ -149,7 +149,7 @@ function GlobalNavigation({
 }: {
   collapsed: boolean;
   capabilities: ReadonlySet<string>;
-  workspace?: ShellWorkspaceContext | null;
+  workspace: ShellWorkspaceContext | null | undefined;
   onNavigate: () => void;
 }) {
   const pathname = usePathname();
