@@ -195,20 +195,21 @@ jobs:
           fi
           exit "$status"
 
-      - name: Execute real WebAuthn browser lifecycle
+      - name: Execute real WebAuthn registration, rotation and recovery lifecycle
         run: |
           pnpm exec playwright install --with-deps chromium
           pnpm exec playwright test \
             tests/e2e/identity-passwordless.spec.ts \
             --project=chromium-desktop
 
-      - name: Verify evidence boundary
+      - name: Verify C2 identity evidence boundary
         shell: bash
         run: |
           ! grep -R -E 'sk_(live|test)_|rk_(live|test)_|whsec_|smtp_password|raw_ip|raw_installation|session_[A-Za-z0-9_-]{40,}' artifacts
           python - <<'PY'
           import json
           from pathlib import Path
+
           evidence = json.loads(Path("artifacts/identity-trial-abuse-e2e.json").read_text())
           assert evidence["status"] == "PASS"
           assert evidence["strong_alias_reuse"] == "REUSE_EXISTING_TRIAL"
@@ -229,9 +230,27 @@ jobs:
           assert evidence["external_identity_provider_calls"] == 0
           assert evidence["model_calls"] == 0
           assert evidence["public_signup_authorised"] is False
+
+          recovery = json.loads(
+              Path("artifacts/c2-identity-recovery-browser.json").read_text()
+          )
+          assert recovery["schema"] == "axignal.c2-identity-recovery-browser.v1"
+          assert recovery["status"] == "PASS"
+          assert recovery["session_rotation_after_authentication"] == "PASS"
+          assert recovery["recovery_code_one_time"] == "PASS"
+          assert recovery["recovery_revoked_prior_sessions"] == "PASS"
+          assert recovery["recovery_revoked_prior_authenticators"] == "PASS"
+          assert recovery["replacement_passkey_registration"] == "PASS"
+          assert recovery["replacement_recovery_codes"] == 8
+          assert recovery["replacement_session_assurance"] == "AAL2"
+          assert recovery["tenant_continuity"] == "PRESERVED"
+          assert recovery["trial_state_after_recovery"] == "READY"
+          assert recovery["public_signup_authorised"] is False
+          assert recovery["external_identity_provider_calls"] == 0
+          assert recovery["model_calls"] == 0
           PY
 
-      - name: Upload P25 evidence
+      - name: Upload P25 and C2 identity evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
@@ -241,6 +260,7 @@ jobs:
             p25-web-health.json
             artifacts/identity-trial-abuse-e2e.json
             artifacts/identity-trial-abuse-e2e.log
+            artifacts/c2-identity-recovery-browser.json
             playwright-report
             test-results
           if-no-files-found: ignore
