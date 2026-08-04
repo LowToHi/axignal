@@ -64,6 +64,9 @@ test("landing metadata and fallback assets stay local and coherent", async () =>
   assert.match(globe, /globe-canvas-fallback-text/);
   assert.match(globe, /onContextFailure/);
   assert.match(globe, /reducedMotion/);
+  assert.match(globe, /europeanOpportunities/);
+  assert.match(globe, /sphereGeometry args=\{\[0\.012, 12, 12\]\}/);
+  assert.doesNotMatch(globe, /ActivityArcLayer|AuraGlyph|axignal-aura/);
 });
 
 test("landing package exposes a real contract test command", async () => {

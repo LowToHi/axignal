@@ -5,7 +5,6 @@ import {
   Canvas,
   type ThreeEvent,
   useFrame,
-  useLoader,
   useThree
 } from "@react-three/fiber";
 import {
@@ -20,8 +19,6 @@ import {
   type ReactNode
 } from "react";
 import * as THREE from "three";
-import { SVGLoader, type SVGResult } from "three/addons/loaders/SVGLoader.js";
-import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { trackLandingEvent } from "@/lib/analytics";
 import {
   EUROPE_LOD_BOUNDS,
@@ -92,19 +89,33 @@ const markerColours: Record<SourceState, string> = {
 
 const europeanOpportunities = [
   { id: "madrid", latitude: 40.4168, longitude: -3.7038 },
+  { id: "lisbon", latitude: 38.7223, longitude: -9.1393 },
   { id: "london", latitude: 51.5074, longitude: -0.1278 },
+  { id: "dublin", latitude: 53.3498, longitude: -6.2603 },
   { id: "paris", latitude: 48.8566, longitude: 2.3522 },
+  { id: "amsterdam", latitude: 52.3676, longitude: 4.9041 },
+  { id: "copenhagen", latitude: 55.6761, longitude: 12.5683 },
+  { id: "stockholm", latitude: 59.3293, longitude: 18.0686 },
+  { id: "oslo", latitude: 59.9139, longitude: 10.7522 },
+  { id: "helsinki", latitude: 60.1699, longitude: 24.9384 },
+  { id: "tallinn", latitude: 59.437, longitude: 24.7536 },
+  { id: "riga", latitude: 56.9496, longitude: 24.1052 },
+  { id: "vilnius", latitude: 54.6872, longitude: 25.2797 },
   { id: "berlin", latitude: 52.52, longitude: 13.405 },
   { id: "brussels", latitude: 50.8503, longitude: 4.3517 },
-  { id: "rome", latitude: 41.9028, longitude: 12.4964 }
+  { id: "zurich", latitude: 47.3769, longitude: 8.5417 },
+  { id: "vienna", latitude: 48.2082, longitude: 16.3738 },
+  { id: "prague", latitude: 50.0755, longitude: 14.4378 },
+  { id: "warsaw", latitude: 52.2297, longitude: 21.0122 },
+  { id: "budapest", latitude: 47.4979, longitude: 19.0402 },
+  { id: "zagreb", latitude: 45.815, longitude: 15.9819 },
+  { id: "belgrade", latitude: 44.7866, longitude: 20.4489 },
+  { id: "sofia", latitude: 42.6977, longitude: 23.3219 },
+  { id: "rome", latitude: 41.9028, longitude: 12.4964 },
+  { id: "milan", latitude: 45.4642, longitude: 9.19 },
+  { id: "bucharest", latitude: 44.4268, longitude: 26.1025 },
+  { id: "athens", latitude: 37.9838, longitude: 23.7275 }
 ] as const;
-
-function surfaceOrientation(point: THREE.Vector3) {
-  return new THREE.Quaternion().setFromUnitVectors(
-    new THREE.Vector3(0, 0, 1),
-    point.clone().normalize()
-  );
-}
 
 function smoothRange(value: number, from: number, to: number) {
   return THREE.MathUtils.smoothstep(value, from, to);
@@ -123,115 +134,16 @@ function configureColourTexture(
   texture.needsUpdate = true;
 }
 
-function createNormalisedAuraGeometry(data: SVGResult) {
-  const shapes = data.paths.flatMap((path) => SVGLoader.createShapes(path));
-  const geometry = new THREE.ShapeGeometry(shapes, 12);
-  geometry.computeBoundingBox();
-
-  const bounds = geometry.boundingBox;
-  if (!bounds) return geometry;
-
-  const centre = bounds.getCenter(new THREE.Vector3());
-  const height = Math.max(bounds.max.y - bounds.min.y, Number.EPSILON);
-  geometry.translate(-centre.x, -centre.y, 0);
-  geometry.scale(1 / height, -1 / height, 1);
-  geometry.computeVertexNormals();
-  return geometry;
-}
-
-function AuraGlyph({
-  colour,
-  geometry,
-  opacity,
-  scale,
-  rotation = Math.PI / 2 - 0.18
-}: {
-  colour: string;
-  geometry: THREE.ShapeGeometry;
-  opacity: number;
-  scale: number;
-  rotation?: number;
-}) {
-  return (
-    <mesh geometry={geometry} position={[0, 0, 0.004]} rotation={[0, 0, rotation]} scale={scale}>
-      <meshBasicMaterial
-        color={colour}
-        transparent
-        opacity={opacity}
-        side={THREE.DoubleSide}
-        depthWrite={false}
-      />
-    </mesh>
-  );
-}
-
-type ArcDefinition = { id: string; from: THREE.Vector3; to: THREE.Vector3 };
-
-function ActivityArcLayer({
-  arcs,
-  progressRef,
-  local = false
-}: {
-  arcs: ArcDefinition[];
-  progressRef: ProgressRef;
-  local?: boolean;
-}) {
-  const material = useRef<THREE.MeshBasicMaterial>(null);
-  const geometry = useMemo(() => {
-    const temporary = arcs.map(({ from, to }) => {
-      const midpoint = from
-        .clone()
-        .add(to)
-        .multiplyScalar(0.5)
-        .normalize()
-        .multiplyScalar(local ? 1.72 : 2.05);
-      const curve = new THREE.QuadraticBezierCurve3(from, midpoint, to);
-      return new THREE.TubeGeometry(curve, 48, local ? 0.004 : 0.007, 5, false);
-    });
-    const merged = mergeGeometries(temporary, false) ?? new THREE.BufferGeometry();
-    temporary.forEach((item) => item.dispose());
-    return merged;
-  }, [arcs, local]);
-
-  useFrame(() => {
-    if (!material.current) return;
-    const progress = progressRef.current;
-    material.current.opacity = local
-      ? smoothRange(progress, 0.12, 0.3) *
-        (1 - smoothRange(progress, 0.58, 0.76)) *
-        0.24
-      : (1 - smoothRange(progress, 0.3, 0.58)) * 0.32;
-  });
-
-  useEffect(() => () => geometry.dispose(), [geometry]);
-
-  return (
-    <mesh geometry={geometry}>
-      <meshBasicMaterial
-        ref={material}
-        color={local ? "#74f0e5" : "#4aa8ad"}
-        transparent
-        opacity={0.4}
-        depthWrite={false}
-        blending={local ? THREE.NormalBlending : THREE.AdditiveBlending}
-      />
-    </mesh>
-  );
-}
-
 type PositionedSource = {
   source: SourcePoint;
   point: THREE.Vector3;
-  orientation: THREE.Quaternion;
 };
 
 function SourceMarkerLayer({
   markers,
-  auraGeometry,
   onSelect
 }: {
   markers: PositionedSource[];
-  auraGeometry: THREE.ShapeGeometry;
   onSelect: (source: SourcePoint) => void;
 }) {
   const mesh = useRef<THREE.InstancedMesh>(null);
@@ -239,11 +151,9 @@ function SourceMarkerLayer({
 
   useEffect(() => {
     if (!mesh.current) return;
-    markers.forEach(({ source, point, orientation }, index) => {
-      const admitted = source.state === "ADMITTED";
+    markers.forEach(({ source, point }, index) => {
       dummy.position.copy(point);
-      dummy.quaternion.copy(orientation);
-      dummy.scale.setScalar(admitted ? 1.12 : 0.82);
+      dummy.scale.setScalar(source.state === "ADMITTED" ? 1 : 0.72);
       dummy.updateMatrix();
       mesh.current?.setMatrixAt(index, dummy.matrix);
       mesh.current?.setColorAt(index, new THREE.Color(markerColours[source.state]));
@@ -270,22 +180,9 @@ function SourceMarkerLayer({
           document.body.style.cursor = "";
         }}
       >
-        <sphereGeometry args={[0.028, 18, 18]} />
+        <sphereGeometry args={[0.02, 16, 16]} />
         <meshBasicMaterial />
       </instancedMesh>
-      {markers.map(({ source, point, orientation }) => {
-        const admitted = source.state === "ADMITTED";
-        return (
-          <group key={`aura-${source.id}`} position={point} quaternion={orientation}>
-            <AuraGlyph
-              colour={markerColours[source.state]}
-              geometry={auraGeometry}
-              opacity={admitted ? 0.84 : 0.42}
-              scale={admitted ? 0.13 : 0.074}
-            />
-          </group>
-        );
-      })}
     </>
   );
 }
@@ -293,47 +190,14 @@ function SourceMarkerLayer({
 type PositionedOpportunity = {
   id: string;
   point: THREE.Vector3;
-  orientation: THREE.Quaternion;
 };
-
-function OpportunityAura({
-  marker,
-  progressRef,
-  auraGeometry
-}: {
-  marker: PositionedOpportunity;
-  progressRef: ProgressRef;
-  auraGeometry: THREE.ShapeGeometry;
-}) {
-  const group = useRef<THREE.Group>(null);
-
-  useFrame(() => {
-    const reveal =
-      smoothRange(progressRef.current, 0.12, 0.3) *
-      (1 - smoothRange(progressRef.current, 0.58, 0.76) * 0.72);
-    group.current?.scale.setScalar(0.001 + reveal * 0.999);
-  });
-
-  return (
-    <group
-      ref={group}
-      position={marker.point}
-      quaternion={marker.orientation}
-      scale={0.001}
-    >
-      <AuraGlyph colour="#00e1cf" geometry={auraGeometry} opacity={0.62} scale={0.068} />
-    </group>
-  );
-}
 
 function OpportunityMarkerLayer({
   markers,
-  progressRef,
-  auraGeometry
+  progressRef
 }: {
   markers: PositionedOpportunity[];
   progressRef: ProgressRef;
-  auraGeometry: THREE.ShapeGeometry;
 }) {
   const mesh = useRef<THREE.InstancedMesh>(null);
   const material = useRef<THREE.MeshBasicMaterial>(null);
@@ -345,8 +209,7 @@ function OpportunityMarkerLayer({
       (1 - smoothRange(progressRef.current, 0.58, 0.76) * 0.72);
     markers.forEach((marker, index) => {
       dummy.position.copy(marker.point);
-      dummy.quaternion.copy(marker.orientation);
-      dummy.scale.setScalar(0.001 + reveal * 0.999);
+      dummy.scale.setScalar(0.001 + reveal * 0.82);
       dummy.updateMatrix();
       mesh.current?.setMatrixAt(index, dummy.matrix);
     });
@@ -357,17 +220,9 @@ function OpportunityMarkerLayer({
   return (
     <>
       <instancedMesh ref={mesh} args={[undefined, undefined, markers.length]}>
-        <sphereGeometry args={[0.018, 14, 14]} />
+        <sphereGeometry args={[0.012, 12, 12]} />
         <meshBasicMaterial ref={material} color="#e7f2f1" transparent opacity={0} />
       </instancedMesh>
-      {markers.map((marker) => (
-        <OpportunityAura
-          key={marker.id}
-          marker={marker}
-          progressRef={progressRef}
-          auraGeometry={auraGeometry}
-        />
-      ))}
     </>
   );
 }
@@ -1027,13 +882,11 @@ function GlobeScene({
     });
     return GLOBE_TIER_CONFIGS[tier];
   }, [gl, reducedMotion]);
-  const auraData = useLoader(SVGLoader, "/brand/axignal-aura.svg");
-  const auraGeometry = useMemo(() => createNormalisedAuraGeometry(auraData), [auraData]);
   const sourceMarkers = useMemo(
     () =>
       sourcePoints.map((source) => {
         const point = latLonToVector(source.latitude, source.longitude);
-        return { source, point, orientation: surfaceOrientation(point) };
+        return { source, point };
       }),
     []
   );
@@ -1041,24 +894,10 @@ function GlobeScene({
     () =>
       europeanOpportunities.map((opportunity) => {
         const point = latLonToVector(opportunity.latitude, opportunity.longitude, 1.525);
-        return { ...opportunity, point, orientation: surfaceOrientation(point) };
+        return { ...opportunity, point };
       }),
     []
   );
-  const globalArcs = useMemo(() => {
-    const ted = sourceMarkers.find(({ source }) => source.id === "EU_TED")!.point;
-    return sourceMarkers
-      .filter(({ source }) => source.id !== "EU_TED")
-      .map(({ source, point }) => ({ id: `global-${source.id}`, from: ted, to: point }));
-  }, [sourceMarkers]);
-  const europeArcs = useMemo(() => {
-    const brussels = opportunityMarkers.find(({ id }) => id === "brussels")!.point;
-    return opportunityMarkers
-      .filter(({ id }) => id !== "brussels")
-      .map(({ id, point }) => ({ id: `europe-${id}`, from: brussels, to: point }));
-  }, [opportunityMarkers]);
-
-  useEffect(() => () => auraGeometry.dispose(), [auraGeometry]);
 
   useFrame((state, delta) => {
     if (!globe.current) return;
@@ -1168,16 +1007,12 @@ function GlobeScene({
         />
         <SourceMarkerLayer
           markers={sourceMarkers}
-          auraGeometry={auraGeometry}
           onSelect={onSelect}
         />
         <OpportunityMarkerLayer
           markers={opportunityMarkers}
           progressRef={progressRef}
-          auraGeometry={auraGeometry}
         />
-        <ActivityArcLayer arcs={globalArcs} progressRef={progressRef} />
-        <ActivityArcLayer arcs={europeArcs} progressRef={progressRef} local />
       </group>
 
       <OrbitControls
