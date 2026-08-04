@@ -21,6 +21,12 @@ import {
 import type { FormEvent, KeyboardEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
 
+import {
+  AXENT_LOCAL_HISTORY_RETENTION_DAYS,
+  axentLocalHistoryKey,
+  loadAxentLocalHistory,
+  saveAxentLocalHistory
+} from "@/lib/axent-local-history";
 import type { SubscriberWorkspaceBootstrap } from "@/lib/subscriber-workspace-contract";
 
 import styles from "./axent-home.module.css";
@@ -87,8 +93,6 @@ const STARTERS = [
   { title: "Find opportunities", prompt: "Show high-potential opportunities to pursue." },
   { title: "Understand this workspace", prompt: "Explain the data, sources, and how to use AXENT." }
 ] as const;
-
-const CHAT_HISTORY_PREFIX = "axignal:axent:history:v3";
 
 function createId(prefix: string) {
   return `${prefix}-${crypto.randomUUID()}`;
@@ -197,6 +201,7 @@ function isAxentMessage(value: unknown): value is AxentMessage {
     typeof message.id === "string" &&
     (message.role === "user" || message.role === "assistant") &&
     typeof message.body === "string" &&
+    message.body.length <= 4_000 &&
     (message.detail === undefined || typeof message.detail === "string")
   );
 }
@@ -208,6 +213,7 @@ function isAxentConversation(value: unknown): value is AxentConversation {
     typeof conversation.id !== "string" ||
     typeof conversation.title !== "string" ||
     typeof conversation.updatedAt !== "string" ||
+    !Number.isFinite(Date.parse(conversation.updatedAt)) ||
     !Array.isArray(conversation.messages) ||
     !conversation.messages.every(isAxentMessage)
   ) return false;
@@ -219,6 +225,21 @@ function isAxentConversation(value: unknown): value is AxentConversation {
     Array.isArray(context.messages) &&
     context.messages.every(isAxentMessage)
   );
+}
+
+function boundedConversations(conversations: AxentConversation[]): AxentConversation[] {
+  return conversations.slice(0, 50).map((conversation) => ({
+    ...conversation,
+    messages: conversation.messages.slice(-100),
+    ...(conversation.context
+      ? {
+          context: {
+            ...conversation.context,
+            messages: conversation.context.messages.slice(-20)
+          }
+        }
+      : {})
+  }));
 }
 
 function firstContext(bootstrap: SubscriberWorkspaceBootstrap): AssistantContext {
@@ -317,7 +338,7 @@ function ChatHistory({
         </div>
       </article>)}
     </nav> : <div className={styles.chatHistoryEmpty}><MessageSquareText size={19} /><p>Your conversations will appear here.</p><span>Start with a question to create the first chat.</span></div>}
-    <div className={styles.chatHistoryScope}><LockKeyhole size={15} /><span>History is saved locally for this organisation and stays under your control.</span></div>
+    <div className={styles.chatHistoryScope}><LockKeyhole size={15} /><span>Stored only in this browser for the signed-in identity. Not synced to AXIGNAL servers. Expires after {AXENT_LOCAL_HISTORY_RETENTION_DAYS} days.</span></div>
   </aside>;
 }
 
@@ -342,7 +363,10 @@ export function AxentHome({
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmAcknowledged, setConfirmAcknowledged] = useState(false);
   const [pendingContext, setPendingContext] = useState<AxentContextSnapshot | null>(null);
-  const storageKey = useMemo(() => `${CHAT_HISTORY_PREFIX}:${bootstrap.tenant.id}`, [bootstrap.tenant.id]);
+  const storageKey = useMemo(
+    () => axentLocalHistoryKey(bootstrap.tenant.id, bootstrap.identity.id),
+    [bootstrap.identity.id, bootstrap.tenant.id]
+  );
   const activeConversation = conversations.find((conversation) => conversation.id === activeConversationId) ?? null;
   const activeMessages = activeConversation?.messages ?? [];
 
@@ -351,27 +375,37 @@ export function AxentHome({
     setConversations([]);
     setActiveConversationId(null);
     try {
-      const stored = window.localStorage.getItem(storageKey);
-      if (stored) {
-        const parsed = JSON.parse(stored) as { conversations?: AxentConversation[]; activeConversationId?: string | null };
-        if (Array.isArray(parsed.conversations)) {
-          const validConversations = parsed.conversations.filter(isAxentConversation);
-          setConversations(validConversations);
-          setActiveConversationId(typeof parsed.activeConversationId === "string" && validConversations.some((conversation) => conversation.id === parsed.activeConversationId) ? parsed.activeConversationId : null);
-        }
-      }
+      const stored = loadAxentLocalHistory({
+        storage: window.localStorage,
+        tenantId: bootstrap.tenant.id,
+        identityId: bootstrap.identity.id,
+        isConversation: isAxentConversation
+      });
+      setConversations(stored.conversations);
+      setActiveConversationId(stored.activeConversationId);
     } catch {
       setConversations([]);
       setActiveConversationId(null);
+      setError("Local AXENT history is unavailable in this browser.");
     } finally {
       setHistoryReady(true);
     }
-  }, [storageKey]);
+  }, [bootstrap.identity.id, bootstrap.tenant.id, storageKey]);
 
   useEffect(() => {
     if (!historyReady) return;
-    window.localStorage.setItem(storageKey, JSON.stringify({ conversations, activeConversationId }));
-  }, [activeConversationId, conversations, historyReady, storageKey]);
+    try {
+      saveAxentLocalHistory({
+        storage: window.localStorage,
+        tenantId: bootstrap.tenant.id,
+        identityId: bootstrap.identity.id,
+        conversations: boundedConversations(conversations),
+        activeConversationId
+      });
+    } catch {
+      setError("This conversation could not be retained locally.");
+    }
+  }, [activeConversationId, bootstrap.identity.id, bootstrap.tenant.id, conversations, historyReady, storageKey]);
 
   async function submit(message = draft) {
     const value = message.trim();
@@ -395,9 +429,9 @@ export function AxentHome({
     setConversations((current) => {
       const existing = current.find((conversation) => conversation.id === conversationId);
       if (existing) {
-        return current.map((conversation) => conversation.id === conversationId ? { ...conversation, updatedAt: now, messages: [...conversation.messages, userMessage] } : conversation).sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
+        return current.map((conversation) => conversation.id === conversationId ? { ...conversation, updatedAt: now, messages: [...conversation.messages, userMessage].slice(-100) } : conversation).sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
       }
-      return [{ id: conversationId, title: conversationTitle(value), updatedAt: now, messages: [userMessage], ...(pendingContext ? { context: pendingContext } : {}) }, ...current];
+      return [{ id: conversationId, title: conversationTitle(value), updatedAt: now, messages: [userMessage], ...(pendingContext ? { context: pendingContext } : {}) }, ...current].slice(0, 50);
     });
     setIsSubmitting(true);
     try {
@@ -411,7 +445,7 @@ export function AxentHome({
       const next = body as AssistantResponse;
       setResponse(next);
       const assistantMessage: AxentMessage = { id: createId("assistant"), role: "assistant", body: next.reply, detail: responseGrounding(next.evidence) };
-      setConversations((current) => current.map((conversation) => conversation.id === conversationId ? { ...conversation, updatedAt: new Date().toISOString(), messages: [...conversation.messages, assistantMessage] } : conversation).sort((left, right) => right.updatedAt.localeCompare(left.updatedAt)));
+      setConversations((current) => current.map((conversation) => conversation.id === conversationId ? { ...conversation, updatedAt: new Date().toISOString(), messages: [...conversation.messages, assistantMessage].slice(-100) } : conversation).sort((left, right) => right.updatedAt.localeCompare(left.updatedAt)));
       setConfirmOpen(false);
       setConfirmAcknowledged(false);
     } catch (cause) {
