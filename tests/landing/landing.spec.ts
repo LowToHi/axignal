@@ -124,7 +124,12 @@ test("does not expose the admitted source brand as public landing identity", asy
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await expect(page.getByText(/Tenders Electronic Daily|TED bounded/i)).toHaveCount(0);
   await expect(page.getByText(/^TED · PRODUCT_ADMITTED/i)).not.toBeVisible();
-  await expect(page.getByText(/ADMITTED PUBLIC-SOURCE PROFILE · PRIVATE AUTHENTICATED PILOT/i)).toBeVisible();
+  const statusRibbon = page.locator(".status-ribbon");
+  await expect(statusRibbon).toBeVisible();
+  const generatedBoundary = await statusRibbon.evaluate((element) =>
+    getComputedStyle(element, "::before").content.replaceAll('"', "")
+  );
+  expect(generatedBoundary).toBe("ADMITTED PUBLIC-SOURCE PROFILE · PRIVATE AUTHENTICATED PILOT");
 });
 
 test("retains Globe continuity and contained pricing on mobile", async ({ browser }, testInfo) => {
