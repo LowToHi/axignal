@@ -2,17 +2,18 @@ import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
 import "@axignal/design-tokens/tokens.css";
 import "./globals.css";
+import "./contract-overrides.css";
 
 import { htmlLanguages, isLocale } from "@/lib/i18n";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://axignal.com"),
   title: {
-    default: "AXIGNAL — Public Procurement Intelligence",
+    default: "AXIGNAL — B2G Opportunity Intelligence",
     template: "%s · AXIGNAL"
   },
   description:
-    "Evidence-governed intelligence for organisations that sell to government.",
+    "Find, qualify and investigate public contracts with traceable evidence and human authority.",
   icons: {
     icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
     apple: [{ url: "/favicon.svg", type: "image/svg+xml" }]
