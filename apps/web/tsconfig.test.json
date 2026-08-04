@@ -15,6 +15,7 @@
     "lib/auth-token.ts",
     "lib/security-boundaries.ts",
     "components/subscriber/intelligence/globe-geometry.ts",
+    "tests/**/*.d.ts",
     "tests/**/*.test.ts"
   ],
   "exclude": ["node_modules", ".next", "dist"]
