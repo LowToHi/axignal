@@ -77,6 +77,14 @@ const locales = {
 
 test.describe.configure({ mode: "serial" });
 
+test.afterEach(async ({ page }) => {
+  await page.goto("/axent");
+  const language = page.locator("header select");
+  await language.selectOption("en");
+  await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  await expect(language).toHaveValue("en");
+});
+
 test("renders equivalent Shell routes and controls in all six locales", async ({
   page,
 }) => {
