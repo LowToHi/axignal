@@ -175,14 +175,21 @@ test("purges AXENT local history on logout without deleting unrelated storage", 
     name: "Sign out and clear local AXENT history",
   }).click();
   expect((await logoutResponse).status()).toBe(200);
-  await page.waitForURL("**/");
+  await page.waitForURL("**/", { waitUntil: "domcontentloaded" });
 
-  const storage = await page.evaluate(({ localPrefix, legacyPrefix }) => ({
-    axentKeys: Object.keys(localStorage).filter(
-      (key) => key.startsWith(localPrefix) || key.startsWith(legacyPrefix),
-    ),
-    unrelated: localStorage.getItem("axignal:unrelated"),
-  }), { localPrefix: LOCAL_PREFIX, legacyPrefix: LEGACY_PREFIX });
-  expect(storage.axentKeys).toEqual([]);
-  expect(storage.unrelated).toBe("keep");
+  const storageState = await page.context().storageState();
+  const originStorage = storageState.origins.find(
+    (origin) => origin.origin === new URL(page.url()).origin,
+  )?.localStorage ?? [];
+  const axentKeys = originStorage
+    .map((entry) => entry.name)
+    .filter(
+      (key) => key.startsWith(LOCAL_PREFIX) || key.startsWith(LEGACY_PREFIX),
+    );
+  const unrelated = originStorage.find(
+    (entry) => entry.name === "axignal:unrelated",
+  )?.value ?? null;
+
+  expect(axentKeys).toEqual([]);
+  expect(unrelated).toBe("keep");
 });
