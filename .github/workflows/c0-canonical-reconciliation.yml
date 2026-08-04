@@ -11,6 +11,7 @@ on:
     paths:
       - ".github/workflows/c0-canonical-reconciliation.yml"
       - "scripts/execute_axignal_c0_reconciliation.py"
+      - "scripts/finalize_axignal_c0_reconciliation.py"
   workflow_dispatch:
 
 permissions:
@@ -77,6 +78,11 @@ jobs:
           python scripts/execute_axignal_c0_reconciliation.py \
             --controller-head "$CONTROLLER_SHA" | tee c0-reconciliation-result.json
           grep -F 'AX_C0_RECONCILIATION_TREE_PASS' c0-reconciliation-result.json
+          python scripts/finalize_axignal_c0_reconciliation.py \
+            | tee c0-pricing-authority-result.json
+          grep -F 'AX_C0_PRICING_AUTHORITY_RECONCILIATION_PASS' \
+            c0-pricing-authority-result.json
+          git add docs/tasks/active/2026-08-04_axignal-c0-canonical-reconciliation.v1.json
 
       - name: Validate reconciled contracts before commit
         shell: bash
@@ -125,6 +131,7 @@ jobs:
           path: |
             c0-controller-inputs.txt
             c0-reconciliation-result.json
+            c0-pricing-authority-result.json
             c0-integration-identity.txt
             docs/tasks/active/2026-08-04_axignal-c0-canonical-reconciliation.v1.json
           if-no-files-found: warn
