@@ -122,7 +122,7 @@ export function QualificationSection(props: SectionProps) {
             type="button"
             disabled={!canSubmit}
             onClick={() => {
-              if (!canSubmit || decision === "review") return;
+              if (!canSubmit) return;
               void props.onAction({
                 actionType: "workspace.qualify",
                 workspaceId: props.data.workspaceId,
