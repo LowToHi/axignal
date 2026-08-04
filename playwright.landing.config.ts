@@ -30,6 +30,7 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
     env: {
+      AXIGNAL_PUBLIC_ORIGIN: publicOrigin,
       AXIGNAL_LANDING_PUBLIC_ORIGIN: publicOrigin,
     },
   },
