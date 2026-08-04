@@ -206,8 +206,9 @@ def main() -> None:
         "unlimited monthly ai tokens" in allowed_scope,
         "AX-F9-T15 must retain paid no-quota AI access",
     )
+    prohibited_terms = ("general-purpose ai", "psychology", "code generation")
     _require(
-        all(term in prohibited_scope for term in ("general-purpose ai", "psychology", "code generation")),
+        all(term in prohibited_scope for term in prohibited_terms),
         "AX-F9-T15 must prohibit general-purpose, psychology and code assistance",
     )
 
