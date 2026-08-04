@@ -12,6 +12,7 @@ import {
   getSubscriberWorkspaceFixtureBootstrap,
   getSubscriberWorkspaceFixtureEvents,
   parseSubscriberWorkspaceAction,
+  subscriberWorkspaceEnabled,
   subscriberWorkspaceFixtureConfiguration,
   type SubscriberWorkspaceServerActor
 } from "../lib/subscriber-workspace-server";
@@ -181,6 +182,60 @@ test("fixture actions persist once, replay idempotently and append a bounded aud
     assert.equal(stored.events.length, 1);
     assert.equal(Object.keys(stored.action_receipts).length, 1);
   } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("subscriber kill switch preserves the tenant ledger and restores the exact workspace context", async () => {
+  const previousEnabled = process.env.AXIGNAL_SUBSCRIBER_WORKSPACE_ENABLED;
+  const { directory, options } = isolatedStore();
+  const ledgerPath = path.join(directory, `${owner.tenantId}.json`);
+
+  try {
+    process.env.AXIGNAL_SUBSCRIBER_WORKSPACE_ENABLED = "true";
+    assert.equal(subscriberWorkspaceEnabled(), true);
+
+    const initial = await getSubscriberWorkspaceFixtureBootstrap(owner, options);
+    const mutation = await executeSubscriberWorkspaceFixtureAction(
+      owner,
+      action(
+        `axfx_action_rollback_${randomUUID().replaceAll("-", "")}`,
+        "requirement.update",
+        initial.tenant.revision,
+        {
+          workspace_id: "axfx_ws_eu_cloud_001",
+          requirement_id: "axfx_req_turnover_003",
+          status: "blocked"
+        }
+      ),
+      options
+    );
+    const ledgerBeforeDisable = await readFile(ledgerPath, "utf8");
+
+    process.env.AXIGNAL_SUBSCRIBER_WORKSPACE_ENABLED = "false";
+    assert.equal(subscriberWorkspaceEnabled(), false);
+    assert.equal(await readFile(ledgerPath, "utf8"), ledgerBeforeDisable);
+
+    process.env.AXIGNAL_SUBSCRIBER_WORKSPACE_ENABLED = "true";
+    assert.equal(subscriberWorkspaceEnabled(), true);
+
+    const restored = await getSubscriberWorkspaceFixtureBootstrap(owner, options);
+    const restoredEvents = await getSubscriberWorkspaceFixtureEvents(owner, 0, options);
+    const restoredRequirement = restored.route_data.workspaces
+      .find((workspace) => workspace.id === "axfx_ws_eu_cloud_001")
+      ?.requirements.find((requirement) => requirement.id === "axfx_req_turnover_003");
+
+    assert.equal(restored.tenant.revision, mutation.tenant_revision);
+    assert.equal(restoredRequirement?.status, "blocked");
+    assert.equal(restoredEvents.events.length, 1);
+    assert.equal(restoredEvents.events[0]?.type, "requirement.updated");
+    assert.equal(await readFile(ledgerPath, "utf8"), ledgerBeforeDisable);
+  } finally {
+    if (previousEnabled === undefined) {
+      delete process.env.AXIGNAL_SUBSCRIBER_WORKSPACE_ENABLED;
+    } else {
+      process.env.AXIGNAL_SUBSCRIBER_WORKSPACE_ENABLED = previousEnabled;
+    }
     await rm(directory, { recursive: true, force: true });
   }
 });
