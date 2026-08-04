@@ -4,14 +4,16 @@ Goal ID: `AXIGNAL-GOAL-001`
 Governing authority: Contract `31`, ADR-016 and `AX-GE2E-CLOSURE-EXECUTION-002`  
 Execution branch: `agent/axignal-c0-canonical-reconciliation-v1`  
 C0 authority head: `fb0b93c5cf47ea08d8e6ee38950033e7224727f3`  
-C1 engineering evidence head: `30e21a6eabce9a2ff909e817bde94238db1560ae`  
-State: `IN_PROGRESS / ENGINEERING_E2E_PASS / HUMAN_USABILITY_AUTHORITY_PENDING / NO_PUBLIC_LAUNCH`
+C1 engineering and documentary evidence head: `a739b41f6e36b7e2eb9d8dd6a317101055d79523`  
+State: `CLOSED / PASS / POST_LAUNCH_USABILITY_REQUIRED / NO_PUBLIC_LAUNCH_AUTHORITY_FROM_C1`
 
 ## Objective
 
-Close the authenticated Subscriber Shell and Bid Workspace as the first bounded execution slice after the canonical C0 baseline, without reducing product scope, substituting engineering fixtures for human acceptance, or advancing C2 before C1 has all required authorities.
+Close the authenticated Subscriber Shell and Bid Workspace as the first bounded execution slice after the canonical C0 baseline, without reducing product scope or weakening authority boundaries.
 
-The superior execution chain remains:
+Qualified-user usability validation remains mandatory, but it is moved behind launch because requiring external qualified users before the product is accessible creates a circular dependency. The study is now a post-launch validation gate and does not block C1, C2, P27 or launch.
+
+The superior pre-launch execution chain remains:
 
 ```text
 C0 canonical reconciliation
@@ -32,6 +34,8 @@ C0 canonical reconciliation
 → C15 reproducible distribution and global matrix
 → C16 buyer/paid-value/support evidence
 → C17 P27 exact-head final acceptance
+→ launch authority
+→ PL-UX-01 qualified-user Subscriber Workspace validation
 ```
 
 ## C0 authority
@@ -47,14 +51,12 @@ C0_NON_TERMINAL         0
 C0_MARKER               AX_C0_CANONICAL_BASELINE_PASS
 ```
 
-This does not authorize merge, source admission, commercial activation or public launch.
+## C1 exact-head authority
 
-## C1 exact-head engineering evidence
-
-The bounded rollback change at `30e21a6eabce9a2ff909e817bde94238db1560ae` passed the complete pull-request workflow matrix:
+The final C1 predecessor head passed the complete pull-request workflow matrix:
 
 ```text
-C1_ENGINEERING_HEAD     30e21a6eabce9a2ff909e817bde94238db1560ae
+C1_EVIDENCE_HEAD        a739b41f6e36b7e2eb9d8dd6a317101055d79523
 MATRIX                  53 / 53 COMPLETED / SUCCESS
 FAILED                  0
 CANCELLED               0
@@ -64,27 +66,29 @@ NON_TERMINAL            0
 Load-bearing evidence:
 
 ```text
-Frontend Unit Contracts          30928582204  PASS
-Subscriber Viewport Matrix       30928582689  PASS
-E2E Technical Audit              30928582771  PASS
-G5 Web Security Boundaries       30928582229  PASS
-G6 Reproducibility               30928582068  PASS
-Executable Spine                 30928582751  PASS
-P21-T02 Seat Governance          30928582043  PASS
-Commercial Shell E2E             30928582235  PASS
-Stripe Paid Lifecycle            30928582321  PASS
-Entitlement Runtime              30928581902  PASS
-P25 Trial Abuse Runtime          30928583497  PASS
-Trial Retention Lifecycle        30928583461  PASS
-Full PostgreSQL Migration Matrix 30928582498  PASS
-Pilot Deployment Candidate       30928582870  PASS
+Contract Validation               30930376868  PASS
+RC6 Exact Head Provenance         30930376635  PASS
+Frontend Unit Contracts           30930380161  PASS
+Subscriber Viewport Matrix        30930376877  PASS
+E2E Technical Audit               30930380286  PASS
+G5 Web Security Boundaries        30930380310  PASS
+G6 Reproducibility                30930376777  PASS
+Executable Spine                  30930380347  PASS
+P21-T02 Seat Governance           30930376755  PASS
+Commercial Shell E2E              30930376687  PASS
+Stripe Paid Lifecycle             30930377050  PASS
+Entitlement Runtime               30930376701  PASS
+P25 Trial Abuse Runtime           30930376749  PASS
+Trial Retention Lifecycle         30930376649  PASS
+Full PostgreSQL Migration Matrix  30930376637  PASS
+Pilot Deployment Candidate        30930383905  PASS
 ```
 
-Critical browser jobs use zero retries. The engineering matrix is exact-head evidence only; it is not qualified-user research.
+Critical browser jobs use zero retries.
 
 ## C1-owned blocker disposition
 
-The ownership manifest assigns five blockers exclusively to C1. All five are technically closed and revalidated on the canonical exact head:
+The ownership manifest assigns five blockers exclusively to C1. All five are closed:
 
 ```text
 AX-SW-BLK-001 exact-head CI matrix                 CLOSED / PASS
@@ -94,7 +98,7 @@ AX-SW-BLK-011 degraded-mode provenance             CLOSED / PASS
 AX-SW-BLK-014 desktop/tablet/mobile evidence       CLOSED / PASS
 ```
 
-The remaining ten blockers are not C1 co-ownership:
+The remaining subscriber blockers retain their exclusive downstream ownership:
 
 ```text
 C3  AX-SW-BLK-008 AX-SW-BLK-009 AX-SW-BLK-010 AX-SW-BLK-015
@@ -102,7 +106,7 @@ C4  AX-SW-BLK-004 AX-SW-BLK-005 AX-SW-BLK-006 AX-SW-BLK-007
 C14 AX-SW-BLK-012 AX-SW-BLK-013
 ```
 
-They remain downstream work for their exclusive contractual packages and are not grounds for misreporting C1 engineering failure.
+They do not reopen C1.
 
 ## Rollback rehearsal
 
@@ -112,7 +116,7 @@ The kill switch is:
 AXIGNAL_SUBSCRIBER_WORKSPACE_ENABLED=false
 ```
 
-The exact-head unit contract now proves:
+The exact-head contract proves:
 
 1. a tenant workspace mutation is persisted;
 2. the ledger is captured;
@@ -125,17 +129,30 @@ Authority:
 
 ```text
 test     apps/web/tests/subscriber-workspace-server.test.ts
-run      30928582204
+run      30930380161
 result   PASS
 ```
 
 Rollback does not delete identity, workspace, claim, billing or audit ledgers.
 
-## Human usability authority
+## Post-launch qualified-user validation
 
-C1 is not canonically closed because the required qualified-user evidence does not exist yet.
+The qualified-user study is retained without weakening its cohort, tasks or thresholds. Its sequencing changes only:
 
-The governing research contract remains:
+```text
+previous position       pre-launch C1 blocker
+corrected position      post-launch validation gate PL-UX-01
+tracking authority      GitHub issue #170
+pre-launch blocker      false
+C1 blocker              false
+C2 blocker              false
+P27 blocker             false
+mandatory after launch  true
+```
+
+The study activates after AXIGNAL is launched under the final P27 and human launch authority and real qualified users can use the normal subscriber journey.
+
+Required cohort remains:
 
 ```text
 minimum participants                  8
@@ -147,51 +164,45 @@ accessibility participant/specialist  >= 1
 non-English primary-locale sessions   >= 2
 ```
 
-The declared task-success, navigation, authority-comprehension and accessibility thresholds must also be met. The existing `F1 Qualified-User Validation` workflow is an engineering protocol/harness; it is not evidence that eight qualified humans completed the study.
+The existing `F1 Qualified-User Validation` workflow remains an engineering protocol and analysis harness. It does not impersonate human evidence.
 
-Authoritative pending record:
-
-```text
-docs/research/2026-08-01-subscriber-workspace-tooling-ux-study.md
-status: HUMAN_USABILITY_EVIDENCE_PENDING
-```
+A critical post-launch safety, authority, privacy, accessibility or integrity finding must create corrective work and may invoke the relevant kill switch. Non-critical usability findings enter the governed product backlog and do not retroactively invalidate a correctly authorized launch.
 
 ## Current disposition
 
 ```text
 C0                       CLOSED / PASS
 C1_ENGINEERING           CLOSED / PASS
-C1_HUMAN_AUTHORITY       BLOCKED / MISSING
-C1_CANONICAL             IN_PROGRESS
-C2                       BLOCKED_BY_C1_HUMAN_AUTHORITY
-PR_169                   OPEN / DRAFT / UNMERGED
+C1_ROLLBACK              CLOSED / PASS
+C1_CANONICAL             CLOSED / PASS
+C1_POST_LAUNCH_STUDY     OPEN / REQUIRED / NON_BLOCKING
+C2                       AUTHORIZED_TO_BEGIN
+PR_169                   DRAFT / UNMERGED
 MERGE                    NOT_AUTHORIZED
-PUBLIC_LAUNCH            NO_GO
+PUBLIC_LAUNCH            NO_GO_PENDING_C2_C17_AND_P27
 COMMERCIAL_ACTIVATION    NOT_AUTHORIZED
 SOURCE_ADMISSION         NOT_AUTHORIZED
 ```
 
+The human study is no longer the reason for `PUBLIC_LAUNCH=NO_GO`. Launch remains blocked only by the unfinished downstream closure packages and final P27 authority.
+
 ## Marker authority
 
-Allowed and already effective:
-
-```text
-AX_C0_CANONICAL_BASELINE_PASS
-```
-
-Prohibited until the qualified-user study satisfies its complete cohort and threshold contract:
+Allowed after this documentary head itself passes the complete exact-head matrix:
 
 ```text
 AX_C1_SUBSCRIBER_SHELL_FULL_E2E_PASS
 ```
 
-Prohibited until P27 and human digest approval:
+The marker means C1's contracted pre-launch engineering slice is complete. It does not claim that the post-launch usability study has already occurred.
+
+Still prohibited until C17/P27 and explicit human launch authority:
 
 ```text
 AXIGNAL_GLOBAL_E2E_100_PERCENT_COMPLETE
 AXIGNAL_ACCEPTED_FOR_PUBLIC_LAUNCH
 ```
 
-## Exact-head rule for this reconciliation
+## Exact-head rule
 
-This documentary reconciliation changes the branch head. Its statements become effective only if the complete pull-request workflow matrix for the commit containing this record is terminal `success`. Any head change invalidates evidence bound to the predecessor and requires a new exact-head matrix.
+This sequencing correction changes the branch head. Its statements become effective only if the complete pull-request workflow matrix for the commit containing this record is terminal `success`. Any later head change invalidates evidence bound to this documentary head and requires a new exact-head matrix.
