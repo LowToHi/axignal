@@ -1,11 +1,16 @@
 import { expect, test } from "@playwright/test";
 
+const LOCAL_PREFIX = "axignal:axent:local-history:v1:";
+const LEGACY_PREFIX = "axignal:axent:history:v3:";
+
 test.beforeEach(async ({ page }) => {
-  await page.addInitScript(() => {
+  await page.addInitScript(({ localPrefix, legacyPrefix }) => {
     for (const key of Object.keys(localStorage)) {
-      if (key.startsWith("axignal:axent:history:")) localStorage.removeItem(key);
+      if (key.startsWith(localPrefix) || key.startsWith(legacyPrefix)) {
+        localStorage.removeItem(key);
+      }
     }
-  });
+  }, { localPrefix: LOCAL_PREFIX, legacyPrefix: LEGACY_PREFIX });
 });
 
 test("turns the welcome state into a focused conversation", async ({ page }) => {
@@ -25,6 +30,64 @@ test("turns the welcome state into a focused conversation", async ({ page }) => 
   );
   await expect(page.getByRole("complementary", { name: "Chat history" })).toBeVisible();
   await expect(page.getByRole("button", { name: "New chat", exact: true })).toBeVisible();
+  await expect(page.getByText("Not synced to AXIGNAL servers.")).toBeVisible();
+  await expect(page.getByText("Expires after 30 days.")).toBeVisible();
+});
+
+test("persists a conversation in identity-scoped bounded history", async ({ page }) => {
+  const bootstrapResponse = await page.request.get(
+    "/api/subscriber-workspace/bootstrap"
+  );
+  expect(bootstrapResponse.status()).toBe(200);
+  const bootstrap = (await bootstrapResponse.json()) as {
+    tenant: { id: string };
+    identity: { id: string };
+  };
+
+  await page.goto("/axent");
+  const composer = page.getByRole("textbox", {
+    name: "Ask AXENT anything about AXIGNAL",
+    exact: true,
+  });
+  await composer.fill("Show AXIGNAL opportunities");
+  await composer.press("Enter");
+  await expect(page.locator('[aria-label="Saved conversations"] article')).toHaveCount(1);
+
+  const persisted = await page.evaluate(
+    ({ prefix, tenantId, identityId }) => {
+      const key = `${prefix}${tenantId}:${identityId}`;
+      return { key, raw: localStorage.getItem(key) };
+    },
+    {
+      prefix: LOCAL_PREFIX,
+      tenantId: bootstrap.tenant.id,
+      identityId: bootstrap.identity.id,
+    },
+  );
+  expect(persisted.raw).not.toBeNull();
+  const envelope = JSON.parse(persisted.raw ?? "null") as {
+    schema_version: string;
+    tenant_id: string;
+    identity_id: string;
+    saved_at: string;
+    expires_at: string;
+    conversations: unknown[];
+  };
+  expect(envelope).toMatchObject({
+    schema_version: "axignal.axent-local-history/v1",
+    tenant_id: bootstrap.tenant.id,
+    identity_id: bootstrap.identity.id,
+  });
+  expect(envelope.conversations).toHaveLength(1);
+  expect(Date.parse(envelope.expires_at) - Date.parse(envelope.saved_at)).toBe(
+    30 * 24 * 60 * 60 * 1000,
+  );
+  expect(
+    await page.evaluate(
+      ({ prefix, tenantId }) => localStorage.getItem(`${prefix}${tenantId}`),
+      { prefix: LEGACY_PREFIX, tenantId: bootstrap.tenant.id },
+    ),
+  ).toBeNull();
 });
 
 test("persists a conversation in history and lets the subscriber start another", async ({
@@ -90,4 +153,36 @@ test("reuses, downloads, exports and deletes a saved conversation", async ({ pag
   await activeConversation.getByRole("button", { name: /Delete/ }).click();
   await dialogPromise;
   await expect(page.locator('[aria-label="Saved conversations"] article')).toHaveCount(1);
+});
+
+test("purges AXENT local history on logout without deleting unrelated storage", async ({
+  page,
+}) => {
+  await page.goto("/axent");
+  await page.evaluate(({ localPrefix, legacyPrefix }) => {
+    localStorage.setItem(`${localPrefix}tenant:user`, "current");
+    localStorage.setItem(`${legacyPrefix}tenant`, "legacy");
+    localStorage.setItem("axignal:unrelated", "keep");
+  }, { localPrefix: LOCAL_PREFIX, legacyPrefix: LEGACY_PREFIX });
+
+  await page.getByRole("button", { name: /Account menu for/ }).click();
+  const logoutResponse = page.waitForResponse(
+    (response) =>
+      response.url().endsWith("/api/auth/logout") &&
+      response.request().method() === "POST",
+  );
+  await page.getByRole("menuitem", {
+    name: "Sign out and clear local AXENT history",
+  }).click();
+  expect((await logoutResponse).status()).toBe(200);
+  await page.waitForURL("**/");
+
+  const storage = await page.evaluate(({ localPrefix, legacyPrefix }) => ({
+    axentKeys: Object.keys(localStorage).filter(
+      (key) => key.startsWith(localPrefix) || key.startsWith(legacyPrefix),
+    ),
+    unrelated: localStorage.getItem("axignal:unrelated"),
+  }), { localPrefix: LOCAL_PREFIX, legacyPrefix: LEGACY_PREFIX });
+  expect(storage.axentKeys).toEqual([]);
+  expect(storage.unrelated).toBe("keep");
 });
