@@ -8,6 +8,8 @@ test("restores a stored light preference before navigation changes the workspace
   });
 
   await page.goto("/alerts");
+  await page.locator("header select").selectOption("en");
+  await expect(page.locator("html")).toHaveAttribute("lang", "en");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
   await expect(page.locator("html")).toHaveCSS("color-scheme", "light");
 
