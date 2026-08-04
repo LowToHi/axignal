@@ -1,0 +1,125 @@
+name: C0 Canonical Reconciliation Controller
+
+on:
+  push:
+    branches:
+      - agent/axignal-c0-canonical-reconciliation-v1
+    paths:
+      - ".github/workflows/c0-canonical-reconciliation.yml"
+      - "scripts/execute_axignal_c0_reconciliation.py"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  WP1_HEAD: cb851be6bb5ff1d5feb8f61c0deb171dbbc38428
+  WP2_HEAD: 4d03c88fb747b6b9a6531def146fc2b4003f1b1e
+  C0_BRANCH: agent/axignal-c0-canonical-reconciliation-v1
+
+concurrency:
+  group: c0-canonical-reconciliation-controller
+  cancel-in-progress: false
+
+jobs:
+  reconcile:
+    name: Build one two-parent canonical tree
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - name: Checkout controller head
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Freeze controller and source inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git fetch --no-tags origin "$WP1_HEAD" "$WP2_HEAD"
+          test "$(git rev-parse "$WP1_HEAD")" = "$WP1_HEAD"
+          test "$(git rev-parse "$WP2_HEAD")" = "$WP2_HEAD"
+          test ! -e docs/tasks/active/2026-08-04_axignal-c0-canonical-reconciliation.v1.json
+          {
+            printf 'controller_head=%s\n' "$GITHUB_SHA"
+            printf 'wp1_head=%s\n' "$WP1_HEAD"
+            printf 'wp2_head=%s\n' "$WP2_HEAD"
+          } | tee c0-controller-inputs.txt
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.13"
+
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22.14.0"
+
+      - name: Configure merge identity
+        run: |
+          git config user.name "AXIGNAL C0 Controller"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Reconcile canonical authorities
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/execute_axignal_c0_reconciliation.py \
+            --controller-head "$GITHUB_SHA" | tee c0-reconciliation-result.json
+          grep -F 'AX_C0_RECONCILIATION_TREE_PASS' c0-reconciliation-result.json
+
+      - name: Validate reconciled contracts before commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/verify_axignal_e2e_blocker_ownership.py
+          python scripts/verify_landing_foundation.py
+          python scripts/verify_landing_implementation.py
+          corepack enable
+          pnpm install --frozen-lockfile
+          pnpm --filter @axignal/landing test
+          pnpm --filter @axignal/landing typecheck
+          pnpm --filter @axignal/landing build
+          node skills/axignal-gsap-ui-ux/scripts/audit-gsap-motion.mjs --self-test
+          node skills/axignal-gsap-ui-ux/scripts/audit-gsap-motion.mjs apps/landing
+          node skills/axignal-cinematic-webgl-scroll/scripts/audit-webgl-globe.mjs --self-test
+          node skills/axignal-cinematic-webgl-scroll/scripts/audit-webgl-globe.mjs
+
+      - name: Create the two-parent integration commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse -q --verify MERGE_HEAD)" = "$WP1_HEAD"
+          git commit -m "merge(c0): reconcile canonical authorities [c0-integrated]"
+          final_sha="$(git rev-parse HEAD)"
+          final_tree="$(git rev-parse 'HEAD^{tree}')"
+          parent_one="$(git rev-parse 'HEAD^1')"
+          parent_two="$(git rev-parse 'HEAD^2')"
+          test "$parent_one" = "$GITHUB_SHA"
+          test "$parent_two" = "$WP1_HEAD"
+          git merge-base --is-ancestor "$WP2_HEAD" "$final_sha"
+          {
+            printf 'final_sha=%s\n' "$final_sha"
+            printf 'final_tree=%s\n' "$final_tree"
+            printf 'parent_one=%s\n' "$parent_one"
+            printf 'parent_two=%s\n' "$parent_two"
+            printf 'wp2_ancestor=%s\n' "$WP2_HEAD"
+          } | tee c0-integration-identity.txt
+          git push origin "HEAD:refs/heads/$C0_BRANCH"
+
+      - name: Upload reconciliation evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: c0-controller-${{ github.sha }}
+          path: |
+            c0-controller-inputs.txt
+            c0-reconciliation-result.json
+            c0-integration-identity.txt
+            docs/tasks/active/2026-08-04_axignal-c0-canonical-reconciliation.v1.json
+          if-no-files-found: warn
+          retention-days: 30
