@@ -1,0 +1,7 @@
+contract_id=AX-GE2E-CLOSURE-EXECUTION-002
+work_package=C0_CANONICAL_RECONCILIATION
+wp1_head=cb851be6bb5ff1d5feb8f61c0deb171dbbc38428
+wp2_head=4d03c88fb747b6b9a6531def146fc2b4003f1b1e
+controller_base=5da8b26dfcb0d2949d168022b203fd01007c2528
+execution=ONE_SHOT
+public_launch=NO_GO
