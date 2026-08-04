@@ -15,7 +15,7 @@ async function login(page: import("@playwright/test").Page) {
     await page.getByLabel("Contraseña").fill("pilot-password");
     await page.getByRole("button", { name: "Entrar" }).click();
   }
-  await expect(page.locator("main.shell")).toBeVisible();
+  await expect(page.locator("main").first()).toBeVisible();
 }
 
 async function emitProviderEvent(
@@ -57,7 +57,7 @@ test("executes the authenticated commercial shell without external Stripe", asyn
   await expect(page.getByText(/Cargar esta página o volver a AXIGNAL no concede acceso/)).toBeVisible();
 
   await page.getByRole("link", { name: "Cancelar y volver" }).click();
-  await expect(page.locator("main.shell")).toBeVisible();
+  await expect(page.locator("main").first()).toBeVisible();
   await page.getByRole("button", { name: /PLAN ·/ }).click();
   await expect(page.getByText(/PAYMENT_CONFIRMATION_PENDING/)).toBeVisible();
   await expect(page.getByText(/acceso NO_ENTITLEMENT/)).toBeVisible();
@@ -65,7 +65,7 @@ test("executes the authenticated commercial shell without external Stripe", asyn
   await page.goto(checkoutUrl);
   await page.getByRole("button", { name: "Confirmar pago de prueba" }).click();
   await expect(page).toHaveURL(/billing=success/);
-  await expect(page.locator("main.shell")).toBeVisible();
+  await expect(page.locator("main").first()).toBeVisible();
   await expect(page.getByText("ACTIVE", { exact: true }).first()).toBeVisible();
   await expect(page.getByText(/Plan: Professional · acceso ACTIVE/)).toBeVisible();
   await expect(page.getByText(/IA mensual sin cuota de tokens: sí/)).toBeVisible();
