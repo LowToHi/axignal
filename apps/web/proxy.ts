@@ -14,7 +14,7 @@ export function proxy(request: NextRequest) {
     secFetchSite: request.headers.get("sec-fetch-site"),
     configuredPublicOrigin: process.env.AXIGNAL_PUBLIC_ORIGIN,
     requestOrigin: request.nextUrl.origin,
-    environment: process.env.NODE_ENV,
+    environment: process.env.AXIGNAL_ENVIRONMENT ?? process.env.NODE_ENV,
     legacyPasswordLoginEnabled:
       process.env.AXIGNAL_LEGACY_PASSWORD_LOGIN_ENABLED,
     exemptPaths: MUTATION_ORIGIN_EXEMPT_PATHS,
