@@ -170,7 +170,10 @@ for forbidden_source_identity in (
 ):
     assert forbidden_source_identity.lower() not in public_source_projection.lower()
 assert "ADMITTED_PUBLIC_SOURCE_PROFILE_01" in product_profile
-assert "Admitted European public-source profile" in product_profile
+assert (
+    "A bounded public-source profile is admitted for the private authenticated pilot."
+    in product_profile
+)
 
 public_copy = "\n".join((canonical, i18n, form, metadata, product_profile, landing_data))
 for phrase in runtime["prohibited_claims"]:
