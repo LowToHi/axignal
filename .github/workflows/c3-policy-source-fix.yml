@@ -1,0 +1,62 @@
+name: C3 Policy Source Fix
+
+on:
+  pull_request:
+    branches:
+      - agent/axignal-c0-canonical-reconciliation-v1
+    types:
+      - opened
+      - synchronize
+      - reopened
+    paths:
+      - .github/workflows/c3-policy-source-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.event.pull_request.head.ref == 'ci/c3-policy-source-fix'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ci/c3-policy-source-fix
+          fetch-depth: 0
+
+      - name: Correct dynamic RLS policy identifiers
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('infra/postgres/140-subscriber-persistent-authority.sql')
+          content = path.read_text(encoding='utf-8')
+          old_drop = "EXECUTE format('DROP POLICY IF EXISTS %I_tenant_isolation ON tenant_private.%I', v_table, v_table);"
+          new_drop = "EXECUTE format('DROP POLICY IF EXISTS %I ON tenant_private.%I', v_table || '_tenant_isolation', v_table);"
+          old_create = """      'CREATE POLICY %I_tenant_isolation ON tenant_private.%I USING (tenant_id = tenant_private.current_tenant_id()) WITH CHECK (tenant_id = tenant_private.current_tenant_id())',
+      v_table,
+      v_table"""
+          new_create = """      'CREATE POLICY %I ON tenant_private.%I USING (tenant_id = tenant_private.current_tenant_id()) WITH CHECK (tenant_id = tenant_private.current_tenant_id())',
+      v_table || '_tenant_isolation',
+      v_table"""
+          if content.count(old_drop) != 1 or content.count(old_create) != 1:
+              raise SystemExit('C3 policy source contract changed unexpectedly')
+          content = content.replace(old_drop, new_drop).replace(old_create, new_create)
+          path.write_text(content, encoding='utf-8')
+          PY
+          grep -F "v_table || '_tenant_isolation'" infra/postgres/140-subscriber-persistent-authority.sql
+          ! grep -F "%I_tenant_isolation" infra/postgres/140-subscriber-persistent-authority.sql
+
+      - name: Commit corrected source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'AXIGNAL C3 Source Fix'
+          git config user.email 'c3-source-fix@users.noreply.github.com'
+          git add infra/postgres/140-subscriber-persistent-authority.sql
+          git diff --cached --check
+          git commit -m 'fix(c3): quote dynamic RLS policy identifiers'
+          git push origin HEAD:ci/c3-policy-source-fix
