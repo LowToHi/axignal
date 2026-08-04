@@ -194,7 +194,7 @@ identity and tenant authority
 
 Failure must release or reconcile reservations idempotently.
 
-The browser cannot declare token, cost or concurrency availability.
+The browser cannot declare token, cost or concurrency availability. A frontend-only check is not an enforcement boundary; scope, rights, cost and authority checks must execute server-side before model or provider execution.
 
 ## 11. Provider routing
 
