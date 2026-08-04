@@ -34,5 +34,6 @@ COPY 122-identity-passkeys-sessions-recovery.sql /docker-entrypoint-initdb.d/122
 COPY 123-trial-abuse-runtime.sql /docker-entrypoint-initdb.d/123-axignal-trial-abuse.sql
 COPY 124-identity-clone-detection-hardening.sql /docker-entrypoint-initdb.d/124-axignal-identity-clone-hardening.sql
 COPY 125-trial-cost-settlement-after-expiry.sql /docker-entrypoint-initdb.d/125-axignal-trial-cost-settlement.sql
+COPY 126-trial-cost-retention-purge-boundary.sql /docker-entrypoint-initdb.d/126-axignal-trial-cost-retention-purge.sql
 COPY 130-organic-discovery-founder-admin.sql /docker-entrypoint-initdb.d/130-axignal-organic-discovery.sql
 COPY 131-organic-discovery-alert-lifecycle.sql /docker-entrypoint-initdb.d/131-axignal-organic-alerts.sql
