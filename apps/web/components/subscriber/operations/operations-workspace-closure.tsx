@@ -5,40 +5,11 @@ import {
   TenderOperationsWorkspace as BaseTenderOperationsWorkspace,
   type OperationsWorkspaceProps
 } from "./tender-operations-workspace";
-import type {
-  TenderOperationsWorkspaceProps,
-  TenderWorkspaceData
-} from "./types";
+import { provenanceSafeOperationsData } from "./operations-provenance";
+import type { TenderOperationsWorkspaceProps } from "./types";
 
 const REAL_ADAPTER_BOUNDARY =
   "Live-adapter mode withholds documents, team, approvals, amendment impact and derived readiness until each projection carries persistent provenance.";
-
-export function provenanceSafeOperationsData(data: TenderWorkspaceData): TenderWorkspaceData {
-  if (data.fixtureMode === true) return data;
-
-  const {
-    metrics,
-    commercial,
-    documents: _documents,
-    amendments: _amendments,
-    team: _team,
-    approvals: _approvals,
-    readiness: _readiness,
-    ...persisted
-  } = data;
-
-  return {
-    ...persisted,
-    procedure: "Procedure unavailable",
-    summary: "Server-backed workspace records are available. Client-synthesised operational projections are withheld.",
-    ...(metrics ? { metrics: metrics.filter((metric) => metric.label !== "Readiness") } : {}),
-    documents: [],
-    amendments: [],
-    ...(commercial ? { commercial: commercial.filter((record) => record.id !== "axfx_com_003") } : {}),
-    team: [],
-    approvals: []
-  };
-}
 
 export function TenderOperationsWorkspace(props: TenderOperationsWorkspaceProps) {
   if (!props.data || props.data.fixtureMode === true) {
