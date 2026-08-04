@@ -1,0 +1,82 @@
+name: CI Architecture Inventory
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/ci-architecture-inventory.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-architecture-inventory-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  inventory:
+    name: Inventory current workflow architecture
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      AXIGNAL_EXACT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Prove exact-head checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$AXIGNAL_EXACT_SHA"
+          printf 'exact_head_sha=%s\n' "$AXIGNAL_EXACT_SHA" > ci-architecture-exact-head.txt
+          printf 'git_tree_sha=%s\n' "$(git rev-parse 'HEAD^{tree}')" >> ci-architecture-exact-head.txt
+
+      - name: Capture workflow sources and inventory
+        shell: bash
+        run: |
+          set -euo pipefail
+          find .github/workflows -maxdepth 1 -type f \( -name '*.yml' -o -name '*.yaml' \) -printf '%f\n' \
+            | LC_ALL=C sort \
+            | tee ci-workflow-files.txt
+          tar --sort=name --mtime='UTC 1970-01-01' --owner=0 --group=0 --numeric-owner \
+            -czf ci-workflow-sources.tar.gz .github/workflows
+          python - <<'PY'
+          from __future__ import annotations
+
+          import json
+          from pathlib import Path
+
+          files = sorted(
+              str(path.as_posix())
+              for path in Path('.github/workflows').iterdir()
+              if path.is_file() and path.suffix in {'.yml', '.yaml'}
+          )
+          payload = {
+              'schema': 'axignal.ci-workflow-inventory.v1',
+              'workflow_count': len(files),
+              'workflows': files,
+          }
+          Path('ci-workflow-inventory.json').write_text(
+              json.dumps(payload, indent=2, sort_keys=True) + '\n',
+              encoding='utf-8',
+          )
+          PY
+
+      - name: Upload workflow inventory
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: ci-architecture-inventory-${{ env.AXIGNAL_EXACT_SHA }}
+          path: |
+            ci-architecture-exact-head.txt
+            ci-workflow-files.txt
+            ci-workflow-inventory.json
+            ci-workflow-sources.tar.gz
+          if-no-files-found: error
+          retention-days: 3
