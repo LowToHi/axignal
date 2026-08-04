@@ -159,6 +159,10 @@ test("purges AXENT local history on logout without deleting unrelated storage", 
   page,
 }) => {
   await page.goto("/axent");
+  const language = page.locator("header select");
+  await language.selectOption("en");
+  await expect(page.locator("html")).toHaveAttribute("lang", "en");
+
   await page.evaluate(({ localPrefix, legacyPrefix }) => {
     localStorage.setItem(`${localPrefix}tenant:user`, "current");
     localStorage.setItem(`${legacyPrefix}tenant`, "legacy");
