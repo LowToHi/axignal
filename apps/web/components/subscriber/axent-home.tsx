@@ -526,7 +526,7 @@ export function AxentHome({
 
   return <section className={styles.home} data-testid="axent-home">
     <div className={styles.homeGrid}>
-      <main className={`${styles.content} ${isChat ? styles.chatContent : ""}`} data-mode={isChat ? "chat" : "welcome"}>
+      <section className={`${styles.content} ${isChat ? styles.chatContent : ""}`} data-mode={isChat ? "chat" : "welcome"} aria-label="AXENT assistant">
         {!isChat && <div className={styles.hero}>
           <AxentMark large />
           <span className={styles.brandWordmark}>AXENT</span>
@@ -559,7 +559,7 @@ export function AxentHome({
         {!isChat && response.action && <section className={styles.nextStep}><div className={styles.nextStepIcon}><FolderOpen size={24} /></div><div><span>Next step (suggested)</span><strong>{response.action.title}</strong><small>{response.action.description}</small></div><button type="button" onClick={reviewWorkspace}>Open workspace <ArrowRight size={15} /></button>{confirmOpen && <div className={styles.confirmBox}><p>AXENT will only navigate to the selected Workspace. It will not approve requirements or submit anything.</p><label><input type="checkbox" checked={confirmAcknowledged} onChange={(event) => setConfirmAcknowledged(event.target.checked)} />I understand this is a navigation step and I remain the decision-maker.</label><button className={styles.confirmButton} type="button" disabled={!confirmAcknowledged} onClick={() => onOpenWorkspace(response.action!.workspaceId)}><Check size={14} />Confirm and open</button></div>}</section>}
 
         {!isChat && <footer className={styles.trust}><ShieldCheck size={16} /><strong>AXENT · grounded in AXIGNAL knowledge</strong><CircleHelp size={14} /><span>Responses are evidence-bounded and include sources.<br />They may be incomplete or reflect unknowns where evidence is insufficient.</span></footer>}
-      </main>
+      </section>
 
       <ChatHistory conversations={conversations} activeConversationId={activeConversationId} onSelect={selectConversation} onNewChat={() => startNewChat()} onDelete={deleteConversation} onUseContext={useConversationAsContext} onDownload={downloadConversation} onExportPdf={exportConversationPdf} />
     </div>
