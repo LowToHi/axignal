@@ -100,7 +100,7 @@ test("keeps the globe canvas mounted while the Navigator draft changes", async (
   await expect(globe).toHaveAttribute("data-render-identity", identity);
 });
 
-test("keeps the globe canvas mounted after a Navigator route action", async ({
+test("keeps the globe mounted when a persistent Navigator run is rejected", async ({
   page,
 }) => {
   await page.goto("/investigations");
@@ -115,14 +115,18 @@ test("keeps the globe canvas mounted after a Navigator route action", async ({
 
   const actionResponse = page.waitForResponse(
     (response) =>
-      new URL(response.url()).pathname === "/api/subscriber-workspace/actions" &&
+      new URL(response.url()).pathname === "/api/research/runs" &&
       response.request().method() === "POST",
   );
   const composer = page.locator("#axignal-navigator-command");
   await composer.fill("Review public procurement evidence");
   await composer.press("Enter");
-  await actionResponse;
+  const response = await actionResponse;
 
+  expect(response.status()).toBe(503);
+  await expect(page.getByTestId("navigator-research-error")).toContainText(
+    "synthetic fallback is forbidden",
+  );
   await expect(globe).toHaveAttribute("data-render-identity", identity);
 });
 
