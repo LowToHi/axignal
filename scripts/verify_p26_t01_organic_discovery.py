@@ -130,11 +130,16 @@ def main() -> None:
     canonical_origin = (
         "${AXIGNAL_ORGANIC_PUBLIC_ORIGIN:-http://127.0.0.1:18080}"
     )
+    canonical_rp_id = "${AXIGNAL_ORGANIC_WEBAUTHN_RP_ID:-127.0.0.1}"
     assert organic_compose.count(
         f"AXIGNAL_PUBLIC_SITE_URL: {canonical_origin}"
     ) == 2
+    assert f"AXIGNAL_PUBLIC_APP_URL: {canonical_origin}" in organic_compose
     assert f"AXIGNAL_PUBLIC_ORIGIN: {canonical_origin}" in organic_compose
+    assert f"AXIGNAL_WEBAUTHN_ORIGIN: {canonical_origin}" in organic_compose
+    assert f"AXIGNAL_WEBAUTHN_RP_ID: {canonical_rp_id}" in organic_compose
     assert "http://localhost:18080" not in organic_compose
+    assert "AXIGNAL_WEBAUTHN_RP_ID: localhost" not in organic_compose
 
     print("P26-T01 organic discovery contract: PASS")
 
