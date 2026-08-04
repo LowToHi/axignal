@@ -17,6 +17,11 @@ def require(content: str, values: list[str], label: str) -> None:
     assert not missing, f"{label} is missing {missing}"
 
 
+def forbid(content: str, values: list[str], label: str) -> None:
+    present = [value for value in values if value in content]
+    assert not present, f"{label} contains forbidden values {present}"
+
+
 def main() -> None:
     package = json.loads(read("apps/landing/package.json"))
     dependencies = package["dependencies"]
@@ -27,12 +32,23 @@ def main() -> None:
     globe = read("apps/landing/components/semantic-globe.tsx")
     globe_rendering = read("apps/landing/lib/globe-rendering.ts")
     globe_implementation = "\n".join((globe, globe_rendering))
+    canonical = read("apps/landing/lib/canonical-commercial-contract.ts")
+    i18n = read("apps/landing/lib/i18n.ts")
     pricing = read("apps/landing/lib/pricing-data.ts")
     product_profile = read("apps/landing/lib/product-profile.ts")
+    landing_data = read("apps/landing/lib/landing-data.ts")
     form = read("apps/landing/components/pilot-access-form.tsx")
     endpoint = read("apps/landing/app/api/pilot-intake/route.ts")
-    css = read("apps/landing/app/globals.css")
-    tests = read("tests/landing/landing.spec.ts")
+    css = "\n".join(
+        (
+            read("apps/landing/app/globals.css"),
+            read("apps/landing/app/contract-overrides.css"),
+        )
+    )
+    metadata = read("apps/landing/lib/metadata.ts")
+    robots = read("apps/landing/app/robots.ts")
+    browser_tests = read("tests/landing/landing.spec.ts")
+    contract_tests = read("tests/landing/landing-contract.test.mjs")
 
     require(
         experience,
@@ -68,13 +84,8 @@ def main() -> None:
             "earth-europe-high.webp",
             "countries-110m.simplified.geojson",
             "europe-boundaries-50m.geojson",
-            "TubeGeometry",
-            "ActivityArcLayer",
             "CloudLayer",
             "OpportunityMarkerLayer",
-            "axignal-aura.svg",
-            "AuraGlyph",
-            "SVGLoader",
             "getMaxAnisotropy",
             "selectGlobeTextureTier",
             "estimateTextureMemoryMb",
@@ -92,58 +103,71 @@ def main() -> None:
         ],
         "semantic globe",
     )
+    forbid(
+        globe_implementation,
+        ["ActivityArcLayer", "AuraGlyph", "SVGLoader", "axignal-aura.svg"],
+        "retired Globe layers",
+    )
+
+    require(
+        canonical,
+        [
+            'schema: "axignal.price-book.v1"',
+            'code: "CONTROLLED_TRIAL_7D"',
+            "durationDays: 7",
+            "cumulativeTokens: 1_000_000",
+            "cardRequired: false",
+            "automaticConversion: false",
+            'code: "PROFESSIONAL_MONTHLY"',
+            "amountMinor: 14_900",
+            'code: "TEAM_MONTHLY"',
+            "amountMinor: 39_900",
+            'schema: "axignal.b2g-trial-intake.v1"',
+            'source: "landing_b2g_opportunity_v1_0"',
+            'messageVersion: "b2g-opportunity-v1.0"',
+            "Find the public contracts your business is built to pursue.",
+            "Request your 7-day B2G trial",
+        ],
+        "canonical B2G commercial contract",
+    )
+    for locale in LOCALES:
+        require(canonical, [f"\n  {locale}: {{"], f"{locale}:"], f"canonical locale {locale}")
+    require(
+        i18n,
+        [
+            "canonicalCommercialCopy[locale]",
+            "meta: canonical.meta",
+            "cta: canonical.navCta",
+            "...canonical.hero",
+            "items: canonical.faqItems",
+            "...canonical.form",
+        ],
+        "effective locale projection",
+    )
+
     require(
         product_profile,
         [
-            'profileId: "TED_SEARCH_API_BOUNDED_PRODUCT_PROFILE"',
+            'profileId: "ADMITTED_PUBLIC_SOURCE_PROFILE_01"',
             'admissionState: "PRODUCT_ADMITTED"',
             'accessScope: "PRIVATE_AUTHENTICATED_PILOT"',
             'publicAccess: "PUBLIC_ACCESS_DISABLED"',
             "unrestrictedSourceUse: false",
             'demonstrationData: "SYNTHETIC_FIXTURES"',
         ],
-        "current TED product projection",
+        "bounded public-source projection",
     )
-    require(
-        pricing,
-        [
-            '"Controlled Free Trial"',
-            '"7 days"',
-            '"1,000,000 cumulative tokens / organisation · no overage"',
-            "read-only at expiry",
-            '"Apply for controlled trial"',
-            '"Professional"',
-            '"Team / Growth"',
-            '"Enterprise"',
-            '"Indicative candidate pricing"',
-            '"Unlimited monthly AI within AXIGNAL scope"',
-        ],
-        "pricing boundary",
-    )
-    require(
-        form,
-        [
-            'fetch("/api/pilot-intake"',
-            'name="consent"',
-            'name="website"',
-            "aria-live",
-        ],
-        "pilot form",
-    )
-    require(
-        endpoint,
-        [
-            "AXIGNAL_PILOT_INTAKE_WEBHOOK_URL",
-            "AXIGNAL_PILOT_INTAKE_BEARER_TOKEN",
-            "AXIGNAL_PILOT_CONTACT_EMAIL",
-            "AbortSignal.timeout",
-            '"cache-control": "no-store, max-age=0"',
-        ],
-        "pilot intake endpoint",
+    forbid(
+        "\n".join((product_profile, landing_data)),
+        ["Tenders Electronic Daily", "EU_TED", "TED_SEARCH_API_BOUNDED_PRODUCT_PROFILE"],
+        "public source identity",
     )
     require(
         css,
         [
+            ".status-ribbon span:first-child",
+            "display: none",
+            "ADMITTED PUBLIC-SOURCE PROFILE · PRIVATE AUTHENTICATED PILOT",
             "@media (prefers-reduced-motion: reduce)",
             ".cinematic-stage",
             ".trace-object",
@@ -153,30 +177,100 @@ def main() -> None:
             ".globe-initialising",
             ".skip-link",
         ],
-        "landing styles",
+        "landing styles and public source-brand suppression",
+    )
+
+    require(
+        pricing,
+        [
+            "AXIGNAL_PRICE_BOOK.plans.controlledTrial",
+            "AXIGNAL_PRICE_BOOK.plans.professional",
+            "AXIGNAL_PRICE_BOOK.plans.team",
+            'name: "Controlled Trial"',
+            'name: "Professional"',
+            'name: "Team"',
+            '"Unlimited monthly AI within AXIGNAL scope"',
+        ],
+        "versioned pricing boundary",
+    )
+    forbid(
+        pricing,
+        ["€349", "€899", "€1,499", "€18k", 'name: "Enterprise"', "Design Partner"],
+        "rejected pricing and programme copy",
+    )
+
+    require(
+        form,
+        [
+            'fetch("/api/pilot-intake"',
+            "schema: AXIGNAL_TRIAL_INTAKE.schema",
+            "source: AXIGNAL_TRIAL_INTAKE.source",
+            "messageVersion: AXIGNAL_TRIAL_INTAKE.messageVersion",
+            "governmentOffer:",
+            "qualificationBottleneck:",
+            'name="consent"',
+            'name="website"',
+            "aria-live",
+        ],
+        "B2G trial form",
     )
     require(
-        tests,
+        endpoint,
+        [
+            "AXIGNAL_PILOT_INTAKE_WEBHOOK_URL",
+            "AXIGNAL_PILOT_INTAKE_BEARER_TOKEN",
+            "AXIGNAL_PILOT_CONTACT_EMAIL",
+            "AbortSignal.timeout",
+            '"cache-control": "no-store, max-age=0"',
+            "messageVersion: typeof AXIGNAL_TRIAL_INTAKE.messageVersion",
+            "idempotencyKeyHash",
+            "No success was recorded",
+            'new Set(["Controlled Trial", "Professional", "Team"])',
+        ],
+        "B2G trial intake endpoint",
+    )
+
+    require(
+        browser_tests,
         [
             "reducedMotion",
             "semantic-globe",
             "data-continuity-id",
-            "Controlled Free Trial",
+            "Controlled Trial",
+            "€149",
+            "€399",
+            "ADMITTED PUBLIC-SOURCE PROFILE",
             "scrollWidth",
             "consoleErrors",
             "pageErrors",
         ],
-        "landing browser tests",
+        "canonical landing browser tests",
+    )
+    forbid(
+        browser_tests,
+        [
+            'getByRole("heading", { name: "Design Partner" })',
+            'getByRole("heading", { name: "Enterprise" }).toBeVisible',
+            "Indicative candidate pricing",
+            "Win the right public opportunities",
+        ],
+        "rejected browser assertions",
+    )
+    require(
+        contract_tests,
+        [
+            "canonical B2G copy overrides every supported locale",
+            "price book is versioned",
+            "public landing removes source-brand identity",
+            "B2G trial intake persists canonical schema",
+            "landing stays fail-closed for indexing",
+        ],
+        "canonical static contract tests",
     )
 
-    for locale in LOCALES:
-        messages = read(f"apps/landing/messages/{locale}.json")
-        assert "TED remains TECHNICAL_PROBE" not in messages
-        assert "TED sigue en TECHNICAL_PROBE" not in messages
-        assert "TED reste TECHNICAL_PROBE" not in messages
-        assert "TED continua TECHNICAL_PROBE" not in messages
-        assert "TED bleibt TECHNICAL_PROBE" not in messages
-        assert "TED resta TECHNICAL_PROBE" not in messages
+    require(metadata, ["index: false", "follow: false", "noarchive: true"], "fail-closed metadata")
+    require(robots, ['disallow: "/"'], "fail-closed robots")
+    forbid(robots, ["sitemap:"], "pre-authority robots")
 
     forbidden = [
         "pilot.axignal.com",
@@ -184,29 +278,30 @@ def main() -> None:
         "guaranteed return",
         "live investment performance",
     ]
-    joined = "\n".join((experience, form, endpoint, pricing, product_profile))
-    violations = [value for value in forbidden if value in joined]
-    assert not violations, f"forbidden public/deployment claims present: {violations}"
+    joined = "\n".join((experience, form, endpoint, pricing, product_profile, canonical))
+    forbid(joined, forbidden, "public/deployment claims")
 
     evidence = {
         "status": "PASS",
-        "scope": "STATIC_IMPLEMENTATION_CONTRACT",
+        "scope": "STATIC_CANONICAL_B2G_IMPLEMENTATION_CONTRACT",
+        "canonical_copy_locales": list(LOCALES),
+        "public_source_brand_visible": False,
+        "professional_monthly_eur": 149,
+        "team_monthly_eur": 399,
+        "controlled_trial_days": 7,
+        "controlled_trial_cumulative_tokens": 1_000_000,
+        "controlled_trial_card_required": False,
+        "controlled_trial_auto_conversion": False,
+        "intake_schema": "axignal.b2g-trial-intake.v1",
+        "intake_source": "landing_b2g_opportunity_v1_0",
+        "intake_message_version": "b2g-opportunity-v1.0",
         "gsap_scrolltrigger": True,
         "single_persistent_canvas": True,
         "six_named_scenes": True,
         "semantic_globe": True,
-        "texture_quality_tiers": True,
-        "regional_europe_lod": True,
-        "vector_boundaries": True,
-        "adaptive_dpr_telemetry": True,
-        "healthy_webgl_poster_isolated": True,
-        "ted_bounded_product_projection": True,
-        "historical_probe_rewrite_required": False,
-        "controlled_trial_application_only": True,
-        "pricing_operational_boundaries": True,
-        "synthetic_demo_labelled": True,
+        "retired_globe_layers_absent": True,
         "reduced_motion_content_parity": True,
-        "typed_intake_boundary": True,
+        "indexing_authorised": False,
         "visual_gate_independently_passed": False,
     }
     print(json.dumps(evidence, sort_keys=True))
