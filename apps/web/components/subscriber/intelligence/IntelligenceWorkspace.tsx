@@ -159,7 +159,7 @@ export function IntelligenceWorkspace({
         </form>
       </aside>
 
-      <main className={styles.primary}>
+      <section className={styles.primary} aria-label="Intelligence visualization and metrics">
         <div className={styles.canvasArea} data-lens={effectiveLens}>
           {effectiveLens === "GLOBE" ? <SemanticGlobe opportunities={data.opportunities} selectedOpportunityId={data.context.selectedOpportunityId} label={data.context.geography} onSelect={selectOpportunity} /> : null}
           {effectiveLens === "GRAPH" ? <GraphSurface entities={data.graphEntities} relationships={data.graphRelationships} selectedOpportunityId={data.context.selectedOpportunityId} /> : null}
@@ -169,7 +169,7 @@ export function IntelligenceWorkspace({
         <section className={styles.metrics} aria-label="Investigation metrics">
           {data.metrics.map((metric) => <article key={metric.id}><span>{metric.label}</span><strong>{metric.value}</strong><small>{metric.detail}</small>{metric.trend ? <Sparkline values={metric.trend} /> : null}</article>)}
         </section>
-      </main>
+      </section>
 
       <aside className={styles.rightRail}>
         <section className={styles.opportunityRail} aria-label={copy.opportunitiesTitle}>
