@@ -53,14 +53,16 @@ test("replaces animated globe output with a static equivalent when reduced motio
 
   const globe = page.getByRole("region", { name: "European Union" });
   await expect(globe).toBeVisible();
-  await expect(page.getByTestId("semantic-globe-webgl")).toBeHidden();
+  await expect(page.getByTestId("semantic-globe-webgl")).toHaveCount(0);
+  await expect(page.getByTestId("semantic-globe-static")).toBeVisible();
+  await expect(page.getByText(/Motion reduced\. A static cartographic equivalent is shown/)).toBeVisible();
 
   const motionContract = await page.locator("html").evaluate((element) => ({
     active: getComputedStyle(element).getPropertyValue("--ax-reduced-motion-active").trim(),
-    backgroundImage: getComputedStyle(document.querySelector('[aria-describedby="axignal-globe-description"]')!).backgroundImage,
+    staticSurface: document.querySelector('[data-reduced-motion="true"]') !== null,
   }));
   expect(motionContract.active).toBe("1");
-  expect(motionContract.backgroundImage).toContain("globe-poster.webp");
+  expect(motionContract.staticSurface).toBe(true);
 
   await expect(globe.getByRole("table")).toBeAttached();
   await expect(globe.getByRole("button", { name: /Select Sovereign cloud operations framework/ })).toBeAttached();
