@@ -2,8 +2,15 @@ import { expect, test } from "@playwright/test";
 
 const workspaceId = "axfx_ws_eu_cloud_001";
 
+async function useEnglishShell(page: Parameters<typeof test>[0] extends never ? never : any) {
+  const language = page.locator("header select");
+  await language.selectOption("en");
+  await expect(page.locator("html")).toHaveAttribute("lang", "en");
+}
+
 test("traps and restores focus for the command palette", async ({ page }) => {
   await page.goto("/axent");
+  await useEnglishShell(page);
   const viewportWidth = page.viewportSize()?.width ?? 1280;
   const trigger = viewportWidth <= 900
     ? page.getByRole("button", { name: "Open navigation", exact: true })
@@ -27,6 +34,7 @@ test("traps and restores focus for the command palette", async ({ page }) => {
 
 test("keeps contextual workspace navigation available across desktop, tablet and mobile", async ({ page }) => {
   await page.goto(`/workspaces/${workspaceId}/overview`);
+  await useEnglishShell(page);
   const viewportWidth = page.viewportSize()?.width ?? 1280;
 
   if (viewportWidth <= 900) {
