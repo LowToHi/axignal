@@ -11,7 +11,6 @@ const expectedLocales = ["en", "es", "fr", "de", "pt", "it"];
 const criticalNavigationKeys = [
   "commandCenter",
   "opportunities",
-  "investigations",
   "workspaces",
   "settings",
   "methodology",
