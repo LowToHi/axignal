@@ -37,9 +37,11 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Install generator dependency
+      - name: Install generator dependencies
         shell: bash
-        run: python -m pip install --disable-pip-version-check 'ruamel.yaml==0.18.16'
+        run: >-
+          python -m pip install --disable-pip-version-check
+          'ruamel.yaml==0.18.16' 'PyYAML==6.0.3'
 
       - name: Reconstruct and verify migration generator
         shell: bash
@@ -60,6 +62,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          rm -f .github/workflows/ci-architecture-migration.yml
           python /tmp/apply_ci_architecture_v1.py
 
       - name: Verify generated architecture
