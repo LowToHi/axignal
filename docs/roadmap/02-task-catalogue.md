@@ -38,6 +38,8 @@ P25–P27 use the dual-state schema at `schemas/global-e2e-v1.5-task.schema.json
 | `AX-GE2E-P17-T01`–`AX-GE2E-P23-T01` | Evidence present in stacked engineering PRs | `CANONICAL_ACCEPTANCE_BLOCKED` | No public or commercial activation |
 | `AX-GE2E-P24-T01` | Acceptance framework implemented | `CANONICAL_ACCEPTANCE_BLOCKED` | `NO_GO`; no longer final launch authority |
 
+Historical procurement task `AX-GE2E-P08-T01` remains present only in `data/programmes/global-e2e-tasks-p05-p09.v1.4.json`; it is immutable implementation evidence and is not an active v1.5 task.
+
 ## P25–P27 tasks
 
 | Task | Outcome | Engineering state | Canonical state |
