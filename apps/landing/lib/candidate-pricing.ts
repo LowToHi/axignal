@@ -5,9 +5,9 @@ import { resolve } from "node:path";
 
 import {
   parseCandidatePlans,
+  type CandidatePlan,
   type CommercialRuntime
 } from "./candidate-pricing-contract";
-import type { CandidatePlan } from "./landing-data";
 
 export async function getCandidatePlans(): Promise<readonly CandidatePlan[]> {
   const runtimePath = resolve(
