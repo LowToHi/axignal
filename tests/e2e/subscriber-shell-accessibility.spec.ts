@@ -46,3 +46,22 @@ test("keeps contextual workspace navigation available across desktop, tablet and
     await expect(page.getByRole("button", { name: "Open navigation", exact: true })).toBeHidden();
   }
 });
+
+test("replaces animated globe output with a static equivalent when reduced motion is requested", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/investigations");
+
+  const globe = page.getByRole("region", { name: "European Union" });
+  await expect(globe).toBeVisible();
+  await expect(page.getByTestId("semantic-globe-webgl")).toBeHidden();
+
+  const motionContract = await page.locator("html").evaluate((element) => ({
+    active: getComputedStyle(element).getPropertyValue("--ax-reduced-motion-active").trim(),
+    backgroundImage: getComputedStyle(document.querySelector('[aria-describedby="axignal-globe-description"]')!).backgroundImage,
+  }));
+  expect(motionContract.active).toBe("1");
+  expect(motionContract.backgroundImage).toContain("globe-poster.webp");
+
+  await expect(globe.getByRole("table")).toBeAttached();
+  await expect(globe.getByRole("button", { name: /Select Sovereign cloud operations framework/ })).toBeAttached();
+});
