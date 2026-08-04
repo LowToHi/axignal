@@ -12,6 +12,7 @@ import psycopg
 from psycopg import sql
 
 from axignal_api.entitlement_repository import EntitlementRepository
+from trial_grant_fixture import ensure_active_trial_grant
 
 TENANT_ID = UUID("cccccccc-cccc-4ccc-8ccc-cccccccccccc")
 START = datetime(2026, 7, 29, 19, 0, tzinfo=UTC)
@@ -149,6 +150,7 @@ def run(dsn: str) -> dict[str, object]:
     )
     if entitlement["state"] != "ACTIVE":
         raise AssertionError("Security-definer activation did not return ACTIVE entitlement")
+    ensure_active_trial_grant(dsn, tenant_id=TENANT_ID, now=START)
 
     _assert_direct_table_mutation_blocked(dsn)
     _assert_non_app_cannot_execute_mutator(dsn)
