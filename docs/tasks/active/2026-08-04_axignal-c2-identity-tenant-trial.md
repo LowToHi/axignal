@@ -5,10 +5,11 @@ Contract                 AX-GE2E-CLOSURE-EXECUTION-002
 Gate                     C2
 Task authority           AX-GE2E-P03-T02
 Implementation renewal   P25-T01 identity/passwordless/trial abuse
-State                    IN_PROGRESS
+State                    EVIDENCE_READY
 Required marker          AX_C2_IDENTITY_TENANT_TRIAL_PASS
+Validated predecessor    11d8c2435ff899d0276dd4f0d6c51da45775e0dc
 Previous canonical gate  C1 CLOSED / PASS
-Next gate                C3 BLOCKED_BY_C2
+Next gate                C3 AUTHORIZED_ONLY_AFTER_ATTESTATION_HEAD_PASS
 Merge                    NOT_AUTHORIZED
 Public launch            NO_GO
 ```
@@ -16,12 +17,12 @@ Public launch            NO_GO
 ## Scope decision
 
 ```text
-Passwordless recovery evidence       MUST_CLOSE / EVIDENCE_ONLY
-P25 exact-head renewal                MUST_CLOSE
-Organisation and membership evidence REUSE_EXISTING_AUTHORITY
-Seat governance                      REUSE_EXISTING_AUTHORITY
-Entitlement runtime                  REUSE_EXISTING_AUTHORITY
-Trial retention                      REUSE_EXISTING_AUTHORITY
+Passwordless recovery evidence       CLOSED / PASS
+P25 exact-head renewal                CLOSED / PASS
+Organisation and membership evidence REUSED / PASS
+Seat governance                      REUSED / PASS
+Entitlement runtime                  REUSED / PASS
+Trial retention                      REUSED / PASS
 Second identity implementation       REJECTED_OVERENGINEERING
 C3 persistence changes               DEFERRED_CONTRACTED
 C4 research changes                  DEFERRED_CONTRACTED
@@ -63,11 +64,9 @@ READY
 → server-enforced read-only retention or governed paid conversion
 ```
 
-## Material gap identified
+## Material gap closed
 
-The integrated head already demonstrated signup, WebAuthn registration, AAL2 authentication, logout, session rotation, tenant-owned trial, alias reuse, step-up, budgets, concurrency, memberships, seats, entitlement and retention.
-
-The missing C2 evidence was the complete recovery boundary. The existing UI, API and PostgreSQL functions were present, but the exact-head browser journey did not execute:
+The existing UI, API and PostgreSQL functions already implemented recovery, but the prior browser journey did not execute the complete boundary. The C2 change added exact-head evidence for:
 
 - recovery from another browser while a session remained active;
 - immediate invalidation of that session;
@@ -77,9 +76,11 @@ The missing C2 evidence was the complete recovery boundary. The existing UI, API
 - replacement recovery-code issuance;
 - continuity of the same tenant and trial.
 
-## Bounded implementation
+No second identity, tenant, membership, entitlement or trial implementation was introduced.
 
-The existing `tests/e2e/identity-passwordless.spec.ts` now uses two independent browser contexts and two virtual CTAP2 authenticators:
+## Recovery evidence
+
+The existing `tests/e2e/identity-passwordless.spec.ts` uses two independent browser contexts and two virtual CTAP2 authenticators:
 
 ```text
 browser A
@@ -106,58 +107,64 @@ browser B
 → new rotated session issued
 ```
 
-The journey emits the non-sensitive marker:
+The exact-head P25 artifact is:
+
+```text
+artifact_id  8906279065
+run_id       30943693350
+head_sha     11d8c2435ff899d0276dd4f0d6c51da45775e0dc
+digest       sha256:6a9a5e86dfd1ea4c18db7267a99596f22305d2e2aff72e346ab9dcf40aa54576
+```
+
+It contains the non-sensitive marker:
 
 ```text
 artifacts/c2-identity-recovery-browser.json
 ```
 
-The P25 workflow fails closed unless that marker proves:
-
-- session rotation;
-- one-time recovery code;
-- revocation of prior sessions;
-- revocation of prior authenticators;
-- replacement passkey;
-- eight replacement codes;
-- AAL2 replacement session;
-- tenant continuity;
-- preserved trial state;
-- zero external identity-provider and model calls;
-- public signup remains unauthorized.
-
-## Existing authorities to renew on the final head
+## Validated predecessor matrix
 
 ```text
-P03 security, identity and rights
-P25 identity/passwordless/trial abuse
-P21-T02 organisation/membership/seat governance
-Entitlement Runtime
-Trial Retention Lifecycle
-G5 and protected-route boundaries
-Full Migration Matrix
-Core, Runtime and Domain canonical gates
+AXIGNAL PR Gate — Core       30943693385  SUCCESS
+AXIGNAL PR Gate — Runtime    30943693350  SUCCESS
+AXIGNAL PR Gate — Domain     30943693506  SUCCESS
+Remote Pilot Operations      30943693253  SUCCESS
+Procurement Admission        30943692976  SUCCESS
 ```
 
-## Acceptance status
+The validated predecessor proves:
 
 ```text
-Passwordless signup and rotation        PENDING_FINAL_HEAD
-Recovery and authenticator replacement  PENDING_FINAL_HEAD
-Organisation and membership             PENDING_FINAL_HEAD
-Seat governance                         PENDING_FINAL_HEAD
-Trial READY → ACTIVE                     PENDING_FINAL_HEAD
-Token/cost/concurrency limits            PENDING_FINAL_HEAD
-Expiry → read-only retention             PENDING_FINAL_HEAD
-Deletion/purge/restore                   PENDING_FINAL_HEAD
-Protected routes                         PENDING_FINAL_HEAD
-Complete exact-head matrix               PENDING_FINAL_HEAD
+Passwordless signup and rotation        PASS
+Recovery and authenticator replacement  PASS
+Organisation and membership             PASS
+Seat governance                         PASS
+Trial READY → ACTIVE                     PASS
+Token/cost/concurrency limits            PASS
+Expiry → read-only retention             PASS
+Deletion/purge/restore                   PASS
+Protected routes                         PASS
+Complete exact-head matrix               PASS
 ```
 
-The marker remains prohibited:
+## Closure rule
+
+The predecessor matrix proves the implementation, but does not make this documentary head authoritative by itself. The C2 marker is carried by a separate closure attestation and becomes effective only when the complete matrix for the commit containing that attestation is terminal success.
+
+Until then:
 
 ```text
-AX_C2_IDENTITY_TENANT_TRIAL_PASS = NOT_EMITTED
+AX_C2_IDENTITY_TENANT_TRIAL_PASS = CANDIDATE_NOT_EFFECTIVE
+C2                              = EVIDENCE_READY
+C3                              = BLOCKED_BY_ATTESTATION_HEAD_MATRIX
 ```
 
-C3 remains blocked until every required item is terminal success on one exact SHA and this record is updated to `CLOSED / PASS` without changing that authority silently.
+The closure attestation preserves:
+
+```text
+PR_STATE               OPEN / DRAFT / UNMERGED
+MERGE                   NOT_AUTHORIZED
+PUBLIC_LAUNCH           NO_GO
+COMMERCIAL_ACTIVATION   NOT_AUTHORIZED
+SOURCE_ADMISSION        NOT_AUTHORIZED
+```
