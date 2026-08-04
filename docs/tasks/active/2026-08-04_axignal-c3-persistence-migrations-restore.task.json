@@ -1,0 +1,241 @@
+{
+  "task_id": "AX-GE2E-P03-T03",
+  "goal_id": "AXIGNAL-GOAL-001",
+  "phase": "P03",
+  "state": "IN_PROGRESS",
+  "objective": "Establish the bounded PostgreSQL persistent authority plane for Subscriber Workspace and AXENT, including evidence sufficiency, submission readiness, typed append-only events, deterministic deadlines, retention, legal hold, export, deletion, terminal purge and backup/restore.",
+  "outcome": "C3 remains in progress until a fresh database, supported migration matrix, tenant-isolation circuit, AXENT retention circuit, terminal purge and snapshot restore all pass on one exact head without replacing the C4 product adapter journey.",
+  "contracts": [
+    "GOAL_LOCK",
+    "AGENTS",
+    "03",
+    "05",
+    "06",
+    "18",
+    "22",
+    "25",
+    "26",
+    "29",
+    "31",
+    "ADR-016"
+  ],
+  "skills": [
+    {
+      "skill_id": "goal-keeper",
+      "version": "0.1.0",
+      "activation_reason": "Keep C3 limited to persistent authority, migrations and restore rather than implementing the later C4 adapter journey."
+    },
+    {
+      "skill_id": "database-engineer",
+      "version": "0.1.0",
+      "activation_reason": "Design tenant-isolated PostgreSQL state, RLS, immutable ledgers, retention and deterministic restore semantics."
+    },
+    {
+      "skill_id": "security-reviewer",
+      "version": "0.1.0",
+      "activation_reason": "Verify cross-tenant denial, encrypted AXENT content, legal holds, separation of duties and append-only evidence."
+    },
+    {
+      "skill_id": "test-engineer",
+      "version": "0.1.0",
+      "activation_reason": "Execute fresh migrations, invariant failures, purge and byte-preserving snapshot restore in a disposable topology."
+    }
+  ],
+  "dependencies": {
+    "phases": [
+      "P03",
+      "P21"
+    ],
+    "tasks": [
+      "AX-GE2E-P03-T01",
+      "AX-GE2E-P03-T02",
+      "AX-GE2E-P21-T02"
+    ],
+    "external": [
+      "C0 canonical reconciliation is CLOSED / PASS",
+      "C1 subscriber shell is CLOSED / PASS",
+      "C2 identity, tenant, seats and trial is CLOSED / PASS",
+      "C4 remains the authority for wiring the real Subscriber Workspace and AXENT product adapter",
+      "Public launch, commercial activation and source admission remain unauthorized"
+    ]
+  },
+  "allowed_scope": [
+    "Add one ordered PostgreSQL migration for Subscriber Workspace and AXENT authority",
+    "Persist evidence, requirements, amendments, readiness, approvals and typed audit events",
+    "Calculate deadlines_next_30_days from persisted timestamps using deterministic half-open semantics",
+    "Encrypt AXENT message content at rest and enforce tenant-scoped export",
+    "Enforce conversation retention classes, legal hold, deletion and terminal tenant purge",
+    "Add C3 object-count purge receipts without weakening existing deletion tombstones",
+    "Execute fresh migration, cross-tenant, backup and restore evidence in the existing full migration workflow"
+  ],
+  "prohibited_scope": [
+    "No second identity, tenant, membership, entitlement, trial or billing plane",
+    "No broad frontend rewrite or replacement of the existing Subscriber Workspace shell",
+    "No claim that the filesystem fixture or browser localStorage is production authority after C3",
+    "No C4 Navigator, queue, worker or ResearchRun adapter implementation",
+    "No autonomous submission, external communication, signature or payment action",
+    "No AX_C3_PERSISTENCE_MIGRATIONS_RESTORE_PASS marker before final exact-head evidence is terminal success"
+  ],
+  "acceptance_evidence": [
+    {
+      "evidence_type": "DOCUMENT",
+      "description": "Ordered migration defines the persistent workspace, evidence, amendment, audit, AXENT, legal-hold and purge-receipt authority.",
+      "required": true,
+      "location": "infra/postgres/140-subscriber-persistent-authority.sql",
+      "status": "PRESENT"
+    },
+    {
+      "evidence_type": "TEST",
+      "description": "Evidence insufficiency, unresolved amendments and same-actor approval fail closed; valid independent approval becomes ready.",
+      "required": true,
+      "location": "scripts/verify_c3_persistent_authority_e2e.sh",
+      "status": "PRESENT"
+    },
+    {
+      "evidence_type": "TEST",
+      "description": "Typed audit events are append-only and submission-invalidating changes are recorded with tenant revisions.",
+      "required": true,
+      "location": "scripts/verify_c3_persistent_authority_e2e.sh",
+      "status": "PRESENT"
+    },
+    {
+      "evidence_type": "TEST",
+      "description": "deadlines_next_30_days is calculated from persisted deadlines using a deterministic [as_of, as_of + 30 days) interval.",
+      "required": true,
+      "location": "scripts/verify_c3_persistent_authority_e2e.sh",
+      "status": "PRESENT"
+    },
+    {
+      "evidence_type": "SECURITY_REVIEW",
+      "description": "Workspace and AXENT access is tenant-isolated; AXENT plaintext is absent at rest and exports are explicit, audited and tenant scoped.",
+      "required": true,
+      "location": "scripts/verify_c3_persistent_authority_e2e.sh",
+      "status": "PRESENT"
+    },
+    {
+      "evidence_type": "RESTORE_TEST",
+      "description": "Legal hold blocks deletion, released conversations purge, terminal workspace purge records C3 counts, and a database snapshot restores workspace, audit, ciphertext and hold state.",
+      "required": true,
+      "location": "scripts/verify_c3_persistent_authority_e2e.sh",
+      "status": "PRESENT"
+    },
+    {
+      "evidence_type": "TEST",
+      "description": "Full PostgreSQL migration matrix and C3 persistent-authority rehearsal complete on the exact candidate head.",
+      "required": true,
+      "location": "github-actions:full-migration-matrix",
+      "status": "MISSING"
+    },
+    {
+      "evidence_type": "TEST",
+      "description": "All canonical PR gates and specialised direct checks complete successfully on the final C3 head.",
+      "required": true,
+      "location": "github-actions:exact-head-matrix",
+      "status": "MISSING"
+    }
+  ],
+  "impacts": {
+    "security": "CRITICAL",
+    "privacy": "CRITICAL",
+    "data_rights": "MATERIAL",
+    "regulatory": "MATERIAL",
+    "multilingual": "LOW",
+    "epistemic": "CRITICAL",
+    "billing": "MATERIAL"
+  },
+  "observability": {
+    "metrics": [
+      "subscriber_workspace_readiness_blocked_total",
+      "subscriber_submission_approved_total",
+      "subscriber_deadline_window_total",
+      "subscriber_cross_tenant_denied_total",
+      "axent_export_total",
+      "axent_legal_hold_total",
+      "axent_purge_total",
+      "c3_terminal_purge_receipt_total"
+    ],
+    "logs": [
+      "typed workspace event receipt",
+      "submission invalidation receipt",
+      "AXENT export receipt without plaintext",
+      "legal hold placement and release receipt",
+      "terminal purge object-count receipt"
+    ],
+    "traces": [
+      "requirement to evidence sufficiency",
+      "preparer to independent approver",
+      "deadline calculation at fixed as_of",
+      "AXENT create append export hold delete purge",
+      "fresh migration snapshot restore terminal purge"
+    ],
+    "alerts": [
+      "cross-tenant workspace visibility",
+      "plaintext AXENT message at rest",
+      "legal-hold bypass",
+      "audit ledger mutation",
+      "restore missing C3 authority objects",
+      "terminal purge without C3 receipt"
+    ]
+  },
+  "rollback": {
+    "strategy": "Revert the C3 migration registration and bounded authority code before deployment; after migration, preserve data and use the existing retention/deletion machinery rather than destructive down-migrations.",
+    "kill_switch": "AXIGNAL_SUBSCRIBER_WORKSPACE_ENABLED=false",
+    "tested": false
+  },
+  "goal_lock_checks": [
+    {
+      "check_id": 1,
+      "answer": "YES",
+      "evidence": "C3 establishes the durable authority required by the contracted B2G opportunity workflow."
+    },
+    {
+      "check_id": 2,
+      "answer": "YES",
+      "evidence": "Evidence sufficiency and readiness are computed from persisted canonical records, not fixtures or model output."
+    },
+    {
+      "check_id": 3,
+      "answer": "YES",
+      "evidence": "C3 does not modify Globe, Graph or Timeline presentation."
+    },
+    {
+      "check_id": 4,
+      "answer": "YES",
+      "evidence": "Submission readiness remains deterministic and no AI proposal is promoted to authority."
+    },
+    {
+      "check_id": 5,
+      "answer": "YES",
+      "evidence": "No unsupported locale or multilingual claim is introduced."
+    },
+    {
+      "check_id": 6,
+      "answer": "YES",
+      "evidence": "Workspace, audit, AXENT, retention, purge and restore state is durable PostgreSQL authority."
+    },
+    {
+      "check_id": 7,
+      "answer": "YES",
+      "evidence": "Preparation and approval are separate; no external submission or communication is automated."
+    },
+    {
+      "check_id": 8,
+      "answer": "YES",
+      "evidence": "RLS, legal hold, encryption and append-only guards fail closed."
+    },
+    {
+      "check_id": 9,
+      "answer": "YES",
+      "evidence": "C3 contains explicit snapshot restore and terminal purge receipts."
+    },
+    {
+      "check_id": 10,
+      "answer": "YES",
+      "evidence": "The task remains IN_PROGRESS and C4 stays blocked until the attestation-head matrix succeeds."
+    }
+  ],
+  "owner": "Staff Product Engineering",
+  "reviewer": null,
+  "created_at": "2026-08-04T20:18:00Z",
+  "updated_at": "2026-08-04T20:18:00Z"
+}
