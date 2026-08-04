@@ -152,7 +152,8 @@ def main() -> None:
         "token ceiling 1,000,000",
         "the trial belongs to a tenant or economic identity",
         "token and cost reservations are transactional",
-        "only `in_scope_axignal` may proceed to an ai model or axignal tool",
+        "tool access is deny-by-default and context-specific",
+        "models receive only data admitted for the declared purpose and tenant scope",
         "generate an axignal report in pdf form",
     ):
         _require(marker in normalized_contract, f"contract authority missing: {marker}")
