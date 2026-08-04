@@ -70,7 +70,21 @@ jobs:
         run: |
           set -o pipefail
           bash scripts/verify_c3_persistent_authority_e2e.sh \
-            2>&1 | tee c3-persistent-authority-e2e.json
+            2>&1 | tee c3-persistent-authority-e2e.log
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          log = Path("c3-persistent-authority-e2e.log").read_text()
+          marker = '{\n  "schema": "axignal.c3-persistent-authority-e2e.v1"'
+          start = log.rfind(marker)
+          if start < 0:
+              raise SystemExit("C3 structured evidence marker not found")
+          payload = json.loads(log[start:])
+          Path("c3-persistent-authority-e2e.json").write_text(
+              json.dumps(payload, indent=2, sort_keys=True) + "\n"
+          )
+          PY
 
       - name: Verify C3 evidence boundary
         shell: bash
