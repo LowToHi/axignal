@@ -59,22 +59,27 @@ Implemented on this branch:
 - the complete Shell chrome has one typed catalogue for English, Spanish, French, German, Portuguese and Italian;
 - global navigation, contextual workspace navigation, command palette, notification, account, logout and accessibility labels change locale while retaining identical routes and capabilities;
 - language preference persists through a full navigation and updates the document language;
+- AXENT, Investigations and Bid Workspace expose one and only one main-content landmark from the product Shell;
+- critical AXENT, Investigations and Bid Workspace routes reject duplicate IDs, positive tabindex and visible interactive controls without accessible names;
+- those critical routes reflow without page-level horizontal overflow at 320 CSS pixels;
+- critical AXENT controls remain available under 200 percent text scaling;
+- forced-colors mode preserves interactive borders, current/pressed states and a visible two-pixel focus outline;
 - synthetic Intelligence projections are withheld in real-adapter mode instead of being presented as live data;
 - Playwright launches the subscriber candidate with explicit non-production fixture authority;
 - critical browser tests use zero retries;
 - web and landing security-boundary implementations are identical again;
-- browser tests cover authority, degraded mode, server preconditions, precise audit projection, the Navigator-to-ResearchRun route transition, AXENT local-retention/logout boundaries, reduced-motion equivalence and six-locale Shell semantics.
+- browser tests cover authority, degraded mode, server preconditions, precise audit projection, the Navigator-to-ResearchRun route transition, AXENT local-retention/logout boundaries, reduced-motion equivalence, six-locale Shell semantics and the automated accessibility boundary.
 
 ## Exact-head evidence boundary
 
 The immediately preceding exact head
-`e7c3cb1106a89bd76b578d26104386ab6f6dff58` passed the complete triggered
+`b74c1b0728a065be6331d02455569670e5a48c9e` passed the complete triggered
 matrix, including Contract Validation, Frontend Unit Contracts, G5, G6,
 Executable Spine, E2E Technical Audit, P21-T02, P25-T01 and P26-T01.
 
-That evidence is immutable evidence for that predecessor only. The subsequent
-six-locale Shell implementation changes the head and therefore requires a fresh
-complete matrix before it can contribute to C0–C1 acceptance.
+That evidence is immutable evidence for that predecessor only. This documentary
+reconciliation changes the head and therefore requires a fresh complete matrix
+before it can contribute to C0–C1 acceptance.
 
 ## C1 blockers and disposition
 
@@ -91,16 +96,17 @@ AX-SW-BLK-009 deadlines_next_30_days calculation         PARTIAL_FIX_AT_BFF
 AX-SW-BLK-010 AXENT retention/persistence contract       PARTIAL_FIX_AT_CLIENT
 AX-SW-BLK-011 assistant degraded-mode provenance         FIXED_FOR_CURRENT_BFF
 AX-SW-BLK-012 six-locale functional parity               PARTIAL_FIX_AT_SHELL_CHROME
-AX-SW-BLK-013 formal accessibility acceptance            OPEN
+AX-SW-BLK-013 formal accessibility acceptance            PARTIAL_FIX_AUTOMATED_ACCESSIBILITY
 AX-SW-BLK-014 global desktop/tablet/mobile evidence      OPEN
 AX-SW-BLK-015 real adapter and real-data journey         OPEN
 ```
 
 `PARTIAL_FIX_AT_BFF`, `PARTIAL_FIX_AT_BFF_AND_UI`,
-`PARTIAL_FIX_AT_CLIENT` and `PARTIAL_FIX_AT_SHELL_CHROME` do not close the
-persistent or product-wide upstream contract. Equivalent enforcement, native
-event typing, audit, reconciliation, retention, export, deletion and semantic
-parity must exist in the authoritative service and every contracted surface.
+`PARTIAL_FIX_AT_CLIENT`, `PARTIAL_FIX_AT_SHELL_CHROME` and
+`PARTIAL_FIX_AUTOMATED_ACCESSIBILITY` do not close the persistent,
+product-wide or human-authority contracts. Equivalent enforcement, native event
+typing, audit, reconciliation, retention, export, deletion, semantic parity and
+accessibility acceptance must exist across every contracted surface.
 
 For `AX-SW-BLK-005`, the subscriber Shell now creates only persistent
 ResearchRuns, validates the selected opportunity against the server-resolved
@@ -131,12 +137,15 @@ server errors and source-derived multilingual presentation are not yet complete
 across all six locales. C14 must demonstrate the same meaning, authority,
 uncertainty and action availability on every contracted surface.
 
-The reduced-motion boundary suppresses CSS animation and transition and does
-not mount the dynamic WebGL Globe whenever the operating system requests
-reduced motion, while preserving the accessible opportunity table and actions.
-This does not close `AX-SW-BLK-013`: formal accessibility acceptance still
-requires the full C14 matrix, including axe/pa11y, keyboard, screen reader,
-zoom, reflow, forced colours and human approval.
+For `AX-SW-BLK-013`, the automated boundary now verifies a single main landmark,
+unique IDs, non-positive tabindex, accessible names for visible controls, reflow
+at 320 CSS pixels, critical controls under 200 percent text scaling, reduced
+motion and forced-colors keyboard focus across AXENT, Investigations and Bid
+Workspace. The blocker remains partial: C14 still requires a reproducibly locked
+axe/pa11y rule set, broader route and state coverage, real screen-reader and
+keyboard sessions, zoom and reflow review for every contracted surface,
+platform/browser assistive-technology coverage and explicit human accessibility
+authority.
 
 ## Non-negotiable execution rules
 
