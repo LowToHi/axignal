@@ -7,6 +7,14 @@ test.skip(
   "P26 E2E requires the isolated organic-discovery topology."
 );
 
+function canonicalBrowserOrigin(baseURL: string): string {
+  const url = new URL(baseURL);
+  if (url.hostname === "127.0.0.1" || url.hostname === "::1") {
+    url.hostname = "localhost";
+  }
+  return url.origin;
+}
+
 test("publishes only admitted intelligence and exposes a governed founder OS", async ({
   page,
   context,
@@ -14,7 +22,7 @@ test("publishes only admitted intelligence and exposes a governed founder OS", a
 }) => {
   test.setTimeout(120_000);
   if (!baseURL) throw new Error("P26_PLAYWRIGHT_BASE_URL_REQUIRED");
-  const origin = new URL(baseURL).origin;
+  const origin = canonicalBrowserOrigin(baseURL);
   const publicUrl = `${origin}/tenders/germany/cybersecurity`;
   const publicResponse = await page.goto(publicUrl);
   expect(publicResponse?.status()).toBe(200);
