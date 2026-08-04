@@ -4,10 +4,16 @@
   "contract_id": "AX-GE2E-CLOSURE-EXECUTION-002",
   "contract_sha256": "01d034f3a40ad0fa7e57675afec37ac39c67abcbad5f2b6e1e2c58a850ac34c8",
   "frozen_head_sha": "365ee7d4de6ef09668b941a896c609f827619087",
-  "implementation_head_before_evidence_sha": "21fc424d6952c44ba31adec59c10f37628c3a9c3",
+  "validated_implementation_sha": "f4b46e269c22c6bc36e6a97a19a2ac2964ed221c",
+  "validated_git_tree_sha": "derived_from_exact_head_checkout_artifact",
   "branch": "codex/landing-b2g-international",
   "pull_request": 168,
-  "classification": "EVIDENCE_ONLY",
+  "validation_base": {
+    "branch": "evidence/landing-wp1-a49330d",
+    "sha": "a49330dfa01af9328b459c4bf6818477c78da775",
+    "purpose": "Execute the pre-existing Landing Globe pull-request workflow at the true merge-base without integrating later main changes or advancing C0."
+  },
+  "classification": "WP1_CLOSURE_EVIDENCE",
   "scope": "WP1_CANONICAL_B2G_LANDING_CONTRACT_RECONCILIATION",
   "implemented": [
     "six_locale_effective_canonical_b2g_copy",
@@ -17,7 +23,7 @@
     "durable_source_and_message_version",
     "fail_closed_noindex_no_sitemap",
     "positive_and_negative_contract_verifiers",
-    "exact_head_static_and_browser_workflow_definition"
+    "single_exact_head_landing_workflow_authority"
   ],
   "preserved": [
     "single_globe_canvas",
@@ -32,17 +38,66 @@
   "material_corrections": [
     "replaced_browser_assertions_for_rejected_copy",
     "replaced_static_verifier_requirements_for_retired_globe_layers_and_superseded_commercial_copy",
-    "fixed_gsap_audit_invocation_to_include_scope",
-    "verified_generated_public_source_boundary_in_browser_contract",
-    "removed_sitemap_before_launch_authority"
+    "converged_ci_into_existing_landing_foundation_workflow",
+    "fixed_generated_public_source_boundary_browser_assertion",
+    "removed_sitemap_before_launch_authority",
+    "fixed_contractual_verifier_syntax",
+    "reflowed_asset_preparation_lines_without_relaxing_ruff"
   ],
-  "execution_channel": {
-    "workflow": ".github/workflows/landing-canonical-b2g-contract.yml",
-    "exact_head_enforced": true,
-    "workflow_run_observed_through_connector": false,
-    "combined_status_observed_through_connector": false,
-    "reason": "The available GitHub connector returned no pull-request workflow runs or commit statuses for the implementation SHAs and exposes no workflow-dispatch action. No PASS marker is inferred."
+  "landing_exact_head_validation": {
+    "workflow": ".github/workflows/landing-foundation.yml",
+    "run_id": 30895704257,
+    "result": "PASS",
+    "jobs": {
+      "contract_typecheck_build_audits": "PASS",
+      "globe_desktop_mobile_reduced_motion": "PASS"
+    },
+    "artifacts": [
+      {
+        "id": 8886921904,
+        "name": "landing-static-f4b46e269c22c6bc36e6a97a19a2ac2964ed221c",
+        "digest": "sha256:c3b1610df72607be88e664ff14f0daf7133fdfb1e4226801e3d3a5d7ff43b4c1",
+        "expires_at": "2026-09-03T09:18:30Z"
+      },
+      {
+        "id": 8886945865,
+        "name": "landing-browser-f4b46e269c22c6bc36e6a97a19a2ac2964ed221c",
+        "digest": "sha256:a3d2f33e2383a73c02d7677fe74c465a9c55d9ae251b005bc150587f269bc931",
+        "expires_at": "2026-09-03T09:19:19Z"
+      }
+    ]
   },
+  "cross_cutting_validation": {
+    "contract_validation": {
+      "run_id": 30895704132,
+      "result": "PASS"
+    },
+    "executable_spine": {
+      "run_id": 30895704206,
+      "result": "PASS",
+      "jobs": [
+        "FastAPI contracts, proposal authority and admission policy",
+        "Persistent research, authority isolation and human review",
+        "Web, landing and browser contract"
+      ]
+    },
+    "human_review_acceptance": {
+      "run_id": 30895704102,
+      "result": "PASS"
+    }
+  },
+  "required_markers": {
+    "LANDING_CANONICAL_B2G_COPY_PASS": "PASS",
+    "LANDING_PUBLIC_TED_ABSENT_PASS": "PASS",
+    "LANDING_PRICE_BOOK_RECONCILIATION_PASS": "PASS",
+    "LANDING_B2G_TRIAL_INTAKE_PASS": "PASS",
+    "LANDING_DESKTOP_PASS": "PASS",
+    "LANDING_MOBILE_PASS": "PASS",
+    "LANDING_REDUCED_MOTION_PASS": "PASS",
+    "LANDING_WEBGL_PASS": "PASS",
+    "LANDING_EXACT_HEAD_MATRIX_PASS": "PASS"
+  },
+  "closure_record_policy": "This evidence record is accepted only if the workflows associated with the commit containing it also pass; GitHub Checks are the authority for that final record commit.",
   "not_authorized": [
     "merge",
     "publication",
@@ -50,14 +105,8 @@
     "stripe_live",
     "public_launch"
   ],
-  "required_markers": {
-    "LANDING_CANONICAL_B2G_COPY_PASS": "PENDING_EXECUTION",
-    "LANDING_PUBLIC_TED_ABSENT_PASS": "PENDING_EXECUTION",
-    "LANDING_PRICE_BOOK_RECONCILIATION_PASS": "PENDING_EXECUTION",
-    "LANDING_B2G_TRIAL_INTAKE_PASS": "PENDING_EXECUTION",
-    "LANDING_EXACT_HEAD_MATRIX_PASS": "PENDING_EXECUTION"
-  },
-  "gate_decision": "HOLD_FAIL_CLOSED",
-  "state": "IMPLEMENTED_EXACT_HEAD_MATRIX_NOT_OBSERVED",
-  "recorded_at": "2026-08-04T10:00:00+02:00"
+  "gate_decision": "WP1_PASS",
+  "next_transition": "WP2_CLASSIFY_PR167_BLOCKERS_BY_CLOSURE_CLAUSE",
+  "state": "WP1_SUBJECT_VALIDATED_CLOSURE_RECORD_PENDING_OWN_EXACT_HEAD_CHECKS",
+  "recorded_at": "2026-08-04T11:20:00+02:00"
 }
