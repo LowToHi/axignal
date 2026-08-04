@@ -32,6 +32,10 @@ export default defineConfig({
       name: "chromium-tablet",
       use: { ...devices["iPad Pro 11"], browserName: "chromium" },
     },
+    {
+      name: "chromium-mobile",
+      use: { ...devices["iPhone 13"], browserName: "chromium" },
+    },
   ],
   webServer: useExternalServer
     ? undefined
