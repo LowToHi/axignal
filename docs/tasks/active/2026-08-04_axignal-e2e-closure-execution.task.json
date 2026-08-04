@@ -4,7 +4,7 @@
   "phase": "P08",
   "state": "IN_PROGRESS",
   "objective": "Close the authenticated subscriber Shell and Bid Workspace against the AXIGNAL global E2E closure contract without reducing product scope or weakening authority boundaries.",
-  "outcome": "The subscriber Shell reaches exact-head engineering E2E acceptance with server-authoritative actions, honest fixture and degraded states, no enabled dead controls, complete recovery evidence and no unsupported launch claims.",
+  "outcome": "The subscriber Shell has complete exact-head engineering evidence, including rollback and recovery, but canonical C1 acceptance remains blocked until qualified-user usability evidence satisfies the normative cohort and threshold contract.",
   "contracts": [
     "GOAL_LOCK",
     "AGENTS",
@@ -52,15 +52,22 @@
     {
       "skill_id": "test-engineer",
       "version": "0.1.0",
-      "activation_reason": "Produce first-run exact-head unit, integration and browser evidence."
+      "activation_reason": "Produce first-run exact-head unit, integration, browser and rollback evidence."
     }
   ],
   "dependencies": {
-    "phases": ["P07", "P08"],
-    "tasks": ["AX-GE2E-P07-T01", "AX-GE2E-P08-T01", "AX-GE2E-P08-T02"],
+    "phases": [
+      "P07",
+      "P08"
+    ],
+    "tasks": [
+      "AX-GE2E-P07-T01",
+      "AX-GE2E-P08-T01",
+      "AX-GE2E-P08-T02"
+    ],
     "external": [
       "Contract 31 and ADR-016 remain the superior programme authority",
-      "Qualified-user UX acceptance remains external and pending",
+      "Qualified-user UX acceptance remains external and pending: minimum 8 qualified participants, required role mix, at least 2 non-English primary-locale sessions and all declared acceptance thresholds",
       "Real source and production-provider admission remain independently gated"
     ]
   },
@@ -79,56 +86,57 @@
     "No silent fixture fallback or synthetic data presented as live evidence",
     "No enabled control that can only terminate in an unavailable-operation rejection",
     "No CI retry used to convert critical browser flakiness into acceptance",
-    "No canonical product, commercial availability or public-launch claim"
+    "No canonical product, commercial availability or public-launch claim",
+    "No AX_C1_SUBSCRIBER_SHELL_FULL_E2E_PASS marker before qualified-user usability authority exists"
   ],
   "acceptance_evidence": [
     {
       "evidence_type": "DOCUMENT",
-      "description": "Human-readable execution record with blockers, authority and transition state.",
+      "description": "Human-readable execution record with blockers, authority, exact-head engineering evidence and transition state.",
       "required": true,
       "location": "docs/tasks/active/2026-08-04_axignal-e2e-closure-execution.md",
       "status": "PRESENT"
     },
     {
       "evidence_type": "TEST",
-      "description": "Exact-head typecheck, frontend unit contracts and production build pass.",
+      "description": "Exact-head typecheck, frontend unit contracts, kill-switch recovery rehearsal and production builds completed successfully.",
       "required": true,
-      "location": null,
-      "status": "MISSING"
+      "location": "github-actions-run:30928582204@30e21a6eabce9a2ff909e817bde94238db1560ae",
+      "status": "PRESENT"
     },
     {
       "evidence_type": "TEST",
-      "description": "Subscriber desktop and tablet browser matrix passes on the first run with no retries.",
+      "description": "Subscriber desktop, tablet and mobile browser matrix completed successfully on the first run with zero retries.",
       "required": true,
-      "location": null,
-      "status": "MISSING"
+      "location": "github-actions-run:30928582689@30e21a6eabce9a2ff909e817bde94238db1560ae",
+      "status": "PRESENT"
     },
     {
       "evidence_type": "SECURITY_REVIEW",
-      "description": "G5 security boundaries, tenant denial and external-authority negative cases pass.",
+      "description": "G5 security boundaries, tenant denial, browser security and external-authority negative cases completed successfully.",
       "required": true,
-      "location": null,
-      "status": "MISSING"
+      "location": "github-actions-run:30928582229@30e21a6eabce9a2ff909e817bde94238db1560ae",
+      "status": "PRESENT"
     },
     {
       "evidence_type": "TRACE",
-      "description": "Qualification, evidence, submission, AXENT degradation and recovery journeys are traceable.",
+      "description": "Qualification, evidence, submission, AXENT degradation, navigation, persistence and recovery journeys are traceable across the exact-head audit and subscriber browser matrix.",
       "required": true,
-      "location": null,
-      "status": "MISSING"
+      "location": "github-actions-runs:30928582771,30928582689@30e21a6eabce9a2ff909e817bde94238db1560ae",
+      "status": "PRESENT"
     },
     {
       "evidence_type": "RESTORE_TEST",
-      "description": "Feature-flag rollback and persisted-workspace recovery are rehearsed without deleting ledgers.",
+      "description": "The subscriber feature flag was disabled after a persisted mutation, the ledger remained byte-identical, and reactivation restored the exact tenant revision, requirement state and audit event.",
       "required": true,
-      "location": null,
-      "status": "MISSING"
+      "location": "apps/web/tests/subscriber-workspace-server.test.ts#subscriber-kill-switch-preserves-the-tenant-ledger-and-restores-the-exact-workspace-context;github-actions-run:30928582204",
+      "status": "PRESENT"
     },
     {
       "evidence_type": "USER_RESEARCH",
-      "description": "Qualified users meet the normative usability thresholds for the subscriber workflow.",
+      "description": "Qualified users meet the normative usability thresholds for the subscriber workflow. Required evidence remains absent.",
       "required": true,
-      "location": null,
+      "location": "docs/research/2026-08-01-subscriber-workspace-tooling-ux-study.md#11-required-usability-research",
       "status": "MISSING"
     }
   ],
@@ -173,7 +181,7 @@
   "rollback": {
     "strategy": "Disable the subscriber workspace feature flag or revert this bounded execution branch while preserving identity, workspace, claim, billing and audit ledgers.",
     "kill_switch": "AXIGNAL_SUBSCRIBER_WORKSPACE_ENABLED=false",
-    "tested": false
+    "tested": true
   },
   "goal_lock_checks": [
     {
@@ -199,7 +207,7 @@
     {
       "check_id": 5,
       "answer": "YES",
-      "evidence": "The required locale set remains en, es, fr, de, pt and it; parity is still an explicit blocker."
+      "evidence": "The required locale set remains en, es, fr, de, pt and it; human semantic acceptance remains explicitly pending."
     },
     {
       "check_id": 6,
@@ -219,16 +227,16 @@
     {
       "check_id": 9,
       "answer": "YES",
-      "evidence": "A feature flag and branch revert provide bounded rollback without deleting canonical ledgers."
+      "evidence": "The feature flag rollback was rehearsed and restored exact persisted context without deleting the ledger."
     },
     {
       "check_id": 10,
       "answer": "YES",
-      "evidence": "This task closes only the subscriber P08 engineering slice and cannot issue P27 or public-launch authority."
+      "evidence": "This task records only C1 engineering acceptance; human usability, C2, P27, merge and public-launch authority remain blocked."
     }
   ],
   "owner": "Staff Product Engineering",
   "reviewer": null,
   "created_at": "2026-08-04T00:00:00Z",
-  "updated_at": "2026-08-04T00:00:00Z"
+  "updated_at": "2026-08-04T16:36:00Z"
 }
