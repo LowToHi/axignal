@@ -144,6 +144,7 @@ def test_axent_routes_list_export_and_request_governed_deletion(
 
     exported = axent_routes.get_axent_conversation(repository.conversation_id, actor)
     assert exported["schema"] == "axignal.axent-conversation-export.v1"
+    assert repository.calls[-1][1]["identity_subject"] == actor.subject
 
     deletion = axent_routes.request_axent_conversation_deletion(
         repository.conversation_id,
@@ -152,6 +153,7 @@ def test_axent_routes_list_export_and_request_governed_deletion(
     )
     assert deletion["state"] == "DELETION_REQUESTED"
     delete_call = repository.calls[-1][1]
+    assert delete_call["identity_subject"] == actor.subject
     assert delete_call["delete_after"] >= datetime.now(UTC) - timedelta(seconds=2)
 
 
@@ -161,13 +163,25 @@ def test_axent_idempotency_conflict_is_fail_closed() -> None:
     assert "different content" in str(error.detail)
 
 
-def test_c4_axent_migration_preserves_single_authority_and_rls() -> None:
+def test_c4_axent_migration_preserves_single_authority_and_exact_ownership() -> None:
     migration = Path("infra/postgres/141-c4-axent-idempotency.sql").read_text()
     assert "ENABLE ROW LEVEL SECURITY" in migration
     assert "FORCE ROW LEVEL SECURITY" in migration
     assert "pg_advisory_xact_lock" in migration
     assert "create_axent_conversation_idempotent" in migration
     assert "append_axent_message_idempotent" in migration
-    assert "list_axent_conversations" in migration
+    assert "export_axent_conversation_for_identity" in migration
+    assert "request_axent_conversation_deletion_for_identity" in migration
+    assert "identity_subject = p_identity_subject" in migration
+    assert "REVOKE EXECUTE ON FUNCTION tenant_private.append_axent_message" in migration
+    assert "REVOKE EXECUTE ON FUNCTION tenant_private.export_axent_conversation" in migration
     assert "TO axignal_app" in migration
     assert "GRANT SELECT" not in migration
+
+
+def test_repository_uses_identity_scoped_database_functions_without_list_authorization() -> None:
+    source = Path("apps/api/src/axignal_api/axent_repository.py").read_text()
+    assert "append_axent_message_idempotent" in source
+    assert "export_axent_conversation_for_identity" in source
+    assert "request_axent_conversation_deletion_for_identity" in source
+    assert "_require_owned_conversation" not in source

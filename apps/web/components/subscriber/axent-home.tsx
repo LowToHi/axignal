@@ -1,567 +1,368 @@
 "use client";
 
-import {
-  ArrowRight,
-  BookOpen,
-  BookOpenCheck,
-  Check,
-  CircleHelp,
-  Download,
-  FileDown,
-  FolderOpen,
-  Link2,
-  LockKeyhole,
-  MessageSquareText,
-  Paperclip,
-  Plus,
-  Send,
-  ShieldCheck,
-  Trash2
-} from "lucide-react";
-import type { FormEvent, KeyboardEvent } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-import {
-  AXENT_LOCAL_HISTORY_RETENTION_DAYS,
-  axentLocalHistoryKey,
-  loadAxentLocalHistory,
-  saveAxentLocalHistory
-} from "@/lib/axent-local-history";
+import type {
+  AxentConversationExport,
+  AxentConversationList,
+  AxentConversationSummary,
+  AxentMessage
+} from "@/lib/axent-server";
 import type { SubscriberWorkspaceBootstrap } from "@/lib/subscriber-workspace-contract";
 
-import styles from "./axent-home.module.css";
-
-type EvidenceKind = "FACT" | "INFERENCE" | "CONTRADICTION" | "UNKNOWN";
+type AxentHomeProps = {
+  bootstrap: SubscriberWorkspaceBootstrap;
+  onOpenWorkspace: (workspaceId: string) => void;
+  onHelp: () => void;
+};
 
 type EvidenceCard = {
   id: string;
-  kind: EvidenceKind;
+  kind: "FACT" | "INFERENCE" | "CONTRADICTION" | "UNKNOWN";
   statement: string;
   source: string;
   confidence: number | null;
 };
 
-type AssistantContext = {
-  scope: string;
-  jurisdiction: string;
-  entities: string;
-  framework: string;
-};
-
-type AssistantAction = {
-  workspaceId: string;
-  title: string;
-  description: string;
-};
-
 type AssistantResponse = {
   reply: string;
-  context: AssistantContext;
+  context: {
+    scope: string;
+    jurisdiction: string;
+    entities: string;
+    framework: string;
+  };
   evidence: EvidenceCard[];
-  action: AssistantAction | null;
+  action: { workspaceId: string; title: string; description: string } | null;
   mode: "fixture" | "upstream";
 };
 
-type AxentMessage = {
-  id: string;
-  role: "user" | "assistant";
-  body: string;
-  detail?: string;
-};
+type ApiError = { error?: string; code?: string };
 
-type AxentConversation = {
-  id: string;
-  title: string;
-  updatedAt: string;
-  messages: AxentMessage[];
-  context?: AxentContextSnapshot;
-};
-
-type AxentContextSnapshot = {
-  sourceConversationId: string;
-  sourceTitle: string;
-  messages: AxentMessage[];
-};
-
-type AssistantHistoryItem = {
-  role: "user" | "assistant";
-  content: string;
-};
-
-const STARTERS = [
-  { title: "Start with onboarding", prompt: "Help me onboard to this organisation and its data." },
-  { title: "Find opportunities", prompt: "Show high-potential opportunities to pursue." },
-  { title: "Understand this workspace", prompt: "Explain the data, sources, and how to use AXENT." }
-] as const;
-
-function createId(prefix: string) {
-  return `${prefix}-${crypto.randomUUID()}`;
+function requestId(): string {
+  return `axent_req_${crypto.randomUUID().replaceAll("-", "")}`;
 }
 
-function conversationTitle(message: string) {
-  const compact = message.replace(/\s+/g, " ").trim();
-  return compact.length > 48 ? `${compact.slice(0, 48).trimEnd()}…` : compact;
-}
-
-function responseGrounding(evidence: EvidenceCard[]) {
-  const sources = evidence.map((item) => item.source).filter(Boolean);
-  return sources.length > 0 ? `Grounded in ${sources.join(" · ")}.` : "Grounded in the current AXIGNAL context.";
-}
-
-function conversationText(conversation: AxentConversation) {
-  const contextLine = conversation.context
-    ? `Context reused from: ${conversation.context.sourceTitle}`
-    : null;
-  const messages = conversation.messages.map((message) => `${message.role === "user" ? "You" : "AXENT"}: ${message.body}`);
-  return [
-    `AXENT conversation: ${conversation.title}`,
-    `Updated: ${new Date(conversation.updatedAt).toLocaleString()}`,
-    contextLine,
-    "",
-    ...messages,
-  ].filter((line): line is string => line !== null).join("\n\n");
-}
-
-function safeFileName(value: string) {
-  return value.toLowerCase().replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "").slice(0, 64) || "axent-conversation";
-}
-
-function downloadFile(fileName: string, content: BlobPart, type: string) {
-  const url = URL.createObjectURL(new Blob([content], { type }));
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = fileName;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  window.setTimeout(() => URL.revokeObjectURL(url), 0);
-}
-
-function pdfText(value: string) {
-  let hex = "FEFF";
-  for (const symbol of value) {
-    const codePoint = symbol.codePointAt(0) ?? 32;
-    if (codePoint <= 0xffff) {
-      hex += codePoint.toString(16).padStart(4, "0");
-    } else {
-      const adjusted = codePoint - 0x10000;
-      hex += (0xd800 + (adjusted >> 10)).toString(16).padStart(4, "0");
-      hex += (0xdc00 + (adjusted & 0x3ff)).toString(16).padStart(4, "0");
-    }
-  }
-  return `<${hex.toUpperCase()}>`;
-}
-
-function wrapPdfLine(value: string, width = 92) {
-  const characters = Array.from(value);
-  if (characters.length <= width) return [value];
-  const lines: string[] = [];
-  for (let index = 0; index < characters.length; index += width) lines.push(characters.slice(index, index + width).join(""));
-  return lines;
-}
-
-function conversationPdf(conversation: AxentConversation) {
-  const lines = conversationText(conversation).split("\n").flatMap((line) => wrapPdfLine(line));
-  const pageLines = 44;
-  const pages = Array.from({ length: Math.max(1, Math.ceil(lines.length / pageLines)) }, (_, index) => lines.slice(index * pageLines, (index + 1) * pageLines));
-  const pageObjectStart = 3;
-  const contentObjectStart = pageObjectStart + pages.length;
-  const fontObject = contentObjectStart + pages.length;
-  const objects: string[] = [];
-  objects[1] = "<< /Type /Catalog /Pages 2 0 R >>";
-  objects[2] = `<< /Type /Pages /Kids [${pages.map((_, index) => `${pageObjectStart + index} 0 R`).join(" ")}] /Count ${pages.length} >>`;
-
-  pages.forEach((page, index) => {
-    const commands = ["BT", "/F1 11 Tf", "16 TL", "50 748 Td"];
-    page.forEach((line, lineIndex) => commands.push(`${lineIndex === 0 ? "" : "T* "}${pdfText(line)} Tj`));
-    commands.push("ET");
-    const stream = commands.join("\n");
-    objects[pageObjectStart + index] = `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents ${contentObjectStart + index} 0 R /Resources << /Font << /F1 ${fontObject} 0 R >> >> >>`;
-    objects[contentObjectStart + index] = `<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`;
+async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
+  const response = await fetch(url, {
+    ...init,
+    headers: { "content-type": "application/json" },
+    cache: "no-store"
   });
-  objects[fontObject] = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>";
-
-  let output = "%PDF-1.4\n";
-  const offsets = new Array(objects.length).fill(0) as number[];
-  for (let index = 1; index < objects.length; index += 1) {
-    offsets[index] = output.length;
-    output += `${index} 0 obj\n${objects[index]}\nendobj\n`;
-  }
-  const xrefOffset = output.length;
-  output += `xref\n0 ${objects.length}\n0000000000 65535 f \n`;
-  for (let index = 1; index < objects.length; index += 1) output += `${String(offsets[index]).padStart(10, "0")} 00000 n \n`;
-  output += `trailer\n<< /Size ${objects.length} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`;
-  return output;
+  const body = (await response.json().catch(() => ({}))) as T & ApiError;
+  if (!response.ok) throw new Error(body.error ?? "AXENT operation failed.");
+  return body;
 }
 
-function isAxentMessage(value: unknown): value is AxentMessage {
-  if (!value || typeof value !== "object") return false;
-  const message = value as Partial<AxentMessage>;
-  return (
-    typeof message.id === "string" &&
-    (message.role === "user" || message.role === "assistant") &&
-    typeof message.body === "string" &&
-    message.body.length <= 4_000 &&
-    (message.detail === undefined || typeof message.detail === "string")
-  );
+function displayRole(role: AxentMessage["role"]): string {
+  if (role === "USER") return "You";
+  if (role === "SYSTEM") return "System";
+  return "AXENT";
 }
 
-function isAxentConversation(value: unknown): value is AxentConversation {
-  if (!value || typeof value !== "object") return false;
-  const conversation = value as Partial<AxentConversation>;
-  if (
-    typeof conversation.id !== "string" ||
-    typeof conversation.title !== "string" ||
-    typeof conversation.updatedAt !== "string" ||
-    !Number.isFinite(Date.parse(conversation.updatedAt)) ||
-    !Array.isArray(conversation.messages) ||
-    !conversation.messages.every(isAxentMessage)
-  ) return false;
-  if (!conversation.context) return true;
-  const context = conversation.context;
-  return (
-    typeof context.sourceConversationId === "string" &&
-    typeof context.sourceTitle === "string" &&
-    Array.isArray(context.messages) &&
-    context.messages.every(isAxentMessage)
-  );
+function titleFromMessage(message: string): string {
+  const compact = message.replace(/\s+/g, " ").trim();
+  return compact.length > 72 ? `${compact.slice(0, 69)}…` : compact;
 }
 
-function boundedConversations(conversations: AxentConversation[]): AxentConversation[] {
-  return conversations.slice(0, 50).map((conversation) => ({
-    ...conversation,
-    messages: conversation.messages.slice(-100),
-    ...(conversation.context
-      ? {
-          context: {
-            ...conversation.context,
-            messages: conversation.context.messages.slice(-20)
-          }
-        }
-      : {})
-  }));
-}
-
-function firstContext(bootstrap: SubscriberWorkspaceBootstrap): AssistantContext {
-  const opportunity = bootstrap.route_data.opportunities[0];
-  const workspace = bootstrap.route_data.workspaces[0];
-  return {
-    scope: opportunity?.title ?? "AXIGNAL opportunity intelligence",
-    jurisdiction: opportunity?.jurisdiction ?? "Tenant scope",
-    entities: [opportunity?.buyer, workspace?.title].filter(Boolean).join(" · ") || "No entities selected",
-    framework: "AXIGNAL epistemic claims, source rights and subscriber authority"
-  };
-}
-
-function firstEvidence(bootstrap: SubscriberWorkspaceBootstrap): EvidenceCard[] {
-  const opportunity = bootstrap.route_data.opportunities[0];
-  const workspace = bootstrap.route_data.workspaces[0];
-  return [
-    {
-      id: "axent_fact_context",
-      kind: "FACT",
-      statement: opportunity ? `${opportunity.title} is pinned to the current AXIGNAL opportunity context.` : "The current AXIGNAL context is source-pinned.",
-      source: opportunity?.source_id ?? "AXIGNAL route data",
-      confidence: opportunity?.confidence ? Math.round(opportunity.confidence * 100) : 82
-    },
-    {
-      id: "axent_inference_readiness",
-      kind: "INFERENCE",
-      statement: workspace ? `${workspace.requirements.filter((item) => item.blocking && item.status !== "met").length} blocking requirements still need review before readiness can advance.` : "Readiness requires review of requirements and evidence.",
-      source: "AXIGNAL readiness assessment · candidate",
-      confidence: 68
-    },
-    {
-      id: "axent_unknown_gap",
-      kind: "UNKNOWN",
-      statement: opportunity?.unknowns[0] ?? "The current evidence set has unresolved questions.",
-      source: "AXIGNAL coverage registry",
-      confidence: null
-    }
-  ];
-}
-
-function initialResponse(bootstrap: SubscriberWorkspaceBootstrap): AssistantResponse {
-  const workspace = bootstrap.route_data.workspaces[0];
-  return {
-    reply: "I can help you understand AXIGNAL, find a relevant investigation, review evidence and prepare the right Workspace. I will keep facts, inferences, contradictions and unknowns separate, and I will ask before navigating or changing anything.",
-    context: firstContext(bootstrap),
-    evidence: firstEvidence(bootstrap),
-    action: workspace ? {
-      workspaceId: workspace.id,
-      title: "Open an Investigation Workspace",
-      description: "Create a workspace to investigate a specific opportunity or area."
-    } : null,
-    mode: "fixture"
-  };
-}
-
-function AxentMark({ large = false }: { large?: boolean }) {
-  return <span className={large ? styles.brandMarkLarge : styles.brandMark} aria-hidden="true"><img src="/axent.svg" alt="" /></span>;
-}
-
-function ChatHistory({
-  conversations,
-  activeConversationId,
-  onSelect,
-  onNewChat,
-  onDelete,
-  onUseContext,
-  onDownload,
-  onExportPdf,
-}: {
-  conversations: AxentConversation[];
-  activeConversationId: string | null;
-  onSelect: (conversationId: string) => void;
-  onNewChat: () => void;
-  onDelete: (conversation: AxentConversation) => void;
-  onUseContext: (conversation: AxentConversation) => void;
-  onDownload: (conversation: AxentConversation) => void;
-  onExportPdf: (conversation: AxentConversation) => void;
-}) {
-  return <aside className={styles.chatHistory} aria-label="Chat history">
-    <header className={styles.chatHistoryHeader}>
-      <div><h2>Chat history</h2><p>Continue a grounded AXENT conversation.</p></div>
-      <button className={styles.newChatButton} type="button" onClick={onNewChat}><Plus size={14} />New chat</button>
-    </header>
-    {conversations.length > 0 ? <nav className={styles.chatHistoryList} aria-label="Saved conversations">
-      {conversations.map((conversation) => <article className={styles.chatHistoryItem} data-active={conversation.id === activeConversationId} key={conversation.id}>
-        <button className={styles.chatHistoryOpen} type="button" aria-current={conversation.id === activeConversationId ? "page" : undefined} onClick={() => onSelect(conversation.id)}>
-          <MessageSquareText size={16} />
-          <span><strong>{conversation.title}</strong><small>{conversation.messages.length} messages · {new Date(conversation.updatedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</small></span>
-        </button>
-        <div className={styles.chatHistoryActions} aria-label={`Actions for ${conversation.title}`}>
-          <button type="button" aria-label={`Use ${conversation.title} as context`} title="Use as context" onClick={() => onUseContext(conversation)}><BookOpenCheck size={14} /></button>
-          <button type="button" aria-label={`Download ${conversation.title}`} title="Download conversation" onClick={() => onDownload(conversation)}><Download size={14} /></button>
-          <button type="button" aria-label={`Export ${conversation.title} as PDF`} title="Export PDF" onClick={() => onExportPdf(conversation)}><FileDown size={14} /></button>
-          <button type="button" aria-label={`Delete ${conversation.title}`} title="Delete conversation" onClick={() => onDelete(conversation)}><Trash2 size={14} /></button>
-        </div>
-      </article>)}
-    </nav> : <div className={styles.chatHistoryEmpty}><MessageSquareText size={19} /><p>Your conversations will appear here.</p><span>Start with a question to create the first chat.</span></div>}
-    <div className={styles.chatHistoryScope}><LockKeyhole size={15} /><span>Stored only in this browser for the signed-in identity. Not synced to AXIGNAL servers. Expires after {AXENT_LOCAL_HISTORY_RETENTION_DAYS} days.</span></div>
-  </aside>;
-}
-
-export function AxentHome({
-  bootstrap,
-  onOpenWorkspace,
-  onHelp
-}: {
-  bootstrap: SubscriberWorkspaceBootstrap;
-  onOpenWorkspace: (workspaceId: string) => void;
-  onHelp: () => void;
-}) {
+export function AxentHome({ bootstrap, onOpenWorkspace, onHelp }: AxentHomeProps) {
+  const [conversations, setConversations] = useState<AxentConversationSummary[]>([]);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [conversation, setConversation] = useState<AxentConversationExport | null>(null);
   const [draft, setDraft] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [conversations, setConversations] = useState<AxentConversation[]>([]);
-  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
-  const [historyReady, setHistoryReady] = useState(false);
-  const [lastFailedMessage, setLastFailedMessage] = useState<string | null>(null);
-  const [pendingConversationId, setPendingConversationId] = useState<string | null>(null);
-  const [response, setResponse] = useState<AssistantResponse>(() => initialResponse(bootstrap));
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [confirmAcknowledged, setConfirmAcknowledged] = useState(false);
-  const [pendingContext, setPendingContext] = useState<AxentContextSnapshot | null>(null);
-  const storageKey = useMemo(
-    () => axentLocalHistoryKey(bootstrap.tenant.id, bootstrap.identity.id),
-    [bootstrap.identity.id, bootstrap.tenant.id]
+  const [assistantContext, setAssistantContext] = useState<AssistantResponse | null>(null);
+
+  const activeSummary = useMemo(
+    () => conversations.find((item) => item.conversation_id === activeId) ?? null,
+    [activeId, conversations]
   );
-  const activeConversation = conversations.find((conversation) => conversation.id === activeConversationId) ?? null;
-  const activeMessages = activeConversation?.messages ?? [];
+
+  const loadConversation = useCallback(async (conversationId: string) => {
+    const value = await requestJson<AxentConversationExport>(
+      `/api/subscriber-workspace/axent/${encodeURIComponent(conversationId)}`
+    );
+    setConversation(value);
+    setActiveId(conversationId);
+  }, []);
+
+  const loadConversations = useCallback(async (preferredId?: string | null) => {
+    const value = await requestJson<AxentConversationList>(
+      "/api/subscriber-workspace/axent"
+    );
+    setConversations(value.conversations);
+    const selected =
+      preferredId && value.conversations.some((item) => item.conversation_id === preferredId)
+        ? preferredId
+        : value.conversations[0]?.conversation_id ?? null;
+    if (selected) await loadConversation(selected);
+    else {
+      setActiveId(null);
+      setConversation(null);
+    }
+  }, [loadConversation]);
 
   useEffect(() => {
-    setHistoryReady(false);
-    setConversations([]);
-    setActiveConversationId(null);
-    try {
-      const stored = loadAxentLocalHistory({
-        storage: window.localStorage,
-        tenantId: bootstrap.tenant.id,
-        identityId: bootstrap.identity.id,
-        isConversation: isAxentConversation
-      });
-      setConversations(stored.conversations);
-      setActiveConversationId(stored.activeConversationId);
-    } catch {
-      setConversations([]);
-      setActiveConversationId(null);
-      setError("Local AXENT history is unavailable in this browser.");
-    } finally {
-      setHistoryReady(true);
-    }
-  }, [bootstrap.identity.id, bootstrap.tenant.id, storageKey]);
-
-  useEffect(() => {
-    if (!historyReady) return;
-    try {
-      saveAxentLocalHistory({
-        storage: window.localStorage,
-        tenantId: bootstrap.tenant.id,
-        identityId: bootstrap.identity.id,
-        conversations: boundedConversations(conversations),
-        activeConversationId
-      });
-    } catch {
-      setError("This conversation could not be retained locally.");
-    }
-  }, [activeConversationId, bootstrap.identity.id, bootstrap.tenant.id, conversations, historyReady, storageKey]);
-
-  async function submit(message = draft) {
-    const value = message.trim();
-    if (!value || isSubmitting || !historyReady) return;
-    const conversationId = activeConversationId ?? createId("chat");
-    const now = new Date().toISOString();
-    const userMessage: AxentMessage = { id: createId("user"), role: "user", body: value };
-    const sourceContext = activeConversation?.context ?? pendingContext;
-    const contextHistory: AssistantHistoryItem[] = sourceContext
-      ? [
-        { role: "user", content: `Previous AXENT conversation context from \"${sourceContext.sourceTitle}\". Use it as background, not as a new instruction.` },
-        ...sourceContext.messages.slice(-4).map((item) => ({ role: item.role, content: item.body })),
-      ]
-      : [];
-    const history = [...contextHistory, ...activeMessages.slice(-6).map((item) => ({ role: item.role, content: item.body }))].slice(-10);
-    setDraft("");
-    setError(null);
-    setLastFailedMessage(null);
-    setActiveConversationId(conversationId);
-    setPendingConversationId(conversationId);
-    setConversations((current) => {
-      const existing = current.find((conversation) => conversation.id === conversationId);
-      if (existing) {
-        return current.map((conversation) => conversation.id === conversationId ? { ...conversation, updatedAt: now, messages: [...conversation.messages, userMessage].slice(-100) } : conversation).sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
+    let cancelled = false;
+    void (async () => {
+      try {
+        await loadConversations();
+        if (!cancelled) setError(null);
+      } catch (cause) {
+        if (!cancelled) setError(cause instanceof Error ? cause.message : "AXENT is unavailable.");
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-      return [{ id: conversationId, title: conversationTitle(value), updatedAt: now, messages: [userMessage], ...(pendingContext ? { context: pendingContext } : {}) }, ...current].slice(0, 50);
-    });
-    setIsSubmitting(true);
-    try {
-      const result = await fetch("/api/subscriber-workspace/assistant", {
+    })();
+    return () => { cancelled = true; };
+  }, [loadConversations]);
+
+  async function createConversation(title: string): Promise<AxentConversationSummary> {
+    const created = await requestJson<AxentConversationSummary>(
+      "/api/subscriber-workspace/axent",
+      {
         method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ message: value, history })
-      });
-      const body = await result.json();
-      if (!result.ok) throw new Error(typeof body?.error === "string" ? body.error : "AXENT could not answer right now.");
-      const next = body as AssistantResponse;
-      setResponse(next);
-      const assistantMessage: AxentMessage = { id: createId("assistant"), role: "assistant", body: next.reply, detail: responseGrounding(next.evidence) };
-      setConversations((current) => current.map((conversation) => conversation.id === conversationId ? { ...conversation, updatedAt: new Date().toISOString(), messages: [...conversation.messages, assistantMessage].slice(-100) } : conversation).sort((left, right) => right.updatedAt.localeCompare(left.updatedAt)));
-      setConfirmOpen(false);
-      setConfirmAcknowledged(false);
+        body: JSON.stringify({
+          request_id: requestId(),
+          title,
+          retention_class: "STANDARD_90D"
+        })
+      }
+    );
+    await loadConversations(created.conversation_id);
+    return created;
+  }
+
+  async function startNewConversation() {
+    if (busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await createConversation("New AXENT conversation");
+      setAssistantContext(null);
     } catch (cause) {
-      setLastFailedMessage(value);
-      setError(cause instanceof Error ? cause.message : "AXENT could not answer right now.");
+      setError(cause instanceof Error ? cause.message : "Conversation creation failed.");
     } finally {
-      setPendingConversationId((current) => current === conversationId ? null : current);
-      setIsSubmitting(false);
+      setBusy(false);
     }
   }
 
-  function startNewChat(context: AxentContextSnapshot | null = null) {
-    setActiveConversationId(null);
-    setPendingContext(context);
-    setDraft("");
+  async function appendMessage(
+    conversationId: string,
+    role: "USER" | "ASSISTANT",
+    content: string
+  ): Promise<void> {
+    await requestJson(
+      `/api/subscriber-workspace/axent/${encodeURIComponent(conversationId)}/messages`,
+      {
+        method: "POST",
+        body: JSON.stringify({ request_id: requestId(), role, content })
+      }
+    );
+  }
+
+  async function sendMessage() {
+    const message = draft.trim();
+    if (!message || busy) return;
+    setBusy(true);
     setError(null);
-    setLastFailedMessage(null);
-    setResponse(initialResponse(bootstrap));
-    setConfirmOpen(false);
-    setConfirmAcknowledged(false);
-  }
-
-  function selectConversation(conversationId: string) {
-    setActiveConversationId(conversationId);
-    setPendingContext(null);
     setDraft("");
-    setError(null);
-    setLastFailedMessage(null);
-    setConfirmOpen(false);
-    setConfirmAcknowledged(false);
-  }
+    try {
+      const target = activeId
+        ? { conversation_id: activeId }
+        : await createConversation(titleFromMessage(message));
+      const conversationId = target.conversation_id;
 
-  function retryLastMessage() {
-    if (!lastFailedMessage || isSubmitting) return;
-    void submit(lastFailedMessage);
-  }
+      await appendMessage(conversationId, "USER", message);
+      await loadConversation(conversationId);
 
-  function useConversationAsContext(conversation: AxentConversation) {
-    startNewChat({
-      sourceConversationId: conversation.id,
-      sourceTitle: conversation.title,
-      messages: conversation.messages.slice(-8),
-    });
-  }
-
-  function deleteConversation(conversation: AxentConversation) {
-    if (isSubmitting || !window.confirm(`Delete “${conversation.title}”?`)) return;
-    setConversations((current) => current.filter((item) => item.id !== conversation.id));
-    if (activeConversationId === conversation.id) startNewChat();
-  }
-
-  function downloadConversation(conversation: AxentConversation) {
-    downloadFile(`${safeFileName(conversation.title)}.txt`, conversationText(conversation), "text/plain;charset=utf-8");
-  }
-
-  function exportConversationPdf(conversation: AxentConversation) {
-    downloadFile(`${safeFileName(conversation.title)}.pdf`, conversationPdf(conversation), "application/pdf");
-  }
-
-  function handleComposerKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
-    if (event.key === "Enter" && !event.shiftKey) {
-      event.preventDefault();
-      void submit();
+      const answer = await requestJson<AssistantResponse>(
+        "/api/subscriber-workspace/assistant",
+        {
+          method: "POST",
+          body: JSON.stringify({ message, conversation_id: conversationId })
+        }
+      );
+      await appendMessage(conversationId, "ASSISTANT", answer.reply);
+      setAssistantContext(answer);
+      await loadConversations(conversationId);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "AXENT could not complete the turn.");
+      if (activeId) {
+        try { await loadConversation(activeId); } catch { /* retain the last coherent view */ }
+      }
+    } finally {
+      setBusy(false);
     }
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    void submit();
+  async function deleteConversation() {
+    if (!activeId || busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await requestJson(
+        `/api/subscriber-workspace/axent/${encodeURIComponent(activeId)}`,
+        { method: "DELETE" }
+      );
+      setAssistantContext(null);
+      await loadConversations(null);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Conversation deletion failed.");
+    } finally {
+      setBusy(false);
+    }
   }
 
-  function reviewWorkspace() {
-    setConfirmOpen(true);
-    setConfirmAcknowledged(false);
-  }
+  const workspace = bootstrap.route_data.workspaces[0];
 
-  const isChat = Boolean(activeConversation);
+  return (
+    <main className="mx-auto grid min-h-[calc(100vh-5rem)] max-w-[1480px] gap-5 px-4 py-5 lg:grid-cols-[300px_minmax(0,1fr)_320px] lg:px-6">
+      <aside className="rounded-3xl border border-white/10 bg-slate-950/70 p-4 shadow-2xl shadow-black/20">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300">Persistent AXENT</p>
+            <h1 className="mt-1 text-xl font-semibold text-white">Conversations</h1>
+          </div>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void startNewConversation()}
+            className="rounded-xl border border-cyan-400/30 bg-cyan-400/10 px-3 py-2 text-sm font-semibold text-cyan-100 hover:bg-cyan-400/20 disabled:opacity-50"
+          >
+            New
+          </button>
+        </div>
+        <p className="mt-3 text-sm leading-6 text-slate-400">
+          Encrypted tenant storage. Retention, export and deletion are governed by the server authority.
+        </p>
+        <div className="mt-5 space-y-2">
+          {loading ? <p className="text-sm text-slate-400">Loading server history…</p> : null}
+          {!loading && conversations.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-white/15 p-4 text-sm text-slate-400">
+              No persistent conversations yet.
+            </div>
+          ) : null}
+          {conversations.map((item) => (
+            <button
+              type="button"
+              key={item.conversation_id}
+              onClick={() => void loadConversation(item.conversation_id).catch((cause) => setError(cause instanceof Error ? cause.message : "Conversation unavailable."))}
+              className={`w-full rounded-2xl border p-3 text-left transition ${item.conversation_id === activeId ? "border-cyan-400/40 bg-cyan-400/10" : "border-white/10 bg-white/[0.03] hover:bg-white/[0.06]"}`}
+            >
+              <span className="block truncate text-sm font-semibold text-slate-100">{item.title}</span>
+              <span className="mt-1 block text-xs text-slate-500">{item.message_count ?? 0} messages · {new Date(item.updated_at).toLocaleString()}</span>
+            </button>
+          ))}
+        </div>
+        {activeSummary ? (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void deleteConversation()}
+            className="mt-5 w-full rounded-xl border border-rose-400/20 px-3 py-2 text-sm font-medium text-rose-200 hover:bg-rose-400/10 disabled:opacity-50"
+          >
+            Request deletion
+          </button>
+        ) : null}
+      </aside>
 
-  return <section className={styles.home} data-testid="axent-home">
-    <div className={styles.homeGrid}>
-      <section className={`${styles.content} ${isChat ? styles.chatContent : ""}`} data-mode={isChat ? "chat" : "welcome"} aria-label="AXENT assistant">
-        {!isChat && <div className={styles.hero}>
-          <AxentMark large />
-          <span className={styles.brandWordmark}>AXENT</span>
-          <h1>What are you investigating today?</h1>
-          <p>Ask anything about opportunities, suppliers, entities, risk, or procurement.<br />AXENT responds using AXIGNAL knowledge and your context.</p>
-        </div>}
+      <section className="flex min-h-[70vh] flex-col overflow-hidden rounded-3xl border border-white/10 bg-slate-950/60 shadow-2xl shadow-black/20">
+        <header className="border-b border-white/10 px-5 py-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-300">Evidence-governed assistant</p>
+          <div className="mt-1 flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-xl font-semibold text-white">{conversation?.title ?? "Ask AXENT"}</h2>
+            <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-200">Server persistent</span>
+          </div>
+        </header>
 
-        {isChat && <div className={styles.chatThread} role="log" aria-live="polite" aria-label="AXENT conversation">
-          {activeMessages.map((message) => <article className={styles.chatMessage} key={message.id} data-role={message.role}><span>{message.role === "user" ? "You" : "AXENT"}</span><p>{message.body}</p>{message.detail ? <small>{message.detail}</small> : null}</article>)}
-          {pendingConversationId === activeConversationId && <div className={styles.chatTyping} role="status"><span />AXENT is thinking…</div>}
-        </div>}
+        <div className="flex-1 space-y-4 overflow-y-auto p-5" aria-live="polite">
+          {!conversation?.messages.length ? (
+            <div className="mx-auto mt-16 max-w-xl text-center">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-400/20 to-violet-400/20 text-2xl">✦</div>
+              <h3 className="mt-5 text-2xl font-semibold text-white">Research with visible evidence boundaries</h3>
+              <p className="mt-3 leading-7 text-slate-400">Ask about opportunities, investigations, requirements, sources, claims or the current Workspace. AXENT proposes; the subscriber remains the decision authority.</p>
+            </div>
+          ) : null}
+          {conversation?.messages.map((item) => (
+            <article
+              key={item.message_id}
+              className={`max-w-[88%] rounded-2xl border px-4 py-3 ${item.role === "USER" ? "ml-auto border-cyan-400/20 bg-cyan-400/10" : "border-white/10 bg-white/[0.04]"}`}
+            >
+              <div className="flex items-center justify-between gap-4 text-xs">
+                <span className="font-semibold uppercase tracking-[0.14em] text-slate-300">{displayRole(item.role)}</span>
+                <span className="text-slate-600">#{item.ordinal}</span>
+              </div>
+              <p className="mt-2 whitespace-pre-wrap text-sm leading-7 text-slate-200">{item.content}</p>
+            </article>
+          ))}
+          {busy ? <p className="text-sm text-cyan-200">Persisting and reconciling the AXENT turn…</p> : null}
+        </div>
 
-        {!isChat && pendingContext && <div className={styles.contextChip} role="status">
-          <BookOpenCheck size={15} />
-          <span>Using context from <strong>{pendingContext.sourceTitle}</strong></span>
-          <button type="button" aria-label="Clear reused context" onClick={() => setPendingContext(null)}>Clear</button>
-        </div>}
-
-        <form className={`${styles.composer} ${isChat ? styles.chatComposer : ""}`} onSubmit={handleSubmit}>
-          <label className={styles.srOnly} htmlFor="axent-composer">Ask AXENT anything about AXIGNAL</label>
-          <textarea id="axent-composer" value={draft} onChange={(event) => setDraft(event.target.value)} onKeyDown={handleComposerKeyDown} placeholder="Ask AXENT anything…" disabled={isSubmitting || !historyReady} rows={3} />
-          <div className={styles.composerFooter}><button className={styles.attach} type="button" aria-label="Attach context" onClick={onHelp} disabled={!historyReady}><Paperclip size={17} /></button><span>Shift + Enter for new line</span><button className={styles.send} type="submit" aria-label="Send message" disabled={isSubmitting || !historyReady || !draft.trim()}><Send size={17} /></button></div>
-        </form>
-        {error && <p className={styles.error} role="alert">{error} {lastFailedMessage ? <button type="button" onClick={retryLastMessage}>Retry</button> : null}</p>}
-
-        {!isChat && <div className={styles.starterGrid} aria-label="Starter questions">
-          {STARTERS.map((starter, index) => <button className={styles.starter} key={starter.title} type="button" onClick={() => void submit(starter.prompt)} disabled={isSubmitting || !historyReady}><span className={styles.starterIcon}>{index === 0 ? <ShieldCheck size={19} /> : index === 1 ? <Link2 size={19} /> : <BookOpen size={19} />}</span><span className={styles.starterCopy}><strong>{starter.title}</strong><small>{starter.prompt}</small></span><ArrowRight size={16} /></button>)}
-        </div>}
-
-        {!isChat && response.action && <section className={styles.nextStep}><div className={styles.nextStepIcon}><FolderOpen size={24} /></div><div><span>Next step (suggested)</span><strong>{response.action.title}</strong><small>{response.action.description}</small></div><button type="button" onClick={reviewWorkspace}>Open workspace <ArrowRight size={15} /></button>{confirmOpen && <div className={styles.confirmBox}><p>AXENT will only navigate to the selected Workspace. It will not approve requirements or submit anything.</p><label><input type="checkbox" checked={confirmAcknowledged} onChange={(event) => setConfirmAcknowledged(event.target.checked)} />I understand this is a navigation step and I remain the decision-maker.</label><button className={styles.confirmButton} type="button" disabled={!confirmAcknowledged} onClick={() => onOpenWorkspace(response.action!.workspaceId)}><Check size={14} />Confirm and open</button></div>}</section>}
-
-        {!isChat && <footer className={styles.trust}><ShieldCheck size={16} /><strong>AXENT · grounded in AXIGNAL knowledge</strong><CircleHelp size={14} /><span>Responses are evidence-bounded and include sources.<br />They may be incomplete or reflect unknowns where evidence is insufficient.</span></footer>}
+        <div className="border-t border-white/10 p-4">
+          {error ? <div className="mb-3 rounded-xl border border-rose-400/20 bg-rose-400/10 px-3 py-2 text-sm text-rose-100">{error}</div> : null}
+          <div className="flex gap-3">
+            <textarea
+              value={draft}
+              onChange={(event) => setDraft(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && !event.shiftKey) {
+                  event.preventDefault();
+                  void sendMessage();
+                }
+              }}
+              maxLength={4_000}
+              rows={3}
+              placeholder="Ask about an opportunity, evidence gap, claim or Workspace…"
+              className="min-h-20 flex-1 resize-none rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-600 focus:border-cyan-400/40"
+            />
+            <button
+              type="button"
+              disabled={busy || !draft.trim()}
+              onClick={() => void sendMessage()}
+              className="self-end rounded-2xl bg-gradient-to-r from-cyan-400 to-violet-400 px-5 py-3 text-sm font-bold text-slate-950 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Send
+            </button>
+          </div>
+          <p className="mt-2 text-xs text-slate-500">Enter sends · Shift+Enter adds a line · no browser-local history</p>
+        </div>
       </section>
 
-      <ChatHistory conversations={conversations} activeConversationId={activeConversationId} onSelect={selectConversation} onNewChat={() => startNewChat()} onDelete={deleteConversation} onUseContext={useConversationAsContext} onDownload={downloadConversation} onExportPdf={exportConversationPdf} />
-    </div>
-  </section>;
+      <aside className="space-y-4">
+        <section className="rounded-3xl border border-white/10 bg-slate-950/70 p-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-300">Current context</p>
+          <dl className="mt-4 space-y-3 text-sm">
+            <div><dt className="text-slate-500">Scope</dt><dd className="mt-1 text-slate-200">{assistantContext?.context.scope ?? bootstrap.route_data.opportunities[0]?.title ?? "AXIGNAL"}</dd></div>
+            <div><dt className="text-slate-500">Jurisdiction</dt><dd className="mt-1 text-slate-200">{assistantContext?.context.jurisdiction ?? bootstrap.route_data.opportunities[0]?.jurisdiction ?? "Tenant scope"}</dd></div>
+            <div><dt className="text-slate-500">Retention</dt><dd className="mt-1 text-slate-200">{activeSummary?.retention_class ?? "STANDARD_90D"}</dd></div>
+          </dl>
+        </section>
+
+        {assistantContext?.evidence.map((item) => (
+          <section key={item.id} className="rounded-3xl border border-white/10 bg-slate-950/70 p-4">
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-xs font-semibold tracking-[0.14em] text-cyan-200">{item.kind}</span>
+              <span className="text-xs text-slate-500">{item.confidence === null ? "unknown" : `${item.confidence}%`}</span>
+            </div>
+            <p className="mt-3 text-sm leading-6 text-slate-200">{item.statement}</p>
+            <p className="mt-3 text-xs text-slate-500">{item.source}</p>
+          </section>
+        ))}
+
+        <section className="rounded-3xl border border-white/10 bg-slate-950/70 p-4">
+          <p className="text-sm font-semibold text-white">Subscriber authority</p>
+          <p className="mt-2 text-sm leading-6 text-slate-400">AXENT can explain and propose navigation. It cannot approve, submit, sign or perform an external action.</p>
+          <div className="mt-4 grid gap-2">
+            {workspace ? (
+              <button type="button" onClick={() => onOpenWorkspace(workspace.id)} className="rounded-xl border border-cyan-400/30 bg-cyan-400/10 px-3 py-2 text-sm font-semibold text-cyan-100">Open prepared Workspace</button>
+            ) : null}
+            <button type="button" onClick={onHelp} className="rounded-xl border border-white/10 px-3 py-2 text-sm text-slate-300 hover:bg-white/[0.05]">Open help</button>
+          </div>
+        </section>
+      </aside>
+    </main>
+  );
 }

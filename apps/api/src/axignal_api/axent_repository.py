@@ -83,21 +83,17 @@ class AxentRepository:
         content: str,
         actor_subject: str,
     ) -> dict[str, Any]:
-        self._require_owned_conversation(
-            tenant_id=tenant_id,
-            identity_subject=identity_subject,
-            conversation_id=conversation_id,
-        )
         with self._cursor(tenant_id=tenant_id) as cursor:
             cursor.execute(
                 """
                 SELECT *
                 FROM tenant_private.append_axent_message_idempotent(
-                  %s, %s, %s, %s, %s, %s
+                  %s, %s, %s, %s, %s, %s, %s
                 )
                 """,
                 (
                     conversation_id,
+                    identity_subject,
                     request_id,
                     message_role,
                     content,
@@ -118,17 +114,19 @@ class AxentRepository:
         conversation_id: UUID,
         actor_subject: str,
     ) -> dict[str, Any]:
-        self._require_owned_conversation(
-            tenant_id=tenant_id,
-            identity_subject=identity_subject,
-            conversation_id=conversation_id,
-        )
         with self._cursor(tenant_id=tenant_id) as cursor:
             cursor.execute(
                 """
-                SELECT tenant_private.export_axent_conversation(%s, %s, %s) AS value
+                SELECT tenant_private.export_axent_conversation_for_identity(
+                  %s, %s, %s, %s
+                ) AS value
                 """,
-                (conversation_id, self.encryption_key, actor_subject),
+                (
+                    conversation_id,
+                    identity_subject,
+                    self.encryption_key,
+                    actor_subject,
+                ),
             )
             row = cursor.fetchone()
         value = row["value"] if row else None
@@ -145,38 +143,22 @@ class AxentRepository:
         delete_after: datetime,
         actor_subject: str,
     ) -> dict[str, Any]:
-        self._require_owned_conversation(
-            tenant_id=tenant_id,
-            identity_subject=identity_subject,
-            conversation_id=conversation_id,
-        )
         with self._cursor(tenant_id=tenant_id) as cursor:
             cursor.execute(
                 """
                 SELECT *
-                FROM tenant_private.request_axent_conversation_deletion(%s, %s, %s)
+                FROM tenant_private.request_axent_conversation_deletion_for_identity(
+                  %s, %s, %s, %s
+                )
                 """,
-                (conversation_id, delete_after, actor_subject),
+                (
+                    conversation_id,
+                    identity_subject,
+                    delete_after,
+                    actor_subject,
+                ),
             )
             row = cursor.fetchone()
         if row is None:
             raise LookupError("AXENT conversation not found")
         return row
-
-    def _require_owned_conversation(
-        self,
-        *,
-        tenant_id: UUID,
-        identity_subject: str,
-        conversation_id: UUID,
-    ) -> None:
-        conversations = self.list_conversations(
-            tenant_id=tenant_id,
-            identity_subject=identity_subject,
-            limit=50,
-        )
-        if not any(
-            str(item.get("conversation_id")) == str(conversation_id)
-            for item in conversations
-        ):
-            raise LookupError("AXENT conversation not found")

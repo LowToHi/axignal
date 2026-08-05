@@ -1,4 +1,4 @@
--- AXIGNAL C4 AXENT durable idempotency and read adapter.
+-- AXIGNAL C4 AXENT durable idempotency and exact identity ownership adapter.
 -- Extends the C3 tenant-governed conversation authority without creating a
 -- second conversation store or granting direct table access to the app role.
 
@@ -64,10 +64,7 @@ BEGIN
   END IF;
   v_request_hash := 'sha256:' || encode(
     public.digest(
-      convert_to(
-        concat_ws(E'\n', p_identity_subject, p_title, p_retention_class),
-        'UTF8'
-      ),
+      convert_to(concat_ws(E'\n', p_identity_subject, p_title, p_retention_class), 'UTF8'),
       'sha256'
     ),
     'hex'
@@ -111,6 +108,7 @@ $$;
 
 CREATE OR REPLACE FUNCTION tenant_private.append_axent_message_idempotent(
   p_conversation_id uuid,
+  p_identity_subject text,
   p_request_id text,
   p_message_role text,
   p_content text,
@@ -132,6 +130,14 @@ BEGIN
   IF p_request_id IS NULL OR p_request_id !~ '^axent_req_[A-Za-z0-9_-]{8,120}$' THEN
     RAISE EXCEPTION 'axent_request_id_invalid';
   END IF;
+  PERFORM 1
+  FROM tenant_private.axent_conversations
+  WHERE tenant_id = v_tenant_id
+    AND conversation_id = p_conversation_id
+    AND identity_subject = p_identity_subject
+    AND state = 'ACTIVE';
+  IF NOT FOUND THEN RAISE EXCEPTION 'axent_conversation_not_found'; END IF;
+
   v_request_hash := 'sha256:' || encode(
     public.digest(
       convert_to(concat_ws(E'\n', p_message_role, p_content), 'UTF8'),
@@ -223,17 +229,87 @@ AS $$
   ) conversation
 $$;
 
+CREATE OR REPLACE FUNCTION tenant_private.export_axent_conversation_for_identity(
+  p_conversation_id uuid,
+  p_identity_subject text,
+  p_encryption_key text,
+  p_actor_subject text,
+  p_now timestamptz DEFAULT now()
+)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO pg_catalog
+AS $$
+DECLARE
+  v_tenant_id uuid := tenant_private.c3_require_tenant();
+BEGIN
+  PERFORM 1
+  FROM tenant_private.axent_conversations
+  WHERE tenant_id = v_tenant_id
+    AND conversation_id = p_conversation_id
+    AND identity_subject = p_identity_subject;
+  IF NOT FOUND THEN RAISE EXCEPTION 'axent_conversation_not_found'; END IF;
+  RETURN tenant_private.export_axent_conversation(
+    p_conversation_id,
+    p_encryption_key,
+    p_actor_subject,
+    p_now
+  );
+END
+$$;
+
+CREATE OR REPLACE FUNCTION tenant_private.request_axent_conversation_deletion_for_identity(
+  p_conversation_id uuid,
+  p_identity_subject text,
+  p_delete_after timestamptz,
+  p_actor_subject text,
+  p_now timestamptz DEFAULT now()
+)
+RETURNS tenant_private.axent_conversations
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO pg_catalog
+AS $$
+DECLARE
+  v_tenant_id uuid := tenant_private.c3_require_tenant();
+BEGIN
+  PERFORM 1
+  FROM tenant_private.axent_conversations
+  WHERE tenant_id = v_tenant_id
+    AND conversation_id = p_conversation_id
+    AND identity_subject = p_identity_subject;
+  IF NOT FOUND THEN RAISE EXCEPTION 'axent_conversation_not_found'; END IF;
+  RETURN tenant_private.request_axent_conversation_deletion(
+    p_conversation_id,
+    p_delete_after,
+    p_actor_subject,
+    p_now
+  );
+END
+$$;
+
 REVOKE ALL ON tenant_private.axent_conversation_receipts,
   tenant_private.axent_message_receipts
 FROM PUBLIC, axignal_app;
 
+-- C4 makes idempotent, identity-scoped wrappers the only app-role mutation/read path.
+REVOKE EXECUTE ON FUNCTION tenant_private.create_axent_conversation(text, text, text, text, timestamptz) FROM axignal_app;
+REVOKE EXECUTE ON FUNCTION tenant_private.append_axent_message(uuid, text, text, text, text, timestamptz) FROM axignal_app;
+REVOKE EXECUTE ON FUNCTION tenant_private.export_axent_conversation(uuid, text, text, timestamptz) FROM axignal_app;
+REVOKE EXECUTE ON FUNCTION tenant_private.request_axent_conversation_deletion(uuid, timestamptz, text, timestamptz) FROM axignal_app;
+
 REVOKE ALL ON FUNCTION tenant_private.create_axent_conversation_idempotent(text, text, text, text, text, timestamptz) FROM PUBLIC;
-REVOKE ALL ON FUNCTION tenant_private.append_axent_message_idempotent(uuid, text, text, text, text, text, timestamptz) FROM PUBLIC;
+REVOKE ALL ON FUNCTION tenant_private.append_axent_message_idempotent(uuid, text, text, text, text, text, text, timestamptz) FROM PUBLIC;
 REVOKE ALL ON FUNCTION tenant_private.list_axent_conversations(text, integer) FROM PUBLIC;
+REVOKE ALL ON FUNCTION tenant_private.export_axent_conversation_for_identity(uuid, text, text, text, timestamptz) FROM PUBLIC;
+REVOKE ALL ON FUNCTION tenant_private.request_axent_conversation_deletion_for_identity(uuid, text, timestamptz, text, timestamptz) FROM PUBLIC;
 
 GRANT EXECUTE ON FUNCTION tenant_private.create_axent_conversation_idempotent(text, text, text, text, text, timestamptz),
-  tenant_private.append_axent_message_idempotent(uuid, text, text, text, text, text, timestamptz),
-  tenant_private.list_axent_conversations(text, integer)
+  tenant_private.append_axent_message_idempotent(uuid, text, text, text, text, text, text, timestamptz),
+  tenant_private.list_axent_conversations(text, integer),
+  tenant_private.export_axent_conversation_for_identity(uuid, text, text, text, timestamptz),
+  tenant_private.request_axent_conversation_deletion_for_identity(uuid, text, timestamptz, text, timestamptz)
 TO axignal_app;
 
 CREATE INDEX IF NOT EXISTS axent_conversation_receipts_conversation_idx
