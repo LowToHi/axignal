@@ -135,18 +135,13 @@ export function AxentHome({ bootstrap, onOpenWorkspace, onHelp }: AxentHomeProps
     return created;
   }
 
-  async function startNewConversation() {
+  function startNewConversation() {
     if (busy) return;
-    setBusy(true);
+    setActiveId(null);
+    setConversation(null);
+    setAssistantContext(null);
     setError(null);
-    try {
-      await createConversation("New AXENT conversation");
-      setAssistantContext(null);
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Conversation creation failed.");
-    } finally {
-      setBusy(false);
-    }
+    setDraft("");
   }
 
   async function appendMessage(
@@ -223,16 +218,20 @@ export function AxentHome({ bootstrap, onOpenWorkspace, onHelp }: AxentHomeProps
       aria-label="AXENT assistant"
       className="mx-auto grid min-h-[calc(100vh-5rem)] max-w-[1480px] gap-5 px-4 py-5 lg:grid-cols-[300px_minmax(0,1fr)_320px] lg:px-6"
     >
-      <aside className="rounded-3xl border border-white/10 bg-slate-950/70 p-4 shadow-2xl shadow-black/20">
+      <aside
+        aria-label="Chat history"
+        className="rounded-3xl border border-white/10 bg-slate-950/70 p-4 shadow-2xl shadow-black/20"
+      >
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300">Persistent AXENT</p>
-            <h1 className="mt-1 text-xl font-semibold text-white">Conversations</h1>
+            <h2 className="mt-1 text-xl font-semibold text-white">Conversations</h2>
           </div>
           <button
             type="button"
+            aria-label="New chat"
             disabled={busy}
-            onClick={() => void startNewConversation()}
+            onClick={startNewConversation}
             className="rounded-xl border border-cyan-400/30 bg-cyan-400/10 px-3 py-2 text-sm font-semibold text-cyan-100 hover:bg-cyan-400/20 disabled:opacity-50"
           >
             New
@@ -241,7 +240,7 @@ export function AxentHome({ bootstrap, onOpenWorkspace, onHelp }: AxentHomeProps
         <p className="mt-3 text-sm leading-6 text-slate-400">
           Encrypted tenant storage. Retention, export and deletion are governed by the server authority.
         </p>
-        <div className="mt-5 space-y-2">
+        <div aria-label="Saved conversations" className="mt-5 space-y-2">
           {loading ? <p className="text-sm text-slate-400">Loading server history…</p> : null}
           {!loading && conversations.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-white/15 p-4 text-sm text-slate-400">
@@ -249,15 +248,17 @@ export function AxentHome({ bootstrap, onOpenWorkspace, onHelp }: AxentHomeProps
             </div>
           ) : null}
           {conversations.map((item) => (
-            <button
-              type="button"
-              key={item.conversation_id}
-              onClick={() => void loadConversation(item.conversation_id).catch((cause) => setError(cause instanceof Error ? cause.message : "Conversation unavailable."))}
-              className={`w-full rounded-2xl border p-3 text-left transition ${item.conversation_id === activeId ? "border-cyan-400/40 bg-cyan-400/10" : "border-white/10 bg-white/[0.03] hover:bg-white/[0.06]"}`}
-            >
-              <span className="block truncate text-sm font-semibold text-slate-100">{item.title}</span>
-              <span className="mt-1 block text-xs text-slate-500">{item.message_count ?? 0} messages · {new Date(item.updated_at).toLocaleString()}</span>
-            </button>
+            <article key={item.conversation_id}>
+              <button
+                type="button"
+                aria-label={`Open conversation ${item.title}`}
+                onClick={() => void loadConversation(item.conversation_id).catch((cause) => setError(cause instanceof Error ? cause.message : "Conversation unavailable."))}
+                className={`w-full rounded-2xl border p-3 text-left transition ${item.conversation_id === activeId ? "border-cyan-400/40 bg-cyan-400/10" : "border-white/10 bg-white/[0.03] hover:bg-white/[0.06]"}`}
+              >
+                <span className="block truncate text-sm font-semibold text-slate-100">{item.title}</span>
+                <span className="mt-1 block text-xs text-slate-500">{item.message_count ?? 0} messages · {new Date(item.updated_at).toLocaleString()}</span>
+              </button>
+            </article>
           ))}
         </div>
         {activeSummary ? (
@@ -281,11 +282,16 @@ export function AxentHome({ bootstrap, onOpenWorkspace, onHelp }: AxentHomeProps
           </div>
         </header>
 
-        <div className="flex-1 space-y-4 overflow-y-auto p-5" aria-live="polite">
+        <div
+          role="log"
+          aria-label="AXENT conversation"
+          aria-live="polite"
+          className="flex-1 space-y-4 overflow-y-auto p-5"
+        >
           {!conversation?.messages.length ? (
             <div className="mx-auto mt-16 max-w-xl text-center">
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-400/20 to-violet-400/20 text-2xl">✦</div>
-              <h3 className="mt-5 text-2xl font-semibold text-white">Research with visible evidence boundaries</h3>
+              <h1 className="mt-5 text-2xl font-semibold text-white">What are you investigating today?</h1>
               <p className="mt-3 leading-7 text-slate-400">Ask about opportunities, investigations, requirements, sources, claims or the current Workspace. AXENT proposes; the subscriber remains the decision authority.</p>
             </div>
           ) : null}
@@ -324,6 +330,7 @@ export function AxentHome({ bootstrap, onOpenWorkspace, onHelp }: AxentHomeProps
             />
             <button
               type="button"
+              aria-label="Send message"
               disabled={busy || !draft.trim()}
               onClick={() => void sendMessage()}
               className="self-end rounded-2xl bg-gradient-to-r from-cyan-400 to-violet-400 px-5 py-3 text-sm font-bold text-slate-950 disabled:cursor-not-allowed disabled:opacity-40"

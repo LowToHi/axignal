@@ -1,6 +1,9 @@
 import { expect, test } from "@playwright/test";
 
+import { installAxentPersistenceStub } from "./helpers/axent-persistence-stub";
+
 test("discloses deterministic AXENT guidance when no live model response is used", async ({ page }) => {
+  await installAxentPersistenceStub(page);
   await page.goto("/axent");
 
   const composer = page.getByRole("textbox", { name: "Ask AXENT anything about AXIGNAL" });
