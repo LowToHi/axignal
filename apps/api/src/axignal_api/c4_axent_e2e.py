@@ -137,11 +137,14 @@ def _seed_active_tenants(dsn: str, tenant_ids: tuple[UUID, ...]) -> None:
                   updated_at
                 ) VALUES (%s, 'ACTIVE', 'c4-research-axent-e2e-v1', now(), now())
                 ON CONFLICT (tenant_id) DO UPDATE
-                SET state = 'ACTIVE',
+                SET deletion_id = NULL,
+                    state = 'ACTIVE',
                     policy_version = EXCLUDED.policy_version,
-                    read_only_at = NULL,
+                    reason_code = NULL,
                     deletion_requested_at = NULL,
-                    purged_at = NULL,
+                    retention_until = NULL,
+                    purge_lease_owner = NULL,
+                    purge_lease_expires_at = NULL,
                     updated_at = now()
                 """,
                 (tenant_id,),
