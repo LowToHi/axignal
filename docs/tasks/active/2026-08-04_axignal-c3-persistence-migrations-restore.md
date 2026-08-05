@@ -4,7 +4,7 @@
 Contract                 AX-GE2E-CLOSURE-EXECUTION-002
 Gate                     C3
 Task authority           AX-GE2E-P03-T03
-State                    IN_PROGRESS
+State                    EVIDENCE_READY
 Candidate marker         AX_C3_PERSISTENCE_MIGRATIONS_RESTORE_PASS
 Previous canonical gate  C2 CLOSED / PASS
 Next gate                C4 BLOCKED_BY_C3
@@ -126,10 +126,10 @@ Fresh migration registration    PRESENT
 Workspace invariant rehearsal   PRESENT
 AXENT retention rehearsal       PRESENT
 Snapshot restore rehearsal      PRESENT
-Full migration CI               MISSING
-Exact-head root matrix           MISSING
-C3 marker                        NOT_EMITTED
-C4                               BLOCKED_BY_C3
+Full migration CI               PASS / run 30961773636
+Exact-head root matrix           PASS / candidate 64c00df0ac2cb57448e54284b1bd0b333690b2ae
+C3 marker                        ATTESTATION_PENDING / NOT_EFFECTIVE
+C4                               BLOCKED_PENDING_ATTESTATION_HEAD
 ```
 
-The marker is prohibited until the candidate head and a later closure-attestation head both complete all five root authorities successfully.
+Candidate head `64c00df0ac2cb57448e54284b1bd0b333690b2ae` completed all five root authorities successfully. The marker remains ineffective until a later closure-attestation head also completes the full matrix.
