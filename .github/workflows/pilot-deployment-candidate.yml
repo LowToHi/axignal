@@ -50,7 +50,9 @@ jobs:
       - name: Lint pilot boundary
         run: |
           ruff check \
+            apps/api/src/axignal_api/c4_axent_e2e.py \
             apps/api/src/axignal_api/pilot_health.py \
+            apps/api/tests/test_c4_axent_e2e_contract.py \
             apps/api/tests/test_pilot_health.py \
             infra/pilot/remote/tests/test_axent_secret_wiring.py \
             scripts/verify_pilot_candidate.py \
@@ -58,11 +60,12 @@ jobs:
             scripts/verify_ted_product_runtime.py \
             scripts/verify_ted_security_review.py
 
-      - name: Test pilot health boundary
-        run: pytest apps/api/tests/test_pilot_health.py
-
-      - name: Test AXENT secret wiring
-        run: pytest infra/pilot/remote/tests/test_axent_secret_wiring.py
+      - name: Test pilot and C4 static boundaries
+        run: |
+          pytest \
+            apps/api/tests/test_pilot_health.py \
+            apps/api/tests/test_c4_axent_e2e_contract.py \
+            infra/pilot/remote/tests/test_axent_secret_wiring.py
 
       - name: Verify deployment contract
         run: python scripts/verify_pilot_candidate.py | tee pilot-contract.json
@@ -136,7 +139,7 @@ jobs:
           retention-days: 14
 
   runtime-acceptance:
-    name: Private edge, live TED, health, auth, backup and restore
+    name: Private edge, live TED, AXENT, auth, backup and restore
     runs-on: ubuntu-latest
     timeout-minutes: 50
     needs: [static-contract, web-build]
@@ -373,6 +376,35 @@ jobs:
           }, sort_keys=True))
           PY
 
+      - name: Prepare C4 ResearchRun-to-AXENT state
+        shell: bash
+        run: |
+          set -o pipefail
+          docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" \
+            -f "$AXIGNAL_PILOT_COMPOSE_FILE" \
+            -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE" exec -T api \
+            python -m axignal_api.c4_axent_e2e prepare \
+            | tee pilot-c4-axent-prepare.json
+
+      - name: Restart AXENT API and web processes
+        run: |
+          docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" \
+            -f "$AXIGNAL_PILOT_COMPOSE_FILE" \
+            -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE" restart api web
+          docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" \
+            -f "$AXIGNAL_PILOT_COMPOSE_FILE" \
+            -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE" up --detach --wait api web
+
+      - name: Verify C4 persistence, isolation and governed deletion
+        shell: bash
+        run: |
+          set -o pipefail
+          docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" \
+            -f "$AXIGNAL_PILOT_COMPOSE_FILE" \
+            -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE" exec -T api \
+            python -m axignal_api.c4_axent_e2e verify \
+            | tee pilot-c4-axent-verify.json
+
       - name: Verify edge security headers
         shell: bash
         run: |
@@ -397,6 +429,8 @@ jobs:
             pilot-demo-headers.txt
             pilot-demo.html
             pilot-ted-runtime.json
+            pilot-c4-axent-prepare.json
+            pilot-c4-axent-verify.json
             pilot-headers.txt
             pilot-restore.json
           if-no-files-found: ignore
