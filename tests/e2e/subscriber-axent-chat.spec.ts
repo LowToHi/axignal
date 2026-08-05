@@ -37,6 +37,7 @@ test("persists through the identity-scoped BFF without browser-local authority",
   await composer.fill("Show AXIGNAL opportunities");
   await composer.press("Enter");
 
+  await expect.poll(() => stub.conversations()[0]?.messages.length ?? 0).toBe(2);
   await expect(page.locator('[aria-label="Saved conversations"] article')).toHaveCount(1);
   expect(stub.createRequests).toHaveLength(1);
   expect(stub.createRequests[0]).toMatchObject({ retention_class: "STANDARD_90D" });
@@ -74,11 +75,12 @@ test("sends only a conversation reference and requests governed deletion", async
   const composer = page.getByRole("textbox", { name: COMPOSER_NAME, exact: true });
   await composer.fill("Explain the evidence model");
   await composer.press("Enter");
+  await expect.poll(() => stub.assistantRequests.length).toBe(1);
   await expect(page.locator('[aria-label="Saved conversations"] article')).toHaveCount(1);
 
   await composer.fill("What should I review next?");
   await composer.press("Enter");
-  expect(stub.assistantRequests).toHaveLength(2);
+  await expect.poll(() => stub.assistantRequests.length).toBe(2);
   expect(stub.assistantRequests[1]).toHaveProperty("conversation_id");
   expect(stub.assistantRequests[1]).not.toHaveProperty("history");
   expect(await axentLocalHistoryKeys(page)).toEqual([]);
@@ -97,11 +99,15 @@ test("logout clears obsolete AXENT keys without deleting unrelated storage", asy
     localStorage.setItem("axignal:unrelated", "keep");
   });
 
-  await page.getByRole("button", { name: /Account menu for/ }).click();
+  const accountMenu = page.locator('button[aria-controls="subscriber-account-menu"]');
+  await expect(accountMenu).toBeVisible();
+  await accountMenu.click();
+  const signOut = page.locator('#subscriber-account-menu button[role="menuitem"]');
+  await expect(signOut).toBeVisible();
   const logoutResponse = page.waitForResponse(
     (response) => response.url().endsWith("/api/auth/logout") && response.request().method() === "POST",
   );
-  await page.getByRole("menuitem", { name: "Sign out and clear local AXENT history" }).click();
+  await signOut.click();
   expect((await logoutResponse).status()).toBe(200);
   await page.waitForURL("**/", { waitUntil: "domcontentloaded" });
 
