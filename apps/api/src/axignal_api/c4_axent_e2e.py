@@ -60,7 +60,7 @@ def _identity_assertion(*, subject: str, email: str, tenant_id: UUID) -> str:
         subject=subject,
         email=email,
         tenant_id=tenant_id,
-        ttl_seconds=900,
+        ttl_seconds=300,
     )
 
 
