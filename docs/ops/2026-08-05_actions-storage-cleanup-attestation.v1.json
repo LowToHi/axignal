@@ -1,0 +1,59 @@
+{
+  "schema": "axignal.actions-storage-cleanup-attestation.v1",
+  "repository": "LowToHi/axignal",
+  "observed_at": "2026-08-05T13:38:42Z",
+  "policy": {
+    "workflow": ".github/workflows/actions-storage-governance.yml",
+    "document": "docs/ops/actions-storage-policy.md",
+    "canonical_storage": "git_metadata_and_content_addressed_references",
+    "debug_storage": "ephemeral_github_actions_artifacts",
+    "actions_cache_is_evidence_authority": false
+  },
+  "cache_usage": {
+    "active_caches_count": 0,
+    "active_caches_size_in_bytes": 0
+  },
+  "cleanup_runs": [
+    {
+      "issue": 174,
+      "workflow_run_id": 30998504798,
+      "status": "SUCCESS",
+      "artifacts_scanned": 15000,
+      "artifacts_deleted": 600,
+      "bytes_deleted": 4712124409,
+      "delete_failures": 0
+    },
+    {
+      "issue": 175,
+      "workflow_run_id": 31010994318,
+      "status": "SUCCESS",
+      "artifacts_scanned": 15000,
+      "artifacts_deleted": 600,
+      "bytes_deleted": 329783797,
+      "delete_failures": 0
+    }
+  ],
+  "verified_totals": {
+    "artifacts_deleted": 1200,
+    "bytes_deleted": 5041908206
+  },
+  "residual_snapshot": {
+    "artifact_records": 52795,
+    "note": "Artifact record count includes active and expired records and can change while CI is running."
+  },
+  "protected_contractual_artifacts": [
+    {
+      "artifact_id": 8906279065,
+      "name": "identity-trial-abuse-e2e-11d8c2435ff899d0276dd4f0d6c51da45775e0dc",
+      "digest": "sha256:6a9a5e86dfd1ea4c18db7267a99596f22305d2e2aff72e346ab9dcf40aa54576",
+      "available_after_cleanup": true
+    },
+    {
+      "artifact_id": 8913254281,
+      "name": "full-migration-matrix-64c00df0ac2cb57448e54284b1bd0b333690b2ae",
+      "digest": "sha256:41216e196e98545beec1f9cb670eb89b709e26226aa20a9a6b7c63e08cb70af6",
+      "available_after_cleanup": true
+    }
+  ],
+  "result": "PASS"
+}
