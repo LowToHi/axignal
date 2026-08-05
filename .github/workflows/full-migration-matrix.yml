@@ -94,11 +94,41 @@ jobs:
             c3-persistent-authority-e2e.json
           python - <<'PY'
           import json
+          import re
           from pathlib import Path
 
           payload = json.loads(Path("c3-persistent-authority-e2e.json").read_text())
+          sha256 = re.compile(r"^[0-9a-f]{64}$")
+
           assert payload["schema"] == "axignal.c3-persistent-authority-e2e.v1"
           assert payload["status"] == "PASS"
+          assert payload["origin_schema_migration"] == "140-subscriber-persistent-authority.sql"
+          assert payload["final_schema_migration"] == "142-c4-axent-upgrade-hardening.sql"
+
+          assert sha256.fullmatch(payload["origin_source_data_hash"])
+          assert payload["origin_source_data_hash"] == payload["origin_restored_data_hash"]
+          assert sha256.fullmatch(payload["origin_source_schema_authority_hash"])
+          assert (
+              payload["origin_source_schema_authority_hash"]
+              == payload["origin_restored_schema_authority_hash"]
+          )
+
+          assert sha256.fullmatch(payload["final_restored_data_hash"])
+          assert payload["final_restored_data_hash"] == payload["final_comparison_data_hash"]
+          assert sha256.fullmatch(payload["final_restored_schema_authority_hash"])
+          assert (
+              payload["final_restored_schema_authority_hash"]
+              == payload["final_comparison_schema_authority_hash"]
+          )
+          assert (
+              payload["origin_restored_schema_authority_hash"]
+              != payload["final_restored_schema_authority_hash"]
+          )
+
+          assert payload["same_schema_140_equivalence"] == "PASS"
+          assert payload["deterministic_141_142_replay"] == "PASS"
+          assert payload["final_authority_contraction"] == "PASS"
+          assert payload["consecutive_cycle_comparator"] == "PASS"
           assert payload["evidence_sufficiency_enforced"] is True
           assert payload["submission_readiness_enforced"] is True
           assert payload["separation_of_duties_enforced"] is True
