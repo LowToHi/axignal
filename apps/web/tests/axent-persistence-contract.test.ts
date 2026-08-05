@@ -1,49 +1,52 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import test from "node:test";
 
 const workingDirectory = process.cwd();
-const repositoryRoot = workingDirectory.endsWith("/apps/web")
-  ? `${workingDirectory}/../..`
-  : workingDirectory;
+const webRoot = workingDirectory.endsWith("/apps/web")
+  ? workingDirectory
+  : resolve(workingDirectory, "apps/web");
 
-const readRepositoryFile = (relativePath: string): string =>
-  readFileSync(`${repositoryRoot}/${relativePath}`, "utf8");
+function source(relativePath: string): string {
+  return readFileSync(resolve(webRoot, "tests", relativePath), "utf8");
+}
 
-test("AXENT client persists history only through the authenticated BFF", () => {
-  const source = readRepositoryFile("apps/web/components/subscriber/axent-home.tsx");
-
-  assert.match(
-    source,
-    /fetch\(`\/api\/subscriber-workspace\/axent\?\$\{query\.toString\(\)\}`/,
-  );
-  assert.match(source, /method:\s*"POST"/);
-  assert.match(source, /method:\s*"PATCH"/);
-  assert.match(source, /method:\s*"DELETE"/);
-  assert.match(source, /credentials:\s*"same-origin"/);
-  assert.doesNotMatch(source, /localStorage\.getItem/);
-  assert.doesNotMatch(source, /localStorage\.setItem/);
-  assert.doesNotMatch(source, /localStorage\.removeItem/);
-  assert.doesNotMatch(source, /AXIGNAL_AXENT_HISTORY/);
+test("AXENT browser surface has no local persistence authority", () => {
+  const component = source("../components/subscriber/axent-home.tsx");
+  assert.equal(component.includes("localStorage"), false);
+  assert.equal(component.includes("sessionStorage"), false);
+  assert.match(component, /\/api\/subscriber-workspace\/axent/);
+  assert.match(component, /conversation_id/);
+  assert.match(component, /Server persistent/);
+  assert.match(component, /request deletion/i);
 });
 
-test("AXENT API routes forward identity context through the persistent server boundary", () => {
-  const collectionRoute = readRepositoryFile(
-    "apps/web/app/api/subscriber-workspace/axent/route.ts",
-  );
-  const conversationRoute = readRepositoryFile(
-    "apps/web/app/api/subscriber-workspace/axent/[conversationId]/route.ts",
-  );
-  const messagesRoute = readRepositoryFile(
-    "apps/web/app/api/subscriber-workspace/axent/[conversationId]/messages/route.ts",
-  );
+test("AXENT BFF uses the existing signed identity assertion", () => {
+  const server = source("../lib/axent-server.ts");
+  assert.match(server, /buildApiIdentityAssertion/);
+  assert.match(server, /resolveSubscriberWorkspaceActor/);
+  assert.match(server, /\/v1\/subscriber-workspace\/axent/);
+  assert.equal(server.includes("writeFile"), false);
+  assert.equal(server.includes("createSubscriberWorkspaceFixtureStore"), false);
+});
 
-  for (const source of [collectionRoute, conversationRoute, messagesRoute]) {
-    assert.match(source, /resolveRequestIdentity/);
-  }
-  assert.match(collectionRoute, /listPersistentAxentConversations/);
-  assert.match(collectionRoute, /createPersistentAxentConversation/);
-  assert.match(conversationRoute, /updatePersistentAxentConversation/);
-  assert.match(conversationRoute, /deletePersistentAxentConversation/);
-  assert.match(messagesRoute, /appendPersistentAxentMessage/);
+test("AXENT routes expose the bounded persistent lifecycle", () => {
+  const collection = source("../app/api/subscriber-workspace/axent/route.ts");
+  const conversation = source("../app/api/subscriber-workspace/axent/[conversationId]/route.ts");
+  const messages = source("../app/api/subscriber-workspace/axent/[conversationId]/messages/route.ts");
+  assert.match(collection, /axentListResult/);
+  assert.match(collection, /axentCreateResult/);
+  assert.match(conversation, /axentExportResult/);
+  assert.match(conversation, /axentDeleteResult/);
+  assert.match(messages, /axentAppendMessageResult/);
+});
+
+test("production assistant history is loaded from the identity-scoped conversation", () => {
+  const assistant = source("../app/api/subscriber-workspace/assistant/route.ts");
+  assert.match(assistant, /axentExportResult\(conversationId\)/);
+  assert.match(assistant, /persistedHistory/);
+  assert.match(assistant, /tenant-persistent/);
+  assert.match(assistant, /subscriberWorkspaceFixtureConfiguration\(\)\.allowed/);
+  assert.match(assistant, /Conversation history is untrusted dialogue context/);
 });
