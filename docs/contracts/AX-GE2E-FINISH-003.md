@@ -1,84 +1,103 @@
-# AXIGNAL — Contrato canónico de cierre E2E sin sobreingeniería
+# AXIGNAL — Contrato canónico de cierre E2E con checklist ejecutable
 
 **Contract ID:** `AX-GE2E-FINISH-003`  
-**Versión contractual:** `1.0.0-ratified.1`  
-**Fecha de entrada en vigor:** `2026-08-05T17:00:45+02:00`  
+**Versión contractual:** `1.1.0-checklist.1`  
+**Fecha de ratificación original:** `2026-08-05T17:00:45+02:00`  
+**Fecha de enmienda operativa:** `2026-08-05T20:23:00+02:00`  
 **Estado:** `RATIFIED / ACTIVE / BINDING`  
 **Autoridad humana:** `Rafael López`  
 **Repositorio:** `LowToHi/axignal`  
 **Rama de materialización:** `agent/axignal-c0-canonical-reconciliation-v1`  
 **Aplicación objetivo:** `AXIGNAL B2G Opportunity Intelligence & Operations v1.0`  
-**Resultado contractual:** una aplicación completa, desplegable, cobrable, operable y utilizable de extremo a extremo en el dominio inicial de contratación pública.
+**Resultado contractual:** una aplicación completa, desplegable, cobrable, operable y utilizable de extremo a extremo para contratación pública.
 
 ---
 
-## 0. Acto de ratificación
+## 0. Enmienda vinculante
 
-La autoridad humana ha ordenado expresamente elevar a contrato el documento:
+La autoridad humana ordena sustituir el formato narrativo y los snapshots de avance del contrato por una checklist contractual única y actualizable.
 
-```text
-AXIGNAL_Contrato_Roadmap_Cierre_E2E_Sin_Sobreingenieria.md
-```
+Desde esta versión:
 
-En consecuencia, desde la fecha de entrada en vigor:
-
-1. el documento queda aprobado y deja de estar en estado `PROPOSED / HUMAN APPROVAL REQUIRED`;
-2. sus definiciones de producto terminado, alcance, work packages, reglas de cambio mínimo, prohibiciones de sobreingeniería, gates y condiciones de parada pasan a ser vinculantes;
-3. este archivo materializa en el repositorio la ratificación y prevalece como autoridad operativa frente a roadmaps, estados, attestations o interpretaciones anteriores que entren en conflicto;
-4. los documentos anteriores se conservan como audit trail, pero no pueden ampliar, reducir ni alterar silenciosamente este contrato;
-5. toda modificación futura requiere una enmienda expresa aprobada por la autoridad humana.
+1. este archivo contiene la lista completa de tareas necesarias para alcanzar el E2E contratado;
+2. `[ ]` significa tarea pendiente y `[x]` significa tarea cumplida;
+3. el progreso se determina exclusivamente contando tareas marcadas, no mediante porcentajes estimados, relatos de avance ni declaraciones informales;
+4. cada tarea cumplida debe conservar evidencia verificable;
+5. las tareas cumplidas pueden reabrirse si una regresión invalida su evidencia;
+6. el ledger debe reflejar el mismo work package y tarea activos;
+7. quedan eliminados los snapshots históricos de avance del cuerpo operativo del contrato;
+8. los documentos y attestations anteriores se conservan únicamente como audit trail.
 
 ```text
 HUMAN_AUTHORITY_APPROVAL     APPROVED
 APPROVED_BY                  Rafael López
-APPROVED_AT                  2026-08-05T17:00:45+02:00
+AMENDMENT_EFFECTIVE_AT       2026-08-05T20:23:00+02:00
 CONTRACT_STATUS              RATIFIED_ACTIVE
 PUBLIC_LAUNCH_AUTHORITY      false
 ```
 
 ---
 
-## 1. Incorporación del documento aprobado
+## 1. Reglas de uso de la checklist
 
-Se incorpora por referencia, íntegramente y sin reducción material, el contenido de:
+### 1.1 Semántica
 
 ```text
-filename       AXIGNAL_Contrato_Roadmap_Cierre_E2E_Sin_Sobreingenieria.md
-contract_id    AX-GE2E-FINISH-003
-version        1.0.0
-source_date    2026-08-05
-source_file_id file_00000000416c81f4a516bd5fc4f97431
+[ ]  pendiente: no existe evidencia completa o la evidencia ha quedado invalidada
+[x]  cumplida: todos los criterios de la tarea pasan y su evidencia está registrada
 ```
 
-Quedan ratificados, en particular:
+No existen estados implícitos. Una tarea parcialmente implementada permanece `[ ]`.
 
-- la decisión de cerrar AXIGNAL B2G v1.0 como vertical comercial completa;
-- la separación entre `AXIGNAL B2G v1.0` y el programa de expansión `O02–O09`;
-- la prohibición de rebajar el producto a maqueta, demo, buscador aislado o MVP incompleto;
-- la cadena de valor desde identidad y fuente admitida hasta oportunidad, Bid Workspace, billing, soporte, backup y restauración;
-- la autoridad server-side para identidad, tenant, roles, entitlements, billing y admisión;
-- el carácter proposal-only de los modelos y la reserva humana de decisiones materiales;
-- la política de un único PR, un único work package activo y un único ledger operativo;
-- la regla de cambio mínimo basada en fallo observado y causa reproducible;
-- la prohibición de retries, fixtures finales, timeouts artificiales y refactors no vinculados al blocker;
-- el cierre canónico sólo después de merge protegido a `main` y smoke post-merge;
-- el orden estricto `WP0 → WP1 → WP2 → WP3 → WP4 → WP5 → WP6`;
-- las condiciones de parada por pérdida de datos, aislamiento tenant, autoridad, seguridad, cobro, restore, accesibilidad o manifiesto no ligado al SHA;
-- la reserva de la matriz global exact-head para hitos contractuales, no para microcambios documentales.
+### 1.2 Regla para marcar `[x]`
+
+Una tarea sólo puede marcarse `[x]` cuando:
+
+1. todos sus criterios materiales están satisfechos;
+2. las pruebas afectadas pasan;
+3. la evidencia identifica el SHA ejecutable validado;
+4. los jobs, artefactos, manifests o aprobaciones requeridos están registrados;
+5. no se ha obtenido el PASS mediante retries, fixtures finales, bypasses o ampliaciones arbitrarias de timeout;
+6. no existe una regresión conocida que contradiga el cierre;
+7. la modificación de la casilla y el ledger se realizan en el mismo cambio documental o en cambios consecutivos inequívocamente ligados.
+
+### 1.3 Exact-head y actualizaciones documentales
+
+Marcar una casilla en un commit documental no transforma ese commit en evidencia de producto. Cada `[x]` debe señalar el `EVIDENCE_SHA` sobre el que pasó la tarea.
+
+Antes de cerrar un work package se exige una validación exact-head del estado integrado vigente. Antes de P27 se exige una validación exact-head completa que incluya código, configuración, contratos, ledger y manifiesto final.
+
+### 1.4 Reapertura
+
+Una tarea `[x]` vuelve a `[ ]` cuando:
+
+- una regresión material reproduce el fallo;
+- cambia su contrato de aceptación;
+- el SHA o artefacto queda invalidado;
+- el merge introduce una divergencia;
+- una autoridad humana, legal, de seguridad o de datos revoca la aceptación.
+
+### 1.5 Orden de ejecución
+
+```text
+WP0 → WP1 → WP2 → WP3 → WP4 → WP5 → WP6
+```
+
+Dentro de cada work package se ejecutará primero la primera tarea pendiente, salvo dependencia técnica explícita o enmienda humana. No se iniciará un work package posterior para evitar resolver el anterior.
 
 ---
 
-## 2. Objeto contractual
+## 2. Definición contractual de E2E
 
-AXIGNAL B2G v1.0 sólo podrá considerarse terminado cuando complete de forma real y persistente la cadena:
+AXIGNAL B2G v1.0 sólo estará terminado cuando complete de forma real y persistente:
 
 ```text
 visitante
 → registro y verificación
 → passkey y sesión revocable
-→ organización, tenant y trial
+→ organización, tenant, roles, seats y trial
 → fuente oficial admitida
-→ ingestión y normalización
+→ ingestión, normalización y recuperación
 → Navigator
 → ResearchRun persistente
 → AXENT con contexto gobernado
@@ -89,30 +108,32 @@ visitante
 → Opportunity
 → Pursuit
 → Bid Workspace
-→ requisitos, evidencias, tareas, hitos y documentos
-→ decisión y aprobación humana
+→ requisitos, evidencias, tareas, hitos, documentos y aprobaciones
+→ decisión humana
 → exportación o activación registrada
 → outcome y aprendizaje
 → facturación, renovación, impago y cancelación
 → soporte, observabilidad, backup, restauración y auditoría
+→ aceptación privada
+→ P27 y autorización humana final
 ```
 
-No constituye cumplimiento contractual:
+No constituye E2E:
 
 - una interfaz sin backend real;
-- un flujo basado en fixtures;
-- una demo sin persistencia;
-- un buscador sin operaciones de oportunidad;
+- una demo basada en fixtures;
+- una ejecución sin persistencia;
+- un buscador que termina antes de Opportunity Operations;
 - una respuesta de modelo sin evidencia gobernada;
-- un PASS obtenido mediante retry o ampliación arbitraria de timeout;
-- una attestation no ligada al SHA ejecutado;
-- un cierre declarado exclusivamente en una rama no fusionada.
+- una attestation no ligada al SHA;
+- un PASS obtenido mediante retry o timeout artificial;
+- un cierre declarado únicamente en una rama no fusionada.
 
 ---
 
-## 3. Alcance y no sobreingeniería
+## 3. Alcance y límites
 
-### 3.1 Alcance inicial obligatorio
+### 3.1 Alcance obligatorio
 
 ```text
 AXIGNAL B2G v1.0
@@ -126,19 +147,11 @@ AXIGNAL B2G v1.0
 + P27 y autorización humana final
 ```
 
-### 3.2 Expansión posterior
+### 3.2 Fuera de la ruta crítica
 
-```text
-AXIGNAL Global Programme
-= O02–O09
-+ nuevas fuentes
-+ nuevas bibliotecas
-+ nuevas capacidades empresariales
-```
+`O02–O09`, nuevas bibliotecas y capacidades futuras no son blockers de este cierre salvo que una dependencia concreta sea materialmente necesaria para O01.
 
-La expansión posterior no es blocker de O01 salvo que una dependencia concreta sea materialmente necesaria para completar la cadena B2G contratada.
-
-### 3.3 Prohibiciones vinculantes
+### 3.3 Prohibiciones
 
 Durante el cierre no se permite:
 
@@ -146,203 +159,347 @@ Durante el cierre no se permite:
 2. añadir otra base de datos sin imposibilidad material demostrada;
 3. introducir Kubernetes, service mesh, streaming o infraestructura no requerida por un fallo observado;
 4. crear nuevos root workflows de CI;
-5. incorporar O02–O09 en la ruta crítica;
+5. incorporar O02–O09 a la ruta crítica;
 6. refactorizar módulos ajenos al blocker;
 7. sustituir integraciones reales por fixtures en gates finales;
 8. usar retries para convertir flakiness en PASS;
-9. elevar timeouts sin demostrar que representan un requisito funcional legítimo;
-10. abrir varios PR o work packages de cierre simultáneos;
-11. declarar `CLOSED` antes del merge protegido a `main`;
-12. ampliar el contrato para evitar corregir el fallo activo.
+9. elevar timeouts sin requisito funcional demostrado;
+10. mantener varios PR o work packages de cierre simultáneos;
+11. declarar cierre canónico antes del merge protegido y smoke post-merge;
+12. alterar el contrato para evitar corregir la primera tarea pendiente.
 
 ---
 
 ## 4. Jerarquía de autoridad
 
-En caso de contradicción se aplicará este orden:
-
 ```text
 1. Enmienda contractual aprobada por la autoridad humana
-2. Este contrato ratificado AX-GE2E-FINISH-003
-3. Ledger canónico AXIGNAL_E2E_FINISH_LEDGER.json
-4. Código y migraciones del exact HEAD activo
-5. Resultado terminal de CI ligado al exact HEAD
-6. Attestations y artefactos content-addressed
-7. Documentos históricos y conversaciones
+2. Este contrato AX-GE2E-FINISH-003
+3. Checklist y evidencias registradas en este archivo
+4. Ledger docs/roadmap/AXIGNAL_E2E_FINISH_LEDGER.json
+5. Código y migraciones del exact HEAD activo
+6. Resultado terminal de CI ligado al exact HEAD
+7. Attestations y artefactos content-addressed
+8. Documentos históricos y conversaciones
 ```
-
-Una conversación, comentario, roadmap histórico o marcador anterior no puede modificar por sí solo el alcance o el estado contractual.
 
 ---
 
-## 5. Modelo de cierre
+## 5. Panel de progreso contractual
 
-### 5.1 Ingeniería
+| Work package | Cumplidas | Total | Estado |
+|---|---:|---:|---|
+| `WP0` Canonicalización C0–C4 | 5 | 12 | `IN_PROGRESS` |
+| `WP1` Investigación, AXENT y evidencia real | 0 | 10 | `BLOCKED_BY_WP0` |
+| `WP2` O01, Opportunity y Bid Workspace | 0 | 12 | `BLOCKED_BY_WP1` |
+| `WP3` Comercial, billing y Founder Operations | 0 | 12 | `BLOCKED_BY_WP2` |
+| `WP4` Producción, seguridad, UX y distribución | 0 | 12 | `BLOCKED_BY_WP3` |
+| `WP5` Aceptación privada | 0 | 7 | `BLOCKED_BY_WP4` |
+| `WP6` P27, release y lanzamiento | 0 | 10 | `BLOCKED_BY_WP5` |
+| **TOTAL** | **5** | **75** | **E2E INCOMPLETE** |
 
 ```text
-NOT_STARTED
-IN_PROGRESS
-AFFECTED_TESTS_PASS
-SUBSYSTEM_E2E_PASS
-RELEASE_CANDIDATE_PASS
+ACTIVE_WORK_PACKAGE          WP0
+ACTIVE_TASK                  WP0-T05
+NEXT_CANONICAL_MARKER        AX_C0_C4_CANONICAL_MAIN_PASS
+PUBLIC_LAUNCH                NO_GO
 ```
 
-### 5.2 Canonicalidad
-
-```text
-UNMERGED
-MERGE_READY
-CANONICAL_CLOSED
-PRODUCTION_DEPLOYED
-PRIVATE_ACCEPTED
-PUBLIC_LAUNCH_AUTHORIZED
-```
-
-### 5.3 Regla de cierre
-
-Un work package sólo queda `CANONICAL_CLOSED` cuando:
-
-1. el alcance está congelado;
-2. las pruebas afectadas pasan;
-3. la matriz del subsistema pasa;
-4. la rama está reconciliada con `main`;
-5. el merge protegido se completa;
-6. el SHA resultante de `main` queda registrado;
-7. el smoke post-merge pasa.
+El panel se actualizará en el mismo cambio que marque o reabra una tarea. En caso de discrepancia, prevalecen las casillas individuales.
 
 ---
 
-## 6. Work packages vinculantes
+# 6. Checklist contractual E2E
 
-```text
-WP0  Canonicalización del baseline C0–C4
-WP1  Investigación, AXENT y evidencia real
-WP2  O01, Opportunity y Bid Workspace completos
-WP3  Comercial, billing y Founder Operations
-WP4  Producción, seguridad, UX y distribución
-WP5  Aceptación privada sobre producto terminado
-WP6  P27, release candidate y lanzamiento
-```
+## WP0 — Canonicalización del baseline C0–C4
 
-No se inicia un work package posterior para evitar resolver el anterior.
+**Objetivo:** obtener un baseline C0–C4 integrado, exact-head, fusionado de forma protegida y reproducible desde `main`.
 
-Las únicas preparaciones paralelas permitidas son externas y no mutantes:
+- [x] **WP0-T01 — Reconciliar C0 como baseline canónico único.**  
+  **Cierre:** no existen autoridades divergentes; baseline y contratos apuntan a una única línea de producto.  
+  **Evidencia:** `AX_C0_CANONICAL_BASELINE_PASS`.
 
-- credenciales de producción;
-- correo;
-- Stripe;
-- contacto de aceptación;
-- revisión legal de fuente;
-- provisioning del VPS.
+- [x] **WP0-T02 — Cerrar el Subscriber Shell C1 de extremo a extremo.**  
+  **Cierre:** alta de suscriptor, consentimiento, confirmación, gestión y revocación persisten con autoridad server-side.  
+  **Evidencia:** `AX_C1_SUBSCRIBER_SHELL_FULL_E2E_PASS`.
 
----
+- [x] **WP0-T03 — Cerrar identidad, sesión, tenant, seats y trial C2.**  
+  **Cierre:** passkey, recuperación, revocación, tenant, roles, seats, trial, límites y aislamiento pasan.  
+  **Evidencia:** `AX_C2_IDENTITY_TENANT_TRIAL_PASS`; `EVIDENCE_SHA=2ca1cf0451ff0a1544047a2426cf397dae0bb99a`.
 
-## 7. Enmienda operativa de ratificación
+- [x] **WP0-T04 — Cerrar la autoridad de producto C3 de persistencia y migraciones.**  
+  **Cierre:** migraciones, tenant-private authority, retención, backup y restore de producto quedan demostrados.  
+  **Evidencia:** `AX_C3_PERSISTENCE_MIGRATIONS_RESTORE_PASS`; `EVIDENCE_SHA=8a81d2a417d5645899c3ba50489552bbeb3f829a`; `artifact_id=8913254281`.
 
-El documento incorporado contiene un snapshot histórico del comienzo de WP0. Desde entonces, C4 ha superado su recorrido técnico y el blocker material activo se ha desplazado al verificador C3 de ciclos consecutivos.
+- [ ] **WP0-T05 — Cerrar el comparador C3 de ciclos consecutivos 140→142.**  
+  **Cierre:** snapshot restaurado en schema 140; equivalencia de datos y autoridad en 140; aplicación determinista de 141–142; equivalencia final de schema, datos y autoridad; hashes materiales preservados; CI afectada PASS.  
+  **Evidencia requerida:** job y artefacto C3 PASS sobre el mismo `EVIDENCE_SHA`.  
+  **Restricción:** no modificar las migraciones 141–142, no relajar ACL, no ignorar schema drift y no retirar hashes.
 
-Esta actualización no modifica el alcance, los criterios de calidad ni la secuencia WP0–WP6. Sustituye exclusivamente el snapshot operativo obsoleto.
+- [x] **WP0-T06 — Cerrar el runtime técnico C4 de Research/AXENT.**  
+  **Cierre:** recorrido técnico C4, autoridad y persistencia pasan sin sustituir evidencia por fixtures finales.  
+  **Evidencia:** `C4_FINAL_RUNTIME_PASS`; `EVIDENCE_SHA=dd119139555e885cc73d24d13e4b7b148797576e`; `job_id=92338125477`.
 
-### 7.1 Estado exacto al ratificar
+- [ ] **WP0-T07 — Ejecutar y cerrar la full migration matrix exact-head.**  
+  **Cierre:** bootstrap, upgrade paths, replay, backup, restore, retention y migraciones soportadas pasan en toda la matriz requerida.  
+  **Evidencia requerida:** run terminal SUCCESS y artefactos ligados al exact HEAD.
 
-```text
-PR                         #169
-BRANCH                     agent/axignal-c0-canonical-reconciliation-v1
-BASE                       main
-EXACT_HEAD_PRE_RATIFICATION dd119139555e885cc73d24d13e4b7b148797576e
-PR_STATE                   OPEN / DRAFT / UNMERGED
-PR_MERGEABLE               true
-WP0                        IN_PROGRESS
-WP1–WP6                    BLOCKED
-PUBLIC_LAUNCH              NO_GO
-```
+- [ ] **WP0-T08 — Ejecutar y cerrar los root gates exact-head.**  
+  **Cierre:** `Core`, `Runtime`, `Domain`, `Procurement Admission` y `Remote Pilot Operations` pasan sobre el mismo producto candidato.  
+  **Evidencia requerida:** IDs de runs, conclusiones SUCCESS y SHA común.
 
-### 7.2 Evidencia preservada
+- [ ] **WP0-T09 — Incorporar el último `main` y resolver sólo conflictos materiales.**  
+  **Cierre:** rama actualizada respecto a `main`, sin pérdida de cambios ni ampliación de alcance; pruebas afectadas PASS.  
+  **Evidencia requerida:** merge-base, head reconciliado y diff revisado.
 
-```text
-Core                       PASS
-Domain                     PASS
-Specialized source         PASS
-Remote pilot               PASS
-Data integrity             PASS
-C4 final runtime           PASS
-C3 final closure           FAIL
-```
+- [ ] **WP0-T10 — Dejar el PR contractual listo y protegiblemente fusionable.**  
+  **Cierre:** PR no draft, mergeable, checks obligatorios PASS, expected head verificado y cero conversaciones bloqueantes.  
+  **Evidencia requerida:** snapshot del PR y `expected_head_sha`.
 
-### 7.3 Blocker vigente
+- [ ] **WP0-T11 — Completar el merge protegido a `main`.**  
+  **Cierre:** merge realizado mediante la protección configurada, sin bypass y sobre el head esperado.  
+  **Evidencia requerida:** SHA canónico de `main` y registro de merge.
 
-```text
-ID                         AX-CLOSE-BLK-002
-ámbito                     C3 backup/restore consecutive-cycle verification
-síntoma                     C3 first full-cycle hash drifted
-causa acotada               comparación de evidencia generada bajo schema 140
-                            con estado restaurado/actualizado bajo schema 142
-naturaleza                  discrepancia de verificación; no evidencia de pérdida de datos
-cambio permitido            comparador/verificador C3 exclusivamente
-prohibido                   relajar integridad, ignorar schema drift, retirar hashes,
-                            modificar producto, C4, billing, fuentes o arquitectura
-criterio de cierre          equivalencia de datos en schema de origen,
-                            upgrade determinista 141–142,
-                            equivalencia final de schema/datos/autoridad,
-                            matriz exact-head PASS
-estado                      ROOT_CAUSE_CONFIRMED
-```
-
-### 7.4 Transición exacta autorizada
-
-```text
-ratification HEAD
-→ localizar el comparador exacto de ciclos C3
-→ corregir sólo la semántica de comparación entre schema 140 y schema 142
-→ preservar la prueba de determinismo y todos los hashes materiales
-→ ejecutar pruebas afectadas
-→ full migration matrix PASS
-→ Core PASS
-→ Runtime PASS
-→ Domain PASS
-→ incorporar latest main
-→ resolver únicamente conflictos materiales
-→ full exact-head matrix PASS
-→ PR #169 mergeable y ready
-→ protected merge
-→ smoke post-merge
-→ registrar SHA canónico
-→ AX_C0_C4_CANONICAL_MAIN_PASS
-→ iniciar WP1
-```
-
-Cualquier otra transición material queda fuera de contrato hasta cerrar WP0.
+- [ ] **WP0-T12 — Ejecutar smoke post-merge y emitir el marcador WP0.**  
+  **Cierre:** instalación/arranque, login, recorrido crítico C0–C4 y persistencia pasan desde `main`; ledger registra el SHA canónico.  
+  **Evidencia requerida:** `AX_C0_C4_CANONICAL_MAIN_PASS`.
 
 ---
 
-## 8. Ledger obligatorio
+## WP1 — Investigación, AXENT y evidencia real
 
-La ejecución se gobernará mediante:
+**Objetivo:** demostrar el recorrido real desde una intención en Navigator hasta un InvestigationContext gobernado y persistente.
 
-```text
-docs/roadmap/AXIGNAL_E2E_FINISH_LEDGER.json
-```
+- [ ] **WP1-T01 — Admitir al menos una fuente oficial O01 para evidencia real.**  
+  **Cierre:** autoridad humana, derechos, alcance, calidad, límites, retención, revocación y kill switch aprobados.
 
-El ledger debe reflejar únicamente hechos verificables y contener, como mínimo:
+- [ ] **WP1-T02 — Crear un ResearchRun persistente desde Navigator.**  
+  **Cierre:** submit real, `runId` durable, redirección canónica `/research-runs/{runId}` y estados server-side.
 
-- contract ID y versión;
-- SHA canónico de `main`;
-- rama, PR y exact HEAD activos;
-- work package activo;
-- blocker activo;
-- transición permitida;
-- estado de WP0–WP6;
-- autoridad de lanzamiento;
-- evidencia de CI y artefactos;
-- último cambio aprobado por autoridad humana.
+- [ ] **WP1-T03 — Cerrar el ciclo de worker.**  
+  **Cierre:** lease, heartbeat, progreso, reanudación, terminalidad e idempotencia sin doble procesamiento.
 
-No habrá otro documento operativo paralelo con igual autoridad.
+- [ ] **WP1-T04 — Recuperar y normalizar evidencia oficial real.**  
+  **Cierre:** contenido, metadatos, identificadores, idioma, timestamps y procedencia se preservan sin fixtures finales.
+
+- [ ] **WP1-T05 — Materializar Evidence Objects verificables.**  
+  **Cierre:** hash, fuente, ubicación, captura, licencia/derechos, temporalidad y trazabilidad quedan persistidos.
+
+- [ ] **WP1-T06 — Producir Candidate Claims con incertidumbre explícita.**  
+  **Cierre:** cada claim referencia evidencia suficiente, conserva contradicciones y no se presenta como hecho admitido.
+
+- [ ] **WP1-T07 — Ejecutar admisión determinista y Claim Ledger.**  
+  **Cierre:** reglas independientes del modelo deciden admisión/rechazo; ledger append-only, reproducible y auditable.
+
+- [ ] **WP1-T08 — Construir InvestigationContext y respuesta AXENT gobernada.**  
+  **Cierre:** AXENT usa únicamente contexto autorizado, cita evidencia, distingue hechos/hipótesis y mantiene autoridad humana.
+
+- [ ] **WP1-T09 — Probar continuidad, aislamiento y recuperación.**  
+  **Cierre:** reload, restart, backup/restore, logout, route protection y cross-tenant preservan o deniegan correctamente el estado.
+
+- [ ] **WP1-T10 — Cerrar el recorrido navegador→investigación completo.**  
+  **Cierre:** journey browser real desde login hasta paquete de investigación, sin bypasses y con manifest exact-head.  
+  **Evidencia requerida:** `AX_WP1_RESEARCH_EVIDENCE_FULL_E2E_PASS`.
 
 ---
 
-## 9. Condiciones de parada
+## WP2 — O01, Opportunity y Bid Workspace
 
-El lanzamiento se detendrá ante:
+**Objetivo:** convertir investigación admitida en una operación completa de oportunidad pública hasta outcome y aprendizaje.
+
+- [ ] **WP2-T01 — Cerrar el manifiesto O01 de fuentes, derechos y cobertura.**  
+  **Cierre:** países, idiomas, sectores, profundidad histórica, actualización, calidad, lag, límites y fuentes suspendidas quedan declarados.
+
+- [ ] **WP2-T02 — Cerrar ingestión y actualización O01.**  
+  **Cierre:** alta inicial, actualización incremental, deduplicación, corrección, revocación, kill switch y rollback pasan.
+
+- [ ] **WP2-T03 — Cerrar descubrimiento O01 en Navigator.**  
+  **Cierre:** búsqueda, filtros, relevancia, multilingüismo, disclosure de cobertura y enlaces a evidencia funcionan con datos reales.
+
+- [ ] **WP2-T04 — Crear Opportunity desde InvestigationContext admitido.**  
+  **Cierre:** lineage completo, tenant, fuente, claims, elegibilidad no garantizada, estado y auditoría persisten.
+
+- [ ] **WP2-T05 — Implementar el ciclo de vida Pursuit.**  
+  **Cierre:** qualify, watch, pursue, hold, no-bid, won, lost y archived tienen transiciones autorizadas y auditables.
+
+- [ ] **WP2-T06 — Cerrar Requirements, Evidence y WorkItems del Bid Workspace.**  
+  **Cierre:** requisitos, evidencias, gaps, tareas, responsables, prioridades y dependencias funcionan server-side.
+
+- [ ] **WP2-T07 — Cerrar Milestones, Documents, Comments y colaboración.**  
+  **Cierre:** hitos, versiones documentales, comentarios, asignaciones y concurrencia preservan integridad y tenant isolation.
+
+- [ ] **WP2-T08 — Cerrar Decision y Approval con autoridad humana.**  
+  **Cierre:** bid/no-bid y aprobaciones materiales no pueden ser ejecutadas autónomamente por el modelo.
+
+- [ ] **WP2-T09 — Cerrar exportación y SubmissionOrActivationRecord.**  
+  **Cierre:** exportación reproducible, registro de activación/envío, actor, timestamp, versión y audit trail persisten.
+
+- [ ] **WP2-T10 — Cerrar Outcome y Learning.**  
+  **Cierre:** resultado, razón, feedback y aprendizaje tenant-private se registran sin contaminar autoridad global.
+
+- [ ] **WP2-T11 — Probar aislamiento, retención, eliminación y restauración O01.**  
+  **Cierre:** RLS, IDOR/BOLA, tombstones, legal hold, purge y restore preservan el contrato.
+
+- [ ] **WP2-T12 — Cerrar el E2E O01 completo en UI.**  
+  **Cierre:** fuente real→Navigator→investigación→Opportunity→Pursuit→Bid Workspace→decisión→registro→outcome funciona en navegadores, móvil y teclado.  
+  **Evidencia requerida:** `AX_WP2_O01_BID_WORKSPACE_FULL_E2E_PASS`.
+
+---
+
+## WP3 — Comercial, billing y Founder Operations
+
+**Objetivo:** demostrar que AXIGNAL puede conceder trial, cobrar, renovar, restringir, cancelar, reconciliar y operar clientes de forma auditable.
+
+- [ ] **WP3-T01 — Congelar price book y paquetes server-side.**  
+  **Cierre:** Trial, Professional, Team y Enterprise tienen precio/quote, seats, límites, features, impuestos y versión inequívocos.
+
+- [ ] **WP3-T02 — Cerrar trial y economía de uso.**  
+  **Cierre:** READY→ACTIVE→EXPIRED, siete días, budgets transaccionales, concurrencia y read-only final pasan.
+
+- [ ] **WP3-T03 — Cerrar seats, roles y entitlements.**  
+  **Cierre:** reservas, altas, bajas, límites Professional/Team, cambios de rol y revocación se aplican server-side.
+
+- [ ] **WP3-T04 — Completar checkout y alta real en Stripe sandbox.**  
+  **Cierre:** customer, price, checkout/subscription, tenant binding, invoice y entitlement inicial quedan reconciliados.
+
+- [ ] **WP3-T05 — Completar renovación e invoice paid.**  
+  **Cierre:** ciclo renovado, periodo, factura, pago, ledger y continuidad de acceso coinciden.
+
+- [ ] **WP3-T06 — Completar impago y dunning.**  
+  **Cierre:** payment failure, retries propios de Stripe, grace policy, notificación, restricción y recuperación son deterministas.
+
+- [ ] **WP3-T07 — Completar upgrade, downgrade, cancelación y reactivación.**  
+  **Cierre:** prorrateo/política, effective dates, seats, entitlements y auditoría son correctos.
+
+- [ ] **WP3-T08 — Cerrar webhooks y reconciliación.**  
+  **Cierre:** firma, replay denial, idempotencia, eventos duplicados/fuera de orden, backfill y reconciliación manual pasan.
+
+- [ ] **WP3-T09 — Cerrar refunds, disputes, credit notes e invoices.**  
+  **Cierre:** cada mutación tiene autoridad tipada, estado durable y trazabilidad financiera.
+
+- [ ] **WP3-T10 — Cerrar Founder Operations de Growth y Customers/Billing.**  
+  **Cierre:** SEO, páginas, alerts, CRM, customers, trials y billing tienen controles reales o aparecen explícitamente bloqueados/read-only.
+
+- [ ] **WP3-T11 — Cerrar Founder Operations de Risk, Abuse, Sources y Coverage.**  
+  **Cierre:** decisiones, revisiones, fuentes, derechos, cobertura, consentimiento y eliminación tienen autoridad server-side y audit.
+
+- [ ] **WP3-T12 — Cerrar Founder Operations de Platform y soporte.**  
+  **Cierre:** queues, workers, SLO, incidents, DR, flags, settings, audit y soporte operan sin controles simulados.  
+  **Evidencia requerida:** `AX_WP3_COMMERCIAL_FOUNDER_OPS_FULL_E2E_PASS`.
+
+---
+
+## WP4 — Producción, seguridad, UX y distribución
+
+**Objetivo:** obtener un artefacto reproducible, seguro, operable y desplegable en producción sin depender del checkout de desarrollo.
+
+- [ ] **WP4-T01 — Crear distribución reproducible e instalable.**  
+  **Cierre:** builds independientes, imágenes, bundle, checksums y SBOM reproducibles; fresh install sin checkout.
+
+- [ ] **WP4-T02 — Cerrar despliegue de producción.**  
+  **Cierre:** VPS, dominio, TLS, DNS, configuración, secretos y rollback quedan versionados y documentados sin secretos en artefactos.
+
+- [ ] **WP4-T03 — Endurecer runtime y persistencia.**  
+  **Cierre:** usuarios no-root, redes mínimas, healthchecks, `pull_policy`, persistencia tras restart y cero bind mounts de desarrollo.
+
+- [ ] **WP4-T04 — Cerrar identidad, RBAC y aislamiento de producción.**  
+  **Cierre:** sesiones, recuperación, roles, tenant resolution, IDOR/BOLA y cross-tenant pasan bajo configuración productiva.
+
+- [ ] **WP4-T05 — Cerrar seguridad web, red y agente.**  
+  **Cierre:** CSRF, CORS, replay, rate limits, SSRF, DNS rebinding, prompt injection, egress y tool permissions pasan.
+
+- [ ] **WP4-T06 — Cerrar supply chain y vulnerabilidades.**  
+  **Cierre:** dependencias, imágenes, firmas/checksums, secrets scan y vulnerabilidades tienen cero hallazgos críticos explotables.
+
+- [ ] **WP4-T07 — Cerrar rendimiento, carga, soak y capacidad.**  
+  **Cierre:** SLO, concurrencia, colas, latencias, capacidad, costes y límites se demuestran con carga representativa.
+
+- [ ] **WP4-T08 — Cerrar observabilidad, alertas e incident response.**  
+  **Cierre:** logs, métricas, trazas, alertas accionables, runbooks, escalado, kill switches y postmortem template están operativos.
+
+- [ ] **WP4-T09 — Cerrar backup, restauración, rollback y DR.**  
+  **Cierre:** RPO/RTO, backups cifrados, restore limpio, mutación/restore, rotación y recuperación desde proceso fresco pasan.
+
+- [ ] **WP4-T10 — Cerrar privacidad, legal, consentimiento y derechos.**  
+  **Cierre:** términos, privacidad, DPA cuando aplique, cookies, email consent, retención, exportación, eliminación y source rights están aprobados.
+
+- [ ] **WP4-T11 — Cerrar UX/UI y accesibilidad del producto terminado.**  
+  **Cierre:** recorridos canónicos, estados vacíos/error/carga, copy veraz, responsive, teclado, lectores, contraste y navegadores soportados pasan.
+
+- [ ] **WP4-T12 — Ejecutar smoke productivo y gate de release técnico.**  
+  **Cierre:** install→bootstrap→login→O01 E2E→billing sandbox→backup/restore→logout funciona en el artefacto desplegado.  
+  **Evidencia requerida:** `AX_WP4_PRODUCTION_SECURITY_UX_DISTRIBUTION_PASS`.
+
+---
+
+## WP5 — Aceptación privada sobre producto terminado
+
+**Objetivo:** validar el producto completo con organizaciones expresamente admitidas, sin rebajar el alcance ni presentarlo como lanzamiento público.
+
+- [ ] **WP5-T01 — Desplegar un release candidate completo para aceptación privada.**  
+  **Cierre:** mismo artefacto, configuración y manifiesto que se propone para release, con límites visibles.
+
+- [ ] **WP5-T02 — Admitir organizaciones y usuarios de aceptación.**  
+  **Cierre:** identidad, términos, roles, seats, soporte, billing si aplica, revocación y tratamiento de datos quedan autorizados.
+
+- [ ] **WP5-T03 — Completar el recorrido de valor con usuarios reales.**  
+  **Cierre:** usuarios externos ejecutan fuente→investigación→Opportunity→Bid Workspace→decisión→outcome sin asistencia que oculte defectos.
+
+- [ ] **WP5-T04 — Obtener evidencia comercial controlada.**  
+  **Cierre:** al menos una relación privada de aceptación pagada o contractualmente comprometida sobre el producto terminado, con valor entregado y límites declarados.
+
+- [ ] **WP5-T05 — Probar soporte y operación durante uso real.**  
+  **Cierre:** incidencias, consultas, tiempos de respuesta, auditoría, recuperación y revocación funcionan con carga real de aceptación.
+
+- [ ] **WP5-T06 — Resolver findings materiales y repetir journeys afectados.**  
+  **Cierre:** cero findings abiertos de severidad crítica o bloqueante; regresión completa sobre el RC corregido.
+
+- [ ] **WP5-T07 — Emitir aceptación privada humana.**  
+  **Cierre:** resultados, limitaciones, soporte, valor, pricing y riesgos son revisados por la autoridad humana.  
+  **Evidencia requerida:** `AX_WP5_PRIVATE_ACCEPTANCE_PASS`.
+
+---
+
+## WP6 — P27, release candidate y lanzamiento
+
+**Objetivo:** ligar toda la evidencia a un único SHA, aprobar el release y habilitar únicamente las autoridades expresamente concedidas.
+
+- [ ] **WP6-T01 — Congelar alcance y SHA del release candidate final.**  
+  **Cierre:** código, configuración, migraciones, contratos, price book y assets quedan content-addressed.
+
+- [ ] **WP6-T02 — Construir el manifiesto P27.**  
+  **Cierre:** todas las tareas `[x]`, evidencias, digests, runs, artefactos, approvals, limitaciones y rollback están ligados al RC.
+
+- [ ] **WP6-T03 — Ejecutar la matriz exact-head final completa.**  
+  **Cierre:** todos los root gates y suites críticas pasan sobre el mismo SHA sin retries ni bypasses.
+
+- [ ] **WP6-T04 — Revalidar instalación, upgrade, persistencia y DR del artefacto final.**  
+  **Cierre:** fresh install, bootstrap, upgrade soportado, restart, backup, mutation, restore y rollback pasan desde proceso fresco.
+
+- [ ] **WP6-T05 — Completar reaceptación de seguridad, privacidad, legal y accesibilidad.**  
+  **Cierre:** threat model actualizado, cero críticos, derechos O01, consentimiento, identidad, abuso, UX y accesibilidad aprobados.
+
+- [ ] **WP6-T06 — Completar reconciliación comercial final.**  
+  **Cierre:** trial, plans, seats, Stripe sandbox, invoices, renewal, impago, cancellation, webhooks, entitlements y Founder Ops coinciden.
+
+- [ ] **WP6-T07 — Completar el journey O01 productivo final.**  
+  **Cierre:** usuario real y fuente oficial recorren toda la cadena E2E bajo el RC, con auditoría y recuperación.
+
+- [ ] **WP6-T08 — Fusionar, etiquetar y publicar el release técnico.**  
+  **Cierre:** protected merge, tag/version, imágenes/bundle, SBOM, checksums, notas y rollback corresponden al mismo SHA.
+
+- [ ] **WP6-T09 — Ejecutar smoke post-deploy y confirmar operabilidad.**  
+  **Cierre:** salud, login, investigación, Bid Workspace, billing, email, observabilidad, backup y soporte funcionan en producción.
+
+- [ ] **WP6-T10 — Obtener autorización humana final y emitir el cierre E2E.**  
+  **Cierre:** la autoridad humana aprueba el digest P27 y decide explícitamente qué modos se habilitan.  
+  **Evidencia requerida:** `AXIGNAL_E2E_COMPLETE`; disposición `ACCEPTED_FOR_PUBLIC_LAUNCH` o `NO_GO`.
+
+---
+
+## 7. Condiciones de parada
+
+Se detendrá la progresión y se reabrirá la tarea afectada ante:
 
 - pérdida o corrupción de datos;
 - aislamiento tenant fallido;
@@ -357,22 +514,38 @@ El lanzamiento se detendrá ante:
 - accesibilidad que impida la tarea principal;
 - manifiesto no ligado al SHA desplegado.
 
-No se detendrá por:
-
-- bibliotecas futuras fuera de O01;
-- mejoras cosméticas;
-- preferencias de diseño;
-- integraciones no contratadas;
-- dashboards auxiliares;
-- abstracciones futuras;
-- warnings no materiales;
-- métricas que sólo puedan existir después del lanzamiento.
+No se detendrá por bibliotecas O02–O09, mejoras cosméticas, dashboards auxiliares, abstracciones futuras, integraciones no contratadas, warnings no materiales o métricas que sólo puedan existir después del lanzamiento.
 
 ---
 
-## 10. Autoridades reservadas
+## 8. Ledger obligatorio
 
-Hasta el cierre de WP6 permanecen denegadas:
+El estado máquina se mantiene en:
+
+```text
+docs/roadmap/AXIGNAL_E2E_FINISH_LEDGER.json
+```
+
+El ledger debe reflejar:
+
+- `contract_id` y versión;
+- `active_work_package`;
+- `active_task`;
+- rama, PR y exact HEAD;
+- estados WP0–WP6;
+- blocker material;
+- transición permitida;
+- evidencia y artefactos;
+- autoridad de lanzamiento;
+- última enmienda humana.
+
+En caso de discrepancia, se corrige el ledger; no se crea otro roadmap operativo paralelo.
+
+---
+
+## 9. Autoridades reservadas
+
+Hasta completar WP6 y recibir aprobación humana explícita:
 
 ```text
 PUBLIC_LAUNCH_AUTHORIZED    false
@@ -384,25 +557,22 @@ GLOBAL_COVERAGE_CLAIM       false
 AUTONOMOUS_EXTERNAL_ACTIONS false
 ```
 
-La aprobación de este contrato autoriza su ejecución, no el lanzamiento público.
+La ejecución de este contrato no autoriza por sí sola el lanzamiento.
 
 ---
 
-## 11. Firma y entrada en vigor
+## 10. Firma
 
 ```text
 HUMAN_AUTHORITY_APPROVAL     APPROVED
 APPROVED_BY                  Rafael López
-APPROVED_AT                  2026-08-05T17:00:45+02:00
 CONTRACT_ID                  AX-GE2E-FINISH-003
-CONTRACT_VERSION             1.0.0-ratified.1
+CONTRACT_VERSION             1.1.0-checklist.1
 CONTRACT_STATE               ACTIVE_BINDING
-CANONICAL_BASELINE_SHA       dd119139555e885cc73d24d13e4b7b148797576e
 ACTIVE_WORK_PACKAGE          WP0
-ACTIVE_BLOCKER               AX-CLOSE-BLK-002
-ALLOWED_NEXT_TRANSITION      FIX_C3_CONSECUTIVE_CYCLE_COMPARATOR_ONLY
+ACTIVE_TASK                  WP0-T05
 NEXT_CANONICAL_MARKER        AX_C0_C4_CANONICAL_MAIN_PASS
 PUBLIC_LAUNCH                NO_GO
 ```
 
-Este contrato entra en vigor con su materialización en la rama activa. Su canonicalidad definitiva se producirá al integrarse mediante el merge protegido de WP0 en `main` y superar el smoke post-merge.
+Este contrato se completa únicamente cuando las 75 tareas están `[x]`, el manifiesto P27 está ligado al SHA final y la autoridad humana emite `AXIGNAL_E2E_COMPLETE`.
