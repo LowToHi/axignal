@@ -32,7 +32,9 @@ services:
     restart_policy: unless-stopped
   - id: api
     exposure: internal
-    credential_env: AXIGNAL_DATABASE_URL
+    credential_env:
+      - AXIGNAL_DATABASE_URL
+      - AXIGNAL_AXENT_ENCRYPTION_KEY
     healthcheck: GET /readyz
     restart_policy: unless-stopped
   - id: postgres
@@ -93,6 +95,7 @@ security:
     - scheduler-runtime
     - web-session
     - identity-assertion
+    - axent-conversation-encryption
 
 canonical_demo:
   route: /demo
