@@ -1,0 +1,257 @@
+name: Actions Storage Governance
+
+on:
+  issues:
+    types: [opened]
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+  issues: write
+  pull-requests: read
+
+concurrency:
+  group: actions-storage-governance
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    if: >-
+      github.event_name == 'schedule' ||
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'issues' && github.event.issue.title == 'OPS: actions storage cleanup 2026-08-05')
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPOSITORY: ${{ github.repository }}
+      EVENT_NAME: ${{ github.event_name }}
+      ISSUE_NUMBER: ${{ github.event.issue.number || '' }}
+    steps:
+      - name: Delete obsolete failed and cancelled workflow runs
+        shell: bash
+        run: |
+          python - <<'PY'
+          from __future__ import annotations
+
+          import json
+          import os
+          import sys
+          import time
+          import urllib.error
+          import urllib.parse
+          import urllib.request
+          from datetime import datetime, timedelta, timezone
+          from pathlib import Path
+          from typing import Any
+
+          token = os.environ["GH_TOKEN"]
+          repository = os.environ["REPOSITORY"]
+          event_name = os.environ["EVENT_NAME"]
+          issue_number = os.environ.get("ISSUE_NUMBER", "").strip()
+          owner, repo = repository.split("/", 1)
+          api_root = "https://api.github.com"
+
+          emergency = event_name in {"issues", "workflow_dispatch"}
+          cutoff = datetime.now(timezone.utc) - timedelta(hours=2 if emergency else 24)
+          deletion_limit = 3500 if emergency else 500
+
+          protected_run_ids = {
+              30945029230,
+              30945029340,
+              30945029670,
+              30945028991,
+              30945029140,
+              30961773544,
+              30961773534,
+              30961773631,
+              30961773636,
+              30961773664,
+              30962399581,
+              30962399596,
+              30962399682,
+              30962399713,
+              30962399734,
+              30943693350,
+          }
+          protected_artifact_ids = {8906279065, 8913254281}
+
+          def request(method: str, path: str, payload: dict[str, Any] | None = None) -> Any:
+              url = path if path.startswith("http") else f"{api_root}{path}"
+              data = None if payload is None else json.dumps(payload).encode("utf-8")
+              req = urllib.request.Request(
+                  url,
+                  data=data,
+                  method=method,
+                  headers={
+                      "Authorization": f"Bearer {token}",
+                      "Accept": "application/vnd.github+json",
+                      "X-GitHub-Api-Version": "2022-11-28",
+                      "User-Agent": "axignal-actions-storage-governance",
+                  },
+              )
+              try:
+                  with urllib.request.urlopen(req, timeout=60) as response:
+                      body = response.read()
+                      if not body:
+                          return None
+                      return json.loads(body.decode("utf-8"))
+              except urllib.error.HTTPError as exc:
+                  body = exc.read().decode("utf-8", errors="replace")
+                  raise RuntimeError(f"GitHub API {method} {url} failed: {exc.code} {body}") from exc
+
+          repo_info = request("GET", f"/repos/{owner}/{repo}")
+          default_branch = repo_info["default_branch"]
+
+          protected_shas: set[str] = set()
+          page = 1
+          while True:
+              pulls = request(
+                  "GET",
+                  f"/repos/{owner}/{repo}/pulls?state=open&per_page=100&page={page}",
+              )
+              if not pulls:
+                  break
+              for pull in pulls:
+                  sha = pull.get("head", {}).get("sha")
+                  if sha:
+                      protected_shas.add(sha)
+              if len(pulls) < 100:
+                  break
+              page += 1
+
+          for artifact_id in protected_artifact_ids:
+              try:
+                  artifact = request(
+                      "GET", f"/repos/{owner}/{repo}/actions/artifacts/{artifact_id}"
+                  )
+              except RuntimeError as exc:
+                  print(f"warning: protected artifact {artifact_id} could not be read: {exc}")
+                  continue
+              run_id = artifact.get("workflow_run", {}).get("id")
+              if run_id:
+                  protected_run_ids.add(int(run_id))
+
+          artifacts_before = request(
+              "GET", f"/repos/{owner}/{repo}/actions/artifacts?per_page=1"
+          )["total_count"]
+
+          statuses = ["cancelled", "failure", "timed_out", "stale", "action_required"]
+          candidates: list[dict[str, Any]] = []
+          seen: set[int] = set()
+
+          for status in statuses:
+              for page in range(1, 101):
+                  query = urllib.parse.urlencode(
+                      {"status": status, "per_page": 100, "page": page}
+                  )
+                  result = request(
+                      "GET", f"/repos/{owner}/{repo}/actions/runs?{query}"
+                  )
+                  runs = result.get("workflow_runs", [])
+                  if not runs:
+                      break
+
+                  for run in runs:
+                      run_id = int(run["id"])
+                      if run_id in seen or run_id in protected_run_ids:
+                          continue
+                      seen.add(run_id)
+
+                      created_at = datetime.fromisoformat(
+                          run["created_at"].replace("Z", "+00:00")
+                      )
+                      if created_at >= cutoff:
+                          continue
+                      if run.get("head_branch") in {None, default_branch}:
+                          continue
+                      if run.get("head_sha") in protected_shas:
+                          continue
+                      if run.get("event") in {"release", "workflow_dispatch"}:
+                          continue
+
+                      candidates.append(run)
+                      if len(candidates) >= deletion_limit:
+                          break
+
+                  if len(candidates) >= deletion_limit or len(runs) < 100:
+                      break
+              if len(candidates) >= deletion_limit:
+                  break
+
+          deleted = 0
+          failures: list[dict[str, Any]] = []
+          by_conclusion: dict[str, int] = {}
+
+          for run in candidates:
+              run_id = int(run["id"])
+              conclusion = str(run.get("conclusion") or "unknown")
+              try:
+                  request(
+                      "DELETE", f"/repos/{owner}/{repo}/actions/runs/{run_id}"
+                  )
+                  deleted += 1
+                  by_conclusion[conclusion] = by_conclusion.get(conclusion, 0) + 1
+              except RuntimeError as exc:
+                  failures.append({"run_id": run_id, "error": str(exc)})
+
+              if deleted and deleted % 100 == 0:
+                  print(f"deleted {deleted}/{len(candidates)} obsolete runs")
+                  time.sleep(0.2)
+
+          artifacts_after = request(
+              "GET", f"/repos/{owner}/{repo}/actions/artifacts?per_page=1"
+          )["total_count"]
+
+          report = {
+              "repository": repository,
+              "mode": "emergency" if emergency else "scheduled",
+              "cutoff": cutoff.isoformat(),
+              "deletion_limit": deletion_limit,
+              "protected_open_pr_shas": sorted(protected_shas),
+              "protected_run_ids": sorted(protected_run_ids),
+              "protected_artifact_ids": sorted(protected_artifact_ids),
+              "candidates": len(candidates),
+              "deleted_runs": deleted,
+              "delete_failures": failures[:20],
+              "deleted_by_conclusion": by_conclusion,
+              "artifacts_before": artifacts_before,
+              "artifacts_after": artifacts_after,
+              "artifacts_removed_observed": max(0, artifacts_before - artifacts_after),
+          }
+
+          summary_path = Path(os.environ["GITHUB_STEP_SUMMARY"])
+          summary_path.write_text(
+              "# Actions storage governance\n\n"
+              f"```json\n{json.dumps(report, indent=2, sort_keys=True)}\n```\n",
+              encoding="utf-8",
+          )
+          print(json.dumps(report, indent=2, sort_keys=True))
+
+          if issue_number:
+              body = (
+                  "Storage cleanup completed.\n\n"
+                  f"- Obsolete workflow runs deleted: **{deleted}**\n"
+                  f"- Artifact records before: **{artifacts_before}**\n"
+                  f"- Artifact records after: **{artifacts_after}**\n"
+                  f"- Artifact records removed: **{max(0, artifacts_before - artifacts_after)}**\n"
+                  f"- Protected canonical artifacts: `{sorted(protected_artifact_ids)}`\n"
+                  f"- Delete failures: **{len(failures)}**\n"
+              )
+              request(
+                  "POST",
+                  f"/repos/{owner}/{repo}/issues/{issue_number}/comments",
+                  {"body": body},
+              )
+              request(
+                  "PATCH",
+                  f"/repos/{owner}/{repo}/issues/{issue_number}",
+                  {"state": "closed", "state_reason": "completed"},
+              )
+
+          if failures:
+              sys.exit("one or more workflow-run deletions failed")
+          PY
