@@ -32,6 +32,7 @@ type AxentPersistenceStub = {
 const COLLECTION_PATH = "/api/subscriber-workspace/axent";
 const CONVERSATION_PATH = /^\/api\/subscriber-workspace\/axent\/([^/]+)$/;
 const MESSAGES_PATH = /^\/api\/subscriber-workspace\/axent\/([^/]+)\/messages$/;
+const AXENT_API_PATH = /\/api\/subscriber-workspace\/axent(?:\/.*)?(?:\?.*)?$/;
 
 function timestamp(sequence: number): string {
   return new Date(Date.UTC(2026, 7, 5, 9, sequence, 0)).toISOString();
@@ -77,7 +78,7 @@ export async function installAxentPersistenceStub(
   const deleteRequests: string[] = [];
   let sequence = 0;
 
-  await page.route("**/api/subscriber-workspace/axent**", async (route) => {
+  await page.route(AXENT_API_PATH, async (route) => {
     const request = route.request();
     const path = new URL(request.url()).pathname;
 
