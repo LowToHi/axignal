@@ -219,7 +219,10 @@ export function AxentHome({ bootstrap, onOpenWorkspace, onHelp }: AxentHomeProps
   const workspace = bootstrap.route_data.workspaces[0];
 
   return (
-    <main className="mx-auto grid min-h-[calc(100vh-5rem)] max-w-[1480px] gap-5 px-4 py-5 lg:grid-cols-[300px_minmax(0,1fr)_320px] lg:px-6">
+    <section
+      aria-label="AXENT assistant"
+      className="mx-auto grid min-h-[calc(100vh-5rem)] max-w-[1480px] gap-5 px-4 py-5 lg:grid-cols-[300px_minmax(0,1fr)_320px] lg:px-6"
+    >
       <aside className="rounded-3xl border border-white/10 bg-slate-950/70 p-4 shadow-2xl shadow-black/20">
         <div className="flex items-center justify-between gap-3">
           <div>
@@ -305,6 +308,7 @@ export function AxentHome({ bootstrap, onOpenWorkspace, onHelp }: AxentHomeProps
           {error ? <div className="mb-3 rounded-xl border border-rose-400/20 bg-rose-400/10 px-3 py-2 text-sm text-rose-100">{error}</div> : null}
           <div className="flex gap-3">
             <textarea
+              aria-label="Ask AXENT anything about AXIGNAL"
               value={draft}
               onChange={(event) => setDraft(event.target.value)}
               onKeyDown={(event) => {
@@ -363,6 +367,6 @@ export function AxentHome({ bootstrap, onOpenWorkspace, onHelp }: AxentHomeProps
           </div>
         </section>
       </aside>
-    </main>
+    </section>
   );
 }
