@@ -216,7 +216,7 @@ SELECT
   )
   AND has_function_privilege(
     'axignal_app',
-    'tenant_private.export_axent_conversation_for_identity(uuid,text,text,text,timestamptz)'::regprocedure,
+    'tenant_private.export_axent_conversation_for_identity(uuid,text,text,timestamptz)'::regprocedure,
     'EXECUTE'
   )
   AND has_function_privilege(
@@ -247,6 +247,10 @@ origin_migrations=()
 forward_migrations=()
 for migration in "${migrations[@]}"; do
   migration_name="${migration##*/}"
+  if [[ "$migration_name" == "init.sql" ]]; then
+    origin_migrations+=("$migration")
+    continue
+  fi
   migration_number="${migration_name%%-*}"
   if [[ ! "$migration_number" =~ ^[0-9]+$ ]]; then
     echo "C3 migration has no numeric prefix: $migration" >&2
