@@ -1,0 +1,112 @@
+{
+  "schema_version": "1.0.0",
+  "contract": {
+    "id": "AX-GE2E-FINISH-003",
+    "version": "1.0.0-ratified.1",
+    "status": "RATIFIED_ACTIVE",
+    "path": "docs/contracts/AX-GE2E-FINISH-003.md",
+    "approved_by": "Rafael López",
+    "approved_at": "2026-08-05T17:00:45+02:00",
+    "ratification_commit": "773b9aec7c6626659ce77c38b071840661bbf181"
+  },
+  "repository": {
+    "name": "LowToHi/axignal",
+    "base_branch": "main",
+    "active_branch": "agent/axignal-c0-canonical-reconciliation-v1",
+    "active_pull_request": 169,
+    "pull_request_state": "OPEN_DRAFT_UNMERGED",
+    "canonical_main_sha": null,
+    "last_validated_product_sha": "dd119139555e885cc73d24d13e4b7b148797576e",
+    "current_branch_sha": null,
+    "current_branch_sha_reason": "Document-only ratification commits are not claimed as validated product exact-head evidence. Resolve from Git before the next executable transition."
+  },
+  "execution": {
+    "active_work_package": "WP0",
+    "active_blocker": "AX-CLOSE-BLK-002",
+    "allowed_next_transition": "FIX_C3_CONSECUTIVE_CYCLE_COMPARATOR_ONLY",
+    "next_canonical_marker": "AX_C0_C4_CANONICAL_MAIN_PASS",
+    "public_launch": "NO_GO",
+    "commercial_live_mode": "DENIED",
+    "stripe_live_mode": "DENIED",
+    "production_source_admission": "DENIED"
+  },
+  "work_packages": {
+    "WP0": "IN_PROGRESS",
+    "WP1": "BLOCKED",
+    "WP2": "BLOCKED",
+    "WP3": "BLOCKED",
+    "WP4": "BLOCKED",
+    "WP5": "BLOCKED",
+    "WP6": "BLOCKED"
+  },
+  "blocker": {
+    "id": "AX-CLOSE-BLK-002",
+    "scope": "C3 backup/restore consecutive-cycle verification",
+    "symptom": "C3 first full-cycle hash drifted",
+    "root_cause": "The first cycle and snapshot authority represent schema 140 while the restored/current state represents schema 142. Data-plane hashes are equal; the verifier compares full-cycle evidence across different schema authorities.",
+    "state": "ROOT_CAUSE_CONFIRMED",
+    "allowed_files": [
+      "C3 consecutive-cycle verifier",
+      "direct helper used by that verifier",
+      "focused verifier tests"
+    ],
+    "forbidden_changes": [
+      "remove or weaken integrity hashes",
+      "ignore schema drift",
+      "modify product data model",
+      "modify C4",
+      "modify billing",
+      "modify source admission",
+      "redesign CI architecture",
+      "add retries",
+      "increase timeouts as a fix"
+    ],
+    "closure_criteria": [
+      "restore schema-140 snapshot",
+      "prove data equivalence at schema 140",
+      "apply migrations 141 and 142 deterministically",
+      "prove final schema, data and authority equivalence",
+      "full migration matrix PASS",
+      "Core root gate PASS",
+      "Runtime root gate PASS",
+      "Domain root gate PASS"
+    ]
+  },
+  "evidence": {
+    "last_validated_product_sha": "dd119139555e885cc73d24d13e4b7b148797576e",
+    "core": "PASS",
+    "domain": "PASS",
+    "specialized_source": "PASS",
+    "remote_pilot": "PASS",
+    "data_integrity": "PASS",
+    "c4_final_runtime": "PASS",
+    "c3_final_closure": "FAIL",
+    "failure_message": "C3 first full-cycle hash drifted",
+    "failure_job_id": 92337799753,
+    "c4_success_job_id": 92338125477,
+    "full_migration_artifact_id": 8934847450
+  },
+  "transition": [
+    "resolve current branch SHA before write",
+    "locate exact C3 consecutive-cycle comparator",
+    "patch comparator/verifier only",
+    "preserve determinism and material hashes",
+    "run affected tests",
+    "run full migration matrix",
+    "run Core, Runtime and Domain root gates",
+    "incorporate latest main",
+    "resolve material conflicts only",
+    "run full exact-head matrix",
+    "make PR 169 ready and mergeable",
+    "perform protected merge",
+    "run post-merge smoke",
+    "record canonical main SHA",
+    "emit AX_C0_C4_CANONICAL_MAIN_PASS",
+    "authorize WP1"
+  ],
+  "last_human_authority_change": {
+    "instruction": "Eleva AXIGNAL_Contrato_Roadmap_Cierre_E2E_Sin_Sobreingenieria.md a contrato",
+    "effective_at": "2026-08-05T17:00:45+02:00",
+    "effect": "The proposed roadmap contract is ratified and active. Execution remains fail-closed at WP0; no public-launch authority is granted."
+  }
+}
