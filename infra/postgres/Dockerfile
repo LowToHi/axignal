@@ -39,3 +39,5 @@ COPY 130-organic-discovery-founder-admin.sql /docker-entrypoint-initdb.d/130-axi
 COPY 131-organic-discovery-alert-lifecycle.sql /docker-entrypoint-initdb.d/131-axignal-organic-alerts.sql
 COPY 132-retention-late-domain-purge.sql /docker-entrypoint-initdb.d/132-axignal-retention-late-domain-purge.sql
 COPY 140-subscriber-persistent-authority.sql /docker-entrypoint-initdb.d/140-axignal-subscriber-persistent-authority.sql
+COPY 141-c4-axent-idempotency.sql /docker-entrypoint-initdb.d/141-axignal-c4-axent-idempotency.sql
+COPY 142-c4-axent-upgrade-hardening.sql /docker-entrypoint-initdb.d/142-axignal-c4-axent-upgrade-hardening.sql
