@@ -2,9 +2,9 @@
   "task_id": "AX-GE2E-P03-T03",
   "goal_id": "AXIGNAL-GOAL-001",
   "phase": "P03",
-  "state": "IN_PROGRESS",
+  "state": "EVIDENCE_READY",
   "objective": "Establish the bounded PostgreSQL persistent authority plane for Subscriber Workspace and AXENT, including evidence sufficiency, submission readiness, typed append-only events, deterministic deadlines, retention, legal hold, export, deletion, terminal purge and backup/restore.",
-  "outcome": "C3 remains in progress until a fresh database, supported migration matrix, tenant-isolation circuit, AXENT retention circuit, terminal purge and snapshot restore all pass on one exact head without replacing the C4 product adapter journey.",
+  "outcome": "All C3 technical authorities passed on candidate head 64c00df0ac2cb57448e54284b1bd0b333690b2ae. Acceptance remains effective only when the complete workflow matrix for the commit containing the C3 closure attestation is terminal success.",
   "contracts": [
     "GOAL_LOCK",
     "AGENTS",
@@ -123,15 +123,15 @@
       "evidence_type": "TEST",
       "description": "Full PostgreSQL migration matrix and C3 persistent-authority rehearsal complete on the exact candidate head.",
       "required": true,
-      "location": "github-actions:full-migration-matrix",
-      "status": "MISSING"
+      "location": "github-actions:30961773636/full_migration_matrix;artifact:8913254281/c3-persistent-authority-e2e.json",
+      "status": "PASS"
     },
     {
       "evidence_type": "TEST",
       "description": "All canonical PR gates and specialised direct checks complete successfully on the final C3 head.",
       "required": true,
-      "location": "github-actions:exact-head-matrix",
-      "status": "MISSING"
+      "location": "github-actions:core=30961773664;runtime=30961773636;domain=30961773631;remote-pilot=30961773534;procurement=30961773544",
+      "status": "PASS"
     }
   ],
   "impacts": {
@@ -180,7 +180,7 @@
   "rollback": {
     "strategy": "Revert the C3 migration registration and bounded authority code before deployment; after migration, preserve data and use the existing retention/deletion machinery rather than destructive down-migrations.",
     "kill_switch": "AXIGNAL_SUBSCRIBER_WORKSPACE_ENABLED=false",
-    "tested": false
+    "tested": true
   },
   "goal_lock_checks": [
     {
@@ -231,11 +231,11 @@
     {
       "check_id": 10,
       "answer": "YES",
-      "evidence": "The task remains IN_PROGRESS and C4 stays blocked until the attestation-head matrix succeeds."
+      "evidence": "C3 is EVIDENCE_READY and becomes accepted only when the closure-attestation head matrix passes."
     }
   ],
   "owner": "Staff Product Engineering",
   "reviewer": null,
   "created_at": "2026-08-04T20:18:00Z",
-  "updated_at": "2026-08-04T20:18:00Z"
+  "updated_at": "2026-08-05T00:06:00Z"
 }
