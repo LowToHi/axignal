@@ -1,0 +1,80 @@
+{
+  "schema": "axignal.c3.closure-attestation.v1",
+  "contract_id": "AX-GE2E-CLOSURE-EXECUTION-002",
+  "work_package": "C3_PERSISTENCE_MIGRATIONS_RESTORE",
+  "closure_decision": "PASS",
+  "output_marker": "AX_C3_PERSISTENCE_MIGRATIONS_RESTORE_PASS",
+  "source_ledger": {
+    "path": "docs/tasks/active/2026-08-04_axignal-c3-persistence-migrations-restore.task.json",
+    "blob_sha": "623a20f91bceb92e03f4f5bd0050bb3def72b572",
+    "task_id": "AX-GE2E-P03-T03",
+    "state_at_attestation": "EVIDENCE_READY"
+  },
+  "validated_predecessor": {
+    "exact_head_sha": "64c00df0ac2cb57448e54284b1bd0b333690b2ae",
+    "matrix_status": "FIVE_ROOT_AUTHORITIES_COMPLETED_SUCCESS",
+    "failed_runs": 0,
+    "cancelled_runs_after_same_sha_rerun": 0,
+    "non_terminal_runs": 0,
+    "root_authorities": {
+      "core": 30961773664,
+      "runtime": 30961773636,
+      "domain": 30961773631,
+      "remote_pilot_operations": 30961773534,
+      "procurement_admission_rehearsal": 30961773544
+    }
+  },
+  "critical_exact_head_evidence": {
+    "runtime_root_run": 30961773636,
+    "full_migration_matrix_artifact": 8913254281,
+    "full_migration_matrix_artifact_digest": "sha256:41216e196e98545beec1f9cb670eb89b709e26226aa20a9a6b7c63e08cb70af6",
+    "ordered_fresh_migrations": "PASS",
+    "workspace_evidence_sufficiency": "PASS",
+    "submission_readiness_and_separation_of_duties": "PASS",
+    "typed_audit_append_only": "PASS",
+    "deterministic_deadline_window": "PASS",
+    "cross_tenant_workspace_access": "DENIED",
+    "axent_ciphertext_at_rest": "PASS",
+    "axent_export_tenant_scoped": "PASS",
+    "axent_legal_hold": "ENFORCED",
+    "axent_conversation_deletion": "PASS",
+    "terminal_workspace_purge": "PASS",
+    "c3_purge_receipt": "PASS",
+    "snapshot_restore": "PASS",
+    "pgcrypto_extension_resolution": "SCHEMA_QUALIFIED"
+  },
+  "bounded_corrections": [
+    {
+      "path": "infra/postgres/140-subscriber-persistent-authority.sql",
+      "decision": "QUALIFY_PGCRYPTO_FUNCTIONS_WITH_PUBLIC_SCHEMA_UNDER_FIXED_PG_CATALOG_SEARCH_PATH",
+      "migration_authority_changed": true,
+      "product_adapter_changed": false,
+      "authority_boundary_weakened": false
+    }
+  ],
+  "attestation_head_rule": {
+    "binding": "GITHUB_PULL_REQUEST_HEAD_SHA",
+    "effective_only_when": "THE_COMPLETE_PULL_REQUEST_WORKFLOW_MATRIX_FOR_THE_COMMIT_CONTAINING_THIS_ATTESTATION_IS_TERMINAL_SUCCESS",
+    "head_change_invalidates_prior_effective_marker": true,
+    "cancelled_or_non_terminal_root_authority_is_not_acceptance": true,
+    "retries_cannot_convert_a_MATERIAL_PERSISTENCE_CROSS_TENANT_LEGAL_HOLD_OR_RESTORE_FAILURE_INTO_ACCEPTANCE": true
+  },
+  "preserved_boundaries": {
+    "second_persistence_authority_created": false,
+    "subscriber_workspace_product_adapter_wired": false,
+    "axent_browser_local_storage_accepted_as_authority": false,
+    "c4_research_spine_claimed_complete": false,
+    "pr_169_merge_authorized": false,
+    "public_launch_authorized": false,
+    "commercial_activation_authorized": false,
+    "source_admission_authorized": false,
+    "stripe_live_activation_authorized": false,
+    "autonomous_submission_authorized": false
+  },
+  "next_transition": {
+    "from": "C3_PERSISTENCE_MIGRATIONS_RESTORE",
+    "to": "C4_RESEARCH_AXENT_E2E",
+    "status": "AUTHORIZED_ONLY_AFTER_ATTESTATION_HEAD_MATRIX_PASS"
+  },
+  "created_at": "2026-08-05T00:08:00Z"
+}
