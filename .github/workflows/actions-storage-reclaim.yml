@@ -1,5 +1,6 @@
 name: Actions Storage Reclamation
 
+# Execution revision: contract-aware dry-run v1
 on:
   push:
     branches:
