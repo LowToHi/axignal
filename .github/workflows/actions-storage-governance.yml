@@ -46,6 +46,12 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Prepare report directory
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0755 reports
+
       - name: Compile governance tools
         shell: bash
         run: |
@@ -113,6 +119,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           persist-credentials: false
+
+      - name: Prepare report directory
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0755 reports
 
       - name: Inventory all Actions artifacts without mutation
         env:
