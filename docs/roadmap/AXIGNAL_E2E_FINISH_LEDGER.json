@@ -2,36 +2,40 @@
   "schema_version": "1.1.0",
   "contract": {
     "id": "AX-GE2E-FINISH-003",
-    "version": "1.1.0-checklist.1",
+    "version": "1.1.0-checklist.3",
     "status": "RATIFIED_ACTIVE",
     "path": "docs/contracts/AX-GE2E-FINISH-003.md",
     "approved_by": "Rafael López",
     "approved_at": "2026-08-05T17:00:45+02:00",
     "ratification_commit": "773b9aec7c6626659ce77c38b071840661bbf181",
-    "latest_amendment_at": "2026-08-05T20:23:00+02:00",
-    "latest_amendment_commit": "70f7c39fbfb1edcf5e3ff017147ae03dd11e7788"
+    "latest_amendment_at": "2026-08-06T17:36:43+02:00",
+    "latest_amendment_commit": "ca05c94d1e4689ffdf6acca478a42a4fc16afa33"
   },
   "repository": {
     "name": "LowToHi/axignal",
     "base_branch": "main",
-    "active_branch": "agent/axignal-c0-canonical-reconciliation-v1",
-    "active_pull_request": 169,
-    "pull_request_state": "OPEN_READY_UNMERGED",
-    "canonical_main_sha": null,
-    "last_validated_product_sha": "f64fa9f0737df7725ae9f6e95fa9c5898656d34e",
-    "current_branch_sha": "f64fa9f0737df7725ae9f6e95fa9c5898656d34e",
-    "current_branch_sha_reason": "Executable exact-head evidence SHA for WP0-T10. The immediately consecutive contract and ledger commits are documentation-only successors and must themselves pass the root gates before WP0-T11."
+    "active_branch": "agent/axignal-wp0-post-merge-release-repair",
+    "active_pull_request": 177,
+    "pull_request_state": "OPEN_READY_FOR_CONTROLLED_MERGE_AFTER_REVALIDATION",
+    "canonical_main_sha": "fae293b9f2c6cc1ebfffd2302f3ce6ddcfef00c2",
+    "last_validated_product_sha": "90edfb1e0697ced0e0b4eb90d7f18d93f4661c7f",
+    "current_branch_sha": "RESOLVE_FROM_PR_HEAD_AT_EXECUTION",
+    "current_branch_sha_reason": "The ledger is itself a documentation commit; its immutable commit SHA is resolved from PR 177 immediately before exact-head validation and merge rather than self-referenced inside its own content.",
+    "documentation_contract_commit": "ca05c94d1e4689ffdf6acca478a42a4fc16afa33"
   },
   "execution": {
     "active_work_package": "WP0",
     "active_task": "WP0-T11",
-    "active_blocker": "AX-CLOSE-BLK-005",
-    "allowed_next_transition": "PROTECTED_MERGE_WITH_EXPECTED_HEAD",
+    "active_blocker": null,
+    "allowed_next_transition": "REVALIDATE_DOCUMENTATION_SUCCESSOR_THEN_CONTROLLED_MERGE_PR_177_WITH_EXPECTED_HEAD",
     "next_canonical_marker": "AX_C0_C4_CANONICAL_MAIN_PASS",
-    "public_launch": "NO_GO",
+    "public_launch": "CONTROLLED_DEPLOYMENT_AUTHORIZED_RELEASE_THEN_ITERATE",
     "commercial_live_mode": "DENIED",
     "stripe_live_mode": "DENIED",
-    "production_source_admission": "DENIED"
+    "production_source_admission": "DENIED",
+    "publication_strategy": "RELEASE_THEN_ITERATE",
+    "controlled_public_deployment": true,
+    "e2e_completion_claim": false
   },
   "checklist": {
     "path": "docs/contracts/AX-GE2E-FINISH-003.md",
@@ -41,17 +45,45 @@
     "progress_source_of_truth": "MARKDOWN_CHECKBOXES",
     "completion_rule": "A task is complete only when every material criterion passes and evidence is bound to an executable EVIDENCE_SHA.",
     "work_packages": {
-      "WP0": {"completed": 10, "total": 12, "state": "IN_PROGRESS"},
-      "WP1": {"completed": 0, "total": 10, "state": "BLOCKED_BY_WP0"},
-      "WP2": {"completed": 0, "total": 12, "state": "BLOCKED_BY_WP1"},
-      "WP3": {"completed": 0, "total": 12, "state": "BLOCKED_BY_WP2"},
-      "WP4": {"completed": 0, "total": 12, "state": "BLOCKED_BY_WP3"},
-      "WP5": {"completed": 0, "total": 7, "state": "BLOCKED_BY_WP4"},
-      "WP6": {"completed": 0, "total": 10, "state": "BLOCKED_BY_WP5"}
+      "WP0": {
+        "completed": 10,
+        "total": 12,
+        "state": "READY_FOR_CONTROLLED_MERGE"
+      },
+      "WP1": {
+        "completed": 0,
+        "total": 10,
+        "state": "BLOCKED_BY_WP0"
+      },
+      "WP2": {
+        "completed": 0,
+        "total": 12,
+        "state": "BLOCKED_BY_WP1"
+      },
+      "WP3": {
+        "completed": 0,
+        "total": 12,
+        "state": "BLOCKED_BY_WP2"
+      },
+      "WP4": {
+        "completed": 0,
+        "total": 12,
+        "state": "BLOCKED_BY_WP3"
+      },
+      "WP5": {
+        "completed": 0,
+        "total": 7,
+        "state": "BLOCKED_BY_WP4"
+      },
+      "WP6": {
+        "completed": 0,
+        "total": 10,
+        "state": "BLOCKED_BY_WP5"
+      }
     }
   },
   "work_packages": {
-    "WP0": "IN_PROGRESS",
+    "WP0": "READY_FOR_CONTROLLED_MERGE",
     "WP1": "BLOCKED",
     "WP2": "BLOCKED",
     "WP3": "BLOCKED",
@@ -61,24 +93,48 @@
   },
   "blocker": {
     "id": "AX-CLOSE-BLK-005",
-    "task": "WP0-T11",
-    "scope": "Protected merge to main on the exact expected head without bypass",
-    "state": "READY_PENDING_EXACT_HEAD_REVALIDATION",
-    "closure_criteria": [
-      "documentation successor root gates pass",
-      "PR remains open, non-draft and mergeable",
-      "expected_head_sha is re-read immediately before merge",
-      "protected merge completes without bypass",
-      "canonical main SHA and merge record are captured"
+    "issue": 176,
+    "task": "WP4-T06",
+    "scope": "Repository branch protection or equivalent ruleset hardening",
+    "state": "DEFERRED_NON_BLOCKING_BY_HUMAN_AUTHORITY",
+    "observed_main_protection": false,
+    "risk_acceptance": {
+      "approved_by": "Rafael López",
+      "effective_at": "2026-08-06T17:36:43+02:00",
+      "strategy": "RELEASE_THEN_ITERATE",
+      "limits": [
+        "PR must be open, non-draft and mergeable",
+        "root gates must pass on exact head",
+        "expected_head_sha must be re-read immediately before merge",
+        "merge must use GitHub merge API",
+        "force push and direct ref mutation are forbidden",
+        "post-merge smoke is mandatory",
+        "material regression reopens the task"
+      ]
+    },
+    "deferred_closure_criteria": [
+      "main branch protection or equivalent ruleset is enabled",
+      "pull request is required",
+      "required status checks are configured and up to date",
+      "force pushes and branch deletion are blocked",
+      "administrative bypass is explicitly governed",
+      "the control is verified during WP4-T06"
     ]
   },
   "evidence": {
-    "last_validated_product_sha": "f64fa9f0737df7725ae9f6e95fa9c5898656d34e",
+    "last_validated_product_sha": "90edfb1e0697ced0e0b4eb90d7f18d93f4661c7f",
     "wp0_completed_tasks": {
       "WP0-T01": "AX_C0_CANONICAL_BASELINE_PASS",
       "WP0-T02": "AX_C1_SUBSCRIBER_SHELL_FULL_E2E_PASS",
-      "WP0-T03": {"marker": "AX_C2_IDENTITY_TENANT_TRIAL_PASS", "evidence_sha": "2ca1cf0451ff0a1544047a2426cf397dae0bb99a"},
-      "WP0-T04": {"marker": "AX_C3_PERSISTENCE_MIGRATIONS_RESTORE_PASS", "evidence_sha": "8a81d2a417d5645899c3ba50489552bbeb3f829a", "artifact_id": 8913254281},
+      "WP0-T03": {
+        "marker": "AX_C2_IDENTITY_TENANT_TRIAL_PASS",
+        "evidence_sha": "2ca1cf0451ff0a1544047a2426cf397dae0bb99a"
+      },
+      "WP0-T04": {
+        "marker": "AX_C3_PERSISTENCE_MIGRATIONS_RESTORE_PASS",
+        "evidence_sha": "8a81d2a417d5645899c3ba50489552bbeb3f829a",
+        "artifact_id": 8913254281
+      },
       "WP0-T05": {
         "marker": "C3_CONSECUTIVE_CYCLE_COMPARATOR_PASS",
         "evidence_sha": "316f34d0ec3c2bc1fc91e0fa2494840a5aa8e243",
@@ -90,7 +146,11 @@
         "origin_schema_authority_hash": "4540c3e8e4445ca453f5bee01e4c76334ccade2b613e6215f2a4e72e19c3268e",
         "final_schema_authority_hash": "b270b122a743e1fc39c13db7687b4698c7fa9bcc8b75f888e4cc00fed4023a3c"
       },
-      "WP0-T06": {"marker": "C4_FINAL_RUNTIME_PASS", "evidence_sha": "dd119139555e885cc73d24d13e4b7b148797576e", "job_id": 92338125477},
+      "WP0-T06": {
+        "marker": "C4_FINAL_RUNTIME_PASS",
+        "evidence_sha": "dd119139555e885cc73d24d13e4b7b148797576e",
+        "job_id": 92338125477
+      },
       "WP0-T07": {
         "marker": "FULL_MIGRATION_MATRIX_EXACT_HEAD_PASS",
         "evidence_sha": "316f34d0ec3c2bc1fc91e0fa2494840a5aa8e243",
@@ -102,7 +162,13 @@
       "WP0-T08": {
         "marker": "ROOT_GATES_EXACT_HEAD_PASS",
         "evidence_sha": "316f34d0ec3c2bc1fc91e0fa2494840a5aa8e243",
-        "runs": {"core": 31092164195, "runtime": 31092162860, "domain": 31092161635, "procurement_admission": 31092161086, "remote_pilot_operations": 31092162583}
+        "runs": {
+          "core": 31092164195,
+          "runtime": 31092162860,
+          "domain": 31092161635,
+          "procurement_admission": 31092161086,
+          "remote_pilot_operations": 31092162583
+        }
       },
       "WP0-T09": {
         "marker": "LATEST_MAIN_RECONCILIATION_PASS",
@@ -114,27 +180,76 @@
         "root_gates": "SUCCESS"
       },
       "WP0-T10": {
-        "marker": "PR_READY_PROTECTED_MERGE_PASS",
-        "pull_request": 169,
-        "evidence_sha": "f64fa9f0737df7725ae9f6e95fa9c5898656d34e",
-        "expected_head_sha": "f64fa9f0737df7725ae9f6e95fa9c5898656d34e",
+        "marker": "PR_READY_CONTROLLED_MERGE_PASS",
+        "pull_request": 177,
+        "evidence_sha": "90edfb1e0697ced0e0b4eb90d7f18d93f4661c7f",
+        "expected_head_sha": "RE_READ_AFTER_DOCUMENTATION_SUCCESSORS",
         "state": "OPEN",
         "draft": false,
         "mergeable": true,
         "blocking_requested_changes": 0,
-        "runs": {"core": 31093095249, "runtime": 31093094248, "domain": 31093093278, "procurement_admission": 31093074068, "remote_pilot_operations": 31093074039}
+        "runs": {
+          "core": 31113947505,
+          "runtime": 31113950967,
+          "domain": 31113954472
+        },
+        "gate_jobs": {
+          "core": 92660535386,
+          "runtime": 92662147571,
+          "domain": 92659174165
+        },
+        "runtime_attempt": 2,
+        "infrastructure_failure_job": 92660034439,
+        "infrastructure_failure_classification": "PRE_CHECKOUT_GITHUB_HOSTED_ACTION_DOWNLOAD_503_502_NO_PRODUCT_EXECUTION"
       }
+    },
+    "wp0_pending_tasks": {
+      "WP0-T11": {
+        "state": "READY_FOR_CONTROLLED_MERGE",
+        "issue": 176,
+        "pull_request": 177,
+        "expected_head_sha": "RE_READ_IMMEDIATELY_BEFORE_MERGE",
+        "main_protected": false,
+        "last_validated_executable_head": "90edfb1e0697ced0e0b4eb90d7f18d93f4661c7f",
+        "main_protection_risk": "ACKNOWLEDGED_AND_DEFERRED_TO_WP4_T06",
+        "merge_authority": "GRANTED_BY_HUMAN_AMENDMENT"
+      },
+      "WP0-T12": {
+        "state": "READY_AFTER_CONTROLLED_MERGE",
+        "required_marker": "AX_C0_C4_CANONICAL_MAIN_PASS",
+        "candidate_jobs": {
+          "public_landing_release_candidate": 92651677368,
+          "g6_inputs": 92651677342,
+          "g6_double_build": 92651858417,
+          "full_migration_matrix": 92651680867,
+          "browser_e2e": 92651677486,
+          "c4_runtime_pilot": 92652044804
+        },
+        "g6_artifact_id": 8972205296,
+        "g6_artifact_digest": "sha256:563e0c6c647578269ab77a1008d962bf7037028ea8011fc68892e9690080d90f"
+      }
+    },
+    "post_merge_failure": {
+      "canonical_main_sha": "fae293b9f2c6cc1ebfffd2302f3ce6ddcfef00c2",
+      "run_id": 31097383391,
+      "job_id": 92602528596,
+      "failure": "AXIGNAL_LANDING_IMAGE_REPOSITORY is missing a value",
+      "repair_pr": 177,
+      "repair_evidence_sha": "90edfb1e0697ced0e0b4eb90d7f18d93f4661c7f"
     }
   },
   "transition": [
-    "revalidate the documentation successor exact head",
-    "complete WP0-T11 protected merge",
+    "revalidate the documentation-only successor exact head",
+    "re-read PR 177 metadata and expected_head_sha immediately before merge",
+    "complete WP0-T11 controlled API merge without force push or direct ref mutation",
     "complete WP0-T12 post-merge smoke and canonical marker",
-    "authorize WP1-T01"
+    "record WP0-T11 and WP0-T12 as completed",
+    "authorize WP1-T01",
+    "close repository protection hardening during WP4-T06"
   ],
   "last_human_authority_change": {
-    "instruction": "Continue executing AX-GE2E-FINISH-003 faithfully and mark completed tasks with X.",
-    "effective_at": "2026-08-06T12:00:00+02:00",
-    "effect": "Ten evidence-backed WP0 tasks are complete. WP0-T11 is active and remains fail-closed until the documentation successor exact head passes and the protected merge is executed without bypass."
+    "instruction": "Do not allow repository branch protection to block progress. Continue toward publication, then iterate toward perfection through E2E audits and human review.",
+    "effective_at": "2026-08-06T17:36:43+02:00",
+    "effect": "Branch protection issue 176 is reclassified as deferred non-blocking hardening under WP4-T06. Controlled public deployment is authorized under RELEASE_THEN_ITERATE. Controlled merges still require an open non-draft mergeable PR, exact-head green root gates, immediate expected_head_sha verification, GitHub merge API, no force push, and mandatory post-merge smoke."
   }
 }

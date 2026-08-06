@@ -55,13 +55,19 @@ jobs:
           set -euo pipefail
           image="axignal-landing:${GITHUB_SHA}"
           docker build --pull --file infra/landing/Dockerfile --tag "${image}" .
-          docker image inspect "${image}" >/dev/null
+          image_id="$(docker image inspect --format '{{.Id}}' "${image}")"
+          [[ "${image_id}" =~ ^sha256:[0-9a-f]{64}$ ]]
+          printf '%s\n' "${image_id}" > /tmp/axignal-landing-image.id
           docker save "${image}" | gzip -9 > /tmp/axignal-landing-image.tar.gz
           (
             cd /tmp
-            sha256sum axignal-landing-image.tar.gz > axignal-landing-image.tar.gz.sha256
-            test "$(awk '{print $2}' axignal-landing-image.tar.gz.sha256)" = "axignal-landing-image.tar.gz"
-            sha256sum -c axignal-landing-image.tar.gz.sha256
+            sha256sum \
+              axignal-landing-image.tar.gz \
+              axignal-landing-image.id \
+              > axignal-landing-release.sha256
+            test "$(awk 'NR == 1 {print $2}' axignal-landing-release.sha256)" = "axignal-landing-image.tar.gz"
+            test "$(awk 'NR == 2 {print $2}' axignal-landing-release.sha256)" = "axignal-landing-image.id"
+            sha256sum -c axignal-landing-release.sha256
           )
 
       - name: Materialise deploy credential and pin host identity
@@ -132,7 +138,8 @@ jobs:
           ssh "${ssh_opts[@]}" "${user}@${host}" "umask 077; rm -rf '${remote_dir}'; mkdir -p '${remote_dir}'"
           scp "${scp_opts[@]}" \
             /tmp/axignal-landing-image.tar.gz \
-            /tmp/axignal-landing-image.tar.gz.sha256 \
+            /tmp/axignal-landing-image.id \
+            /tmp/axignal-landing-release.sha256 \
             infra/landing/compose.yaml \
             infra/landing/deploy.sh \
             "${user}@${host}:${remote_dir}/"
@@ -173,7 +180,7 @@ jobs:
           )
 
           ssh "${ssh_opts[@]}" "${user}@${host}" \
-            "cd '${remote_dir}' && sha256sum -c axignal-landing-image.tar.gz.sha256 && chmod 0750 deploy.sh && ./deploy.sh '${GITHUB_SHA}' 'axignal-landing:${GITHUB_SHA}' '${remote_dir}/axignal-landing-image.tar.gz' '${remote_dir}'"
+            "cd '${remote_dir}' && sha256sum -c axignal-landing-release.sha256 && image_id=\$(cat axignal-landing-image.id) && printf '%s\\n' \"\${image_id}\" | grep -Eq '^sha256:[0-9a-f]{64}$' && chmod 0750 deploy.sh && ./deploy.sh '${GITHUB_SHA}' \"\${image_id}\" '${remote_dir}/axignal-landing-image.tar.gz' '${remote_dir}'"
           scp "${scp_opts[@]}" "${user}@${host}:${remote_dir}/deployment-evidence.json" deployment-evidence.json
 
       - name: Verify public route externally
@@ -281,4 +288,8 @@ jobs:
               -o LogLevel=ERROR \
               "${user}@${host}" "rm -rf '${remote_dir}'" >/dev/null 2>&1
           fi
-          rm -rf /tmp/axignal-release-ssh /tmp/axignal-landing-image.tar.gz /tmp/axignal-landing-image.tar.gz.sha256
+          rm -rf \
+            /tmp/axignal-release-ssh \
+            /tmp/axignal-landing-image.tar.gz \
+            /tmp/axignal-landing-image.id \
+            /tmp/axignal-landing-release.sha256

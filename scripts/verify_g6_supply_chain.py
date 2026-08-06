@@ -13,6 +13,12 @@ RUNTIME_LOCK = ROOT / "requirements/python-runtime.lock"
 DEV_LOCK = ROOT / "requirements/python-dev.lock"
 IMAGE_LOCK = ROOT / "data/supply-chain/image-lock.v1.json"
 PYPROJECT = ROOT / "pyproject.toml"
+LANDING_COMPOSE = ROOT / "infra/landing/compose.yaml"
+LANDING_CANDIDATE_WORKFLOW = (
+    ROOT / ".github/workflows/public-landing-release-candidate.yml"
+)
+LANDING_RELEASE_WORKFLOW = ROOT / ".github/workflows/public-landing-release.yml"
+LANDING_LOCAL_IMAGE_REFERENCE = "${AXIGNAL_LANDING_IMAGE:?required}"
 
 SHA256_RE = re.compile(r"sha256:[0-9a-f]{64}$")
 ACTION_SHA_RE = re.compile(r"^[0-9a-f]{40}$")
@@ -246,6 +252,8 @@ def verify_image_reference(
         return False
     if DYNAMIC_RELEASE_IMAGE_RE.fullmatch(reference):
         return True
+    if path == LANDING_COMPOSE and reference == LANDING_LOCAL_IMAGE_REFERENCE:
+        return True
     if "@" not in reference:
         record(findings, path, line, f"mutable image reference: {reference}")
         return False
@@ -382,6 +390,24 @@ def inspect_workflow_actions(findings: list[Finding]) -> int:
     return count
 
 
+def require_contract_tokens(
+    *,
+    path: Path,
+    content: str,
+    required: tuple[str, ...],
+    message: str,
+    findings: list[Finding],
+) -> None:
+    missing = [token for token in required if token not in content]
+    if missing:
+        record(
+            findings,
+            path,
+            1,
+            f"{message}; missing: {', '.join(missing)}",
+        )
+
+
 def inspect_release_build_contract(findings: list[Finding]) -> None:
     runtime_path = ROOT / "infra/runtime/Dockerfile"
     runtime = runtime_path.read_text(encoding="utf-8")
@@ -417,20 +443,55 @@ def inspect_release_build_contract(findings: list[Finding]) -> None:
                 "web build does not enforce pnpm frozen lockfile",
             )
 
-    landing_path = ROOT / "infra/landing/compose.yaml"
-    landing_compose = landing_path.read_text(encoding="utf-8")
-    required_reference = (
-        "${AXIGNAL_LANDING_IMAGE_REPOSITORY:?required}:"
-        "${AXIGNAL_LANDING_IMAGE_TAG:?required}@sha256:"
-        "${AXIGNAL_LANDING_IMAGE_DIGEST:?required}"
-    )
-    if required_reference not in landing_compose:
+    landing_compose = LANDING_COMPOSE.read_text(encoding="utf-8")
+    if f"image: {LANDING_LOCAL_IMAGE_REFERENCE}" not in landing_compose:
         record(
             findings,
-            "infra/landing/compose.yaml",
+            LANDING_COMPOSE,
             1,
-            "landing release image is not forced into tag@sha256 form",
+            "landing release image is not forced to a local content-addressed image ID",
         )
+    if "pull_policy: never" not in landing_compose:
+        record(
+            findings,
+            LANDING_COMPOSE,
+            1,
+            "landing release compose permits image pulls",
+        )
+
+    candidate = LANDING_CANDIDATE_WORKFLOW.read_text(encoding="utf-8")
+    require_contract_tokens(
+        path=LANDING_CANDIDATE_WORKFLOW,
+        content=candidate,
+        required=(
+            "docker save",
+            "docker load",
+            "axignal-landing-candidate.sha256",
+            "sha256sum -c",
+            "loaded_image_id",
+            'test "${loaded_image_id}" = "${image_id}"',
+            "docker inspect --format '{{.Image}}'",
+            'AXIGNAL_LANDING_IMAGE="${image_id}"',
+            "create --no-build",
+        ),
+        message="landing candidate lacks archive and image-ID identity proof",
+        findings=findings,
+    )
+
+    production = LANDING_RELEASE_WORKFLOW.read_text(encoding="utf-8")
+    require_contract_tokens(
+        path=LANDING_RELEASE_WORKFLOW,
+        content=production,
+        required=(
+            "axignal-landing-image.id",
+            "axignal-landing-release.sha256",
+            "sha256sum -c axignal-landing-release.sha256",
+            "grep -Eq '^sha256:[0-9a-f]{64}$'",
+            "./deploy.sh '${GITHUB_SHA}'",
+        ),
+        message="landing production release lacks verified image-ID transfer",
+        findings=findings,
+    )
 
 
 def main() -> int:
