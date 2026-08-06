@@ -115,14 +115,12 @@ jobs:
         run: |
           set -euo pipefail
           docker compose -f compose.yaml config > compose-root.rendered.yaml
-          AXIGNAL_LANDING_IMAGE_REPOSITORY=registry.example.invalid/axignal/landing \
-          AXIGNAL_LANDING_IMAGE_TAG="$AXIGNAL_EXACT_SHA" \
-          AXIGNAL_LANDING_IMAGE_DIGEST=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa \
+          landing_image="sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          AXIGNAL_LANDING_IMAGE="${landing_image}" \
           AXIGNAL_BUILD_SHA="$AXIGNAL_EXACT_SHA" \
             docker compose -f infra/landing/compose.yaml config > compose-landing.rendered.yaml
-          grep -F \
-            "registry.example.invalid/axignal/landing:${AXIGNAL_EXACT_SHA}@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" \
-            compose-landing.rendered.yaml
+          grep -F "image: ${landing_image}" compose-landing.rendered.yaml
+          grep -F "pull_policy: never" compose-landing.rendered.yaml
 
       - name: Upload immutable-input evidence
         if: always()
