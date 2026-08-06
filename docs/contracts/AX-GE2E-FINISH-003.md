@@ -1,9 +1,9 @@
 # AXIGNAL — Contrato canónico de cierre E2E con checklist ejecutable
 
 **Contract ID:** `AX-GE2E-FINISH-003`  
-**Versión contractual:** `1.1.0-checklist.2`  
+**Versión contractual:** `1.1.0-checklist.3`  
 **Fecha de ratificación original:** `2026-08-05T17:00:45+02:00`  
-**Fecha de enmienda operativa:** `2026-08-06T17:00:20+02:00`  
+**Fecha de enmienda operativa:** `2026-08-06T17:36:43+02:00`  
 **Estado:** `RATIFIED / ACTIVE / BINDING`  
 **Autoridad humana:** `Rafael López`  
 **Repositorio:** `LowToHi/axignal`  
@@ -32,12 +32,26 @@ Desde esta versión:
 HUMAN_AUTHORITY_APPROVAL     APPROVED
 APPROVED_BY                  Rafael López
 AMENDMENT_EFFECTIVE_AT       2026-08-05T20:23:00+02:00
-CONTROL_UPDATE_AT            2026-08-06T17:00:20+02:00
+CONTROL_UPDATE_AT            2026-08-06T17:36:43+02:00
 CONTRACT_STATUS              RATIFIED_ACTIVE
-PUBLIC_LAUNCH_AUTHORITY      false
+PUBLICATION_STRATEGY         RELEASE_THEN_ITERATE
+CONTROLLED_PUBLIC_DEPLOYMENT true
+E2E_COMPLETION_CLAIM         false
 ```
 
-La actualización `1.1.0-checklist.2` registra el repair post-merge, su evidencia exact-head y el bloqueo administrativo de protección de `main`. No modifica los criterios de cierre y no marca `WP0-T11` ni `WP0-T12` como cumplidas.
+La actualización `1.1.0-checklist.3` incorpora una enmienda expresa de la autoridad humana: AXIGNAL avanzará mediante publicación controlada seguida de auditorías E2E, revisión humana e iteración. La ausencia de branch protection o rulesets deja de ser un blocker de ejecución y pasa a ser hardening de repositorio diferido a `WP4-T06`.
+
+Esta enmienda no relaja los controles técnicos del merge. Mientras `main` siga sin protección, todo merge deberá cumplir simultáneamente:
+
+1. PR no draft y mergeable;
+2. cero requested changes o conversaciones bloqueantes;
+3. root gates exact-head terminales y verdes;
+4. `expected_head_sha` reconsultado inmediatamente antes del merge;
+5. merge mediante API, sin force push ni actualización directa del ref;
+6. registro del SHA canónico y smoke post-merge;
+7. reapertura inmediata ante regresión material.
+
+La publicación controlada no equivale a declarar `AXIGNAL_E2E_COMPLETE`, ni habilita por sí sola Stripe live, claims globales o acciones externas autónomas.
 
 ---
 
@@ -168,7 +182,7 @@ Durante el cierre no se permite:
 8. usar retries para convertir flakiness en PASS;
 9. elevar timeouts sin requisito funcional demostrado;
 10. mantener varios PR o work packages de cierre simultáneos;
-11. declarar cierre canónico antes del merge protegido y smoke post-merge;
+11. declarar cierre canónico antes del merge controlado exact-head y smoke post-merge;
 12. alterar el contrato para evitar corregir la primera tarea pendiente.
 
 ---
@@ -192,7 +206,7 @@ Durante el cierre no se permite:
 
 | Work package | Cumplidas | Total | Estado |
 |---|---:|---:|---|
-| `WP0` Canonicalización C0–C4 | 10 | 12 | `BLOCKED_BY_MAIN_PROTECTION` |
+| `WP0` Canonicalización C0–C4 | 10 | 12 | `READY_FOR_CONTROLLED_MERGE` |
 | `WP1` Investigación, AXENT y evidencia real | 0 | 10 | `BLOCKED_BY_WP0` |
 | `WP2` O01, Opportunity y Bid Workspace | 0 | 12 | `BLOCKED_BY_WP1` |
 | `WP3` Comercial, billing y Founder Operations | 0 | 12 | `BLOCKED_BY_WP2` |
@@ -206,23 +220,22 @@ ACTIVE_WORK_PACKAGE          WP0
 ACTIVE_TASK                  WP0-T11
 ACTIVE_BRANCH                agent/axignal-wp0-post-merge-release-repair
 ACTIVE_PULL_REQUEST          177
-EXPECTED_EXECUTABLE_HEAD     ad29aa13437ee16fb3f067949ad24a09972f0bed
+EXPECTED_EXECUTABLE_HEAD     90edfb1e0697ced0e0b4eb90d7f18d93f4661c7f
 TECHNICAL_VALIDATION         EXACT_HEAD_GREEN
-ACTIVE_BLOCKER               AX-CLOSE-BLK-005_MAIN_PROTECTION
-WP0_T12_STATUS               READY_BLOCKED_BY_WP0_T11
+ACTIVE_BLOCKER               NONE
+WP0_T12_STATUS               READY_AFTER_CONTROLLED_MERGE
 NEXT_CANONICAL_MARKER        AX_C0_C4_CANONICAL_MAIN_PASS
-PUBLIC_LAUNCH                NO_GO
+PUBLIC_DEPLOYMENT            AUTHORIZED_RELEASE_THEN_ITERATE
 ```
 
 El panel se actualizará en el mismo cambio que marque o reabra una tarea. En caso de discrepancia, prevalecen las casillas individuales.
 
 ---
-
 # 6. Checklist contractual E2E
 
 ## WP0 — Canonicalización del baseline C0–C4
 
-**Objetivo:** obtener un baseline C0–C4 integrado, exact-head, fusionado de forma protegida y reproducible desde `main`.
+**Objetivo:** obtener un baseline C0–C4 integrado, exact-head, fusionado de forma controlada y reproducible desde `main`.
 
 - [x] **WP0-T01 — Reconciliar C0 como baseline canónico único.**  
   **Cierre:** no existen autoridades divergentes; baseline y contratos apuntan a una única línea de producto.  
@@ -261,19 +274,19 @@ El panel se actualizará en el mismo cambio que marque o reabra una tarea. En ca
   **Cierre:** rama actualizada respecto a `main`, sin pérdida de cambios ni ampliación de alcance; pruebas afectadas PASS.  
   **Evidencia:** `MAIN_SHA=6091795f79aec19c9dcbac71bb8b6b19877f101b`; `MERGE_BASE=6091795f79aec19c9dcbac71bb8b6b19877f101b`; `RECONCILED_HEAD=316f34d0ec3c2bc1fc91e0fa2494840a5aa8e243`; comparación `ahead_by=983`, `behind_by=0`; commit `merge(main): reconcile latest storage governance baseline`; cinco root gates exact-head `SUCCESS`.
 
-- [x] **WP0-T10 — Dejar el PR contractual listo y protegiblemente fusionable.**  
+- [x] **WP0-T10 — Dejar el PR contractual listo para merge controlado exact-head.**  
   **Cierre:** PR no draft, mergeable, checks obligatorios PASS, expected head verificado y cero conversaciones bloqueantes.  
-  **Evidencia vigente:** `PR=177`; `EVIDENCE_SHA=ad29aa13437ee16fb3f067949ad24a09972f0bed`; `expected_head_sha=ad29aa13437ee16fb3f067949ad24a09972f0bed`; `state=OPEN`; `draft=false`; `mergeable=true`; `blocking_requested_changes=0`; `Core=31111915110 SUCCESS`; `Runtime=31111916555 SUCCESS`; `Domain=31111915044 SUCCESS`; `Core gate job=92653830617 SUCCESS`; `Runtime gate job=92653269541 SUCCESS`; `Domain gate job=92652592481 SUCCESS`.  
+  **Evidencia vigente:** `PR=177`; `EVIDENCE_SHA=90edfb1e0697ced0e0b4eb90d7f18d93f4661c7f`; `state=OPEN`; `draft=false`; `mergeable=true`; `blocking_requested_changes=0`; `Core=31113947505 SUCCESS`; `Runtime=31113950967 attempt 2 SUCCESS`; `Domain=31113954472 SUCCESS`; `Core gate job=92660535386 SUCCESS`; `Runtime gate job=92662147571 SUCCESS`; `Domain gate job=92659174165 SUCCESS`; fallo inicial de infraestructura `job=92660034439` anterior a checkout, clasificado y recuperado sin cambio de código ni criterios.  
   **Repair acotado:** preservación de identidad de imagen Docker local inmutable durante `save/load/deploy`; sin registry, credenciales, infraestructura o autoridad de producto nuevas.
 
-- [ ] **WP0-T11 — Completar el merge protegido a `main`.**  
-  **Cierre:** merge realizado mediante la protección configurada, sin bypass y sobre el head esperado.  
-  **Estado exacto:** `BLOCKED_BY_MAIN_PROTECTION`; `main.protected=false`; `PR=177`; `expected_head_sha=ad29aa13437ee16fb3f067949ad24a09972f0bed`; blocker `AX-CLOSE-BLK-005`; issue `#176`.  
-  **Evidencia requerida:** SHA canónico de `main`, protección efectiva y registro de merge sin bypass.
+- [ ] **WP0-T11 — Completar el merge controlado exact-head a `main`.**  
+  **Cierre:** merge realizado sobre el head reconsultado, con PR no draft y mergeable, root gates verdes y sin force push ni mutación directa del ref.  
+  **Estado exacto:** `READY_FOR_CONTROLLED_MERGE`; `main.protected=false` aceptado como riesgo temporal por la autoridad humana; `PR=177`; `LAST_VALIDATED_EXECUTABLE_HEAD=90edfb1e0697ced0e0b4eb90d7f18d93f4661c7f`; issue `#176` reclasificada como hardening no bloqueante de `WP4-T06`.  
+  **Evidencia requerida:** SHA canónico de `main`, `expected_head_sha` usado por la operación, registro de merge API y ausencia de force push.
 
 - [ ] **WP0-T12 — Ejecutar smoke post-merge y emitir el marcador WP0.**  
   **Cierre:** instalación/arranque, login, recorrido crítico C0–C4 y persistencia pasan desde `main`; ledger registra el SHA canónico.  
-  **Estado exacto:** `TECHNICALLY_READY / BLOCKED_BY_WP0_T11`; el release candidate y la matriz afectada pasan sobre `ad29aa13437ee16fb3f067949ad24a09972f0bed`, pero no existe aún merge protegido ni ejecución post-merge desde `main`.  
+  **Estado exacto:** `READY_AFTER_CONTROLLED_MERGE`; el release candidate, la matriz afectada y los root gates pasan sobre `90edfb1e0697ced0e0b4eb90d7f18d93f4661c7f`; falta el merge controlado y la ejecución post-merge desde `main`.  
   **Evidencia requerida:** `AX_C0_C4_CANONICAL_MAIN_PASS`.
 
 ### Registro operativo exacto del repair post-merge
@@ -285,7 +298,7 @@ FAILED_POST_MERGE_JOB                92602528596
 OBSERVED_FAILURE                     AXIGNAL_LANDING_IMAGE_REPOSITORY missing
 REPAIR_PULL_REQUEST                  177
 REPAIR_BRANCH                        agent/axignal-wp0-post-merge-release-repair
-REPAIR_EXECUTABLE_EVIDENCE_SHA       ad29aa13437ee16fb3f067949ad24a09972f0bed
+REPAIR_EXECUTABLE_EVIDENCE_SHA       90edfb1e0697ced0e0b4eb90d7f18d93f4661c7f
 PUBLIC_LANDING_CANDIDATE_JOB         92651677368 SUCCESS
 G6_INPUTS_JOB                        92651677342 SUCCESS
 G6_DOUBLE_BUILD_JOB                  92651858417 SUCCESS
@@ -294,9 +307,16 @@ BROWSER_E2E_JOB                      92651677486 SUCCESS
 C4_RUNTIME_PILOT_JOB                 92652044804 SUCCESS
 G6_ARTIFACT_ID                       8972205296
 G6_ARTIFACT_DIGEST                   sha256:563e0c6c647578269ab77a1008d962bf7037028ea8011fc68892e9690080d90f
-MAIN_PROTECTION                      false
-ACTIVE_BLOCKER_ISSUE                 176
-MERGE_AUTHORITY                      DENIED_UNTIL_MAIN_PROTECTED
+ROOT_CORE_RUN                       31113947505 SUCCESS
+ROOT_RUNTIME_RUN                    31113950967 ATTEMPT_2 SUCCESS
+ROOT_DOMAIN_RUN                     31113954472 SUCCESS
+ROOT_CORE_GATE_JOB                  92660535386 SUCCESS
+ROOT_RUNTIME_GATE_JOB               92662147571 SUCCESS
+ROOT_DOMAIN_GATE_JOB                92659174165 SUCCESS
+MAIN_PROTECTION                      false ACKNOWLEDGED_RISK
+DEFERRED_HARDENING_ISSUE             176
+DEFERRED_HARDENING_TASK              WP4-T06
+MERGE_AUTHORITY                      GRANTED_BY_HUMAN_AMENDMENT
 ```
 
 ---
@@ -417,7 +437,6 @@ MERGE_AUTHORITY                      DENIED_UNTIL_MAIN_PROTECTED
 
 - [ ] **WP3-T11 — Cerrar Founder Operations de Risk, Abuse, Sources y Coverage.**  
   **Cierre:** decisiones, revisiones, fuentes, derechos, cobertura, consentimiento y eliminación tienen autoridad server-side y audit.
-
 - [ ] **WP3-T12 — Cerrar Founder Operations de Platform y soporte.**  
   **Cierre:** queues, workers, SLO, incidents, DR, flags, settings, audit y soporte operan sin controles simulados.  
   **Evidencia requerida:** `AX_WP3_COMMERCIAL_FOUNDER_OPS_FULL_E2E_PASS`.
@@ -443,8 +462,8 @@ MERGE_AUTHORITY                      DENIED_UNTIL_MAIN_PROTECTED
 - [ ] **WP4-T05 — Cerrar seguridad web, red y agente.**  
   **Cierre:** CSRF, CORS, replay, rate limits, SSRF, DNS rebinding, prompt injection, egress y tool permissions pasan.
 
-- [ ] **WP4-T06 — Cerrar supply chain y vulnerabilidades.**  
-  **Cierre:** dependencias, imágenes, firmas/checksums, secrets scan y vulnerabilidades tienen cero hallazgos críticos explotables.
+- [ ] **WP4-T06 — Cerrar supply chain, repositorio y vulnerabilidades.**  
+  **Cierre:** dependencias, imágenes, firmas/checksums, secrets scan y vulnerabilidades tienen cero hallazgos críticos explotables; `main` dispone de branch protection o ruleset equivalente con PR requerido, checks obligatorios, bloqueo de force push/deletion y bypass explícitamente gobernado.
 
 - [ ] **WP4-T07 — Cerrar rendimiento, carga, soak y capacidad.**  
   **Cierre:** SLO, concurrencia, colas, latencias, capacidad, costes y límites se demuestran con carga representativa.
@@ -521,7 +540,7 @@ MERGE_AUTHORITY                      DENIED_UNTIL_MAIN_PROTECTED
   **Cierre:** usuario real y fuente oficial recorren toda la cadena E2E bajo el RC, con auditoría y recuperación.
 
 - [ ] **WP6-T08 — Fusionar, etiquetar y publicar el release técnico.**  
-  **Cierre:** protected merge, tag/version, imágenes/bundle, SBOM, checksums, notas y rollback corresponden al mismo SHA.
+  **Cierre:** merge controlado exact-head, tag/version, imágenes/bundle, SBOM, checksums, notas y rollback corresponden al mismo SHA; el estado de protección del repositorio queda declarado y no se usa force push.
 
 - [ ] **WP6-T09 — Ejecutar smoke post-deploy y confirmar operabilidad.**  
   **Cierre:** salud, login, investigación, Bid Workspace, billing, email, observabilidad, backup y soporte funcionan en producción.
@@ -549,7 +568,9 @@ Se detendrá la progresión y se reabrirá la tarea afectada ante:
 - accesibilidad que impida la tarea principal;
 - manifiesto no ligado al SHA desplegado.
 
-No se detendrá por bibliotecas O02–O09, mejoras cosméticas, dashboards auxiliares, abstracciones futuras, integraciones no contratadas, warnings no materiales o métricas que sólo puedan existir después del lanzamiento.
+No se detendrá por bibliotecas O02–O09, mejoras cosméticas, dashboards auxiliares, abstracciones futuras, integraciones no contratadas, warnings no materiales, ausencia temporal de branch protection aceptada por la autoridad humana o métricas que sólo puedan existir después del lanzamiento.
+
+La deuda de protección de `main` permanece trazada en `#176` y debe cerrarse en `WP4-T06`, pero no bloquea merges controlados exact-head ni publicación técnica.
 
 ---
 
@@ -578,21 +599,22 @@ En caso de discrepancia, se corrige el ledger; no se crea otro roadmap operativo
 
 ---
 
-## 9. Autoridades reservadas
+## 9. Autoridades de publicación y límites
 
-Hasta completar WP6 y recibir aprobación humana explícita:
+La autoridad humana aprueba una estrategia `RELEASE_THEN_ITERATE`: publicación técnica controlada antes de la perfección final, seguida de auditorías E2E, revisión humana y corrección continua.
 
 ```text
-PUBLIC_LAUNCH_AUTHORIZED    false
-COMMERCIAL_LIVE_MODE        false
-STRIPE_LIVE_MODE            false
-PUBLIC_SIGNUP               false
-PRODUCTION_SOURCE_ADMISSION false
-GLOBAL_COVERAGE_CLAIM       false
-AUTONOMOUS_EXTERNAL_ACTIONS false
+CONTROLLED_PUBLIC_DEPLOYMENT true
+PUBLIC_COMPLETION_CLAIM      false
+COMMERCIAL_LIVE_MODE         false
+STRIPE_LIVE_MODE             false
+PUBLIC_SIGNUP                false
+PRODUCTION_SOURCE_ADMISSION  false
+GLOBAL_COVERAGE_CLAIM        false
+AUTONOMOUS_EXTERNAL_ACTIONS  false
 ```
 
-La ejecución de este contrato no autoriza por sí sola el lanzamiento.
+La publicación no permite afirmar que AXIGNAL está terminado E2E hasta que las 75 tareas estén `[x]` y se emita `AXIGNAL_E2E_COMPLETE`.
 
 ---
 
@@ -602,16 +624,18 @@ La ejecución de este contrato no autoriza por sí sola el lanzamiento.
 HUMAN_AUTHORITY_APPROVAL     APPROVED
 APPROVED_BY                  Rafael López
 CONTRACT_ID                  AX-GE2E-FINISH-003
-CONTRACT_VERSION             1.1.0-checklist.2
+CONTRACT_VERSION             1.1.0-checklist.3
 CONTRACT_STATE               ACTIVE_BINDING
 ACTIVE_WORK_PACKAGE          WP0
 ACTIVE_TASK                  WP0-T11
 ACTIVE_BRANCH                agent/axignal-wp0-post-merge-release-repair
 ACTIVE_PULL_REQUEST          177
-EXPECTED_EXECUTABLE_HEAD     ad29aa13437ee16fb3f067949ad24a09972f0bed
-ACTIVE_BLOCKER               AX-CLOSE-BLK-005_MAIN_PROTECTION
+EXPECTED_EXECUTABLE_HEAD     90edfb1e0697ced0e0b4eb90d7f18d93f4661c7f
+ACTIVE_BLOCKER               NONE
+DEFERRED_HARDENING           AX-CLOSE-BLK-005 / ISSUE_176 / WP4-T06
 NEXT_CANONICAL_MARKER        AX_C0_C4_CANONICAL_MAIN_PASS
-PUBLIC_LAUNCH                NO_GO
+PUBLICATION_STRATEGY         RELEASE_THEN_ITERATE
+PUBLIC_DEPLOYMENT            AUTHORIZED
 ```
 
 Este contrato se completa únicamente cuando las 75 tareas están `[x]`, el manifiesto P27 está ligado al SHA final y la autoridad humana emite `AXIGNAL_E2E_COMPLETE`.
