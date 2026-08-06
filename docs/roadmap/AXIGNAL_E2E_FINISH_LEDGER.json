@@ -16,17 +16,17 @@
     "base_branch": "main",
     "active_branch": "agent/axignal-c0-canonical-reconciliation-v1",
     "active_pull_request": 169,
-    "pull_request_state": "OPEN_DRAFT_UNMERGED",
+    "pull_request_state": "OPEN_READY_UNMERGED",
     "canonical_main_sha": null,
-    "last_validated_product_sha": "316f34d0ec3c2bc1fc91e0fa2494840a5aa8e243",
-    "current_branch_sha": "316f34d0ec3c2bc1fc91e0fa2494840a5aa8e243",
-    "current_branch_sha_reason": "Executable evidence SHA for WP0-T05, WP0-T07, WP0-T08 and WP0-T09. Subsequent checklist and ledger commits are documentation-only successors and do not replace product evidence."
+    "last_validated_product_sha": "f64fa9f0737df7725ae9f6e95fa9c5898656d34e",
+    "current_branch_sha": "f64fa9f0737df7725ae9f6e95fa9c5898656d34e",
+    "current_branch_sha_reason": "Executable exact-head evidence SHA for WP0-T10. The immediately consecutive contract and ledger commits are documentation-only successors and must themselves pass the root gates before WP0-T11."
   },
   "execution": {
     "active_work_package": "WP0",
-    "active_task": "WP0-T10",
-    "active_blocker": "AX-CLOSE-BLK-004",
-    "allowed_next_transition": "MAKE_PR_READY_AND_VERIFY_EXPECTED_HEAD",
+    "active_task": "WP0-T11",
+    "active_blocker": "AX-CLOSE-BLK-005",
+    "allowed_next_transition": "PROTECTED_MERGE_WITH_EXPECTED_HEAD",
     "next_canonical_marker": "AX_C0_C4_CANONICAL_MAIN_PASS",
     "public_launch": "NO_GO",
     "commercial_live_mode": "DENIED",
@@ -36,12 +36,12 @@
   "checklist": {
     "path": "docs/contracts/AX-GE2E-FINISH-003.md",
     "total_tasks": 75,
-    "completed_tasks": 9,
-    "pending_tasks": 66,
+    "completed_tasks": 10,
+    "pending_tasks": 65,
     "progress_source_of_truth": "MARKDOWN_CHECKBOXES",
     "completion_rule": "A task is complete only when every material criterion passes and evidence is bound to an executable EVIDENCE_SHA.",
     "work_packages": {
-      "WP0": {"completed": 9, "total": 12, "state": "IN_PROGRESS"},
+      "WP0": {"completed": 10, "total": 12, "state": "IN_PROGRESS"},
       "WP1": {"completed": 0, "total": 10, "state": "BLOCKED_BY_WP0"},
       "WP2": {"completed": 0, "total": 12, "state": "BLOCKED_BY_WP1"},
       "WP3": {"completed": 0, "total": 12, "state": "BLOCKED_BY_WP2"},
@@ -60,20 +60,20 @@
     "WP6": "BLOCKED"
   },
   "blocker": {
-    "id": "AX-CLOSE-BLK-004",
-    "task": "WP0-T10",
-    "scope": "PR readiness, expected-head verification and blocking-conversation clearance",
-    "state": "PENDING_FAIL_CLOSED",
+    "id": "AX-CLOSE-BLK-005",
+    "task": "WP0-T11",
+    "scope": "Protected merge to main on the exact expected head without bypass",
+    "state": "READY_PENDING_EXACT_HEAD_REVALIDATION",
     "closure_criteria": [
-      "PR is not draft",
-      "PR remains mergeable",
-      "required checks pass on expected head",
-      "expected_head_sha is verified immediately before merge",
-      "no blocking review conversations remain"
+      "documentation successor root gates pass",
+      "PR remains open, non-draft and mergeable",
+      "expected_head_sha is re-read immediately before merge",
+      "protected merge completes without bypass",
+      "canonical main SHA and merge record are captured"
     ]
   },
   "evidence": {
-    "last_validated_product_sha": "316f34d0ec3c2bc1fc91e0fa2494840a5aa8e243",
+    "last_validated_product_sha": "f64fa9f0737df7725ae9f6e95fa9c5898656d34e",
     "wp0_completed_tasks": {
       "WP0-T01": "AX_C0_CANONICAL_BASELINE_PASS",
       "WP0-T02": "AX_C1_SUBSCRIBER_SHELL_FULL_E2E_PASS",
@@ -112,18 +112,29 @@
         "ahead_by": 983,
         "behind_by": 0,
         "root_gates": "SUCCESS"
+      },
+      "WP0-T10": {
+        "marker": "PR_READY_PROTECTED_MERGE_PASS",
+        "pull_request": 169,
+        "evidence_sha": "f64fa9f0737df7725ae9f6e95fa9c5898656d34e",
+        "expected_head_sha": "f64fa9f0737df7725ae9f6e95fa9c5898656d34e",
+        "state": "OPEN",
+        "draft": false,
+        "mergeable": true,
+        "blocking_requested_changes": 0,
+        "runs": {"core": 31093095249, "runtime": 31093094248, "domain": 31093093278, "procurement_admission": 31093074068, "remote_pilot_operations": 31093074039}
       }
     }
   },
   "transition": [
-    "complete WP0-T10 PR readiness",
+    "revalidate the documentation successor exact head",
     "complete WP0-T11 protected merge",
     "complete WP0-T12 post-merge smoke and canonical marker",
     "authorize WP1-T01"
   ],
   "last_human_authority_change": {
-    "instruction": "Replace narrative progress in AX-GE2E-FINISH-003 with a complete executable checklist and mark completed tasks with X.",
-    "effective_at": "2026-08-05T20:23:00+02:00",
-    "effect": "The contract contains 75 stable tasks. Nine evidence-backed WP0 tasks are complete, WP0-T10 is active, and all later tasks remain pending or blocked."
+    "instruction": "Continue executing AX-GE2E-FINISH-003 faithfully and mark completed tasks with X.",
+    "effective_at": "2026-08-06T12:00:00+02:00",
+    "effect": "Ten evidence-backed WP0 tasks are complete. WP0-T11 is active and remains fail-closed until the documentation successor exact head passes and the protected merge is executed without bypass."
   }
 }
