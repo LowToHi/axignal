@@ -2,7 +2,8 @@ name: axignal-landing
 
 services:
   landing:
-    image: ${AXIGNAL_LANDING_IMAGE_REPOSITORY:?required}:${AXIGNAL_LANDING_IMAGE_TAG:?required}@sha256:${AXIGNAL_LANDING_IMAGE_DIGEST:?required}
+    image: ${AXIGNAL_LANDING_IMAGE:?required}
+    pull_policy: never
     container_name: axignal-landing
     environment:
       AXIGNAL_BUILD_SHA: ${AXIGNAL_BUILD_SHA:?required}
