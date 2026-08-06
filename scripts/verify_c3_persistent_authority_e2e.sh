@@ -38,7 +38,6 @@ scalar() {
   local sql="$2"
   psql_database "$target_database" -Atc "$sql"
 }
-
 tenant_scalar() {
   local target_database="$1"
   local tenant_id="$2"
@@ -216,7 +215,7 @@ SELECT
   )
   AND has_function_privilege(
     'axignal_app',
-    'tenant_private.export_axent_conversation_for_identity(uuid,text,text,timestamptz)'::regprocedure,
+    'tenant_private.export_axent_conversation_for_identity(uuid,text,text,text,timestamptz)'::regprocedure,
     'EXECUTE'
   )
   AND has_function_privilege(
