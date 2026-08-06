@@ -20,13 +20,13 @@
     "canonical_main_sha": null,
     "last_validated_product_sha": "316f34d0ec3c2bc1fc91e0fa2494840a5aa8e243",
     "current_branch_sha": "316f34d0ec3c2bc1fc91e0fa2494840a5aa8e243",
-    "current_branch_sha_reason": "Executable evidence SHA for WP0-T05, WP0-T07 and WP0-T08. Subsequent checklist and ledger commits are documentation-only successors and do not replace product evidence."
+    "current_branch_sha_reason": "Executable evidence SHA for WP0-T05, WP0-T07, WP0-T08 and WP0-T09. Subsequent checklist and ledger commits are documentation-only successors and do not replace product evidence."
   },
   "execution": {
     "active_work_package": "WP0",
-    "active_task": "WP0-T09",
-    "active_blocker": "AX-CLOSE-BLK-003",
-    "allowed_next_transition": "RECONCILE_LATEST_MAIN_AND_REVALIDATE_AFFECTED_EXACT_HEAD",
+    "active_task": "WP0-T10",
+    "active_blocker": "AX-CLOSE-BLK-004",
+    "allowed_next_transition": "MAKE_PR_READY_AND_VERIFY_EXPECTED_HEAD",
     "next_canonical_marker": "AX_C0_C4_CANONICAL_MAIN_PASS",
     "public_launch": "NO_GO",
     "commercial_live_mode": "DENIED",
@@ -36,46 +36,18 @@
   "checklist": {
     "path": "docs/contracts/AX-GE2E-FINISH-003.md",
     "total_tasks": 75,
-    "completed_tasks": 8,
-    "pending_tasks": 67,
+    "completed_tasks": 9,
+    "pending_tasks": 66,
     "progress_source_of_truth": "MARKDOWN_CHECKBOXES",
     "completion_rule": "A task is complete only when every material criterion passes and evidence is bound to an executable EVIDENCE_SHA.",
     "work_packages": {
-      "WP0": {
-        "completed": 8,
-        "total": 12,
-        "state": "IN_PROGRESS"
-      },
-      "WP1": {
-        "completed": 0,
-        "total": 10,
-        "state": "BLOCKED_BY_WP0"
-      },
-      "WP2": {
-        "completed": 0,
-        "total": 12,
-        "state": "BLOCKED_BY_WP1"
-      },
-      "WP3": {
-        "completed": 0,
-        "total": 12,
-        "state": "BLOCKED_BY_WP2"
-      },
-      "WP4": {
-        "completed": 0,
-        "total": 12,
-        "state": "BLOCKED_BY_WP3"
-      },
-      "WP5": {
-        "completed": 0,
-        "total": 7,
-        "state": "BLOCKED_BY_WP4"
-      },
-      "WP6": {
-        "completed": 0,
-        "total": 10,
-        "state": "BLOCKED_BY_WP5"
-      }
+      "WP0": {"completed": 9, "total": 12, "state": "IN_PROGRESS"},
+      "WP1": {"completed": 0, "total": 10, "state": "BLOCKED_BY_WP0"},
+      "WP2": {"completed": 0, "total": 12, "state": "BLOCKED_BY_WP1"},
+      "WP3": {"completed": 0, "total": 12, "state": "BLOCKED_BY_WP2"},
+      "WP4": {"completed": 0, "total": 12, "state": "BLOCKED_BY_WP3"},
+      "WP5": {"completed": 0, "total": 7, "state": "BLOCKED_BY_WP4"},
+      "WP6": {"completed": 0, "total": 10, "state": "BLOCKED_BY_WP5"}
     }
   },
   "work_packages": {
@@ -88,16 +60,16 @@
     "WP6": "BLOCKED"
   },
   "blocker": {
-    "id": "AX-CLOSE-BLK-003",
-    "task": "WP0-T09",
-    "scope": "Latest-main reconciliation and affected exact-head revalidation",
+    "id": "AX-CLOSE-BLK-004",
+    "task": "WP0-T10",
+    "scope": "PR readiness, expected-head verification and blocking-conversation clearance",
     "state": "PENDING_FAIL_CLOSED",
     "closure_criteria": [
-      "resolve current main SHA and merge-base",
-      "incorporate latest main without loss of branch changes",
-      "review conflict resolution and resulting diff",
-      "run affected exact-head verification",
-      "record reconciled head and evidence"
+      "PR is not draft",
+      "PR remains mergeable",
+      "required checks pass on expected head",
+      "expected_head_sha is verified immediately before merge",
+      "no blocking review conversations remain"
     ]
   },
   "evidence": {
@@ -105,15 +77,8 @@
     "wp0_completed_tasks": {
       "WP0-T01": "AX_C0_CANONICAL_BASELINE_PASS",
       "WP0-T02": "AX_C1_SUBSCRIBER_SHELL_FULL_E2E_PASS",
-      "WP0-T03": {
-        "marker": "AX_C2_IDENTITY_TENANT_TRIAL_PASS",
-        "evidence_sha": "2ca1cf0451ff0a1544047a2426cf397dae0bb99a"
-      },
-      "WP0-T04": {
-        "marker": "AX_C3_PERSISTENCE_MIGRATIONS_RESTORE_PASS",
-        "evidence_sha": "8a81d2a417d5645899c3ba50489552bbeb3f829a",
-        "artifact_id": 8913254281
-      },
+      "WP0-T03": {"marker": "AX_C2_IDENTITY_TENANT_TRIAL_PASS", "evidence_sha": "2ca1cf0451ff0a1544047a2426cf397dae0bb99a"},
+      "WP0-T04": {"marker": "AX_C3_PERSISTENCE_MIGRATIONS_RESTORE_PASS", "evidence_sha": "8a81d2a417d5645899c3ba50489552bbeb3f829a", "artifact_id": 8913254281},
       "WP0-T05": {
         "marker": "C3_CONSECUTIVE_CYCLE_COMPARATOR_PASS",
         "evidence_sha": "316f34d0ec3c2bc1fc91e0fa2494840a5aa8e243",
@@ -125,11 +90,7 @@
         "origin_schema_authority_hash": "4540c3e8e4445ca453f5bee01e4c76334ccade2b613e6215f2a4e72e19c3268e",
         "final_schema_authority_hash": "b270b122a743e1fc39c13db7687b4698c7fa9bcc8b75f888e4cc00fed4023a3c"
       },
-      "WP0-T06": {
-        "marker": "C4_FINAL_RUNTIME_PASS",
-        "evidence_sha": "dd119139555e885cc73d24d13e4b7b148797576e",
-        "job_id": 92338125477
-      },
+      "WP0-T06": {"marker": "C4_FINAL_RUNTIME_PASS", "evidence_sha": "dd119139555e885cc73d24d13e4b7b148797576e", "job_id": 92338125477},
       "WP0-T07": {
         "marker": "FULL_MIGRATION_MATRIX_EXACT_HEAD_PASS",
         "evidence_sha": "316f34d0ec3c2bc1fc91e0fa2494840a5aa8e243",
@@ -141,18 +102,20 @@
       "WP0-T08": {
         "marker": "ROOT_GATES_EXACT_HEAD_PASS",
         "evidence_sha": "316f34d0ec3c2bc1fc91e0fa2494840a5aa8e243",
-        "runs": {
-          "core": 31092164195,
-          "runtime": 31092162860,
-          "domain": 31092161635,
-          "procurement_admission": 31092161086,
-          "remote_pilot_operations": 31092162583
-        }
+        "runs": {"core": 31092164195, "runtime": 31092162860, "domain": 31092161635, "procurement_admission": 31092161086, "remote_pilot_operations": 31092162583}
+      },
+      "WP0-T09": {
+        "marker": "LATEST_MAIN_RECONCILIATION_PASS",
+        "main_sha": "6091795f79aec19c9dcbac71bb8b6b19877f101b",
+        "merge_base": "6091795f79aec19c9dcbac71bb8b6b19877f101b",
+        "reconciled_head": "316f34d0ec3c2bc1fc91e0fa2494840a5aa8e243",
+        "ahead_by": 983,
+        "behind_by": 0,
+        "root_gates": "SUCCESS"
       }
     }
   },
   "transition": [
-    "complete WP0-T09 latest-main reconciliation",
     "complete WP0-T10 PR readiness",
     "complete WP0-T11 protected merge",
     "complete WP0-T12 post-merge smoke and canonical marker",
@@ -161,6 +124,6 @@
   "last_human_authority_change": {
     "instruction": "Replace narrative progress in AX-GE2E-FINISH-003 with a complete executable checklist and mark completed tasks with X.",
     "effective_at": "2026-08-05T20:23:00+02:00",
-    "effect": "The contract contains 75 stable tasks. Eight evidence-backed WP0 tasks are complete, WP0-T09 is active, and all later tasks remain pending or blocked."
+    "effect": "The contract contains 75 stable tasks. Nine evidence-backed WP0 tasks are complete, WP0-T10 is active, and all later tasks remain pending or blocked."
   }
 }
