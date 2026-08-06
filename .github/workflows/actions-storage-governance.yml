@@ -1,6 +1,16 @@
 name: Actions Storage Governance
 
 on:
+  push:
+    branches:
+      - "agent/actions-storage-structural-governance"
+    paths:
+      - ".github/workflows/actions-storage-governance.yml"
+      - "config/actions-storage-policy.json"
+      - "scripts/ops/audit_actions_storage.py"
+      - "scripts/ops/migrate_actions_artifact_retention.py"
+      - "scripts/ops/install_axignal_trusted_runner.sh"
+      - "tests/ops/test_actions_storage_policy_tools.py"
   pull_request:
     paths:
       - ".github/workflows/**"
@@ -50,7 +60,7 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
-          python3 -m unittest tests.ops.test_actions_storage_policy_tools
+          python3 tests/ops/test_actions_storage_policy_tools.py
 
       - name: Audit workflow storage policy
         shell: bash
