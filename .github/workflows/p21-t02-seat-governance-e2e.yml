@@ -239,7 +239,7 @@ jobs:
             playwright-report
             test-results
           if-no-files-found: ignore
-          retention-days: 30
+          retention-days: 1
 
       - name: Dump diagnostics on failure
         if: failure()

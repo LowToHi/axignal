@@ -49,7 +49,7 @@ jobs:
           name: frontend-unit-tests-exact-head-1-${{ env.AXIGNAL_EXACT_SHA }}
           path: frontend-unit-tests-exact-head-1.txt
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 1
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "22.14.0"

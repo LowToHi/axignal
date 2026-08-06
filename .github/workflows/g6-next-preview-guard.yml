@@ -56,4 +56,4 @@ jobs:
             g6-next-preview-exact-head.txt
             g6-next-preview-guard.json
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 1

@@ -47,7 +47,7 @@ jobs:
           name: executable-spine-exact-head-1-${{ env.AXIGNAL_EXACT_SHA }}
           path: executable-spine-exact-head-1.txt
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 1
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "22.14.0"
@@ -67,7 +67,7 @@ jobs:
           name: typescript-diagnostics-${{ env.AXIGNAL_EXACT_SHA }}
           path: typecheck.log
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 2
       - name: Build product and landing
         run: pnpm build
       - name: Install Chromium
@@ -83,7 +83,7 @@ jobs:
             playwright-report
             test-results
           if-no-files-found: ignore
-          retention-days: 7
+          retention-days: 2
 
   api:
     name: FastAPI contracts, proposal authority and admission policy
@@ -116,7 +116,7 @@ jobs:
           name: executable-spine-exact-head-2-${{ env.AXIGNAL_EXACT_SHA }}
           path: executable-spine-exact-head-2.txt
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 1
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.13"
@@ -133,7 +133,7 @@ jobs:
           name: ruff-diagnostics-${{ env.AXIGNAL_EXACT_SHA }}
           path: ruff-report.json
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 2
       - name: Enforce API lint
         run: ruff check apps/api scripts
       - name: Test API
@@ -150,7 +150,7 @@ jobs:
           name: local-document-proposal-diagnostics-${{ env.AXIGNAL_EXACT_SHA }}
           path: local-document-proposal-acceptance.log
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 2
 
   services:
     name: Persistent research, authority isolation and human review
@@ -199,7 +199,7 @@ jobs:
           name: executable-spine-exact-head-3-${{ env.AXIGNAL_EXACT_SHA }}
           path: executable-spine-exact-head-3.txt
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 1
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.13"
@@ -278,7 +278,7 @@ jobs:
             deterministic-admission-acceptance.log
             bounded-human-review-acceptance.log
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 2
       - name: Destroy disposable services
         if: always()
         run: docker compose down --volumes --remove-orphans

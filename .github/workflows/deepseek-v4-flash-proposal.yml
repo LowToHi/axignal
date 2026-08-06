@@ -85,7 +85,7 @@ jobs:
           name: deepseek-v4-flash-0731-contract-${{ env.AXIGNAL_EXACT_SHA }}
           path: exact-head.txt
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 1
 
   authenticated-preflight:
     if: >-
@@ -128,4 +128,4 @@ jobs:
           name: deepseek-v4-flash-0731-preflight-${{ env.AXIGNAL_EXACT_SHA }}
           path: deepseek-v4-flash-0731-preflight-evidence.json
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 1

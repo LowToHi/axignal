@@ -116,7 +116,7 @@ jobs:
           name: ted-security-review-${{ github.sha }}
           path: ted-security-review.json
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 1
 
   persistent-e2e:
     name: Identity to tenant, worker, admission, dossier and polling view
@@ -162,7 +162,7 @@ jobs:
           name: ted-product-runtime-${{ github.sha }}
           path: ted-product-runtime-evidence.json
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 1
 
       - name: Dump service diagnostics on failure
         if: failure()
@@ -209,7 +209,7 @@ jobs:
           name: ted-product-runtime-metrics-${{ github.sha }}
           path: ted-product-runtime-metrics.json
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 1
       - name: Dump metric service diagnostics on failure
         if: failure()
         run: docker compose logs --no-color postgres valkey

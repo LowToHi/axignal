@@ -42,4 +42,4 @@ jobs:
           name: p23-final-ux-landing-copy-marketing-${{ github.sha }}
           path: p23-experience-evidence.json
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 1

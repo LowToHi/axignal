@@ -94,7 +94,7 @@ jobs:
             pilot-demo.json
             pilot-ted-contract.json
             pilot-ted-security.json
-          retention-days: 14
+          retention-days: 1
 
   web-build:
     name: Standalone web build
@@ -136,7 +136,7 @@ jobs:
           name: pilot-web-build-evidence-${{ env.AXIGNAL_EXACT_SHA }}
           path: pilot-web-build-exact-head.txt
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 1
 
   runtime-acceptance:
     name: Private edge, live TED, AXENT, auth, backup and restore
@@ -434,7 +434,7 @@ jobs:
             pilot-headers.txt
             pilot-restore.json
           if-no-files-found: ignore
-          retention-days: 14
+          retention-days: 1
 
       - name: Capture service logs
         if: failure()
@@ -447,7 +447,7 @@ jobs:
           name: pilot-failure-logs-${{ env.AXIGNAL_EXACT_SHA }}
           path: pilot-services.log
           if-no-files-found: ignore
-          retention-days: 7
+          retention-days: 1
 
       - name: Destroy pilot services
         if: always()

@@ -151,6 +151,50 @@ jobs:
             self.assertEqual(result.uploads[0].issue, "missing-retention-days")
             self.assertTrue(result.pull_request)
 
+    def test_auditor_stops_at_job_boundary_and_uses_artifact_name(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            path = self.make_workflow(
+                root,
+                """name: Fixture
+on: workflow_dispatch
+jobs:
+  first:
+    name: First human-readable job
+    runs-on: ubuntu-latest
+    steps:
+      - name: Upload diagnostic evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-audit-diagnostics
+          path: reports/
+          retention-days: 2
+
+  following:
+    name: Human-readable following job
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo ok
+""",
+            )
+
+            result = AUDIT.scan_workflow(path, POLICY, root)
+
+            self.assertEqual(len(result.uploads), 1)
+            self.assertEqual(
+                result.uploads[0].artifact_name,
+                "e2e-audit-diagnostics",
+            )
+            self.assertEqual(
+                result.uploads[0].classification,
+                "diagnostic",
+            )
+            self.assertEqual(result.uploads[0].retention_days, 2)
+            self.assertIsNone(result.uploads[0].issue)
+
     def test_family_normalization_removes_sha(self) -> None:
         family = AUDIT.normalize_family(
             "diagnostic-7c551728c7d750ee35b3607a3939df493f697592"

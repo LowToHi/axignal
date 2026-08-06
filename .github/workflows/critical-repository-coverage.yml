@@ -40,7 +40,7 @@ jobs:
             apps/api/tests/test_critical_repositories_proposal_ted.py
             apps/api/tests/test_critical_repository_cursors.py
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 1
 
   wrapper-contracts:
     name: Repository roles, wrappers, failures and coverage
@@ -97,4 +97,4 @@ jobs:
             critical-repository-coverage.json
             critical-repository-pytest.log
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 2

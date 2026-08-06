@@ -38,4 +38,4 @@ jobs:
           name: p22-production-slo-dr-security-${{ github.sha }}
           path: p22-production-evidence.json
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 1

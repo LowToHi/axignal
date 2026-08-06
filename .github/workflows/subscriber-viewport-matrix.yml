@@ -62,7 +62,7 @@ jobs:
             blocker-ownership-result.json
             docs/tasks/active/2026-08-04_axignal-e2e-blocker-ownership.v1.json
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 1
 
   subscriber-viewport-e2e:
     name: Subscriber E2E ${{ matrix.label }}
@@ -108,7 +108,7 @@ jobs:
           name: subscriber-viewport-${{ matrix.label }}-exact-head-${{ env.AXIGNAL_EXACT_SHA }}
           path: subscriber-viewport-exact-head.txt
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 2
 
       - name: Set up Node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
@@ -142,4 +142,4 @@ jobs:
             playwright-report
             test-results
           if-no-files-found: warn
-          retention-days: 30
+          retention-days: 2

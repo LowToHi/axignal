@@ -126,7 +126,7 @@ jobs:
           path: |
             remote-operations-contract.json
             remote-environment-evidence.json
-          retention-days: 14
+          retention-days: 1
       - name: Remove synthetic private files
         if: always()
         run: |

@@ -70,7 +70,7 @@ jobs:
           name: stripe-billing-contract-${{ github.sha }}
           path: stripe-billing-contract.json
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 1
 
   transactional-e2e:
     name: Checkout, signed events, upgrade, cancellation and rollback E2E
@@ -106,7 +106,7 @@ jobs:
             artifacts/stripe-paid-lifecycle-e2e.json
             artifacts/stripe-billing-authority-e2e.json
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 1
       - name: Dump PostgreSQL diagnostics on failure
         if: failure()
         run: docker compose logs --no-color postgres

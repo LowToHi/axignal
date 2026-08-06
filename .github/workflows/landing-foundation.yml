@@ -131,7 +131,7 @@ jobs:
             asset-acquisition-plan.json
             landing-contract-markers.txt
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 1
 
   browser-matrix:
     name: Globe, desktop, mobile and reduced motion
@@ -217,4 +217,4 @@ jobs:
             test-results
             playwright-report
           if-no-files-found: warn
-          retention-days: 30
+          retention-days: 2

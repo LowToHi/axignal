@@ -122,7 +122,7 @@ jobs:
             ci-changed-files.txt
             ci-scope-domain.json
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 1
 
   first_lawful_universe:
     needs: scope

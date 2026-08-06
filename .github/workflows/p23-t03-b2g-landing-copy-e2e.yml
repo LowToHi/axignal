@@ -45,7 +45,7 @@ jobs:
           name: p23-t03-b2g-landing-copy-e2e-exact-head-${{ env.AXIGNAL_EXACT_SHA }}
           path: p23-t03-b2g-landing-copy-e2e-exact-head.txt
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 1
 
       - name: Set up Node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
@@ -136,4 +136,4 @@ jobs:
             playwright-report
             test-results
           if-no-files-found: warn
-          retention-days: 30
+          retention-days: 1

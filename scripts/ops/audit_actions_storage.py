@@ -26,6 +26,7 @@ CACHE_RE = re.compile(r"^\s*-?\s*uses:\s*actions/cache@", re.I)
 RUNNER_RE = re.compile(r"^\s*runs-on:\s*(.+?)\s*$", re.I)
 RETENTION_RE = re.compile(r"^\s*retention-days:\s*(.+?)\s*$", re.I)
 NAME_RE = re.compile(r"^\s*name:\s*(.+?)\s*$", re.I)
+WITH_RE = re.compile(r"^(\s*)with:\s*$", re.I)
 STEP_RE = re.compile(r"^(\s*)-\s+(?:name|uses):")
 
 
@@ -104,14 +105,29 @@ def bounds(lines: list[str], index: int) -> tuple[int, int]:
     start = index
     while start > 0 and not STEP_RE.match(lines[start]):
         start -= 1
+
     match = STEP_RE.match(lines[start])
-    indent = len(match.group(1)) if match else 0
+    if match is None:
+        raise ValueError(
+            f"cannot determine workflow step boundary at line {index + 1}"
+        )
+
+    step_indent = len(match.group(1))
     end = index + 1
+
     while end < len(lines):
-        candidate = STEP_RE.match(lines[end])
-        if candidate and len(candidate.group(1)) <= indent:
-            break
+        candidate_line = lines[end]
+        stripped = candidate_line.strip()
+
+        if stripped and not stripped.startswith("#"):
+            candidate_indent = len(candidate_line) - len(
+                candidate_line.lstrip()
+            )
+            if candidate_indent <= step_indent:
+                break
+
         end += 1
+
     return start, end
 
 
@@ -122,14 +138,37 @@ def scan(path: Path, root: Path, policy: dict[str, Any]) -> Workflow:
     for index, line in enumerate(lines):
         if not UPLOAD_RE.match(line):
             continue
-        start, end = bounds(lines, index)
+        _, end = bounds(lines, index)
         name = "<dynamic-or-missing>"
         retention: str | None = None
-        for candidate in lines[start:end]:
-            if match := NAME_RE.match(candidate):
-                name = scalar(match.group(1))
-            if match := RETENTION_RE.match(candidate):
-                retention = scalar(match.group(1))
+        with_index: int | None = None
+        with_indent: int | None = None
+
+        for position in range(index + 1, end):
+            if match := WITH_RE.match(lines[position]):
+                with_index = position
+                with_indent = len(match.group(1))
+                break
+
+        if with_index is not None and with_indent is not None:
+            for candidate in lines[with_index + 1 : end]:
+                stripped = candidate.strip()
+
+                if not stripped or stripped.startswith("#"):
+                    continue
+
+                candidate_indent = len(candidate) - len(
+                    candidate.lstrip()
+                )
+
+                if candidate_indent <= with_indent:
+                    break
+
+                if match := NAME_RE.match(candidate):
+                    name = scalar(match.group(1))
+
+                if match := RETENTION_RE.match(candidate):
+                    retention = scalar(match.group(1))
         kind = classify(name, policy)
         maximum = int(policy["retention_days"][kind])
         days: int | None = None

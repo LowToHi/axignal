@@ -121,7 +121,7 @@ jobs:
             ci-changed-files.txt
             ci-scope-runtime.json
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 1
 
   commercial_shell_e2e:
     needs: scope

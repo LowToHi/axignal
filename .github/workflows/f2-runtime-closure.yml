@@ -73,7 +73,7 @@ jobs:
           name: f2-ruff-diagnostics-${{ env.AXIGNAL_EXACT_SHA }}
           path: f2-ruff.json
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 2
       - name: Run bounded unit tests
         run: pytest apps/api/tests/test_f2_runtime.py
       - name: Verify process topology
@@ -156,7 +156,7 @@ jobs:
             f2-migration-rehearsal.log
             f2-runtime-acceptance.log
           if-no-files-found: ignore
-          retention-days: 7
+          retention-days: 2
       - name: Destroy disposable services
         if: always()
         run: docker compose --profile runtime down --volumes --remove-orphans

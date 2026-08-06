@@ -57,4 +57,4 @@ jobs:
           name: subscriber-workspace-ux-${{ env.AXIGNAL_EXACT_SHA }}
           path: subscriber-workspace-ux-evidence.json
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 1

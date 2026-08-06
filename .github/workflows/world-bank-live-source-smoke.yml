@@ -44,4 +44,4 @@ jobs:
           name: world-bank-live-source-evidence
           path: world-bank-live-source-evidence.json
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 1

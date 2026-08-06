@@ -45,7 +45,7 @@ jobs:
           name: p23-t02-message-copy-validation-e2e-exact-head-1-${{ env.AXIGNAL_EXACT_SHA }}
           path: p23-t02-message-copy-validation-e2e-exact-head-1.txt
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 1
       - name: Set up Node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
@@ -105,4 +105,4 @@ jobs:
             playwright-report
             test-results
           if-no-files-found: warn
-          retention-days: 30
+          retention-days: 1

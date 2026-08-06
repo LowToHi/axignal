@@ -68,4 +68,4 @@ jobs:
           name: p24-global-acceptance-${{ github.sha }}
           path: p24-global-acceptance-evidence.json
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 1
