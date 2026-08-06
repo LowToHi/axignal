@@ -18,15 +18,15 @@
     "active_pull_request": 169,
     "pull_request_state": "OPEN_DRAFT_UNMERGED",
     "canonical_main_sha": null,
-    "last_validated_product_sha": "dd119139555e885cc73d24d13e4b7b148797576e",
-    "current_branch_sha": null,
-    "current_branch_sha_reason": "The checklist amendment and ledger synchronization are documentation-only commits. Resolve the exact branch SHA immediately before the next executable transition."
+    "last_validated_product_sha": "316f34d0ec3c2bc1fc91e0fa2494840a5aa8e243",
+    "current_branch_sha": "316f34d0ec3c2bc1fc91e0fa2494840a5aa8e243",
+    "current_branch_sha_reason": "Executable evidence SHA for WP0-T05, WP0-T07 and WP0-T08. Subsequent checklist and ledger commits are documentation-only successors and do not replace product evidence."
   },
   "execution": {
     "active_work_package": "WP0",
-    "active_task": "WP0-T05",
-    "active_blocker": "AX-CLOSE-BLK-002",
-    "allowed_next_transition": "COMPLETE_WP0_T05_C3_CONSECUTIVE_CYCLE_COMPARATOR",
+    "active_task": "WP0-T09",
+    "active_blocker": "AX-CLOSE-BLK-003",
+    "allowed_next_transition": "RECONCILE_LATEST_MAIN_AND_REVALIDATE_AFFECTED_EXACT_HEAD",
     "next_canonical_marker": "AX_C0_C4_CANONICAL_MAIN_PASS",
     "public_launch": "NO_GO",
     "commercial_live_mode": "DENIED",
@@ -36,13 +36,13 @@
   "checklist": {
     "path": "docs/contracts/AX-GE2E-FINISH-003.md",
     "total_tasks": 75,
-    "completed_tasks": 5,
-    "pending_tasks": 70,
+    "completed_tasks": 8,
+    "pending_tasks": 67,
     "progress_source_of_truth": "MARKDOWN_CHECKBOXES",
     "completion_rule": "A task is complete only when every material criterion passes and evidence is bound to an executable EVIDENCE_SHA.",
     "work_packages": {
       "WP0": {
-        "completed": 5,
+        "completed": 8,
         "total": 12,
         "state": "IN_PROGRESS"
       },
@@ -88,38 +88,20 @@
     "WP6": "BLOCKED"
   },
   "blocker": {
-    "id": "AX-CLOSE-BLK-002",
-    "task": "WP0-T05",
-    "scope": "C3 backup/restore consecutive-cycle verification",
-    "state": "IN_PROGRESS_FAIL_CLOSED",
-    "allowed_files": [
-      "C3 consecutive-cycle verifier",
-      "direct helper used by that verifier",
-      "focused verifier tests"
-    ],
-    "forbidden_changes": [
-      "remove or weaken integrity hashes",
-      "ignore schema drift",
-      "modify product data model",
-      "modify migrations 141 or 142",
-      "modify C4",
-      "modify billing",
-      "modify source admission",
-      "redesign CI architecture",
-      "add retries",
-      "increase timeouts as a fix"
-    ],
+    "id": "AX-CLOSE-BLK-003",
+    "task": "WP0-T09",
+    "scope": "Latest-main reconciliation and affected exact-head revalidation",
+    "state": "PENDING_FAIL_CLOSED",
     "closure_criteria": [
-      "restore schema-140 snapshot",
-      "prove data and authority equivalence at schema 140",
-      "apply migrations 141 and 142 deterministically",
-      "prove final schema, data and authority equivalence",
-      "preserve material hashes",
-      "C3 affected verification PASS on one EVIDENCE_SHA"
+      "resolve current main SHA and merge-base",
+      "incorporate latest main without loss of branch changes",
+      "review conflict resolution and resulting diff",
+      "run affected exact-head verification",
+      "record reconciled head and evidence"
     ]
   },
   "evidence": {
-    "last_validated_product_sha": "dd119139555e885cc73d24d13e4b7b148797576e",
+    "last_validated_product_sha": "316f34d0ec3c2bc1fc91e0fa2494840a5aa8e243",
     "wp0_completed_tasks": {
       "WP0-T01": "AX_C0_CANONICAL_BASELINE_PASS",
       "WP0-T02": "AX_C1_SUBSCRIBER_SHELL_FULL_E2E_PASS",
@@ -132,19 +114,44 @@
         "evidence_sha": "8a81d2a417d5645899c3ba50489552bbeb3f829a",
         "artifact_id": 8913254281
       },
+      "WP0-T05": {
+        "marker": "C3_CONSECUTIVE_CYCLE_COMPARATOR_PASS",
+        "evidence_sha": "316f34d0ec3c2bc1fc91e0fa2494840a5aa8e243",
+        "run_id": 31092162860,
+        "job_id": 92585538939,
+        "artifact_id": 8963978249,
+        "artifact_digest": "sha256:e78c14cbf9e5480a0b66e1c8214a80250604c5b6dd1370733fb8f156c01f73be",
+        "origin_data_hash": "d8de8c1b64fbc238d393328c2188656d749b37fcebf005f91a40c54b4aea1f53",
+        "origin_schema_authority_hash": "4540c3e8e4445ca453f5bee01e4c76334ccade2b613e6215f2a4e72e19c3268e",
+        "final_schema_authority_hash": "b270b122a743e1fc39c13db7687b4698c7fa9bcc8b75f888e4cc00fed4023a3c"
+      },
       "WP0-T06": {
         "marker": "C4_FINAL_RUNTIME_PASS",
         "evidence_sha": "dd119139555e885cc73d24d13e4b7b148797576e",
         "job_id": 92338125477
+      },
+      "WP0-T07": {
+        "marker": "FULL_MIGRATION_MATRIX_EXACT_HEAD_PASS",
+        "evidence_sha": "316f34d0ec3c2bc1fc91e0fa2494840a5aa8e243",
+        "run_id": 31092162860,
+        "job_id": 92585538939,
+        "artifact_id": 8963978249,
+        "artifact_digest": "sha256:e78c14cbf9e5480a0b66e1c8214a80250604c5b6dd1370733fb8f156c01f73be"
+      },
+      "WP0-T08": {
+        "marker": "ROOT_GATES_EXACT_HEAD_PASS",
+        "evidence_sha": "316f34d0ec3c2bc1fc91e0fa2494840a5aa8e243",
+        "runs": {
+          "core": 31092164195,
+          "runtime": 31092162860,
+          "domain": 31092161635,
+          "procurement_admission": 31092161086,
+          "remote_pilot_operations": 31092162583
+        }
       }
     }
   },
   "transition": [
-    "resolve current branch SHA before write",
-    "complete WP0-T05 only",
-    "run C3 affected verification",
-    "complete WP0-T07 full migration matrix",
-    "complete WP0-T08 exact-head root gates",
     "complete WP0-T09 latest-main reconciliation",
     "complete WP0-T10 PR readiness",
     "complete WP0-T11 protected merge",
@@ -154,6 +161,6 @@
   "last_human_authority_change": {
     "instruction": "Replace narrative progress in AX-GE2E-FINISH-003 with a complete executable checklist and mark completed tasks with X.",
     "effective_at": "2026-08-05T20:23:00+02:00",
-    "effect": "The contract now contains 75 stable tasks. Five evidence-backed WP0 tasks are complete, WP0-T05 is active, and all later tasks remain pending or blocked."
+    "effect": "The contract contains 75 stable tasks. Eight evidence-backed WP0 tasks are complete, WP0-T09 is active, and all later tasks remain pending or blocked."
   }
 }
