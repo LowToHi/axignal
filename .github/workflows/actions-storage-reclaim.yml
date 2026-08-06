@@ -1,3 +1,4 @@
+# Registered on the previous branch commit; this update triggers the isolated cleanup run.
 name: Actions Storage Reclamation
 
 on:
@@ -41,7 +42,6 @@ jobs:
 
           import json
           import os
-          import sys
           import time
           import urllib.error
           import urllib.request
@@ -53,14 +53,12 @@ jobs:
           target_bytes = target_mib * 1024 * 1024
           cutoff = datetime.now(UTC) - timedelta(hours=2)
 
-          # Content-addressed evidence explicitly cited by AX-GE2E-FINISH-003.
           preserve_ids = {
               8913254281,
               8963978249,
               8972205296,
           }
 
-          # Preserve active/canonical product lines and their audit evidence.
           preserve_shas = {
               "7c551728c7d750ee35b3607a3939df493f697592",
               "8b4149b6bf8de8ff958597c02a908a1a29fbea0f",
@@ -103,7 +101,7 @@ jobs:
                       f"artifact delete failed id={artifact_id} status={exc.code}: {body}"
                   ) from exc
 
-          first_page, first_headers = request_json(
+          first_page, _ = request_json(
               f"{api_root}/actions/artifacts?per_page=100&page=1"
           )
           total_count = int(first_page.get("total_count", 0))
@@ -143,7 +141,6 @@ jobs:
                   continue
               candidates.append(artifact)
 
-          # Largest-first maximizes reclaimed bytes per API mutation.
           candidates.sort(key=lambda item: int(item.get("size_in_bytes", 0)), reverse=True)
 
           freed = 0
@@ -163,7 +160,7 @@ jobs:
                   if remaining < 100:
                       failures.append("stopped before exhausting GitHub API rate limit")
                       break
-              except Exception as exc:  # fail with a complete audit trail
+              except Exception as exc:
                   failures.append(str(exc))
                   if len(failures) >= 10:
                       break
