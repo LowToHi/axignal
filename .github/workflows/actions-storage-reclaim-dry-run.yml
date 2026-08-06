@@ -1,0 +1,58 @@
+name: Actions Storage Reclamation Dry Run
+
+on:
+  push:
+    branches:
+      - agent/actions-storage-reclaim
+    paths:
+      - .github/workflows/actions-storage-reclaim-dry-run.yml
+
+permissions:
+  actions: write
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: actions-storage-reclamation-dry-run
+  cancel-in-progress: true
+
+jobs:
+  inventory:
+    name: Inventory protected and reclaimable storage
+    runs-on: ubuntu-22.04
+    timeout-minutes: 45
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+      TARGET_FREE_MIB: "300"
+      DRY_RUN: "true"
+      PRESERVE_RECENT_HOURS: "24"
+      REPORT_PATH: /tmp/axignal-actions-storage-report.json
+    steps:
+      - name: Fetch exact-head reclaimer
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          curl --fail --location --retry 5 --retry-all-errors --connect-timeout 20 \
+            "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_SHA}/scripts/ops/reclaim_github_actions_storage.py" \
+            --output /tmp/reclaim.py
+          python3 -m py_compile /tmp/reclaim.py
+
+      - name: Execute dry-run inventory
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 /tmp/reclaim.py
+
+      - name: Publish summary
+        if: always()
+        shell: bash
+        run: |
+          if [[ -f "$REPORT_PATH" ]]; then
+            {
+              echo '## AXIGNAL Actions storage dry-run'
+              echo
+              echo '```json'
+              cat "$REPORT_PATH"
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
