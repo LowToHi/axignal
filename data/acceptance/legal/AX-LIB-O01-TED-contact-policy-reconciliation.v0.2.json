@@ -1,0 +1,192 @@
+{
+  "schema_version": "axignal.o01-contact-policy-reconciliation/v0.2",
+  "task_id": "AX-GE2E-G7-O01-T03",
+  "gate_id": "PUBLIC-LAUNCH-GATE-7",
+  "library_id": "AX-LIB-O01",
+  "source_id": "src_ted_search_api_v3",
+  "status": "IMPLEMENTED_CANDIDATE_PENDING_TYPED_APPROVAL",
+  "policy_version": "o01-ted-contact-policy@0.2.0",
+  "supersession": {
+    "historical_matrix": "data/acceptance/legal/AX-LIB-O01-TED-field-rights-matrix.v0.1.json",
+    "affected_field_class": "PROFESSIONAL_CONTACT_PERSON_DATA",
+    "scope": "CONTACT_CHANNEL_CLASSIFICATION_AND_USE_ONLY",
+    "historical_evidence_remains_immutable": true,
+    "unaffected_prohibitions": [
+      "NATURAL_PERSON_TENDERER_OR_CONTRACTOR",
+      "ATTACHMENTS_AND_THIRD_PARTY_WORKS",
+      "LOGOS_TRADEMARKS_NAMES_AND_INDUSTRIAL_PROPERTY",
+      "PUBLIC_API_REDISTRIBUTION",
+      "MODEL_TRAINING_OR_FINE_TUNING",
+      "RAW_FULL_PAYLOAD",
+      "FULL_SOURCE_NATIVE_TEXT"
+    ]
+  },
+  "domain_contract_binding": {
+    "task_id": "AX-GE2E-G7-O01-T02",
+    "path": "data/contracts/AX-GE2E-G7-O01-T02-domain-contracts.v0.1.json",
+    "required_output": "O01_DOMAIN_CONTRACTS_PASS",
+    "required_entity": "ProcurementContactChannel",
+    "required_policy_decisions": [
+      "ALLOW",
+      "CONTEXTUAL",
+      "LINK_ONLY",
+      "BLOCK"
+    ],
+    "required_data_classes": [
+      "INSTITUTIONAL",
+      "FUNCTIONAL_NON_PERSONAL",
+      "PROFESSIONAL_PERSONAL",
+      "AMBIGUOUS_PERSONAL",
+      "BLOCKED"
+    ]
+  },
+  "contact_policy": [
+    {
+      "data_class": "INSTITUTIONAL",
+      "decision": "ALLOW",
+      "examples": [
+        "procurement platform",
+        "buyer profile",
+        "official procedure form"
+      ],
+      "persistence": "OPPORTUNITY_SCOPED_REFERENCE_AFTER_TYPED_APPROVAL",
+      "presentation": "ALLOWED_IN_THE_SAME_OPPORTUNITY_AFTER_TYPED_APPROVAL",
+      "allowed_actions": [
+        "OPEN"
+      ],
+      "conditions": [
+        "official procurement purpose only",
+        "source provenance required",
+        "no marketing, export or global person search"
+      ]
+    },
+    {
+      "data_class": "FUNCTIONAL_NON_PERSONAL",
+      "decision": "ALLOW",
+      "examples": [
+        "procurement@authority.example",
+        "official switchboard or procurement phone"
+      ],
+      "persistence": "OPPORTUNITY_SCOPED_REFERENCE_AFTER_TYPED_APPROVAL",
+      "presentation": "ALLOWED_IN_THE_SAME_OPPORTUNITY_AFTER_TYPED_APPROVAL",
+      "allowed_actions": [
+        "REVEAL",
+        "COPY",
+        "COMPOSE_PROCEDURE_QUERY",
+        "CALL"
+      ],
+      "conditions": [
+        "endpoint represents an organisation or function",
+        "source provenance required",
+        "no marketing, export or cross-opportunity reuse"
+      ]
+    },
+    {
+      "data_class": "PROFESSIONAL_PERSONAL",
+      "decision": "CONTEXTUAL",
+      "examples": [
+        "named procurement officer email",
+        "named procurement officer phone"
+      ],
+      "persistence": "OPPORTUNITY_SCOPED_REFERENCE_PENDING_TYPED_PRIVACY_DECISION",
+      "presentation": "CONTEXTUAL_IN_THE_SAME_PROCEDURE_PENDING_TYPED_APPROVAL",
+      "allowed_actions": [
+        "REVEAL",
+        "COPY",
+        "COMPOSE_PROCEDURE_QUERY",
+        "CALL"
+      ],
+      "conditions": [
+        "published by the source for the same procurement procedure",
+        "strictly necessary for procedure-specific communication",
+        "tenant and opportunity scope required",
+        "no marketing, export, global search or cross-opportunity reuse",
+        "endpoint and message body excluded from audit payloads",
+        "retention and deletion require typed Privacy/Data Rights approval"
+      ]
+    },
+    {
+      "data_class": "AMBIGUOUS_PERSONAL",
+      "decision": "LINK_ONLY",
+      "examples": [
+        "mailbox or telephone whose personal status cannot be classified reliably"
+      ],
+      "persistence": "SOURCE_LINK_ONLY_NO_ENDPOINT_PERSISTENCE",
+      "presentation": "SOURCE_LINK_ONLY",
+      "allowed_actions": [
+        "OPEN"
+      ],
+      "conditions": [
+        "do not persist the ambiguous endpoint",
+        "open only the source-native notice or buyer profile",
+        "reclassify or block before any direct communication action"
+      ]
+    },
+    {
+      "data_class": "BLOCKED",
+      "decision": "BLOCK",
+      "examples": [
+        "private or unrelated personal contact data",
+        "data obtained outside the procurement-purpose context"
+      ],
+      "persistence": "DENIED",
+      "presentation": "DENIED",
+      "allowed_actions": [],
+      "conditions": [
+        "do not persist, index, search, reveal or act on the endpoint",
+        "record aggregate rejection evidence only"
+      ]
+    }
+  ],
+  "global_invariants": {
+    "person_entity_created": false,
+    "lead_or_prospect_entity_created": false,
+    "crm_replication": false,
+    "global_person_search": false,
+    "bulk_contact_export": false,
+    "marketing_use": false,
+    "cross_opportunity_reuse": false,
+    "autonomous_external_communication": false,
+    "audit_endpoint_replication": false,
+    "message_body_replication": false,
+    "subscriber_approval_required_before_external_handoff": true,
+    "subscriber_confirmation_required_for_sent_state": true,
+    "source_provenance_required": true
+  },
+  "human_decisions_required": {
+    "LEGAL": {
+      "status": "MISSING",
+      "must_decide": [
+        "whether the contextual use remains within the TED reuse framework",
+        "required attribution and transformation wording",
+        "whether source-linked presentation and opportunity-scoped references are permitted",
+        "whether additional jurisdictional restrictions apply"
+      ]
+    },
+    "PRIVACY_DATA_RIGHTS": {
+      "status": "MISSING",
+      "must_decide": [
+        "lawful basis for professional-personal contact processing",
+        "necessity and purpose limitation",
+        "retention, deletion and quarantine periods",
+        "data-subject rights and correction propagation",
+        "access control, logging and processor conditions",
+        "whether a DPIA or records-of-processing update is required"
+      ]
+    }
+  },
+  "campaign_effect": {
+    "campaign_status": "BLOCKED",
+    "execution_authorised": false,
+    "external_request_budget": 0,
+    "source_state": "CANDIDATE",
+    "product_admitted": false,
+    "public_claim_contribution": false,
+    "global_coverage_authorised": false,
+    "multilingual_authorised": false,
+    "public_launch_authorised": false
+  },
+  "approvals": [],
+  "signatures": [],
+  "expires_at": "2026-08-31T23:59:59Z"
+}

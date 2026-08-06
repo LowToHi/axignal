@@ -2,8 +2,9 @@
 set -euo pipefail
 
 service="${AXIGNAL_POSTGRES_SERVICE:-postgres}"
-rehearsal_db="${AXIGNAL_F2_MIGRATION_DB:-axignal_f2_migration_rehearsal}"
-restore_db="${AXIGNAL_F2_RESTORE_DB:-axignal_f2_migration_restore}"
+run_suffix="${GITHUB_RUN_ID:-$$}"
+rehearsal_db="${AXIGNAL_F2_MIGRATION_DB:-axignal_f2_migration_rehearsal_${run_suffix}}"
+restore_db="${AXIGNAL_F2_RESTORE_DB:-axignal_f2_migration_restore_${run_suffix}}"
 dump_file="$(mktemp -t axignal-pre-f2-XXXXXX.dump)"
 
 compose() { docker compose "$@"; }
@@ -19,8 +20,10 @@ cleanup() {
 }
 trap cleanup EXIT
 
+# Every execution receives isolated database names. This removes destructive
+# setup races between reruns and prevents `dropdb --force` from terminating a
+# connection that belongs to another rehearsal using the same Compose service.
 for database in "$rehearsal_db" "$restore_db"; do
-  compose exec -T "$service" dropdb -U axignal --if-exists --force "$database" >/dev/null
   compose exec -T "$service" createdb -U axignal "$database"
 done
 

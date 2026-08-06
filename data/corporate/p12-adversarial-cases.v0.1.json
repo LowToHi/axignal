@@ -1,0 +1,75 @@
+{
+  "schema_version": "axignal.corporate-ownership-account-workspace-cases/v0.1",
+  "task_id": "AX-GE2E-P12-T01",
+  "scopes": [
+    "ENTITY_REGISTRY",
+    "FILING_DISCLOSURE",
+    "OWNERSHIP_CONTROL",
+    "GOVERNANCE_OFFICER",
+    "CAPITAL_CORPORATE_ACTION",
+    "ACCOUNT_OPPORTUNITY_WORKSPACE",
+    "MONITORING_RELATIONSHIP_RISK",
+    "EXTERNAL_ACTION_OUTCOME",
+    "CROSS_MODULE"
+  ],
+  "threats": [
+    "ENTITY_SILENT_MERGE",
+    "FILING_VERSION_OR_STATUS_CONFUSION",
+    "OWNERSHIP_AS_CONTROL_OR_BENEFICIAL_OWNER",
+    "PERSONAL_DATA_EXPANSION",
+    "ANNOUNCED_ACTION_AS_COMPLETED",
+    "RIGHTS_REVOKED",
+    "CROSS_TENANT_REFERENCE",
+    "AUTHORITY_ESCALATION"
+  ],
+  "expected_by_threat": {
+    "ENTITY_SILENT_MERGE": {
+      "decision": "QUARANTINE",
+      "canonical_delta": 0,
+      "external_action_delta": 0,
+      "reason_code": "NO_SILENT_ENTITY_MERGE"
+    },
+    "FILING_VERSION_OR_STATUS_CONFUSION": {
+      "decision": "DENY",
+      "canonical_delta": 0,
+      "external_action_delta": 0,
+      "reason_code": "FILING_NOT_CURRENT_OR_STATUS_UNKNOWN"
+    },
+    "OWNERSHIP_AS_CONTROL_OR_BENEFICIAL_OWNER": {
+      "decision": "REVIEW_REQUIRED",
+      "canonical_delta": 0,
+      "external_action_delta": 0,
+      "reason_code": "CONTROL_OR_BO_NOT_ESTABLISHED"
+    },
+    "PERSONAL_DATA_EXPANSION": {
+      "decision": "BLOCK",
+      "canonical_delta": 0,
+      "external_action_delta": 0,
+      "reason_code": "PERSON_SCOPE_NOT_AUTHORISED"
+    },
+    "ANNOUNCED_ACTION_AS_COMPLETED": {
+      "decision": "DENY",
+      "canonical_delta": 0,
+      "external_action_delta": 0,
+      "reason_code": "CORPORATE_ACTION_NOT_COMPLETED"
+    },
+    "RIGHTS_REVOKED": {
+      "decision": "DENY",
+      "canonical_delta": 0,
+      "external_action_delta": 0,
+      "reason_code": "RIGHTS_REVOKED"
+    },
+    "CROSS_TENANT_REFERENCE": {
+      "decision": "BLOCK",
+      "canonical_delta": 0,
+      "external_action_delta": 0,
+      "reason_code": "TENANT_SCOPE_MISMATCH"
+    },
+    "AUTHORITY_ESCALATION": {
+      "decision": "BLOCK",
+      "canonical_delta": 0,
+      "external_action_delta": 0,
+      "reason_code": "ACTOR_AUTHORITY_EXCEEDED"
+    }
+  }
+}

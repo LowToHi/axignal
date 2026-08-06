@@ -1,0 +1,46 @@
+{
+  "authority_boundary_unchanged": true,
+  "campaign_id": "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.6",
+  "change_class": "REPORTING_AND_INSTRUMENTATION_CORRECTION",
+  "experimental_contract_delta": false,
+  "invariants": {
+    "check_query_syntax": false,
+    "countries_unchanged": true,
+    "fields_unchanged": true,
+    "languages_unchanged": true,
+    "network_request_budget_unchanged": true,
+    "pagination_unchanged": true,
+    "query_unchanged": true,
+    "retention_unchanged": true,
+    "sample_allocation_unchanged": true,
+    "source_scope": "ALL",
+    "thresholds_unchanged": true
+  },
+  "observed_failure": {
+    "all_other_thresholds_passed": true,
+    "artifact_id": 8837674401,
+    "normalisation_lag_p95_seconds": 126.181661,
+    "normalisation_lag_threshold_seconds": 1.0,
+    "output": "O01_QUALITY_COVERAGE_LAG_FAIL",
+    "sample_count": 180,
+    "workflow_run_id": 30761651795
+  },
+  "root_cause": {
+    "classification": "BATCH_QUEUE_WAIT_MISLABELLED_AS_NORMALISATION_STAGE_DURATION",
+    "details": [
+      "The previous lag report subtracted page retrieval completion from a later batch normalisation timestamp.",
+      "The interval therefore included remaining bounded network requests, deterministic sampling and contact classification.",
+      "normalised_at, indexed_at and notification_enqueued_at were captured before normalize_notice executed."
+    ]
+  },
+  "schema_version": "axignal.o01-stage-timing-remediation/v0.1",
+  "solution": {
+    "audit_timestamps_ordered": true,
+    "clock": "MONOTONIC_FOR_STAGE_DURATION_UTC_FOR_AUDIT_TIMESTAMPS",
+    "indexing_lag": "SQLite indexing stage duration",
+    "normalisation_lag": "normalize_notice call duration",
+    "queue_wait": "disclosed separately and not thresholded as local normalisation",
+    "subscriber_notification_lag": "private notification-ledger append duration"
+  },
+  "task_id": "AX-GE2E-G7-O01-C-R6"
+}

@@ -1,0 +1,68 @@
+name: G6 Inactive Next Preview Guard
+
+on:
+  pull_request:
+    paths:
+      - "apps/web/**"
+      - "apps/landing/**"
+      - "infra/pilot/Dockerfile.web"
+      - "infra/landing/Dockerfile"
+      - "scripts/verify_no_next_preview_mode.py"
+      - ".github/workflows/g6-next-preview-guard.yml"
+  push:
+    branches:
+      - main
+      - "agent/**"
+
+permissions:
+  contents: read
+
+env:
+  AXIGNAL_EXACT_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+
+concurrency:
+  group: g6-next-preview-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Reject active Draft or Preview Mode
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact branch head
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Prove exact-head checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual_sha="$(git rev-parse HEAD)"
+          tree_sha="$(git rev-parse 'HEAD^{tree}')"
+          test "$actual_sha" = "$AXIGNAL_EXACT_SHA"
+          {
+            printf 'exact_head_sha=%s\n' "$actual_sha"
+            printf 'git_tree_sha=%s\n' "$tree_sha"
+          } | tee g6-next-preview-exact-head.txt
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.13.14"
+
+      - name: Verify preview capability remains absent
+        run: python scripts/verify_no_next_preview_mode.py | tee g6-next-preview-guard.json
+
+      - name: Upload guard evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: g6-next-preview-guard-${{ env.AXIGNAL_EXACT_SHA }}
+          path: |
+            g6-next-preview-exact-head.txt
+            g6-next-preview-guard.json
+          if-no-files-found: error
+          retention-days: 14

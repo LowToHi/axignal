@@ -1,0 +1,146 @@
+{
+  "schema_version": "axignal.o01-history-frequency-lag-closure/v0.1",
+  "task_id": "AX-GE2E-G7-O01-E",
+  "library_id": "AX-LIB-O01",
+  "source_id": "src_ted_search_api_v3",
+  "status": "PASS",
+  "output": "O01_HISTORY_FREQUENCY_LAG_CLOSED",
+  "phase_closed": true,
+  "closed_at": "2026-08-02T23:47:12.605136Z",
+  "evidence_expires_at": "2026-08-22T23:11:50.816732Z",
+  "revalidation_required_at_or_before": "2026-08-22T23:11:50.816732Z",
+  "source_admission": {
+    "artifact_id": 8838855002,
+    "artifact_digest": "sha256:870261e24767ab170b191ee4a5e8fca27b9c406aec7113237cc41220eb80f74a",
+    "source_state": "PRODUCT_ADMITTED"
+  },
+  "measurement": {
+    "workflow_run_id": 30771690223,
+    "job_id": 91559905777,
+    "request_head_sha": "134fae19b78693164a797f8938ee2451656a70e4",
+    "request_tree_sha": "c789fdb4b1830699f91f9c5f2349313501f3c6a0",
+    "controller_parent_sha": "976ab6964546aaf7ace87bfe1e51a06eeaa73024",
+    "controller_parent_tree_sha": "1c2b2d719118881b9437369405c3bc245074cd74",
+    "artifact_id": 8840746749,
+    "artifact_name": "o01-history-frequency-lag-v0-7-134fae19b78693164a797f8938ee2451656a70e4",
+    "artifact_digest": "sha256:9d94a78484928a79a2a23e0d78dab52a74f68526708a6807234f3a4477ed75c5",
+    "artifact_size_bytes": 31165,
+    "measurement_step": "SUCCESS",
+    "status": "PASS",
+    "output": "O01_HISTORY_FREQUENCY_LAG_PASS",
+    "network_requests_used": 52,
+    "network_requests_maximum": 60,
+    "fabricated_evidence": 0,
+    "synthetic_evidence": 0
+  },
+  "verification_repair": {
+    "workflow_run_id": 30772939221,
+    "job_id": 91563202076,
+    "request_head_sha": "ed84e5ecaad9b89b3f60d8ae1f1a304127582839",
+    "request_tree_sha": "1cfa4cbc8688f9e11dffddc2e893e86b0518d00f",
+    "controller_parent_sha": "98e1bcab4330e74d2afb186037cfefb4f4c08c45",
+    "controller_parent_tree_sha": "a2878aa9aa17bab6c8032dbfd38618434bc95f1b",
+    "artifact_id": 8841114156,
+    "artifact_name": "o01-history-frequency-lag-verification-repair-v0-4-ed84e5ecaad9b89b3f60d8ae1f1a304127582839",
+    "artifact_digest": "sha256:8167cbbef67798e4d92a9cdf273b8f6f0a2be3116dc32a420756353b63053128",
+    "artifact_size_bytes": 3007,
+    "status": "PASS",
+    "output": "O01_HISTORY_FREQUENCY_LAG_RETAINED_EVIDENCE_PASS",
+    "source_member_count": 15,
+    "source_members_exact": true,
+    "repair_ted_network_requests": 0,
+    "source_files_mutated": false,
+    "published_lag_key": "direct_first-seen_timestamp_claimed",
+    "internal_verifier_alias": "direct_first_seen_timestamp_claimed"
+  },
+  "calendar_evidence": {
+    "2025": {
+      "role": "COMPLETED_REFERENCE_YEAR",
+      "release_count": 252,
+      "first_issue": 1,
+      "last_issue": 252,
+      "first_release": "2025-01-02",
+      "last_release": "2025-12-31",
+      "issue_sequence_contiguous_from_one": true
+    },
+    "2026": {
+      "role": "PUBLISHED_ANNUAL_SCHEDULE",
+      "release_count": 254,
+      "first_issue": 1,
+      "last_issue": 254,
+      "first_release": "2026-01-02",
+      "last_release": "2026-12-31",
+      "issue_sequence_contiguous_from_one": true
+    }
+  },
+  "historical_depth": {
+    "status": "PASS",
+    "declared_public_years": 10,
+    "declared_boundary_date": "2016-08-02",
+    "earliest_available_date": "2016-08-02",
+    "earliest_publication_number": "265469-2016",
+    "day_before_earliest_total": 0,
+    "boundary_slack_days": 0,
+    "latest_available_date": "2026-07-31",
+    "latest_publication_number": "529733-2026",
+    "public_depth_days": 3651,
+    "full_internal_archive_claimed": false,
+    "exhaustive_notice_ingestion_performed": false
+  },
+  "update_frequency": {
+    "status": "PASS",
+    "declared": "DAILY_EDITION_MONDAY_TO_FRIDAY_EXCEPT_RELEASE_CALENDAR_EXCEPTIONS",
+    "reference_year": 2025,
+    "reference_year_editions": 252,
+    "reference_year_editions_minimum": 240,
+    "reference_year_weekend_editions": 0,
+    "recent_release_sample_count": 20,
+    "search_presence_ratio": 1.0,
+    "daily_package_sample_count": 10,
+    "package_presence_ratio": 1.0
+  },
+  "publication_lag": {
+    "status": "PASS",
+    "metric_semantics": "CONSERVATIVE_UPPER_BOUND_NOT_EXACT_FIRST_SEEN",
+    "search_request_p95_seconds": 0.36788410000000016,
+    "publication_to_axignal_p95_seconds": 32400.367884099996,
+    "publication_to_axignal_p95_threshold_seconds": 32430,
+    "exact_first_seen_timestamp_claimed": false
+  },
+  "privacy_and_retention": {
+    "raw_notice_payloads_persisted": false,
+    "official_source_response_bodies_persisted": false,
+    "release_calendar_bodies_persisted": false,
+    "daily_package_bodies_persisted": false,
+    "contact_values_persisted": false
+  },
+  "decision": {
+    "o01_metrics_closed": true,
+    "o01_canonical_state": "ACCEPTED",
+    "o01_claim_decision": "DENIED",
+    "source_state": "PRODUCT_ADMITTED",
+    "source_contributes_to_public_claim": false,
+    "gate7_decision": "IN_PROGRESS",
+    "public_launch": "NO_GO"
+  },
+  "integrity": {
+    "thresholds_relaxed": false,
+    "measurement_mutated": false,
+    "source_files_mutated": false,
+    "network_replay_for_repair": false,
+    "failed_attempts_applied_state_transition": false,
+    "one_shot_requests_retired": true
+  },
+  "permanent_boundaries": {
+    "full_internal_archive_access": false,
+    "global_coverage_claim": false,
+    "public_claim_contribution": false,
+    "public_redistribution": false,
+    "contact_marketing": false,
+    "model_training": false,
+    "bid_submission": false,
+    "external_notification_delivery": false,
+    "gate7_closed": false,
+    "public_launch": "NO_GO"
+  }
+}

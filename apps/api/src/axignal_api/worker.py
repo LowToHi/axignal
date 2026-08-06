@@ -3,10 +3,14 @@ from __future__ import annotations
 import argparse
 import logging
 import time
+from collections.abc import Callable
 
 from axignal_api.admission import (
     build_world_bank_inflation_artifacts,
     evaluate_observed_fact,
+)
+from axignal_api.concurrent_repository import (
+    ConcurrentTEDResearchRepository as TEDResearchRepository,
 )
 from axignal_api.connectors.ted import (
     SOURCE_ID as TED_SOURCE_ID,
@@ -23,8 +27,8 @@ from axignal_api.connectors.world_bank import (
     WorldBankConnector,
 )
 from axignal_api.queue import OutboxPublisher, ResearchJob, ValkeyResearchQueue
+from axignal_api.runtime_invariants import require_runtime_value
 from axignal_api.settings import Settings
-from axignal_api.ted_repository import TEDResearchRepository
 from axignal_api.ted_runtime import (
     PROFILE_ID,
     build_ted_search_artifacts,
@@ -56,19 +60,19 @@ class ResearchWorker:
         return True
 
     def process(self, job: ResearchJob) -> None:
-        run = self.repository.get_run_for_worker(
+        observed_run = self.repository.get_run_for_worker(
             tenant_id=job.tenant_id,
             run_id=job.research_run_id,
         )
-        if run is None:
+        if observed_run is None:
             LOGGER.warning(
                 "Ignoring job for missing tenant-scoped ResearchRun %s",
                 job.research_run_id,
             )
             return
-        if run["state"] == "COMPLETED":
+        if observed_run.get("state") != "QUEUED":
             LOGGER.info(
-                "ResearchRun %s is already complete; duplicate delivery ignored",
+                "ResearchRun %s is not QUEUED; duplicate or in-flight delivery ignored",
                 job.research_run_id,
             )
             return
@@ -100,6 +104,14 @@ class ResearchWorker:
             )
             return
 
+        run = self._claim_run(job, observed_run=observed_run)
+        if run is None:
+            LOGGER.info(
+                "ResearchRun %s was claimed concurrently; duplicate delivery ignored",
+                job.research_run_id,
+            )
+            return
+
         try:
             if job.source_id == TED_SOURCE_ID:
                 self._process_ted(job=job, run=run, source=source)
@@ -120,6 +132,26 @@ class ResearchWorker:
                 error_detail=str(exc),
             )
 
+    def _claim_run(
+        self,
+        job: ResearchJob,
+        *,
+        observed_run: dict[str, object],
+    ) -> dict[str, object] | None:
+        atomic_claim = getattr(self.repository, "claim_run_for_worker", None)
+        if isinstance(atomic_claim, Callable):
+            return atomic_claim(
+                tenant_id=job.tenant_id,
+                run_id=job.research_run_id,
+            )
+
+        self.repository.transition_run(
+            tenant_id=job.tenant_id,
+            run_id=job.research_run_id,
+            state="RETRIEVING",
+        )
+        return observed_run | {"state": "RETRIEVING"}
+
     def _process_world_bank(
         self,
         *,
@@ -127,11 +159,6 @@ class ResearchWorker:
         run: dict[str, object],
         source: dict[str, object],
     ) -> None:
-        self.repository.transition_run(
-            tenant_id=job.tenant_id,
-            run_id=job.research_run_id,
-            state="RETRIEVING",
-        )
         observation = self.world_bank_connector.fetch_latest_inflation()
         self.repository.transition_run(
             tenant_id=job.tenant_id,
@@ -175,11 +202,6 @@ class ResearchWorker:
             raise ValueError("TED source was requested by a non-TED ResearchRun")
         if self.ted_connector is None:
             raise RuntimeError("TED connector is not configured")
-        self.repository.transition_run(
-            tenant_id=job.tenant_id,
-            run_id=job.research_run_id,
-            state="RETRIEVING",
-        )
         page = self.ted_connector.fetch_probe_page()
         self.repository.transition_run(
             tenant_id=job.tenant_id,
@@ -240,10 +262,16 @@ class ResearchWorker:
 
 def build_runtime(settings: Settings) -> tuple[OutboxPublisher, ResearchWorker]:
     settings.require_persistent_research()
-    assert settings.database_url is not None
-    assert settings.valkey_url is not None
-    repository = TEDResearchRepository(settings.database_url)
-    queue = ValkeyResearchQueue(settings.valkey_url, queue_key=settings.queue_key)
+    database_url = require_runtime_value(
+        settings.database_url,
+        name="AXIGNAL_DATABASE_URL",
+    )
+    valkey_url = require_runtime_value(
+        settings.valkey_url,
+        name="AXIGNAL_VALKEY_URL",
+    )
+    repository = TEDResearchRepository(database_url)
+    queue = ValkeyResearchQueue(valkey_url, queue_key=settings.queue_key)
     world_bank_connector = WorldBankConnector(
         live_enabled=settings.live_sources_enabled,
         fixture_path=settings.world_bank_fixture_path,

@@ -1,0 +1,162 @@
+name: O01 TED Source Admission v0.1 Historical Evidence
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "data/acceptance/campaign-results/AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.1.json"
+      - "data/acceptance/source-admission/AX-LIB-O01-TED-source-admission-gate.v0.1.json"
+      - "data/acceptance/source-admission/AX-LIB-O01-TED-source-admission-closure.v0.2.json"
+      - ".github/workflows/o01-ted-source-admission.yml"
+  push:
+    branches: [main, "agent/**"]
+    paths:
+      - "data/acceptance/campaign-results/AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.1.json"
+      - "data/acceptance/source-admission/AX-LIB-O01-TED-source-admission-gate.v0.1.json"
+      - "data/acceptance/source-admission/AX-LIB-O01-TED-source-admission-closure.v0.2.json"
+      - ".github/workflows/o01-ted-source-admission.yml"
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: o01-ted-source-admission-v0-1-historical-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  AXIGNAL_EXACT_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+  ARTIFACT_DIR: artifacts/o01-ted-source-admission-v0.1-historical
+
+jobs:
+  historical-admission:
+    name: Verify superseded O01-D v0.1 evidence
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Freeze exact provenance
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$AXIGNAL_EXACT_SHA"
+          mkdir -p "$ARTIFACT_DIR"
+          {
+            echo "head_sha=$(git rev-parse HEAD)"
+            echo "tree_sha=$(git rev-parse 'HEAD^{tree}')"
+          } > "$ARTIFACT_DIR/exact-provenance.txt"
+
+      - name: Verify immutable failed campaign artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          artifact_id=8833930837
+          expected_digest='sha256:6a3d55557d16459e546839a6170db02e618b3a4c31cfadf6761a0d2885dab47f'
+          gh api "/repos/${GITHUB_REPOSITORY}/actions/artifacts/${artifact_id}" \
+            > "$ARTIFACT_DIR/campaign-artifact-metadata.json"
+          jq -e --arg digest "$expected_digest" \
+            '.expired == false and .digest == $digest' \
+            "$ARTIFACT_DIR/campaign-artifact-metadata.json"
+          gh api "/repos/${GITHUB_REPOSITORY}/actions/artifacts/${artifact_id}/zip" \
+            > /tmp/o01-campaign-v0.1.zip
+          mkdir -p /tmp/o01-campaign-v0.1
+          unzip -q /tmp/o01-campaign-v0.1.zip -d /tmp/o01-campaign-v0.1
+          member=/tmp/o01-campaign-v0.1/current/campaign-run-result.json
+          test -f "$member"
+          test "$(sha256sum "$member" | awk '{print $1}')" = \
+            '0d5c88da9f48371a754d58486ef4a738be67a8c76fcae953d6055767b91475df'
+          cp "$member" "$ARTIFACT_DIR/campaign-run-result.v0.1.json"
+          rm -rf /tmp/o01-campaign-v0.1 /tmp/o01-campaign-v0.1.zip
+
+      - name: Prove supersession without rewriting history
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          retained = json.loads(
+              Path(
+                  "data/acceptance/campaign-results/"
+                  "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.1.json"
+              ).read_text()
+          )
+          member = json.loads(
+              Path(
+                  "artifacts/o01-ted-source-admission-v0.1-historical/"
+                  "campaign-run-result.v0.1.json"
+              ).read_text()
+          )
+          old_gate = json.loads(
+              Path(
+                  "data/acceptance/source-admission/"
+                  "AX-LIB-O01-TED-source-admission-gate.v0.1.json"
+              ).read_text()
+          )
+          current = json.loads(
+              Path(
+                  "data/acceptance/source-admission/"
+                  "AX-LIB-O01-TED-source-admission-closure.v0.2.json"
+              ).read_text()
+          )
+
+          assert member["status"] == retained["status"] == "FAIL"
+          assert member["output"] == retained["output"]
+          assert member["failure_stage"] == retained["failure"]["stage"]
+          assert member["fabricated_evidence"] == 0
+          assert member["raw_directory_removed"] is True
+          assert member["raw_plaintext_uploaded"] is False
+          assert member["source_state"] == "CANDIDATE"
+          assert old_gate["expected_current_decision"]["decision"] == "BLOCKED"
+          assert old_gate["expected_current_decision"]["source_state"] == "CANDIDATE"
+
+          assert current["status"] == "PASS"
+          assert current["output"] == "O01_TED_SOURCE_ADMISSION_PASS"
+          assert current["source_state"] == "PRODUCT_ADMITTED"
+          assert current["product_admitted"] is True
+          assert current["permanent_boundary"]["bounded_claim_contribution"] is False
+          assert current["permanent_boundary"]["o01_canonical_state"] == "IN_REVIEW"
+          assert current["permanent_boundary"]["o01_claim_decision"] == "PENDING"
+          assert current["permanent_boundary"]["gate7_closed"] is False
+          assert current["permanent_boundary"]["public_launch"] == "NO_GO"
+          PY
+
+      - name: Record historical disposition
+        run: |
+          cat > "$ARTIFACT_DIR/historical-disposition.json" <<'JSON'
+          {
+            "status": "PASS",
+            "output": "O01_TED_SOURCE_ADMISSION_V0_1_HISTORICAL_PASS",
+            "historical_campaign_output": "O01_QUALITY_COVERAGE_LAG_FAIL",
+            "historical_source_state": "CANDIDATE",
+            "superseded_by": "O01_TED_SOURCE_ADMISSION_PASS",
+            "current_source_state": "PRODUCT_ADMITTED",
+            "bounded_claim_contribution": false,
+            "gate7_closed": false,
+            "public_launch": "NO_GO"
+          }
+          JSON
+          sha256sum \
+            data/acceptance/campaign-results/AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.1.json \
+            data/acceptance/source-admission/AX-LIB-O01-TED-source-admission-gate.v0.1.json \
+            data/acceptance/source-admission/AX-LIB-O01-TED-source-admission-closure.v0.2.json \
+            >> "$ARTIFACT_DIR/exact-provenance.txt"
+
+      - name: Reject secret material
+        run: |
+          ! grep -R -E \
+            'sk_(live|test)_|rk_(live|test)_|whsec_|BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY' \
+            "$ARTIFACT_DIR"
+
+      - name: Upload historical evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: o01-ted-source-admission-v0-1-historical-${{ env.AXIGNAL_EXACT_SHA }}
+          path: ${{ env.ARTIFACT_DIR }}
+          if-no-files-found: error
+          retention-days: 30

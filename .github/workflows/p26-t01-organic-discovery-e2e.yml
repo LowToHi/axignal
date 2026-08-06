@@ -1,0 +1,305 @@
+name: P26-T01 Organic Discovery and Founder Admin E2E
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "data/growth/organic-discovery-runtime.v0.1.json"
+      - "docs/growth/P26-T01-organic-discovery-founder-admin-e2e-v0.1.md"
+      - "infra/postgres/13*-organic-*.sql"
+      - "infra/postgres/Dockerfile"
+      - "infra/pilot/compose.organic-test.yaml"
+      - "apps/api/src/axignal_api/founder_identity.py"
+      - "apps/api/src/axignal_api/organic_*.py"
+      - "apps/api/src/axignal_api/application.py"
+      - "apps/api/tests/test_organic_policy.py"
+      - "apps/web/app/admin/**"
+      - "apps/web/app/alerts/**"
+      - "apps/web/app/api/admin/**"
+      - "apps/web/app/api/public/**"
+      - "apps/web/app/tenders/**"
+      - "apps/web/app/market-intelligence/**"
+      - "apps/web/app/robots.ts"
+      - "apps/web/app/sitemap.ts"
+      - "apps/web/app/llms.txt/**"
+      - "apps/web/app/page.tsx"
+      - "apps/web/app/layout.tsx"
+      - "apps/web/app/discovery-page.module.css"
+      - "apps/web/app/alert-confirm.css"
+      - "apps/web/components/discovery-view.tsx"
+      - "apps/web/components/tender-alert-form.tsx"
+      - "apps/web/lib/organic-server.ts"
+      - "scripts/verify_p26_t01_organic_discovery.py"
+      - "scripts/verify_organic_discovery_e2e.py"
+      - "tests/e2e/organic-discovery-founder-admin.spec.ts"
+      - ".github/workflows/p26-t01-organic-discovery-e2e.yml"
+  push:
+    branches: [main, "agent/**"]
+    paths:
+      - "data/growth/organic-discovery-runtime.v0.1.json"
+      - "docs/growth/P26-T01-organic-discovery-founder-admin-e2e-v0.1.md"
+      - "infra/postgres/13*-organic-*.sql"
+      - "infra/postgres/Dockerfile"
+      - "infra/pilot/compose.organic-test.yaml"
+      - "apps/api/src/axignal_api/founder_identity.py"
+      - "apps/api/src/axignal_api/organic_*.py"
+      - "apps/api/src/axignal_api/application.py"
+      - "apps/api/tests/test_organic_policy.py"
+      - "apps/web/app/admin/**"
+      - "apps/web/app/alerts/**"
+      - "apps/web/app/api/admin/**"
+      - "apps/web/app/api/public/**"
+      - "apps/web/app/tenders/**"
+      - "apps/web/app/market-intelligence/**"
+      - "apps/web/app/robots.ts"
+      - "apps/web/app/sitemap.ts"
+      - "apps/web/app/llms.txt/**"
+      - "apps/web/app/page.tsx"
+      - "apps/web/app/layout.tsx"
+      - "apps/web/app/discovery-page.module.css"
+      - "apps/web/app/alert-confirm.css"
+      - "apps/web/components/discovery-view.tsx"
+      - "apps/web/components/tender-alert-form.tsx"
+      - "apps/web/lib/organic-server.ts"
+      - "scripts/verify_p26_t01_organic_discovery.py"
+      - "scripts/verify_organic_discovery_e2e.py"
+      - "tests/e2e/organic-discovery-founder-admin.spec.ts"
+      - ".github/workflows/p26-t01-organic-discovery-e2e.yml"
+
+permissions:
+  contents: read
+
+env:
+  AXIGNAL_EXACT_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+
+concurrency:
+  group: p26-t01-organic-discovery-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  organic-discovery:
+    name: Indexability, public intelligence, alerts and Founder OS
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      AXIGNAL_PILOT_ENV_FILE: /tmp/axignal-p26-organic-ci.env
+      AXIGNAL_PILOT_COMPOSE_FILE: infra/pilot/compose.yaml
+      AXIGNAL_PILOT_COMPOSE_EDGE_FILE: infra/pilot/remote/compose.shared-traefik.yaml
+      AXIGNAL_IDENTITY_TEST_COMPOSE_FILE: infra/pilot/compose.identity-test.yaml
+      AXIGNAL_ORGANIC_TEST_COMPOSE_FILE: infra/pilot/compose.organic-test.yaml
+      AXIGNAL_PLAYWRIGHT_EXTERNAL_SERVER: "true"
+      AXIGNAL_PLAYWRIGHT_BASE_URL: http://127.0.0.1:18080
+
+    steps:
+      - name: Checkout exact branch head
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Prove exact-head checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual_sha="$(git rev-parse HEAD)"
+          tree_sha="$(git rev-parse 'HEAD^{tree}')"
+          test "$actual_sha" = "$AXIGNAL_EXACT_SHA"
+          {
+            printf 'exact_head_sha=%s\n' "$actual_sha"
+            printf 'git_tree_sha=%s\n' "$tree_sha"
+          } | tee p26-exact-head.txt
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.13"
+
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22.14.0"
+
+      - name: Install frozen dependencies
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+
+      - name: Verify P26 contract
+        run: python scripts/verify_p26_t01_organic_discovery.py
+
+      - name: Enforce focused lint and policy tests
+        run: |
+          ruff check \
+            apps/api/src/axignal_api/founder_identity.py \
+            apps/api/src/axignal_api/organic_config.py \
+            apps/api/src/axignal_api/organic_delivery.py \
+            apps/api/src/axignal_api/organic_policy.py \
+            apps/api/src/axignal_api/organic_repository.py \
+            apps/api/src/axignal_api/organic_routes.py \
+            apps/api/tests/test_organic_policy.py \
+            scripts/verify_p26_t01_organic_discovery.py \
+            scripts/verify_organic_discovery_e2e.py
+          pytest apps/api/tests/test_organic_policy.py
+
+      - name: Typecheck and build product surfaces
+        run: |
+          pnpm typecheck
+          pnpm build
+
+      - name: Create isolated P26 environment
+        shell: bash
+        run: |
+          cat > "$AXIGNAL_PILOT_ENV_FILE" <<'ENV'
+          AXIGNAL_BUILD_SHA=${{ env.AXIGNAL_EXACT_SHA }}
+          AXIGNAL_PILOT_SITE_ADDRESS=:80
+          AXIGNAL_PILOT_CADDY_SITE_ADDRESS=:80
+          AXIGNAL_PILOT_EDGE_MODE=shared-traefik
+          AXIGNAL_PILOT_BIND_ADDRESS=127.0.0.1
+          AXIGNAL_PILOT_HTTP_PORT=18080
+          AXIGNAL_PILOT_HTTPS_PORT=18443
+          AXIGNAL_POSTGRES_DB=axignal
+          AXIGNAL_POSTGRES_USER=axignal
+          AXIGNAL_POSTGRES_PASSWORD=ci-admin-password-not-for-deployment
+          AXIGNAL_PROPOSAL_DB_PASSWORD=ci-proposal-password-not-for-deployment
+          AXIGNAL_ADMISSION_DB_PASSWORD=ci-admission-password-not-for-deployment
+          AXIGNAL_HUMAN_REVIEW_DB_PASSWORD=ci-review-password-not-for-deployment
+          AXIGNAL_VALIDATION_DB_PASSWORD=ci-validation-password-not-for-deployment
+          AXIGNAL_VALIDATION_ANALYST_DB_PASSWORD=ci-analyst-password-not-for-deployment
+          AXIGNAL_SCHEDULER_DB_PASSWORD=ci-scheduler-password-not-for-deployment
+          AXIGNAL_AUTH_EMAIL=pilot@example.test
+          AXIGNAL_AUTH_SUBJECT=usr_pilot_ci
+          AXIGNAL_AUTH_TENANT_ID=11111111-1111-4111-8111-111111111111
+          AXIGNAL_AUTH_PASSWORD_SCRYPT='scrypt$00112233445566778899aabbccddeeff$c90f8bf5f5c77a981b682204633909aba0e58fe328cb71c9c357399c5ca92ea4a088a494b462b96f17efb7360ac400648f893f36fa31d4ec996236784dcbee94'
+          AXIGNAL_SESSION_SECRET=ci-session-secret-with-at-least-32-bytes
+          AXIGNAL_IDENTITY_ASSERTION_SECRET=ci-identity-secret-with-at-least-32-bytes
+          AXIGNAL_IDENTITY_HMAC_PEPPER=ci-identity-hmac-pepper-with-at-least-48-bytes-123456
+          AXIGNAL_ORGANIC_HMAC_PEPPER=ci-organic-hmac-pepper-with-at-least-48-bytes-123456
+          AXIGNAL_VALIDATION_PARTICIPANT_SALT=ci-participant-salt-with-at-least-32-bytes
+          AXIGNAL_OTEL_ENABLED=false
+          ENV
+
+      - name: Start organic discovery topology
+        shell: bash
+        run: |
+          compose=(
+            docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE"
+            -f "$AXIGNAL_PILOT_COMPOSE_FILE"
+            -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE"
+            -f "$AXIGNAL_IDENTITY_TEST_COMPOSE_FILE"
+            -f "$AXIGNAL_ORGANIC_TEST_COMPOSE_FILE"
+          )
+          "${compose[@]}" config >/dev/null
+          "${compose[@]}" up --build --detach --wait
+          curl --fail --silent http://127.0.0.1:18080/api/health \
+            | tee p26-web-health.json >/dev/null
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          health = json.loads(Path("p26-web-health.json").read_text())
+          assert health["buildSha"] == os.environ["AXIGNAL_EXACT_SHA"], health
+          PY
+
+      - name: Execute organic discovery database E2E
+        shell: bash
+        run: |
+          rm -rf artifacts
+          mkdir -p artifacts
+          compose=(
+            docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE"
+            -f "$AXIGNAL_PILOT_COMPOSE_FILE"
+            -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE"
+            -f "$AXIGNAL_IDENTITY_TEST_COMPOSE_FILE"
+            -f "$AXIGNAL_ORGANIC_TEST_COMPOSE_FILE"
+          )
+          set +e
+          "${compose[@]}" exec -T api sh -c '
+            rm -rf /tmp/p26-evidence
+            mkdir -p /tmp/p26-evidence
+            cat > /tmp/verify-organic-discovery-e2e.py
+            AXIGNAL_ORGANIC_EVIDENCE_DIR=/tmp/p26-evidence \
+              python /tmp/verify-organic-discovery-e2e.py
+          ' < scripts/verify_organic_discovery_e2e.py \
+            2>&1 | tee artifacts/organic-discovery-e2e.log
+          status=${PIPESTATUS[0]}
+          set -e
+          if [ "$status" -eq 0 ]; then
+            "${compose[@]}" cp \
+              api:/tmp/p26-evidence/organic-discovery-e2e.json \
+              artifacts/organic-discovery-e2e.json
+          fi
+          exit "$status"
+
+      - name: Execute public discovery and Founder OS browser E2E
+        run: |
+          pnpm exec playwright install --with-deps chromium
+          pnpm exec playwright test \
+            tests/e2e/organic-discovery-founder-admin.spec.ts \
+            --project=chromium-desktop
+
+      - name: Verify evidence boundary
+        shell: bash
+        run: |
+          ! grep -R -E 'sk_(live|test)_|rk_(live|test)_|whsec_|smtp_password|raw_ip|raw_installation|session_[A-Za-z0-9_-]{40,}' artifacts
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          evidence = json.loads(Path("artifacts/organic-discovery-e2e.json").read_text())
+          assert evidence["status"] == "PASS"
+          assert evidence["high_quality_candidate"] == "INDEX"
+          assert evidence["synthetic_candidate"] == "NOINDEX"
+          assert evidence["synthetic_in_sitemap"] is False
+          assert evidence["published_snapshot_version"] == 1
+          assert evidence["public_sitemap_entries"] == 1
+          assert evidence["alert_initial_state"] == "PENDING_CONFIRMATION"
+          assert evidence["alert_confirmed_state"] == "ACTIVE"
+          assert evidence["alert_created_tenant"] is False
+          assert evidence["alert_created_trial"] is False
+          assert evidence["identity_organisation_delta"] == 0
+          assert evidence["trial_grant_delta"] == 0
+          assert evidence["citation_recorded"] is True
+          assert evidence["direct_growth_table_access"] == "permission denied"
+          assert evidence["indexability_ledger"] == "append_only_relation"
+          assert evidence["citation_ledger"] == "append_only_relation"
+          assert evidence["founder_audit_ledger"] == "append_only_relation"
+          assert evidence["external_search_provider_calls"] == 0
+          assert evidence["model_calls"] == 0
+          assert evidence["public_indexing_authorised_by_ci"] is False
+          PY
+
+      - name: Upload P26 evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: organic-discovery-founder-admin-${{ env.AXIGNAL_EXACT_SHA }}
+          path: |
+            p26-exact-head.txt
+            p26-web-health.json
+            artifacts/organic-discovery-e2e.json
+            artifacts/organic-discovery-e2e.log
+            playwright-report
+            test-results
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Dump diagnostics on failure
+        if: failure()
+        run: |
+          docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" \
+            -f "$AXIGNAL_PILOT_COMPOSE_FILE" \
+            -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE" \
+            -f "$AXIGNAL_IDENTITY_TEST_COMPOSE_FILE" \
+            -f "$AXIGNAL_ORGANIC_TEST_COMPOSE_FILE" logs --no-color
+
+      - name: Stop disposable services
+        if: always()
+        run: |
+          docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" \
+            -f "$AXIGNAL_PILOT_COMPOSE_FILE" \
+            -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE" \
+            -f "$AXIGNAL_IDENTITY_TEST_COMPOSE_FILE" \
+            -f "$AXIGNAL_ORGANIC_TEST_COMPOSE_FILE" down -v

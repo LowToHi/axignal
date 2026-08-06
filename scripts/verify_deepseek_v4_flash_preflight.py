@@ -8,8 +8,9 @@ from urllib.parse import urlparse
 import httpx
 
 BASE_URL = "https://api.deepseek.com"
-MODEL = "deepseek-v4-flash"
-OUTPUT = Path("deepseek-v4-flash-preflight-evidence.json")
+API_MODEL = "deepseek-v4-flash"
+PROVIDER_CHECKPOINT = "deepseek-v4-flash-0731"
+OUTPUT = Path("deepseek-v4-flash-0731-preflight-evidence.json")
 
 
 class PreflightError(RuntimeError):
@@ -21,6 +22,42 @@ def require_secret() -> str:
     if not value:
         raise PreflightError("DEEPSEEK_API_KEY is not configured")
     return value
+
+
+def read_model_listing(response: httpx.Response) -> tuple[bool, int]:
+    if response.status_code != 200:
+        return False, response.status_code
+    try:
+        models_body = response.json()
+        model_ids = {
+            str(item["id"])
+            for item in models_body["data"]
+            if isinstance(item, dict) and "id" in item
+        }
+    except (KeyError, TypeError, ValueError) as exc:
+        raise PreflightError("DeepSeek model-list response was malformed") from exc
+    return API_MODEL in model_ids, response.status_code
+
+
+def safe_provider_error(response: httpx.Response) -> str:
+    try:
+        body = response.json()
+    except ValueError:
+        return f"status={response.status_code}; non_json_error_body"
+    if not isinstance(body, dict):
+        return f"status={response.status_code}; malformed_error_body"
+    error = body.get("error")
+    if not isinstance(error, dict):
+        return f"status={response.status_code}; missing_error_object"
+    safe_fields = []
+    for key in ("type", "code", "message"):
+        value = error.get(key)
+        if value is None:
+            continue
+        normalised = " ".join(str(value).split())[:240]
+        safe_fields.append(f"{key}={normalised}")
+    detail = "; ".join(safe_fields) or "empty_error_object"
+    return f"status={response.status_code}; {detail}"
 
 
 def main() -> int:
@@ -36,26 +73,12 @@ def main() -> int:
     }
     with httpx.Client(base_url=BASE_URL, headers=headers, timeout=45.0) as client:
         models_response = client.get("/models")
-        if models_response.status_code != 200:
-            raise PreflightError(
-                f"DeepSeek model-list preflight failed with status {models_response.status_code}"
-            )
-        try:
-            models_body = models_response.json()
-            model_ids = {
-                str(item["id"])
-                for item in models_body["data"]
-                if isinstance(item, dict) and "id" in item
-            }
-        except (KeyError, TypeError, ValueError) as exc:
-            raise PreflightError("DeepSeek model-list response was malformed") from exc
-        if MODEL not in model_ids:
-            raise PreflightError("deepseek-v4-flash is not available to this credential")
+        model_listed, model_list_status = read_model_listing(models_response)
 
         chat_response = client.post(
             "/chat/completions",
             json={
-                "model": MODEL,
+                "model": API_MODEL,
                 "temperature": 0,
                 "max_tokens": 32,
                 "thinking": {"type": "disabled"},
@@ -77,25 +100,37 @@ def main() -> int:
         )
         if chat_response.status_code != 200:
             raise PreflightError(
-                f"DeepSeek chat preflight failed with status {chat_response.status_code}"
+                f"DeepSeek chat preflight failed: {safe_provider_error(chat_response)}"
             )
         try:
             chat_body = chat_response.json()
             content = chat_body["choices"][0]["message"]["content"]
             decoded = json.loads(content)
             usage = chat_body.get("usage") or {}
+            returned_model = chat_body.get("model")
         except (KeyError, IndexError, TypeError, ValueError) as exc:
             raise PreflightError("DeepSeek chat response was malformed") from exc
         if decoded != {"status": "ok"}:
             raise PreflightError("DeepSeek chat preflight returned an unexpected JSON contract")
+        if returned_model is not None and returned_model not in {
+            API_MODEL,
+            PROVIDER_CHECKPOINT,
+        }:
+            raise PreflightError("DeepSeek response reported an unexpected model identity")
 
     evidence = {
         "provider": "deepseek",
         "transport": "direct",
         "base_url_host": "api.deepseek.com",
-        "model": MODEL,
+        "api_model_requested": API_MODEL,
+        "api_model_returned": returned_model,
+        "provider_checkpoint": PROVIDER_CHECKPOINT,
+        "checkpoint_binding": "PROVIDER_MANAGED_ALIAS_USER_SUPPLIED_NOTICE",
+        "checkpoint_exposed_by_api": returned_model == PROVIDER_CHECKPOINT,
         "credential_configured": True,
-        "model_listed": True,
+        "model_list_status": model_list_status,
+        "api_model_listed": model_listed,
+        "direct_chat_execution": True,
         "chat_completion_json_contract": True,
         "thinking": "disabled",
         "max_output_tokens": 32,

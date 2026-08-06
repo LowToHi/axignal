@@ -5,6 +5,9 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 
+from axignal_api.concurrent_repository import (
+    ConcurrentResearchRepository as ResearchRepository,
+)
 from axignal_api.identity import AuthenticatedIdentity, require_identity
 from axignal_api.persistent_models import (
     PersistentResearchRunAccepted,
@@ -12,7 +15,6 @@ from axignal_api.persistent_models import (
     PersistentResearchRunView,
 )
 from axignal_api.queue import OutboxPublisher, ValkeyResearchQueue
-from axignal_api.repository import ResearchRepository
 from axignal_api.settings import Settings
 
 router = APIRouter(prefix="/v1", tags=["persistent-research"])

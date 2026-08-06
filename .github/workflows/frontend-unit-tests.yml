@@ -1,0 +1,92 @@
+name: Frontend Unit Contracts
+
+on:
+  pull_request:
+    paths:
+      - "apps/web/**"
+      - "apps/landing/**"
+      - "packages/design-tokens/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "turbo.json"
+      - ".github/workflows/frontend-unit-tests.yml"
+  push:
+    branches:
+      - "agent/axignal-rc2-frontend-tests-v1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  AXIGNAL_EXACT_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+
+concurrency:
+  group: frontend-unit-contracts-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unit-contracts:
+    name: Executable web, landing and token tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout exact branch head 1
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Prove exact-head checkout 1
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual_sha="$(git rev-parse HEAD)"
+          tree_sha="$(git rev-parse 'HEAD^{tree}')"
+          test "$actual_sha" = "$AXIGNAL_EXACT_SHA"
+          {
+            printf 'exact_head_sha=%s\n' "$actual_sha"
+            printf 'git_tree_sha=%s\n' "$tree_sha"
+          } | tee frontend-unit-tests-exact-head-1.txt
+
+      - name: Upload exact-head identity 1
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: frontend-unit-tests-exact-head-1-${{ env.AXIGNAL_EXACT_SHA }}
+          path: frontend-unit-tests-exact-head-1.txt
+          if-no-files-found: error
+          retention-days: 30
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22.14.0"
+      - name: Enable pinned pnpm
+        run: corepack enable
+      - name: Install frozen dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Reject no-op workspace test scripts
+        run: |
+          node <<'NODE'
+          const { readFileSync } = require("node:fs");
+          const packages = [
+            "apps/web/package.json",
+            "apps/landing/package.json",
+            "packages/design-tokens/package.json"
+          ];
+          for (const path of packages) {
+            const manifest = JSON.parse(readFileSync(path, "utf8"));
+            const command = manifest.scripts?.test;
+            if (!command || /process[.]exit[(]0[)]/.test(command)) {
+              throw new Error(`${path} does not define an executable test contract`);
+            }
+          }
+          NODE
+      - name: Run workspace unit contracts
+        run: pnpm test
+      - name: Enforce TypeScript contracts
+        run: pnpm typecheck
+      - name: Build production applications
+        run: pnpm build
+      - name: Verify no generated test output is tracked
+        run: test -z "$(git status --short --untracked-files=all -- ':(glob)**/dist/tests/**')"

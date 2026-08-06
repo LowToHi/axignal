@@ -1,0 +1,178 @@
+name: Gate 7 F01 Rights Technical Baseline
+
+on:
+  pull_request:
+    paths:
+      - "data/acceptance/source-baselines/AX-LIB-F01-eu-countries-territories-baseline-contract.v0.1.json"
+      - "data/acceptance/source-inventory/AX-LIB-F01-eu-countries-territories-candidate.v0.1.json"
+      - "data/acceptance/library-coverage/AX-LIB-F01.json"
+      - "scripts/build_gate7_f01_official_baseline.py"
+      - "scripts/verify_gate7_f01_official_baseline_contract.py"
+      - "apps/api/tests/test_f01_official_baseline.py"
+      - ".github/workflows/gate7-f01-rights-technical-baseline.yml"
+  push:
+    branches:
+      - "agent/**"
+    paths:
+      - "data/acceptance/source-baselines/AX-LIB-F01-eu-countries-territories-baseline-contract.v0.1.json"
+      - "data/acceptance/source-inventory/AX-LIB-F01-eu-countries-territories-candidate.v0.1.json"
+      - "data/acceptance/library-coverage/AX-LIB-F01.json"
+      - "scripts/build_gate7_f01_official_baseline.py"
+      - "scripts/verify_gate7_f01_official_baseline_contract.py"
+      - "apps/api/tests/test_f01_official_baseline.py"
+      - ".github/workflows/gate7-f01-rights-technical-baseline.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gate7-f01-rights-technical-baseline-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  AXIGNAL_EXACT_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+  RESULT_DIR: artifacts/gate7-f01-rights-technical-baseline/current
+  CONTRACT_PATH: data/acceptance/source-baselines/AX-LIB-F01-eu-countries-territories-baseline-contract.v0.1.json
+
+jobs:
+  validate:
+    name: Build content-addressed F01 baseline
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Freeze exact identity
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$AXIGNAL_EXACT_SHA"
+          mkdir -p "$RESULT_DIR"
+          {
+            printf 'head_sha=%s\n' "$(git rev-parse HEAD)"
+            printf 'tree_sha=%s\n' "$(git rev-parse 'HEAD^{tree}')"
+          } | tee "$RESULT_DIR/exact-head.txt"
+
+      - name: Set up frozen Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.13.14"
+          check-latest: false
+
+      - name: Install frozen development graph
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade "pip==26.1.2"
+          python -m pip install \
+            --require-hashes \
+            --only-binary=:all: \
+            --requirement requirements/python-dev.lock
+          python -m pip check
+
+      - name: Validate implementation and contract
+        run: |
+          set -euo pipefail
+          python -m compileall -q \
+            scripts/build_gate7_f01_official_baseline.py \
+            scripts/verify_gate7_f01_official_baseline_contract.py \
+            apps/api/tests/test_f01_official_baseline.py
+          python -m ruff check \
+            scripts/build_gate7_f01_official_baseline.py \
+            scripts/verify_gate7_f01_official_baseline_contract.py \
+            apps/api/tests/test_f01_official_baseline.py
+          python -m pytest -q apps/api/tests/test_f01_official_baseline.py
+          python scripts/verify_gate7_f01_official_baseline_contract.py \
+            --output "$RESULT_DIR/contract-result.json"
+
+      - name: Fetch and classify the official publication
+        run: |
+          set -euo pipefail
+          python scripts/build_gate7_f01_official_baseline.py \
+            --contract "$CONTRACT_PATH" \
+            --output-dir "$RESULT_DIR" \
+            --exact-head-sha "$AXIGNAL_EXACT_SHA"
+
+      - name: Enforce technical and authority boundary
+        run: |
+          set -euo pipefail
+          jq -e \
+            '.status == "PASS" and
+             .output == "F01_OFFICIAL_CONTENT_ADDRESSED_BASELINE_PASS" and
+             .exact_head_sha == env.AXIGNAL_EXACT_SHA and
+             .official_publication_version == "20260617-0" and
+             .catalogue_entry_count == 375 and
+             .category_xml_record_count == 378 and
+             .retired_record_count == 3 and
+             .canonical_concept_count == 345 and
+             .non_retired_unique_concept_count == 342 and
+             .duplicate_record_surplus == 33 and
+             .http_requests_used == 6 and
+             .http_requests_used == .http_request_budget and
+             .external_monetary_spend_eur == 0 and
+             .technical_baseline == "PRESENT" and
+             .legal == "MISSING" and
+             .privacy_data_rights == "MISSING" and
+             .campaign_authorised == false and
+             .f01_state == "BLOCKED" and
+             .claim_decision == "DENIED" and
+             .gate7 == "IN_PROGRESS" and
+             .public_launch == "NO_GO"' \
+            "$RESULT_DIR/result.json"
+          jq -e \
+            '.baseline_payload.count_reconciliation.category_xml_records == 378 and
+             .baseline_payload.count_reconciliation.catalogue_non_retired_entries == 375 and
+             .baseline_payload.count_reconciliation.retired_entries == 3 and
+             .baseline_payload.count_reconciliation.non_retired_unique_authority_codes == 342 and
+             .baseline_payload.count_reconciliation.non_retired_duplicate_record_surplus == 33 and
+             .baseline_payload.count_reconciliation.canonical_concepts == 345 and
+             .baseline_payload.count_reconciliation.sparql_concepts == 345 and
+             .baseline_payload.count_reconciliation.rdf_sparql_exact_parity == true and
+             (.baseline_payload.canonical_concepts | length) == 345 and
+             (.baseline_payload.published_entries | length) == 375 and
+             (.baseline_payload.retired_entries | length) == 3 and
+             .baseline_payload.authority_boundary.f01_state == "BLOCKED" and
+             .baseline_payload.authority_boundary.campaign_authorised == false and
+             .baseline_payload.rights_boundary.iso_or_other_standard_text_ingestion == false' \
+            "$RESULT_DIR/official-online-baseline.v0.2.json"
+          jq -e \
+            '.canonical_state == "BLOCKED" and
+             .countries_covered == [] and
+             .sources.active == [] and
+             .claim_decision == "DENIED"' \
+            data/acceptance/library-coverage/AX-LIB-F01.json
+
+      - name: Reject sensitive or active-source material
+        run: |
+          set -euo pipefail
+          ! grep -R -E \
+            'sk_(live|test)_|rk_(live|test)_|whsec_|BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY' \
+            "$RESULT_DIR" \
+            "$CONTRACT_PATH" \
+            data/acceptance/library-coverage/AX-LIB-F01.json
+
+      - name: Record exact provenance
+        run: |
+          set -euo pipefail
+          {
+            sha256sum "$CONTRACT_PATH"
+            sha256sum data/acceptance/library-coverage/AX-LIB-F01.json
+            sha256sum scripts/build_gate7_f01_official_baseline.py
+            sha256sum scripts/verify_gate7_f01_official_baseline_contract.py
+            sha256sum apps/api/tests/test_f01_official_baseline.py
+            sha256sum "$RESULT_DIR/contract-result.json"
+            sha256sum "$RESULT_DIR/official-online-baseline.v0.2.json"
+            sha256sum "$RESULT_DIR/result.json"
+          } > "$RESULT_DIR/exact-provenance.txt"
+
+      - name: Upload retained F01 baseline evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: gate7-f01-rights-technical-baseline-${{ env.AXIGNAL_EXACT_SHA }}
+          path: artifacts/gate7-f01-rights-technical-baseline
+          if-no-files-found: error
+          retention-days: 30

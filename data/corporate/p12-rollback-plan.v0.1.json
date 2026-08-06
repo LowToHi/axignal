@@ -1,0 +1,44 @@
+{
+  "schema_version": "axignal.p12-rollback-plan/v0.1",
+  "task_id": "AX-GE2E-P12-T01",
+  "baseline_sha": "315d88731939c1904fcca7be4e5b58d4615ab423",
+  "expected_changed_paths": [
+    ".github/workflows/contract-validation.yml",
+    "data/corporate/corporate-ownership-account-workspace-runtime.v0.1.json",
+    "data/corporate/p12-adversarial-cases.v0.1.json",
+    "data/corporate/p12-conformance-fixtures.v0.1.json",
+    "data/corporate/p12-rollback-plan.v0.1.json",
+    "docs/corporate/P12-corporate-ownership-account-workspace-v0.1.md",
+    "schemas/corporate-ownership-account-workspace-cases.schema.json",
+    "schemas/corporate-ownership-account-workspace-fixtures.schema.json",
+    "schemas/corporate-ownership-account-workspace-runtime.schema.json",
+    "scripts/p12_corporate_reference.py",
+    "scripts/verify_p12_corporate_ownership_account_workspace.py",
+    "scripts/verify_p12_rollback.py"
+  ],
+  "p12_only_artifacts": [
+    "data/corporate/corporate-ownership-account-workspace-runtime.v0.1.json",
+    "data/corporate/p12-adversarial-cases.v0.1.json",
+    "data/corporate/p12-conformance-fixtures.v0.1.json",
+    "data/corporate/p12-rollback-plan.v0.1.json",
+    "docs/corporate/P12-corporate-ownership-account-workspace-v0.1.md",
+    "schemas/corporate-ownership-account-workspace-cases.schema.json",
+    "schemas/corporate-ownership-account-workspace-fixtures.schema.json",
+    "schemas/corporate-ownership-account-workspace-runtime.schema.json",
+    "scripts/p12_corporate_reference.py",
+    "scripts/verify_p12_corporate_ownership_account_workspace.py",
+    "scripts/verify_p12_rollback.py"
+  ],
+  "restored_baseline_files": [
+    ".github/workflows/contract-validation.yml"
+  ],
+  "preserved_p11_authority_files": [
+    "data/infrastructure/infrastructure-project-pursuit-workspace-runtime.v0.1.json",
+    "data/infrastructure/p11-adversarial-cases.v0.1.json",
+    "data/infrastructure/p11-conformance-fixtures.v0.1.json",
+    "schemas/infrastructure-project-pursuit-workspace-runtime.schema.json",
+    "scripts/p11_infrastructure_reference.py",
+    "scripts/verify_p11_infrastructure_project_pursuit_workspace.py",
+    "scripts/verify_p11_rollback.py"
+  ]
+}

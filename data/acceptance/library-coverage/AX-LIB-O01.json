@@ -1,0 +1,290 @@
+{
+  "canonical_name": "Global Public Procurement",
+  "canonical_state": "IN_REVIEW",
+  "claim_decision": "PENDING",
+  "countries_covered": [
+    "AT",
+    "BE",
+    "CZ",
+    "DE",
+    "ES",
+    "FR",
+    "IE",
+    "IT",
+    "NL",
+    "PL",
+    "PT",
+    "SE"
+  ],
+  "historical_depth": {
+    "earliest_date": null,
+    "evidence": [
+      {
+        "expires_at": "2026-08-29T10:02:52.417201Z",
+        "kind": "QUALITY_REPORT",
+        "reference": "data/acceptance/campaign-results/AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.6-r4.json",
+        "sha256": "2bc13a2d52734106b87a30498331a4a0a1d34e17a3ddfe2cc1ba8ebd19af758b"
+      }
+    ],
+    "latest_date": null,
+    "status": "MISSING"
+  },
+  "kill_switch": {
+    "evidence": [
+      {
+        "expires_at": "2026-08-29T10:02:52.417201Z",
+        "kind": "OPERATIONS_REHEARSAL",
+        "reference": "data/acceptance/campaign-results/AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.6-r4.json",
+        "sha256": "2bc13a2d52734106b87a30498331a4a0a1d34e17a3ddfe2cc1ba8ebd19af758b"
+      }
+    ],
+    "implemented": true,
+    "tested": true
+  },
+  "kind": "OPPORTUNITY",
+  "lag": {
+    "evidence": [
+      {
+        "expires_at": "2026-08-29T10:02:52.417201Z",
+        "kind": "QUALITY_REPORT",
+        "reference": "data/acceptance/campaign-results/AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.6-r4.json",
+        "sha256": "2bc13a2d52734106b87a30498331a4a0a1d34e17a3ddfe2cc1ba8ebd19af758b"
+      }
+    ],
+    "max_seconds": null,
+    "p50_seconds": null,
+    "p95_seconds": null,
+    "status": "MISSING"
+  },
+  "languages": [
+    {
+      "evidence": [
+        {
+          "expires_at": "2026-08-29T10:02:52.417201Z",
+          "kind": "LANGUAGE_JOURNEY",
+          "reference": "data/acceptance/campaign-results/AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.6-r4.json",
+          "sha256": "2bc13a2d52734106b87a30498331a4a0a1d34e17a3ddfe2cc1ba8ebd19af758b"
+        }
+      ],
+      "ingestion": "PASS",
+      "language": "en",
+      "normalisation": "PASS",
+      "presentation": "PASS",
+      "search": "PASS"
+    },
+    {
+      "evidence": [
+        {
+          "expires_at": "2026-08-29T10:02:52.417201Z",
+          "kind": "LANGUAGE_JOURNEY",
+          "reference": "data/acceptance/campaign-results/AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.6-r4.json",
+          "sha256": "2bc13a2d52734106b87a30498331a4a0a1d34e17a3ddfe2cc1ba8ebd19af758b"
+        }
+      ],
+      "ingestion": "PASS",
+      "language": "es",
+      "normalisation": "PASS",
+      "presentation": "PASS",
+      "search": "PASS"
+    },
+    {
+      "evidence": [
+        {
+          "expires_at": "2026-08-29T10:02:52.417201Z",
+          "kind": "LANGUAGE_JOURNEY",
+          "reference": "data/acceptance/campaign-results/AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.6-r4.json",
+          "sha256": "2bc13a2d52734106b87a30498331a4a0a1d34e17a3ddfe2cc1ba8ebd19af758b"
+        }
+      ],
+      "ingestion": "PASS",
+      "language": "fr",
+      "normalisation": "PASS",
+      "presentation": "PASS",
+      "search": "PASS"
+    },
+    {
+      "evidence": [
+        {
+          "expires_at": "2026-08-29T10:02:52.417201Z",
+          "kind": "LANGUAGE_JOURNEY",
+          "reference": "data/acceptance/campaign-results/AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.6-r4.json",
+          "sha256": "2bc13a2d52734106b87a30498331a4a0a1d34e17a3ddfe2cc1ba8ebd19af758b"
+        }
+      ],
+      "ingestion": "PASS",
+      "language": "de",
+      "normalisation": "PASS",
+      "presentation": "PASS",
+      "search": "PASS"
+    },
+    {
+      "evidence": [
+        {
+          "expires_at": "2026-08-29T10:02:52.417201Z",
+          "kind": "LANGUAGE_JOURNEY",
+          "reference": "data/acceptance/campaign-results/AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.6-r4.json",
+          "sha256": "2bc13a2d52734106b87a30498331a4a0a1d34e17a3ddfe2cc1ba8ebd19af758b"
+        }
+      ],
+      "ingestion": "PASS",
+      "language": "pt",
+      "normalisation": "PASS",
+      "presentation": "PASS",
+      "search": "PASS"
+    },
+    {
+      "evidence": [
+        {
+          "expires_at": "2026-08-29T10:02:52.417201Z",
+          "kind": "LANGUAGE_JOURNEY",
+          "reference": "data/acceptance/campaign-results/AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.6-r4.json",
+          "sha256": "2bc13a2d52734106b87a30498331a4a0a1d34e17a3ddfe2cc1ba8ebd19af758b"
+        }
+      ],
+      "ingestion": "PASS",
+      "language": "it",
+      "normalisation": "PASS",
+      "presentation": "PASS",
+      "search": "PASS"
+    }
+  ],
+  "library_id": "AX-LIB-O01",
+  "limitations": [
+    "TED is product-admitted only for the measured twelve buyer-country strata and bounded AX-LIB-O01 workflows; it does not establish worldwide procurement coverage.",
+    "The frozen retrieval cap was 200 notices per country and every measured stratum retained truncation risk.",
+    "Exhaustive archive depth remains MISSING because the bounded history probe failed closed.",
+    "TED provider publication frequency remains MISSING because it was not declared in the frozen execution contract.",
+    "The campaign measured bounded acquisition and local processing stages, not a complete source-publication-to-product freshness SLA; library-level lag therefore remains MISSING.",
+    "National, sub-threshold and non-TED procurement portals remain outside this source admission.",
+    "Attachments, full source text, third-party works, protected marks, natural-person data and retained contact values remain excluded.",
+    "The seven source-admission decisions are conditional and do not constitute complete library-wide Gate 7 reviews.",
+    "TED contributes to bounded product use but not to a public, global or multilingual coverage claim.",
+    "AX-LIB-O01 remains IN_REVIEW with claim decision PENDING until historical depth, provider frequency, library-level freshness/lag and final coverage authority are closed."
+  ],
+  "quality": {
+    "accuracy": 1.0,
+    "completeness": 0.9166666666666666,
+    "duplicate_rate": 0.0,
+    "evidence": [
+      {
+        "expires_at": "2026-08-29T10:02:52.417201Z",
+        "kind": "QUALITY_REPORT",
+        "reference": "data/acceptance/campaign-results/AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.6-r4.json",
+        "sha256": "2bc13a2d52734106b87a30498331a4a0a1d34e17a3ddfe2cc1ba8ebd19af758b"
+      }
+    ],
+    "freshness": null,
+    "status": "PASS"
+  },
+  "reviews": [],
+  "rights": {
+    "evidence": [
+      {
+        "expires_at": "2026-08-31T23:59:59Z",
+        "kind": "LEGAL_REVIEW",
+        "reference": "data/acceptance/legal/AX-LIB-O01-TED-official-terms-snapshot.v0.1.json",
+        "sha256": "f64e4b63e3e1bbef1b95ed04e5f89721e1afe5bad08d0825213b7328656430fc"
+      },
+      {
+        "expires_at": "2026-08-31T23:59:59Z",
+        "kind": "LEGAL_REVIEW",
+        "reference": "data/acceptance/legal/AX-LIB-O01-TED-field-rights-matrix.v0.1.json",
+        "sha256": "228d2a05eaeab1a5021677797dd623da29523a7730e6d16f61555e97cd198193"
+      },
+      {
+        "expires_at": "2026-08-28T10:00:00Z",
+        "kind": "HUMAN_APPROVAL",
+        "reference": "github-actions:artifact:8838419160/result.json",
+        "sha256": "73178dc8419cbe967eb47e8a523cbff8e548811f589e54d71a345e1511933e7f"
+      }
+    ],
+    "status": "PASS"
+  },
+  "rollback": {
+    "evidence": [
+      {
+        "expires_at": "2026-08-29T10:02:52.417201Z",
+        "kind": "OPERATIONS_REHEARSAL",
+        "reference": "data/acceptance/campaign-results/AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.6-r4.json",
+        "sha256": "2bc13a2d52734106b87a30498331a4a0a1d34e17a3ddfe2cc1ba8ebd19af758b"
+      }
+    ],
+    "implemented": true,
+    "tested": true
+  },
+  "runtime_reference": "data/procurement/global-procurement-bid-workspace-runtime.v0.1.json",
+  "sectors": [
+    "PUBLIC_PROCUREMENT"
+  ],
+  "sources": {
+    "active": [
+      {
+        "admission": {
+          "human_authority": "PASS",
+          "legal": "PASS",
+          "quality": "PASS",
+          "rights": "PASS",
+          "technical": "PASS"
+        },
+        "contributes_to_public_claim": false,
+        "evidence": [
+          {
+            "expires_at": "2026-08-31T23:59:59Z",
+            "kind": "SOURCE_SNAPSHOT",
+            "reference": "data/acceptance/source-rights/AX-LIB-O01-source-inventory-rights.v0.1.json",
+            "sha256": "544329412388cf7a29aaa975daff883c8de347cc359ff2cad461e37876e66ea8"
+          },
+          {
+            "expires_at": "2026-08-31T23:59:59Z",
+            "kind": "LEGAL_REVIEW",
+            "reference": "data/acceptance/legal/AX-LIB-O01-TED-official-terms-snapshot.v0.1.json",
+            "sha256": "f64e4b63e3e1bbef1b95ed04e5f89721e1afe5bad08d0825213b7328656430fc"
+          },
+          {
+            "expires_at": "2026-08-31T23:59:59Z",
+            "kind": "LEGAL_REVIEW",
+            "reference": "data/acceptance/legal/AX-LIB-O01-TED-field-rights-matrix.v0.1.json",
+            "sha256": "228d2a05eaeab1a5021677797dd623da29523a7730e6d16f61555e97cd198193"
+          },
+          {
+            "expires_at": "2026-08-29T10:02:52.417201Z",
+            "kind": "QUALITY_REPORT",
+            "reference": "data/acceptance/campaign-results/AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.6-r4.json",
+            "sha256": "2bc13a2d52734106b87a30498331a4a0a1d34e17a3ddfe2cc1ba8ebd19af758b"
+          },
+          {
+            "expires_at": "2026-08-28T10:00:00Z",
+            "kind": "HUMAN_APPROVAL",
+            "reference": "github-actions:artifact:8838419160/result.json",
+            "sha256": "73178dc8419cbe967eb47e8a523cbff8e548811f589e54d71a345e1511933e7f"
+          }
+        ],
+        "name": "TED Search API v3.0",
+        "rights_expiry": "2026-08-28T10:00:00Z",
+        "source_id": "src_ted_search_api_v3",
+        "state": "PRODUCT_ADMITTED"
+      }
+    ],
+    "candidate": [],
+    "suspended": []
+  },
+  "synthetic_data": {
+    "contributes_to_public_claim": false,
+    "disclosed": true,
+    "evidence": [],
+    "present": false
+  },
+  "update_frequency": {
+    "declared": null,
+    "evidence": [
+      {
+        "expires_at": "2026-08-29T10:02:52.417201Z",
+        "kind": "QUALITY_REPORT",
+        "reference": "data/acceptance/campaign-results/AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.6-r4.json",
+        "sha256": "2bc13a2d52734106b87a30498331a4a0a1d34e17a3ddfe2cc1ba8ebd19af758b"
+      }
+    ],
+    "observed": null,
+    "status": "MISSING"
+  }
+}

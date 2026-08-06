@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
 from uuid import UUID
@@ -83,6 +84,10 @@ class OutboxPublisher:
         self.queue = queue
 
     def publish_pending(self, *, limit: int = 10) -> int:
+        atomic_publisher = getattr(self.repository, "publish_pending_to_queue", None)
+        if isinstance(atomic_publisher, Callable):
+            return int(atomic_publisher(queue=self.queue, limit=limit))
+
         published = 0
         for event in self.repository.pending_outbox(limit=limit):
             try:

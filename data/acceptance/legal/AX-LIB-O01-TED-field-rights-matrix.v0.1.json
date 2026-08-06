@@ -1,0 +1,266 @@
+{
+  "claim_effect": {
+    "global_coverage_authorised": false,
+    "legal_admission": "MISSING",
+    "multilingual_authorised": false,
+    "public_claim_contribution": false,
+    "rights_admission": "MISSING",
+    "source_state": "CANDIDATE"
+  },
+  "default_policy": "DENY_UNLESS_EXPLICITLY_ALLOWED",
+  "expires_at": "2026-08-31T23:59:59Z",
+  "fields": [
+    {
+      "examples": [
+        "search-field definitions",
+        "schema metadata",
+        "technical metadata"
+      ],
+      "field_class": "SIMAP_SYSTEM_METADATA",
+      "human_decision_required": true,
+      "machine_rights_assessment": "REUSE_APPEARS_PERMITTED_CC0",
+      "personal_data_risk": "LOW",
+      "presentation": "ALLOWED_WITH_PROVENANCE_AFTER_APPROVAL",
+      "product_policy": "ALLOW_AFTER_HUMAN_APPROVAL",
+      "retention": "PENDING_PRIVACY_AND_LEGAL_DECISION",
+      "storage": "NORMALISED_STORAGE_ALLOWED_AFTER_APPROVAL",
+      "third_party_risk": "LOW"
+    },
+    {
+      "examples": [
+        "publication number",
+        "notice identifier",
+        "notice type",
+        "publication date"
+      ],
+      "field_class": "NOTICE_IDENTIFIERS_AND_PUBLICATION_METADATA",
+      "human_decision_required": true,
+      "machine_rights_assessment": "REUSE_APPEARS_PERMITTED",
+      "personal_data_risk": "LOW",
+      "presentation": "ALLOWED_WITH_SOURCE_LINK_AFTER_APPROVAL",
+      "product_policy": "ALLOW_AFTER_HUMAN_APPROVAL",
+      "retention": "PENDING_LEGAL_DECISION",
+      "storage": "NORMALISED_STORAGE_ALLOWED_AFTER_APPROVAL",
+      "third_party_risk": "LOW"
+    },
+    {
+      "examples": [
+        "title",
+        "subject",
+        "CPV",
+        "NUTS",
+        "procedure type",
+        "deadline",
+        "amount",
+        "currency"
+      ],
+      "field_class": "NON_PERSONAL_PROCUREMENT_FACTS",
+      "human_decision_required": true,
+      "machine_rights_assessment": "REUSE_APPEARS_PERMITTED_SUBJECT_TO_SOURCE_AND_CHANGE_DISCLOSURE",
+      "personal_data_risk": "LOW_TO_CONTEXTUAL",
+      "presentation": "ALLOWED_WITH_PROVENANCE_AND_TRANSFORMATION_DISCLOSURE_AFTER_APPROVAL",
+      "product_policy": "ALLOW_AFTER_HUMAN_APPROVAL",
+      "retention": "PENDING_LEGAL_DECISION",
+      "storage": "NORMALISED_FACTS_ONLY_AFTER_APPROVAL",
+      "third_party_risk": "LOW_TO_CONTEXTUAL"
+    },
+    {
+      "examples": [
+        "legal entity name",
+        "registration identifier",
+        "organisation address"
+      ],
+      "field_class": "BUYER_AND_SUPPLIER_LEGAL_ENTITY_DATA",
+      "human_decision_required": true,
+      "machine_rights_assessment": "REUSE_APPEARS_PERMITTED_WHEN_ENTITY_IS_NOT_A_NATURAL_PERSON",
+      "personal_data_risk": "MEDIUM_DUE_TO_SOLE_TRADERS_AND_MISCLASSIFICATION",
+      "presentation": "ALLOWED_WITH_SOURCE_LINK_AFTER_APPROVAL",
+      "product_policy": "ALLOW_ONLY_AFTER_ENTITY_TYPE_CLASSIFICATION_AND_HUMAN_APPROVAL",
+      "retention": "PENDING_LEGAL_AND_PRIVACY_DECISION",
+      "storage": "NORMALISED_STORAGE_AFTER_APPROVAL",
+      "third_party_risk": "LOW"
+    },
+    {
+      "examples": [
+        "contact name",
+        "professional email",
+        "phone",
+        "fax",
+        "job title"
+      ],
+      "field_class": "PROFESSIONAL_CONTACT_PERSON_DATA",
+      "human_decision_required": true,
+      "machine_rights_assessment": "PUBLICATION_BY_TED_DOES_NOT_RESOLVE_AXIGNAL_SECONDARY_PROCESSING",
+      "personal_data_risk": "HIGH",
+      "presentation": "DENIED",
+      "product_policy": "BLOCK_INGESTION_INDEXING_SEARCH_AND_PRESENTATION",
+      "retention": "ZERO_BY_DEFAULT; INCIDENT_QUARANTINE_MAXIMUM_PENDING_PRIVACY_APPROVAL",
+      "storage": "DO_NOT_PERSIST; QUARANTINE_AND_PURGE_IF_UNAVOIDABLY_RECEIVED",
+      "third_party_risk": "LOW"
+    },
+    {
+      "examples": [
+        "individual supplier name",
+        "individual address"
+      ],
+      "field_class": "NATURAL_PERSON_TENDERER_OR_CONTRACTOR",
+      "human_decision_required": true,
+      "machine_rights_assessment": "PERSONAL_DATA_REQUIRING_SEPARATE_LAWFUL_BASIS_AND_MINIMISATION",
+      "personal_data_risk": "HIGH",
+      "presentation": "DENIED",
+      "product_policy": "BLOCK_AND_EXCLUDE_FROM_PUBLIC_PRODUCT",
+      "retention": "ZERO",
+      "storage": "DO_NOT_PERSIST",
+      "third_party_risk": "LOW"
+    },
+    {
+      "examples": [
+        "full description",
+        "conditions",
+        "award narrative"
+      ],
+      "field_class": "SOURCE_NATIVE_NOTICE_TEXT",
+      "human_decision_required": true,
+      "machine_rights_assessment": "REUSE_APPEARS_PERMITTED_BUT_MAY_CONTAIN_PERSONAL_OR_THIRD_PARTY_CONTENT",
+      "personal_data_risk": "MEDIUM_TO_HIGH",
+      "presentation": "SHORT_DERIVED_SUMMARY_ONLY_AFTER_APPROVAL_WITH_SOURCE_AND_CHANGE_DISCLOSURE",
+      "product_policy": "LINK_TO_SOURCE; NO_FULL_REPUBLICATION_PENDING_APPROVAL",
+      "retention": "PENDING_LEGAL_AND_PRIVACY_DECISION",
+      "storage": "RAW_STORAGE_DENIED; NORMALISED_NON_PERSONAL_FACT_EXTRACTION_ONLY_AFTER_APPROVAL",
+      "third_party_risk": "MEDIUM"
+    },
+    {
+      "examples": [
+        "technical drawings",
+        "photos",
+        "third-party specifications",
+        "embedded documents"
+      ],
+      "field_class": "ATTACHMENTS_AND_THIRD_PARTY_WORKS",
+      "human_decision_required": true,
+      "machine_rights_assessment": "NOT_COVERED_BY_BLANKET_REUSE_WHEN_THIRD_PARTY_RIGHTS_APPLY",
+      "personal_data_risk": "UNKNOWN",
+      "presentation": "SOURCE_LINK_ONLY",
+      "product_policy": "DENY_MIRRORING_EXTRACTION_AND_REPUBLICATION_UNLESS_SEPARATELY_CLEARED",
+      "retention": "ZERO",
+      "storage": "DENIED",
+      "third_party_risk": "HIGH"
+    },
+    {
+      "examples": [
+        "TED logo",
+        "SIMAP logo",
+        "third-party trademarks",
+        "registered designs"
+      ],
+      "field_class": "LOGOS_TRADEMARKS_NAMES_AND_INDUSTRIAL_PROPERTY",
+      "human_decision_required": true,
+      "machine_rights_assessment": "EXCLUDED_OR_REQUIRES_SEPARATE_CONSENT",
+      "personal_data_risk": "LOW",
+      "presentation": "DENIED",
+      "product_policy": "DENIED",
+      "retention": "ZERO",
+      "storage": "DENIED_EXCEPT_SECURITY_CACHE_NOT_USER_VISIBLE",
+      "third_party_risk": "HIGH"
+    },
+    {
+      "examples": [
+        "help text",
+        "developer documentation prose"
+      ],
+      "field_class": "SIMAP_EDITORIAL_DOCUMENTATION",
+      "human_decision_required": true,
+      "machine_rights_assessment": "CC_BY_4_0_APPEARS_APPLICABLE",
+      "personal_data_risk": "LOW",
+      "presentation": "REFERENCE_ONLY",
+      "product_policy": "NO_COPY_IN_PRODUCT; REFERENCE_OR_PARAPHRASE_ONLY_PENDING_APPROVAL",
+      "retention": "PENDING_LEGAL_DECISION",
+      "storage": "NO_SOURCE_TEXT_CORPUS",
+      "third_party_risk": "MEDIUM"
+    },
+    {
+      "examples": [
+        "normalised deadline",
+        "translated title",
+        "classified sector",
+        "derived alert"
+      ],
+      "field_class": "NORMALISED_DERIVED_FACTS_AND_TRANSLATIONS",
+      "human_decision_required": true,
+      "machine_rights_assessment": "VALUE_ADDED_REUSE_APPEARS_SUPPORTED_IF_SOURCE_MEANING_IS_NOT_DISTORTED",
+      "personal_data_risk": "INHERITS_SOURCE",
+      "presentation": "MUST_DISCLOSE_TRANSFORMATION_AND_LINK_SOURCE",
+      "product_policy": "ALLOW_AFTER_HUMAN_APPROVAL_AND_PROVENANCE_CONTROLS",
+      "retention": "PENDING_LEGAL_AND_PRIVACY_DECISION",
+      "storage": "ALLOWED_AFTER_APPROVAL",
+      "third_party_risk": "INHERITS_SOURCE"
+    },
+    {
+      "examples": [
+        "AXIGNAL API exposing TED-derived fields",
+        "bulk export"
+      ],
+      "field_class": "PUBLIC_API_REDISTRIBUTION",
+      "human_decision_required": true,
+      "machine_rights_assessment": "NOTICE_REUSE_APPEARS_POSSIBLE_BUT_FIELD_FILTERING_ATTRIBUTION_AND_PERSONAL_DATA_CONTROLS_ARE_UNRESOLVED",
+      "personal_data_risk": "HIGH_WITHOUT_FIELD_FILTERING",
+      "presentation": "DENIED",
+      "product_policy": "DENIED_PENDING_TYPED_LEGAL_AND_PRIVACY_APPROVAL",
+      "retention": "NOT_APPLICABLE",
+      "storage": "NOT_APPLICABLE",
+      "third_party_risk": "HIGH_WITHOUT_FIELD_FILTERING"
+    },
+    {
+      "examples": [
+        "training corpus",
+        "fine-tuning dataset",
+        "embedding corpus retaining source text"
+      ],
+      "field_class": "MODEL_TRAINING_OR_FINE_TUNING",
+      "human_decision_required": true,
+      "machine_rights_assessment": "NOT_NECESSARY_FOR_PRODUCT_ACCEPTANCE_AND_NOT_SPECIFICALLY_CLEARED",
+      "personal_data_risk": "HIGH",
+      "presentation": "NOT_APPLICABLE",
+      "product_policy": "DENIED",
+      "retention": "ZERO",
+      "storage": "DENIED",
+      "third_party_risk": "HIGH"
+    }
+  ],
+  "gate_id": "PUBLIC-LAUNCH-GATE-7",
+  "human_approval_requirements": {
+    "LEGAL": {
+      "must_decide": [
+        "Scope of notice reuse and attribution.",
+        "Treatment of source-native text and attachments.",
+        "Public API redistribution.",
+        "Retention of raw and normalised records.",
+        "Use of TED and SIMAP names without logos."
+      ],
+      "status": "MISSING"
+    },
+    "PRIVACY_DATA_RIGHTS": {
+      "must_decide": [
+        "Lawful basis for secondary processing.",
+        "Field minimisation and personal-data detection.",
+        "Retention and deletion periods.",
+        "Data-subject rights and correction propagation.",
+        "Natural-person supplier and contact-person handling."
+      ],
+      "status": "MISSING"
+    }
+  },
+  "legal_source_snapshot_reference": "data/acceptance/legal/AX-LIB-O01-TED-official-terms-snapshot.v0.1.json",
+  "library_id": "AX-LIB-O01",
+  "mandatory_provenance": {
+    "notice_identifier": "REQUIRED",
+    "retrieved_at": "REQUIRED",
+    "source_name": "TED",
+    "source_url": "REQUIRED",
+    "transformation_disclosure": "REQUIRED_WHEN_CONTENT_IS_NORMALISED_TRANSLATED_OR_SUMMARISED"
+  },
+  "observed_at": "2026-08-01T17:50:00Z",
+  "overall_status": "PENDING_TYPED_HUMAN_APPROVAL",
+  "schema_version": "axignal.field-rights-matrix/v0.1",
+  "source_id": "src_ted_search_api_v3"
+}

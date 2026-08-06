@@ -1,0 +1,128 @@
+{
+  "schema_version": "axignal.f01-official-baseline-contract/v0.1",
+  "task_id": "AX-GE2E-G7-F01-B",
+  "library_id": "AX-LIB-F01",
+  "source_id": "src_eu_vocab_countries_territories",
+  "source_state": "CANDIDATE",
+  "lineage": {
+    "f01_a_head_sha": "c0259cc6abdb0d43504e9891501cf00b727fdacd",
+    "candidate_inventory_version": "20260318-0",
+    "candidate_inventory_path": "data/acceptance/source-inventory/AX-LIB-F01-eu-countries-territories-candidate.v0.1.json",
+    "version_drift_expected": true
+  },
+  "official_publication": {
+    "expected_latest_version": "20260617-0",
+    "expected_catalogue_entry_count": 375,
+    "expected_category_xml_record_count": 378,
+    "expected_retired_record_count": 3,
+    "expected_canonical_concept_count": 345,
+    "expected_non_retired_unique_concept_count": 342,
+    "expected_non_retired_duplicate_record_surplus": 33,
+    "dataset_uri": "http://publications.europa.eu/resource/dataset/country",
+    "authority_graph_uri": "http://publications.europa.eu/resource/authority/country",
+    "catalogue_url": "https://op.europa.eu/en/web/eu-vocabularies/at-dataset/-/resource/dataset/country",
+    "documentation_url": "https://op.europa.eu/en/web/eu-vocabularies/countries-and-territories",
+    "samples_url": "https://op.europa.eu/en/web/eu-vocabularies/samples",
+    "sparql_endpoint": "https://publications.europa.eu/webapi/rdf/sparql",
+    "reserved_concept_uri": "http://publications.europa.eu/resource/authority/country/OP_DATPRO",
+    "required_distributions": [
+      "countries-skos.rdf",
+      "countries-skos-ap-act.rdf",
+      "at-country-v3.xsd",
+      "at-countries-v2.xsd",
+      "Country.gc",
+      "countries.xml",
+      "ATTO_XML_Countries-and-territories.zip"
+    ],
+    "canonical_concept_distribution": "countries-skos.rdf",
+    "canonical_entry_distribution": "countries.xml"
+  },
+  "count_semantics": {
+    "catalogue_entry": "A non-retired record in countries.xml; current and deprecated records are counted independently even when they share one authority code.",
+    "canonical_concept": "A unique non-reserved skos:Concept identified by one authority URI in countries-skos.rdf and the live authority graph.",
+    "required_reconciliation": "378 XML records = 375 non-retired catalogue entries + 3 retired records; the 375 non-retired entries collapse to 342 unique authority codes with 33 duplicate historical record instances; adding the 3 retired authority codes yields 345 canonical concepts.",
+    "prohibited_claim": "The catalogue count of 375 must not be represented as 375 unique SKOS concepts."
+  },
+  "access_contract": {
+    "authentication": "NONE",
+    "transport": "HTTPS",
+    "methods": ["GET", "POST"],
+    "required_formats": [
+      "text/html",
+      "application/rdf+xml",
+      "application/xml",
+      "text/csv",
+      "application/sparql-results+json"
+    ],
+    "timeout_seconds_per_request": 60,
+    "maximum_http_requests": 6,
+    "maximum_response_bytes_per_request": 50000000,
+    "maximum_retries": 0,
+    "concurrency": 1,
+    "external_monetary_budget_eur": 0,
+    "fail_closed": true
+  },
+  "concept_schemes": {
+    "0001": "CURRENT_COUNTRIES_AND_TERRITORIES_ISSUING_CITIZENSHIP",
+    "0002": "MARINE_AREAS",
+    "0003": "TERRITORIES",
+    "0004": "DISPUTED_TERRITORIES",
+    "0005": "CURRENT_EU_MEMBER_STATES",
+    "0006": "OVERSEAS_COUNTRIES_AND_TERRITORIES",
+    "0007": "OUTERMOST_REGIONS",
+    "0008": "CURRENT_COUNTRIES_AND_TERRITORIES_OF_BIRTH",
+    "0009": "CURRENT_UN_MEMBER_STATES",
+    "0010": "TERRITORIES_WITH_SPECIAL_STATUS"
+  },
+  "derived_bucket_precedence": [
+    "HISTORICAL_OR_DEPRECATED",
+    "DISPUTED_ENTITY",
+    "MARINE_AREA",
+    "SPECIAL_STATUS_TERRITORY",
+    "TERRITORY",
+    "COUNTRY_OR_CITIZENSHIP_ENTITY",
+    "OTHER_GEOPOLITICAL_ENTITY"
+  ],
+  "rights_boundary": {
+    "dataset_specific_reuse": "HUMAN_LEGAL_DECISION_REQUIRED",
+    "retention": "HUMAN_LEGAL_DECISION_REQUIRED",
+    "redistribution": "HUMAN_LEGAL_DECISION_REQUIRED",
+    "derived_data": "HUMAN_LEGAL_DECISION_REQUIRED",
+    "attribution": "REQUIRED_IF_AUTHORISED",
+    "source_changes_and_version_disclosure": "REQUIRED_IF_AUTHORISED",
+    "no_distortion_or_misleading_attribution": "REQUIRED_IF_AUTHORISED",
+    "third_party_components": "EXCLUDED_UNLESS_SEPARATELY_AUTHORISED",
+    "iso_codes_free_use_observed": true,
+    "iso_publications_and_collections_redistribution": "NOT_AUTHORISED_BY_THIS_CONTRACT",
+    "iso_or_other_standard_text_ingestion": false,
+    "model_training_or_fine_tuning": false
+  },
+  "privacy_boundary": {
+    "personal_data_expected": false,
+    "contact_values_ingested": false,
+    "profiling_or_marketing_use": false,
+    "human_privacy_data_rights_decision_required": true
+  },
+  "campaign_plan": {
+    "mode": "PRIVATE_TECHNICAL_EVIDENCE_ONLY",
+    "request_budget": 6,
+    "paid_budget_eur": 0,
+    "retention_days": 30,
+    "product_ingestion": false,
+    "public_redistribution": false,
+    "public_claims": false,
+    "launch_transition": false
+  },
+  "evidence_expires_at": "2026-08-31T23:59:59Z",
+  "required_state": {
+    "technical_baseline": "PRESENT",
+    "legal": "MISSING_OR_CURRENT_HUMAN_DECISION",
+    "privacy_data_rights": "MISSING_OR_CURRENT_HUMAN_DECISION",
+    "product_admitted": false,
+    "active_source": false,
+    "f01_state": "BLOCKED",
+    "claim_decision": "DENIED",
+    "gate7": "IN_PROGRESS",
+    "public_launch": "NO_GO"
+  }
+}

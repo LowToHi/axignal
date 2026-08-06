@@ -22,7 +22,7 @@ services:
       - backend
 
   db-hardening:
-    image: postgres:17-alpine
+    image: postgres:17-alpine@sha256:742f40ea20b9ff2ff31db5458d127452988a2164df9e17441e191f3b72252193
     environment:
       AXIGNAL_POSTGRES_DB: ${AXIGNAL_POSTGRES_DB:-axignal}
       AXIGNAL_POSTGRES_USER: ${AXIGNAL_POSTGRES_USER:-axignal}
@@ -44,7 +44,7 @@ services:
       - backend
 
   valkey:
-    image: valkey/valkey:8-alpine
+    image: valkey/valkey:8-alpine@sha256:a038175878d66b9d274fbf8be73c0305e93798b83917647f167e18cef3c71eec
     command: ["valkey-server", "--appendonly", "yes", "--appendfsync", "everysec"]
     expose:
       - "6379"
@@ -128,6 +128,7 @@ services:
       AXIGNAL_DOCUMENT_PROPOSAL_UI_ENABLED: "true"
       AXIGNAL_HUMAN_REVIEW_UI_ENABLED: "true"
       AXIGNAL_VALIDATION_UI_ENABLED: "false"
+      AXIGNAL_SUBSCRIBER_WORKSPACE_ENABLED: "true"
     expose:
       - "3000"
     depends_on:
@@ -144,7 +145,7 @@ services:
       - edge
 
   caddy:
-    image: caddy:2.10.0-alpine
+    image: caddy:2.10.0-alpine@sha256:ae4458638da8e1a91aafffb231c5f8778e964bca650c8a8cb23a7e8ac557aa3c
     environment:
       AXIGNAL_PILOT_CADDY_SITE_ADDRESS: ${AXIGNAL_PILOT_CADDY_SITE_ADDRESS:-http://localhost}
       AXIGNAL_PILOT_ACME_EMAIL: ${AXIGNAL_PILOT_ACME_EMAIL:-}
@@ -249,7 +250,7 @@ services:
 
   otel-collector:
     profiles: ["observability"]
-    image: otel/opentelemetry-collector-contrib:0.130.0
+    image: otel/opentelemetry-collector-contrib:0.130.0@sha256:867d1074c2f750936fb9358ec9eefa009308053cf156b2c7ca1761ba5ef78452
     command: ["--config=/etc/otelcol-contrib/collector-config.yaml"]
     volumes:
       - ../otel/collector-config.yaml:/etc/otelcol-contrib/collector-config.yaml:ro

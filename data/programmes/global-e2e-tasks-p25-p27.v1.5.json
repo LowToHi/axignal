@@ -1,0 +1,312 @@
+{
+  "version": "1.5.0",
+  "goal_id": "AXIGNAL-GOAL-001",
+  "programme": "P25-P27",
+  "schema": "schemas/global-e2e-v1.5-task.schema.json",
+  "tasks": [
+    {
+      "task_id": "AX-GE2E-P25-T01",
+      "goal_id": "AXIGNAL-GOAL-001",
+      "phase": "P25",
+      "objective": "Implement persistent passwordless identity, revocable sessions, secure recovery and tenant-level seven-day trial-abuse governance.",
+      "engineering_state": "ENGINEERING_E2E_PASS",
+      "canonical_state": "CANONICAL_ACCEPTANCE_BLOCKED",
+      "governing_contracts": ["GOAL_LOCK", "03", "06", "18", "22", "29", "31", "ADR-016"],
+      "dependencies": {
+        "phases": ["P03", "P21", "P24"],
+        "tasks": ["AX-GE2E-P03-T01", "AX-GE2E-P21-T01", "AX-GE2E-P24-T01"]
+      },
+      "acceptance_evidence": [
+        {
+          "evidence": "Exact-head P25 passwordless identity and trial-abuse E2E",
+          "status": "PASS",
+          "location": ".github/workflows/p25-t01-identity-trial-abuse-e2e.yml"
+        },
+        {
+          "evidence": "Persistent identity, WebAuthn, session, recovery and trial migrations",
+          "status": "PASS",
+          "location": "infra/postgres/120-identity-passwordless-core.sql"
+        },
+        {
+          "evidence": "Production SMTP and anti-bot provider acceptance",
+          "status": "MISSING",
+          "location": null
+        },
+        {
+          "evidence": "Public signup approval",
+          "status": "MISSING",
+          "location": null
+        }
+      ],
+      "prohibited_authority": [
+        "No public signup",
+        "No external identity-provider activation",
+        "No automatic trial grant outside the risk authority",
+        "No live Stripe activation",
+        "No public launch"
+      ],
+      "rollback": {
+        "strategy": "Disable the P25 runtime, preserve identity and security evidence, and restore the frozen pilot authentication boundary only in controlled environments.",
+        "kill_switch": "AXIGNAL_IDENTITY_RUNTIME_ENABLED",
+        "tested": true
+      },
+      "engineering_head": "a35bbbf018c1e5c4dfaa55c7669cba56ca1be090",
+      "notes": [
+        "Engineering E2E pass does not provide canonical or production acceptance.",
+        "The seven-day clock starts on first admitted AI use, not signup."
+      ]
+    },
+    {
+      "task_id": "AX-GE2E-P26-T01",
+      "goal_id": "AXIGNAL-GOAL-001",
+      "phase": "P26",
+      "objective": "Implement governed organic discovery, IndexabilityGate, public snapshots, Tender Alerts, CRM foundation, AI-citation evidence and the Founder Admin foundation.",
+      "engineering_state": "ENGINEERING_E2E_PASS",
+      "canonical_state": "CANONICAL_ACCEPTANCE_BLOCKED",
+      "governing_contracts": ["GOAL_LOCK", "06", "18", "21", "23", "24", "31", "ADR-016"],
+      "dependencies": {
+        "phases": ["P23", "P25"],
+        "tasks": ["AX-GE2E-P23-T01", "AX-GE2E-P25-T01"]
+      },
+      "acceptance_evidence": [
+        {
+          "evidence": "Exact-head P26 organic discovery and Founder Admin E2E",
+          "status": "PASS",
+          "location": ".github/workflows/p26-t01-organic-discovery-e2e.yml"
+        },
+        {
+          "evidence": "Indexability, snapshot, alert, CRM and founder database authority",
+          "status": "PASS",
+          "location": "infra/postgres/130-organic-discovery-founder-admin.sql"
+        },
+        {
+          "evidence": "Public indexing approval",
+          "status": "MISSING",
+          "location": null
+        },
+        {
+          "evidence": "Production email and consent delivery acceptance",
+          "status": "MISSING",
+          "location": null
+        }
+      ],
+      "prohibited_authority": [
+        "No public indexing",
+        "No public Tender Alert capture",
+        "No Search Console mutation",
+        "No source admission from the dashboard",
+        "No Founder authority declared by the browser",
+        "No public launch"
+      ],
+      "rollback": {
+        "strategy": "Disable organic public routes and Founder mutations while preserving snapshots, consent, CRM, citation and audit evidence.",
+        "kill_switch": "AXIGNAL_ORGANIC_DISCOVERY_ENABLED",
+        "tested": true
+      },
+      "engineering_head": "e1e4999ecd1a7140d9b18ea4b5ad6f0a20e32073",
+      "notes": [
+        "P26-T01 closes the foundation only; the P26 phase remains in progress.",
+        "Dataset presence does not grant page indexability."
+      ]
+    },
+    {
+      "task_id": "AX-GE2E-P26-T02",
+      "goal_id": "AXIGNAL-GOAL-001",
+      "phase": "P26",
+      "objective": "Implement Founder Operations for customers, organisations, trials, subscriptions, invoices, disputes, refunds and entitlement reconciliation.",
+      "engineering_state": "NOT_STARTED",
+      "canonical_state": "CANONICAL_NOT_STARTED",
+      "governing_contracts": ["GOAL_LOCK", "06", "18", "21", "22", "29", "31", "ADR-016"],
+      "dependencies": {
+        "phases": ["P21", "P25", "P26"],
+        "tasks": ["AX-GE2E-P21-T01", "AX-GE2E-P25-T01", "AX-GE2E-P26-T01"]
+      },
+      "acceptance_evidence": [
+        {
+          "evidence": "Typed customer, trial and billing administration contracts",
+          "status": "MISSING",
+          "location": null
+        },
+        {
+          "evidence": "Provider-state and AXIGNAL-ledger reconciliation E2E",
+          "status": "MISSING",
+          "location": null
+        },
+        {
+          "evidence": "Privilege, step-up and immutable audit E2E",
+          "status": "MISSING",
+          "location": null
+        }
+      ],
+      "prohibited_authority": [
+        "No fabricated provider state",
+        "No direct Stripe event creation",
+        "No silent trial extension",
+        "No browser-selected entitlement",
+        "No unaudited refund or cancellation"
+      ],
+      "rollback": {
+        "strategy": "Disable all founder commercial mutations and retain read-only reconciled provider, billing and entitlement evidence.",
+        "kill_switch": "AXIGNAL_FOUNDER_COMMERCIAL_MUTATIONS_ENABLED",
+        "tested": false
+      },
+      "engineering_head": null,
+      "notes": []
+    },
+    {
+      "task_id": "AX-GE2E-P26-T03",
+      "goal_id": "AXIGNAL-GOAL-001",
+      "phase": "P26",
+      "objective": "Implement Founder Operations for risk, abuse, source admission, rights, coverage, connector inventory and independent source kill switches.",
+      "engineering_state": "NOT_STARTED",
+      "canonical_state": "CANONICAL_NOT_STARTED",
+      "governing_contracts": ["GOAL_LOCK", "03", "06", "08", "18", "24", "31", "ADR-016"],
+      "dependencies": {
+        "phases": ["P04", "P05", "P25", "P26"],
+        "tasks": ["AX-GE2E-P04-T01", "AX-GE2E-P05-T01", "AX-GE2E-P25-T01", "AX-GE2E-P26-T01"]
+      },
+      "acceptance_evidence": [
+        {
+          "evidence": "Risk and abuse review with bounded human override",
+          "status": "MISSING",
+          "location": null
+        },
+        {
+          "evidence": "Source admission, suspension and revocation lifecycle",
+          "status": "MISSING",
+          "location": null
+        },
+        {
+          "evidence": "Google Search Console and MCP candidate admission tests",
+          "status": "MISSING",
+          "location": "data/growth/google-search-console-integration.v0.1.json"
+        }
+      ],
+      "prohibited_authority": [
+        "No model or browser source admission",
+        "No MCP installation by catalogue presence",
+        "No weak-signal-only abuse block",
+        "No source-right override",
+        "No unsupported coverage claim"
+      ],
+      "rollback": {
+        "strategy": "Disable founder risk and source mutations, revoke connector credentials and preserve all decisions and source history.",
+        "kill_switch": "AXIGNAL_FOUNDER_TRUST_MUTATIONS_ENABLED",
+        "tested": false
+      },
+      "engineering_head": null,
+      "notes": [
+        "Search Console DNS verification is evidence only; API access remains unproven.",
+        "Every MCP tool is deny-by-default."
+      ]
+    },
+    {
+      "task_id": "AX-GE2E-P26-T04",
+      "goal_id": "AXIGNAL-GOAL-001",
+      "phase": "P26",
+      "objective": "Implement Founder Operations for workers, queues, SLOs, incidents, backup, restore, feature flags, kill switches, settings and immutable audit.",
+      "engineering_state": "NOT_STARTED",
+      "canonical_state": "CANONICAL_NOT_STARTED",
+      "governing_contracts": ["GOAL_LOCK", "06", "08", "10", "18", "19", "31", "ADR-016"],
+      "dependencies": {
+        "phases": ["P22", "P25", "P26"],
+        "tasks": ["AX-GE2E-P22-T01", "AX-GE2E-P25-T01", "AX-GE2E-P26-T01"]
+      },
+      "acceptance_evidence": [
+        {
+          "evidence": "Operational telemetry and queue/worker status",
+          "status": "MISSING",
+          "location": null
+        },
+        {
+          "evidence": "Incident, backup and isolated restore control-plane evidence",
+          "status": "MISSING",
+          "location": null
+        },
+        {
+          "evidence": "Feature flag, kill switch and break-glass security E2E",
+          "status": "MISSING",
+          "location": null
+        }
+      ],
+      "prohibited_authority": [
+        "No secret values rendered in the browser",
+        "No root-only routine operations",
+        "No unaudited break-glass access",
+        "No UI-only kill switch",
+        "No backup-success claim without restore evidence"
+      ],
+      "rollback": {
+        "strategy": "Disable founder operational mutations, retain read-only telemetry and require typed emergency authority for any break-glass path.",
+        "kill_switch": "AXIGNAL_FOUNDER_OPERATIONS_MUTATIONS_ENABLED",
+        "tested": false
+      },
+      "engineering_head": null,
+      "notes": []
+    },
+    {
+      "task_id": "AX-GE2E-P27-T01",
+      "goal_id": "AXIGNAL-GOAL-001",
+      "phase": "P27",
+      "objective": "Bind the exact P00-P26 evidence, renew all launch-critical acceptance on the final head and return the only authorised public-launch disposition.",
+      "engineering_state": "NOT_STARTED",
+      "canonical_state": "CANONICAL_NOT_STARTED",
+      "governing_contracts": ["GOAL_LOCK", "01", "02", "03", "04", "06", "08", "16", "18", "21", "22", "23", "24", "29", "31", "ADR-016"],
+      "dependencies": {
+        "phases": ["P00", "P01", "P02", "P03", "P04", "P05", "P06", "P07", "P08", "P09", "P10", "P11", "P12", "P13", "P14", "P15", "P16", "P17", "P18", "P19", "P20", "P21", "P22", "P23", "P24", "P25", "P26"],
+        "tasks": [
+          "AX-GE2E-P24-T01",
+          "AX-GE2E-P25-T01",
+          "AX-GE2E-P26-T01",
+          "AX-GE2E-P26-T02",
+          "AX-GE2E-P26-T03",
+          "AX-GE2E-P26-T04"
+        ]
+      },
+      "acceptance_evidence": [
+        {
+          "evidence": "Exact P00-P26 accepted-head manifest",
+          "status": "MISSING",
+          "location": null
+        },
+        {
+          "evidence": "Renewed production, security, privacy, legal, DR, UX and accessibility acceptance",
+          "status": "MISSING",
+          "location": null
+        },
+        {
+          "evidence": "Complete billing, paid value, retention, renewal, margin and support evidence",
+          "status": "MISSING",
+          "location": null
+        },
+        {
+          "evidence": "Source, global coverage and multilingual acceptance",
+          "status": "MISSING",
+          "location": null
+        },
+        {
+          "evidence": "Typed human approvals bound to one immutable manifest digest",
+          "status": "MISSING",
+          "location": null
+        }
+      ],
+      "prohibited_authority": [
+        "No partial public launch",
+        "No launch from CI alone",
+        "No launch from a model or worker decision",
+        "No launch with a missing critical evidence class",
+        "No launch approval surviving a head change"
+      ],
+      "rollback": {
+        "strategy": "Return NO_GO, stop new admissions and spend, preserve customer, provider, ledger, source and audit evidence, and restore the last accepted immutable artifact.",
+        "kill_switch": "AXIGNAL_PUBLIC_LAUNCH_ENABLED",
+        "tested": false
+      },
+      "engineering_head": null,
+      "notes": [
+        "P27 may return only ACCEPTED_FOR_PUBLIC_LAUNCH, IN_PROGRESS or REJECTED.",
+        "PRIVATE_ACCEPTANCE is not a public-launch disposition."
+      ]
+    }
+  ]
+}

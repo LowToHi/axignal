@@ -129,10 +129,18 @@ assert set(p01_route["required_skills"]) == {
 current = (
     ROOT / "docs/roadmap/06-current-execution-state.md"
 ).read_text(encoding="utf-8")
-assert "P01 IN_PROGRESS" in current
-assert "primary research remains missing" in current
+v15_contract = ROOT / "docs/contracts/31-global-e2e-development-contract-v1.5.md"
+if v15_contract.is_file():
+    assert "| P01 | IN_PROGRESS | IN_PROGRESS | Secondary research only |" in current
+    assert "Primary evidence remains missing" in current
+    assert "| P02–P16 | Engineering evidence ready | Canonical acceptance blocked |" in current
+    assert "| P17–P23 | Engineering evidence ready | Canonical acceptance blocked |" in current
+    assert "| P24 | Acceptance framework implemented | Canonical acceptance blocked |" in current
+else:
+    assert "P01 IN_PROGRESS" in current
+    assert "primary research remains missing" in current
+    assert "P02–P24" in current and "`BLOCKED`" in current
 assert '"public_launch_authorised": false' in current
-assert "P02–P24" in current and "`BLOCKED`" in current
 
 print(
     json.dumps(
@@ -145,6 +153,7 @@ print(
             "primary_research_complete": False,
             "p02_authorised": False,
             "public_launch_authorised": False,
+            "v15_extension_present": v15_contract.is_file(),
         },
         sort_keys=True,
     )

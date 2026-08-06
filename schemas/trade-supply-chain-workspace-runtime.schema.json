@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://axignal.com/schemas/trade-supply-chain-workspace-runtime.schema.json",
+  "title": "AXIGNAL P14 Trade and Supply Chain Runtime",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "task_id", "programme_version", "status",
+    "canonical_activation_authorised", "dependency_status", "trust_principles",
+    "trade_library_binding", "domain_modules", "trade_opportunity_lifecycle",
+    "operating_pipeline", "trade_value_classes", "flow_measure_types",
+    "customs_measure_types", "route_event_types", "risk_classes",
+    "readiness_gates", "external_action_types", "required_approvals",
+    "supply_outcome_states", "languages", "critical_dimensions",
+    "source_catalogue_contract", "authority_model", "rights_dimensions",
+    "observability", "acceptance_gate"
+  ],
+  "properties": {
+    "schema_version": {"const": "axignal.trade-supply-chain-workspace-runtime/v0.1"},
+    "task_id": {"const": "AX-GE2E-P14-T01"},
+    "programme_version": {"const": "1.4.0"},
+    "status": {"const": "DRAFT_ENGINEERING_FOUNDATION"},
+    "canonical_activation_authorised": {"const": false},
+    "dependency_status": {"type": "object"},
+    "trust_principles": {"type": "array", "minItems": 16, "uniqueItems": true, "items": {"type": "string"}},
+    "trade_library_binding": {"type": "object"},
+    "domain_modules": {
+      "type": "array", "minItems": 8, "maxItems": 8,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["module_id", "service_id", "record_types", "invariants"],
+        "properties": {
+          "module_id": {"type": "string"},
+          "service_id": {"type": "string"},
+          "record_types": {"type": "array", "minItems": 4, "maxItems": 4, "uniqueItems": true, "items": {"type": "string"}},
+          "invariants": {"type": "array", "minItems": 6, "maxItems": 6, "uniqueItems": true, "items": {"type": "string"}}
+        }
+      }
+    },
+    "trade_opportunity_lifecycle": {"type": "object"},
+    "operating_pipeline": {"type": "object"},
+    "trade_value_classes": {"type": "array", "minItems": 10, "maxItems": 10, "uniqueItems": true, "items": {"type": "string"}},
+    "flow_measure_types": {"type": "array", "minItems": 10, "maxItems": 10, "uniqueItems": true, "items": {"type": "string"}},
+    "customs_measure_types": {"type": "array", "minItems": 10, "maxItems": 10, "uniqueItems": true, "items": {"type": "string"}},
+    "route_event_types": {"type": "array", "minItems": 10, "maxItems": 10, "uniqueItems": true, "items": {"type": "string"}},
+    "risk_classes": {"type": "array", "minItems": 10, "maxItems": 10, "uniqueItems": true, "items": {"type": "string"}},
+    "readiness_gates": {"type": "array", "minItems": 12, "maxItems": 12, "uniqueItems": true, "items": {"type": "string"}},
+    "external_action_types": {"type": "array", "minItems": 8, "uniqueItems": true, "items": {"type": "string"}},
+    "required_approvals": {"type": "array", "minItems": 6, "uniqueItems": true, "items": {"type": "string"}},
+    "supply_outcome_states": {"type": "array", "minItems": 12, "uniqueItems": true, "items": {"type": "string"}},
+    "languages": {"const": ["en", "es", "fr", "de", "pt", "it"]},
+    "critical_dimensions": {"type": "array", "minItems": 10, "uniqueItems": true, "items": {"type": "string"}},
+    "source_catalogue_contract": {"type": "object"},
+    "authority_model": {"type": "object"},
+    "rights_dimensions": {"type": "array", "minItems": 10, "maxItems": 10, "uniqueItems": true, "items": {"type": "string"}},
+    "observability": {"type": "object"},
+    "acceptance_gate": {"type": "object"}
+  }
+}

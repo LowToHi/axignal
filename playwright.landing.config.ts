@@ -1,5 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const baseURL = "http://127.0.0.1:3001";
+const publicOrigin = new URL(baseURL).origin;
+
 export default defineConfig({
   testDir: "./tests/landing",
   fullyParallel: false,
@@ -7,20 +10,27 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [["html", { open: "never" }], ["list"]] : "list",
   use: {
-    baseURL: "http://127.0.0.1:3001",
+    baseURL,
+    extraHTTPHeaders: {
+      origin: publicOrigin,
+      "sec-fetch-site": "same-origin",
+    },
     trace: "retain-on-failure",
-    screenshot: "only-on-failure"
+    screenshot: "only-on-failure",
   },
   projects: [
     { name: "landing-desktop", use: { ...devices["Desktop Chrome"] } },
-    { name: "landing-mobile", use: { ...devices["Pixel 7"] } }
+    { name: "landing-mobile", use: { ...devices["Pixel 7"] } },
   ],
   webServer: {
     command: process.env.CI
       ? "pnpm --filter @axignal/landing start"
       : "pnpm --filter @axignal/landing dev",
-    url: "http://127.0.0.1:3001",
+    url: baseURL,
     reuseExistingServer: !process.env.CI,
-    timeout: 120_000
-  }
+    timeout: 120_000,
+    env: {
+      AXIGNAL_LANDING_PUBLIC_ORIGIN: publicOrigin,
+    },
+  },
 });

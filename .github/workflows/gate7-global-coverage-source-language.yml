@@ -1,0 +1,321 @@
+name: Gate 7 Global Coverage Sources and Multilingual Acceptance
+
+on:
+  workflow_dispatch:
+    inputs:
+      require_gate_pass:
+        description: Fail unless Gate 7 has complete accepted evidence
+        required: true
+        type: boolean
+        default: false
+  pull_request:
+    paths:
+      - "data/acceptance/**"
+      - "data/foundations/**"
+      - "data/procurement/**"
+      - "data/grants/**"
+      - "data/regulatory/**"
+      - "data/infrastructure/**"
+      - "data/corporate/**"
+      - "data/sovereign-macro/**"
+      - "data/trade-supply-chain/**"
+      - "data/energy-climate/**"
+      - "data/innovation-ip/**"
+      - "apps/api/src/axignal_api/o01_source_admission_authority.py"
+      - "apps/api/tests/test_o01_source_admission_authority.py"
+      - "schemas/global-coverage-source-language-*.schema.json"
+      - "schemas/o01-source-admission-authority-manifest.schema.json"
+      - "scripts/verify_gate7_global_coverage.py"
+      - "scripts/verify_gate7_source_snapshots.py"
+      - "scripts/verify_gate7_source_rights.py"
+      - "scripts/verify_gate7_source_rights_v0_2.py"
+      - "scripts/verify_gate7_o01_source_admission_contract_v0_2.py"
+      - "scripts/extract_gate7_o01_source_admission_authority.py"
+      - "docs/acceptance/Gate-7-global-coverage-sources-multilingual-v0.1.md"
+      - "docs/acceptance/Gate-7-O01-TED-source-admission-v0.2.md"
+      - ".github/workflows/gate7-global-coverage-source-language.yml"
+  push:
+    branches:
+      - main
+      - "agent/**"
+    paths:
+      - "data/acceptance/**"
+      - "data/foundations/**"
+      - "data/procurement/**"
+      - "data/grants/**"
+      - "data/regulatory/**"
+      - "data/infrastructure/**"
+      - "data/corporate/**"
+      - "data/sovereign-macro/**"
+      - "data/trade-supply-chain/**"
+      - "data/energy-climate/**"
+      - "data/innovation-ip/**"
+      - "apps/api/src/axignal_api/o01_source_admission_authority.py"
+      - "apps/api/tests/test_o01_source_admission_authority.py"
+      - "schemas/global-coverage-source-language-*.schema.json"
+      - "schemas/o01-source-admission-authority-manifest.schema.json"
+      - "scripts/verify_gate7_global_coverage.py"
+      - "scripts/verify_gate7_source_snapshots.py"
+      - "scripts/verify_gate7_source_rights.py"
+      - "scripts/verify_gate7_source_rights_v0_2.py"
+      - "scripts/verify_gate7_o01_source_admission_contract_v0_2.py"
+      - "scripts/extract_gate7_o01_source_admission_authority.py"
+      - "docs/acceptance/Gate-7-global-coverage-sources-multilingual-v0.1.md"
+      - "docs/acceptance/Gate-7-O01-TED-source-admission-v0.2.md"
+      - ".github/workflows/gate7-global-coverage-source-language.yml"
+
+permissions:
+  contents: read
+  issues: read
+
+concurrency:
+  group: gate7-global-coverage-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  AXIGNAL_EXACT_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+  ADMISSION_MANIFEST: data/acceptance/source-admission/AX-LIB-O01-TED-source-admission-authority-manifest.v0.2.json
+  ADMISSION_CONTRACT: data/acceptance/source-admission/AX-LIB-O01-TED-source-admission-contract.v0.2.json
+  ADMISSION_CLOSURE: data/acceptance/source-admission/AX-LIB-O01-TED-source-admission-closure.v0.2.json
+  CAMPAIGN_CLOSURE: data/acceptance/campaigns/AX-LIB-O01-quality-coverage-lag-closure.v0.6-r4.json
+  CAMPAIGN_REGISTRY: data/acceptance/campaign-results/AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.6-r4.json
+  RESULT_DIR: artifacts/gate7
+
+jobs:
+  coverage-source-language:
+    name: Coverage, source admission and multilingual journeys
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact branch head
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Prove exact-head checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual_sha="$(git rev-parse HEAD)"
+          test "$actual_sha" = "$AXIGNAL_EXACT_SHA"
+          mkdir -p "$RESULT_DIR"
+          {
+            printf 'exact_head_sha=%s\n' "$actual_sha"
+            printf 'git_tree=%s\n' "$(git rev-parse 'HEAD^{tree}')"
+          } | tee "$RESULT_DIR/exact-head.txt"
+
+      - name: Set up frozen Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.13.14"
+          check-latest: false
+
+      - name: Install frozen development graph
+        run: |
+          python -m pip install --upgrade "pip==26.1.2"
+          python -m pip install \
+            --require-hashes \
+            --only-binary=:all: \
+            --requirement requirements/python-dev.lock
+          python -m pip check
+          python -m pip install --no-deps --no-build-isolation .
+
+      - name: Verify implementation quality
+        env:
+          PYTHONPATH: apps/api/src
+        run: |
+          python -m compileall -q \
+            apps/api/src/axignal_api/o01_source_admission_authority.py \
+            apps/api/tests/test_o01_source_admission_authority.py \
+            scripts/verify_gate7_global_coverage.py \
+            scripts/verify_gate7_source_snapshots.py \
+            scripts/verify_gate7_source_rights.py \
+            scripts/verify_gate7_source_rights_v0_2.py \
+            scripts/verify_gate7_o01_source_admission_contract_v0_2.py \
+            scripts/extract_gate7_o01_source_admission_authority.py
+          python -m ruff check \
+            apps/api/src/axignal_api/o01_source_admission_authority.py \
+            apps/api/tests/test_o01_source_admission_authority.py \
+            scripts/verify_gate7_global_coverage.py \
+            scripts/verify_gate7_source_snapshots.py \
+            scripts/verify_gate7_source_rights.py \
+            scripts/verify_gate7_source_rights_v0_2.py \
+            scripts/verify_gate7_o01_source_admission_contract_v0_2.py \
+            scripts/extract_gate7_o01_source_admission_authority.py
+          python -m pytest -q apps/api/tests/test_o01_source_admission_authority.py
+
+      - name: Verify repository source snapshots
+        run: |
+          python scripts/verify_gate7_source_snapshots.py \
+            | tee "$RESULT_DIR/source-snapshot-integrity.json"
+
+      - name: Reconcile historical rights and current admission
+        run: |
+          python scripts/verify_gate7_source_rights_v0_2.py \
+            | tee "$RESULT_DIR/source-rights-admission-reconciliation.json"
+
+      - name: Verify frozen O01 admission contract
+        run: |
+          python scripts/verify_gate7_o01_source_admission_contract_v0_2.py \
+            --manifest "$ADMISSION_MANIFEST" \
+            --contract "$ADMISSION_CONTRACT" \
+            --closure "$CAMPAIGN_CLOSURE" \
+            --registry "$CAMPAIGN_REGISTRY" \
+            | tee "$RESULT_DIR/o01-source-admission-contract.json"
+
+      - name: Reconstruct seven current human authorities
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          python scripts/extract_gate7_o01_source_admission_authority.py \
+            --manifest "$ADMISSION_MANIFEST" \
+            --closure "$CAMPAIGN_CLOSURE" \
+            --output "$RESULT_DIR/o01-source-admission-result.json" \
+            --require-admitted
+
+      - name: Materialise Gate 7 report
+        env:
+          AXIGNAL_EVIDENCE_HEAD_SHA: ${{ env.AXIGNAL_EXACT_SHA }}
+          AXIGNAL_GATE7_EVIDENCE_DIR: ${{ env.RESULT_DIR }}
+        run: |
+          require_pass=false
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && \
+             [ "${{ inputs.require_gate_pass }}" = "true" ]; then
+            require_pass=true
+          fi
+          AXIGNAL_REQUIRE_GATE7_PASS="$require_pass" \
+            python scripts/verify_gate7_global_coverage.py \
+            | tee "$RESULT_DIR/gate7-console.json"
+
+      - name: Enforce admitted-source and non-launch boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path("artifacts/gate7")
+          rights = json.loads(
+              (root / "source-rights-admission-reconciliation.json").read_text()
+          )
+          admission = json.loads(
+              (root / "o01-source-admission-result.json").read_text()
+          )
+          report = json.loads(
+              (root / "global-coverage-source-language-report.json").read_text()
+          )
+          summary = json.loads((root / "gate7-summary.json").read_text())
+          closure = json.loads(
+              Path(
+                  "data/acceptance/source-admission/"
+                  "AX-LIB-O01-TED-source-admission-closure.v0.2.json"
+              ).read_text()
+          )
+
+          assert rights["status"] == "PASS"
+          assert rights["output"] == "O01_SOURCE_RIGHTS_ADMISSION_RECONCILIATION_PASS"
+          assert rights["historical_source_state"] == "CANDIDATE"
+          assert rights["source_state"] == "PRODUCT_ADMITTED"
+          assert rights["legal_admission"] == "PASS"
+          assert rights["rights_admission"] == "PASS"
+          assert rights["privacy_data_rights_approval"] == "PASS"
+          assert rights["human_authority"] == "PASS"
+          assert rights["bounded_product_use_authorised"] is True
+          assert rights["claim_contribution"] is False
+          assert rights["o01_canonical_state"] == "IN_REVIEW"
+          assert rights["o01_claim_decision"] == "PENDING"
+          assert rights["historical_depth"] == "MISSING"
+          assert rights["update_frequency"] == "MISSING"
+          assert rights["publication_lag"] == "MISSING"
+          assert rights["controls"]["global_coverage_claim_authorised"] is False
+          assert rights["controls"]["gate7_closed"] is False
+          assert rights["controls"]["public_launch"] == "NO_GO"
+
+          assert admission["status"] == "PASS"
+          assert admission["output"] == "O01_TED_SOURCE_ADMISSION_PASS"
+          assert admission["decision"] == "ADMIT"
+          assert admission["next_state"] == "PRODUCT_ADMITTED"
+          assert admission["product_admitted"] is True
+          assert admission["bounded_product_use_authorised"] is True
+          assert admission["bounded_claim_contribution"] is False
+          assert admission["global_coverage_claim_authorised"] is False
+          assert admission["public_launch"] == "NO_GO"
+          assert admission["head_match"] is True
+          assert admission["manifest_match"] is True
+          assert admission["scope_match"] is True
+          assert admission["issue_match"] is True
+          assert admission["signatures_human"] is True
+          assert admission["expiry_within_evidence"] is True
+          assert set(admission["authorities"].values()) == {"APPROVED_CURRENT"}
+          assert len(admission["decision_sources"]) == 7
+
+          assert closure["status"] == "PASS"
+          assert closure["output"] == "O01_TED_SOURCE_ADMISSION_PASS"
+          assert closure["source_state"] == "PRODUCT_ADMITTED"
+          assert closure["permanent_boundary"]["bounded_claim_contribution"] is False
+          assert closure["permanent_boundary"]["gate7_closed"] is False
+          assert closure["permanent_boundary"]["public_launch"] == "NO_GO"
+
+          assert summary["status"] == "PASS"
+          assert summary["gate_decision"] == "IN_PROGRESS"
+          assert summary["global_coverage_authorised"] is False
+          assert summary["multilingual_authorised"] is False
+          assert summary["all_sources_admitted"] is False
+          assert summary["public_launch_authorised"] is False
+
+          assert report["decision"] == "IN_PROGRESS"
+          assert report["claims"] == {
+              "all_sources_admitted": False,
+              "global_coverage_authorised": False,
+              "multilingual_authorised": False,
+              "public_claim_text": None,
+          }
+          o01 = next(
+              library
+              for library in report["libraries"]
+              if library["library_id"] == "AX-LIB-O01"
+          )
+          assert o01["canonical_state"] == "IN_REVIEW"
+          assert o01["claim_decision"] == "PENDING"
+          assert o01["historical_depth"]["status"] == "MISSING"
+          assert o01["update_frequency"]["status"] == "MISSING"
+          assert o01["lag"]["status"] == "MISSING"
+          assert o01["sources"]["candidate"] == []
+          assert len(o01["sources"]["active"]) == 1
+          ted = o01["sources"]["active"][0]
+          assert ted["state"] == "PRODUCT_ADMITTED"
+          assert ted["contributes_to_public_claim"] is False
+          assert set(ted["admission"].values()) == {"PASS"}
+          PY
+
+      - name: Reject sensitive evidence and secret material
+        run: |
+          set -euo pipefail
+          ! grep -R -E \
+            'sk_(live|test)_|rk_(live|test)_|whsec_|BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY' \
+            "$RESULT_DIR"
+          ! grep -R -E \
+            '"(buyer-email|buyer-tel|organisation-tel-buyer|buyer-contact-point)"[[:space:]]*:' \
+            "$RESULT_DIR"
+
+      - name: Record exact provenance
+        run: |
+          {
+            echo "head_sha=$(git rev-parse HEAD)"
+            echo "tree_sha=$(git rev-parse 'HEAD^{tree}')"
+            sha256sum "$ADMISSION_MANIFEST"
+            sha256sum "$ADMISSION_CONTRACT"
+            sha256sum "$ADMISSION_CLOSURE"
+            sha256sum "$CAMPAIGN_CLOSURE"
+            sha256sum "$CAMPAIGN_REGISTRY"
+            sha256sum data/acceptance/library-coverage/AX-LIB-O01.json
+          } > "$RESULT_DIR/exact-provenance.txt"
+
+      - name: Upload Gate 7 evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: gate7-global-coverage-${{ env.AXIGNAL_EXACT_SHA }}
+          path: ${{ env.RESULT_DIR }}
+          if-no-files-found: error
+          retention-days: 30

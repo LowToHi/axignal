@@ -1,8 +1,10 @@
-FROM postgis/postgis:17-3.5
+FROM pgvector/pgvector:pg17@sha256:7ae6051efd0e60444282c27c7e141af07f322ce033300e727a49c3dd11075e38 AS pgvector
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends postgresql-17-pgvector \
-    && rm -rf /var/lib/apt/lists/*
+FROM postgis/postgis:17-3.5@sha256:77e89c11c4779c394ebeeaac1099dafb77b728abc8cd45dcaf6c4695503a0c37
+
+COPY --from=pgvector /usr/lib/postgresql/17/lib/vector.so /usr/lib/postgresql/17/lib/vector.so
+COPY --from=pgvector /usr/share/postgresql/17/extension/vector.control /usr/share/postgresql/17/extension/vector.control
+COPY --from=pgvector /usr/share/postgresql/17/extension/vector--*.sql /usr/share/postgresql/17/extension/
 
 COPY init.sql /docker-entrypoint-initdb.d/010-axignal-extensions.sql
 COPY 020-research-spine.sql /docker-entrypoint-initdb.d/020-axignal-research-spine.sql
@@ -25,3 +27,12 @@ COPY 082-entitlement-expiry-sweep.sql /docker-entrypoint-initdb.d/082-axignal-en
 COPY 090-trial-retention-lifecycle.sql /docker-entrypoint-initdb.d/090-axignal-trial-retention-lifecycle.sql
 COPY 091-retention-pgcrypto-boundary.sql /docker-entrypoint-initdb.d/091-axignal-retention-pgcrypto-boundary.sql
 COPY 100-stripe-paid-lifecycle.sql /docker-entrypoint-initdb.d/100-axignal-stripe-paid-lifecycle.sql
+COPY 110-seat-governance.sql /docker-entrypoint-initdb.d/110-axignal-seat-governance.sql
+COPY 120-identity-passwordless-core.sql /docker-entrypoint-initdb.d/120-axignal-identity-core.sql
+COPY 121-identity-signup-webauthn-challenges.sql /docker-entrypoint-initdb.d/121-axignal-identity-signup.sql
+COPY 122-identity-passkeys-sessions-recovery.sql /docker-entrypoint-initdb.d/122-axignal-identity-passkeys.sql
+COPY 123-trial-abuse-runtime.sql /docker-entrypoint-initdb.d/123-axignal-trial-abuse.sql
+COPY 124-identity-clone-detection-hardening.sql /docker-entrypoint-initdb.d/124-axignal-identity-clone-hardening.sql
+COPY 130-organic-discovery-founder-admin.sql /docker-entrypoint-initdb.d/130-axignal-organic-discovery.sql
+COPY 131-organic-discovery-alert-lifecycle.sql /docker-entrypoint-initdb.d/131-axignal-organic-alerts.sql
+COPY 140-subscriber-workspace-live.sql /docker-entrypoint-initdb.d/140-axignal-subscriber-workspace.sql

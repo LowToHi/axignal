@@ -1,0 +1,141 @@
+{
+  "schema_version": "axignal.seat-governance-runtime/v0.1",
+  "task_id": "AX-GE2E-P21-T02",
+  "phase": "P21",
+  "state": "BLOCKED",
+  "engineering_evidence_ready": true,
+  "commercial_activation_authorised": false,
+  "public_launch_authorised": false,
+  "objective": "Govern flat-tier seats end to end across pricing, billing, tenant membership, roles, invitations, access, audit and lifecycle.",
+  "billing_model": "FLAT_TIER",
+  "stripe_subscription_quantity": 1,
+  "price_book_binding": {
+    "path": "data/commercial/commercial-runtime-pricing-stripe-runtime.v0.1.json",
+    "status": "CANDIDATE_ONLY",
+    "plans": {
+      "CONTROLLED_TRIAL_7D": {
+        "database_plan_code": "TRIAL_7D",
+        "seat_capacity": 2
+      },
+      "PROFESSIONAL_MONTHLY": {
+        "seat_capacity": 3
+      },
+      "TEAM_MONTHLY": {
+        "seat_capacity": 15
+      }
+    }
+  },
+  "modules": [
+    "SEAT_PLAN_POLICY",
+    "TENANT_SEAT_ENTITLEMENT",
+    "MEMBERSHIP_REGISTRY",
+    "INVITATION_RESERVATION",
+    "ROLE_BINDING",
+    "ACCESS_ENFORCEMENT",
+    "LIFECYCLE_RECONCILIATION",
+    "APPEND_ONLY_AUDIT"
+  ],
+  "seat_states": [
+    "ACTIVE",
+    "READ_ONLY",
+    "SUSPENDED",
+    "CANCELLED"
+  ],
+  "membership_states": [
+    "ACTIVE",
+    "SUSPENDED",
+    "REVOKED",
+    "EXPIRED"
+  ],
+  "invitation_states": [
+    "PENDING",
+    "ACCEPTED",
+    "EXPIRED",
+    "REVOKED",
+    "DELIVERY_FAILED"
+  ],
+  "allocation_states": [
+    "RESERVED",
+    "ACTIVE",
+    "RELEASED"
+  ],
+  "roles": [
+    "ORG_OWNER",
+    "ORG_ADMIN",
+    "B2G_MANAGER",
+    "RESEARCH_OPERATOR",
+    "BID_REVIEWER",
+    "VIEWER",
+    "BILLING_ADMIN",
+    "AUDITOR"
+  ],
+  "seat_consumption_policy": {
+    "active_membership": true,
+    "pending_unexpired_invitation": true,
+    "suspended_membership": true,
+    "revoked_membership": false,
+    "expired_invitation": false,
+    "service_principal": false,
+    "internal_worker": false,
+    "support_access": false
+  },
+  "invariants": [
+    "I01 Stripe bills one flat-tier package unit and does not determine member identity.",
+    "I02 Effective seat capacity is server-derived from the versioned plan policy.",
+    "I03 Professional permits at most three active or reserved seats.",
+    "I04 Team permits at most fifteen active or reserved seats.",
+    "I05 The controlled trial permits at most two active or reserved seats.",
+    "I06 A pending unexpired invitation reserves exactly one seat.",
+    "I07 Invitation acceptance converts the existing reservation and never consumes a second seat.",
+    "I08 Invitation expiry, revocation or delivery failure releases the reservation.",
+    "I09 Membership revocation releases the active seat and invalidates active roles.",
+    "I10 Two concurrent allocations at the last available seat cannot both succeed.",
+    "I11 Downgrade is denied while occupied seats exceed target capacity.",
+    "I12 The last active organisation owner cannot be revoked or demoted.",
+    "I13 Tenant and membership authority are resolved server-side, never from browser tenant input.",
+    "I14 Missing membership or entitlement denies product access.",
+    "I15 READ_ONLY permits reads and denies writes.",
+    "I16 SUSPENDED and CANCELLED deny product access.",
+    "I17 The application role cannot directly mutate seat, membership, role or audit tables.",
+    "I18 RLS is enabled and forced on every tenant-scoped governance table.",
+    "I19 Invitation tokens are single-use; only digests are persisted.",
+    "I20 Production invitation delivery fails closed without an approved provider.",
+    "I21 Test invitation tokens are exposed only inside the isolated test runtime.",
+    "I22 Membership and invitation audit events are append-only.",
+    "I23 Billing, seat entitlement, membership and technical quota remain distinct authorities.",
+    "I24 A plan label in the UI is not proof that capacity was persisted.",
+    "I25 Models and workers cannot create memberships, invite users or grant roles.",
+    "I26 Role changes and revocations require active owner or admin authority.",
+    "I27 Cross-tenant membership, invitation and allocation access returns no rows.",
+    "I28 Idempotent operation identifiers cannot reserve duplicate seats.",
+    "I29 Plan suspension revokes pending invitations and releases reserved seats.",
+    "I30 Commercial activation requires independent human authority."
+  ],
+  "readiness_gates": [
+    "PRICE_BOOK_AND_SEAT_POLICY_MATCH",
+    "TRIGGERED_PLAN_RECONCILIATION_PASS",
+    "OWNER_BOOTSTRAP_PASS",
+    "INVITATION_DELIVERY_FAIL_CLOSED",
+    "CONCURRENT_LAST_SEAT_PASS",
+    "PROFESSIONAL_CAPACITY_PASS",
+    "TEAM_CAPACITY_PASS",
+    "DOWNGRADE_CONFLICT_PASS",
+    "LAST_OWNER_PROTECTION_PASS",
+    "RLS_CROSS_TENANT_PASS",
+    "READ_ONLY_WRITE_DENIAL_PASS",
+    "AUDIT_IMMUTABILITY_PASS",
+    "API_AND_BROWSER_E2E_PASS",
+    "HUMAN_COMMERCIAL_SECURITY_APPROVAL"
+  ],
+  "truth_boundaries": [
+    "seat range in copy != persisted seat capacity",
+    "Stripe subscription != membership",
+    "invitation created != invitation delivered",
+    "invitation delivered != membership accepted",
+    "membership active != unrestricted role authority",
+    "seat available != source rights or technical quota",
+    "plan downgrade requested != downgrade admissible",
+    "engineering E2E pass != commercial activation"
+  ],
+  "current_decision": "ENGINEERING_IMPLEMENTATION_REQUIRED_AND_COMMERCIAL_ACTIVATION_BLOCKED"
+}

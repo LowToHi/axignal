@@ -1,0 +1,115 @@
+name: O01 Quality Coverage and Lag Campaign v0.6-r1 Historical Evidence
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/o01-quality-coverage-lag-campaign-v0.6-r1.yml"
+      - "data/acceptance/campaigns/AX-LIB-O01-stage-timing-remediation.v0.6-r1.json"
+      - "data/acceptance/campaign-results/AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.6-r4.json"
+      - "data/acceptance/campaigns/AX-LIB-O01-quality-coverage-lag-closure.v0.6-r4.json"
+  push:
+    branches:
+      - main
+      - "agent/**"
+    paths:
+      - ".github/workflows/o01-quality-coverage-lag-campaign-v0.6-r1.yml"
+      - "data/acceptance/campaigns/AX-LIB-O01-stage-timing-remediation.v0.6-r1.json"
+      - "data/acceptance/campaign-results/AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.6-r4.json"
+      - "data/acceptance/campaigns/AX-LIB-O01-quality-coverage-lag-closure.v0.6-r4.json"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: o01-quality-coverage-lag-v0-6-r1-historical-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  AXIGNAL_EXACT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  REMEDIATION: data/acceptance/campaigns/AX-LIB-O01-stage-timing-remediation.v0.6-r1.json
+  REGISTRY: data/acceptance/campaign-results/AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.6-r4.json
+  CLOSURE: data/acceptance/campaigns/AX-LIB-O01-quality-coverage-lag-closure.v0.6-r4.json
+  RESULT_DIR: artifacts/o01-quality-coverage-lag-v0.6-r1-historical
+
+jobs:
+  historical-remediation:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Verify superseded remediation and current closure
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$AXIGNAL_EXACT_SHA"
+          mkdir -p "$RESULT_DIR"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          remediation = json.loads(Path(
+              "data/acceptance/campaigns/"
+              "AX-LIB-O01-stage-timing-remediation.v0.6-r1.json"
+          ).read_text())
+          registry = json.loads(Path(
+              "data/acceptance/campaign-results/"
+              "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.6-r4.json"
+          ).read_text())
+          closure = json.loads(Path(
+              "data/acceptance/campaigns/"
+              "AX-LIB-O01-quality-coverage-lag-closure.v0.6-r4.json"
+          ).read_text())
+
+          assert remediation["experimental_contract_delta"] is False
+          assert remediation["invariants"]["thresholds_unchanged"] is True
+          assert remediation["authority_boundary_unchanged"] is True
+          assert registry["status"] == "PASS"
+          assert registry["output"] == "O01_QUALITY_COVERAGE_LAG_PASS"
+          assert registry["lag_seconds"]["queue_wait_context"][
+              "thresholded_as_normalisation"
+          ] is False
+          assert closure["status"] == "PASS"
+          assert closure["output"] == "O01_QUALITY_COVERAGE_LAG_PASS"
+          assert closure["closure"]["phase_closed"] is True
+          assert closure["closure"]["thresholds_relaxed"] is False
+          assert closure["authority_boundary"]["public_launch"] == "NO_GO"
+          PY
+
+      - name: Record historical disposition
+        run: |
+          {
+            echo "head_sha=$(git rev-parse HEAD)"
+            echo "tree_sha=$(git rev-parse 'HEAD^{tree}')"
+            sha256sum "$REMEDIATION" "$REGISTRY" "$CLOSURE"
+          } > "$RESULT_DIR/exact-provenance.txt"
+          cat > "$RESULT_DIR/historical-disposition.json" <<'JSON'
+          {
+            "status": "PASS",
+            "output": "O01_QUALITY_COVERAGE_LAG_V0_6_R1_HISTORICAL_PASS",
+            "historical_controller": "v0.6-r1",
+            "superseded_by": "v0.6-r4",
+            "current_output": "O01_QUALITY_COVERAGE_LAG_PASS",
+            "network_requests_emitted": 0,
+            "thresholds_relaxed": false,
+            "public_launch": "NO_GO"
+          }
+          JSON
+
+      - name: Reject secret material
+        run: |
+          ! grep -R -E \
+            'sk_(live|test)_|rk_(live|test)_|whsec_|BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY' \
+            "$RESULT_DIR"
+
+      - name: Upload historical evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: o01-quality-coverage-lag-v0-6-r1-historical-${{ env.AXIGNAL_EXACT_SHA }}
+          path: ${{ env.RESULT_DIR }}
+          if-no-files-found: error
+          retention-days: 30

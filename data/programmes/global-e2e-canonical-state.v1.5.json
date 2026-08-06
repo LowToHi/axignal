@@ -1,0 +1,196 @@
+{
+  "registry_id": "AX-GE2E-CANONICAL-STATE-001",
+  "version": "1.5.0",
+  "goal_id": "AXIGNAL-GOAL-001",
+  "governing_contract": "31",
+  "governing_adr": "ADR-016",
+  "status": "NORMATIVE_CANDIDATE_HUMAN_APPROVAL_REQUIRED",
+  "recorded_at": "2026-07-31T22:09:00+02:00",
+  "canonical_repository": {
+    "branch": "main",
+    "head": "b9a08a2a07d04d635164e161d1b27a7a53df8575",
+    "truth": "P00_ACCEPTED_P01_IN_PROGRESS"
+  },
+  "engineering_stack": {
+    "head": "e1e4999ecd1a7140d9b18ea4b5ad6f0a20e32073",
+    "branch": "agent/ax-ge2e-p26-t01-organic-discovery-founder-admin-v1.0",
+    "relationship_to_canonical": "391_COMMITS_AHEAD_NOT_CANONICALLY_ACCEPTED_AT_RECORD_TIME",
+    "aggregate_ci_observed": "PASS_ON_RECORDED_HEAD",
+    "ci_pass_is_canonical_acceptance": false
+  },
+  "programme": "P00-P27",
+  "launch": {
+    "decision": "NO_GO",
+    "public_launch_authorised": false,
+    "partial_launch_allowed": false,
+    "bounded_public_launch_allowed": false,
+    "private_acceptance_allowed_under_contract": true,
+    "public_signup_authorised": false,
+    "public_indexing_authorised": false,
+    "public_tender_alerts_authorised": false,
+    "live_self_service_billing_authorised": false,
+    "global_coverage_claim_authorised": false,
+    "production_mcp_authorised": false
+  },
+  "phases": [
+    {
+      "phase": "P00",
+      "engineering_state": "ENGINEERING_E2E_PASS",
+      "canonical_state": "CANONICALLY_ACCEPTED",
+      "current_authority": "GOVERNANCE_ONLY"
+    },
+    {
+      "phase": "P01",
+      "engineering_state": "ENGINEERING_IN_PROGRESS",
+      "canonical_state": "IN_PROGRESS",
+      "current_authority": "SECONDARY_RESEARCH_ONLY",
+      "blocking_evidence": [
+        "Qualified primary buyer interviews",
+        "Budget-authority evidence",
+        "Direct operator evidence",
+        "Negative evidence",
+        "Willingness-to-pay evidence"
+      ]
+    },
+    {
+      "phase_range": "P02-P16",
+      "engineering_state": "ENGINEERING_EVIDENCE_READY",
+      "canonical_state": "CANONICAL_ACCEPTANCE_BLOCKED",
+      "current_authority": "NO_PRODUCT_ADMISSION_NO_SOURCE_COMMERCIAL_AUTHORITY"
+    },
+    {
+      "phase_range": "P17-P23",
+      "engineering_state": "ENGINEERING_EVIDENCE_READY",
+      "canonical_state": "CANONICAL_ACCEPTANCE_BLOCKED",
+      "current_authority": "NO_PUBLIC_OR_COMMERCIAL_ACTIVATION"
+    },
+    {
+      "phase": "P24",
+      "engineering_state": "ENGINEERING_EVIDENCE_READY",
+      "canonical_state": "CANONICAL_ACCEPTANCE_BLOCKED",
+      "current_authority": "ACCEPTANCE_FRAMEWORK_ONLY_NOT_FINAL_LAUNCH_GATE",
+      "decision": "NO_GO"
+    },
+    {
+      "phase": "P25",
+      "task": "AX-GE2E-P25-T01",
+      "engineering_state": "ENGINEERING_E2E_PASS",
+      "canonical_state": "CANONICAL_ACCEPTANCE_BLOCKED",
+      "current_authority": "IMPLEMENTED_NOT_PUBLIC",
+      "head": "a35bbbf018c1e5c4dfaa55c7669cba56ca1be090"
+    },
+    {
+      "phase": "P26",
+      "engineering_state": "ENGINEERING_IN_PROGRESS",
+      "canonical_state": "CANONICAL_ACCEPTANCE_BLOCKED",
+      "current_authority": "T01_PASS_T02_T04_PENDING",
+      "head": "e1e4999ecd1a7140d9b18ea4b5ad6f0a20e32073",
+      "tasks": [
+        {
+          "task_id": "AX-GE2E-P26-T01",
+          "state": "ENGINEERING_E2E_PASS"
+        },
+        {
+          "task_id": "AX-GE2E-P26-T02",
+          "state": "NOT_STARTED"
+        },
+        {
+          "task_id": "AX-GE2E-P26-T03",
+          "state": "NOT_STARTED"
+        },
+        {
+          "task_id": "AX-GE2E-P26-T04",
+          "state": "NOT_STARTED"
+        }
+      ]
+    },
+    {
+      "phase": "P27",
+      "task": "AX-GE2E-P27-T01",
+      "engineering_state": "NOT_STARTED",
+      "canonical_state": "CANONICAL_NOT_STARTED",
+      "current_authority": "ONLY_FUTURE_FINAL_PUBLIC_LAUNCH_GATE"
+    }
+  ],
+  "commercial": {
+    "pricing_validated": false,
+    "candidate_price_book": {
+      "CONTROLLED_TRIAL_7D": {
+        "amount_minor": 0,
+        "currency": "EUR",
+        "duration_days": 7,
+        "seat_capacity": 2,
+        "token_ceiling": 1000000,
+        "status": "CANDIDATE_ONLY"
+      },
+      "PROFESSIONAL_MONTHLY": {
+        "amount_minor": 14900,
+        "currency": "EUR",
+        "billing_interval": "MONTH",
+        "seat_capacity": 3,
+        "status": "CANDIDATE_ONLY"
+      },
+      "TEAM_MONTHLY": {
+        "amount_minor": 39900,
+        "currency": "EUR",
+        "billing_interval": "MONTH",
+        "seat_capacity": 15,
+        "status": "CANDIDATE_ONLY"
+      },
+      "ENTERPRISE_CONTRACT": {
+        "pricing": "QUOTE_ONLY",
+        "status": "CANDIDATE_ONLY"
+      }
+    },
+    "historical_price_ranges_are_current_authority": false,
+    "stripe_live": "BLOCKED",
+    "independent_paid_customer_evidence": "MISSING",
+    "retention_evidence": "MISSING",
+    "margin_evidence": "ASSUMPTION_BOUND_ONLY"
+  },
+  "identity_and_trial": {
+    "persistent_identity_engineering": "PASS",
+    "passkeys_engineering": "PASS",
+    "revocable_sessions_engineering": "PASS",
+    "recovery_engineering": "PASS",
+    "trial_per_tenant_engineering": "PASS",
+    "multiple_account_governance_engineering": "PASS",
+    "public_signup": "BLOCKED",
+    "production_smtp": "NOT_CONFIGURED",
+    "production_bot_provider": "NOT_CONFIGURED",
+    "oidc_google_microsoft": "NOT_IMPLEMENTED",
+    "production_saml_scim_acceptance": "NOT_PROVEN"
+  },
+  "organic_and_founder": {
+    "indexability_gate_engineering": "PASS",
+    "public_snapshots_engineering": "PASS",
+    "tender_alert_double_opt_in_engineering": "PASS",
+    "crm_foundation_engineering": "PASS",
+    "ai_citation_ledger_engineering": "PASS",
+    "founder_admin_foundation_engineering": "PASS",
+    "founder_admin_complete": false,
+    "public_indexing": "BLOCKED",
+    "public_alert_capture": "BLOCKED"
+  },
+  "search_console": {
+    "integration_record": "data/growth/google-search-console-integration.v0.1.json",
+    "dns_verification": "USER_ATTESTED_PRESENT",
+    "api_access": "NOT_YET_PROVEN",
+    "performance_import": "BLOCKED",
+    "mcp_candidate": "DISCOVERED_NOT_PRODUCT_ADMITTED"
+  },
+  "library_truth": {
+    "foundational_libraries_canonically_accepted": 0,
+    "opportunity_libraries_commercial": 0,
+    "global_coverage_claim_authorised": false
+  },
+  "truth_boundaries": [
+    "Engineering E2E pass is not canonical acceptance",
+    "Canonical acceptance is not commercial availability",
+    "DNS verification is not Search Console API admission",
+    "MCP catalogue presence is not connector admission",
+    "Candidate price is not validated public price",
+    "Founder Admin shell is not complete founder operations",
+    "Private acceptance is not public launch"
+  ]
+}

@@ -6,6 +6,8 @@ coverage/
 playwright-report/
 test-results/
 .turbo/
+.data/
+artifacts/subscriber-dev.*.log
 *.tsbuildinfo
 .env
 .env.*

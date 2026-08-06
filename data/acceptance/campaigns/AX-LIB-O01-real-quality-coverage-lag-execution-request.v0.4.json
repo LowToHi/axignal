@@ -1,0 +1,30 @@
+{
+  "authority_boundary": {
+    "product_admitted": false,
+    "public_claims_authorised": false,
+    "public_launch": "NO_GO",
+    "source_state": "CANDIDATE"
+  },
+  "campaign_id": "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.4",
+  "controller_parent_sha": "1aa14e8cdd900400599f3e6516abebcbf669ff68",
+  "execute": true,
+  "execution_mode": "REAL_BOUNDED_PRIVATE_EVIDENCE",
+  "manifest_reference": "sha256:fb4de11ed01dbadb76b8e8d91474a482d3011fa8128b99adcf5c1fe0363c3983",
+  "one_shot": true,
+  "remediation_of": {
+    "experimental_delta": "/source/scope: ACTIVE -> ALL",
+    "previous_artifact_digest": "sha256:13e316f6e4401f5e3a46ffe449a856adb9052b3f311934dafe75ad2160371bcb",
+    "previous_artifact_id": 8837152884,
+    "previous_controller_head_sha": "dfa3625b48d24e5f1931f4776f92c3cb4dc429b2",
+    "previous_network_requests_used": 49,
+    "previous_output": "O01_QUALITY_COVERAGE_LAG_FAIL",
+    "previous_sample_count": 0,
+    "previous_workflow_run_id": 30759915694,
+    "query_fields_sample_thresholds_retention_unchanged": true
+  },
+  "requested_at": "2026-08-02T18:08:46Z",
+  "requested_by": "LowToHi",
+  "schema_version": "axignal.o01-real-campaign-execution-request/v0.4",
+  "source_scope": "ALL",
+  "target_head_sha": "a525cef3019f004af0c278a92b8afc2403e7ec9a"
+}

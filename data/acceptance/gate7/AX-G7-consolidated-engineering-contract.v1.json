@@ -1,0 +1,163 @@
+{
+  "active_contracts": {
+    "approval_renewal_policy": "data/acceptance/approvals/AX-LIB-O01-approval-renewal-policy.v0.1.json",
+    "approval_request": "data/acceptance/approvals/AX-LIB-O01-legal-privacy-approval-request.v0.2.json",
+    "contact_policy_reconciliation": "data/acceptance/legal/AX-LIB-O01-TED-contact-policy-reconciliation.v0.2.json",
+    "coverage_index": "data/acceptance/global-coverage-source-language-index.v0.1.json",
+    "domain_contract": "data/contracts/AX-GE2E-G7-O01-T02-domain-contracts.v0.1.json",
+    "evidence_campaign_contract": "data/acceptance/campaigns/AX-LIB-O01-quality-lag-multilingual-controls.v0.1.json",
+    "field_rights_matrix": "data/acceptance/legal/AX-LIB-O01-TED-field-rights-matrix.v0.1.json",
+    "o01_library_dossier": "data/acceptance/library-coverage/AX-LIB-O01.json",
+    "official_terms_snapshot": "data/acceptance/legal/AX-LIB-O01-TED-official-terms-snapshot.v0.1.json",
+    "performance_capacity_contract": "data/acceptance/performance/AX-G7-performance-capacity-contract.v0.2.json",
+    "source_inventory_rights": "data/acceptance/source-rights/AX-LIB-O01-source-inventory-rights.v0.1.json"
+  },
+  "authority_boundary": {
+    "campaign_authority": false,
+    "current_authority_is_runtime_exact_head": true,
+    "historical_heads_are_current_authority": false,
+    "legal_decision": "MISSING",
+    "privacy_data_rights_decision": "MISSING",
+    "public_launch": "NO_GO",
+    "source_admission_authority": false
+  },
+  "baseline": {
+    "authority_branch": "release/axignal-rc6r-55ed7fb",
+    "authority_sha": "55ed7fb6d73bee8ca22ccdcaeaf4c5a550819a22"
+  },
+  "canonical_stack": [
+    {
+      "authority": "HISTORICAL_LINEAGE",
+      "component": "GATE7_CONTRACT",
+      "head_sha": "60b7c1f28b9ca1bc27bc242f2ad53a44228a48aa",
+      "sequence": 1,
+      "source_pr": 101
+    },
+    {
+      "authority": "HISTORICAL_LINEAGE",
+      "component": "O01_EVIDENCE_BASELINE",
+      "head_sha": "2b47b4b15569b21c44cca8858ee54c841fbc1647",
+      "sequence": 2,
+      "source_pr": 102
+    },
+    {
+      "authority": "HISTORICAL_LINEAGE",
+      "component": "SOURCE_INVENTORY_AND_RIGHTS",
+      "head_sha": "736c2260b431c101c001079d6ad78ebdc64a1614",
+      "sequence": 3,
+      "source_pr": 119
+    },
+    {
+      "authority": "HISTORICAL_LINEAGE",
+      "component": "LEGAL_PRIVACY_EVIDENCE",
+      "head_sha": "e423ea5911f557a0f1b66d73bbce88fb64194efb",
+      "sequence": 4,
+      "source_pr": 121
+    },
+    {
+      "authority": "HISTORICAL_LINEAGE",
+      "component": "EVIDENCE_CAMPAIGN_CONTRACT",
+      "head_sha": "0f8c9cba4eafc6eb6502fcff18e6ea0f17769841",
+      "sequence": 5,
+      "source_pr": 123
+    },
+    {
+      "authority": "HISTORICAL_LINEAGE",
+      "component": "DOMAIN_CONTRACTS",
+      "head_sha": "703d5db37a788b2fbf51cd901e2d69c6518a83c6",
+      "sequence": 6,
+      "source_pr": 126
+    },
+    {
+      "authority": "CONSOLIDATION_BASE",
+      "component": "CONTEXTUAL_CONTACT_POLICY_AND_APPROVAL_RENEWAL",
+      "head_sha": "abd37a5844c79288858e94ec308e85abe26822fe",
+      "sequence": 7,
+      "source_pr": 127
+    }
+  ],
+  "contract_id": "AX-G7-CONSOLIDATED-ENGINEERING-v1",
+  "excluded_workstreams": [
+    {
+      "pull_requests": [
+        128,
+        130
+      ],
+      "reason": "Subscriber workspace and UX work are independent of Gate 7 engineering consolidation."
+    }
+  ],
+  "exit_criteria": {
+    "CAMPAIGN_AUTHORITY": false,
+    "CI_FAILING": 0,
+    "PUBLIC_LAUNCH": "NO_GO",
+    "SINGLE_EXACT_HEAD": true,
+    "STACK_CONSOLIDATED": true,
+    "STALE_HEAD_EVIDENCE": 0,
+    "UNRESOLVED_CONFLICTS": 0
+  },
+  "freeze_contract": {
+    "approval_manifest_digest": "RUNTIME_APPROVAL_MANIFEST_SHA256",
+    "artifact_retention_days": 30,
+    "evidence_expiry": "MINIMUM_REFERENCED_EVIDENCE_EXPIRY",
+    "exact_head_sha": "RUNTIME_GIT_HEAD",
+    "gate7_artifact_digest": "GITHUB_ACTIONS_ARTIFACT_DIGEST",
+    "git_tree_sha": "RUNTIME_GIT_TREE"
+  },
+  "gate": "PUBLIC_LAUNCH_GATE_7",
+  "output": "GATE7_CONSOLIDATED_ENGINEERING_PASS",
+  "parallel_integrations": [
+    {
+      "authority": "HISTORICAL_LINEAGE",
+      "component": "F01_F07_AND_O02_O09_LIBRARY_DOSSIERS",
+      "head_sha": "f7d8f5feaecdadca00f27158e6da0dbacd92c174",
+      "integration_mode": "ADDITIVE_EXACT_BLOBS",
+      "source_pr": 120
+    },
+    {
+      "authority": "HISTORICAL_LINEAGE",
+      "component": "G7_PERFORMANCE_CAPACITY_AND_CONCURRENCY_HARNESS",
+      "head_sha": "d82dec6c3659d7fa1de37c694e589c96bb4e3787",
+      "integration_mode": "FINAL_EXACT_BLOBS",
+      "source_pr": 129
+    }
+  ],
+  "required_libraries": [
+    "AX-LIB-F01",
+    "AX-LIB-F02",
+    "AX-LIB-F03",
+    "AX-LIB-F04",
+    "AX-LIB-F05",
+    "AX-LIB-F06",
+    "AX-LIB-F07",
+    "AX-LIB-O01",
+    "AX-LIB-O02",
+    "AX-LIB-O03",
+    "AX-LIB-O04",
+    "AX-LIB-O05",
+    "AX-LIB-O06",
+    "AX-LIB-O07",
+    "AX-LIB-O08",
+    "AX-LIB-O09"
+  ],
+  "status": "ENGINEERING_CONSOLIDATED",
+  "supersession_map": [
+    {
+      "active": "data/acceptance/approvals/AX-LIB-O01-legal-privacy-approval-request.v0.2.json",
+      "historical_file_retained": true,
+      "scope": "FULL",
+      "superseded": "data/acceptance/approvals/AX-LIB-O01-legal-privacy-approval-request.v0.1.json"
+    },
+    {
+      "active": "data/acceptance/legal/AX-LIB-O01-TED-contact-policy-reconciliation.v0.2.json",
+      "historical_file_retained": true,
+      "scope": "PROFESSIONAL_CONTACT_PERSON_DATA_ONLY",
+      "superseded": "data/acceptance/legal/AX-LIB-O01-TED-field-rights-matrix.v0.1.json"
+    },
+    {
+      "active": "data/acceptance/performance/AX-G7-performance-capacity-contract.v0.2.json",
+      "historical_file_retained": true,
+      "scope": "FULL",
+      "superseded": "data/acceptance/performance/AX-G7-performance-capacity-contract.v0.1.json"
+    }
+  ]
+}

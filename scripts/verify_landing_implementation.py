@@ -27,6 +27,9 @@ def main() -> None:
     form = read("apps/landing/components/pilot-access-form.tsx")
     endpoint = read("apps/landing/app/api/pilot-intake/route.ts")
     css = read("apps/landing/app/globals.css")
+    message_css = read("apps/landing/app/message-copy.css")
+    pricing_adapter = read("apps/landing/lib/candidate-pricing.ts")
+    pricing_contract = read("apps/landing/lib/candidate-pricing-contract.ts")
     tests = read("tests/landing/landing.spec.ts")
 
     require(
@@ -35,11 +38,15 @@ def main() -> None:
             "ScrollTrigger",
             "pin: globeStage.current",
             "prefers-reduced-motion",
-            "Synthetic demonstration · not investment performance",
+            "Synthetic demonstration · not procurement or win-rate evidence",
             "Proposal is not admission",
-            "Request private access",
+            "Request your 7-day B2G trial",
+            "BUSINESS-TO-GOVERNMENT (B2G) OPPORTUNITY INTELLIGENCE",
+            "Find the public contracts your business is built to pursue.",
+            "data-message-version={MESSAGE_VERSION}",
+            'id="pricing"',
         ],
-        "landing experience",
+        "B2G landing experience",
     )
     require(
         globe,
@@ -58,9 +65,11 @@ def main() -> None:
             'fetch("/api/pilot-intake"',
             'name="consent"',
             'name="website"',
+            "messageVersion",
+            "Request 7-day B2G trial",
             "aria-live",
         ],
-        "pilot form",
+        "B2G controlled-trial form",
     )
     require(
         endpoint,
@@ -68,10 +77,12 @@ def main() -> None:
             "AXIGNAL_PILOT_INTAKE_WEBHOOK_URL",
             "AXIGNAL_PILOT_INTAKE_BEARER_TOKEN",
             "AXIGNAL_PILOT_CONTACT_EMAIL",
+            "axignal.b2g-trial-intake.v1",
+            "messageVersion",
             "AbortSignal.timeout",
             '"cache-control": "no-store"',
         ],
-        "pilot intake endpoint",
+        "B2G controlled-trial endpoint",
     )
     require(
         css,
@@ -84,11 +95,45 @@ def main() -> None:
         "landing styles",
     )
     require(
+        message_css,
+        [
+            ".problem-section",
+            ".pricing-section",
+            ".assurance-section",
+            ".faq-section",
+            ".pricing-grid article:first-child",
+        ],
+        "B2G message styles",
+    )
+    require(
+        pricing_adapter,
+        [
+            "commercial-runtime-pricing-stripe-runtime.v0.1.json",
+            "parseCandidatePlans",
+            "getCandidatePlans",
+        ],
+        "server pricing adapter",
+    )
+    require(
+        pricing_contract,
+        [
+            'pricing?.status !== "CANDIDATE_ONLY"',
+            'planCode === "CONTROLLED_TRIAL_7D"',
+            "plan.self_service_activation !== false",
+            "plan.commercial_activation_authorised !== false",
+        ],
+        "B2G trial and candidate pricing contract",
+    )
+    require(
         tests,
         [
             "reducedMotion",
             "semantic-globe",
             "pilot-intake",
+            "messageVersion",
+            "controlled_trial_7d",
+            "professional_monthly",
+            "Business-to-Government",
             "scrollWidth",
         ],
         "landing browser tests",
@@ -98,7 +143,10 @@ def main() -> None:
         "pilot.axignal.com",
         "REMOTE_PILOT_ACCEPTED",
         "guaranteed return",
-        "live investment performance",
+        "guaranteed win",
+        "zero hallucinations",
+        "complete global coverage",
+        "market validated",
     ]
     joined = "\n".join((experience, form, endpoint))
     violations = [value for value in forbidden if value in joined]
@@ -106,6 +154,12 @@ def main() -> None:
 
     evidence = {
         "status": "PASS",
+        "message_version": "b2g-opportunity-v1.0",
+        "market_category": "BUSINESS_TO_GOVERNMENT_OPPORTUNITY_INTELLIGENCE",
+        "real_landing_copy_implemented": True,
+        "controlled_trial_visible": True,
+        "server_price_book_bound": True,
+        "pricing_contract_separated_from_io": True,
         "gsap_scrolltrigger": True,
         "react_three_fiber": True,
         "semantic_globe": True,

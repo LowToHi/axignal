@@ -1,0 +1,131 @@
+name: O01 Quality Coverage and Lag Campaign v0.2 Historical Evidence
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/o01-quality-coverage-lag-campaign-v0.2.yml"
+      - "data/acceptance/campaigns/AX-LIB-O01-real-quality-coverage-lag-plan.v0.2.json"
+      - "data/acceptance/campaign-results/AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.6-r4.json"
+      - "data/acceptance/campaigns/AX-LIB-O01-quality-coverage-lag-closure.v0.6-r4.json"
+  push:
+    branches:
+      - main
+      - "agent/**"
+    paths:
+      - ".github/workflows/o01-quality-coverage-lag-campaign-v0.2.yml"
+      - "data/acceptance/campaigns/AX-LIB-O01-real-quality-coverage-lag-plan.v0.2.json"
+      - "data/acceptance/campaign-results/AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.6-r4.json"
+      - "data/acceptance/campaigns/AX-LIB-O01-quality-coverage-lag-closure.v0.6-r4.json"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: o01-quality-coverage-lag-v0-2-historical-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  AXIGNAL_EXACT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  PLAN: data/acceptance/campaigns/AX-LIB-O01-real-quality-coverage-lag-plan.v0.2.json
+  REGISTRY: data/acceptance/campaign-results/AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.6-r4.json
+  CLOSURE: data/acceptance/campaigns/AX-LIB-O01-quality-coverage-lag-closure.v0.6-r4.json
+  RESULT_DIR: artifacts/o01-quality-coverage-lag-v0.2-historical
+
+jobs:
+  historical-campaign:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Prove exact checkout
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$AXIGNAL_EXACT_SHA"
+          mkdir -p "$RESULT_DIR"
+          {
+            echo "head_sha=$(git rev-parse HEAD)"
+            echo "tree_sha=$(git rev-parse 'HEAD^{tree}')"
+          } > "$RESULT_DIR/exact-provenance.txt"
+
+      - name: Verify superseded v0.2 contract and current authority
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          plan = json.loads(Path(
+              "data/acceptance/campaigns/"
+              "AX-LIB-O01-real-quality-coverage-lag-plan.v0.2.json"
+          ).read_text())
+          registry = json.loads(Path(
+              "data/acceptance/campaign-results/"
+              "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.6-r4.json"
+          ).read_text())
+          closure = json.loads(Path(
+              "data/acceptance/campaigns/"
+              "AX-LIB-O01-quality-coverage-lag-closure.v0.6-r4.json"
+          ).read_text())
+
+          assert plan["schema_version"] == "axignal.o01-quality-coverage-lag-plan/v0.2"
+          assert plan["campaign_id"] == "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.2"
+          assert plan["source"]["scope"] == "ACTIVE"
+          assert plan["sampling"]["check_query_syntax"] is True
+          assert "buyer-tel" in plan["fields"]["ephemeral_contact_projection"]
+          assert plan["non_authorisations"]["ted_product_admission"] is False
+          assert plan["non_authorisations"]["public_launch"] == "NO_GO"
+
+          assert registry["schema_version"] == (
+              "axignal.o01-campaign-result-registry/v0.6-r4"
+          )
+          assert registry["status"] == "PASS"
+          assert registry["output"] == "O01_QUALITY_COVERAGE_LAG_PASS"
+          assert registry["measurement"]["sample_count"] == 180
+          assert len(registry["measurement"]["countries"]) == 12
+          assert registry["controls"]["fabricated_evidence"] == 0
+
+          assert closure["status"] == "PASS"
+          assert closure["output"] == "O01_QUALITY_COVERAGE_LAG_PASS"
+          assert closure["phase_scope"] == "AX-LIB-O01/O01-C_QUALITY_COVERAGE_LAG"
+          assert closure["closure"]["phase_closed"] is True
+          assert closure["closure"]["thresholds_relaxed"] is False
+          assert closure["authority_boundary"]["public_launch"] == "NO_GO"
+          PY
+
+      - name: Record historical disposition
+        run: |
+          cat > "$RESULT_DIR/historical-disposition.json" <<'JSON'
+          {
+            "status": "PASS",
+            "output": "O01_QUALITY_COVERAGE_LAG_V0_2_HISTORICAL_PASS",
+            "historical_contract": "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.2",
+            "historical_scope": "ACTIVE",
+            "historical_check_query_syntax": true,
+            "historical_contact_field": "buyer-tel",
+            "superseded_by": "AX-LIB-O01-TED-QALAG-ML-CONTROLS-v0.6",
+            "current_output": "O01_QUALITY_COVERAGE_LAG_PASS",
+            "network_requests_emitted": 0,
+            "public_launch": "NO_GO"
+          }
+          JSON
+          sha256sum "$PLAN" "$REGISTRY" "$CLOSURE" \
+            >> "$RESULT_DIR/exact-provenance.txt"
+
+      - name: Reject secret material
+        run: |
+          ! grep -R -E \
+            'sk_(live|test)_|rk_(live|test)_|whsec_|BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY' \
+            "$RESULT_DIR"
+
+      - name: Upload historical evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: o01-quality-coverage-lag-v0-2-historical-${{ env.AXIGNAL_EXACT_SHA }}
+          path: ${{ env.RESULT_DIR }}
+          if-no-files-found: error
+          retention-days: 30

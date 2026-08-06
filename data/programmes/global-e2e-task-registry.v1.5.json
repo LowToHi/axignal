@@ -1,0 +1,63 @@
+{
+  "registry_id": "AX-GE2E-TASK-REGISTRY-001",
+  "version": "1.5.0",
+  "status": "NORMATIVE_CANDIDATE_HUMAN_APPROVAL_REQUIRED",
+  "goal_id": "AXIGNAL-GOAL-001",
+  "programme": "P00-P27",
+  "governing_contract": "31",
+  "governing_adr": "ADR-016",
+  "canonical_state_registry": "data/programmes/global-e2e-canonical-state.v1.5.json",
+  "legacy_v1_4_shards": [
+    {
+      "range": "P00-P04",
+      "path": "data/programmes/global-e2e-tasks-p00-p04.v1.4.json",
+      "task_count": 5,
+      "status": "PRESERVED_V1_4_TASK_DEFINITIONS"
+    },
+    {
+      "range": "P05-P09",
+      "path": "data/programmes/global-e2e-tasks-p05-p09.v1.4.json",
+      "task_count": 5,
+      "status": "PRESERVED_V1_4_TASK_DEFINITIONS"
+    },
+    {
+      "range": "P10-P14",
+      "path": "data/programmes/global-e2e-tasks-p10-p14.v1.4.json",
+      "task_count": 5,
+      "status": "PRESERVED_V1_4_TASK_DEFINITIONS"
+    },
+    {
+      "range": "P15-P19",
+      "path": "data/programmes/global-e2e-tasks-p15-p19.v1.4.json",
+      "task_count": 5,
+      "status": "PRESERVED_V1_4_TASK_DEFINITIONS"
+    },
+    {
+      "range": "P20-P24",
+      "path": "data/programmes/global-e2e-tasks-p20-p24.v1.4.json",
+      "task_count": 5,
+      "status": "PRESERVED_V1_4_TASK_DEFINITIONS_WITH_P24_ROLE_SUPERSEDED_BY_CONTRACT_31"
+    }
+  ],
+  "v1_5_shards": [
+    {
+      "range": "P25-P27",
+      "path": "data/programmes/global-e2e-tasks-p25-p27.v1.5.json",
+      "task_count": 6,
+      "schema": "schemas/global-e2e-v1.5-task.schema.json"
+    }
+  ],
+  "total_phase_count": 28,
+  "total_task_count": 31,
+  "state_model": {
+    "engineering_and_canonical_state_separated": true,
+    "engineering_evidence_is_acceptance": false,
+    "canonical_acceptance_is_commercial_availability": false,
+    "only_final_launch_task": "AX-GE2E-P27-T01"
+  },
+  "supersession": {
+    "contract_30": "PRESERVED_HISTORY_SUPERSEDED_AS_ACTIVE_PROGRAMME_AUTHORITY",
+    "adr_015": "PRESERVED_HISTORY_SUPERSEDED_AS_ACTIVE_SEQUENCE_AUTHORITY",
+    "p24": "ACCEPTANCE_FRAMEWORK_NOT_FINAL_LAUNCH_AUTHORITY"
+  }
+}

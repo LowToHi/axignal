@@ -1,0 +1,292 @@
+{
+  "task_id": "AX-GE2E-P22-T01",
+  "version": "0.1.0",
+  "baseline_sha": "ee196e3cd8d7027adf92eb40e04868a5ad6e7594",
+  "state": "BLOCKED",
+  "engineering_evidence_ready": true,
+  "production_deployment_authorised": false,
+  "public_traffic_authorised": false,
+  "stripe_live_authorised": false,
+  "external_action_authorised": false,
+  "canonical_activation_authorised": false,
+  "input_contract_bindings": [
+    {
+      "task_id": "AX-GE2E-P17-T01",
+      "path": "data/intelligence/cross-library-intelligence-runtime.v0.1.json",
+      "engineering_evidence_ready": true,
+      "canonical_activation_authorised": false
+    },
+    {
+      "task_id": "AX-GE2E-P18-T01",
+      "path": "data/intelligence/intent-intelligence-knowledge-tides-runtime.v0.1.json",
+      "engineering_evidence_ready": true,
+      "canonical_activation_authorised": false
+    },
+    {
+      "task_id": "AX-GE2E-P19-T01",
+      "path": "data/scenarios/scenarios-calibration-outcomes-runtime.v0.1.json",
+      "engineering_evidence_ready": true,
+      "canonical_activation_authorised": false
+    },
+    {
+      "task_id": "AX-GE2E-P20-T01",
+      "path": "data/enterprise/enterprise-api-private-data-runtime.v0.1.json",
+      "engineering_evidence_ready": true,
+      "canonical_activation_authorised": false
+    },
+    {
+      "task_id": "AX-GE2E-P21-T01",
+      "path": "data/commercial/commercial-runtime-pricing-stripe-runtime.v0.1.json",
+      "engineering_evidence_ready": true,
+      "canonical_activation_authorised": false
+    }
+  ],
+  "modules": [
+    "release_control",
+    "runtime_topology",
+    "service_level_objectives",
+    "observability",
+    "incident_response",
+    "backup_restore",
+    "disaster_recovery",
+    "security_acceptance"
+  ],
+  "record_types": [
+    "DeploymentCandidate",
+    "ReleaseManifest",
+    "ArtifactDigest",
+    "EnvironmentBinding",
+    "ChangeApproval",
+    "RollbackPlan",
+    "TrafficGate",
+    "HealthSignal",
+    "ServiceLevelIndicator",
+    "ServiceLevelObjective",
+    "ErrorBudget",
+    "BurnRateAlert",
+    "SyntheticProbe",
+    "TraceSample",
+    "MetricSeries",
+    "StructuredLog",
+    "Incident",
+    "SeverityAssignment",
+    "IncidentTimeline",
+    "Mitigation",
+    "PostIncidentReview",
+    "BackupSet",
+    "BackupDigest",
+    "RestoreAttempt",
+    "RestoreEvidence",
+    "RecoveryPoint",
+    "RecoveryTime",
+    "FailoverAttempt",
+    "FailbackAttempt",
+    "SecurityControl",
+    "SecurityFinding",
+    "RiskAcceptance"
+  ],
+  "invariants": [
+    "production deployment requires immutable artifact digest",
+    "production deployment requires exact source revision",
+    "production deployment requires environment-specific secret references",
+    "production deployment cannot contain plaintext secrets",
+    "public traffic requires successful smoke probes",
+    "public traffic requires rollback path",
+    "public traffic requires current security acceptance",
+    "public traffic requires SLO instrumentation",
+    "release approval cannot be inferred from CI success",
+    "release approval cannot be granted by a model",
+    "release approval cannot be granted by a workload",
+    "release approval is environment-bound",
+    "rollback must restore the last known good artifact",
+    "rollback must preserve audit evidence",
+    "health endpoint must not expose secrets",
+    "health endpoint must distinguish liveness and readiness",
+    "readiness must fail closed on unavailable dependencies",
+    "SLO calculations use defined SLIs only",
+    "availability excludes declared maintenance only",
+    "latency SLI is measured server-side",
+    "error budget cannot be reset by deployment",
+    "fast burn requires paging",
+    "slow burn requires ticketed response",
+    "alerts require ownership and runbook",
+    "observability data is tenant-sanitized",
+    "logs exclude credentials and raw payment data",
+    "traces exclude private document bodies",
+    "metrics avoid unbounded tenant labels",
+    "incident severity is deterministic",
+    "security incidents require restricted handling",
+    "incident timelines are append-only",
+    "post-incident review cannot rewrite event history",
+    "backup artifacts are encrypted",
+    "backup digests are verified before restore",
+    "restore evidence must come from an isolated target",
+    "backup success is not restore success",
+    "RPO is measured from recovered durable state",
+    "RTO is measured from declared incident start",
+    "failover cannot bypass tenant isolation",
+    "failback requires consistency verification",
+    "DR exercises cannot mutate production data",
+    "security acceptance is control-specific",
+    "open critical findings block production",
+    "open high findings require explicit risk acceptance",
+    "risk acceptance is typed and expiring",
+    "dependency vulnerabilities are evidence not automatic exploitability",
+    "Stripe live remains independently gated",
+    "canonical source authority remains independently gated"
+  ],
+  "lifecycle_states": [
+    "DRAFT",
+    "VALIDATING",
+    "DEPLOYABLE",
+    "OPERABLE",
+    "DEGRADED",
+    "INCIDENT",
+    "FAILOVER_ACTIVE",
+    "RESTORING",
+    "RECOVERED",
+    "SECURITY_REVIEW",
+    "PRODUCTION_READY",
+    "BLOCKED"
+  ],
+  "pipeline_stages": [
+    "SOURCE_FREEZE",
+    "BUILD",
+    "SBOM",
+    "SIGN",
+    "TEST",
+    "SECURITY_SCAN",
+    "DEPLOY_STAGING",
+    "SMOKE",
+    "DR_EXERCISE",
+    "SECURITY_ACCEPTANCE",
+    "PRODUCTION_GATE"
+  ],
+  "slo_contract": {
+    "window_days": 30,
+    "services": [
+      {
+        "service": "api",
+        "availability_target_bps": 9990,
+        "latency_p95_ms": 500,
+        "latency_p99_ms": 1200
+      },
+      {
+        "service": "web",
+        "availability_target_bps": 9990,
+        "latency_p95_ms": 1500,
+        "latency_p99_ms": 3000
+      },
+      {
+        "service": "worker",
+        "successful_job_target_bps": 9950,
+        "queue_age_p95_seconds": 120
+      }
+    ],
+    "error_budget_policy": {
+      "fast_burn_1h_multiplier": 14.4,
+      "fast_burn_6h_multiplier": 6.0,
+      "slow_burn_3d_multiplier": 1.0,
+      "freeze_threshold_consumed_bps": 10000
+    }
+  },
+  "dr_contract": {
+    "tiers": [
+      {
+        "asset": "postgres_primary",
+        "rpo_minutes": 15,
+        "rto_minutes": 60,
+        "restore_test_required": true
+      },
+      {
+        "asset": "object_evidence_store",
+        "rpo_minutes": 60,
+        "rto_minutes": 240,
+        "restore_test_required": true
+      },
+      {
+        "asset": "application_runtime",
+        "rpo_minutes": 0,
+        "rto_minutes": 30,
+        "restore_test_required": false
+      }
+    ],
+    "backup_policy": {
+      "encrypted": true,
+      "digest_verified": true,
+      "retention_days": [7, 35, 365],
+      "cross_failure_domain_copy_required": true
+    },
+    "exercise_policy": {
+      "isolated_restore_required": true,
+      "production_mutation_forbidden": true,
+      "failback_consistency_check_required": true
+    }
+  },
+  "security_acceptance": {
+    "required_controls": [
+      "identity_and_tenant_resolution",
+      "least_privilege",
+      "secret_management",
+      "dependency_and_container_scan",
+      "artifact_integrity",
+      "network_egress",
+      "webhook_signature_and_replay",
+      "audit_logging",
+      "backup_encryption",
+      "restore_validation",
+      "incident_response",
+      "privacy_and_data_rights"
+    ],
+    "blocking_findings": ["CRITICAL"],
+    "high_finding_policy": "EXPLICIT_EXPIRING_RISK_ACCEPTANCE",
+    "required_artifacts": [
+      "sbom",
+      "vulnerability_report",
+      "container_scan",
+      "secret_scan",
+      "iac_scan",
+      "threat_model_delta",
+      "penetration_test_scope",
+      "restore_evidence",
+      "incident_runbook",
+      "release_manifest"
+    ]
+  },
+  "readiness_gates": [
+    "immutable_artifact",
+    "exact_revision",
+    "staging_smoke",
+    "rollback_test",
+    "slo_instrumented",
+    "alert_routes_verified",
+    "backup_current",
+    "restore_test_passed",
+    "rpo_met",
+    "rto_met",
+    "critical_findings_zero",
+    "security_acceptance_signed"
+  ],
+  "authority_classes": [
+    "CI_EVIDENCE",
+    "RELEASE_ENGINEER",
+    "SRE_ON_CALL",
+    "SECURITY_REVIEWER",
+    "PRIVACY_REVIEWER",
+    "PRODUCT_OWNER",
+    "INCIDENT_COMMANDER",
+    "RISK_ACCEPTOR"
+  ],
+  "risk_classes": [
+    "secret_exposure",
+    "tenant_boundary_failure",
+    "availability_regression",
+    "data_loss",
+    "restore_failure",
+    "alert_failure",
+    "dependency_compromise",
+    "artifact_tampering",
+    "unsafe_rollback",
+    "premature_live_activation"
+  ]
+}

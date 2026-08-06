@@ -1,0 +1,146 @@
+name: O01 Quality Coverage and Lag Campaign v0.6-r3
+
+on:
+  pull_request:
+    paths:
+      - "apps/api/src/axignal_api/o01_quality_stage_timing_v2.py"
+      - "apps/api/tests/test_o01_quality_stage_timing_v2.py"
+      - "data/acceptance/campaigns/AX-LIB-O01-stage-timing-remediation.v0.6-r1.json"
+      - "data/acceptance/campaigns/AX-LIB-O01-real-quality-coverage-lag-execution-request.v0.6-r3.json"
+      - "scripts/run_gate7_o01_campaign_ci_v0_6_r3.sh"
+      - ".github/workflows/o01-quality-coverage-lag-campaign-v0.6-r3.yml"
+  push:
+    branches: ["agent/**"]
+    paths:
+      - "apps/api/src/axignal_api/o01_quality_stage_timing_v2.py"
+      - "apps/api/tests/test_o01_quality_stage_timing_v2.py"
+      - "data/acceptance/campaigns/AX-LIB-O01-stage-timing-remediation.v0.6-r1.json"
+      - "data/acceptance/campaigns/AX-LIB-O01-real-quality-coverage-lag-execution-request.v0.6-r3.json"
+      - "scripts/run_gate7_o01_campaign_ci_v0_6_r3.sh"
+      - ".github/workflows/o01-quality-coverage-lag-campaign-v0.6-r3.yml"
+
+permissions:
+  contents: read
+  actions: read
+  issues: read
+
+concurrency:
+  group: o01-quality-coverage-lag-v0-6-r3-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  AXIGNAL_EXACT_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+  AXIGNAL_SOURCE_BRANCH: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name }}
+  AXIGNAL_SOURCE_REPOSITORY: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name || github.repository }}
+  AUTHORITY_MANIFEST: data/acceptance/approvals/AX-LIB-O01-campaign-authority-manifest.v0.6.json
+  REQUEST_PATH: data/acceptance/campaigns/AX-LIB-O01-real-quality-coverage-lag-execution-request.v0.6-r3.json
+  PLAN_PATH: artifacts/o01-quality-coverage-lag-v0.6-r3/materialized-plan.v0.6.json
+  RESULT_DIR: artifacts/o01-quality-coverage-lag-v0.6-r3/current
+  RAW_TMP_DIR: /tmp/axignal-o01-v0-6-r3-raw-responses
+  KILL_SWITCH_PATH: /tmp/axignal-o01-v0-6-r3.kill
+
+jobs:
+  validate:
+    name: Validate self-contained O01 timing remediation
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    outputs:
+      execute_real_campaign: ${{ steps.request.outputs.execute }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.13.14"
+      - name: Install frozen development graph
+        run: |
+          python -m pip install --upgrade "pip==26.1.2"
+          python -m pip install --require-hashes --only-binary=:all: --requirement requirements/python-dev.lock
+          python -m pip check
+          python -m pip install --no-deps --no-build-isolation .
+      - name: Validate code, regression and immutable campaign contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$AXIGNAL_EXACT_SHA"
+          mkdir -p "$(dirname "$PLAN_PATH")" "$RESULT_DIR"
+          python -m compileall -q apps/api/src/axignal_api/o01_quality_stage_timing_v2.py apps/api/tests/test_o01_quality_stage_timing_v2.py
+          ruff check apps/api/src/axignal_api/o01_quality_stage_timing_v2.py apps/api/tests/test_o01_quality_stage_timing_v2.py scripts/run_gate7_o01_campaign_ci_v0_6_r3.sh
+          pytest -q apps/api/tests/test_o01_quality_stage_timing_v2.py apps/api/tests/test_gate7_o01_multilingual.py apps/api/tests/test_gate7_o01_runtime.py apps/api/tests/test_o01_quality_controls.py apps/api/tests/test_o01_quality_campaign.py
+          jq -e '.experimental_contract_delta == false and .invariants.thresholds_unchanged == true and .authority_boundary_unchanged == true' data/acceptance/campaigns/AX-LIB-O01-stage-timing-remediation.v0.6-r1.json
+          python scripts/verify_gate7_o01_v0_6_execution_contract.py --materialized-output "$RESULT_DIR/materialized-execution-contract.v0.6.json" | tee "$RESULT_DIR/execution-contract-result.json"
+          python scripts/materialize_gate7_o01_quality_coverage_lag_plan_v0_6.py --output "$PLAN_PATH" | tee "$RESULT_DIR/plan-materialization-result.json"
+          python scripts/verify_gate7_o01_quality_coverage_lag_contract_v0_6.py --plan "$PLAN_PATH" | tee "$RESULT_DIR/plan-contract-result.json"
+      - name: Select exact request-only commit
+        id: request
+        shell: bash
+        run: |
+          set -euo pipefail
+          execute=false
+          request_present=false
+          only_change=false
+          absent_in_parent=false
+          if [[ -f "$REQUEST_PATH" ]]; then
+            request_present=true
+            [[ "$(git diff --name-only HEAD^ HEAD)" == "$REQUEST_PATH" ]] && only_change=true
+            ! git cat-file -e "HEAD^:${REQUEST_PATH}" 2>/dev/null && absent_in_parent=true
+          fi
+          if [[ "$request_present" == true && "$only_change" == true && "$absent_in_parent" == true && "$AXIGNAL_SOURCE_REPOSITORY" == "$GITHUB_REPOSITORY" && "$AXIGNAL_SOURCE_BRANCH" == "agent/ax-gate7-o01-v06-execute-query" ]] && jq -e '.execute == true and .one_shot == true and .controller_parent_binding == "IMMEDIATE_PARENT_REQUEST_ONLY" and .instrumentation_implementation == "SELF_CONTAINED_V2"' "$REQUEST_PATH" >/dev/null; then execute=true; fi
+          echo "execute=$execute" >> "$GITHUB_OUTPUT"
+          jq -n --argjson execute "$execute" --argjson request_present "$request_present" --argjson only_change "$only_change" --argjson absent_in_parent "$absent_in_parent" '{execute_real_campaign:$execute,request_present:$request_present,request_is_only_change:$only_change,request_absent_in_parent:$absent_in_parent}' | tee "$RESULT_DIR/execution-selection.json"
+      - name: Upload static validation evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: o01-quality-coverage-lag-v0-6-r3-static-${{ env.AXIGNAL_EXACT_SHA }}
+          path: artifacts/o01-quality-coverage-lag-v0.6-r3
+          if-no-files-found: error
+          retention-days: 30
+
+  real-campaign-v0-6-r3:
+    name: Execute authorised O01 timing remediation
+    needs: validate
+    if: needs.validate.outputs.execute_real_campaign == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.13.14"
+      - name: Install frozen development graph
+        run: |
+          python -m pip install --upgrade "pip==26.1.2"
+          python -m pip install --require-hashes --only-binary=:all: --requirement requirements/python-dev.lock
+          python -m pip check
+          python -m pip install --no-deps --no-build-isolation .
+      - name: Execute exact request-only controller
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash scripts/run_gate7_o01_campaign_ci_v0_6_r3.sh
+      - name: Enforce privacy and permanent authority boundary
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -d "$RAW_TMP_DIR"
+          test ! -e "$RESULT_DIR/raw-responses.tar.gz"
+          if [ -f "$RESULT_DIR/sanitised-sample-inventory.v0.1.jsonl" ]; then ! grep -E '"(buyer-email|buyer-tel|organisation-tel-buyer|buyer-contact-point)"[[:space:]]*:' "$RESULT_DIR/sanitised-sample-inventory.v0.1.jsonl"; fi
+          if [ -f "$RESULT_DIR/notification-ledger.v0.1.jsonl" ]; then jq -e -s 'all(.[]; .external_delivery_authorised == false)' "$RESULT_DIR/notification-ledger.v0.1.jsonl"; fi
+          ! grep -R -E 'sk_(live|test)_|rk_(live|test)_|whsec_|BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY' "$RESULT_DIR" --exclude='raw-responses.cms'
+          if [ -f "$RESULT_DIR/final-result.json" ]; then jq -e '.authority_boundary.source_state == "CANDIDATE" and .authority_boundary.product_admitted == false and .authority_boundary.public_claims_authorised == false and .authority_boundary.public_launch == "NO_GO"' "$RESULT_DIR/final-result.json"; fi
+      - name: Upload retained remediation evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: o01-quality-coverage-lag-v0-6-r3-${{ env.AXIGNAL_EXACT_SHA }}
+          path: artifacts/o01-quality-coverage-lag-v0.6-r3
+          if-no-files-found: error
+          retention-days: 30

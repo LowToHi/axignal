@@ -1,0 +1,33 @@
+{
+  "library_id": "AX-LIB-F02",
+  "kind": "FOUNDATIONAL",
+  "canonical_name": "Entities, organisations and ownership",
+  "runtime_reference": "data/foundations/foundational-library-runtime.v0.1.json",
+  "canonical_state": "BLOCKED",
+  "countries_covered": [],
+  "languages": [
+    {"language": "en", "ingestion": "MISSING", "normalisation": "MISSING", "search": "MISSING", "presentation": "MISSING", "evidence": []},
+    {"language": "es", "ingestion": "MISSING", "normalisation": "MISSING", "search": "MISSING", "presentation": "MISSING", "evidence": []},
+    {"language": "fr", "ingestion": "MISSING", "normalisation": "MISSING", "search": "MISSING", "presentation": "MISSING", "evidence": []},
+    {"language": "de", "ingestion": "MISSING", "normalisation": "MISSING", "search": "MISSING", "presentation": "MISSING", "evidence": []},
+    {"language": "pt", "ingestion": "MISSING", "normalisation": "MISSING", "search": "MISSING", "presentation": "MISSING", "evidence": []},
+    {"language": "it", "ingestion": "MISSING", "normalisation": "MISSING", "search": "MISSING", "presentation": "MISSING", "evidence": []}
+  ],
+  "sectors": [],
+  "historical_depth": {"earliest_date": null, "latest_date": null, "status": "MISSING", "evidence": []},
+  "update_frequency": {"declared": null, "observed": null, "status": "MISSING", "evidence": []},
+  "sources": {"active": [], "suspended": [], "candidate": []},
+  "rights": {"status": "MISSING", "evidence": []},
+  "quality": {"status": "MISSING", "completeness": null, "accuracy": null, "freshness": null, "duplicate_rate": null, "evidence": []},
+  "lag": {"status": "MISSING", "p50_seconds": null, "p95_seconds": null, "max_seconds": null, "evidence": []},
+  "reviews": [],
+  "limitations": [
+    "No product-admitted source evidence exists for this library.",
+    "Coverage, multilingual journeys, rights, quality and lag are unaccepted.",
+    "This library cannot contribute to a public global-coverage claim."
+  ],
+  "synthetic_data": {"present": false, "disclosed": true, "contributes_to_public_claim": false, "evidence": []},
+  "kill_switch": {"implemented": false, "tested": false, "evidence": []},
+  "rollback": {"implemented": false, "tested": false, "evidence": []},
+  "claim_decision": "DENIED"
+}

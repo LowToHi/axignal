@@ -1,0 +1,125 @@
+{
+  "library_id": "AX-LIB-F01",
+  "kind": "FOUNDATIONAL",
+  "canonical_name": "Jurisdiction and geography",
+  "runtime_reference": "data/foundations/foundational-library-runtime.v0.1.json",
+  "canonical_state": "BLOCKED",
+  "countries_covered": [],
+  "languages": [
+    {"language": "en", "ingestion": "MISSING", "normalisation": "MISSING", "search": "MISSING", "presentation": "MISSING", "evidence": []},
+    {"language": "es", "ingestion": "MISSING", "normalisation": "MISSING", "search": "MISSING", "presentation": "MISSING", "evidence": []},
+    {"language": "fr", "ingestion": "MISSING", "normalisation": "MISSING", "search": "MISSING", "presentation": "MISSING", "evidence": []},
+    {"language": "de", "ingestion": "MISSING", "normalisation": "MISSING", "search": "MISSING", "presentation": "MISSING", "evidence": []},
+    {"language": "pt", "ingestion": "MISSING", "normalisation": "MISSING", "search": "MISSING", "presentation": "MISSING", "evidence": []},
+    {"language": "it", "ingestion": "MISSING", "normalisation": "MISSING", "search": "MISSING", "presentation": "MISSING", "evidence": []}
+  ],
+  "sectors": [],
+  "historical_depth": {
+    "earliest_date": null,
+    "latest_date": null,
+    "status": "MISSING",
+    "evidence": [
+      {
+        "kind": "SOURCE_SNAPSHOT",
+        "reference": "data/acceptance/source-baselines/AX-LIB-F01-eu-countries-territories-baseline-contract.v0.1.json",
+        "sha256": "29abbb31ecbfc040438c02f107362303d2eacd677cce5867d06e548228941edb",
+        "expires_at": "2026-08-31T23:59:59Z"
+      }
+    ]
+  },
+  "update_frequency": {
+    "declared": "REGULAR_UPDATES_FORESEEN",
+    "observed": "20260318-0_TO_20260617-0",
+    "status": "MISSING",
+    "evidence": [
+      {
+        "kind": "SOURCE_SNAPSHOT",
+        "reference": "data/acceptance/source-baselines/AX-LIB-F01-eu-countries-territories-baseline-contract.v0.1.json",
+        "sha256": "29abbb31ecbfc040438c02f107362303d2eacd677cce5867d06e548228941edb",
+        "expires_at": "2026-08-31T23:59:59Z"
+      }
+    ]
+  },
+  "sources": {
+    "active": [],
+    "suspended": [],
+    "candidate": [
+      {
+        "source_id": "src_eu_vocab_countries_territories",
+        "name": "EU Vocabularies — Countries and territories",
+        "state": "CANDIDATE",
+        "admission": {
+          "technical": "PASS",
+          "legal": "MISSING",
+          "rights": "MISSING",
+          "quality": "MISSING",
+          "human_authority": "MISSING"
+        },
+        "rights_expiry": null,
+        "contributes_to_public_claim": false,
+        "evidence": [
+          {
+            "kind": "SOURCE_SNAPSHOT",
+            "reference": "data/acceptance/source-baselines/AX-LIB-F01-eu-countries-territories-baseline-contract.v0.1.json",
+            "sha256": "29abbb31ecbfc040438c02f107362303d2eacd677cce5867d06e548228941edb",
+            "expires_at": "2026-08-31T23:59:59Z"
+          }
+        ]
+      }
+    ]
+  },
+  "rights": {
+    "status": "MISSING",
+    "evidence": [
+      {
+        "kind": "SOURCE_SNAPSHOT",
+        "reference": "data/acceptance/source-baselines/AX-LIB-F01-eu-countries-territories-baseline-contract.v0.1.json",
+        "sha256": "29abbb31ecbfc040438c02f107362303d2eacd677cce5867d06e548228941edb",
+        "expires_at": "2026-08-31T23:59:59Z"
+      }
+    ]
+  },
+  "quality": {
+    "status": "MISSING",
+    "completeness": null,
+    "accuracy": null,
+    "freshness": null,
+    "duplicate_rate": null,
+    "evidence": []
+  },
+  "lag": {
+    "status": "MISSING",
+    "p50_seconds": null,
+    "p95_seconds": null,
+    "max_seconds": null,
+    "evidence": []
+  },
+  "reviews": [],
+  "limitations": [
+    "One official candidate source is inventoried and technically baselined but is not product-admitted or active.",
+    "F01-A observed publication 20260318-0; F01-B froze official publication 20260617-0 without rewriting the historical F01-A evidence.",
+    "The catalogue count of 375 denotes non-retired entries, not 375 unique concepts.",
+    "The canonical category XML contains 378 records: 375 current or deprecated entries plus 3 retired records.",
+    "The 375 non-retired entries collapse to 342 unique authority codes because historical revisions create a surplus of 33 record instances.",
+    "Adding the 3 retired authority codes yields 345 canonical non-reserved SKOS concepts; versioned RDF and live SPARQL match exactly.",
+    "The RDF distribution contains 11 concept schemes including the root scheme and ten official subset schemes.",
+    "Entries and concepts remain separately classified and content-addressed; collapsing historical records or inflating concept counts is prohibited.",
+    "Countries, territories, disputed entities, marine areas, special-status entities and historical records have explicit derived buckets while official scheme memberships are preserved.",
+    "The vocabulary does not represent an official EU position on the legal status or policy of listed entities.",
+    "Reuse, retention, redistribution and derived-data rights remain MISSING until a current human Legal decision passes.",
+    "ISO country-code use does not authorise copying ISO publications, collections or standard text; those components remain excluded.",
+    "Privacy/Data Rights authority remains MISSING even though personal data, contact-value ingestion, profiling and marketing use are excluded by contract.",
+    "The frozen technical campaign budget is six requests, zero retries, concurrency one, zero euros and 30-day evidence retention.",
+    "Coverage, six multilingual journeys, quality, lag, kill switch and rollback remain unaccepted.",
+    "This library cannot contribute to a public global-coverage or multilingual claim."
+  ],
+  "synthetic_data": {
+    "present": false,
+    "disclosed": true,
+    "contributes_to_public_claim": false,
+    "evidence": []
+  },
+  "kill_switch": {"implemented": false, "tested": false, "evidence": []},
+  "rollback": {"implemented": false, "tested": false, "evidence": []},
+  "claim_decision": "DENIED"
+}
