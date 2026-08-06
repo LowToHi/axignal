@@ -1,265 +1,137 @@
 name: Actions Storage Governance
 
 on:
-  issues:
-    types: [opened]
+  pull_request:
+    paths:
+      - ".github/workflows/**"
+      - "config/actions-storage-policy.json"
+      - "scripts/ops/audit_actions_storage.py"
+      - "scripts/ops/migrate_actions_artifact_retention.py"
+      - "scripts/ops/install_axignal_trusted_runner.sh"
   schedule:
-    - cron: "17 3 * * *"
+    - cron: "17 3 * * 1"
   workflow_dispatch:
+    inputs:
+      max_pages:
+        description: "Artifact pages to scan; 0 means complete inventory"
+        required: false
+        default: "0"
 
 permissions:
-  actions: write
+  actions: read
   contents: read
-  issues: write
-  pull-requests: read
 
 concurrency:
-  group: actions-storage-governance
+  group: actions-storage-governance-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  cleanup:
-    if: >-
-      github.event_name == 'schedule' ||
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'issues' && startsWith(github.event.issue.title, 'OPS: actions storage cleanup'))
+  static-policy-audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    env:
-      GH_TOKEN: ${{ github.token }}
-      REPOSITORY: ${{ github.repository }}
-      EVENT_NAME: ${{ github.event_name }}
-      ISSUE_NUMBER: ${{ github.event.issue.number || '' }}
+    timeout-minutes: 10
     steps:
-      - name: Delete heavy obsolete workflow artifacts
+      - name: Checkout exact revision
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Compile governance tools
         shell: bash
         run: |
-          python - <<'PY'
-          from __future__ import annotations
+          set -Eeuo pipefail
+          python3 -m py_compile \
+            scripts/ops/audit_actions_storage.py \
+            scripts/ops/migrate_actions_artifact_retention.py
+          bash -n scripts/ops/install_axignal_trusted_runner.sh
 
-          import concurrent.futures
+      - name: Audit workflow storage policy
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 scripts/ops/audit_actions_storage.py \
+            --report-json reports/actions-storage-static-audit.json \
+            --report-md reports/actions-storage-static-audit.md
+          cat reports/actions-storage-static-audit.md >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Dry-run retention migration
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          set +e
+          python3 scripts/ops/migrate_actions_artifact_retention.py \
+            --report reports/actions-retention-migration.json \
+            > reports/actions-retention-migration.log
+          rc=$?
+          set -e
+          cat reports/actions-retention-migration.log
+          python3 - "$rc" <<'PY'
           import json
-          import os
-          import threading
-          import urllib.error
-          import urllib.request
-          from datetime import datetime, timedelta, timezone
-          from pathlib import Path
-          from typing import Any
+          import pathlib
+          import sys
 
-          token = os.environ["GH_TOKEN"]
-          repository = os.environ["REPOSITORY"]
-          event_name = os.environ["EVENT_NAME"]
-          issue_number = os.environ.get("ISSUE_NUMBER", "").strip()
-          owner, repo = repository.split("/", 1)
-          api_root = "https://api.github.com"
-
-          emergency = event_name in {"issues", "workflow_dispatch"}
-          cutoff = datetime.now(timezone.utc) - timedelta(hours=1 if emergency else 24)
-          scan_pages = 150 if emergency else 30
-          deletion_limit = 600 if emergency else 150
-          protected_artifact_ids = {8906279065, 8913254281}
-
-          protected_name_fragments = {
-              "attestation",
-              "canonical-contract",
-              "certificate",
-              "closure",
-              "evidence-bundle",
-              "full-migration",
-              "manifest",
-              "provenance",
-              "restore",
-              "sbom",
-              "signature",
-          }
-          high_value_cleanup_fragments = {
-              "browser",
-              "coverage",
-              "diagnostic",
-              "e2e-audit",
-              "playwright",
-              "screenshot",
-              "test-results",
-              "trace",
-              "video",
-              "viewport",
-          }
-
-          def request(method: str, path: str, payload: dict[str, Any] | None = None) -> Any:
-              url = path if path.startswith("http") else f"{api_root}{path}"
-              data = None if payload is None else json.dumps(payload).encode("utf-8")
-              req = urllib.request.Request(
-                  url,
-                  data=data,
-                  method=method,
-                  headers={
-                      "Authorization": f"Bearer {token}",
-                      "Accept": "application/vnd.github+json",
-                      "X-GitHub-Api-Version": "2022-11-28",
-                      "User-Agent": "axignal-actions-storage-governance",
-                  },
+          rc = int(sys.argv[1])
+          report = json.loads(
+              pathlib.Path("reports/actions-retention-migration.json").read_text(
+                  encoding="utf-8"
               )
-              try:
-                  with urllib.request.urlopen(req, timeout=60) as response:
-                      body = response.read()
-                      return None if not body else json.loads(body.decode("utf-8"))
-              except urllib.error.HTTPError as exc:
-                  body = exc.read().decode("utf-8", errors="replace")
-                  raise RuntimeError(f"GitHub API {method} {url} failed: {exc.code} {body}") from exc
-
-          repo_info = request("GET", f"/repos/{owner}/{repo}")
-          default_branch = repo_info["default_branch"]
-
-          protected_shas: set[str] = set()
-          page = 1
-          while True:
-              pulls = request(
-                  "GET",
-                  f"/repos/{owner}/{repo}/pulls?state=open&per_page=100&page={page}",
-              )
-              if not pulls:
-                  break
-              for pull in pulls:
-                  sha = pull.get("head", {}).get("sha")
-                  if sha:
-                      protected_shas.add(sha)
-              if len(pulls) < 100:
-                  break
-              page += 1
-
-          before = request("GET", f"/repos/{owner}/{repo}/actions/artifacts?per_page=1")
-          artifacts_before = int(before["total_count"])
-
-          candidates: list[dict[str, Any]] = []
-          scanned = 0
-          for page in range(1, scan_pages + 1):
-              result = request(
-                  "GET",
-                  f"/repos/{owner}/{repo}/actions/artifacts?per_page=100&page={page}",
-              )
-              artifacts = result.get("artifacts", [])
-              if not artifacts:
-                  break
-              scanned += len(artifacts)
-
-              for artifact in artifacts:
-                  artifact_id = int(artifact["id"])
-                  if artifact_id in protected_artifact_ids or artifact.get("expired"):
-                      continue
-
-                  created_at = datetime.fromisoformat(
-                      artifact["created_at"].replace("Z", "+00:00")
-                  )
-                  if created_at >= cutoff:
-                      continue
-
-                  run = artifact.get("workflow_run") or {}
-                  if run.get("head_branch") in {None, default_branch}:
-                      continue
-                  if run.get("head_sha") in protected_shas:
-                      continue
-
-                  name = str(artifact.get("name") or "").lower()
-                  if any(fragment in name for fragment in protected_name_fragments):
-                      continue
-
-                  size = int(artifact.get("size_in_bytes") or 0)
-                  is_high_value_cleanup = any(
-                      fragment in name for fragment in high_value_cleanup_fragments
-                  )
-                  if size < 100_000 and not is_high_value_cleanup:
-                      continue
-
-                  candidates.append(artifact)
-
-              if len(artifacts) < 100:
-                  break
-
-          candidates.sort(
-              key=lambda item: int(item.get("size_in_bytes") or 0), reverse=True
           )
-          selected = candidates[:deletion_limit]
+          summary = pathlib.Path(__import__("os").environ["GITHUB_STEP_SUMMARY"])
+          with summary.open("a", encoding="utf-8") as handle:
+              handle.write("\n## Retention migration dry-run\n\n")
+              handle.write(f"- Files requiring changes: **{report['changed_file_count']}**\n")
+              handle.write(f"- Insertions: **{report['insert_count']}**\n")
+              handle.write(f"- Replacements: **{report['replace_count']}**\n")
+              handle.write(f"- Rejected ambiguous steps: **{report['rejected_count']}**\n")
+          if rc not in {0, 3}:
+              raise SystemExit(rc)
+          PY
 
-          deleted: list[dict[str, Any]] = []
-          failures: list[dict[str, Any]] = []
-          lock = threading.Lock()
+  remote-inventory:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
-          def delete_artifact(artifact: dict[str, Any]) -> None:
-              artifact_id = int(artifact["id"])
-              try:
-                  request(
-                      "DELETE",
-                      f"/repos/{owner}/{repo}/actions/artifacts/{artifact_id}",
-                  )
-                  with lock:
-                      deleted.append(
-                          {
-                              "id": artifact_id,
-                              "name": artifact.get("name"),
-                              "size_in_bytes": int(artifact.get("size_in_bytes") or 0),
-                          }
-                      )
-              except RuntimeError as exc:
-                  with lock:
-                      failures.append({"id": artifact_id, "error": str(exc)})
+      - name: Inventory all Actions artifacts without mutation
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MAX_PAGES: ${{ github.event.inputs.max_pages || '0' }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 scripts/ops/audit_actions_storage.py \
+            --inventory-artifacts \
+            --max-pages "${MAX_PAGES}" \
+            --report-json reports/actions-storage-inventory.json \
+            --report-md reports/actions-storage-inventory.md \
+            > reports/actions-storage-inventory.log
+          cat reports/actions-storage-inventory.log
+          cat reports/actions-storage-inventory.md >> "${GITHUB_STEP_SUMMARY}"
 
-          with concurrent.futures.ThreadPoolExecutor(max_workers=12) as executor:
-              list(executor.map(delete_artifact, selected))
+      - name: Verify governance remains non-destructive
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 - <<'PY'
+          import json
+          import pathlib
 
-          after = request("GET", f"/repos/{owner}/{repo}/actions/artifacts?per_page=1")
-          artifacts_after = int(after["total_count"])
-          bytes_deleted = sum(item["size_in_bytes"] for item in deleted)
-
-          report = {
-              "repository": repository,
-              "mode": "emergency" if emergency else "scheduled",
-              "cutoff": cutoff.isoformat(),
-              "pages_scanned": scan_pages,
-              "artifacts_scanned": scanned,
-              "eligible_candidates": len(candidates),
-              "selected": len(selected),
-              "deleted_artifacts": len(deleted),
-              "deleted_bytes": bytes_deleted,
-              "deleted_megabytes": round(bytes_deleted / 1_000_000, 3),
-              "delete_failures": failures[:20],
-              "protected_open_pr_shas": sorted(protected_shas),
-              "protected_artifact_ids": sorted(protected_artifact_ids),
-              "artifacts_before": artifacts_before,
-              "artifacts_after": artifacts_after,
-              "artifact_records_removed_observed": max(0, artifacts_before - artifacts_after),
-          }
-
-          Path(os.environ["GITHUB_STEP_SUMMARY"]).write_text(
-              "# Actions storage governance\n\n"
-              f"```json\n{json.dumps(report, indent=2, sort_keys=True)}\n```\n",
-              encoding="utf-8",
+          policy = json.loads(
+              pathlib.Path("config/actions-storage-policy.json").read_text(
+                  encoding="utf-8"
+              )
           )
-          print(json.dumps(report, indent=2, sort_keys=True))
-
-          if issue_number:
-              body = (
-                  "Heavy-artifact cleanup completed.\n\n"
-                  f"- Artifacts scanned: **{scanned}**\n"
-                  f"- Heavy obsolete artifacts deleted: **{len(deleted)}**\n"
-                  f"- Bytes deleted: **{bytes_deleted:,}** "
-                  f"(**{bytes_deleted / 1_000_000:.2f} MB**)\n"
-                  f"- Artifact records before: **{artifacts_before}**\n"
-                  f"- Artifact records after: **{artifacts_after}**\n"
-                  f"- Protected canonical artifacts: `{sorted(protected_artifact_ids)}`\n"
-                  f"- Delete failures: **{len(failures)}**\n"
+          report = json.loads(
+              pathlib.Path("reports/actions-storage-inventory.json").read_text(
+                  encoding="utf-8"
               )
-              request(
-                  "POST",
-                  f"/repos/{owner}/{repo}/issues/{issue_number}/comments",
-                  {"body": body},
-              )
-              request(
-                  "PATCH",
-                  f"/repos/{owner}/{repo}/issues/{issue_number}",
-                  {"state": "closed", "state_reason": "completed"},
-              )
-
-          if failures:
-              raise SystemExit("one or more artifact deletions failed")
+          )
+          assert policy["destructive_cleanup_enabled"] is False
+          assert report["destructive_cleanup_enabled"] is False
+          assert report["inventory"]["total_count"] >= 0
+          print("AXIGNAL_ACTIONS_STORAGE_AUDIT_ONLY=PASS")
           PY
