@@ -8,6 +8,7 @@ on:
       - "scripts/ops/audit_actions_storage.py"
       - "scripts/ops/migrate_actions_artifact_retention.py"
       - "scripts/ops/install_axignal_trusted_runner.sh"
+      - "tests/ops/test_actions_storage_policy_tools.py"
   schedule:
     - cron: "17 3 * * 1"
   workflow_dispatch:
@@ -41,8 +42,15 @@ jobs:
           set -Eeuo pipefail
           python3 -m py_compile \
             scripts/ops/audit_actions_storage.py \
-            scripts/ops/migrate_actions_artifact_retention.py
+            scripts/ops/migrate_actions_artifact_retention.py \
+            tests/ops/test_actions_storage_policy_tools.py
           bash -n scripts/ops/install_axignal_trusted_runner.sh
+
+      - name: Run governance regression tests
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 -m unittest tests.ops.test_actions_storage_policy_tools
 
       - name: Audit workflow storage policy
         shell: bash
