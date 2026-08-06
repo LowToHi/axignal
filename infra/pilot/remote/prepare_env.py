@@ -122,6 +122,7 @@ def build_environment(
         "AXIGNAL_AUTH_PASSWORD_SCRYPT": scrypt_record(operator_password),
         "AXIGNAL_SESSION_SECRET": random_secret(48),
         "AXIGNAL_IDENTITY_ASSERTION_SECRET": random_secret(48),
+        "AXIGNAL_AXENT_ENCRYPTION_KEY": random_secret(48),
         "AXIGNAL_VALIDATION_PARTICIPANT_SALT": random_secret(48),
         "AXIGNAL_OTEL_ENABLED": "false",
         "AXIGNAL_LIVE_SOURCES_ENABLED": "false",

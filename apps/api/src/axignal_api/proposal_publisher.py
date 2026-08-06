@@ -9,6 +9,7 @@ from axignal_api.proposal_queue import (
     ValkeyDocumentProposalQueue,
 )
 from axignal_api.proposal_repository import DocumentProposalRepository
+from axignal_api.runtime_invariants import require_runtime_value
 from axignal_api.settings import Settings
 
 LOGGER = logging.getLogger("axignal.document-proposal-publisher")
@@ -16,11 +17,17 @@ LOGGER = logging.getLogger("axignal.document-proposal-publisher")
 
 def build_publisher(settings: Settings) -> ProposalOutboxPublisher:
     settings.require_persistent_research()
-    assert settings.database_url is not None
-    assert settings.valkey_url is not None
-    repository = DocumentProposalRepository(app_dsn=settings.database_url)
-    queue = ValkeyDocumentProposalQueue(
+    database_url = require_runtime_value(
+        settings.database_url,
+        name="AXIGNAL_DATABASE_URL",
+    )
+    valkey_url = require_runtime_value(
         settings.valkey_url,
+        name="AXIGNAL_VALKEY_URL",
+    )
+    repository = DocumentProposalRepository(app_dsn=database_url)
+    queue = ValkeyDocumentProposalQueue(
+        valkey_url,
         queue_key=settings.proposal_queue_key,
     )
     return ProposalOutboxPublisher(repository, queue)

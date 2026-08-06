@@ -1,0 +1,186 @@
+{
+  "schema_version": "axignal.o01-approval-renewal-policy/v0.1",
+  "task_id": "AX-GE2E-G7-O01-T04",
+  "gate_id": "PUBLIC-LAUNCH-GATE-7",
+  "library_id": "AX-LIB-O01",
+  "source_id": "src_ted_search_api_v3",
+  "mode": "SEMI_AUTOMATIC",
+  "schedule": {
+    "cadence": "DAILY",
+    "cron_utc": "17 6 * * *",
+    "renewal_window_days": 14,
+    "urgent_window_days": 3,
+    "grace_period_seconds": 0,
+    "overlapping_renewal_allowed": true
+  },
+  "automatic_actions": [
+    "VERIFY_EXACT_HEAD",
+    "VERIFY_GIT_TREE",
+    "VERIFY_RECONCILIATION_CONTRACT",
+    "MATERIALISE_CURRENT_APPROVAL_MANIFEST",
+    "FETCH_OFFICIAL_TERMS_FROM_ALLOWLISTED_HOSTS",
+    "NORMALISE_AND_HASH_OFFICIAL_TERMS",
+    "VERIFY_CRITICAL_LEGAL_ANCHORS",
+    "COMPARE_PREVIOUS_RENEWAL_PACKAGE",
+    "CLASSIFY_RELEVANT_CODE_AND_CONTRACT_DELTA",
+    "GENERATE_LEGAL_DECISION_TEMPLATE",
+    "GENERATE_PRIVACY_DATA_RIGHTS_DECISION_TEMPLATE",
+    "GENERATE_RENEWAL_PACKAGE",
+    "EMIT_AUDITABLE_NOTIFICATION",
+    "FAIL_CLOSED_ON_EXPIRY_OR_UNCERTAINTY"
+  ],
+  "human_required_actions": [
+    "LEGAL_DECISION",
+    "PRIVACY_DATA_RIGHTS_DECISION",
+    "CONDITIONS",
+    "EXPIRY",
+    "SIGNATURE"
+  ],
+  "forbidden_automatic_actions": [
+    "CREATE_HUMAN_SIGNATURE",
+    "COPY_OR_REUSE_PRIOR_SIGNATURE",
+    "EXTEND_APPROVAL_EXPIRY",
+    "AUTO_APPROVE_LEGAL",
+    "AUTO_APPROVE_PRIVACY_DATA_RIGHTS",
+    "AUTHORISE_CAMPAIGN_EXECUTION",
+    "INCREASE_EXTERNAL_REQUEST_BUDGET",
+    "ADMIT_TED_TO_PRODUCT",
+    "ENABLE_PUBLIC_CLAIMS",
+    "ENABLE_PUBLIC_LAUNCH"
+  ],
+  "change_classes": {
+    "NO_MATERIAL_CHANGE": {
+      "execution_effect": "REMAINS_BLOCKED_UNTIL_NEW_TYPED_DECISIONS",
+      "review_path": "ABBREVIATED_HUMAN_DELTA_REVIEW"
+    },
+    "BASELINE_REQUIRED": {
+      "execution_effect": "BLOCK",
+      "review_path": "FULL_HUMAN_REVIEW_AND_BASELINE_ESTABLISHMENT"
+    },
+    "MATERIAL_TECHNICAL_CHANGE": {
+      "execution_effect": "BLOCK",
+      "review_path": "FULL_LEGAL_AND_PRIVACY_REVIEW"
+    },
+    "MATERIAL_TERMS_CHANGE": {
+      "execution_effect": "BLOCK",
+      "review_path": "FULL_LEGAL_AND_PRIVACY_REVIEW"
+    },
+    "AUTHORITY_SURFACE_CHANGE": {
+      "execution_effect": "BLOCK",
+      "review_path": "NEW_COMPLETE_TYPED_DECISIONS"
+    },
+    "EVIDENCE_UNAVAILABLE": {
+      "execution_effect": "BLOCK",
+      "review_path": "RESTORE_EVIDENCE_THEN_FULL_REVIEW"
+    }
+  },
+  "relevant_path_classes": {
+    "AUTHORITY_SURFACE": [
+      "data/acceptance/legal/",
+      "data/acceptance/approvals/",
+      "data/acceptance/campaigns/",
+      "data/contracts/AX-GE2E-G7-O01-",
+      "apps/api/src/axignal_api/procurement_domain.py",
+      "apps/api/src/axignal_api/o01_contact_policy.py",
+      "apps/api/src/axignal_api/o01_approval_renewal.py",
+      "scripts/verify_gate7_o01_",
+      "scripts/materialize_gate7_o01_approval_manifest.py",
+      "scripts/prepare_gate7_o01_renewal.py"
+    ],
+    "NON_MATERIAL_ONLY": [
+      "docs/",
+      "README.md"
+    ]
+  },
+  "official_source_hosts": [
+    "ted.europa.eu",
+    "docs.ted.europa.eu",
+    "eur-lex.europa.eu"
+  ],
+  "official_documents": [
+    {
+      "document_id": "ted-legal-notice-2026",
+      "url": "https://ted.europa.eu/en/legal-notice",
+      "critical_anchors": [
+        "procurement notices published in the supplement to the official journal of the european union can be freely reused",
+        "commercial or non-commercial purposes",
+        "additional rights if specific content depicts identifiable private individuals or includes third-party works",
+        "logos (including that of ted) may not be used without the prior consent",
+        "contact details of the contracting authorities and successful tenderers are required for a correct operation of public procurement procedures"
+      ]
+    },
+    {
+      "document_id": "ted-search-api-3.0",
+      "url": "https://docs.ted.europa.eu/api/latest/search.html",
+      "critical_anchors": [
+        "search api",
+        "published procurement notices",
+        "analysis and reuse"
+      ]
+    },
+    {
+      "document_id": "ted-data-reuse-help-2026",
+      "url": "https://ted.europa.eu/en/help/data-reuse",
+      "critical_anchors": [
+        "data reuse",
+        "xml",
+        "search api"
+      ]
+    },
+    {
+      "document_id": "commission-decision-2011-833-eu",
+      "url": "https://eur-lex.europa.eu/eli/dec/2011/833/oj",
+      "critical_anchors": [
+        "reuse of commission documents",
+        "commercial or non-commercial purposes",
+        "personal data"
+      ]
+    }
+  ],
+  "authority_invariants": {
+    "required_authorities": [
+      "LEGAL",
+      "PRIVACY_DATA_RIGHTS"
+    ],
+    "required_decision": "APPROVE",
+    "approval_survives_head_change": false,
+    "approval_survives_manifest_change": false,
+    "approval_survives_terms_change": false,
+    "execution_after_expiry": false,
+    "automatic_signature_allowed": false,
+    "automatic_expiry_extension_allowed": false
+  },
+  "notification": {
+    "issue_number": 103,
+    "deduplicate_by": [
+      "head_sha",
+      "change_class",
+      "authority_status",
+      "effective_expiry"
+    ],
+    "notify_when": [
+      "BASELINE_REQUIRED",
+      "NO_CURRENT_APPROVAL",
+      "MISSING",
+      "INCOMPLETE",
+      "INVALID_BINDING",
+      "REJECTED",
+      "RENEWAL_WINDOW_OPEN",
+      "URGENT_RENEWAL",
+      "EXPIRED",
+      "MATERIAL_TECHNICAL_CHANGE",
+      "MATERIAL_TERMS_CHANGE",
+      "AUTHORITY_SURFACE_CHANGE",
+      "EVIDENCE_UNAVAILABLE"
+    ]
+  },
+  "campaign_effect": {
+    "campaign_status": "BLOCKED",
+    "execution_authorised": false,
+    "external_request_budget": 0,
+    "source_state": "CANDIDATE",
+    "product_admitted": false,
+    "public_claim_contribution": false,
+    "public_launch_authorised": false
+  }
+}

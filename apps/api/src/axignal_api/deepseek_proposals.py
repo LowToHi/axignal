@@ -13,24 +13,31 @@ from axignal_api.document_proposals import (
 )
 
 DEEPSEEK_BASE_URL = "https://api.deepseek.com"
-DEEPSEEK_MODEL = "deepseek-v4-flash"
-DEEPSEEK_METHOD_VERSION = "deepseek-json-proposal@0.1.0"
-DEEPSEEK_PROMPT_VERSION = "deepseek-document-proposal@0.1.0"
+DEEPSEEK_API_MODEL = "deepseek-v4-flash"
+DEEPSEEK_CHECKPOINT = "deepseek-v4-flash-0731"
+DEEPSEEK_PREVIOUS_MODEL = "deepseek-v4-flash"
+DEEPSEEK_METHOD_VERSION = "deepseek-json-proposal@0.2.0"
+DEEPSEEK_PROMPT_VERSION = "deepseek-document-proposal@0.2.0"
 DEEPSEEK_PRODUCER_ID = "deepseek-direct"
+
+# Compatibility export for existing callers. This is the provider-supported
+# wire identifier, not the independently versioned checkpoint label.
+DEEPSEEK_MODEL = DEEPSEEK_API_MODEL
 
 
 class DeepSeekV4FlashProposalAdapter:
     """Direct DeepSeek adapter with proposal-only authority."""
 
     producer_id = DEEPSEEK_PRODUCER_ID
-    model_version = DEEPSEEK_MODEL
+    model_version = DEEPSEEK_CHECKPOINT
 
     def __init__(
         self,
         *,
         api_key: str,
         base_url: str = DEEPSEEK_BASE_URL,
-        model: str = DEEPSEEK_MODEL,
+        model: str = DEEPSEEK_API_MODEL,
+        checkpoint: str = DEEPSEEK_CHECKPOINT,
         max_output_tokens: int = 1_200,
         timeout_seconds: float = 45.0,
         transport: httpx.BaseTransport | None = None,
@@ -40,8 +47,14 @@ class DeepSeekV4FlashProposalAdapter:
             raise ValueError("DeepSeek base URL must use the official HTTPS API host")
         if parsed.path not in {"", "/"}:
             raise ValueError("DeepSeek base URL must not contain an additional path")
-        if model != DEEPSEEK_MODEL:
-            raise ValueError("Only deepseek-v4-flash is admitted for this adapter")
+        if model != DEEPSEEK_API_MODEL:
+            raise ValueError(
+                f"DeepSeek API model must use the supported alias {DEEPSEEK_API_MODEL}"
+            )
+        if checkpoint != DEEPSEEK_CHECKPOINT:
+            raise ValueError(
+                f"DeepSeek provider checkpoint must be {DEEPSEEK_CHECKPOINT}"
+            )
         if not api_key.strip():
             raise ValueError("DEEPSEEK_API_KEY is required")
         if not 1 <= max_output_tokens <= 4_096:
@@ -50,7 +63,8 @@ class DeepSeekV4FlashProposalAdapter:
             raise ValueError("DeepSeek timeout is outside the admitted range")
 
         self.producer_id = DEEPSEEK_PRODUCER_ID
-        self.model_version = model
+        self.api_model = model
+        self.model_version = checkpoint
         self.max_output_tokens = max_output_tokens
         self._client = httpx.Client(
             base_url=base_url.rstrip("/"),
@@ -78,7 +92,7 @@ class DeepSeekV4FlashProposalAdapter:
             for item in document.fragments
         ]
         payload = {
-            "model": self.model_version,
+            "model": self.api_model,
             "temperature": 0,
             "max_tokens": self.max_output_tokens,
             "thinking": {"type": "disabled"},
@@ -124,7 +138,7 @@ class DeepSeekV4FlashProposalAdapter:
                     "schema_version": 1,
                     "producer_type": "LOCAL_MODEL",
                     "producer_id": DEEPSEEK_PRODUCER_ID,
-                    "model_version": DEEPSEEK_MODEL,
+                    "model_version": self.model_version,
                     "method_version": DEEPSEEK_METHOD_VERSION,
                     "prompt_version": DEEPSEEK_PROMPT_VERSION,
                 }

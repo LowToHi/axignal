@@ -1,0 +1,252 @@
+name: AXIGNAL PR Gate — Domain
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+      - labeled
+      - unlabeled
+  workflow_dispatch:
+    inputs:
+      full_matrix:
+        description: Run every suite in this gate group
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  actions: read
+  issues: write
+
+concurrency:
+  group: axignal-pr-gate-domain-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  scope:
+    name: Resolve exact-head delta scope
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      run_first_lawful_universe: ${{ steps.scope.outputs.run_first_lawful_universe }}
+      run_gate7_global_coverage_source_language: ${{ steps.scope.outputs.run_gate7_global_coverage_source_language }}
+      run_global_procurement_catalogue: ${{ steps.scope.outputs.run_global_procurement_catalogue }}
+      run_o01_approval_renewal: ${{ steps.scope.outputs.run_o01_approval_renewal }}
+      run_o01_domain_contracts: ${{ steps.scope.outputs.run_o01_domain_contracts }}
+      run_o01_legal_privacy_reconciliation: ${{ steps.scope.outputs.run_o01_legal_privacy_reconciliation }}
+      run_p13_sovereign_macro_validation: ${{ steps.scope.outputs.run_p13_sovereign_macro_validation }}
+      run_p14_trade_supply_chain_validation: ${{ steps.scope.outputs.run_p14_trade_supply_chain_validation }}
+      run_p15_energy_climate_transition_validation: ${{ steps.scope.outputs.run_p15_energy_climate_transition_validation }}
+      run_p16_innovation_ip_validation: ${{ steps.scope.outputs.run_p16_innovation_ip_validation }}
+      run_p17_cross_library_intelligence_validation: ${{ steps.scope.outputs.run_p17_cross_library_intelligence_validation }}
+      run_p18_intent_intelligence_knowledge_tides_validation: ${{ steps.scope.outputs.run_p18_intent_intelligence_knowledge_tides_validation }}
+      run_p19_scenarios_calibration_outcomes_validation: ${{ steps.scope.outputs.run_p19_scenarios_calibration_outcomes_validation }}
+      run_p20_enterprise_api_private_data_validation: ${{ steps.scope.outputs.run_p20_enterprise_api_private_data_validation }}
+      run_p21_commercial_runtime_pricing_stripe_validation: ${{ steps.scope.outputs.run_p21_commercial_runtime_pricing_stripe_validation }}
+      run_p22_production_slo_dr_security_validation: ${{ steps.scope.outputs.run_p22_production_slo_dr_security_validation }}
+      run_p23_final_ux_landing_copy_marketing_validation: ${{ steps.scope.outputs.run_p23_final_ux_landing_copy_marketing_validation }}
+      run_p24_global_acceptance_paid_evidence_launch_validation: ${{ steps.scope.outputs.run_p24_global_acceptance_paid_evidence_launch_validation }}
+      selected_count: ${{ steps.scope.outputs.selected_count }}
+      full_matrix: ${{ steps.scope.outputs.full_matrix }}
+    env:
+      AXIGNAL_EXACT_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Prove exact-head checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$AXIGNAL_EXACT_SHA"
+
+      - name: Compute commit delta
+        id: delta
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_ACTION: ${{ github.event.action || '' }}
+          EVENT_BEFORE: ${{ github.event.before || '' }}
+          BASE_REF: ${{ github.base_ref || '' }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT_NAME" = pull_request ] && [ "$EVENT_ACTION" = opened ]; then
+            git fetch --no-tags origin "$BASE_REF"
+            base_sha="$(git merge-base HEAD "origin/$BASE_REF")"
+          elif [ "$EVENT_NAME" = pull_request ] && [ "$EVENT_ACTION" = synchronize ]                && [ -n "$EVENT_BEFORE" ]                && git cat-file -e "$EVENT_BEFORE^{commit}" 2>/dev/null; then
+            base_sha="$EVENT_BEFORE"
+          elif git rev-parse HEAD^ >/dev/null 2>&1; then
+            base_sha="$(git rev-parse HEAD^)"
+          else
+            base_sha="$(git rev-list --max-parents=0 HEAD)"
+          fi
+          printf 'base_sha=%s\n' "$base_sha" >> "$GITHUB_OUTPUT"
+          git diff --name-only --diff-filter=ACMRD "$base_sha" HEAD             | LC_ALL=C sort -u             | tee ci-changed-files.txt
+
+      - name: Resolve affected suites
+        id: scope
+        shell: bash
+        env:
+          CI_GATE_GROUP: domain
+          CI_FULL_MATRIX_INPUT: ${{ inputs.full_matrix || false }}
+          CI_PR_LABELS: ${{ github.event_name == 'pull_request' && toJSON(github.event.pull_request.labels.*.name) || '[]' }}
+        run: |
+          set -euo pipefail
+          args=(
+            --manifest .github/ci/workflow-scope.json
+            --group "$CI_GATE_GROUP"
+            --changed-files ci-changed-files.txt
+            --labels-json "$CI_PR_LABELS"
+          )
+          if [ "$CI_FULL_MATRIX_INPUT" = true ]; then
+            args+=(--full-matrix)
+          fi
+          python scripts/ci/compute_workflow_scope.py "${args[@]}"
+
+      - name: Upload scope evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: ci-domain-scope-${{ env.AXIGNAL_EXACT_SHA }}
+          path: |
+            ci-changed-files.txt
+            ci-scope-domain.json
+          if-no-files-found: error
+          retention-days: 14
+
+  first_lawful_universe:
+    needs: scope
+    if: needs.scope.outputs.run_first_lawful_universe == 'true'
+    uses: ./.github/workflows/first-lawful-universe.yml
+    secrets: inherit
+  gate7_global_coverage_source_language:
+    needs: scope
+    if: needs.scope.outputs.run_gate7_global_coverage_source_language == 'true'
+    uses: ./.github/workflows/gate7-global-coverage-source-language.yml
+    with:
+      require_gate_pass: false
+    secrets: inherit
+  global_procurement_catalogue:
+    needs: scope
+    if: needs.scope.outputs.run_global_procurement_catalogue == 'true'
+    uses: ./.github/workflows/global-procurement-catalogue.yml
+    secrets: inherit
+  o01_approval_renewal:
+    needs: scope
+    if: needs.scope.outputs.run_o01_approval_renewal == 'true'
+    uses: ./.github/workflows/o01-approval-renewal.yml
+    with:
+      online_terms_check: false
+    secrets: inherit
+  o01_domain_contracts:
+    needs: scope
+    if: needs.scope.outputs.run_o01_domain_contracts == 'true'
+    uses: ./.github/workflows/o01-domain-contracts.yml
+    secrets: inherit
+  o01_legal_privacy_reconciliation:
+    needs: scope
+    if: needs.scope.outputs.run_o01_legal_privacy_reconciliation == 'true'
+    uses: ./.github/workflows/o01-legal-privacy-reconciliation.yml
+    secrets: inherit
+  p13_sovereign_macro_validation:
+    needs: scope
+    if: needs.scope.outputs.run_p13_sovereign_macro_validation == 'true'
+    uses: ./.github/workflows/p13-sovereign-macro-validation.yml
+    secrets: inherit
+  p14_trade_supply_chain_validation:
+    needs: scope
+    if: needs.scope.outputs.run_p14_trade_supply_chain_validation == 'true'
+    uses: ./.github/workflows/p14-trade-supply-chain-validation.yml
+    secrets: inherit
+  p15_energy_climate_transition_validation:
+    needs: scope
+    if: needs.scope.outputs.run_p15_energy_climate_transition_validation == 'true'
+    uses: ./.github/workflows/p15-energy-climate-transition-validation.yml
+    secrets: inherit
+  p16_innovation_ip_validation:
+    needs: scope
+    if: needs.scope.outputs.run_p16_innovation_ip_validation == 'true'
+    uses: ./.github/workflows/p16-innovation-ip-validation.yml
+    secrets: inherit
+  p17_cross_library_intelligence_validation:
+    needs: scope
+    if: needs.scope.outputs.run_p17_cross_library_intelligence_validation == 'true'
+    uses: ./.github/workflows/p17-cross-library-intelligence-validation.yml
+    secrets: inherit
+  p18_intent_intelligence_knowledge_tides_validation:
+    needs: scope
+    if: needs.scope.outputs.run_p18_intent_intelligence_knowledge_tides_validation == 'true'
+    uses: ./.github/workflows/p18-intent-intelligence-knowledge-tides-validation.yml
+    secrets: inherit
+  p19_scenarios_calibration_outcomes_validation:
+    needs: scope
+    if: needs.scope.outputs.run_p19_scenarios_calibration_outcomes_validation == 'true'
+    uses: ./.github/workflows/p19-scenarios-calibration-outcomes-validation.yml
+    secrets: inherit
+  p20_enterprise_api_private_data_validation:
+    needs: scope
+    if: needs.scope.outputs.run_p20_enterprise_api_private_data_validation == 'true'
+    uses: ./.github/workflows/p20-enterprise-api-private-data-validation.yml
+    secrets: inherit
+  p21_commercial_runtime_pricing_stripe_validation:
+    needs: scope
+    if: needs.scope.outputs.run_p21_commercial_runtime_pricing_stripe_validation == 'true'
+    uses: ./.github/workflows/p21-commercial-runtime-pricing-stripe-validation.yml
+    secrets: inherit
+  p22_production_slo_dr_security_validation:
+    needs: scope
+    if: needs.scope.outputs.run_p22_production_slo_dr_security_validation == 'true'
+    uses: ./.github/workflows/p22-production-slo-dr-security-validation.yml
+    secrets: inherit
+  p23_final_ux_landing_copy_marketing_validation:
+    needs: scope
+    if: needs.scope.outputs.run_p23_final_ux_landing_copy_marketing_validation == 'true'
+    uses: ./.github/workflows/p23-final-ux-landing-copy-marketing-validation.yml
+    secrets: inherit
+  p24_global_acceptance_paid_evidence_launch_validation:
+    needs: scope
+    if: needs.scope.outputs.run_p24_global_acceptance_paid_evidence_launch_validation == 'true'
+    uses: ./.github/workflows/p24-global-acceptance-paid-evidence-launch-validation.yml
+    secrets: inherit
+
+  gate:
+    name: Domain gate
+    if: always()
+    needs: [scope, first_lawful_universe, gate7_global_coverage_source_language, global_procurement_catalogue, o01_approval_renewal, o01_domain_contracts, o01_legal_privacy_reconciliation, p13_sovereign_macro_validation, p14_trade_supply_chain_validation, p15_energy_climate_transition_validation, p16_innovation_ip_validation, p17_cross_library_intelligence_validation, p18_intent_intelligence_knowledge_tides_validation, p19_scenarios_calibration_outcomes_validation, p20_enterprise_api_private_data_validation, p21_commercial_runtime_pricing_stripe_validation, p22_production_slo_dr_security_validation, p23_final_ux_landing_copy_marketing_validation, p24_global_acceptance_paid_evidence_launch_validation]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      NEEDS_JSON: ${{ toJSON(needs) }}
+    steps:
+      - name: Enforce selected-suite results
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+
+          needs = json.loads(os.environ['NEEDS_JSON'])
+          failures = {
+              name: payload.get('result')
+              for name, payload in needs.items()
+              if payload.get('result') not in {'success', 'skipped'}
+          }
+          if failures:
+              raise SystemExit(f"gate failures: {failures}")
+          print(json.dumps({
+              'status': 'PASS',
+              'gate': 'domain',
+              'results': {name: payload.get('result') for name, payload in needs.items()},
+          }, sort_keys=True))
+          PY

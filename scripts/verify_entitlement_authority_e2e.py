@@ -12,6 +12,7 @@ import psycopg
 from psycopg import sql
 
 from axignal_api.entitlement_repository import EntitlementRepository
+from trial_grant_fixture import ensure_active_trial_grant
 
 TENANT_ID = UUID("cccccccc-cccc-4ccc-8ccc-cccccccccccc")
 START = datetime(2026, 7, 29, 19, 0, tzinfo=UTC)
@@ -130,7 +131,10 @@ def _concurrent_idempotent_reservation(
     if len(reservation_ids) != 1:
         raise AssertionError(f"Concurrent retry created multiple reservations: {reservation_ids}")
     reservation_id = next(iter(reservation_ids))
-    usage = repository.usage(tenant_id=TENANT_ID)
+    usage = repository.usage(
+        tenant_id=TENANT_ID,
+        now=START + timedelta(minutes=1),
+    )
     if usage is None:
         raise AssertionError("Entitlement usage disappeared")
     reserved = int(usage["token_budget_reserved"])
@@ -149,6 +153,7 @@ def run(dsn: str) -> dict[str, object]:
     )
     if entitlement["state"] != "ACTIVE":
         raise AssertionError("Security-definer activation did not return ACTIVE entitlement")
+    ensure_active_trial_grant(dsn, tenant_id=TENANT_ID, now=START)
 
     _assert_direct_table_mutation_blocked(dsn)
     _assert_non_app_cannot_execute_mutator(dsn)
@@ -159,7 +164,10 @@ def run(dsn: str) -> dict[str, object]:
         actor_subject="usr_authority_e2e",
         now=START + timedelta(minutes=2),
     )
-    usage = repository.usage(tenant_id=TENANT_ID)
+    usage = repository.usage(
+        tenant_id=TENANT_ID,
+        now=START + timedelta(minutes=2),
+    )
     if usage is None or usage["token_budget_reserved"] != 0:
         raise AssertionError("Reservation release left authority-test residue")
 
@@ -174,7 +182,10 @@ def run(dsn: str) -> dict[str, object]:
         ),
         "trial_expired",
     )
-    expired_usage = repository.usage(tenant_id=TENANT_ID)
+    expired_usage = repository.usage(
+        tenant_id=TENANT_ID,
+        now=START + timedelta(days=8),
+    )
     if expired_usage is None or expired_usage["state"] != "READ_ONLY":
         raise AssertionError("Expired trial did not persist READ_ONLY state")
 

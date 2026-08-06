@@ -1,0 +1,86 @@
+{
+  "authority_status": "PRIMARY_OFFICIAL_SOURCES_CAPTURED",
+  "expires_at": "2026-08-31T23:59:59Z",
+  "gate_id": "PUBLIC-LAUNCH-GATE-7",
+  "legal_decision": "MISSING",
+  "library_id": "AX-LIB-O01",
+  "machine_assessment": {
+    "cannot_establish": [
+      "AXIGNAL lawful basis and retention period for secondary processing of personal data.",
+      "Whether every attachment or field in every notice is owned by the EU or covered by the reuse notice.",
+      "A blanket right to use TED or SIMAP names, logos or marks in branding.",
+      "Permission to train models on source-native personal or third-party content.",
+      "Human Legal or Privacy/Data Rights approval.",
+      "PRODUCT_ADMITTED source status."
+    ],
+    "conclusion": "Official materials support reuse of non-personal TED notice data and metadata, including commercial value-added services, subject to attribution or change-disclosure where applicable and exclusions for personal data, third-party works and protected marks.",
+    "status": "PROVISIONAL_NON_AUTHORITATIVE"
+  },
+  "observed_at": "2026-08-01T17:50:00Z",
+  "privacy_data_rights_decision": "MISSING",
+  "publisher": "Publications Office of the European Union",
+  "required_human_actions": [
+    "Legal authority must approve, reject or condition the field-level rights matrix.",
+    "Privacy/Data Rights authority must approve a lawful basis, minimisation, retention, deletion and data-subject-rights handling.",
+    "Any approval must bind to an immutable exact-head manifest and expire no later than the source evidence."
+  ],
+  "schema_version": "axignal.legal-source-snapshot/v0.1",
+  "source_documents": [
+    {
+      "authority": "PRIMARY",
+      "document_id": "ted-legal-notice-2026",
+      "observations": [
+        "Unless otherwise noted, procurement notices published in the Supplement to the Official Journal of the European Union are presented as freely reusable for commercial or non-commercial purposes.",
+        "SIMAP editorial content is presented under CC BY 4.0, requiring appropriate credit and indication of changes.",
+        "SIMAP metadata is presented as dedicated to the public domain under CC0 1.0.",
+        "Additional rights may be required for identifiable individuals and third-party works.",
+        "Software, patents, trademarks, registered designs, logos and names are excluded from the general reuse policy; TED logos require prior consent.",
+        "TED notices can contain professional contact details and, in some award notices, names of natural-person tenderers.",
+        "TED states that personal data in public notices is retained on the website for ten years, then archived internally.",
+        "TED disclaims completeness, accuracy and currency and identifies electronically signed OJ S notices as authentic."
+      ],
+      "publisher_version": "Copyright notice © European Union 1998-2026; no explicit revision identifier exposed",
+      "title": "Legal notice of TED website and SIMAP system",
+      "url": "https://ted.europa.eu/en/legal-notice"
+    },
+    {
+      "authority": "PRIMARY",
+      "document_id": "ted-search-api-3.0",
+      "observations": [
+        "The Search API is presented as providing access to published procurement notices for analysis and reuse.",
+        "The API supports bulk XML retrieval and is presented as openly accessible without authentication.",
+        "The documentation explicitly identifies commercial organisations integrating TED data into value-added platforms as an intended user class."
+      ],
+      "publisher_version": "TED API 3.0 documentation observed 2026-08-01",
+      "title": "TED Search API 3.0 documentation",
+      "url": "https://docs.ted.europa.eu/api/latest/search.html"
+    },
+    {
+      "authority": "PRIMARY",
+      "document_id": "ted-data-reuse-help-2026",
+      "observations": [
+        "TED provides direct daily and monthly XML packages without sign-in.",
+        "Daily editions are published Monday to Friday; daily XML packages are stated to be available by 09:30 on publication day.",
+        "The Search API is described as read-only."
+      ],
+      "publisher_version": "Observed 2026-08-01; no explicit revision identifier exposed",
+      "title": "TED data reuse help",
+      "url": "https://ted.europa.eu/en/help/data-reuse"
+    },
+    {
+      "authority": "PRIMARY_LEGAL_ACT",
+      "document_id": "commission-decision-2011-833-eu",
+      "observations": [
+        "The Decision establishes commercial and non-commercial reuse as the general principle for covered documents.",
+        "Reuse must respect personal-data protection rules.",
+        "Third-party intellectual property, industrial property, logos and names are outside the general reuse grant.",
+        "Conditions may include source acknowledgement, preservation of original meaning and Commission non-liability.",
+        "The Decision supports machine-readable structured data, linking, caching and value-added information services."
+      ],
+      "publisher_version": "Official Journal L 330, 14.12.2011; EUR-Lex status observed as in force on 2026-08-01",
+      "title": "Commission Decision 2011/833/EU on reuse of Commission documents",
+      "url": "https://eur-lex.europa.eu/eli/dec/2011/833/oj"
+    }
+  ],
+  "source_id": "src_ted_search_api_v3"
+}

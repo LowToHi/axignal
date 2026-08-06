@@ -6,7 +6,8 @@ The canonical skill set is the union of:
 
 - `skills/registry.yaml` — foundation product, platform, epistemic, risk and operations skills;
 - `skills/commercial-extension.registry.yaml` — marketing, pricing, acquisition and commercial validation skills;
-- `skills/research-retrieval.registry.yaml` — Navigator Research Mode, authorised retrieval, tenant memory, local model operation and Candidate Claim pipeline skills.
+- `skills/research-retrieval.registry.yaml` — Navigator Research Mode, authorised retrieval, tenant memory, local model operation and Candidate Claim pipeline skills;
+- `skills/subscriber-workspace-ux.registry.yaml` — subscriber product shell, procurement workflow, navigation, design system, accessibility and UX validation skills.
 
 ## Registry rules
 
@@ -40,5 +41,6 @@ The following skills are mandatory for their respective scopes:
 | private knowledge | `tenant-memory-engineer`, `privacy-reviewer`, `security-reviewer`, `data-architect` |
 | local model worker | `local-model-operator`, `security-reviewer`, `test-engineer`, `finance-operator` |
 | Candidate Claims | `candidate-claim-pipeline-engineer`, `epistemic-admission`, `evidence-provenance-engineer`, `source-admission` |
+| subscriber workspace UX/UI | every skill declared in `skills/subscriber-workspace-ux.registry.yaml` |
 
 Missing a required skill fails closed.

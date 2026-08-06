@@ -1,0 +1,165 @@
+name: G5 Web Security Boundaries
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+env:
+  AXIGNAL_EXACT_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+
+concurrency:
+  group: g5-web-security-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static-and-unit:
+    name: Static policy, unit tests and production builds
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Checkout exact branch head 1
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Prove exact-head checkout 1
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual_sha="$(git rev-parse HEAD)"
+          tree_sha="$(git rev-parse 'HEAD^{tree}')"
+          test "$actual_sha" = "$AXIGNAL_EXACT_SHA"
+          {
+            printf 'exact_head_sha=%s\n' "$actual_sha"
+            printf 'git_tree_sha=%s\n' "$tree_sha"
+          } | tee g5-web-security-exact-head-1.txt
+
+      - name: Upload exact-head identity 1
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: g5-web-security-exact-head-1-${{ env.AXIGNAL_EXACT_SHA }}
+          path: g5-web-security-exact-head-1.txt
+          if-no-files-found: error
+          retention-days: 30
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "22.14.0"
+      - name: Enable pinned pnpm
+        run: corepack enable
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Verify policy identity and explicit callback boundary
+        run: |
+          cmp apps/web/lib/security-boundaries.ts apps/landing/lib/security-boundaries.ts
+          grep -F 'export const MUTATION_ORIGIN_EXEMPT_PATHS = new Set<string>();' \
+            apps/web/lib/security-boundaries.ts
+          ! grep -R -n -E 'x-forwarded-host|x-forwarded-proto' \
+            apps/web/proxy.ts apps/landing/proxy.ts
+      - name: Verify changed-file formatting
+        run: |
+          pnpm exec prettier --check \
+            apps/web/proxy.ts \
+            apps/landing/proxy.ts \
+            apps/web/lib/security-boundaries.ts \
+            apps/landing/lib/security-boundaries.ts \
+            apps/web/next.config.ts \
+            apps/landing/next.config.ts \
+            apps/web/app/api/auth/login/route.ts \
+            apps/web/tests/security-boundaries.test.ts \
+            apps/landing/tests/security-boundaries.test.ts \
+            apps/web/tsconfig.test.json \
+            apps/landing/tsconfig.test.json \
+            tests/e2e/security-boundaries.spec.ts \
+            tests/landing/security-boundaries.spec.ts \
+            playwright.config.ts \
+            playwright.landing.config.ts
+      - name: Run frontend unit contracts
+        run: |
+          pnpm --filter @axignal/web test
+          pnpm --filter @axignal/landing test
+      - name: Typecheck frontends
+        run: |
+          pnpm --filter @axignal/web typecheck
+          pnpm --filter @axignal/landing typecheck
+      - name: Build production frontends
+        env:
+          AXIGNAL_PUBLIC_ORIGIN: https://axignal.com
+          AXIGNAL_LANDING_PUBLIC_ORIGIN: https://axignal.com
+        run: |
+          pnpm --filter @axignal/web build
+          pnpm --filter @axignal/landing build
+
+  browser-negative-contracts:
+    name: Chromium same-origin, rejection and response-header contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Checkout exact branch head 2
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Prove exact-head checkout 2
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual_sha="$(git rev-parse HEAD)"
+          tree_sha="$(git rev-parse 'HEAD^{tree}')"
+          test "$actual_sha" = "$AXIGNAL_EXACT_SHA"
+          {
+            printf 'exact_head_sha=%s\n' "$actual_sha"
+            printf 'git_tree_sha=%s\n' "$tree_sha"
+          } | tee g5-web-security-exact-head-2.txt
+
+      - name: Upload exact-head identity 2
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: g5-web-security-exact-head-2-${{ env.AXIGNAL_EXACT_SHA }}
+          path: g5-web-security-exact-head-2.txt
+          if-no-files-found: error
+          retention-days: 30
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "22.14.0"
+      - name: Enable pinned pnpm
+        run: corepack enable
+      - name: Install and build
+        env:
+          AXIGNAL_PUBLIC_ORIGIN: http://127.0.0.1:3001
+          AXIGNAL_LANDING_PUBLIC_ORIGIN: http://127.0.0.1:3001
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm --filter @axignal/web build
+          pnpm --filter @axignal/landing build
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Run web security browser contracts
+        run: >-
+          pnpm exec playwright test
+          tests/e2e/security-boundaries.spec.ts
+          --project=chromium-desktop
+      - name: Run landing security browser contracts
+        run: >-
+          pnpm exec playwright test
+          --config=playwright.landing.config.ts
+          tests/landing/security-boundaries.spec.ts
+          --project=landing-desktop
+      - name: Upload G5 browser evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: g5-browser-security-evidence-${{ env.AXIGNAL_EXACT_SHA }}
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: warn
+          retention-days: 14

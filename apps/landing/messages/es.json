@@ -1,0 +1,71 @@
+{
+  "meta": {
+    "title": "AXIGNAL — Inteligencia de contratación pública",
+    "description": "Inteligencia gobernada por evidencia para organizaciones que venden al sector público. Encuentra, cualifica e investiga oportunidades públicas con cada conclusión material vinculada a su evidencia."
+  },
+  "nav": {"product":"Producto","method":"Método","pricing":"Precios","faq":"Preguntas","language":"Idioma","cta":"Acceso Design Partner"},
+  "hero": {
+    "eyebrow":"GLOBAL OPPORTUNITY INTELLIGENCE · PRIMERA EXPRESIÓN COMERCIAL",
+    "title":"Gana las oportunidades públicas adecuadas.",
+    "accent":"Defiende cada conclusión.",
+    "descriptor":"Inteligencia gobernada por evidencia para organizaciones que venden al sector público.",
+    "summary":"Encuentra, cualifica e investiga oportunidades públicas con cada conclusión material vinculada a su evidencia.",
+    "primary":"Solicitar acceso Design Partner","secondary":"Explorar la demo del producto",
+    "proof":["Evidencia vinculada a fuente","Contradicciones visibles","Autoridad humana preservada"],
+    "status":"Demostración sintética del producto · fuentes públicas en vivo desactivadas"
+  },
+  "problem": {
+    "eyebrow":"EL PROBLEMA DE LA FRAGMENTACIÓN","title":"La demanda pública es visible. El contexto listo para decidir no.",
+    "body":"Las oportunidades se reparten entre portales, idiomas, modificaciones, documentos y plazos. Los equipos reconstruyen el mismo contexto a mano y deciden antes de poder probar cada supuesto.",
+    "items":[["Descubrimiento fragmentado","Portales, formatos, taxonomías y ritmos distintos."],["Cualificación costosa","Elegibilidad, encaje, calendario y evidencia se revisan una y otra vez."],["Pérdida de contexto","Los cambios y contradicciones desaparecen entre pestañas y hojas de cálculo."]]
+  },
+  "storyIntro":{"eyebrow":"UNA INVESTIGACIÓN PERSISTENTE","title":"De una pregunta de contratación a un dossier vinculado a evidencia.","body":"Recorre una demostración sintética. Los estados de fuente reflejan el catálogo del repositorio, no cobertura comercializada."},
+  "acts":[
+    {"eyebrow":"01 · FRAGMENTACIÓN","title":"Empieza con el registro público disperso.","body":"AXIGNAL mantiene separados portales, anuncios, documentos y cambios hasta probar su procedencia y ciclo de vida.","signal":"146","metric":"familias de fuentes catalogadas","detail":"Inventario, no disponibilidad de producto"},
+    {"eyebrow":"02 · NAVIGATOR","title":"Formula una pregunta comercial, no una búsqueda por palabras.","body":"Describe capacidad, países, perfil comprador y restricciones. Navigator crea un contexto tipado, persistente y reversible.","signal":"1","metric":"ResearchRun persistente","detail":"Perfil sintético de encaje"},
+    {"eyebrow":"03 · GLOBE","title":"Observa dónde se cruzan demanda, encaje y evidencia.","body":"El Globe separa el perfil TED admitido para piloto de los sistemas en descubrimiento y la cobertura no disponible. La intensidad visual nunca cambia la admisión.","signal":"1","metric":"fuente acotada admitida","detail":"Perfil TED · piloto privado autenticado"},
+    {"eyebrow":"04 · DOSSIER","title":"Cualifica antes de comprometer recursos de oferta.","body":"El dossier reúne alcance, comprador, plazos, elegibilidad, documentos, cambios e incógnitas en un objeto revisable.","signal":"7","metric":"campos materiales de decisión","detail":"Dossier sintético"},
+    {"eyebrow":"05 · CLAIMS","title":"Separa lo observado de lo inferido.","body":"Cada conclusión material incluye tipo, referencia, vigencia, transformación y contraevidencia.","signal":"5","metric":"estados epistémicos","detail":"Observado ≠ calculado ≠ inferido"},
+    {"eyebrow":"06 · ADMISIÓN","title":"La IA propone. El runtime decide qué entra en el ledger.","body":"Validadores deterministas rechazan candidatos mal formados o sin soporte. Contradicciones e incógnitas siguen visibles.","signal":"FAIL CLOSED","metric":"política de admisión","detail":"Propuesta no equivale a admisión"},
+    {"eyebrow":"07 · OPERACIONES","title":"Pasa del esfuerzo de búsqueda a decisiones gobernadas.","body":"Reutiliza la investigación, asigna revisión, vigila cambios y conserva el razonamiento de la decisión.","signal":"TRAZABLE","metric":"historial de decisión","detail":"Sin envío automatizado de ofertas"},
+    {"eyebrow":"08 · DESIGN PARTNER","title":"Valida el flujo con un problema costoso de contratación.","body":"El acceso se revisa para organizaciones que prueben un flujo acotado y aporten evidencia estructurada.","signal":"CANDIDATE","metric":"oferta comercial","detail":"Solo solicitudes · sin facturación ni suscripción"}
+  ],
+  "navigator":{"label":"NAVIGATOR · DEMO SINTÉTICA","prompt":"Encuentra oportunidades públicas de infraestructura en Europa occidental que encajen con nuestra capacidad y exijan cualificación con evidencia.","response":"He creado una investigación acotada. El perfil TED está admitido para el piloto privado autenticado; los demás sistemas visibles siguen como candidatos en descubrimiento.","context":["Europa occidental","Servicios de infraestructura","Horizonte 12–24 meses","Evidencia obligatoria"]},
+  "globe":{
+    "label":"VISTA DEL PROGRAMA DE FUENTES","title":"Estado del catálogo por jurisdicción",
+    "legend":{"ADMITTED":"Admitida","TECHNICAL_PROBE":"Prueba técnica","DISCOVERED":"Descubierta","CANDIDATE":"Candidata","BLOCKED":"Bloqueada","RIGHTS_REVIEW":"Revisión de derechos","UNAVAILABLE":"No disponible"},
+    "layers":"Capas","recenter":"Recentrar","instructions":"Arrastra para rotar y pellizca o desplaza para ampliar. Selecciona un marcador para ver su estado.","fallback":"El globo interactivo no está disponible. La tabla contiene la misma información.","activeRule":"Solo las fuentes ADMITTED son cobertura activa. Recuento acotado del piloto: 1.","tableCaption":"Alternativa tabular al globo","source":"Fuente","jurisdiction":"Jurisdicción","state":"Estado"
+  },
+  "dossier":{
+    "eyebrow":"DOSSIER SINTÉTICO","title":"Acuerdo marco regional de eficiencia energética","buyer":"Autoridad regional de obras públicas","location":"Sur de Europa","deadline":"42 días · sintético",
+    "fields":[["Encaje","Solapamiento alto · calculado con datos demo"],["Elegibilidad","Regla de consorcio sin resolver"],["Valor","Rango sintético €8–12m"],["Documentos","14 registros demo · 2 cambios"],["Contradicción","El plazo de entrega difiere en un anexo"],["Siguiente acción","Revisión humana de elegibilidad"]],
+    "disclaimer":"Todas las entidades, cifras y documentos son sintéticos y no describen una contratación real."
+  },
+  "evidence":{
+    "eyebrow":"CLAIMS, EVIDENCIA Y ADMISIÓN","title":"La confianza es un estado visible del sistema.","body":"El vector descubre; el grafo contextualiza; el runtime admite. La presentación no convierte al modelo en autoridad.",
+    "claims":[["OBSERVED","El anuncio indica un procedimiento en dos fases.","Extracto sintético · T−2d"],["CALCULATED","Faltan 42 días para el plazo.","Transformación de fecha versionada"],["INFERRED","Un consorcio podría mejorar el encaje.","Inferencia demo explícita"],["CONTRADICTED","El plazo difiere entre anexos.","Contraevidencia material"],["UNKNOWN","No se localizó el límite de subcontratación.","La brecha sigue abierta"]],
+    "pipeline":["Candidata","Validación estructural","Política de admisibilidad","Ledger canónico"]
+  },
+  "outcomes":{
+    "eyebrow":"VALOR OPERATIVO","title":"Estima esfuerzo ahorrado sin inventar ROI.","body":"La calculadora solo usa los valores que introduces. Es una ayuda de planificación, no una afirmación de rendimiento.",
+    "inputs":{"opportunities":"Oportunidades revisadas al mes","hours":"Horas actuales por oportunidad","reduction":"Reducción supuesta de investigación","rate":"Coste horario total"},
+    "result":{"hours":"Horas potencialmente reasignadas","value":"Valor mensual ilustrativo de capacidad"},
+    "note":"Estimación = oportunidades × horas × reducción supuesta × coste horario. Excluye tasa de éxito, ingresos, implantación y efectos de calidad."
+  },
+  "pricing":{
+    "eyebrow":"PACKAGING CANDIDATO","title":"Precios profesionales, probados antes de fijarlos.","body":"Design Partner es un programa especial de validación. Se muestran solicitudes para trial controlado y planes; la activación pública, checkout y conversión automática siguen desactivados.","candidate":"Packaging candidato indicativo","current":"Vía actual de validación","cta":"Seleccionar y solicitar",
+    "plans":[["Design Partner","€300–600","organización / mes","Validación acotada, feedback directo y condiciones candidatas preferentes."],["Professional","€349–499","mes","Investigación individual, dossiers, vigilancia y exportación de evidencia."],["Team / Growth","€899–1.499","mes","Investigaciones compartidas, revisión, gobierno y uso ampliado."],["Enterprise","€18k–45k","año","Seguridad, integración, soporte, datos y API definidos por contrato."]]
+  },
+  "faq":{
+    "eyebrow":"PREGUNTAS ANTES DEL ACCESO","title":"Lo que la landing actual promete y lo que no.",
+    "items":[["¿AXIGNAL cubre hoy la contratación global?","No. Existe un catálogo mundial de investigación, pero no hay autorización para afirmar cobertura global."],["¿TED está disponible en el producto?","El perfil acotado de TED Search API está admitido para el piloto privado autenticado. El acceso público y el uso irrestricto de fuentes siguen desactivados."],["¿AXIGNAL redacta o presenta ofertas?","No. Apoya investigación y cualificación; no presenta respuestas ni toma decisiones finales."],["¿Los precios son definitivos?","No. Los rangos son hipótesis comerciales candidatas que requieren evidencia pagada."],["¿Hay prueba gratuita?","La prueba controlada de 7 días solo se solicita mientras el acceso público siga desactivado. Incluye 1.000.000 de tokens acumulados por organización, sin tarjeta, renovación ni overage, y pasa a solo lectura al expirar."]]
+  },
+  "form":{
+    "eyebrow":"SOLICITUD DESIGN PARTNER","title":"Trae un flujo costoso de contratación.","body":"Dos pasos breves nos permiten evaluar el encaje. Enviar no crea suscripción, prueba ni garantía de acceso.",
+    "step":"Paso","of":"de","identity":"Tu organización","fit":"Encaje del flujo","email":"Email de trabajo","organisation":"Organización","role":"Rol","rolePlaceholder":"Selecciona un rol",
+    "roles":["Responsable de ofertas","Desarrollo de negocio","Ventas al sector público","Inteligencia de contratación","Dirección / fundador","Consultoría","Otro"],
+    "countries":"Países o jurisdicciones prioritarios","volume":"Oportunidades revisadas al mes","process":"Proceso o herramientas actuales","useCase":"Caso de uso principal","problem":"Problema más costoso del flujo","timeframe":"Plazo de evaluación","timeframes":["Ahora","En 30 días","Este trimestre","Explorando"],
+    "consent":"Acepto que AXIGNAL use esta información solo para evaluar y responder a esta solicitud. Ningún dato del lead se envía a analítica.","next":"Continuar","back":"Atrás","submit":"Solicitar acceso Design Partner","sending":"Enviando…","success":"Solicitud recibida. AXIGNAL revisará el encaje.","error":"El canal no está disponible. No se registró ningún éxito.","required":"Completa los campos obligatorios.","privacy":"Revisión limitada a la finalidad · sin suscripción · sin PII en analítica"
+  },
+  "footer":{"descriptor":"El estándar de inteligencia B2G para oportunidades públicas globales.","methodology":"Metodología","trust":"Centro de confianza","privacy":"Privacidad","terms":"Términos","accessibility":"Accesibilidad","rights":"Fuentes y datos de demostración"}
+}

@@ -1,580 +1,442 @@
 # 22 — Packaging, Pricing and Entitlements Contract
 
-Version: `0.2.0-candidate`
-Status: `NORMATIVE CANDIDATE / B2G WILLINGNESS-TO-PAY VALIDATION REQUIRED`
+Version: `0.3.0`
+Status: `NORMATIVE CANDIDATE / PUBLIC PRICING AND BILLING BLOCKED`
 Goal ID: `AXIGNAL-GOAL-001`
-Commercial programme: `Contract 28`
+Governing programme: `Contract 31 / ADR-016`
+Commercial runtime: `P21`
+Identity and trial runtime: `P25`
+Final gate: `P27`
 
 ## 1. Purpose
 
-This contract governs how AXIGNAL packages B2G procurement capabilities, presents prices, enforces entitlements and validates willingness to pay without misrepresenting product maturity, source availability or epistemic authority.
+This contract governs how AXIGNAL packages B2G capabilities, presents candidate prices, enforces flat-tier seats and other entitlements, controls the seven-day trial and validates willingness to pay without misrepresenting product, source or commercial maturity.
 
-Pricing MUST reflect delivered professional value rather than reducing AXIGNAL to AI messages, tokens or raw notice counts.
+Pricing reflects delivered professional value. Tokens and provider costs remain internal economic controls unless explicitly sold under a future approved contract.
 
-## 2. Candidate commercial states
+## 2. State hierarchy
 
-AXIGNAL MAY expose these commercial states:
+A label, provider object or UI selection does not grant a capability.
 
-- `PUBLIC_SAMPLE`;
-- `TRIAL_PRIVATE`;
-- `TRIAL_PUBLIC`;
-- `DESIGN_PARTNER`;
-- `PROFESSIONAL`;
-- `TEAM_GROWTH`;
-- `ENTERPRISE`;
-- `GRANDFATHERED`;
-- `READ_ONLY_EXPIRED`;
-- `SUSPENDED`;
-- `CANCELLED`.
+```text
+package definition
+≠ candidate price
+≠ verified provider state
+≠ commercial entitlement
+≠ membership
+≠ operational authority
+≠ public availability
+```
 
-A state name does not grant a capability. Every capability MUST be represented by a versioned server-side entitlement.
+Every effective capability is versioned and enforced server-side.
 
-## 3. Candidate packages
+## 3. Current candidate packages
 
-Exact names and composition remain hypotheses until the acceptance gate passes.
+| Package | Candidate amount | Billing | Seat capacity | Status |
+|---|---:|---|---:|---|
+| `CONTROLLED_TRIAL_7D` | `0 EUR` | No Stripe invocation | 2 | `CANDIDATE_ONLY` |
+| `PROFESSIONAL_MONTHLY` | `149 EUR/month` | Flat-tier recurring package | 3 | `CANDIDATE_ONLY` |
+| `TEAM_MONTHLY` | `399 EUR/month` | Flat-tier recurring package | 15 | `CANDIDATE_ONLY` |
+| `ENTERPRISE_CONTRACT` | Quote only | Contract | Negotiated | `CANDIDATE_ONLY` |
 
-### 3.1 Public Sample
+These values are the current technical candidate price book. They are not validated public prices.
 
-Purpose: demonstrate AXIGNAL's method without reproducing the paid workflow.
+Prior bands such as Professional `349–499 EUR/month` and Team `899–1,499 EUR/month` remain historical hypotheses and have no current runtime authority.
 
-Candidate scope:
+## 4. Candidate price states
 
-- selected public or synthetic investigations;
-- clearly labelled source freshness and coverage;
-- source-linked Claim and Evidence examples;
-- no tenant-private work;
-- no unrestricted ResearchRun execution;
-- no bulk export or API;
-- no implication that every displayed jurisdiction is product-supported.
-
-### 3.2 Design Partner
-
-For an organisation participating in paid workflow validation.
-
-Candidate price band:
-
-- `€300–€600/month` per organisation;
-- fixed three-to-six-month term.
-
-Candidate scope:
-
-- bounded users;
-- admitted European procurement sources;
-- bounded ResearchRuns, dossiers, watchlists and alerts;
-- direct onboarding and declared support;
-- explicit feedback and workflow-validation commitments;
-- experimental capability labels;
-- negotiated migration or exit treatment.
-
-### 3.3 Professional
-
-For one active procurement, business-development or advisory professional.
-
-Candidate price band:
-
-- `€349–€499/month`.
-
-Candidate scope:
-
-- one primary seat;
-- admitted European procurement coverage;
-- Navigator, Globe, Graph and Timeline where released;
-- persistent InvestigationContexts and watchlists;
-- bounded ResearchRuns and evidence-linked dossiers;
-- Claim and Evidence Rail;
-- standard-frequency change, cancellation and award monitoring;
-- bounded professional exports within source rights;
-- standard support.
-
-### 3.4 Team / Growth
-
-For bid teams, consultancies and public-sector sales teams.
-
-Candidate price band:
-
-- `€899–€1,499/month`.
-
-Candidate scope:
-
-- three-to-five included seats;
-- all Professional capabilities;
-- shared InvestigationContexts, Trails, annotations and assignments;
-- larger ResearchRun, dossier, watchlist and alert allowances;
-- deeper historical comparisons;
-- admitted buyer, supplier and award-network analysis;
-- priority support;
-- admitted integrations.
-
-### 3.5 Enterprise
-
-For organisations requiring governance, private data, API or contractual controls.
-
-Candidate price band:
-
-- starting range `€18,000–€45,000/year`;
-- annual contract by default.
-
-Candidate scope MAY include:
-
-- negotiated seats and organisations;
-- jurisdiction packs;
-- SSO and SCIM when delivered;
-- private sources and tenant-private claims;
-- API access, quotas and auditability;
-- source and export-right controls;
-- security and compliance package;
-- service levels and support;
-- data residency or deployment requirements only when available and contracted;
-- onboarding and professional services.
-
-Plan names, price bands and composition MAY be superseded only through commercial evidence and an ADR.
-
-## 4. Candidate value metrics
-
-Pricing MAY depend on one or more declared dimensions:
-
-- seats and organisations;
-- admitted jurisdiction or source packs;
-- persistent InvestigationContexts and active Trails;
-- ResearchRun execution volume;
-- complete evidence-linked dossiers;
-- monitored opportunities and alert cadence;
-- document and page processing capacity;
-- historical depth;
-- collaboration;
-- exports and report generation;
-- API requests or data volume;
-- private-source connectors;
-- private storage and retention;
-- enterprise security, audit, support and SLA obligations.
-
-The commercial model MUST minimise unpredictable bills. Every metered dimension MUST be observable before charges occur.
-
-## 5. Prohibited primary metrics
-
-AXIGNAL SHOULD NOT use as the sole value metric:
-
-- chatbot messages;
-- prompt or completion tokens;
-- clicks;
-- number of claims viewed;
-- raw notices indexed;
-- arbitrary feature unlocks unrelated to customer value;
-- uncalibrated prediction count.
-
-Provider costs MAY influence internal economics, but public pricing SHOULD reflect the customer's research capacity and workflow outcome.
-
-## 6. Price status
-
-Every public or sales-facing price MUST declare one state:
+Every price or offer must declare one of:
 
 - `HYPOTHESIS`;
+- `CANDIDATE_ONLY`;
 - `DESIGN_PARTNER`;
-- `PRIVATE_BETA`;
+- `PRIVATE_ACCEPTANCE`;
 - `PUBLIC_CURRENT`;
 - `GRANDFATHERED`;
 - `RETIRED`.
 
-The candidate bands in this contract are `HYPOTHESIS`. They MUST NOT be represented as validated, customary or guaranteed market prices.
+No price becomes `PUBLIC_CURRENT` before P27.
 
-## 7. Price presentation
+## 5. Flat-tier seat governance
 
-A public pricing surface MUST show:
-
-- billing currency;
-- billing interval;
-- total annual amount when annual billing is offered;
-- monthly equivalent where used;
-- actual annual saving without fabricated reference pricing;
-- tax treatment appropriate to locale;
-- included seats, sources, jurisdictions and limits;
-- ResearchRun, dossier, document, page, monitoring, export and API allowances where relevant;
-- hard stop, upgrade or overage treatment;
-- cancellation and effective-date rules;
-- refund policy;
-- source-dependent limitations;
-- plan-specific CTA.
-
-Currency and tax presentation MUST use locale-aware formatting. Generic Spanish examples use euros, but actual product currency is a commercial decision.
-
-## 8. Annual billing
-
-Annual billing MAY offer a real discount, committed capacity, onboarding or support benefit.
-
-It MUST NOT use:
-
-- false urgency;
-- permanently expiring discounts;
-- misleading crossed-out prices;
-- hidden non-refundable terms;
-- an annual monthly-equivalent price without the total payable amount.
-
-The customer MUST understand the total, renewal timing and cancellation treatment before purchase.
-
-## 9. Early access and Design Partners
-
-Before pricing is validated, permitted public states include:
-
-- Request access;
-- Request pricing;
-- Book a B2G workflow demo;
-- Join private beta;
-- Become a paid Design Partner.
-
-Design Partner agreements SHOULD exchange preferential commercial terms for explicit workflow access, feedback, evidence-quality reporting or case-study permissions. Every obligation MUST be documented.
-
-A Design Partner price MUST NOT be displayed as a permanent discount from an invented list price.
-
-## 10. Entitlement model
-
-Entitlements MUST be explicit, versioned and enforced server-side.
-
-A capability grant SHOULD contain:
+Professional and Team use flat-tier packages, not per-seat Stripe quantity.
 
 ```text
-subject
-organisation
-commercial state
-plan
-capability
-source or jurisdiction scope
-limit
-period
-source-right constraints
-start time
-end time
-origin
-version
+Stripe subscription item quantity = 1
+AXIGNAL seat capacity              = server-side entitlement
 ```
 
-The frontend MAY explain entitlements but MUST NOT be the enforcement boundary.
+The authority chain is:
+
+```text
+verified trial or subscription
+→ plan-to-capacity reconciliation
+→ tenant seat entitlement
+→ RESERVED or ACTIVE allocation
+→ explicit membership
+→ typed role binding
+→ server-resolved access
+→ forced RLS
+→ append-only audit
+```
+
+Rules:
+
+- trial capacity is 2;
+- Professional capacity is 3;
+- Team capacity is 15;
+- a Team tenant may have fewer than four users;
+- a fourth Professional seat is denied;
+- a sixteenth Team seat is denied;
+- invitations reserve capacity;
+- acceptance activates the same allocation;
+- expiry or revocation releases capacity;
+- downgrade is denied while occupancy exceeds target capacity;
+- the final owner cannot be revoked or demoted.
+
+Stripe cannot create memberships, roles or tenant authority.
+
+## 6. Role and capability boundary
+
+Candidate organisation roles:
+
+- Organisation Owner;
+- Organisation Admin;
+- B2G Manager;
+- Research Operator;
+- Bid Reviewer;
+- Viewer;
+- Billing Admin;
+- Auditor.
 
 Effective permission is:
 
 ```text
-commercial entitlement
+verified identity
+∩ active session
+∩ server-resolved tenant
+∩ active membership
+∩ role binding
+∩ workspace scope
+∩ seat-entitlement state
+∩ package capability
 ∩ source rights
-∩ organisation policy
-∩ jurisdiction availability
-∩ epistemic authority
-∩ current security state
+∩ security policy
+∩ RLS
 ```
 
-## 11. Capability catalogue
+A seat is capacity, not unrestricted authority.
 
-The entitlement catalogue SHOULD cover:
+## 7. Controlled seven-day trial
 
-- sources, jurisdictions and government levels;
-- historical depth;
-- Navigator and ResearchRun operations;
-- saved InvestigationContexts, Trails and watchlists;
-- dossier generation;
-- document and page processing;
-- alert count and cadence;
-- collaboration;
-- report and media exports;
-- API access and quotas;
-- private sources;
-- private claims and workspaces;
-- organisation administration;
-- security and audit features;
-- support and SLA.
+### 7.1 Trial ownership
 
-Every marketed plan row MUST map to a real entitlement or contractual service obligation.
+The trial belongs to a tenant or resolved economic identity, not a browser account.
+
+```text
+one tenant
+→ one trial grant
+→ one seven-day clock
+→ one token and cost budget
+→ two seats
+```
+
+Changing account, device, owner or email alias does not produce a new trial.
+
+### 7.2 Trial start
+
+The clock begins on the first admitted AI operation.
+
+```text
+verified email
+→ passkey registered
+→ trial READY
+→ first admitted AI request
+→ trial ACTIVE
+→ expires_at = started_at + 7 days
+```
+
+Signup, login, alert confirmation and workspace opening do not start the clock.
+
+### 7.3 Candidate limits
+
+- seven consecutive 24-hour periods;
+- two seats;
+- 1,000,000-token ceiling;
+- internal estimated-cost ceiling;
+- one concurrent ResearchRun;
+- restricted private connectors;
+- restricted bulk export;
+- no public API unless separately admitted;
+- admitted source and rights scope only.
+
+Token and cost reservations must be transactional.
+
+### 7.4 Abuse controls
+
+Strong subject claims may reuse or block a second trial. Weak signals may restrict or require step-up but cannot independently prove abuse.
+
+Risk decisions:
+
+- `ALLOW`;
+- `ALLOW_RESTRICTED`;
+- `REUSE_EXISTING_TRIAL`;
+- `STEP_UP_REQUIRED`;
+- `MANUAL_REVIEW`;
+- `BLOCK_ABUSE`.
+
+```text
+shared IP ≠ abuse
+risk score ≠ proof
+new account ≠ new trial
+email verified ≠ trial granted
+```
+
+### 7.5 Payment and conversion
+
+The candidate trial uses no card and no Stripe checkout.
+
+The trial must not:
+
+- convert silently;
+- create a paid entitlement without explicit package selection;
+- reset through deletion or cancellation;
+- hide expiry or limits;
+- use fabricated urgency.
+
+### 7.6 Expiry and retention
+
+At expiry:
+
+- new ResearchRuns and expensive operations stop;
+- the workspace follows declared read-only rules;
+- upgrade, export and deletion choices remain visible;
+- tenant-private data follows the accepted retention schedule;
+- source-derived global evidence remains governed independently;
+- no research is silently deleted before its declared schedule.
+
+## 8. Professional candidate package
+
+Candidate audience: a small B2G team or active professional.
+
+Candidate capabilities may include:
+
+- up to three seats;
+- admitted procurement libraries and jurisdictions;
+- Navigator and ResearchRuns;
+- InvestigationContexts, Opportunities and watchlists;
+- evidence-linked dossiers;
+- buyer, award, supplier and ownership context;
+- Tender Alerts;
+- Bid Workspace capabilities actually released;
+- bounded export within rights;
+- standard support.
+
+Usage, source, history, document and workspace capacities remain to be validated.
+
+## 9. Team candidate package
+
+Candidate audience: bid, capture, tender, consulting and public-sector sales teams.
+
+Candidate capabilities may include:
+
+- up to fifteen seats;
+- all admitted Professional capabilities;
+- shared Pursuits;
+- requirements, assignments, tasks and milestones;
+- documents, comments and approvals;
+- reporting and audit;
+- larger admitted operational capacity;
+- deeper comparison and history;
+- admitted integrations;
+- priority support.
+
+## 10. Enterprise candidate package
+
+Enterprise is quote-only and may include only delivered and contracted capabilities:
+
+- negotiated organisations and seats;
+- multiple admitted libraries or jurisdiction packs;
+- SSO and SCIM after production acceptance;
+- API and webhooks;
+- tenant-private libraries and connectors;
+- private data and claims;
+- data residency or deployment controls when available;
+- security, audit, support and SLA;
+- onboarding and professional services.
+
+Software, variable usage, third-party data and services must be separated when material.
+
+## 11. Entitlement model
+
+A capability grant should contain:
+
+```text
+subject
+organisation
+package
+commercial state
+capability
+library, source or jurisdiction scope
+limit
+period
+rights constraints
+start and end time
+origin
+policy version
+security state
+```
+
+The frontend may explain entitlements but is never the enforcement boundary.
 
 ## 12. Source-right interaction
 
-A paid plan or Enterprise agreement cannot override source licences, export restrictions, attribution, jurisdiction or product-admission state.
+A paid plan cannot override:
 
-An unavailable capability MUST explain whether the cause is:
-
-- plan;
-- usage limit;
-- rights;
-- source;
+- licence;
+- source-admission state;
+- export restrictions;
+- attribution;
+- retention;
 - jurisdiction;
-- security;
-- product maturity;
-- trial state;
-- operator suspension.
+- privacy;
+- product maturity.
 
-No catalogue entry creates a commercial entitlement.
+An unavailable capability must identify whether the cause is package, limit, rights, source, jurisdiction, security, trial state or suspension.
 
 ## 13. Usage and overages
 
-Usage meters MUST be:
+Every usage dimension must be:
 
 - defined;
 - inspectable;
 - timely;
 - reproducible;
-- consistent between UI, API and invoice;
-- separated from provider token accounting unless tokens are explicitly sold.
+- consistent across UI, API, entitlement and invoice;
+- separated from internal provider token accounting unless tokens are explicitly sold.
 
-Before a paid overage, AXIGNAL MUST use an approved mechanism:
+Before a paid overage, AXIGNAL must use an approved mechanism:
 
 - hard stop;
-- user-approved purchase;
-- organisation-admin-approved budget;
-- explicit automatic overage setting;
-- plan upgrade.
+- explicit user purchase;
+- organisation-admin budget;
+- explicit automatic-overage setting;
+- package upgrade.
 
 Silent overages are prohibited.
 
-## 14. Seven-day controlled trial
+## 14. Price presentation
 
-A seven-day trial is a candidate acquisition mechanism governed by Contracts 01 and 28. It remains disabled until this section's implementation gate passes.
+Any pricing surface must disclose:
 
-### 14.1 Trial identity and duration
+- currency and interval;
+- exact price state;
+- total annual amount if annual billing exists;
+- tax treatment;
+- included seats;
+- admitted library and jurisdiction scope;
+- limits;
+- hard-stop, upgrade or overage behaviour;
+- cancellation and effective date;
+- refund treatment;
+- retention and deletion;
+- source-dependent limitations;
+- one unambiguous CTA per package.
 
-- Seven consecutive 24-hour periods from activation.
-- One verified organisation and server-resolved tenant.
-- Initial maximum of two users.
-- One trial per organisation or business domain within a declared cooling-off period.
-- Business-email or equivalent organisation verification SHOULD be required.
-- Disposable-email and automated-account abuse controls MUST exist.
+## 15. Upgrades and downgrades
 
-### 14.2 Initial trial scope
-
-The first candidate SHOULD include:
-
-- admitted European TED coverage only;
-- three ResearchRuns;
-- two complete evidence-linked dossiers;
-- declared hard document and page allowance;
-- bounded saved opportunities and alerts;
-- one trial-labelled export where source rights permit;
-- standard-frequency updates.
-
-Every limit MUST be configurable, visible and enforced before cost is incurred.
-
-### 14.3 Trial exclusions
-
-The trial MUST exclude:
-
-- API access;
-- bulk raw-data export or redistribution;
-- private source connectors;
-- SSO, SCIM and enterprise administration;
-- unlimited document processing or AI;
-- high-frequency automation;
-- sources or jurisdictions not product-admitted for trial;
-- predictive win, margin, eligibility or legal scores;
-- bid submission or representation.
-
-### 14.4 Payment and conversion
-
-The initial private validation SHOULD prefer no payment card.
-
-The trial MUST NOT:
-
-- convert silently into paid;
-- create a charge without affirmative plan selection;
-- hide renewal or plan limits;
-- use fabricated countdown urgency.
-
-At expiry:
-
-- new ResearchRuns and monitoring MUST stop;
-- the workspace SHOULD move to `READ_ONLY_EXPIRED` for a declared period;
-- the user MUST receive clear upgrade, export and deletion choices;
-- no paid entitlement starts without explicit agreement.
-
-### 14.5 Retention and deletion
-
-The initial candidate SHOULD retain tenant-private trial state for no more than 30 days after expiry unless the user converts, requests earlier deletion or another lawful basis applies.
-
-The product MUST declare:
-
-- tenant-private content retained;
-- source-derived global objects retained independently;
-- deletion schedule;
-- backup expiry;
-- user deletion path;
-- read-only behaviour;
-- treatment of annotations, uploads and generated dossiers.
-
-Downgrade or expiry MUST NOT silently delete research before the declared schedule.
-
-### 14.6 Trial safety controls
-
-Before any production trial activation, AXIGNAL MUST have:
-
-- server-side entitlements and hard limits;
-- source-right and attribution enforcement;
-- per-trial cost ledger;
-- ResearchRun, export and concurrency budgets;
-- organisation and rate-limit controls;
-- tenant-isolation tests;
-- prompt, document-size and file-type controls;
-- malware and unsafe-file controls for uploads;
-- expiry and deletion jobs;
-- anomaly detection for automated extraction or redistribution;
-- separate trial suspension and kill switch;
-- append-only audit events;
-- no admission-authority bypass.
-
-## 15. Trial promotion gates
-
-### Private trial gate
-
-Pass only when:
-
-1. `AX-F8-T14` has accepted the European procurement E2E loop;
-2. a qualified user completes the full trial value loop without operator data repair;
-3. hard limits, expiry and read-only transition pass E2E tests;
-4. source rights, export and attribution cannot be bypassed;
-5. tenant isolation and deletion pass;
-6. variable cost and support burden fit the approved acquisition model;
-7. no copy overstates coverage, eligibility, prediction or authority.
-
-### Public trial gate
-
-Pass only when:
-
-- private trial evidence is accepted;
-- qualified activation and explicit paid intent are credible;
-- abuse remains controllable;
-- premium perception is not materially damaged;
-- payment, upgrade, cancellation and refund paths are tested;
-- trial and payment kill switches are independently tested.
-
-## 16. Plan comparison
-
-The comparison MUST prioritise decision-relevant differences:
-
-- intended user and team size;
-- admitted sources and jurisdictions;
-- ResearchRun, dossier and history capacity;
-- collaboration;
-- monitoring and alerts;
-- document processing;
-- exports;
-- API;
-- private data;
-- security and administration;
-- support and SLA.
-
-Rows MUST NOT be multiplied solely to make a plan appear larger.
-
-## 17. Upgrades and downgrades
-
-The customer MUST be told:
+The customer must be told:
 
 - when changes take effect;
-- how proration works;
-- what happens to data beyond a lower plan's limits;
-- which ResearchRuns, alerts or automations pause;
+- proration if applicable;
+- capacity changes;
 - what becomes read-only;
-- what remains exportable under source rights;
-- how to reverse an accidental change.
+- which operations pause;
+- export availability;
+- downgrade conflicts;
+- reversal path.
 
-Downgrading MUST NOT silently delete research.
+Downgrade must never silently delete customer work.
 
-## 18. Cancellation
+## 16. Cancellation
 
-Cancellation MUST be available through a reasonable self-service path for self-service plans.
+Self-service packages require a reasonable cancellation path after public activation.
 
-The product MUST state:
+The product must state:
 
 - effective date;
 - remaining access;
-- renewal cancellation status;
+- renewal status;
 - export opportunity;
 - retention and deletion schedule;
 - treatment of organisation-owned content.
 
-Enterprise termination follows the governing agreement but MUST have an operational offboarding plan.
+Cancellation does not reset trial eligibility.
 
-## 19. Enterprise pricing
+## 17. Commercial administration
 
-Enterprise quotes MAY incorporate:
+Founder Operations P26-T02 must administer customers, trials and billing through typed server operations.
 
-- seats and organisations;
-- jurisdiction packs;
-- private-source complexity;
-- data and API volume;
-- security obligations;
-- deployment or residency needs;
-- SLA and support;
-- onboarding and integration services;
-- source licensing costs.
+It must not:
 
-The quote MUST separate recurring software, variable usage, third-party data and professional services when material.
+- fabricate provider events;
+- change verified Stripe state;
+- grant arbitrary entitlement;
+- extend trials silently;
+- issue unaudited refunds;
+- allow browser-selected billing authority.
 
-## 20. Commercial experiments
+## 18. Economic gate
 
-Pricing and trial experiments MUST comply with Contract 23.
+A package or trial cannot become public-current unless evidence supports:
 
-They MUST NOT:
-
-- discriminate using sensitive or protected characteristics;
-- change contracted prices without authority;
-- show inconsistent totals during one purchase journey;
-- use fabricated scarcity;
-- hide limits;
-- weaken accessibility, privacy, security or source rights;
-- treat a catalogue source as a supported entitlement;
-- claim predictive accuracy without accepted evidence.
-
-## 21. Economic gate
-
-A plan or trial cannot be promoted to public scale unless evidence supports:
-
+- qualified buyer understanding;
 - willingness to pay;
-- activation and repeated use;
+- completed product value;
 - retention or annual commitment;
-- gross-margin viability;
-- source, infrastructure, model and support cost coverage;
-- acceptable trial and refund burden;
-- understandable value metric;
-- acceptable upgrade, downgrade and cancellation behaviour;
-- server-side entitlement reproducibility;
-- jurisdiction and source-right enforcement.
+- renewal;
+- contribution margin;
+- source, infrastructure, model and support costs;
+- acceptable abuse, refund and dispute burden;
+- acquisition payback;
+- understandable package distinctions;
+- reproducible entitlement and billing state;
+- cancellation and downgrade operation.
 
-Channels and spend MUST NOT scale before conversion and unit economics are validated.
+## 19. Reinvestment
 
-## 22. Reinvestment policy
+Profits may be reinvested in validated acquisition, source coverage, product, infrastructure, security and customer success only under measured return, margin, risk limits and reserves.
 
-Profits MAY be reinvested in:
+Page volume, source count or advertising spend must not be scaled without evidence.
 
-- validated acquisition channels;
-- admitted source and jurisdiction coverage;
-- evidence and document automation;
-- infrastructure and reliability;
-- product improvement;
-- positioning and methodology;
-- customer success;
-- security, privacy and compliance.
+## 20. Acceptance gate
 
-Reinvestment MUST be conditioned on measured return, margin, risk limits, reserves and channel validation. AXIGNAL MUST NOT scale unvalidated acquisition or source breadth merely because budget is available.
+Packaging, pricing, trial and seats advance only when:
 
-## 23. Acceptance gate
+1. every marketed row maps to server authority;
+2. identity, abuse and seats pass in production acceptance;
+3. complete external Stripe sandbox evidence exists;
+4. paid and retention evidence exists;
+5. pricing and package comprehension pass;
+6. taxes, invoice, refund and dispute rules pass;
+7. source-right constraints pass;
+8. upgrade, downgrade, cancellation, expiry and deletion pass;
+9. no dark pattern or silent conversion exists;
+10. P26-T02 founder administration passes;
+11. P27 binds the final exact head;
+12. human Commercial, Finance/Tax, Security and Product authorities approve.
 
-Packaging, pricing and trial advance from candidate when:
-
-1. target B2G buyers understand plan distinctions and premium value;
-2. each marketed capability maps to a server-side entitlement;
-3. paid willingness-to-pay evidence exists;
-4. gross-margin and support assumptions are measured;
-5. pricing surfaces disclose limits, taxes, sources, jurisdictions and renewal terms;
-6. usage, expiry and overage accounting is reproducible;
-7. source-right constraints remain enforced;
-8. upgrade, downgrade, cancellation, trial expiry and deletion flows are tested;
-9. no dark pattern, fabricated discount or silent conversion exists;
-10. public price status and version are auditable;
-11. the trial passes its private and public promotion gates;
-12. no plan grants unsupported global coverage or predictive authority.
-
-Exact plan names, public prices, limits, discounts and trial allowances remain unfrozen until this gate passes.
-
-## 24. Current authority state
+## 21. Current authority
 
 ```text
-PACKAGES AND PRICE BANDS ARE HYPOTHESES
-/ SERVER-SIDE ENTITLEMENTS REQUIRED
-/ SEVEN-DAY TRIAL DESIGNED BUT DISABLED
-/ NO SILENT CONVERSION
-/ NO PUBLIC CURRENT PRICE
-/ NO GLOBAL SOURCE ENTITLEMENT FROM CATALOGUE LISTING
+CANDIDATE PRICE BOOK        0 / 149 / 399 / QUOTE
+SEATS                       2 / 3 / 15
+PRICE STATUS                CANDIDATE_ONLY
+SEAT GOVERNANCE E2E         PASS
+TRIAL GOVERNANCE E2E        PASS
+PUBLIC TRIAL                BLOCKED
+PUBLIC PRICING              NOT VALIDATED
+P26-T02 BILLING ADMIN       NOT STARTED
+STRIPE LIVE                 BLOCKED
+PUBLIC LAUNCH               NO_GO
 ```

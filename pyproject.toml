@@ -12,26 +12,29 @@ dependencies = [
   "psycopg[binary]>=3.2,<4",
   "pydantic>=2.11,<3",
   "redis>=6.2,<7",
-  "uvicorn[standard]>=0.35,<1"
+  "uvicorn[standard]>=0.35,<1",
+  "webauthn>=3,<4"
 ]
 
 [project.optional-dependencies]
 dev = [
-  "pytest>=8.4,<9",
+  "hatchling==1.27.0",
+  "jsonschema>=4.25,<5",
+  "pytest>=9.0.3,<10",
   "pytest-cov>=6.2,<7",
   "ruff>=0.12,<1",
   "pyyaml>=6,<7"
 ]
 
 [build-system]
-requires = ["hatchling>=1.27"]
+requires = ["hatchling==1.27.0"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["apps/api/src/axignal_api"]
 
 [tool.pytest.ini_options]
-pythonpath = ["apps/api/src"]
+pythonpath = [".", "apps/api/src"]
 testpaths = ["apps/api/tests"]
 addopts = "-q --strict-markers --disable-warnings"
 

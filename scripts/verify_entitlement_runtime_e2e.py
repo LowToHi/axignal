@@ -14,6 +14,7 @@ from psycopg import sql
 from psycopg.rows import dict_row
 
 from axignal_api.entitlement_repository import EntitlementRepository
+from trial_grant_fixture import ensure_active_trial_grant
 
 TENANT_A = UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa")
 TENANT_B = UUID("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb")
@@ -151,6 +152,7 @@ def run(dsn: str) -> dict[str, Any]:
     assert trial_a["token_budget_total"] == 1_000_000
     assert trial_a["unlimited_ai_tokens"] is False
     assert trial_a["expires_at"] - trial_a["starts_at"] == timedelta(days=7)
+    ensure_active_trial_grant(dsn, tenant_id=TENANT_A, now=START)
     _expect_failure(
         lambda: repository.activate_trial(
             tenant_id=TENANT_A,
@@ -178,7 +180,10 @@ def run(dsn: str) -> dict[str, Any]:
         actor_subject="usr_e2e",
         now=START + timedelta(minutes=3),
     )
-    usage_after_first = repository.usage(tenant_id=TENANT_A)
+    usage_after_first = repository.usage(
+        tenant_id=TENANT_A,
+        now=START + timedelta(minutes=3),
+    )
     assert usage_after_first is not None
     assert usage_after_first["token_budget_available"] == 450_000
 
@@ -197,7 +202,10 @@ def run(dsn: str) -> dict[str, Any]:
         actor_subject="usr_e2e",
         now=START + timedelta(minutes=5),
     )
-    exhausted_usage = repository.usage(tenant_id=TENANT_A)
+    exhausted_usage = repository.usage(
+        tenant_id=TENANT_A,
+        now=START + timedelta(minutes=5),
+    )
     assert exhausted_usage is not None
     assert exhausted_usage["token_budget_consumed"] == 1_000_000
     assert exhausted_usage["token_budget_reserved"] == 0
@@ -220,6 +228,7 @@ def run(dsn: str) -> dict[str, Any]:
         actor_subject="usr_e2e_b",
         now=START,
     )
+    ensure_active_trial_grant(dsn, tenant_id=TENANT_B, now=START)
     released = repository.reserve(
         tenant_id=TENANT_B,
         operation_id="op_release_without_usage",
@@ -234,7 +243,10 @@ def run(dsn: str) -> dict[str, Any]:
         actor_subject="usr_e2e_b",
         now=START + timedelta(minutes=2),
     )
-    release_usage = repository.usage(tenant_id=TENANT_B)
+    release_usage = repository.usage(
+        tenant_id=TENANT_B,
+        now=START + timedelta(minutes=2),
+    )
     assert release_usage is not None
     assert release_usage["token_budget_reserved"] == 0
     assert release_usage["token_budget_consumed"] == 0
@@ -259,7 +271,10 @@ def run(dsn: str) -> dict[str, Any]:
     )
 
     _grant_paid_entitlement(dsn)
-    paid_usage = repository.usage(tenant_id=TENANT_B)
+    paid_usage = repository.usage(
+        tenant_id=TENANT_B,
+        now=START + timedelta(days=8),
+    )
     assert paid_usage is not None
     assert paid_usage["entitlement_kind"] == "PAID_MONTHLY"
     assert paid_usage["unlimited_ai_tokens"] is True
@@ -279,7 +294,10 @@ def run(dsn: str) -> dict[str, Any]:
         actor_subject="usr_paid_e2e",
         now=START + timedelta(days=8, minutes=2),
     )
-    paid_after = repository.usage(tenant_id=TENANT_B)
+    paid_after = repository.usage(
+        tenant_id=TENANT_B,
+        now=START + timedelta(days=8, minutes=2),
+    )
     assert paid_after is not None
     assert paid_after["token_budget_available"] is None
     assert paid_after["token_budget_consumed"] == 1_800_000

@@ -1,0 +1,44 @@
+{
+  "schema_version": "axignal.p03-rollback-plan/v0.1",
+  "task_id": "AX-GE2E-P03-T01",
+  "baseline_sha": "1800d5e7944e49cb85f52abeb9c1ce51af666d08",
+  "baseline_description": "P02 engineering-evidence-ready exact head",
+  "expected_changed_paths": [
+    ".github/workflows/contract-validation.yml",
+    "data/security/p03-rollback-plan.v0.1.json",
+    "data/security/p03-threat-model.v0.1.json",
+    "data/security/security-identity-rights-registry.v0.1.json",
+    "docs/security/P03-security-identity-rights-by-design-v0.1.md",
+    "schemas/security-identity-rights-registry.schema.json",
+    "schemas/security-threat-model.schema.json",
+    "scripts/verify_p03_rollback.py",
+    "scripts/verify_p03_security_identity_rights.py"
+  ],
+  "remove_paths": [
+    "data/security/p03-rollback-plan.v0.1.json",
+    "data/security/p03-threat-model.v0.1.json",
+    "data/security/security-identity-rights-registry.v0.1.json",
+    "docs/security/P03-security-identity-rights-by-design-v0.1.md",
+    "schemas/security-identity-rights-registry.schema.json",
+    "schemas/security-threat-model.schema.json",
+    "scripts/verify_p03_rollback.py",
+    "scripts/verify_p03_security_identity_rights.py"
+  ],
+  "restore_paths": [
+    ".github/workflows/contract-validation.yml"
+  ],
+  "preserved_authority_paths": [
+    "data/programmes/global-e2e-tasks-p00-p04.v1.4.json",
+    "data/ontology/global-ontology-registry.v0.1.json",
+    "data/ontology/library-contracts.v0.1.json",
+    "docs/gates/AX-GE2E-P01-gate-v1.4.json",
+    "scripts/verify_p02_ontology_foundation.py",
+    "scripts/verify_p02_library_contracts.py",
+    "scripts/verify_p02_rollback.py"
+  ],
+  "expected_result": {
+    "residual_paths": 0,
+    "rolled_back_tree_equals_baseline": true,
+    "p02_authority_drift": 0
+  }
+}

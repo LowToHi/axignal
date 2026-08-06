@@ -1,0 +1,215 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://axignal.com/schemas/security-identity-rights-registry.schema.json",
+  "title": "AXIGNAL Security, Identity and Rights Registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "task_id",
+    "programme_version",
+    "status",
+    "human_authorised_branch_start",
+    "canonical_activation_authorised",
+    "dependency_status",
+    "trust_principles",
+    "identity_contract",
+    "organisation_contract",
+    "membership_contract",
+    "authorization_contract",
+    "session_contract",
+    "rls_contract",
+    "data_classification_contract",
+    "source_rights_enforcement_contract",
+    "export_contract",
+    "audit_contract",
+    "break_glass_contract",
+    "observability",
+    "acceptance_gate"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "axignal.security-identity-rights-registry/v0.1"
+    },
+    "task_id": {
+      "const": "AX-GE2E-P03-T01"
+    },
+    "programme_version": {
+      "const": "1.4.0"
+    },
+    "status": {
+      "enum": [
+        "DRAFT_ENGINEERING_FOUNDATION",
+        "EVIDENCE_READY",
+        "ACCEPTED",
+        "SUPERSEDED"
+      ]
+    },
+    "human_authorised_branch_start": {
+      "type": "boolean"
+    },
+    "canonical_activation_authorised": {
+      "type": "boolean"
+    },
+    "dependency_status": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "p02_task",
+        "p02_engineering_head",
+        "p02_engineering_evidence_ready",
+        "p02_canonical_activation_authorised",
+        "p01_dependency_satisfied",
+        "stacked_base_branch",
+        "merge_to_main_allowed"
+      ],
+      "properties": {
+        "p02_task": {
+          "const": "AX-GE2E-P02-T01"
+        },
+        "p02_engineering_head": {
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "p02_engineering_evidence_ready": {
+          "type": "boolean"
+        },
+        "p02_canonical_activation_authorised": {
+          "type": "boolean"
+        },
+        "p01_dependency_satisfied": {
+          "type": "boolean"
+        },
+        "stacked_base_branch": {
+          "type": "string",
+          "minLength": 10
+        },
+        "merge_to_main_allowed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "trust_principles": {
+      "type": "array",
+      "minItems": 10,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 20
+      }
+    },
+    "identity_contract": {
+      "$ref": "#/$defs/openContract"
+    },
+    "organisation_contract": {
+      "$ref": "#/$defs/openContract"
+    },
+    "membership_contract": {
+      "$ref": "#/$defs/openContract"
+    },
+    "authorization_contract": {
+      "$ref": "#/$defs/openContract"
+    },
+    "session_contract": {
+      "$ref": "#/$defs/openContract"
+    },
+    "rls_contract": {
+      "$ref": "#/$defs/openContract"
+    },
+    "data_classification_contract": {
+      "$ref": "#/$defs/openContract"
+    },
+    "source_rights_enforcement_contract": {
+      "$ref": "#/$defs/openContract"
+    },
+    "export_contract": {
+      "$ref": "#/$defs/openContract"
+    },
+    "audit_contract": {
+      "$ref": "#/$defs/openContract"
+    },
+    "break_glass_contract": {
+      "$ref": "#/$defs/openContract"
+    },
+    "observability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "metrics",
+        "alerts"
+      ],
+      "properties": {
+        "metrics": {
+          "type": "array",
+          "minItems": 6,
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "alerts": {
+          "type": "array",
+          "minItems": 6,
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "acceptance_gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "required_before_canonical_activation",
+        "current_decision"
+      ],
+      "properties": {
+        "required_before_canonical_activation": {
+          "type": "array",
+          "minItems": 12,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 10
+          }
+        },
+        "current_decision": {
+          "enum": [
+            "NOT_READY_FOR_CANONICAL_ACTIVATION",
+            "READY_FOR_HUMAN_ACCEPTANCE",
+            "ACCEPTED",
+            "REJECTED"
+          ]
+        }
+      }
+    }
+  },
+  "$defs": {
+    "openContract": {
+      "type": "object",
+      "minProperties": 2,
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          },
+          {
+            "type": "array"
+          },
+          {
+            "type": "object"
+          }
+        ]
+      }
+    }
+  }
+}

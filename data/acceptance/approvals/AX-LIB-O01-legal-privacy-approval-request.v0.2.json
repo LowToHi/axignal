@@ -1,0 +1,101 @@
+{
+  "schema_version": "axignal.typed-approval-request/v0.2",
+  "task_id": "AX-GE2E-G7-O01-T03",
+  "gate_id": "PUBLIC-LAUNCH-GATE-7",
+  "library_id": "AX-LIB-O01",
+  "source_id": "src_ted_search_api_v3",
+  "status": "BLOCKED_PENDING_EXACT_HEAD_MANIFEST_AND_TYPED_DECISIONS",
+  "requested_authorities": [
+    "LEGAL",
+    "PRIVACY_DATA_RIGHTS"
+  ],
+  "inputs": [
+    "data/acceptance/legal/AX-LIB-O01-TED-official-terms-snapshot.v0.1.json",
+    "data/acceptance/legal/AX-LIB-O01-TED-field-rights-matrix.v0.1.json",
+    "data/acceptance/legal/AX-LIB-O01-TED-contact-policy-reconciliation.v0.2.json",
+    "data/contracts/AX-GE2E-G7-O01-T02-domain-contracts.v0.1.json",
+    "apps/api/src/axignal_api/o01_contact_policy.py",
+    "apps/api/tests/test_o01_contact_policy.py"
+  ],
+  "target_head_sha": null,
+  "target_git_tree": null,
+  "manifest_digest": null,
+  "manifest_artifact_id": null,
+  "manifest_expiry": null,
+  "approval_contract": {
+    "allowed_decisions": [
+      "APPROVE",
+      "REJECT"
+    ],
+    "required_fields": [
+      "authority",
+      "decision",
+      "scope",
+      "manifest_digest",
+      "head_sha",
+      "timestamp",
+      "expiry",
+      "conditions",
+      "signature"
+    ],
+    "approval_survives_head_change": false,
+    "approval_survives_manifest_change": false,
+    "partial_or_informal_approval_valid": false,
+    "maximum_expiry": "2026-08-31T18:00:00Z"
+  },
+  "decision_scope": {
+    "contact_policy": {
+      "INSTITUTIONAL": "ALLOW",
+      "FUNCTIONAL_NON_PERSONAL": "ALLOW",
+      "PROFESSIONAL_PERSONAL": "CONTEXTUAL",
+      "AMBIGUOUS_PERSONAL": "LINK_ONLY_OR_BLOCK",
+      "BLOCKED": "BLOCK"
+    },
+    "campaign": "PRIVATE_BOUNDED_QUALITY_LAG_MULTILINGUAL_AND_CONTROLS_MEASUREMENT_ONLY",
+    "public_product_admission": false,
+    "public_claim_authority": false,
+    "public_launch_authority": false,
+    "autonomous_external_communication": false,
+    "bid_submission_authority": false
+  },
+  "legal_questions": [
+    "Does the official TED/EU reuse framework permit the bounded campaign with the contextual contact-channel policy?",
+    "Are source acknowledgement and transformation/change disclosures sufficient?",
+    "May institutional and functional non-personal channels be retained as opportunity-scoped references?",
+    "May professional-personal channels be used only in the same published procurement procedure under the stated restrictions?",
+    "Are source-link-only handling, attachment exclusions and mark/logo prohibitions adequate?",
+    "What additional jurisdictional, attribution or retention conditions apply?"
+  ],
+  "privacy_data_rights_questions": [
+    "What lawful basis permits any professional-personal contact processing?",
+    "Is same-procedure necessity plus purpose limitation sufficiently narrow?",
+    "What retention, deletion, quarantine and access-control periods apply?",
+    "How must correction, erasure, objection and restriction requests propagate?",
+    "Must sole traders and ambiguous legal forms remain excluded automatically?",
+    "Which logs, metrics and traces may be retained without replicating personal endpoints?",
+    "Is a DPIA or records-of-processing update required before execution?"
+  ],
+  "proposed_conditions": [
+    "institutional and functional channels remain tenant and opportunity scoped",
+    "professional-personal channels remain contextual to the same procurement procedure",
+    "ambiguous personal endpoints are not persisted and degrade to source-link-only or block",
+    "natural-person tenderers and contractors remain blocked",
+    "no global person search, bulk export, marketing or cross-opportunity reuse",
+    "no endpoint or message-body replication in audit events",
+    "no autonomous external communication or bid submission",
+    "raw payloads remain ephemeral and are not persisted",
+    "attachments and third-party works remain disabled",
+    "public API redistribution and model training remain denied",
+    "any head, tree, manifest, contract or artifact change invalidates approval",
+    "the approval expires before the retained evidence artifact"
+  ],
+  "blocking_reasons": [
+    "The exact-head approval manifest has not yet been materialised by CI.",
+    "No typed LEGAL decision is present.",
+    "No typed PRIVACY_DATA_RIGHTS decision is present.",
+    "No human signature is present.",
+    "Retention, deletion and lawful-basis conditions remain undecided.",
+    "A machine assessment cannot act as Legal or Privacy/Data Rights authority."
+  ],
+  "approvals": []
+}

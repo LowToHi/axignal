@@ -1,54 +1,67 @@
 # 24 — Trust Center and Public Methodology Contract
 
-Version: `0.1.0-candidate`
-Status: `NORMATIVE CANDIDATE / PUBLICATION VALIDATION REQUIRED`
+Version: `0.2.0`
+Status: `NORMATIVE CANDIDATE / PUBLICATION AND P27 VALIDATION REQUIRED`
 Goal ID: `AXIGNAL-GOAL-001`
+Governing programme: `Contract 31 / ADR-016`
 
 ## 1. Purpose
 
-The AXIGNAL Trust Center and public methodology surfaces MUST provide a clear, current and auditable explanation of how the product obtains, structures, evaluates, presents, protects and corrects information.
+The AXIGNAL Trust Center and public methodology surfaces MUST provide a clear, current and auditable explanation of how the product obtains, structures, evaluates, presents, protects, operates and corrects information and customer work.
 
-Trust content is part of the product and conversion system. It MUST NOT be hidden only in legal footers or sales documents.
+Trust content is part of the product and acquisition system. It must not be hidden in legal footers or sales documents.
 
 ## 2. Trust Center scope
 
-The Trust Center SHOULD provide current public information on:
+The Trust Center should provide current public information on:
 
-- product methodology;
+- product and B2G methodology;
 - claim and evidence semantics;
 - data sources and rights;
 - coverage and freshness;
-- AI and model use;
+- AI and deterministic authority;
 - contradiction, correction, expiry and retraction;
-- privacy and user controls;
+- opportunity and pursuit state;
+- identity, sessions, memberships and seats;
+- trial and abuse controls;
+- privacy, consent and deletion;
 - Knowledge Tides;
-- security and organisation isolation;
-- service status and incidents;
+- organisation isolation;
+- public SEO and IndexabilityGate methodology;
+- Tender Alerts and CRM boundaries;
+- AI-citation evidence;
+- Search Console and connector status;
+- Founder Operations authority;
+- service status, incidents and recovery;
 - accessibility;
 - export and API restrictions;
 - contact and disclosure channels.
 
-## 3. Methodology summary
+## 3. Product methodology
 
-The public methodology MUST explain the canonical sequence:
+Public methodology must explain:
 
 ```text
 source
 → raw evidence reference
-→ extraction or calculation
-→ candidate claim
+→ extraction, normalisation or calculation
+→ Candidate Claim
 → deterministic and policy gates
 → admitted claim or rejection
 → contradiction and dependency graph
-→ opportunity or scenario assembly
-→ user-facing explanation
+→ InvestigationContext
+→ Opportunity
+→ human decision
+→ Pursuit and Operational Workspace
+→ observed Outcome
+→ Learning
 ```
 
-It MUST explain that generated language MAY navigate and explain, but only the governed epistemic runtime can admit canonical claims or opportunity states.
+Generated language may navigate and explain. It cannot admit sources, claims, Opportunities, memberships, entitlements, public pages or launch state.
 
 ## 4. Claim classes
 
-The public methodology MUST distinguish at minimum:
+Public definitions must distinguish:
 
 - observed;
 - calculated;
@@ -57,309 +70,515 @@ The public methodology MUST distinguish at minimum:
 - supporting;
 - contradicting;
 - unknown or insufficient evidence;
+- contested;
 - expired;
 - corrected;
+- falsified;
 - retracted.
 
-Definitions MUST align with Contract 02 and the visual treatment in Contracts 13 and 20.
+Definitions align with Contract 02 and actual visual semantics.
 
 ## 5. Evidence and provenance
 
-Public documentation MUST explain:
+Public documentation must explain:
 
-- how evidence references are preserved;
 - source identity and authority;
-- publication and ingestion time;
+- source admission state;
+- source-native identifier;
+- publication, retrieval and observation time;
 - extraction or transformation method;
 - original language and translation provenance;
 - source independence;
 - rights and export restrictions;
-- reproducibility where applicable.
+- version lineage;
+- reproducibility or probabilistic status;
+- revocation and correction.
 
-AXIGNAL MUST NOT imply that a source is available for export merely because it was lawfully used for analysis.
+A source lawfully used for analysis is not automatically exportable or commercially available.
 
 ## 6. Contradiction and uncertainty
 
-The methodology MUST explain that contradiction is first-class and may arise from:
+Contradiction may arise from:
 
 - direct factual disagreement;
 - different time scopes;
-- different populations or geographies;
-- different definitions;
+- different populations or geography;
+- definition or taxonomy differences;
 - methodology differences;
-- value or scenario disagreement.
+- value, scenario or forecast disagreement.
 
-Unknown coverage MUST be represented as unknown, not as a low or neutral result.
+Unknown coverage must remain unknown. Missing or revoked data must not become a low or neutral score.
 
-## 7. Opportunity and scenario boundaries
+## 7. Opportunity and operations boundary
 
-The public methodology MUST explain:
+The public methodology must explain:
 
-- how claims contribute to an opportunity;
-- that an opportunity is a structured research object, not a personalised recommendation;
-- how supporting, contradicting and unknown evidence coexist;
-- how invalidation conditions work;
-- how scenarios differ from observations;
-- how forecast uncertainty and calibration are presented when available.
+```text
+public notice discovered
+≠ qualified opportunity
+qualified opportunity
+≠ bid decision
+bid decision
+≠ submission
+submission
+≠ award
+award announcement
+≠ signed contract
+```
 
-## 8. Data coverage
+An Opportunity is a structured research and workflow object, not a guaranteed recommendation.
 
-The Trust Center MUST provide an understandable coverage model including:
+Operational state must distinguish:
 
-- supported universes;
-- geographies;
-- time ranges;
+- Opportunity;
+- Pursuit;
+- Decision;
+- Requirements;
+- Tasks and Milestones;
+- Documents and Approvals;
+- Submission or Activation Record;
+- Outcome;
+- Learning.
+
+Models cannot approve, sign, submit, file or create observed outcomes.
+
+## 8. Coverage and source states
+
+The Trust Center must expose understandable coverage:
+
+- required and available libraries;
+- admitted geographies and jurisdictions;
 - source categories;
-- update cadence or freshness expectations;
+- time ranges;
+- update cadence;
 - known gaps;
-- suspended or delayed sources;
+- delayed, restricted, suspended or revoked sources;
 - material methodology changes.
 
-Coverage claims MUST be generated from current system state or maintained through an auditable process.
+Coverage claims must derive from current admitted state.
+
+```text
+source catalogue ≠ admitted source
+admitted source ≠ complete jurisdiction
+one source ≠ global coverage
+```
 
 ## 9. Source admission and rights
 
-The public source policy MUST describe:
+Public source policy must describe:
 
-- legal and technical admission;
-- licensing and permitted uses;
+- discovery;
+- legal review;
+- technical probe;
+- evidence readiness;
+- product admission;
+- private acceptance;
+- commercial state;
+- suspension, revocation and rejection;
+- licence and permitted use;
 - attribution;
 - storage and retention;
 - export limitations;
-- correction and revocation handling;
-- third-party data dependencies.
+- kill switch.
 
-Specific commercial source terms MAY remain confidential, but public statements MUST not contradict them.
+Specific commercial terms may remain confidential, but public claims must not contradict them.
 
 ## 10. AI and model transparency
 
-AXIGNAL MUST disclose the material roles of AI and deterministic software, including where models are used for:
+AXIGNAL must disclose material AI uses, including where applicable:
 
 - extraction;
 - classification;
 - translation;
-- semantic search;
-- entity resolution candidates;
+- semantic retrieval;
+- candidate entity resolution;
 - command interpretation;
+- Candidate Claim proposal;
 - generated explanations;
-- scenarios or predictions where applicable.
+- scenarios or predictions.
 
-The site MUST explain where AI output is advisory, candidate or generated and where deterministic or human gates apply.
+It must explain which deterministic and human gates apply.
 
-AXIGNAL MUST NOT claim that AI is error-free, unbiased or autonomous beyond its actual authority.
+AXIGNAL must not claim AI is error-free, unbiased, autonomous, canonical or capable of approving customer or launch decisions.
 
 ## 11. Navigator transparency
 
-Public documentation MUST explain that Navigator:
+Navigator:
 
 - interprets commands;
 - manipulates InvestigationContext;
 - navigates Globe, Graph, Timeline and Claims;
-- retrieves canonical claims and evidence;
-- generates explanations with provenance;
-- cannot directly rewrite the canonical Claim Ledger.
+- requests ResearchRuns;
+- retrieves admitted claims and evidence;
+- generates bounded explanations;
+- may propose Opportunity actions.
 
-## 12. Multilingual semantics
+Navigator cannot directly rewrite canonical ledgers, grant authority or execute external actions.
 
-The Trust Center MUST explain:
+## 12. Identity, passkeys and sessions
+
+The Trust Center must accurately describe the accepted identity design:
+
+```text
+verified email bootstrap
+→ passkey
+→ opaque revocable server session
+→ server-resolved tenant and membership
+```
+
+It must disclose:
+
+- email's limited role;
+- passkey and user-verification role;
+- session timeouts;
+- session revocation;
+- recovery-code process;
+- privileged-operation step-up;
+- organisation and tenant isolation;
+- current external identity-provider availability.
+
+It must not claim passwordless, SSO, SCIM or MFA availability beyond the deployed accepted environment.
+
+## 13. Trial and abuse transparency
+
+The Trust Center must explain:
+
+- trial owner as tenant or economic identity;
+- seven-day start at first admitted AI operation;
+- two seats;
+- 1,000,000-token ceiling;
+- internal cost and concurrency limits;
+- no card and no silent conversion in the candidate design;
+- strong and weak abuse signals;
+- step-up and manual review;
+- false-positive and appeal path;
+- expiry, read-only, export and deletion treatment.
+
+It must preserve:
+
+```text
+risk score ≠ proof of fraud
+shared IP ≠ abuse
+account ≠ trial
+```
+
+## 14. Seat and role transparency
+
+Public plan and security documentation must distinguish:
+
+```text
+seat capacity
+≠ membership
+≠ role
+≠ workspace permission
+≠ unrestricted authority
+```
+
+Candidate capacities and price status must match the versioned price book.
+
+## 15. Multilingual semantics
+
+The Trust Center must explain:
 
 - supported interface languages;
-- preservation of original-language evidence;
-- canonical semantic representation;
+- original-language preservation;
+- canonical semantics;
 - translated renderings;
 - transliteration and aliases;
-- translation version and confidence where material;
-- user ability to inspect original and translated content.
+- translation method, version and confidence;
+- human overrides;
+- ability to inspect original content.
 
-## 13. Knowledge Tides
+Translation is not primary evidence.
 
-The public methodology MUST distinguish:
+## 16. Knowledge Tides
+
+The public methodology must distinguish:
 
 ```text
 individual query
-≠ persistent personal preference
-≠ aggregate attention trend
+≠ private preference
+≠ aggregate attention
+≠ market demand
 ≠ economic evidence
 ```
 
-It MUST explain:
+It must explain eligibility, cohort thresholds, privacy, suppression, manipulation controls and research-candidate creation. Knowledge Tides never directly create canonical claims.
 
-- `USER_INTENT_EVENT`;
-- optional private interest memory;
-- observed, inferred and confirmed preferences;
-- eligible-user denominator;
-- unique-user share;
-- velocity and persistence;
-- organisation and language diversity;
-- anti-manipulation controls;
-- privacy thresholds;
-- research-candidate creation;
-- prohibition on converting a Knowledge Tide directly into an economic claim.
+## 17. Public SEO and IndexabilityGate
 
-A statement such as “60% of eligible active users investigated a topic during a declared period” MAY be a valid aggregate behavioural claim when the cohort, denominator, period and privacy rules are explicit. It does not prove the underlying economic opportunity.
+The public methodology must explain:
 
-## 14. Privacy controls
+```text
+dataset
+→ page candidate
+→ IndexabilityGate
+→ founder review
+→ versioned expiring snapshot
+→ public page and sitemap
+```
 
-The Trust Center MUST explain separately:
+It must disclose the factors used for indexability:
 
-- private conversation and investigation history;
-- optional personalisation memory;
-- aggregate product-improvement analytics;
-- Knowledge Tides participation;
+- inventory;
+- buyer diversity;
+- demand;
+- quality;
+- uniqueness;
+- source coverage;
+- content depth;
+- freshness;
+- non-synthetic evidence;
+- rights.
+
+The Trust Center must state:
+
+```text
+generated page ≠ indexed page
+indexed page ≠ ranked page
+ranked page ≠ qualified acquisition
+```
+
+## 18. Structured data and AI-readable content
+
+Structured data and `llms.txt` must reflect visible admitted content.
+
+They cannot:
+
+- create hidden claims;
+- override robots;
+- authorise a crawler;
+- guarantee search or AI inclusion;
+- expose private data;
+- create a second ungoverned corpus.
+
+## 19. Tender Alerts and consent
+
+Public documentation must explain:
+
+- requested alert scope;
+- bot verification;
+- pending-confirmation state;
+- email delivery;
+- explicit POST confirmation;
+- unsubscribe;
+- retention;
+- marketing-consent separation.
+
+Opening an email link does not confirm consent.
+
+```text
+alert subscriber ≠ account
+alert consent ≠ marketing consent
+alert ≠ trial
+```
+
+## 20. CRM boundary
+
+The Trust Center or privacy information must distinguish CRM contact and lifecycle from identity, trial, billing and product authority.
+
+Lead scoring must not be represented as fraud proof, entitlement or customer value.
+
+## 21. AI citation governance
+
+Public methodology should explain how observed citations are recorded and limited.
+
+```text
+AI citation ≠ endorsement
+AI citation ≠ ranking guarantee
+AI citation ≠ canonical claim
+AI citation ≠ acquisition proof
+```
+
+Citation reporting must preserve provider, surface, cited URL, observation source, time and snapshot version.
+
+## 22. Google Search Console
+
+The Trust Center must state the actual Search Console maturity.
+
+A DNS TXT verification record is public verification evidence.
+
+```text
+DNS verification ≠ API access
+API access ≠ Search Analytics import
+Search Analytics ≠ publication authority
+```
+
+If admitted, Search Console data may inform search diagnostics. It cannot publish pages, override IndexabilityGate, prove buyer quality or authorise launch.
+
+## 23. MCP and external connector transparency
+
+Every MCP server is an external connector and tool authority.
+
+Public or enterprise documentation must not list an MCP as available until:
+
+- exact implementation and version are verified;
+- maintainer and licence are reviewed;
+- dependencies and scopes are accepted;
+- tool permissions are explicit;
+- secrets are isolated;
+- read/write/destructive classes are known;
+- audit, revocation and kill switch pass.
+
+Registry presence is not admission.
+
+## 24. Privacy controls
+
+The Trust Center must explain separately:
+
+- private account and organisation data;
+- investigation and workspace history;
+- optional personalisation;
+- product analytics;
+- Knowledge Tides;
+- CRM and communications;
+- Tender Alert consent;
+- Search Console imported query/page data;
 - model evaluation or improvement use, if any;
-- marketing communications.
+- access, correction, deletion, portability and opt-out.
 
-Users MUST be able to locate applicable access, correction, deletion, portability and opt-out controls.
+## 25. Security overview
 
-## 15. Security overview
+Public security information should cover, at an appropriate level:
 
-The public security overview SHOULD cover, at a level appropriate for publication:
-
-- identity and access control;
-- organisation and tenant isolation;
-- encryption in transit and at rest;
+- passkeys and sessions;
+- memberships, roles and step-up;
+- tenant isolation and RLS;
+- encryption;
 - secrets management;
-- logging and auditability;
-- vulnerability and dependency management;
-- backup and recovery;
+- source and connector isolation;
+- document and prompt-injection controls;
+- logging and audit;
+- vulnerability management;
+- backup and restore;
 - incident response;
-- self-hosted CI isolation;
 - production and CI separation;
-- private-source handling.
+- Founder Admin authority;
+- MCP deny-by-default policy.
 
-Security claims MUST match implemented controls and current audit evidence.
+Security claims must match accepted evidence.
 
-## 16. Enterprise trust package
+## 26. Founder Operations transparency
 
-When available, enterprise customers MAY receive additional controlled documentation such as:
+Founder Operations is an internal control plane. Public documentation may describe governance but must not expose sensitive operations.
 
-- architecture and data-flow diagrams;
-- subprocessor list;
-- penetration-test summary;
-- control matrix;
-- business continuity and disaster recovery evidence;
-- retention and deletion schedule;
-- incident-notification terms;
-- source-right and export matrix;
-- audit logs and service reports.
+The authority chain is:
 
-Public marketing MUST NOT imply certifications or audit results that do not exist.
+```text
+valid passwordless session
+∩ recent AAL2 verification
+∩ server allowlist
+∩ active founder principal
+∩ typed server operation
+∩ append-only audit
+```
 
-## 17. Service status and incidents
+A tenant owner or paid seat is not Founder Admin authority.
 
-AXIGNAL SHOULD provide a public status surface showing material availability of:
+A sidebar does not prove all modules are implemented.
 
-- application;
-- authentication;
-- core API;
-- ingestion or source freshness;
-- research workers;
-- exports;
-- notification systems.
+## 27. Service status and incidents
 
-Incident communication MUST distinguish:
+Status surfaces should distinguish:
 
-- service outage;
+- application outage;
+- authentication issue;
 - source delay;
 - data-quality incident;
 - security incident;
 - rights or licensing suspension;
-- model or methodology defect.
+- model or methodology defect;
+- email or consent delivery issue;
+- Search Console or connector issue.
 
-Post-incident summaries SHOULD explain impact, correction and prevention where disclosure is lawful and safe.
+Incident history should preserve impact, correction and prevention where lawful.
 
-## 18. Corrections and changelog
+## 28. Corrections and changelog
 
-The Trust Center MUST expose or link to:
+Trust surfaces must expose or link to:
 
-- material product changes;
-- methodology changes;
+- material product and methodology changes;
 - claim-policy changes;
 - source additions, suspensions and removals;
 - correction and retraction policy;
 - API deprecations;
-- pricing and entitlement version changes where public.
+- price and entitlement versions;
+- identity or privacy changes;
+- public-page methodology changes;
+- connected-provider changes.
 
-History MUST be preserved rather than silently rewritten.
+History must not be silently rewritten.
 
-## 19. Accessibility statement
+## 29. Accessibility
 
-The public accessibility statement MUST describe:
+The public accessibility statement must describe:
 
 - target standard;
 - supported input modes;
-- map and graph alternatives;
-- reduced-motion behaviour;
+- visualisation alternatives;
+- reduced motion;
 - colour-independent semantics;
 - known limitations;
-- contact route for accessibility issues.
+- contact route.
 
-Claims of compliance MUST be supported by current audits.
+Compliance claims require current evidence.
 
-## 20. Public research and content
+## 30. Prohibited trust practices
 
-Public reports, market briefs and Knowledge Tide publications MUST:
-
-- identify as-of time;
-- cite admissible claims and sources;
-- expose methodology;
-- distinguish observation from inference and prediction;
-- show relevant contradiction and unknown coverage;
-- state export and reuse rights;
-- avoid personalised investment advice.
-
-## 21. FAQ governance
-
-Trust and methodology FAQ answers MUST be generated from or reviewed against current contracts and deployed capabilities.
-
-A FAQ answer MUST be updated when:
-
-- capability maturity changes;
-- a source or universe is added or removed;
-- privacy purposes change;
-- pricing or entitlement changes;
-- security claims change;
-- methodology changes materially.
-
-## 22. Review and ownership
-
-Every public Trust Center page MUST have:
-
-- accountable owner;
-- source contract or evidence;
-- last reviewed date;
-- next review trigger;
-- version or change history where material.
-
-High-risk claims SHOULD require legal, security, privacy or methodology review as applicable.
-
-## 23. Prohibited trust practices
-
-AXIGNAL MUST NOT:
+AXIGNAL must not:
 
 - hide material limitations;
-- use vague “bank-grade” or “military-grade” security language without definition;
-- claim complete market coverage when gaps exist;
+- use undefined security superlatives;
+- claim complete coverage with gaps;
 - imply regulatory approval;
-- describe generated explanations as canonical evidence;
+- describe generated explanations as evidence;
 - present Knowledge Tides as market truth;
-- publish fabricated compliance badges;
+- fabricate compliance badges;
 - erase correction history;
-- bury critical privacy purposes in generic terms.
+- bury consent purposes;
+- claim passwordless or SSO availability not deployed;
+- treat Search Console verification as API integration;
+- list an unadmitted MCP as connected;
+- claim Founder Operations complete from P26-T01;
+- claim public launch before P27.
 
-## 24. Acceptance gate
+## 31. Review and ownership
 
-The Trust Center and public methodology advance from candidate when:
+Every public Trust Center page requires:
 
-1. public explanations align with Contracts 02, 03, 06, 13–16 and 20;
-2. target users understand claim, evidence, contradiction and unknown coverage;
-3. users understand that AXIGNAL is research, not personalised advice;
-4. Navigator and AI authority are described accurately;
-5. Knowledge Tides and privacy controls are understood;
-6. source rights and export boundaries are visible;
-7. security claims match implemented controls;
-8. methodology and status history are auditable;
-9. accessibility information is accurate;
-10. all high-risk public claims have an accountable review path.
+- accountable owner;
+- governing contract or evidence;
+- last reviewed date;
+- review trigger;
+- version history;
+- high-risk review where applicable.
 
-Exact page hierarchy, wording and disclosure depth remain candidates subject to user comprehension, legal review and commercial validation.
+## 32. Acceptance gate
+
+The Trust Center advances only when:
+
+1. public explanations align with Contract 31 and deployed capabilities;
+2. users understand claims, evidence, contradictions and unknown coverage;
+3. users understand B2G decision preparation and human authority;
+4. identity, trial, abuse and seats are described accurately;
+5. source rights and export boundaries are visible;
+6. SEO and public-snapshot methodology are visible;
+7. Tender Alert and CRM consent boundaries are visible;
+8. AI citation limitations are visible;
+9. Search Console and MCP states are truthful;
+10. security and Founder Operations claims match accepted controls;
+11. accessibility information is accurate;
+12. P27 approves the final exact head.
+
+## 33. Current authority
+
+```text
+PUBLIC TRUST CENTER             NOT ACCEPTED FOR LAUNCH
+P25 IDENTITY ENGINEERING        PASS / NOT PUBLIC
+P26 SEO METHODOLOGY ENGINEERING PASS / INDEXING BLOCKED
+SEARCH CONSOLE DNS              USER-ATTESTED
+SEARCH CONSOLE API              NOT PROVEN
+GSC MCP                         NOT ADMITTED
+FOUNDER OPERATIONS COMPLETE     false
+PUBLIC LAUNCH                   NO_GO
+```

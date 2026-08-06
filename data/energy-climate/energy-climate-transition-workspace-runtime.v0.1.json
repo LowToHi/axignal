@@ -1,0 +1,291 @@
+{
+  "schema_version": "axignal.energy-climate-transition-workspace-runtime/v0.1",
+  "task_id": "AX-GE2E-P15-T01",
+  "programme_version": "1.4.0",
+  "status": "DRAFT_ENGINEERING_FOUNDATION",
+  "canonical_activation_authorised": false,
+  "dependency_status": {
+    "normative_dependency_task": "AX-GE2E-P07-T01",
+    "p07_engineering_head": "e30f800cb284f1381c28c4ccbc116a8da4a9fe92",
+    "p07_engineering_evidence_ready": true,
+    "p07_canonical_activation_authorised": false,
+    "engineering_base_task": "AX-GE2E-P14-T01",
+    "p14_engineering_head": "f0ae67f8d38afbdb36e1b2e3d56e955b173fbe8d",
+    "p14_engineering_evidence_ready": true,
+    "p14_canonical_activation_authorised": false,
+    "p13_canonical_activation_authorised": false,
+    "p12_canonical_activation_authorised": false,
+    "p11_canonical_activation_authorised": false,
+    "p10_canonical_activation_authorised": false,
+    "p09_canonical_activation_authorised": false,
+    "p08_canonical_activation_authorised": false,
+    "p06_canonical_activation_authorised": false,
+    "p05_canonical_activation_authorised": false,
+    "p04_canonical_activation_authorised": false,
+    "p03_canonical_activation_authorised": false,
+    "p02_canonical_activation_authorised": false,
+    "p01_dependency_satisfied": false,
+    "stacked_base_branch": "agent/ax-ge2e-p14-trade-supply-chain-workspace-v1.4",
+    "merge_to_main_allowed": false
+  },
+  "trust_principles": [
+    "Catalogue listing does not equal product admission.",
+    "Project announcement does not establish construction, commissioning or operation.",
+    "Nameplate capacity, connected capacity, available capacity and generated energy remain distinct.",
+    "Connection application, connection agreement, energisation and commercial operation remain distinct.",
+    "Policy target, legal obligation, support scheme and support award remain distinct.",
+    "Measured, reported, calculated, estimated and avoided emissions remain distinct.",
+    "An emission factor is not a measured emission observation.",
+    "Avoided emissions are not carbon credits or realised abatement.",
+    "Certificates, guarantees of origin, offsets and physical energy attributes retain separate lineage.",
+    "Offtake memorandum, signed agreement, financial close and delivery remain distinct.",
+    "Climate scenario, projection, forecast, target and observation remain distinct.",
+    "Technology classification does not establish taxonomy eligibility or environmental benefit.",
+    "Unknown, stale, contested or revoked evidence fails closed.",
+    "Models propose and workers execute bounded work; neither may approve or act externally.",
+    "Tenant-private transition strategy cannot mutate global canonical evidence.",
+    "Readiness is operational and confers no investment, legal, submission or representation authority.",
+    "Every consequential action requires current typed human approvals and deterministic preflight.",
+    "Rollback preserves P14 authority files and removes all P15 residue."
+  ],
+  "energy_climate_library_binding": {
+    "library_id": "AX-LIB-O08",
+    "workspace_type": "Transition Opportunity Workspace",
+    "canonical_name": "Energy and Climate Transition",
+    "entities": [
+      "TransitionOpportunity",
+      "EnergyAsset",
+      "EnergyProject",
+      "Technology",
+      "Capacity",
+      "Emission"
+    ],
+    "predicates": [
+      "USES_TECHNOLOGY",
+      "HAS_CAPACITY",
+      "EMITS",
+      "SUPPORTED_BY",
+      "CONNECTED_TO",
+      "HAS_OFFTAKE"
+    ],
+    "events": [
+      "PROJECT_ANNOUNCED",
+      "CAPACITY_COMMISSIONED",
+      "POLICY_SUPPORT_CHANGED",
+      "OFFTAKE_SIGNED",
+      "GRID_CONNECTION_GRANTED"
+    ],
+    "taxonomy_refs": [
+      "NUTS",
+      "NAICS",
+      "TECHNOLOGY_CLASS"
+    ]
+  },
+  "domain_modules": [
+    {
+      "module_id": "ENERGY_ASSET_PROJECT_REGISTRY",
+      "service_id": "energy_asset_project_registry",
+      "record_types": [
+        "EnergyAssetRecord",
+        "EnergyProjectRecord",
+        "ProjectMilestoneRecord",
+        "AssetStatusEvidence"
+      ],
+      "invariants": [
+        "Project announcements do not establish permits, financing, construction, commissioning or operation.",
+        "Assets and projects remain distinct and may have independent identifiers and lifecycle states.",
+        "Status changes require observed evidence, event time and version lineage.",
+        "Cancelled, suspended and superseded projects cannot contribute current operational capacity.",
+        "Duplicate projects are linked as candidates and never silently merged.",
+        "Asset jurisdiction, site and grid zone remain explicit and versioned."
+      ]
+    },
+    {
+      "module_id": "TECHNOLOGY_CAPACITY_PERFORMANCE",
+      "service_id": "energy_technology_capacity_service",
+      "record_types": [
+        "TechnologyRecord",
+        "CapacityRecord",
+        "GenerationRecord",
+        "PerformanceMeasurement"
+      ],
+      "invariants": [
+        "Technology classification is versioned and does not establish eligibility or environmental performance.",
+        "Nameplate, available, connected, operational and generated capacity remain distinct.",
+        "Power, energy, capacity factor and availability retain units, periods and methods.",
+        "Announced capacity is not represented as installed or operational capacity.",
+        "Estimated performance remains distinct from measured performance.",
+        "Unknown or missing production never becomes zero generation."
+      ]
+    },
+    {
+      "module_id": "GRID_CONNECTION_SYSTEM",
+      "service_id": "grid_connection_system_service",
+      "record_types": [
+        "GridZoneRecord",
+        "ConnectionApplication",
+        "ConnectionAgreement",
+        "SystemConstraintEvent"
+      ],
+      "invariants": [
+        "A connection application is not a granted connection agreement.",
+        "A granted connection is not evidence of energisation or commercial operation.",
+        "Queue position, capacity allocation and firm access remain distinct.",
+        "Grid constraints require current operator evidence and temporal scope.",
+        "Curtailment risk is not represented as observed curtailment.",
+        "Cross-border interconnection and domestic connection authority remain separate."
+      ]
+    },
+    {
+      "module_id": "POLICY_SUPPORT_MARKET_MECHANISM",
+      "service_id": "energy_policy_support_service",
+      "record_types": [
+        "PolicySupportRecord",
+        "MarketMechanismRecord",
+        "SupportAwardRecord",
+        "EligibilityAssessment"
+      ],
+      "invariants": [
+        "A policy target is not a binding obligation, award or available budget.",
+        "An announced support scheme is not an awarded contract or entitlement.",
+        "Eligibility remains jurisdiction, technology, date and applicant specific.",
+        "Auction, tariff, certificate and tax mechanisms remain distinct.",
+        "Legal applicability and personalised regulatory conclusions require human legal authority.",
+        "Expired, repealed or exhausted support contributes no current readiness."
+      ]
+    },
+    {
+      "module_id": "EMISSIONS_CARBON_ACCOUNTING",
+      "service_id": "emissions_carbon_accounting_service",
+      "record_types": [
+        "EmissionObservation",
+        "EmissionFactorRecord",
+        "AvoidedEmissionEstimate",
+        "EnvironmentalAttributeRecord"
+      ],
+      "invariants": [
+        "Measured, reported, calculated, estimated and avoided emissions remain distinct.",
+        "Emission values require gas, scope, boundary, period, unit and method.",
+        "An emission factor is not a measured emission observation.",
+        "Avoided emissions are not carbon credits or physical abatement evidence.",
+        "Certificates, guarantees of origin and offsets do not establish physical electricity attributes without lineage.",
+        "Emissions equivalence requires an explicit and versioned conversion method."
+      ]
+    },
+    {
+      "module_id": "TRANSITION_OPPORTUNITY_WORKSPACE",
+      "service_id": "transition_opportunity_workspace_service",
+      "record_types": [
+        "TransitionOpportunity",
+        "TransitionThesis",
+        "TransitionWorkPlan",
+        "TransitionDecisionRecord"
+      ],
+      "invariants": [
+        "The server resolves tenant and workspace scope.",
+        "The workspace cannot mutate global admitted evidence or canonical claims.",
+        "Facts, calculations, scenarios, proposals and unknowns remain visibly distinct.",
+        "Readiness does not confer external-action, investment or representation authority.",
+        "Private transition strategy cannot be promoted to global evidence.",
+        "Every consequential transition references current evidence and typed approval."
+      ]
+    },
+    {
+      "module_id": "OFFTAKE_FINANCING_DELIVERY_RISK",
+      "service_id": "energy_offtake_delivery_risk_service",
+      "record_types": [
+        "OfftakeRecord",
+        "FinancingRecord",
+        "DeliveryDependency",
+        "TransitionRiskAssessment"
+      ],
+      "invariants": [
+        "An offtake memorandum is not a signed or effective power purchase agreement.",
+        "A signed offtake agreement is not financial close or project completion.",
+        "Indicative financing is not committed capital or disbursement.",
+        "Permits, land, equipment, interconnection and commissioning dependencies remain independent.",
+        "Scenario exposure is not an observed loss or guaranteed outcome.",
+        "Risk assessments preserve method, assumptions, uncertainty and invalidation conditions."
+      ]
+    },
+    {
+      "module_id": "EXTERNAL_ACTION_OUTCOME",
+      "service_id": "energy_external_action_service",
+      "record_types": [
+        "TransitionActionRequest",
+        "TransitionActionAuthorisation",
+        "TransitionOutcome",
+        "TransitionAuditEvent"
+      ],
+      "invariants": [
+        "Models and workers cannot contact counterparties, submit applications, sign, trade or commit capital.",
+        "External actions require typed human authority, current approvals and deterministic preflight.",
+        "Submission, award, signature, financial close, commissioning and operation remain distinct outcomes.",
+        "Outcomes require observed evidence and cannot be inferred from internal workflow completion.",
+        "Imported approvals and outcomes have candidate-only authority.",
+        "Audit events are append-only, hash-linked and tenant-scoped."
+      ]
+    }
+  ],
+  "transition_opportunity_lifecycle": {
+    "states": [
+      "DETECTED",
+      "ASSET_RESOLVING",
+      "EVIDENCE_VALIDATING",
+      "QUALIFYING",
+      "QUALIFIED",
+      "REJECTED",
+      "TRANSITION_OPEN",
+      "DECISION_PENDING",
+      "APPROVED",
+      "IN_EXECUTION",
+      "CONTRACTED_OR_OPERATIONAL",
+      "CLOSED"
+    ],
+    "default_decision": "DENY",
+    "indeterminate_as": "DENY"
+  },
+  "operating_pipeline": {
+    "stages": [
+      {"stage_id": "T01_DISCOVER_SIGNAL", "authority": "CANDIDATE_ONLY"},
+      {"stage_id": "T02_RESOLVE_ASSET_PROJECT", "authority": "CANDIDATE_ONLY"},
+      {"stage_id": "T03_VALIDATE_STATUS_CAPACITY", "authority": "PROPOSAL_ONLY"},
+      {"stage_id": "T04_RESOLVE_GRID_CONNECTION", "authority": "PROPOSAL_ONLY"},
+      {"stage_id": "T05_VALIDATE_POLICY_SUPPORT", "authority": "PROPOSAL_ONLY"},
+      {"stage_id": "T06_VALIDATE_EMISSIONS_ATTRIBUTES", "authority": "PROPOSAL_ONLY"},
+      {"stage_id": "T07_QUALIFY_TRANSITION", "authority": "HUMAN"},
+      {"stage_id": "T08_BUILD_TRANSITION_THESIS", "authority": "PROPOSAL_ONLY"},
+      {"stage_id": "T09_REVIEW_RISKS_RIGHTS", "authority": "HUMAN"},
+      {"stage_id": "T10_AUTHORISE_EXTERNAL_ACTION", "authority": "HUMAN"},
+      {"stage_id": "T11_RECORD_OUTCOME_LEARNING", "authority": "HUMAN"}
+    ],
+    "default_decision": "DENY",
+    "indeterminate_as": "DENY"
+  },
+  "project_maturity_states": ["ANNOUNCED", "DEVELOPMENT", "PERMITTING", "FINANCING", "PROCUREMENT", "CONSTRUCTION", "COMMISSIONING", "OPERATIONAL", "SUSPENDED", "CANCELLED"],
+  "capacity_status_types": ["ANNOUNCED_NAMEPLATE", "PERMITTED_NAMEPLATE", "CONTRACTED_NAMEPLATE", "INSTALLED_NAMEPLATE", "CONNECTED_CAPACITY", "OPERATIONAL_CAPACITY", "AVAILABLE_CAPACITY", "GENERATED_ENERGY", "CURTAILED_ENERGY", "UNKNOWN"],
+  "emissions_value_classes": ["MEASURED", "REPORTED", "CALCULATED", "ESTIMATED", "MODELLED", "EMISSION_FACTOR", "AVOIDED_ESTIMATE", "OFFSET_QUANTITY", "TARGET", "UNKNOWN"],
+  "support_mechanism_types": ["FEED_IN_TARIFF", "CONTRACT_FOR_DIFFERENCE", "AUCTION", "TAX_CREDIT", "GRANT", "CERTIFICATE", "CARBON_PRICE", "CAPACITY_MARKET", "REGULATORY_MANDATE", "OTHER"],
+  "risk_classes": ["PERMITTING", "LAND", "GRID_CONNECTION", "TECHNOLOGY", "SUPPLY_CHAIN", "OFFTAKE", "FINANCING", "POLICY", "EMISSIONS_INTEGRITY", "DELIVERY"],
+  "readiness_gates": ["ASSET_PROJECT_IDENTITY_RESOLVED", "PROJECT_STATUS_CURRENT", "TECHNOLOGY_CLASSIFICATION_CURRENT", "CAPACITY_UNIT_STATUS_RESOLVED", "GRID_CONNECTION_STATUS_VERIFIED", "POLICY_SUPPORT_STATUS_VERIFIED", "EMISSIONS_METHOD_BOUNDARY_VERIFIED", "OFFTAKE_FINANCING_STATUS_VERIFIED", "DEPENDENCIES_AND_RISKS_REVIEWED", "RIGHTS_AND_DOCUMENTS_CURRENT", "APPROVALS_CURRENT", "CHANNEL_RECIPIENT_AUTHORITY_VERIFIED"],
+  "external_action_types": ["CONTACT_COUNTERPARTY", "REQUEST_INFORMATION", "SUBMIT_SUPPORT_APPLICATION", "SUBMIT_GRID_APPLICATION", "SIGN_OFFTAKE", "PLACE_EQUIPMENT_ORDER", "COMMIT_CAPITAL", "TRADE_ENVIRONMENTAL_ATTRIBUTE", "PUBLISH_TRANSITION_CLAIM"],
+  "required_approvals": ["PURSUE", "BUDGET", "RIGHTS", "LEGAL", "DOCUMENT", "SUBMISSION_OR_ACTIVATION"],
+  "transition_outcome_states": ["NO_ACTION", "MONITORING_CONTINUES", "CONTACTED", "INFORMATION_RECEIVED", "SUPPORT_APPLICATION_SUBMITTED", "GRID_APPLICATION_SUBMITTED", "GRID_CONNECTION_GRANTED", "OFFTAKE_SIGNED", "FINANCIAL_CLOSE_REACHED", "CONSTRUCTION_STARTED", "CAPACITY_COMMISSIONED", "COMMERCIAL_OPERATION", "DECLINED", "LOST_OR_CLOSED"],
+  "languages": ["en", "es", "fr", "de", "pt", "it"],
+  "critical_dimensions": ["asset identity", "project status", "technology", "capacity type", "unit", "grid connection", "policy support", "emissions method", "emissions boundary", "offtake status", "financing status", "rights", "jurisdiction", "time"],
+  "source_catalogue_contract": {"catalogue_id": "AX-ENERGY-SOURCE-CATALOGUE-001", "library_id": "AX-LIB-O08", "expected_source_count": 5, "status": "RESEARCH_CATALOGUE_NOT_PRODUCT_AVAILABILITY", "listed_does_not_mean_admitted": true, "public_coverage_authorised": false, "scraping_assumed_permitted": false},
+  "authority_model": {
+    "actors": {"BROWSER": "REQUEST_ONLY", "CONNECTOR": "CANDIDATE_ONLY", "PARSER": "CANDIDATE_ONLY", "MODEL": "PROPOSAL_ONLY", "WORKER": "BOUNDED_WORK_MUTATION", "TRANSITION_OPERATOR": "TENANT_SCOPED_OPERATION", "HUMAN_ENERGY_AUTHORITY": "TRANSITION_DECISION_ONLY", "HUMAN_LEGAL_AUTHORITY": "LEGAL_APPROVAL_ONLY", "HUMAN_FINANCE_AUTHORITY": "CAPITAL_APPROVAL_ONLY", "HUMAN_EXTERNAL_ACTION_AUTHORITY": "EXTERNAL_ACTION_ONLY", "HUMAN_OUTCOME_AUTHORITY": "OBSERVED_OUTCOME_ONLY", "INDEPENDENT_ADMISSION_RUNTIME": "DETERMINISTIC_CANONICAL_WRITE_AFTER_APPROVAL"},
+    "forbidden_actions": ["MODEL_DECLARE_PROJECT_OPERATIONAL", "MODEL_DECLARE_GREEN_ATTRIBUTE", "MODEL_APPROVE_SUPPORT_ELIGIBILITY", "MODEL_CONTACT_COUNTERPARTY", "MODEL_SIGN_OFFTAKE", "MODEL_COMMIT_CAPITAL", "WORKER_SUBMIT_APPLICATION", "WORKER_TRADE_ATTRIBUTE", "BROWSER_SELECT_TENANT_AUTHORITY", "IMPORTED_APPROVAL_AS_LIVE_AUTHORITY"],
+    "least_authority_rule": true
+  },
+  "rights_dimensions": ["collection", "transient_processing", "persistent_storage", "model_input", "derived_calculations", "internal_display", "customer_display", "export", "api_redistribution", "model_training_or_evaluation"],
+  "observability": {
+    "metrics": ["energy_project_candidate_total", "capacity_status_review_total", "grid_status_denied_total", "emissions_method_gap_total", "support_status_review_total", "transition_readiness_denied_total", "external_action_denied_total", "rollback_residue_detected_total"],
+    "alerts": ["announcement_promoted_to_operation", "nameplate_promoted_to_generation", "grid_application_promoted_to_grant", "emissions_equivalence_without_method", "green_attribute_promoted_to_physical_abatement", "model_external_action_attempt", "cross_tenant_transition_access", "rights_or_kill_switch_bypass_attempt"]
+  },
+  "acceptance_gate": {
+    "required_before_canonical_activation": ["P07 and transitive P01-P06 dependencies canonically accepted or superseded", "P14 engineering base accepted or rebased onto an accepted chain", "eight energy and climate modules present", "32 record types and 48 invariants validated", "12-state lifecycle and 11-stage pipeline validated", "40 conformance fixtures PASS", "72 adversarial cases fail closed", "five source catalogue entries independently admitted or explicitly excluded", "byte-exact P15 rollback rehearsal PASS", "Human Energy Authority APPROVED", "Human Legal Authority APPROVED", "Human Finance Authority APPROVED", "Human Rights Authority APPROVED", "Human Product Authority APPROVED"],
+    "current_decision": "NOT_READY_FOR_CANONICAL_ACTIVATION"
+  }
+}

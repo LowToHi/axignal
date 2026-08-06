@@ -1,0 +1,4 @@
+interface:
+  display_name: "AXIGNAL GSAP UI/UX"
+  short_description: "Cinematic, accessible AXIGNAL motion systems"
+  default_prompt: "Use $axignal-gsap-ui-ux to design and implement a high-fidelity AXIGNAL interaction with GSAP."

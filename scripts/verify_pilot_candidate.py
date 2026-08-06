@@ -76,6 +76,9 @@ def main() -> None:
     assert web_environment["AXIGNAL_TED_PROCUREMENT_UI_ENABLED"] == "true"
     assert web_environment["AXIGNAL_AUTH_REQUIRED"] == "true"
     assert web_environment["AXIGNAL_VALIDATION_UI_ENABLED"] == "false"
+    assert api_environment["AXIGNAL_AXENT_ENCRYPTION_KEY"] == (
+        "${AXIGNAL_AXENT_ENCRYPTION_KEY:?required}"
+    )
 
     egress_services = {
         service_id
@@ -96,10 +99,12 @@ def main() -> None:
 
     env_example = ENV_EXAMPLE_PATH.read_text(encoding="utf-8")
     required_secret_names = topology["security"]["required_secret_classes"]
-    assert len(required_secret_names) >= 9
+    assert len(required_secret_names) >= 10
     assert "replace-with-long-random-secret" in env_example
     assert "AXIGNAL_SESSION_SECRET" in env_example
     assert "AXIGNAL_IDENTITY_ASSERTION_SECRET" in env_example
+    assert "AXIGNAL_AXENT_ENCRYPTION_KEY" in env_example
+    assert "axent-conversation-encryption" in required_secret_names
 
     assert topology["status"] == "private-pilot-candidate"
     assert topology["public_launch_authorised"] is False
@@ -143,6 +148,7 @@ def main() -> None:
         "direct_api_exposure": False,
         "valkey_persistence": "appendonly-everysec",
         "runtime_database_credentials_rotated": True,
+        "axent_encryption_key_required": True,
         "authentication_required": True,
         "global_live_sources_enabled": False,
         "ted_bounded_live_source_enabled": True,

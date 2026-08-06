@@ -1,0 +1,234 @@
+{
+  "atomic_paths": [
+    ".github/workflows/landing-foundation.yml",
+    "apps/landing",
+    "tests/landing",
+    "docs/landing",
+    "docs/adr/ADR-014-b2g-landing-international-runtime.md",
+    "docs/tasks/active/2026-07-29_landing-b2g-international.md",
+    "docs/tasks/active/2026-07-29_landing-b2g-international.task.json",
+    "docs/tasks/active/2026-08-04_ax-ge2e-closure-next-001.evidence.json",
+    "docs/tasks/completed/2026-07-28_axignal-gsap-ui-ux-skill.md",
+    "scripts/capture_globe_review.mjs",
+    "scripts/prepare_landing_assets.py",
+    "scripts/verify_landing_foundation.py",
+    "scripts/verify_landing_implementation.py",
+    "skills/axignal-cinematic-webgl-scroll",
+    "skills/axignal-gsap-ui-ux"
+  ],
+  "c0_reconciled_wp2_only_paths": [
+    {
+      "path": "apps/landing/lib/candidate-pricing-contract.ts",
+      "reason": "Preserve fail-closed commercial runtime validation while removing the retired public CandidatePlan authority.",
+      "resolution": "BIND_RUNTIME_ADAPTER_TO_WP1_CANONICAL_PRICE_BOOK"
+    },
+    {
+      "path": "apps/landing/lib/candidate-pricing.ts",
+      "reason": "The server-only compatibility adapter no longer depends on the WP1 landing presentation model.",
+      "resolution": "IMPORT_PLAN_TYPE_FROM_RECONCILED_RUNTIME_ADAPTER"
+    }
+  ],
+  "c0_reconciliation_tests": [
+    "apps/landing/tests/candidate-pricing-contract.test.ts",
+    "pnpm --filter @axignal/landing typecheck",
+    "pnpm --filter @axignal/landing build"
+  ],
+  "contract_id": "AX-GE2E-CLOSURE-EXECUTION-002",
+  "controller_head": "5a0dd9da378435334c56280a5c46f3b502331aa4",
+  "inputs": {
+    "merge_base": "a49330dfa01af9328b459c4bf6818477c78da775",
+    "wp1": {
+      "head": "cb851be6bb5ff1d5feb8f61c0deb171dbbc38428",
+      "role": "LANDING_AUTHORITY",
+      "tree": "e8c6fa7093b588618c751e8cadb5b7d1f1b6a638"
+    },
+    "wp2": {
+      "head": "4d03c88fb747b6b9a6531def146fc2b4003f1b1e",
+      "role": "FUNCTIONAL_BASE",
+      "tree": "70ed06d25bf32c8ec69036a3f4de44c2c0d4ea36"
+    }
+  },
+  "output_markers": [
+    "AX_C0_RECONCILIATION_TREE_PASS",
+    "AX_C0_PRICING_AUTHORITY_RECONCILIATION_PASS"
+  ],
+  "overlap_count": 16,
+  "overlap_resolutions": [
+    {
+      "path": ".github/workflows/landing-foundation.yml",
+      "resolution": "WP1_CANONICAL_AUTHORITY"
+    },
+    {
+      "path": "apps/landing/app/api/pilot-intake/route.ts",
+      "resolution": "WP1_CANONICAL_AUTHORITY"
+    },
+    {
+      "path": "apps/landing/app/layout.tsx",
+      "resolution": "WP1_CANONICAL_AUTHORITY"
+    },
+    {
+      "path": "apps/landing/app/page.tsx",
+      "resolution": "WP1_CANONICAL_AUTHORITY"
+    },
+    {
+      "path": "apps/landing/components/landing-experience.tsx",
+      "resolution": "WP1_CANONICAL_AUTHORITY"
+    },
+    {
+      "path": "apps/landing/components/pilot-access-form.tsx",
+      "resolution": "WP1_CANONICAL_AUTHORITY"
+    },
+    {
+      "path": "apps/landing/lib/landing-data.ts",
+      "resolution": "WP1_CANONICAL_AUTHORITY"
+    },
+    {
+      "path": "apps/landing/next.config.ts",
+      "resolution": "WP1_CANONICAL_AUTHORITY"
+    },
+    {
+      "path": "apps/landing/package.json",
+      "resolution": "WP1_CANONICAL_AUTHORITY"
+    },
+    {
+      "path": "apps/landing/proxy.ts",
+      "resolution": "WP1_CANONICAL_AUTHORITY"
+    },
+    {
+      "path": "docs/landing/assets-manifest.json",
+      "resolution": "WP1_CANONICAL_AUTHORITY"
+    },
+    {
+      "path": "docs/roadmap/02-task-catalogue.md",
+      "resolution": "MERGED_EXPLICITLY"
+    },
+    {
+      "path": "docs/roadmap/04-dynamic-skill-map.md",
+      "resolution": "MERGED_EXPLICITLY"
+    },
+    {
+      "path": "scripts/verify_landing_foundation.py",
+      "resolution": "WP1_CANONICAL_AUTHORITY"
+    },
+    {
+      "path": "scripts/verify_landing_implementation.py",
+      "resolution": "WP1_CANONICAL_AUTHORITY"
+    },
+    {
+      "path": "tests/landing/landing.spec.ts",
+      "resolution": "WP1_CANONICAL_AUTHORITY"
+    }
+  ],
+  "policy": {
+    "default": "WP2_PRESERVED",
+    "landing_scopes": "WP1_CANONICAL_AUTHORITY",
+    "public_launch_authorized": false,
+    "shared_files": "MERGED_EXPLICITLY",
+    "source_prs_merged": false,
+    "wp2_only_files_under_imported_directories": "PRESERVED_UNLESS_EXPLICITLY_RECONCILED_TO_WP1_AUTHORITY"
+  },
+  "schema": "axignal.c0.canonical-reconciliation.v1",
+  "shared_paths": [
+    "docs/roadmap/02-task-catalogue.md",
+    "docs/roadmap/04-dynamic-skill-map.md",
+    "skills/registry.yaml"
+  ],
+  "state": "TREE_RECONCILED_AWAITING_EXACT_HEAD_MATRIX",
+  "work_package": "C0_CANONICAL_RECONCILIATION",
+  "wp1_selected_changed_paths": [
+    ".github/workflows/landing-foundation.yml",
+    "apps/landing/app/[locale]/page.tsx",
+    "apps/landing/app/accessibility/page.tsx",
+    "apps/landing/app/api/pilot-intake/route.ts",
+    "apps/landing/app/contract-overrides.css",
+    "apps/landing/app/en/page.tsx",
+    "apps/landing/app/globals.css",
+    "apps/landing/app/layout.tsx",
+    "apps/landing/app/manifest.ts",
+    "apps/landing/app/page.tsx",
+    "apps/landing/app/privacy/page.tsx",
+    "apps/landing/app/robots.ts",
+    "apps/landing/app/terms/page.tsx",
+    "apps/landing/components/impact-calculator.tsx",
+    "apps/landing/components/landing-experience.tsx",
+    "apps/landing/components/pilot-access-form.tsx",
+    "apps/landing/components/policy-page.tsx",
+    "apps/landing/components/semantic-globe.tsx",
+    "apps/landing/lib/analytics.ts",
+    "apps/landing/lib/canonical-commercial-contract.ts",
+    "apps/landing/lib/globe-rendering.ts",
+    "apps/landing/lib/i18n.ts",
+    "apps/landing/lib/landing-data.ts",
+    "apps/landing/lib/metadata.ts",
+    "apps/landing/lib/pricing-data.ts",
+    "apps/landing/lib/product-profile.ts",
+    "apps/landing/messages/de.json",
+    "apps/landing/messages/en.json",
+    "apps/landing/messages/es.json",
+    "apps/landing/messages/fr.json",
+    "apps/landing/messages/it.json",
+    "apps/landing/messages/pt.json",
+    "apps/landing/next-env.d.ts",
+    "apps/landing/next.config.ts",
+    "apps/landing/package.json",
+    "apps/landing/proxy.ts",
+    "apps/landing/public/brand/axignal-aura.svg",
+    "apps/landing/public/brand/axignal-isotipo.svg",
+    "apps/landing/public/brand/axignal-logo-dark.svg",
+    "apps/landing/public/brand/axignal-logo.svg",
+    "apps/landing/public/favicon.svg",
+    "apps/landing/public/globe/countries-110m.simplified.geojson",
+    "apps/landing/public/globe/earth-albedo-high.webp",
+    "apps/landing/public/globe/earth-albedo-mobile.webp",
+    "apps/landing/public/globe/earth-albedo.webp",
+    "apps/landing/public/globe/earth-clouds-mobile.webp",
+    "apps/landing/public/globe/earth-clouds.webp",
+    "apps/landing/public/globe/earth-europe-high.webp",
+    "apps/landing/public/globe/earth-europe-mobile.webp",
+    "apps/landing/public/globe/earth-europe.webp",
+    "apps/landing/public/globe/europe-boundaries-50m.geojson",
+    "apps/landing/public/globe/globe-poster.webp",
+    "apps/landing/public/opengraph-image.jpg",
+    "apps/landing/public/seo-hero.webp",
+    "apps/landing/public/twitter-image.jpg",
+    "docs/adr/ADR-014-b2g-landing-international-runtime.md",
+    "docs/landing/asset-provenance.generated.json",
+    "docs/landing/assets-manifest.json",
+    "docs/landing/motion-brief-b2g.md",
+    "docs/landing/scroll-storyboard.md",
+    "docs/roadmap/02-task-catalogue.md",
+    "docs/roadmap/04-dynamic-skill-map.md",
+    "docs/tasks/active/2026-07-29_landing-b2g-international.md",
+    "docs/tasks/active/2026-07-29_landing-b2g-international.task.json",
+    "docs/tasks/active/2026-08-04_ax-ge2e-closure-next-001.evidence.json",
+    "docs/tasks/completed/2026-07-28_axignal-gsap-ui-ux-skill.md",
+    "scripts/capture_globe_review.mjs",
+    "scripts/prepare_landing_assets.py",
+    "scripts/verify_landing_foundation.py",
+    "scripts/verify_landing_implementation.py",
+    "skills/axignal-cinematic-webgl-scroll/SKILL.md",
+    "skills/axignal-cinematic-webgl-scroll/agents/openai.yaml",
+    "skills/axignal-cinematic-webgl-scroll/references/webgl-rendering-contract.md",
+    "skills/axignal-cinematic-webgl-scroll/scripts/audit-webgl-globe.mjs",
+    "skills/axignal-cinematic-webgl-scroll/skill.contract.json",
+    "skills/axignal-gsap-ui-ux/SKILL.md",
+    "skills/axignal-gsap-ui-ux/agents/openai.yaml",
+    "skills/axignal-gsap-ui-ux/references/axignal-motion-contract.md",
+    "skills/axignal-gsap-ui-ux/references/official-gsap-capability-map.md",
+    "skills/axignal-gsap-ui-ux/references/upstream-attribution.md",
+    "skills/axignal-gsap-ui-ux/scripts/audit-gsap-motion.mjs",
+    "skills/axignal-gsap-ui-ux/skill.contract.json",
+    "skills/registry.yaml",
+    "tests/landing/landing-contract.test.mjs",
+    "tests/landing/landing.spec.ts",
+    "tests/landing/playwright.config.ts"
+  ],
+  "wp2_only_paths_preserved": [
+    "apps/landing/app/message-copy.css",
+    "apps/landing/lib/security-boundaries.ts",
+    "apps/landing/tests/candidate-pricing-contract.test.ts",
+    "apps/landing/tests/security-boundaries.test.ts",
+    "apps/landing/tsconfig.test.json",
+    "tests/landing/security-boundaries.spec.ts"
+  ]
+}

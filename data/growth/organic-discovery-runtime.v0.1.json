@@ -1,0 +1,131 @@
+{
+  "schema_version": "0.1.0",
+  "task": "AX-GE2E-P26-T01",
+  "status": "CANDIDATE_ONLY",
+  "public_indexing_authorised": false,
+  "public_tender_alerts_authorised": false,
+  "founder_admin_publicly_exposed": false,
+  "policy_versions": {
+    "indexability": "indexability-gate@1.0.0",
+    "snapshot": "public-intelligence-snapshot@1.0.0",
+    "citation": "ai-citation-governance@1.0.0",
+    "alerts": "tender-alerts@1.0.0",
+    "crm": "founder-crm@1.0.0"
+  },
+  "page_kinds": [
+    "TENDER_HUB",
+    "MARKET_INTELLIGENCE",
+    "TENDER_DETAIL"
+  ],
+  "page_states": [
+    "DISCOVERED",
+    "CANDIDATE",
+    "INDEXABLE",
+    "PUBLISHED",
+    "DECAYING",
+    "ARCHIVED",
+    "NOINDEX",
+    "GONE"
+  ],
+  "indexability_thresholds": {
+    "maximum_age_hours": 48,
+    "minimum_demand_score": 0.55,
+    "minimum_data_quality_score": 0.75,
+    "minimum_uniqueness_score": 0.65,
+    "minimum_source_coverage_score": 0.70,
+    "minimum_content_depth_score": 0.70,
+    "minimum_active_opportunities": {
+      "TENDER_HUB": 8,
+      "MARKET_INTELLIGENCE": 12,
+      "TENDER_DETAIL": 1
+    },
+    "minimum_unique_buyers": {
+      "TENDER_HUB": 3,
+      "MARKET_INTELLIGENCE": 5,
+      "TENDER_DETAIL": 1
+    }
+  },
+  "indexability_decisions": [
+    "INDEX",
+    "NOINDEX",
+    "HOLD",
+    "ARCHIVE",
+    "GONE"
+  ],
+  "required_truth_boundaries": [
+    "dataset != indexable page",
+    "generated page != published page",
+    "crawlable != indexed",
+    "indexed != ranked",
+    "traffic != qualified buyer",
+    "alert subscriber != trial user",
+    "AI citation != endorsement",
+    "CI pass != public indexing approval"
+  ],
+  "crawler_policy": {
+    "allow": [
+      "Googlebot",
+      "Bingbot",
+      "OAI-SearchBot"
+    ],
+    "disallow_training": [
+      "GPTBot"
+    ],
+    "private_paths": [
+      "/admin",
+      "/api",
+      "/search",
+      "/workspace",
+      "/account"
+    ]
+  },
+  "structured_data": {
+    "required": [
+      "CollectionPage",
+      "Dataset",
+      "Organization",
+      "BreadcrumbList"
+    ],
+    "provenance_properties": [
+      "isBasedOn",
+      "sameAs",
+      "dateModified",
+      "measurementTechnique",
+      "spatialCoverage",
+      "temporalCoverage"
+    ]
+  },
+  "founder_admin_modules": [
+    "OVERVIEW",
+    "ORGANIC_SEO",
+    "PAGES_AND_SITEMAPS",
+    "AI_CITATIONS",
+    "TENDER_ALERTS",
+    "CRM",
+    "CUSTOMERS_AND_TRIALS",
+    "BILLING",
+    "RISK_AND_ABUSE",
+    "SOURCES_AND_COVERAGE",
+    "OPERATIONS",
+    "SETTINGS",
+    "AUDIT"
+  ],
+  "founder_admin_authority": {
+    "authentication": "RECENT_AAL2_PASSKEY",
+    "server_allowlist_required": true,
+    "database_principal_required": true,
+    "tenant_seat_required": false,
+    "browser_supplied_role_authoritative": false,
+    "all_mutations_audited": true
+  },
+  "activation_gates": {
+    "production_database_migration": false,
+    "production_founder_principal_provisioned": false,
+    "search_console_verified": false,
+    "bing_webmaster_verified": false,
+    "production_email_provider": false,
+    "public_indexing": false,
+    "public_alert_capture": false,
+    "external_AI_citation_import": false
+  }
+}

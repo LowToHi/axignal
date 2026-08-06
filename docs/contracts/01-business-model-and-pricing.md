@@ -1,424 +1,488 @@
 # 01 — Business Model and Pricing Contract
 
-Version: `0.2.0`
-Status: `NORMATIVE / B2G HYPOTHESIS-BOUND`
+Version: `0.3.0`
+Status: `NORMATIVE / B2G CANDIDATE-PRICING / VALIDATION REQUIRED`
 Goal ID: `AXIGNAL-GOAL-001`
-Commercial programme: `Contract 28`
+Governing programme: `Contract 31 / ADR-016`
+Commercial runtime: `P21`
+Final pricing gate: `P27`
 
 ## 1. Commercial model
 
-AXIGNAL MUST be sold as a premium recurring B2G intelligence product, not as a low-cost tender newsletter, generic AI assistant, public-data resale or transaction-commission business.
+AXIGNAL MUST be sold as a premium recurring Business-to-Government opportunity-intelligence and operations product, not as a low-cost tender newsletter, generic AI assistant, public-data resale or transaction-commission business.
 
-The first commercial implementation MUST serve organisations and professionals that sell to government. The parent architecture may later support other Global Opportunity Intelligence universes through independent admission and commercial gates.
+The first commercial shell serves organisations and professionals that sell to government. The parent architecture supports the nine Contract 31 opportunity libraries through independent product, source and commercial gates.
 
 The commercial stack MAY include:
 
-1. public methodology and selected source-linked opportunity examples;
-2. paid Design Partner access;
-3. professional recurring subscriptions;
-4. team and enterprise annual plans;
-5. jurisdiction or source-entitlement packs;
-6. API and data entitlements where source rights permit;
-7. one-off evidence-linked research dossiers;
-8. private-data integration for enterprise customers;
-9. professional onboarding and implementation services declared separately.
+1. public methodology and admitted source-linked intelligence pages;
+2. Tender Alerts and limited public discovery;
+3. private Design Partner or acceptance access;
+4. Professional and Team recurring subscriptions;
+5. Enterprise contracts;
+6. additional admitted library, source or jurisdiction entitlements;
+7. API and data entitlements where rights permit;
+8. tenant-private connectors and data;
+9. professional onboarding or services declared separately.
 
-Bid submission, supplier representation, legal certification, transaction execution, custody and performance fees are outside the current scope.
+Bid submission, supplier representation, legal certification, unrelated transaction execution, custody and performance fees remain outside the current authority.
 
-## 2. Canonical B2G narrative
+## 2. Canonical commercial narrative
 
 Commercial category:
 
-> **B2G Public Procurement Intelligence**
+> **Business-to-Government (B2G) Opportunity Intelligence**
 
-Commercial descriptor:
+Initial market:
 
-> **Evidence-governed intelligence for organisations that sell to government.**
+> **Public contracts and global tenders**
 
 Outcome statement:
 
-> **Find, qualify and investigate public opportunities with every material conclusion linked to its evidence.**
+> **Find the public contracts your business is built to pursue, qualify them with traceable evidence and coordinate the pursuit inside one governed workspace.**
 
 The narrative MUST communicate:
 
-- professional procurement and public-sector sales workflow;
-- official-source evidence and lifecycle reconstruction;
-- decision preparation rather than automated decision substitution;
-- explicit unknowns, contradictions and version changes;
-- bounded AI authority;
-- admitted jurisdiction and source coverage.
+- public-contract discovery and qualification;
+- contracting-authority, award, supplier and ownership context;
+- requirements, amendments, deadlines and lifecycle;
+- evidence, contradictions and unknowns;
+- human bid/no-bid and operational authority;
+- admitted source and coverage limitations;
+- persistent team workflow and learning.
 
 The narrative MUST NOT imply:
 
 - guaranteed eligibility, profitability, award or legal compliance;
 - worldwide coverage based on catalogue listings;
-- that a visual interface alone creates predictive advantage;
-- that uncalibrated model confidence is a probability;
-- that AXIGNAL submits or represents bids.
+- autonomous bid decisions;
+- public availability before P27;
+- that TED or another portal is AXIGNAL's product identity.
 
 ## 3. Value unit
 
-The paid value is not the number of notices, AI messages, tokens, claims or interface panels.
+The paid value is not raw notice count, messages, tokens, generated text or interface panels.
 
 The paid value is:
 
-- time saved across fragmented official sources and documents;
-- faster opportunity qualification;
-- reduced cost of pursuing clearly unsuitable or insufficiently evidenced tenders;
+- earlier and more relevant opportunity discovery;
+- faster and better-supported qualification;
+- reduced cost of unsuitable pursuits;
 - traceability from opportunity to source and document version;
-- explicit supporting, contradicting and unresolved evidence;
-- correction, cancellation, award and contract-lifecycle visibility;
-- persistent investigations, dossiers and monitored opportunities;
-- buyer, supplier, lot, award and taxonomy history;
-- collaboration around one InvestigationContext;
-- jurisdiction-selective research capacity without a large internal intelligence team.
+- visible supporting, contradicting and unresolved evidence;
+- buyer, supplier, award, ownership and historical context;
+- persistent investigations and dossiers;
+- requirements, tasks, documents and approvals;
+- collaboration and audit;
+- outcome and reusable learning;
+- governed multi-jurisdiction research capacity.
 
-Pricing SHOULD correspond to professional research capacity and governance, not internal provider cost trivia.
+Public pricing SHOULD reflect professional opportunity capacity and workflow value, not provider token cost.
 
-## 4. Priority buyer and willingness to pay
+## 4. Priority buyer
 
-The priority buyer MUST have a recurring B2G workflow and satisfy at least two of:
+The priority buyer has a recurring B2G workflow and satisfies at least two of:
 
 - reviews public opportunities repeatedly;
 - spends material staff or advisory time qualifying tenders;
-- sells or advises across more than one buyer, geography or procurement category;
+- sells or advises across multiple buyers, categories or geographies;
 - has suffered a missed, late or costly pursue/decline decision;
 - values source auditability and document evidence;
-- can convert one relevant finding or avoided pursuit into value exceeding the annual subscription;
-- needs collaboration, monitoring, history, API or governance beyond commodity alerts.
+- coordinates a team or approval workflow;
+- can convert one relevant finding or avoided pursuit into value exceeding the subscription;
+- needs context, monitoring, API or governance beyond commodity alerts.
 
 Priority segments:
 
-1. SMEs and growth suppliers to government;
-2. bid, tender and public-sector sales teams;
-3. tender and market-entry consultancies;
-4. contractors, technology suppliers, engineering and specialist service firms;
-5. corporate market-intelligence teams;
-6. multi-region organisations requiring auditable procurement research.
+1. B2G business-development leaders;
+2. bid, tender and capture teams;
+3. public-sector sales organisations;
+4. tender and market-entry consultancies;
+5. technology, engineering, defence, energy, health and infrastructure suppliers;
+6. multi-region organisations requiring governed procurement intelligence.
 
-Public bodies, researchers and transparency organisations MAY be served through separate hypotheses. They are not automatically the primary commercial buyer.
+## 5. Current candidate price book
 
-## 5. Candidate packaging and pricing
+The versioned server-side P21 commercial runtime is the current technical source for candidate package definitions.
 
-Every amount below is a hypothesis. No amount is `PUBLIC_CURRENT` until Contracts 11, 22, 23 and 28 pass their evidence gates.
+| Package | Candidate price | Flat-tier seats | Status |
+|---|---:|---:|---|
+| `CONTROLLED_TRIAL_7D` | `0 EUR` | 2 | `CANDIDATE_ONLY` |
+| `PROFESSIONAL_MONTHLY` | `149 EUR/month` | 3 | `CANDIDATE_ONLY` |
+| `TEAM_MONTHLY` | `399 EUR/month` | 15 | `CANDIDATE_ONLY` |
+| `ENTERPRISE_CONTRACT` | Quote only | Contracted | `CANDIDATE_ONLY` |
 
-### 5.1 Design Partner — €300–€600/month per organisation
+These values are not:
 
-Purpose: paid workflow and willingness-to-pay validation.
+- validated public prices;
+- willingness-to-pay evidence;
+- market-standard claims;
+- revenue forecasts;
+- authority to activate billing.
 
-Candidate terms:
+Historical candidate ranges such as:
 
-- fixed three-to-six-month period;
-- bounded users, ResearchRuns, dossiers and admitted sources;
-- direct onboarding and declared support;
-- documented feedback and workflow-validation obligations;
-- optional case-study permission negotiated explicitly;
-- no implication that the preferential amount is the future list price.
+```text
+Professional 349–499 EUR/month
+Team         899–1,499 EUR/month
+```
 
-### 5.2 Professional — €349–€499/month
+remain preserved hypothesis history. They do not override the active candidate price book.
 
-Target: one active procurement, business-development or advisory professional.
+No price becomes `PUBLIC_CURRENT` before P01, P21 and P27 accept buyer, paid, retention, margin and support evidence.
 
-Candidate entitlements:
+## 6. Flat-tier seat model
 
-- one primary seat;
-- admitted European procurement scope;
-- persistent investigations and watchlists;
-- bounded ResearchRuns and evidence-linked dossiers;
-- source-linked Claim and Evidence Rail;
-- standard-frequency change and award monitoring;
-- bounded professional exports within source rights;
+Professional and Team are candidate flat-tier packages.
+
+```text
+Stripe quantity = 1 package
+AXIGNAL = internal seat-capacity authority
+```
+
+Candidate capacities:
+
+- controlled trial: 2;
+- Professional: 3;
+- Team: 15.
+
+A Team organisation may operate with fewer than four users. Professional cannot allocate a fourth seat. Team cannot allocate a sixteenth seat.
+
+Effective access is:
+
+```text
+verified trial or paid entitlement
+∩ tenant seat entitlement
+∩ active membership
+∩ role binding
+∩ workspace scope
+∩ source rights
+∩ security state
+∩ RLS
+```
+
+A Stripe customer, subscription label or browser value cannot grant membership or capacity.
+
+## 7. Controlled seven-day trial
+
+The trial is a candidate acquisition mechanism, implemented in engineering but not publicly activated.
+
+### 7.1 Ownership
+
+A trial belongs to a tenant or resolved economic identity, not to an account, email alias, device, cookie or IP address.
+
+```text
+one tenant
+→ one trial grant
+→ one seven-day clock
+→ one shared token and cost budget
+→ two seats
+```
+
+### 7.2 Start
+
+The clock starts on the first admitted AI operation:
+
+```text
+verified email
+→ passkey
+→ trial READY
+→ first admitted AI request
+→ trial ACTIVE
+→ seven consecutive 24-hour periods
+```
+
+Signup, login, Tender Alert subscription or opening the workspace does not start the trial.
+
+### 7.3 Candidate limits
+
+- two seats;
+- 1,000,000-token ceiling;
+- internal estimated-cost ceiling;
+- one concurrent ResearchRun;
+- restricted bulk export;
+- restricted private connectors;
+- no public API unless separately admitted;
+- source and rights limits;
+- no silent paid conversion.
+
+### 7.4 Abuse governance
+
+Strong claims may reuse or deny another trial. Weak signals may restrict, require step-up or manual review but cannot independently prove abuse.
+
+```text
+account created ≠ trial granted
+shared IP ≠ abuse
+risk score ≠ proof of fraud
+new email alias ≠ new economic identity
+```
+
+### 7.5 Expiry
+
+At expiry:
+
+- new expensive operations stop;
+- existing work follows declared read-only, export, retention and deletion rules;
+- no paid entitlement starts without explicit plan selection;
+- deletion does not reset trial eligibility.
+
+## 8. Professional candidate package
+
+Candidate purpose: a small B2G team or active professional requiring governed discovery, qualification and pursuit context.
+
+Candidate package:
+
+- up to three seats;
+- admitted procurement scope only;
+- persistent investigations, opportunities and watchlists;
+- evidence-linked dossiers;
+- buyer, award, supplier and ownership context where admitted;
+- standard monitoring and Tender Alerts;
+- Bid Workspace capabilities actually released;
+- bounded exports within rights;
 - standard support.
 
-### 5.3 Team / Growth — €899–€1,499/month
+Exact usage, source and workspace limits remain unfrozen.
 
-Target: bid teams, consultancies and public-sector sales teams.
+## 9. Team candidate package
 
-Candidate entitlements:
+Candidate purpose: bid, tender, capture, consulting or public-sector sales teams.
 
-- three-to-five included seats;
-- shared InvestigationContexts, Trails, annotations and assignments;
-- larger ResearchRun, dossier, watchlist and alert allowances;
-- deeper historical and buyer/supplier comparisons;
-- admitted team integrations;
+Candidate package:
+
+- up to fifteen seats;
+- all admitted Professional capabilities;
+- shared Pursuits, requirements, tasks, documents and approvals;
+- larger operational capacity;
+- deeper history and comparisons;
+- reporting and audit;
+- admitted integrations;
 - priority support.
 
-### 5.4 Enterprise — €18,000–€45,000/year starting range
+Exact usage, source and workspace limits remain unfrozen.
 
-Target: larger suppliers, consultancies, multi-region teams and governed intelligence programmes.
+## 10. Enterprise candidate package
 
-Candidate entitlements MAY include:
+Enterprise remains quote-only.
 
-- negotiated seats, organisations and jurisdiction packs;
-- SSO and SCIM when delivered and contracted;
-- API and data feeds within source rights;
-- private connectors and tenant-private claims;
-- security, audit and contractual support package;
-- data residency or deployment requirements when available;
-- enterprise onboarding and professional services.
+Candidate scope MAY include:
 
-The quote MUST separate recurring software, variable usage, third-party data and professional services when material.
+- contracted seats and organisations;
+- multiple admitted libraries or jurisdiction packs;
+- SSO and SCIM after production acceptance;
+- API and webhooks;
+- tenant-private libraries and connectors;
+- private data and claims;
+- security, audit and contractual support;
+- data residency or deployment requirements when actually available;
+- onboarding and professional services.
 
-## 6. Premium-positioning rules
+Quotes MUST separate recurring software, variable usage, third-party data and professional services when material.
 
-1. The initial B2G product MUST NOT use a permanent €19–€99 full-workflow tier.
-2. A free or low-cost discovery surface MAY exist only when its limited role is explicit.
-3. Price comparisons MUST foreground research capacity, collaboration, jurisdiction coverage, evidence and governance.
-4. Unlimited AI or unlimited document processing MUST NOT be promised without bounded economics and abuse controls.
-5. The primary value metric SHOULD be ResearchRuns, monitored opportunities, dossiers, collaboration and admitted coverage.
-6. Discounts MUST NOT become the primary conversion mechanism.
-7. Artificial feature rows, false scarcity and fabricated crossed-out prices are prohibited.
-8. Lower or higher bands MAY be tested only as versioned hypotheses with conversion, retention, margin and premium-perception measures.
+## 11. Price status
 
-## 7. Annual billing
+Every sales-facing price MUST declare one state:
 
-AXIGNAL SHOULD privilege annual commitments after initial validation, especially for Team and Enterprise.
+- `HYPOTHESIS`;
+- `CANDIDATE_ONLY`;
+- `DESIGN_PARTNER`;
+- `PRIVATE_ACCEPTANCE`;
+- `PUBLIC_CURRENT`;
+- `GRANDFATHERED`;
+- `RETIRED`.
 
-Annual billing MAY offer:
+The current 0/149/399/quote catalogue is `CANDIDATE_ONLY`.
 
-- a real monetary saving;
-- additional committed ResearchRun or monitoring capacity;
-- onboarding or support benefits;
-- price protection for the contract term.
+## 12. Price presentation
 
-The pricing surface MUST disclose:
+Any pricing surface MUST show:
+
+- currency;
+- interval;
+- tax treatment;
+- flat-tier seat capacity;
+- source, library and jurisdiction scope;
+- operational limits;
+- upgrade and downgrade behaviour;
+- cancellation effective date;
+- retention and deletion;
+- source-dependent limitations;
+- exact price status;
+- plan-specific CTA.
+
+Candidate pricing MUST NOT be described as market validated.
+
+## 13. Annual billing
+
+Annual billing may be introduced only after evidence and must disclose:
 
 - total annual amount;
 - monthly equivalent where shown;
 - actual saving;
 - tax treatment;
 - renewal date;
-- cancellation and effective-date rules.
+- cancellation and refund rules.
 
-Permanent urgency, misleading reference prices and hidden non-refundable terms are prohibited.
+False urgency, fabricated discounts and hidden non-refundable terms are prohibited.
 
-## 8. Seven-day trial commercial role
+## 14. Acquisition model
 
-A seven-day free trial MAY reduce adoption friction only under Contract 28 and the server-side entitlement requirements of Contract 22.
-
-Its commercial purpose is to demonstrate one complete value loop:
+Priority acquisition system:
 
 ```text
-verified organisation
-→ relevant official opportunity
-→ persistent ResearchRun
-→ evidence-linked dossier
-→ saved or monitored InvestigationContext
-→ explicit paid-plan decision
+admitted procurement data
+→ governed transactional pages and Market Intelligence
+→ Google, Bing and eligible answer engines
+→ Tender Alert or sample investigation
+→ passwordless signup
+→ governed trial
+→ completed B2G value workflow
+→ explicit paid plan
+→ retention and expansion
 ```
 
-The trial MUST NOT reproduce the full Professional, Team or Enterprise product. It MUST be limited by admitted source, ResearchRuns, dossiers, documents, pages, exports, concurrency and cost.
+Supporting channels:
 
-The initial validation SHOULD prefer no card and MUST prohibit silent conversion. Card collection or automatic renewal may be tested later only with transparent affirmative consent and commercial evidence.
+- founder-led B2G intelligence and methodology;
+- LinkedIn distribution;
+- targeted outbound;
+- partnerships and associations;
+- webinars and demonstrations;
+- paid acquisition only after evidence.
 
-## 9. Pricing sweet-spot gate
+Search traffic, Tender Alerts and CRM leads do not grant trials or establish buyer quality.
 
-The selected entry price MUST be:
+Google Search Console data may support diagnostics after API admission. DNS verification alone does not prove API integration.
 
-- credible relative to professional B2G intelligence products;
-- reachable for a qualified SME or consultancy without enterprise procurement in the intended segment;
-- high enough to fund evidence processing, support and source operations;
-- understood as professional intelligence rather than commodity alerts;
-- linked to a measurable avoided cost, time saving or decision advancement;
-- compatible with target gross margin after trial, source, infrastructure and support costs.
+## 15. Design Partners and private acceptance
 
-Price cannot be selected from competitor observation alone. It requires AXIGNAL-specific paid evidence.
+Private paid acceptance may be used to validate complete workflows before public launch.
 
-## 10. Acquisition model
+Requirements:
 
-AXIGNAL SHOULD avoid broad consumer advertising as the initial channel.
+- explicitly admitted organisation;
+- controlled terms and declared maturity;
+- no open signup;
+- no public-launch representation;
+- auditable access and billing;
+- feedback and evidence obligations where agreed;
+- source and coverage disclosure;
+- independent suspension and rollback.
 
-Priority acquisition channels:
+A private-acceptance price is not a permanent discount from an invented list price.
 
-- founder-led B2G methodology and source research;
-- evidence-linked flagship procurement reports;
-- targeted outreach to bid and public-sector sales professionals;
-- partnerships with tender consultancies and sector associations;
-- invite-only demonstrations;
-- paid Design Partners;
-- referrals and customer case studies with explicit permission;
-- cited public data pages that demonstrate method without reproducing the paid workflow;
-- enterprise and jurisdiction partnerships.
+## 16. Pricing experiments
 
-A channel MUST NOT be scaled until qualified activation, retention, margin and payback are measured.
+A package or price change requires evidence such as:
 
-## 11. Onboarding contract
-
-Onboarding MUST configure an objective procurement research scope, such as:
-
-- organisation capabilities and offered categories;
-- geographies and jurisdictions;
-- CPV, NAICS, PSC, UNSPSC or source-native taxonomy interests;
-- buyer types;
-- contract-value bands;
-- procedure and deadline constraints;
-- required certifications or observed capability filters;
-- languages and currencies;
-- evidence thresholds;
-- update cadence;
-- team and collaboration roles.
-
-Onboarding MUST distinguish:
-
-- customer-declared capability;
-- source-observed requirement;
-- inferred relevance;
-- legal or technical verification still required.
-
-It MUST NOT convert filters into guaranteed eligibility, win probability or legal advice.
-
-## 12. Pricing experiments
-
-A price or package change MUST be supported by at least one of:
-
-- independent paid Design Partner event;
-- customer interview with explicit budget responsibility;
+- direct budget-authority interview;
+- independent paid acceptance;
 - signed annual proposal;
-- renewal data;
-- feature-level usage and retention;
-- willingness-to-pay experiment using a working dossier;
+- completed value workflow;
+- renewal or retention;
+- usage and support evidence;
 - enterprise proposal outcome;
-- measured expansion or downgrade behaviour.
+- upgrade, downgrade or cancellation behaviour.
 
-At least two materially different offers SHOULD be tested before freezing public pricing.
-
-Every experiment MUST record:
+Every experiment records:
 
 - audience and eligibility;
-- exact offer and version;
+- exact offer version;
 - source and entitlement scope;
 - primary and guardrail metrics;
-- conversion denominator;
-- support and variable cost;
+- denominator;
+- variable and support cost;
 - limitations;
 - decision and rollback.
 
-## 13. Commercial gates
+## 17. Commercial gates
 
-### Gate B0 — Problem evidence
+### B0 — Problem and buyer evidence
 
-Pass when at least 20 qualified target users confirm recurring procurement-research fragmentation and at least five describe a recent decision where AXIGNAL-like evidence would have had material value.
+Pass only with qualified direct evidence of recurring workflow pain, decision cost and budget responsibility.
 
-### Gate B1 — Paid prototype
+### B1 — Independent paid acceptance
 
-Pass when at least 10 non-affiliated qualified organisations or professionals pay for a narrow Design Partner product, or an independently approved equivalent annual-contract signal demonstrates comparable commitment.
+Pass only with unrelated organisations paying under explicit terms for a working AXIGNAL value loop.
 
-### Gate B2 — Activation and repeated use
+### B2 — Completed value
 
-Pass when the paid cohort repeatedly completes the declared opportunity-to-evidence workflow without depending primarily on unpriced manual consulting.
+Pass only when customers complete the declared opportunity-to-evidence-to-pursuit workflow without hidden unpriced consulting.
 
-### Gate B3 — Retention
+### B3 — Retention or annual commitment
 
-Pass when at least 60% of the first qualified paid cohort remains active and paid after 90 days, or an equivalent annual-commitment and usage signal is accepted.
+Pass only with accepted repeated use, renewal or annual-commitment evidence.
 
-### Gate B4 — Expansion
+### B4 — Expansion
 
-Pass when at least 15% of retained accounts upgrade, add seats, add a jurisdiction pack or purchase an additional admitted entitlement.
+Pass only with accepted seat, package, library or jurisdiction expansion evidence.
 
-### Gate B5 — Repeatable acquisition
+### B5 — Repeatable acquisition
 
-Pass when a defined channel produces paying customers with acceptable contribution margin, support burden and payback under the approved financial model.
+Pass only when an attributable channel produces paying customers with acceptable contribution margin, support burden and payback.
 
-## 14. Cost discipline
+## 18. Cost discipline
 
-Before meaningful revenue, AXIGNAL MUST prioritise:
+AXIGNAL MUST prioritise:
 
-- official and contractually reusable data;
+- official and reusable data;
 - deterministic transforms;
 - caching and incremental processing;
 - content-addressed evidence reuse;
 - local or low-cost models;
-- sampled rather than universal model enrichment;
+- sampled rather than universal enrichment;
 - source-specific processing;
-- hard ResearchRun and document budgets.
+- transactional trial budgets;
+- hard cost, concurrency and export controls.
 
-Paid model usage MUST be metered internally by workflow, source, customer plan and expected product value.
+Provider token usage is an internal cost metric, not the primary paid value unit.
 
-## 15. Revenue-gated AI
+## 19. Reinvestment
 
-The platform SHOULD maintain an AI and source-cost ledger:
-
-```text
-confirmed revenue
-→ taxes, reserves and refunds
-→ source and infrastructure budget
-→ model-usage budget
-→ customer-support budget
-→ workflow-level margin and ROI review
-```
-
-High-cost enrichment MUST NOT run universally when deterministic, cached or local methods satisfy the contract.
-
-## 16. Expectation and refund control
-
-Marketing and customer terms MUST NOT promise:
-
-- award success;
-- profits or margin;
-- eligibility certification;
-- complete or real-time coverage where the source does not provide it;
-- legal conclusions;
-- uninterrupted third-party source availability.
-
-Customer-facing terms SHOULD state that the subscription grants access to information, methodology and software functionality. Service availability, data latency, source-dependent limitations, trial behaviour, cancellation, retention and refund treatment MUST be precise.
-
-## 17. Primary commercial metrics
-
-- qualified trial and Design Partner activation;
-- time to first completed dossier;
-- evidence drill-down;
-- saved or monitored investigation;
-- paid weekly active organisations;
-- trial-to-paid conversion;
-- Design Partner renewal or annual conversion;
-- monthly and annual recurring revenue;
-- gross margin by plan and jurisdiction pack;
-- net revenue retention;
-- logo retention;
-- support minutes per account;
-- source and AI cost per active paid account;
-- enterprise sales-cycle duration;
-- expansion, downgrade and cancellation reasons.
-
-Raw page views, AI messages, token volume and catalogue source count MUST NOT be primary success metrics.
-
-## 18. Reinvestment policy
-
-Profits MAY be reinvested in:
+Profits may be reinvested in:
 
 - validated acquisition channels;
 - source and jurisdiction coverage;
 - evidence and document automation;
 - infrastructure and reliability;
-- product improvement;
-- positioning and methodology content;
+- product and operational workspaces;
+- positioning and methodology;
 - customer success;
 - security, privacy and compliance.
 
-Reinvestment MUST be conditioned on measured return, margin, risk limits, reserves and channel validation. AXIGNAL MUST NOT scale unvalidated advertising or source integration merely because budget is available.
+Reinvestment requires measured return, margin, risk limits, reserves and channel validation. Unvalidated advertising, SEO page volume or source breadth must not be scaled merely because budget exists.
 
-## 19. Kill conditions
+## 20. Acceptance and launch
 
-The commercial model MUST be reconsidered if:
+Final pricing requires P27 evidence for:
 
-- qualified users consume research but refuse to pay;
-- retention depends primarily on constant manual consulting;
-- users value only commodity alerts;
-- source or model costs make target margin structurally unattractive;
-- the seven-day trial creates excessive abuse, support or premium erosion;
-- the Professional entry band produces no retained paid demand;
-- global coverage creates cost without jurisdiction-specific paid usage;
-- trust requires legal certification, bid execution or misleading certainty outside scope;
-- a general AI provider can reproduce the paid value without AXIGNAL’s persistent evidence, lifecycle, source and workflow state.
+- buyer and budget validity;
+- willingness to pay;
+- complete Stripe sandbox evidence;
+- authorised live-boundary evidence;
+- completed customer value;
+- retention and renewal;
+- contribution margin;
+- support burden;
+- acquisition payback;
+- package comprehension;
+- cancellation, refund and dispute operation;
+- source-right and entitlement enforcement.
 
-## 20. Current authority state
+Only P27 can authorise public pricing and launch.
+
+## 21. Current authority
 
 ```text
-B2G COMMERCIAL NARRATIVE SELECTED
-/ PRICE BANDS ARE HYPOTHESES
-/ DESIGN PARTNER MODEL AUTHORISED FOR VALIDATION ONLY
-/ SEVEN-DAY TRIAL DESIGNED BUT DISABLED
-/ NO PUBLIC CURRENT PRICE
-/ NO BILLING ACTIVATION
-/ NO GLOBAL COVERAGE CLAIM
+B2G COMMERCIAL SHELL             SELECTED
+CURRENT CANDIDATE PRICE BOOK     0 / 149 / 399 / QUOTE
+PRICE STATUS                     CANDIDATE_ONLY
+TRIAL ENGINEERING                E2E PASS
+SEAT GOVERNANCE ENGINEERING      E2E PASS
+PUBLIC TRIAL                     BLOCKED
+PUBLIC PRICING                   NOT VALIDATED
+STRIPE LIVE                      BLOCKED
+INDEPENDENT PAID EVIDENCE        MISSING
+RETENTION AND RENEWAL            MISSING
+PUBLIC LAUNCH                    NO_GO
 ```

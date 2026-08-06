@@ -1,0 +1,242 @@
+{
+  "task_id": "AX-GE2E-P08-T03",
+  "goal_id": "AXIGNAL-GOAL-001",
+  "phase": "P08",
+  "state": "ACCEPTED",
+  "objective": "Close the authenticated subscriber Shell and Bid Workspace against the AXIGNAL global E2E closure contract without reducing product scope or weakening authority boundaries.",
+  "outcome": "C1 is canonically closed on complete exact-head engineering, rollback, security, responsive and browser evidence. Qualified-user usability validation remains mandatory but is deferred to the post-launch gate tracked by GitHub issue #170 and does not block C2, P27 or launch.",
+  "contracts": [
+    "GOAL_LOCK",
+    "AGENTS",
+    "05",
+    "06",
+    "08",
+    "12",
+    "13",
+    "14",
+    "16",
+    "18",
+    "20",
+    "25",
+    "26",
+    "29",
+    "31",
+    "ADR-016"
+  ],
+  "skills": [
+    {
+      "skill_id": "goal-keeper",
+      "version": "0.1.0",
+      "activation_reason": "Prevent silent reduction of the contracted global product and unsupported completion claims."
+    },
+    {
+      "skill_id": "frontend-architect",
+      "version": "0.1.0",
+      "activation_reason": "Close route, state, responsive and interaction contracts in the subscriber Shell."
+    },
+    {
+      "skill_id": "backend-architect",
+      "version": "0.1.0",
+      "activation_reason": "Enforce server-authoritative mutations, persistence, preconditions and reconciliation."
+    },
+    {
+      "skill_id": "security-reviewer",
+      "version": "0.1.0",
+      "activation_reason": "Preserve tenant isolation, least privilege and external-action boundaries."
+    },
+    {
+      "skill_id": "accessibility-auditor",
+      "version": "0.1.0",
+      "activation_reason": "Validate keyboard, nonvisual, focus, reflow and reduced-motion acceptance."
+    },
+    {
+      "skill_id": "test-engineer",
+      "version": "0.1.0",
+      "activation_reason": "Produce first-run exact-head unit, integration, browser and rollback evidence."
+    }
+  ],
+  "dependencies": {
+    "phases": [
+      "P07",
+      "P08"
+    ],
+    "tasks": [
+      "AX-GE2E-P07-T01",
+      "AX-GE2E-P08-T01",
+      "AX-GE2E-P08-T02"
+    ],
+    "external": [
+      "Contract 31 and ADR-016 remain the superior programme authority",
+      "Qualified-user usability validation is deferred until after launch and is governed by GitHub issue #170; it is not a C1, C2, P27 or launch dependency",
+      "Real source and production-provider admission remain independently gated"
+    ]
+  },
+  "allowed_scope": [
+    "Reconcile the subscriber Shell candidate with its exact base head",
+    "Correct semantic, authority, persistence, accessibility and browser acceptance defects",
+    "Disable controls whose persistent server contract is not implemented",
+    "Add server-side preconditions and negative tests for requirement and submission workflows",
+    "Make AXENT fixture and degraded response provenance explicit",
+    "Withhold synthetic intelligence projections from real-adapter sessions",
+    "Produce exact-head evidence and rollback records"
+  ],
+  "prohibited_scope": [
+    "No autonomous bid decision, external communication, signature or submission",
+    "No browser-authoritative tenant, role, entitlement, approval or source admission",
+    "No silent fixture fallback or synthetic data presented as live evidence",
+    "No enabled control that can only terminate in an unavailable-operation rejection",
+    "No CI retry used to convert critical browser flakiness into acceptance",
+    "No claim that the post-launch qualified-user study has already been completed",
+    "No global product, commercial availability or public-launch claim from C1 alone"
+  ],
+  "acceptance_evidence": [
+    {
+      "evidence_type": "DOCUMENT",
+      "description": "Human-readable execution record with blocker disposition, exact-head engineering evidence, post-launch usability deferral and C2 transition state.",
+      "required": true,
+      "location": "docs/tasks/active/2026-08-04_axignal-e2e-closure-execution.md",
+      "status": "PRESENT"
+    },
+    {
+      "evidence_type": "TEST",
+      "description": "Exact-head typecheck, frontend unit contracts, kill-switch recovery rehearsal and production builds completed successfully.",
+      "required": true,
+      "location": "github-actions-run:30930380161@a739b41f6e36b7e2eb9d8dd6a317101055d79523",
+      "status": "PRESENT"
+    },
+    {
+      "evidence_type": "TEST",
+      "description": "Subscriber desktop, tablet and mobile browser matrix completed successfully with zero retries.",
+      "required": true,
+      "location": "github-actions-run:30930376877@a739b41f6e36b7e2eb9d8dd6a317101055d79523",
+      "status": "PRESENT"
+    },
+    {
+      "evidence_type": "SECURITY_REVIEW",
+      "description": "G5 security boundaries, tenant denial, browser security and external-authority negative cases completed successfully.",
+      "required": true,
+      "location": "github-actions-run:30930380310@a739b41f6e36b7e2eb9d8dd6a317101055d79523",
+      "status": "PRESENT"
+    },
+    {
+      "evidence_type": "TRACE",
+      "description": "Qualification, evidence, submission, AXENT degradation, navigation, persistence and recovery journeys are traceable across the exact-head audit and subscriber browser matrix.",
+      "required": true,
+      "location": "github-actions-runs:30930380286,30930376877@a739b41f6e36b7e2eb9d8dd6a317101055d79523",
+      "status": "PRESENT"
+    },
+    {
+      "evidence_type": "RESTORE_TEST",
+      "description": "The subscriber feature flag was disabled after a persisted mutation, the ledger remained byte-identical, and reactivation restored the exact tenant revision, requirement state and audit event.",
+      "required": true,
+      "location": "apps/web/tests/subscriber-workspace-server.test.ts#subscriber-kill-switch-preserves-the-tenant-ledger-and-restores-the-exact-workspace-context;github-actions-run:30930380161",
+      "status": "PRESENT"
+    },
+    {
+      "evidence_type": "USER_RESEARCH",
+      "description": "Qualified-user usability study deferred to the post-launch validation gate. It remains mandatory product evidence but is not required for C1, C2, P27 or launch acceptance.",
+      "required": false,
+      "location": "github-issue:170;docs/research/2026-08-01-subscriber-workspace-tooling-ux-study.md#11-required-usability-research",
+      "status": "MISSING"
+    }
+  ],
+  "impacts": {
+    "security": "CRITICAL",
+    "privacy": "MATERIAL",
+    "data_rights": "MATERIAL",
+    "regulatory": "MATERIAL",
+    "multilingual": "CRITICAL",
+    "epistemic": "CRITICAL",
+    "billing": "MATERIAL"
+  },
+  "observability": {
+    "metrics": [
+      "subscriber_route_load_ms",
+      "workspace_mutation_total",
+      "workspace_mutation_denied_total",
+      "workspace_recovery_total",
+      "axent_assistant_mode_total",
+      "subscriber_browser_first_run_failure_total"
+    ],
+    "logs": [
+      "server-resolved capability snapshot",
+      "workspace mutation receipt",
+      "submission precondition denial",
+      "assistant degraded-mode selection"
+    ],
+    "traces": [
+      "qualification decision",
+      "requirement evidence transition",
+      "submission preflight and approval",
+      "AXENT response and workspace navigation"
+    ],
+    "alerts": [
+      "cross-tenant workspace access",
+      "client authority escalation",
+      "synthetic data in real-adapter mode",
+      "external action without approval",
+      "critical accessibility regression"
+    ]
+  },
+  "rollback": {
+    "strategy": "Disable the subscriber workspace feature flag or revert this bounded execution branch while preserving identity, workspace, claim, billing and audit ledgers.",
+    "kill_switch": "AXIGNAL_SUBSCRIBER_WORKSPACE_ENABLED=false",
+    "tested": true
+  },
+  "goal_lock_checks": [
+    {
+      "check_id": 1,
+      "answer": "YES",
+      "evidence": "The Shell preserves AXIGNAL as Global Opportunity Intelligence and Operations rather than a standalone chat or dashboard."
+    },
+    {
+      "check_id": 2,
+      "answer": "YES",
+      "evidence": "Facts, inferences, contradictions, unknowns, fixtures and degraded guidance remain explicitly distinct."
+    },
+    {
+      "check_id": 3,
+      "answer": "YES",
+      "evidence": "Globe, Graph and Timeline remain bounded lenses over one investigation context."
+    },
+    {
+      "check_id": 4,
+      "answer": "YES",
+      "evidence": "Subscriber interest and AXENT output cannot admit evidence or create product truth."
+    },
+    {
+      "check_id": 5,
+      "answer": "YES",
+      "evidence": "The required locale set remains en, es, fr, de, pt and it; qualified-user semantic validation is retained as mandatory post-launch work."
+    },
+    {
+      "check_id": 6,
+      "answer": "YES",
+      "evidence": "Workspace decisions, evidence, amendments, outcomes and audit state remain durable product memory targets."
+    },
+    {
+      "check_id": 7,
+      "answer": "YES",
+      "evidence": "The implementation prohibits autonomous decision, approval, communication, signature and submission."
+    },
+    {
+      "check_id": 8,
+      "answer": "YES",
+      "evidence": "Tenant, rights, export, privacy and source boundaries fail closed."
+    },
+    {
+      "check_id": 9,
+      "answer": "YES",
+      "evidence": "The feature flag rollback was rehearsed and restored exact persisted context without deleting the ledger."
+    },
+    {
+      "check_id": 10,
+      "answer": "YES",
+      "evidence": "C1 closes on complete exact-head engineering evidence; C2 is authorized to begin, while merge and public launch remain governed by the downstream C2-C17 and P27 authorities. Post-launch usability remains open in issue #170."
+    }
+  ],
+  "owner": "Staff Product Engineering",
+  "reviewer": null,
+  "created_at": "2026-08-04T00:00:00Z",
+  "updated_at": "2026-08-04T17:10:00Z"
+}

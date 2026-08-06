@@ -2,32 +2,9 @@ name: TED Product Runtime
 
 on:
   workflow_dispatch:
-  pull_request:
-    branches: [main]
-    paths:
-      - "apps/api/src/axignal_api/ted_*.py"
-      - "apps/api/src/axignal_api/persistent_ted_research.py"
-      - "apps/api/src/axignal_api/worker.py"
-      - "apps/api/src/axignal_api/settings.py"
-      - "apps/api/tests/test_ted_product_runtime.py"
-      - "apps/api/tests/fixtures/ted_search_probe.json"
-      - "apps/web/app/api/research/runs/route.ts"
-      - "apps/web/lib/navigator-client.ts"
-      - "data/sources/ted-search-api-v3.v0.1.json"
-      - "data/universes/eu-public-procurement/ted-product-admission-profile.v0.1.json"
-      - "docs/security/AX-F8-T14-ted-runtime-security-review.md"
-      - "docs/sources/ted-product-admission-v0.1.md"
-      - "docs/roadmap/tasks/AX-F8-T14.json"
-      - "infra/pilot/compose.yaml"
-      - "infra/postgres/070-ted-product-runtime.sql"
-      - "infra/postgres/Dockerfile"
-      - "scripts/verify_ted_product_runtime.py"
-      - "scripts/verify_ted_security_review.py"
-      - "scripts/verify_ted_persistent_e2e.py"
-      - "scripts/benchmark_ted_product_runtime.py"
-      - ".github/workflows/ted-product-runtime.yml"
   push:
-    branches: [main, "agent/**"]
+    branches:
+      - main
     paths:
       - "apps/api/src/axignal_api/ted_*.py"
       - "apps/api/src/axignal_api/persistent_ted_research.py"
@@ -51,6 +28,7 @@ on:
       - "scripts/benchmark_ted_product_runtime.py"
       - ".github/workflows/ted-product-runtime.yml"
 
+  workflow_call:
 permissions:
   contents: read
 

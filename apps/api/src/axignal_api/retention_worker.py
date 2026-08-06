@@ -7,13 +7,17 @@ from datetime import UTC, datetime
 
 from axignal_api.retention_config import RetentionSettings
 from axignal_api.retention_repository import RetentionRepository
+from axignal_api.runtime_invariants import require_runtime_value
 
 
 def run_once(*, now: datetime | None = None) -> dict[str, object]:
     settings = RetentionSettings.from_env()
     settings.require_purge_worker()
-    assert settings.database_url is not None
-    repository = RetentionRepository(settings.database_url)
+    database_url = require_runtime_value(
+        settings.database_url,
+        name="AXIGNAL_RETENTION_DATABASE_URL",
+    )
+    repository = RetentionRepository(database_url)
     current = now or datetime.now(UTC)
     worker_id = f"retention-{socket.gethostname()}-{os.getpid()}"
     queued = repository.queue_due(now=current)

@@ -1,12 +1,13 @@
 # 00 — Product Constitution
 
-Version: `0.2.0`
-Status: `NORMATIVE / FOUNDATION`
+Version: `0.3.0`
+Status: `NORMATIVE / CONTRACT 31 SUBORDINATE`
 Goal ID: `AXIGNAL-GOAL-001`
+Governing programme: `Contract 31 / ADR-016`
 
 ## 1. Product thesis
 
-AXIGNAL MUST be built as a premium global observation and exploration system for economic opportunity.
+AXIGNAL MUST be built as a premium global system for discovering, investigating and operating professional opportunities.
 
 It MUST continuously transform heterogeneous external signals into:
 
@@ -17,158 +18,210 @@ It MUST continuously transform heterogeneous external signals into:
 5. temporal states and lifecycle events;
 6. scenario distributions only when calibrated;
 7. explorable opportunity structures;
-8. persistent professional InvestigationContexts and dossiers.
+8. persistent InvestigationContexts and dossiers;
+9. governed Opportunities and Pursuits;
+10. operational workspaces;
+11. observed outcomes and reusable learning.
 
-AXIGNAL MUST NOT be reduced to a chatbot, newsletter, generic dashboard, idea generator, tender-alert list or trading terminal.
+AXIGNAL MUST NOT be reduced to a chatbot, newsletter, generic dashboard, idea generator, tender-alert list, public-data mirror or research layer that exports the active work into unrelated tools.
 
-## 2. Parent category and first commercial expression
+## 2. Parent product and first commercial shell
 
-Parent category:
+Parent product category:
 
-> **Global Opportunity Intelligence**
+> **Global Opportunity Intelligence & Operations**
 
-Parent descriptor:
+Canonical product definition:
 
-> **The global climate system for economic opportunity.**
+> **AXIGNAL detects signals, connects governed evidence, helps professional teams decide which opportunities deserve attention and provides the workspace in which those teams manage each pursuit through its outcome and learning.**
 
-Canonical principle:
+First commercial shell:
 
-> **Signals reveal change. Claims establish evidence. AXIGNAL maps opportunity.**
+> **Business-to-Government (B2G) Opportunity Intelligence**
 
-The first commercial implementation category is:
+First acquisition universe:
 
-> **B2G Public Procurement Intelligence**
+> **Public contracts and global tenders**
 
-First commercial descriptor:
+Initial commercial descriptor:
 
-> **Evidence-governed intelligence for organisations that sell to government.**
+> **Find the public contracts your business is built to pursue, qualify them with traceable evidence and operate the pursuit inside one governed workspace.**
 
-The B2G wedge narrows execution and commercial validation. It does not remove AXIGNAL's global and multi-universe architecture.
+The B2G shell narrows the first buyer, workflow and acquisition message. It does not remove the mandatory global, multi-library and Opportunity Operations architecture.
 
-## 3. Buyer
+No source, including TED, may define the product identity.
 
-The first priority buyer is an organisation or professional with a recurring B2G workflow and material cost in finding, qualifying, investigating or monitoring public opportunities.
+## 3. Product architecture
 
-Priority segments:
+```text
+GLOBAL OPPORTUNITY INTELLIGENCE
++ EVIDENCE-GOVERNED INVESTIGATION
++ OPPORTUNITY OPERATIONS
+```
 
-1. SMEs and growth suppliers to government;
-2. bid, tender and public-sector sales teams;
+Canonical chain:
+
+```text
+GLOBAL SIGNALS
+→ SOURCE-ADMITTED EVIDENCE
+→ CANDIDATE CLAIMS
+→ DETERMINISTIC ADMISSION
+→ INVESTIGATION CONTEXT
+→ OPPORTUNITY
+→ PURSUIT
+→ OPERATIONAL WORKSPACE
+→ OUTCOME
+→ LEARNING
+```
+
+A workflow ending at search, alert, summary, recommendation, Claim or dossier is incomplete.
+
+## 4. Initial buyer
+
+The first priority buyer is an organisation with a recurring Business-to-Government workflow and material cost in finding, qualifying, investigating or operating public-contract pursuits.
+
+Priority roles and segments:
+
+1. B2G business-development and public-sector sales leaders;
+2. bid, tender and capture teams;
 3. tender and market-entry consultancies;
-4. contractors, technology suppliers, engineering and specialist service firms;
-5. corporate procurement-market-intelligence teams;
-6. multi-region organisations requiring auditable public-procurement research.
+4. contractors, technology suppliers, engineering and specialist-service firms;
+5. companies expanding public-sector sales across jurisdictions;
+6. governed market-intelligence and strategy teams supporting B2G decisions.
 
-The initial product MUST be B2B or professional-user oriented. Consumer mass-market positioning is out of scope for the foundation release.
+The initial product is B2B and professional-user oriented.
 
-Public bodies, researchers and transparency organisations MAY become secondary users under separate hypotheses and entitlements.
+Public bodies, researchers and transparency organisations may be served only under separate validated hypotheses and entitlements.
 
-## 4. User problem
+## 5. Initial B2G problem
 
-The user's primary scarcity is not raw public information. It is:
+The user's scarcity is not raw notices. It is:
 
 - attention;
-- relevant opportunity qualification;
-- reconciliation of fragmented notices and documents;
+- early and relevant opportunity qualification;
+- reconciliation of fragmented portals, notices and documents;
 - source traceability;
 - lifecycle and version understanding;
-- cross-buyer, supplier, geography and taxonomy comparison;
+- buyer, award, supplier, ownership and partner context;
+- cross-jurisdiction and multilingual comparison;
 - visibility into contradictions and missing requirements;
-- confidence that a finding was not improvised by a generative model;
-- knowing when a human legal, technical, financial or bid specialist must verify the result;
-- reusable institutional memory across investigations.
+- confidence that a finding was not improvised by a model;
+- coordination of bid/no-bid and pursuit work;
+- reusable institutional memory.
 
-AXIGNAL MUST optimise for **decision preparation**, not decision substitution.
+AXIGNAL MUST optimise for decision preparation and operational follow-through, not automated decision substitution.
 
-## 5. Product promise
+## 6. B2G product promise
 
-For the first B2G wedge, AXIGNAL MUST help the user answer:
+AXIGNAL MUST help an authorised team answer:
 
-- Which official procurement opportunities are relevant to this organisation's declared scope?
-- What is observed in the current notice and supporting documents?
-- What changed across corrections, cancellations, awards and contracts?
+- Which admitted public opportunities match the organisation's declared capabilities and constraints?
+- What is observed in each notice, lot, correction, award, contract and document?
+- What changed and when?
 - Which requirements are missing, ambiguous, contested or version-dependent?
-- Which buyers, suppliers, lots, awards, classifications and geographies are connected?
+- Which contracting authorities, suppliers, owners, partners, classifications and geographies are connected?
 - What supports or contradicts pursuing the opportunity?
-- What does the historical record show?
-- Which questions require human verification?
-- Is further investigation justified before committing bid resources?
-- How fresh and legally usable is the underlying information?
+- Which questions require legal, technical, financial or bid-specialist verification?
+- What work, documents, approvals and deadlines are required?
+- What was the outcome and what should be reused next time?
 
-AXIGNAL MUST NOT answer as fact:
+AXIGNAL MUST NOT state as fact:
 
-- whether a supplier is legally eligible without an accepted verification method;
-- whether a bid will win;
-- the expected margin or profitability without accepted calibrated evidence;
-- whether a notice is unlawful or deliberately directed to a competitor;
-- what bid the customer should submit;
+- legal eligibility without an accepted verification method;
+- probability of winning without accepted calibration;
+- expected margin or profitability without accepted evidence;
+- unlawfulness, discriminatory intent or competitor targeting without admitted evidence and legal authority;
+- the exact bid the customer should submit;
 - any guaranteed economic outcome.
 
-## 6. Product invariants
+## 7. Product invariants
 
-### 6.1 Structured before conversational
+### 7.1 Structured before conversational
 
-The structured source, evidence, graph, ledger, lifecycle and scenario systems are authoritative. Conversational interfaces MAY query, propose and explain them but MUST NOT invent canonical product state.
+Source, evidence, graph, ledger, lifecycle, opportunity and workspace state are authoritative. Conversational interfaces may query, propose and explain them but must not invent canonical state.
 
-### 6.2 Epistemic transparency
+### 7.2 Epistemic transparency
 
-Every material statement MUST be classified as one of:
+Every material statement must preserve its state:
 
-- `OBSERVED`
-- `CALCULATED`
-- `INFERRED`
-- `PREDICTED`
-- `UNKNOWN`
-- `CONTESTED`
-- `FALSIFIED`
-- `EXPIRED`
+- `OBSERVED`;
+- `CALCULATED`;
+- `INFERRED`;
+- `PREDICTED`;
+- `UNKNOWN`;
+- `CONTESTED`;
+- `FALSIFIED`;
+- `EXPIRED`.
 
-A valid JSON shape, structured output or model confidence MUST NOT be treated as truth or calibrated probability.
+A valid output shape or model confidence is not truth or calibrated probability.
 
-### 6.3 Contradictions are first-class
+### 7.3 Contradictions are first-class
 
-Every material opportunity MUST expose supporting, contradicting and unresolved claims. The system MUST NOT optimise only for positive pursuit evidence.
+Every material opportunity must expose supporting, contradicting and unresolved claims.
 
-### 6.4 Temporal validity
+### 7.4 Temporal validity
 
-Every claim MUST have observation time, relevant event time and validity rules. Procurement notices, corrections, cancellations, awards and contract events MUST preserve version lineage. “Latest” MUST always be source-relative.
+Every claim must preserve observation time, event time and validity. Notices, corrections, cancellations, awards, contracts and regulatory or corporate events retain lineage.
 
-### 6.5 Deterministic governance
+### 7.5 Deterministic governance
 
-The platform MAY use probabilistic extraction, retrieval and modelling, but canonical admission MUST be governed by explicit, versioned rules. Models and human reviewers MUST NOT bypass the admission contract.
+Probabilistic extraction and retrieval may propose. Canonical admission is governed by explicit, versioned policy.
 
-### 6.6 No hidden recommendation or representation
+### 7.6 Human operational authority
 
-The platform MAY allow objective filters such as geography, taxonomy, buyer, value, deadline, procedure and evidence strength. It MUST NOT silently transform those filters into guaranteed suitability, bid advice, legal certification, supplier representation or award prediction.
+Models and workers cannot approve bid/no-bid, submit, sign, file, commit capital, grant a trial, assign a role, admit a source, publish a page or authorise launch.
 
-### 6.7 Progressive source and universe coverage
+### 7.7 Progressive source admission
 
-No source, jurisdiction, government level or universe is considered supported until it passes its independent admission and commercial-availability gates. Breadth MUST NOT be purchased with superficiality.
+No source, jurisdiction, government level or library is supported until it passes its independent rights, quality, lifecycle, privacy and commercial gates.
 
-### 6.8 Original evidence preservation
+### 7.8 Original evidence preservation
 
-Source-native identifiers, values, language, documents, classifications and lifecycle semantics MUST remain recoverable. Crosswalks and translations MUST be versioned and reversible.
+Source-native identifiers, values, language, documents, classifications and lifecycle semantics remain recoverable. Crosswalks and translations are versioned and reversible.
 
-### 6.9 Tenant isolation
+### 7.9 Tenant isolation
 
-Organisation-private interests, annotations, documents, claims, trails and memory MUST remain tenant-scoped. They MUST NOT contaminate global canonical procurement truth.
+Private interests, annotations, documents, claims, Trails, workspaces and memory remain tenant-scoped and cannot contaminate global canonical evidence.
 
-## 7. Product surfaces
+### 7.10 Portable operational value
+
+Retention should come from active work, collaboration, context, history, automation and learning—not from blocking exports, obscuring customer formats or making cancellation difficult.
+
+### 7.11 Identity is server-authoritative
+
+The browser cannot select tenant, membership, role, seat, trial eligibility, billing state or Founder Admin authority.
+
+### 7.12 Public discovery is admitted
+
+```text
+dataset ≠ page
+page generated ≠ page indexable
+page indexable ≠ page published
+indexed ≠ ranked
+traffic ≠ qualified demand
+```
+
+### 7.13 Engineering is not acceptance
+
+```text
+implementation ≠ canonical acceptance
+canonical acceptance ≠ commercial availability
+commercial availability ≠ public launch
+```
+
+## 8. Product surfaces
 
 ### AXIGNAL Navigator
 
-Natural-language and direct-manipulation entry point that creates typed, reversible navigation and ResearchRun operations.
+Natural-language and direct-manipulation entry point creating typed, reversible navigation and ResearchRun operations.
 
 ### AXIGNAL Globe
 
-World-scale geographic exploration using admitted coverage, heatmaps, layers, clusters and temporal playback.
+World-scale geographic exploration using admitted coverage, layers and temporal playback.
 
-### AXIGNAL Explorer
+### AXIGNAL Graph / Atlas
 
-Cross-source discovery and filtering by jurisdiction, geography, buyer, taxonomy, value, procedure, deadline, lifecycle and evidence.
-
-### AXIGNAL Atlas
-
-Graph navigation of buyers, suppliers, notices, procedures, lots, awards, contracts, claims, evidence, classifications and geographies.
+Typed navigation of entities, buyers, suppliers, ownership, notices, awards, contracts, claims, evidence, classifications and geographies.
 
 ### AXIGNAL Timeline
 
@@ -176,112 +229,177 @@ Historical reconstruction of publication, correction, cancellation, award, contr
 
 ### AXIGNAL Claims
 
-Auditable claim detail including evidence, provenance, method, versions, dependencies, conflicts, uncertainty and expiry.
+Auditable claim detail including evidence, provenance, method, dependencies, conflicts, uncertainty and expiry.
 
 ### AXIGNAL Dossiers
 
-Persistent evidence-linked investigation outputs assembled from admitted claims and explicit unresolved questions.
+Persistent evidence-linked investigation outputs assembled from admitted claims and unresolved questions.
 
-### AXIGNAL Watchlists
+### AXIGNAL Opportunity Operations
 
-User-selected observation scopes. Watchlists represent declared interests and monitoring rules, not guaranteed suitability or recommendations.
+Shared Opportunity, Pursuit, Decision, Requirement, WorkItem, Milestone, Document, Comment, Approval, Submission or Activation Record, Outcome and Learning state.
+
+### Specialised Workspaces
+
+- Bid Workspace;
+- Application Workspace;
+- Market Entry and Compliance Opportunity Workspace;
+- Project Pursuit Workspace;
+- Account Opportunity Workspace;
+- Country and Market Strategy Workspace;
+- Supply Opportunity Workspace;
+- Transition Opportunity Workspace;
+- Innovation Opportunity Workspace.
+
+### AXIGNAL Watchlists and Tender Alerts
+
+User-selected observation scopes and independently consented notifications. They represent interests, not guaranteed suitability.
+
+### Public Intelligence Surfaces
+
+Governed Tender Hubs, Market Intelligence and selected Tender Detail pages admitted through the IndexabilityGate.
 
 ### AXIGNAL API
 
-Versioned access to authorised claims, procurement objects, aggregates, dossiers and metadata according to plan entitlements and source rights.
+Versioned access according to tenant, plan, rights, source, security and quota authority.
 
-## 8. Opportunity universes
+### Founder Operations
 
-The architecture MUST support multiple isolated universes with shared epistemic infrastructure:
+Private control plane for growth, customers, trials, billing, risk, sources, operations, settings and audit under separate founder authority.
 
-1. public contracts and non-dilutive capital;
-2. regulation-created business demand;
-3. business and technology opportunities;
-4. trade and supply chains;
-5. macroeconomic and sovereign context;
-6. real assets and property;
-7. private companies and digital assets;
-8. listed instruments and market data;
-9. emerging technology and scientific-commercial signals;
-10. other admitted opportunity systems.
+## 9. Required library architecture
 
-Each universe MUST define its own ontology extensions, source rights, freshness model, risk classification and acceptance gates.
+Seven foundational libraries support nine opportunity libraries as defined by Contract 31.
 
-## 9. Initial wedge and global procurement ambition
+No library may rely on a universal scraper or a false universal normaliser. Rights, identifiers, taxonomies, lifecycle and temporal semantics remain source-specific.
 
-The sole first commercial implementation wedge is **European Public Procurement Intelligence**, beginning with exact admitted profiles from the official TED source family.
+## 10. Global product requirement
 
-The architecture MAY later integrate official procurement systems from the United Kingdom, United States, Canada, Latin America, Asia, Oceania, Africa and subnational governments under Contract 28.
+The finished product requires O01–O09 and F01–F07 to meet their Contract 31 gates before public launch.
 
-A global source catalogue is a research inventory, not a support claim.
+This does not mean every possible world source must be integrated. It means:
 
-The required order is:
+- every required library exists as an accepted product capability;
+- declared global regions have admitted coverage;
+- gaps and restrictions are visible;
+- source-native semantics are preserved;
+- multinational E2E exists;
+- cross-library intelligence works;
+- rights and revocation are independently enforceable.
+
+Catalogue breadth is not coverage.
+
+## 11. Procurement source boundary
+
+Procurement is the first implementation and acquisition wedge. TED and other official portals are source libraries.
 
 ```text
-TED product admission
-→ authenticated tenant-scoped ResearchRun E2E
-→ qualified B2G workflow validation
-→ paid Design Partners
-→ controlled trial and pricing validation
-→ source-specific global technical probes
-→ independent source admission
-→ jurisdiction-selective commercial availability
+TED or another portal = source
+AXIGNAL = B2G opportunity-intelligence and operations product
 ```
 
-Listed-instrument recommendations, crypto execution, automated bid submission, guaranteed eligibility and uncalibrated procurement prediction MUST remain disabled.
+A source may be technically probed, admitted, restricted, suspended or rejected independently. No procurement source becomes mandatory product identity.
 
-## 10. Success definition
+## 12. Identity, trial and seats
 
-The leading product metric is:
+Candidate public identity is passkey-first with revocable server sessions.
 
-> **Meaningful professional decisions whose procurement research process starts or materially advances inside AXIGNAL.**
+The controlled trial belongs to a tenant or economic identity:
+
+- seven days from first admitted AI use;
+- two seats;
+- 1,000,000-token ceiling;
+- internal cost ceiling;
+- one concurrent ResearchRun;
+- no silent paid conversion.
+
+Candidate paid flat-tier seat capacities:
+
+- Professional: 3;
+- Team: 15.
+
+These are implementation candidates, not validated packaging.
+
+## 13. Commercial and acquisition boundary
+
+The B2G landing may use candidate pricing and trial terms only with their actual status visible.
+
+Organic acquisition may use:
+
+- admitted transactional procurement pages;
+- Market Intelligence;
+- Tender Alerts;
+- source-grounded reports;
+- LinkedIn distribution;
+- partnerships;
+- bounded paid acquisition after evidence.
+
+Programmatic SEO must not create low-value mass pages.
+
+Google Search Console data may inform diagnostics after API admission. A DNS token alone is not an API integration.
+
+A third-party MCP cannot be connected by registry presence alone.
+
+## 14. Success definition
+
+Leading product metric:
+
+> **Meaningful professional opportunity decisions and pursuits whose evidence and operational workflow materially advance inside AXIGNAL.**
 
 Supporting metrics:
 
-- qualified B2G weekly active organisations;
+- qualified B2G active organisations;
+- time to first evidence-linked opportunity shortlist;
 - time to first completed dossier;
-- opportunity-to-source drill-down rate;
-- claims and evidence inspected per qualified session;
-- saved or monitored investigation retention;
+- bid/no-bid decisions supported;
+- opportunity-to-source drill-down;
+- requirements and tasks completed;
 - lifecycle-change revisit rate;
 - paid conversion and annual commitment;
+- workspace retention;
+- outcome and learning capture;
 - source and jurisdiction coverage quality;
 - claim correction rate;
 - trust and methodology comprehension;
 - renewal and expansion revenue;
-- user-reported avoided pursuit or research effort.
+- avoided unsuitable pursuits or duplicated work.
 
-Raw page views, chat messages, generated text volume, notice count and catalogue country count MUST NOT be primary success metrics.
+Raw page views, AI messages, token volume, notice count and catalogue country count are not primary success metrics.
 
-## 11. Non-goals
+## 15. Non-goals
 
 Foundation AXIGNAL MUST NOT:
 
 - act as a broker, procurement agent or legal representative;
-- execute, route or submit bids;
-- certify supplier eligibility or legal compliance;
+- execute or submit bids without separately accepted authority;
+- certify eligibility or legal compliance;
 - promise awards, returns or margin;
-- claim deterministic economic outcomes;
 - publish untraceable AI-generated opportunities;
-- ingest publicly visible portals without rights review;
+- ingest public portals without rights review;
 - flatten incompatible taxonomies into false equivalence;
-- launch all procurement jurisdictions or opportunity universes simultaneously;
 - expose global coverage based only on a source catalogue;
-- allow pricing or trial access to override source rights;
-- allow models or reviewers to write canonical truth directly.
+- allow pricing or trial access to override rights;
+- allow models or reviewers to write canonical truth directly;
+- create millions of pages solely from filter combinations;
+- treat Search Console or AI citations as market validation;
+- treat a Founder Admin sidebar as operational completeness;
+- launch a partial product publicly.
 
-## 12. Validation posture
-
-This constitution represents the strongest current product hypothesis. It MUST be iterated through evidence.
-
-No part of this document authorises claims of product-market fit, validated pricing, trial conversion, predictive accuracy, worldwide coverage, source admission or regulatory immunity.
-
-Current maximum authority:
+## 16. Current authority
 
 ```text
-EUROPEAN PROCUREMENT WEDGE SELECTED
-/ B2G NARRATIVE SELECTED
-/ TED TECHNICAL EVIDENCE READY BUT NOT PRODUCT-ADMITTED
-/ PRICING AND TRIAL ARE HYPOTHESES
-/ GLOBAL SOURCES ARE CATALOGUE-ONLY
+PARENT PRODUCT              SELECTED
+B2G COMMERCIAL SHELL        SELECTED
+PUBLIC-CONTRACT WEDGE       SELECTED
+P00                         CANONICALLY ACCEPTED
+P01                         IN_PROGRESS
+P02–P24                     CANONICAL ACCEPTANCE BLOCKED
+P25-T01                     ENGINEERING E2E PASS / NOT PUBLIC
+P26-T01                     ENGINEERING E2E PASS / PHASE IN PROGRESS
+P27                         NOT STARTED
+PUBLIC LAUNCH               NO_GO
+PRICING                     CANDIDATE_ONLY
+GLOBAL SOURCES              NOT COMMERCIALLY ADMITTED
 ```
+
+No part of this constitution authorises claims of product-market fit, validated pricing, public trial availability, predictive accuracy, worldwide coverage, source admission, Search Console API access, MCP admission or public launch.

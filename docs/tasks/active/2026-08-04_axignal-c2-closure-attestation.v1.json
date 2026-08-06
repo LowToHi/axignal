@@ -1,0 +1,97 @@
+{
+  "schema": "axignal.c2.closure-attestation.v1",
+  "contract_id": "AX-GE2E-CLOSURE-EXECUTION-002",
+  "work_package": "C2_IDENTITY_SESSION_TENANT_SEATS_TRIAL",
+  "closure_decision": "PASS",
+  "output_marker": "AX_C2_IDENTITY_TENANT_TRIAL_PASS",
+  "source_ledger": {
+    "path": "docs/tasks/active/2026-08-04_axignal-c2-identity-tenant-trial.task.json",
+    "blob_sha": "2e110d15c5ad6e05d761b65507775a9c2b0cc3b3",
+    "task_id": "AX-GE2E-P03-T02",
+    "state_at_attestation": "EVIDENCE_READY"
+  },
+  "validated_predecessor": {
+    "exact_head_sha": "11d8c2435ff899d0276dd4f0d6c51da45775e0dc",
+    "matrix_status": "FIVE_ROOT_AUTHORITIES_COMPLETED_SUCCESS",
+    "failed_runs": 0,
+    "cancelled_runs_after_same_sha_rerun": 0,
+    "non_terminal_runs": 0,
+    "root_authorities": {
+      "core": 30943693385,
+      "runtime": 30943693350,
+      "domain": 30943693506,
+      "remote_pilot_operations": 30943693253,
+      "procurement_admission_rehearsal": 30943692976
+    }
+  },
+  "critical_exact_head_evidence": {
+    "p25_identity_trial_abuse_run": 30943693350,
+    "p25_identity_trial_abuse_artifact": 8906279065,
+    "p25_identity_trial_abuse_artifact_digest": "sha256:6a9a5e86dfd1ea4c18db7267a99596f22305d2e2aff72e346ab9dcf40aa54576",
+    "passwordless_signup": "PASS",
+    "opaque_http_only_session": "PASS",
+    "session_rotation": "PASS",
+    "session_revocation": "PASS",
+    "recovery_from_sessionless_browser": "PASS",
+    "recovery_code_one_time": "PASS",
+    "pre_recovery_sessions_revoked": "PASS",
+    "pre_recovery_authenticators_revoked": "PASS",
+    "replacement_passkey": "PASS",
+    "replacement_aal2_session": "PASS",
+    "tenant_and_trial_continuity": "PASS",
+    "organisation_membership_and_seats": "PASS",
+    "entitlement_runtime": "PASS",
+    "trial_activation_and_limits": "PASS",
+    "trial_expiry_read_only_retention": "PASS",
+    "deletion_purge_restore": "PASS",
+    "protected_routes": "PASS",
+    "p03_contract_and_rollback": "PASS",
+    "full_postgresql_migration_matrix": "PASS"
+  },
+  "bounded_corrections": [
+    {
+      "path": "tests/e2e/identity-passwordless.spec.ts",
+      "decision": "EXECUTE_RECOVERY_AND_AUTHENTICATOR_REPLACEMENT_WITH_TWO_BROWSER_CONTEXTS",
+      "production_runtime_changed": false,
+      "authority_boundary_weakened": false
+    },
+    {
+      "path": ".github/workflows/p25-t01-identity-trial-abuse-e2e.yml",
+      "decision": "VERIFY_NON_SENSITIVE_C2_RECOVERY_MARKER_AND_PRESERVE_P25_CONTRACT_NAMES",
+      "production_runtime_changed": false,
+      "authority_boundary_weakened": false
+    },
+    {
+      "path": "docs/security/P25-T01-identity-passwordless-trial-abuse-e2e-v0.1.md",
+      "decision": "FREEZE_RECOVERY_REVOCATION_AND_COMPOSE_EXISTING_AUTHORITIES",
+      "production_runtime_changed": false,
+      "authority_boundary_weakened": false
+    }
+  ],
+  "attestation_head_rule": {
+    "binding": "GITHUB_PULL_REQUEST_HEAD_SHA",
+    "effective_only_when": "THE_COMPLETE_PULL_REQUEST_WORKFLOW_MATRIX_FOR_THE_COMMIT_CONTAINING_THIS_ATTESTATION_IS_TERMINAL_SUCCESS",
+    "head_change_invalidates_prior_effective_marker": true,
+    "cancelled_or_non_terminal_root_authority_is_not_acceptance": true,
+    "retries_cannot_convert_a_MATERIAL_IDENTITY_OR_CROSS_TENANT_FAILURE_INTO_ACCEPTANCE": true
+  },
+  "preserved_boundaries": {
+    "second_identity_plane_created": false,
+    "browser_selected_tenant_or_entitlement_authorized": false,
+    "password_fallback_added_to_public_journey": false,
+    "public_signup_authorized": false,
+    "production_identity_provider_activation_authorized": false,
+    "stripe_live_activation_authorized": false,
+    "pr_169_merge_authorized": false,
+    "public_launch_authorized": false,
+    "commercial_activation_authorized": false,
+    "source_admission_authorized": false,
+    "autonomous_external_actions_authorized": false
+  },
+  "next_transition": {
+    "from": "C2_IDENTITY_SESSION_TENANT_SEATS_TRIAL",
+    "to": "C3_PERSISTENCE_MIGRATIONS_RESTORE",
+    "status": "AUTHORIZED_ONLY_AFTER_ATTESTATION_HEAD_MATRIX_PASS"
+  },
+  "created_at": "2026-08-04T19:51:00Z"
+}

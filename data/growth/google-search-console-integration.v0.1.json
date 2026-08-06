@@ -1,0 +1,98 @@
+{
+  "integration_id": "AX-GSC-INTEGRATION-001",
+  "version": "0.1.0",
+  "goal_id": "AXIGNAL-GOAL-001",
+  "governing_contract": "31",
+  "governing_adr": "ADR-016",
+  "domain": "axignal.com",
+  "property_candidate": "sc-domain:axignal.com",
+  "state": "DNS_VERIFICATION_USER_ATTESTED_API_UNPROVEN",
+  "public_launch_authorised": false,
+  "public_indexing_authorised": false,
+  "founder_import_authorised": false,
+  "verification": {
+    "method": "DNS_TXT",
+    "record": "google-site-verification=MSME8b9va1BRkZOAtEXp_zw0v5c1noDOpf3BrVJkIhA",
+    "evidence_source": "HUMAN_AUTHORITY_USER_PROVIDED",
+    "evidence_date": "2026-07-31",
+    "classification": "PUBLIC_DNS_VERIFICATION_MATERIAL_NOT_APPLICATION_SECRET",
+    "proves": [
+      "A Google Search Console verification token was declared as present for axignal.com"
+    ],
+    "does_not_prove": [
+      "The property identifier returned by the Google Search Console API",
+      "Current API access",
+      "Search Analytics data retrieval",
+      "URL Inspection access",
+      "Sitemap submission authority",
+      "Public indexing approval",
+      "Founder Admin authority"
+    ]
+  },
+  "official_api_admission": {
+    "state": "NOT_YET_PROVEN",
+    "required_evidence": [
+      "Official API capability or property-list response",
+      "Least-privilege credential identity",
+      "Successful read-only Search Analytics query",
+      "Rate-limit and error-handling evidence",
+      "Credential secret-reference evidence with no repository secret",
+      "Audit, revocation and kill-switch evidence",
+      "Privacy and retention disposition"
+    ],
+    "default_access": "READ_ONLY",
+    "write_operations_authorised": false
+  },
+  "mcp_candidate": {
+    "catalogue_url": "https://mcpservers.org/es/servers/ahonn/mcp-server-gsc",
+    "discovery_source": "HUMAN_AUTHORITY_USER_PROVIDED",
+    "state": "DISCOVERED_NOT_PRODUCT_ADMITTED",
+    "implementation_repository_verified": false,
+    "maintainer_verified": false,
+    "licence_verified": false,
+    "security_reviewed": false,
+    "connected_to_production": false,
+    "default_permission": "DENY",
+    "probe_permission_if_approved": "READ_ONLY_ALLOWLIST",
+    "allowed_tool_classes_candidate": [
+      "LIST_VERIFIED_PROPERTIES",
+      "READ_SEARCH_ANALYTICS",
+      "READ_INDEX_STATUS",
+      "READ_SITEMAP_STATUS"
+    ],
+    "denied_tool_classes": [
+      "ADD_SITE",
+      "DELETE_SITE",
+      "SUBMIT_SITEMAP",
+      "DELETE_SITEMAP",
+      "CHANGE_USERS_OR_PERMISSIONS",
+      "CHANGE_DNS",
+      "EXPOSE_CREDENTIALS",
+      "ARBITRARY_SHELL",
+      "ARBITRARY_BROWSER_AUTOMATION",
+      "MUTATE_FOUNDER_OS_WITHOUT_TYPED_AUTHORITY"
+    ],
+    "admission_requirements": [
+      "Exact implementation and release identity",
+      "Maintainer and licence review",
+      "Dependency and supply-chain review",
+      "Tool inventory and destructive-action classification",
+      "OAuth or service-account flow review",
+      "Secret isolation",
+      "Network and egress limits",
+      "Prompt-injection and tool-poisoning review",
+      "Explicit per-tool allowlist",
+      "Disposable-environment evidence",
+      "Audit and kill switch",
+      "Typed human approval"
+    ]
+  },
+  "truth_boundaries": [
+    "DNS verification does not equal API admission",
+    "Search Console data does not equal publication authority",
+    "MCP catalogue presence does not equal connector admission",
+    "MCP output does not equal canonical product truth",
+    "Search impressions do not equal qualified buyers",
+    "Clicks do not equal paid conversion"
+  ]
+}

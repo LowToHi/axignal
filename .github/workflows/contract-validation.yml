@@ -1,22 +1,47 @@
 name: Contract Validation
 
 on:
-  pull_request:
   push:
     branches:
       - main
-      - "agent/**"
-
+  workflow_call:
 permissions:
   contents: read
+
+env:
+  AXIGNAL_EXACT_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
 
 jobs:
   validate-contracts:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout exact branch head 1
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
 
+      - name: Prove exact-head checkout 1
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual_sha="$(git rev-parse HEAD)"
+          tree_sha="$(git rev-parse 'HEAD^{tree}')"
+          test "$actual_sha" = "$AXIGNAL_EXACT_SHA"
+          {
+            printf 'exact_head_sha=%s\n' "$actual_sha"
+            printf 'git_tree_sha=%s\n' "$tree_sha"
+          } | tee contract-validation-exact-head-1.txt
+
+      - name: Upload exact-head identity 1
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: contract-validation-exact-head-1-${{ env.AXIGNAL_EXACT_SHA }}
+          path: contract-validation-exact-head-1.txt
+          if-no-files-found: error
+          retention-days: 30
       - name: Set up Python
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
@@ -27,6 +52,10 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install jsonschema pyyaml openapi-spec-validator
 
+      - name: Verify incremental CI architecture
+        run: python scripts/ci/verify_ci_architecture.py
+      - name: Test incremental CI scope router
+        run: python scripts/ci/test_compute_workflow_scope.py
       - name: Validate canonical naming
         run: python scripts/validate_canonical_naming.py .
 
@@ -53,7 +82,9 @@ jobs:
           from pathlib import Path
           from jsonschema import Draft202012Validator
 
-          schema = json.loads(Path('schemas/task.schema.json').read_text(encoding='utf-8'))
+          schema = json.loads(
+              Path('schemas/task.schema.json').read_text(encoding='utf-8')
+          )
           validator = Draft202012Validator(schema)
           paths = [
               *sorted(Path('docs/tasks').glob('**/*.task.json')),
@@ -65,21 +96,40 @@ jobs:
           task_ids: list[str] = []
           for path in paths:
               instance = json.loads(path.read_text(encoding='utf-8'))
-              errors = sorted(validator.iter_errors(instance), key=lambda error: list(error.path))
-              assert not errors, f"{path}: {[error.message for error in errors]}"
+              errors = sorted(
+                  validator.iter_errors(instance),
+                  key=lambda error: list(error.path),
+              )
+              assert not errors, (
+                  f"{path}: {[error.message for error in errors]}"
+              )
               task_ids.append(instance['task_id'])
               print(f'PASS {path}: {instance["task_id"]}')
           registry = json.loads(
-              Path('data/programmes/global-e2e-task-registry.v1.4.json').read_text(encoding='utf-8')
+              Path(
+                  'data/programmes/global-e2e-task-registry.v1.4.json'
+              ).read_text(encoding='utf-8')
           )
           for shard in registry['shards']:
-              data = json.loads(Path(shard['path']).read_text(encoding='utf-8'))
+              data = json.loads(
+                  Path(shard['path']).read_text(encoding='utf-8')
+              )
               for instance in data['tasks']:
-                  errors = sorted(validator.iter_errors(instance), key=lambda error: list(error.path))
-                  assert not errors, f"{instance['task_id']}: {[error.message for error in errors]}"
+                  errors = sorted(
+                      validator.iter_errors(instance),
+                      key=lambda error: list(error.path),
+                  )
+                  assert not errors, (
+                      f"{instance['task_id']}: "
+                      f"{[error.message for error in errors]}"
+                  )
                   task_ids.append(instance['task_id'])
-                  print(f'PASS global registry: {instance["task_id"]}')
-          assert len(task_ids) == len(set(task_ids)), 'Duplicate typed task IDs across task locations'
+                  print(
+                      f'PASS global registry: {instance["task_id"]}'
+                  )
+          assert len(task_ids) == len(set(task_ids)), (
+              'Duplicate typed task IDs across task locations'
+          )
           PY
 
       - name: Validate v1.4 global programme
@@ -88,13 +138,221 @@ jobs:
       - name: Validate P01 research programme
         run: python scripts/verify_p01_research_program.py
 
+      - name: Validate P02 individual library contracts
+        run: python scripts/verify_p02_library_contracts.py
+
+      - name: Validate P02 ontology foundation
+        run: python scripts/verify_p02_ontology_foundation.py
+
+      - name: Rehearse byte-exact P02 rollback at frozen P02 head
+        env:
+          P02_ENGINEERING_HEAD: 1800d5e7944e49cb85f52abeb9c1ce51af666d08
+        run: |
+          set -euo pipefail
+          verification_dir="${RUNNER_TEMP}/axignal-p02-rollback"
+          rm -rf "${verification_dir}"
+          git worktree add --detach "${verification_dir}" "${P02_ENGINEERING_HEAD}"
+          trap 'git worktree remove --force "${verification_dir}" >/dev/null 2>&1 || true' EXIT
+          python "${verification_dir}/scripts/verify_p02_rollback.py"
+
+      - name: Validate P03 security, identity and rights
+        run: python scripts/verify_p03_security_identity_rights.py
+
+      - name: Rehearse byte-exact P03 rollback at frozen P03 head
+        env:
+          P03_ENGINEERING_HEAD: 3b950b1b111a0eb6e3b9b330cc15887db8699f3c
+        run: |
+          set -euo pipefail
+          verification_dir="${RUNNER_TEMP}/axignal-p03-rollback"
+          rm -rf "${verification_dir}"
+          git worktree add --detach "${verification_dir}" "${P03_ENGINEERING_HEAD}"
+          trap 'git worktree remove --force "${verification_dir}" >/dev/null 2>&1 || true' EXIT
+          python "${verification_dir}/scripts/verify_p03_rollback.py"
+
+      - name: Validate P04 Source Admission Factory and Connector SDK
+        run: python scripts/verify_p04_source_admission_factory.py
+
+      - name: Rehearse byte-exact P04 rollback at frozen P04 head
+        env:
+          P04_ENGINEERING_HEAD: 2977a6cd4056969313cf7356070eedf6f7d85ed0
+        run: |
+          set -euo pipefail
+          verification_dir="${RUNNER_TEMP}/axignal-p04-rollback"
+          rm -rf "${verification_dir}"
+          git worktree add --detach "${verification_dir}" "${P04_ENGINEERING_HEAD}"
+          trap 'git worktree remove --force "${verification_dir}" >/dev/null 2>&1 || true' EXIT
+          python "${verification_dir}/scripts/verify_p04_rollback.py"
+
+      - name: Validate P05 foundational libraries
+        run: python scripts/verify_p05_foundational_libraries.py
+
+      - name: Rehearse byte-exact P05 rollback at frozen P05 head
+        env:
+          P05_ENGINEERING_HEAD: 07de87e4ff79b19110394c8901db6a98e0be87b2
+        run: |
+          set -euo pipefail
+          verification_dir="${RUNNER_TEMP}/axignal-p05-rollback"
+          rm -rf "${verification_dir}"
+          git worktree add --detach "${verification_dir}" "${P05_ENGINEERING_HEAD}"
+          trap 'git worktree remove --force "${verification_dir}" >/dev/null 2>&1 || true' EXIT
+          python "${verification_dir}/scripts/verify_p05_rollback.py"
+
+      - name: Validate P06 multilingual and document intelligence
+        run: python scripts/verify_p06_multilingual_document_intelligence.py
+
+      - name: Rehearse byte-exact P06 rollback at frozen P06 head
+        env:
+          P06_ENGINEERING_HEAD: d6317f32caad4f916f1871c23753bacd36b4d9d6
+        run: |
+          set -euo pipefail
+          verification_dir="${RUNNER_TEMP}/axignal-p06-rollback"
+          rm -rf "${verification_dir}"
+          git worktree add --detach "${verification_dir}" "${P06_ENGINEERING_HEAD}"
+          trap 'git worktree remove --force "${verification_dir}" >/dev/null 2>&1 || true' EXIT
+          python "${verification_dir}/scripts/verify_p06_rollback.py"
+
+      - name: Validate P07 Opportunity Operations Core
+        run: python scripts/verify_p07_opportunity_operations_core.py
+
+      - name: Rehearse byte-exact P07 rollback at frozen P07 head
+        env:
+          P07_ENGINEERING_HEAD: e30f800cb284f1381c28c4ccbc116a8da4a9fe92
+        run: |
+          set -euo pipefail
+          verification_dir="${RUNNER_TEMP}/axignal-p07-rollback"
+          rm -rf "${verification_dir}"
+          git worktree add --detach "${verification_dir}" "${P07_ENGINEERING_HEAD}"
+          trap 'git worktree remove --force "${verification_dir}" >/dev/null 2>&1 || true' EXIT
+          python "${verification_dir}/scripts/verify_p07_rollback.py"
+
+      - name: Validate P08 Global Procurement Library and Bid Workspace
+        run: python scripts/verify_p08_global_procurement_bid_workspace.py
+
+      - name: Rehearse byte-exact P08 rollback at frozen P08 head
+        env:
+          P08_ENGINEERING_HEAD: 3e28e08a12d02701d4ab312edfbedc56fcd8bb59
+        run: |
+          set -euo pipefail
+          verification_dir="${RUNNER_TEMP}/axignal-p08-rollback"
+          rm -rf "${verification_dir}"
+          git worktree add --detach "${verification_dir}" "${P08_ENGINEERING_HEAD}"
+          trap 'git worktree remove --force "${verification_dir}" >/dev/null 2>&1 || true' EXIT
+          python "${verification_dir}/scripts/verify_p08_rollback.py"
+
+      - name: Validate P09 Grants Library and Application Workspace
+        run: python scripts/verify_p09_grants_application_workspace.py
+
+      - name: Rehearse byte-exact P09 rollback at frozen P09 head
+        env:
+          P09_ENGINEERING_HEAD: 841e068f0a8e86e6d89733d3958ecd43f0d7eca7
+        run: |
+          set -euo pipefail
+          verification_dir="${RUNNER_TEMP}/axignal-p09-rollback"
+          rm -rf "${verification_dir}"
+          git worktree add --detach "${verification_dir}" "${P09_ENGINEERING_HEAD}"
+          trap 'git worktree remove --force "${verification_dir}" >/dev/null 2>&1 || true' EXIT
+          python "${verification_dir}/scripts/verify_p09_rollback.py"
+
+      - name: Validate P10 Regulatory Library and Market Entry Workspace
+        run: python scripts/verify_p10_regulatory_market_entry_workspace.py
+
+      - name: Rehearse byte-exact P10 rollback at frozen P10 head
+        env:
+          P10_ENGINEERING_HEAD: 563acd353ba3a90d253d582b7c19f1554fd011b1
+        run: |
+          set -euo pipefail
+          verification_dir="${RUNNER_TEMP}/axignal-p10-rollback"
+          rm -rf "${verification_dir}"
+          git worktree add --detach "${verification_dir}" "${P10_ENGINEERING_HEAD}"
+          trap 'git worktree remove --force "${verification_dir}" >/dev/null 2>&1 || true' EXIT
+          python "${verification_dir}/scripts/verify_p10_rollback.py"
+
+      - name: Validate P11 Infrastructure Library and Project Pursuit Workspace
+        run: python scripts/verify_p11_infrastructure_project_pursuit_workspace.py
+
+      - name: Rehearse byte-exact P11 rollback at frozen P11 head
+        env:
+          P11_ENGINEERING_HEAD: 315d88731939c1904fcca7be4e5b58d4615ab423
+        run: |
+          set -euo pipefail
+          verification_dir="${RUNNER_TEMP}/axignal-p11-rollback"
+          rm -rf "${verification_dir}"
+          git worktree add --detach "${verification_dir}" "${P11_ENGINEERING_HEAD}"
+          trap 'git worktree remove --force "${verification_dir}" >/dev/null 2>&1 || true' EXIT
+          python "${verification_dir}/scripts/verify_p11_rollback.py"
+
+      - name: Validate P12 Corporate and Ownership Library and Account Workspace
+        run: python scripts/verify_p12_corporate_ownership_account_workspace.py
+
+      - name: Rehearse byte-exact P12 rollback at frozen P12 head
+        env:
+          P12_ENGINEERING_HEAD: 96b89d8e7bdd7712dae476eeb97e1240c7846f22
+        run: |
+          set -euo pipefail
+          verification_dir="${RUNNER_TEMP}/axignal-p12-rollback"
+          rm -rf "${verification_dir}"
+          git worktree add --detach "${verification_dir}" "${P12_ENGINEERING_HEAD}"
+          trap 'git worktree remove --force "${verification_dir}" >/dev/null 2>&1 || true' EXIT
+          python "${verification_dir}/scripts/verify_p12_rollback.py"
+
+      - name: Validate P13 Sovereign Macro Library and Strategy Workspace
+        run: python scripts/verify_p13_sovereign_macro_strategy_workspace.py
+
+      - name: Rehearse byte-exact P13 rollback at frozen P13 head
+        env:
+          P13_ENGINEERING_HEAD: 0089864b1a3f3d88a0980ecaf4e6dd129299e021
+        run: |
+          set -euo pipefail
+          verification_dir="${RUNNER_TEMP}/axignal-p13-rollback"
+          rm -rf "${verification_dir}"
+          git worktree add --detach "${verification_dir}" "${P13_ENGINEERING_HEAD}"
+          trap 'git worktree remove --force "${verification_dir}" >/dev/null 2>&1 || true' EXIT
+          python "${verification_dir}/scripts/verify_p13_rollback.py"
+
+      - name: Validate P14 Trade and Supply Chain Library and Workspace
+        run: python scripts/verify_p14_trade_supply_chain_workspace.py
+
+      - name: Rehearse byte-exact P14 rollback at frozen P14 head
+        env:
+          P14_ENGINEERING_HEAD: f0ae67f8d38afbdb36e1b2e3d56e955b173fbe8d
+        run: |
+          set -euo pipefail
+          verification_dir="${RUNNER_TEMP}/axignal-p14-rollback"
+          rm -rf "${verification_dir}"
+          git worktree add --detach "${verification_dir}" "${P14_ENGINEERING_HEAD}"
+          trap 'git worktree remove --force "${verification_dir}" >/dev/null 2>&1 || true' EXIT
+          python "${verification_dir}/scripts/verify_p14_rollback.py"
+
+      - name: Validate P15 Energy and Climate Transition Workspace
+        run: python scripts/verify_p15_energy_climate_transition_workspace.py
+
+      - name: Rehearse byte-exact P15 rollback at frozen P15 head
+        env:
+          P15_ENGINEERING_HEAD: ef0d252eecde429d7ff30dbbce82b75ab1a7aac3
+        run: |
+          set -euo pipefail
+          verification_dir="${RUNNER_TEMP}/axignal-p15-rollback"
+          rm -rf "${verification_dir}"
+          git worktree add --detach "${verification_dir}" "${P15_ENGINEERING_HEAD}"
+          trap 'git worktree remove --force "${verification_dir}" >/dev/null 2>&1 || true' EXIT
+          python "${verification_dir}/scripts/verify_p15_rollback.py"
+
+      - name: Validate P16 Innovation and IP Workspace
+        run: python scripts/verify_p16_innovation_ip_workspace.py
+
+      - name: Rehearse byte-exact P16 rollback
+        run: python scripts/verify_p16_rollback.py
+
       - name: Validate modular skill registries
         run: |
           python - <<'PY'
           from pathlib import Path
           import yaml
 
-          paths = [Path('skills/registry.yaml'), *sorted(Path('skills').glob('*.registry.yaml'))]
+          paths = [
+              Path('skills/registry.yaml'),
+              *sorted(Path('skills').glob('*.registry.yaml')),
+          ]
           all_ids: list[str] = []
           for path in paths:
               data = yaml.safe_load(path.read_text(encoding='utf-8'))
@@ -102,12 +360,18 @@ jobs:
               assert data['canonical_brand'] == 'AXIGNAL', path
               assert data['canonical_domain'] == 'axignal.com', path
               ids = [item['skill_id'] for item in data['skills']]
-              assert len(ids) == len(set(ids)), f'Duplicate skill IDs inside {path}'
+              assert len(ids) == len(set(ids)), (
+                  f'Duplicate skill IDs inside {path}'
+              )
               all_ids.extend(ids)
               print(f'PASS {path}: {len(ids)} skills')
 
-          assert len(all_ids) == len(set(all_ids)), 'Duplicate skill IDs across registries'
-          print(f'PASS combined registry: {len(all_ids)} unique skills')
+          assert len(all_ids) == len(set(all_ids)), (
+              'Duplicate skill IDs across registries'
+          )
+          print(
+              f'PASS combined registry: {len(all_ids)} unique skills'
+          )
           PY
 
       - name: Validate OpenAPI

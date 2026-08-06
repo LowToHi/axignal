@@ -13,9 +13,19 @@ async function login(page: import("@playwright/test").Page) {
   if (await email.isVisible().catch(() => false)) {
     await email.fill("pilot@example.test");
     await page.getByLabel("Contraseña").fill("pilot-password");
+    const loginResponse = page.waitForResponse(
+      (response) => response.url().includes("/api/auth/login")
+    );
     await page.getByRole("button", { name: "Entrar" }).click();
+    const response = await loginResponse;
+    if (!response.ok()) {
+      throw new Error(
+        `Login rejected (${response.status()}): ${await response.text()}`
+      );
+    }
+    await expect(email).toBeHidden();
   }
-  await expect(page.locator("main.shell")).toBeVisible();
+  await expect(page.getByRole("button", { name: /PLAN ·/ })).toBeVisible();
 }
 
 async function emitProviderEvent(
@@ -57,7 +67,7 @@ test("executes the authenticated commercial shell without external Stripe", asyn
   await expect(page.getByText(/Cargar esta página o volver a AXIGNAL no concede acceso/)).toBeVisible();
 
   await page.getByRole("link", { name: "Cancelar y volver" }).click();
-  await expect(page.locator("main.shell")).toBeVisible();
+  await expect(page.locator("main").first()).toBeVisible();
   await page.getByRole("button", { name: /PLAN ·/ }).click();
   await expect(page.getByText(/PAYMENT_CONFIRMATION_PENDING/)).toBeVisible();
   await expect(page.getByText(/acceso NO_ENTITLEMENT/)).toBeVisible();
@@ -65,7 +75,7 @@ test("executes the authenticated commercial shell without external Stripe", asyn
   await page.goto(checkoutUrl);
   await page.getByRole("button", { name: "Confirmar pago de prueba" }).click();
   await expect(page).toHaveURL(/billing=success/);
-  await expect(page.locator("main.shell")).toBeVisible();
+  await expect(page.locator("main").first()).toBeVisible();
   await expect(page.getByText("ACTIVE", { exact: true }).first()).toBeVisible();
   await expect(page.getByText(/Plan: Professional · acceso ACTIVE/)).toBeVisible();
   await expect(page.getByText(/IA mensual sin cuota de tokens: sí/)).toBeVisible();

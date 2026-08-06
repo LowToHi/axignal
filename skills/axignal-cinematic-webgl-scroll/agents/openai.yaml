@@ -1,0 +1,4 @@
+interface:
+  display_name: "AXIGNAL Cinematic WebGL"
+  short_description: "WebGL texture, LOD and sharpness gates"
+  default_prompt: "Use $axignal-cinematic-webgl-scroll to audit or upgrade the AXIGNAL Globe rendering pipeline without duplicating GSAP choreography."

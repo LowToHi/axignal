@@ -1,120 +1,348 @@
 # 23 — Acquisition Analytics and Experimentation Contract
 
-Version: `0.1.0-candidate`
-Status: `NORMATIVE CANDIDATE / VALIDATION REQUIRED`
+Version: `0.2.0`
+Status: `NORMATIVE CANDIDATE / PRODUCTION DATA AND P27 VALIDATION REQUIRED`
 Goal ID: `AXIGNAL-GOAL-001`
+Governing programme: `Contract 31 / ADR-016`
+Primary phases: `P23`, `P26`, `P27`
 
 ## 1. Purpose
 
-This contract governs how AXIGNAL measures acquisition, conversion, activation, retention and expansion, and how it runs experiments without sacrificing truthfulness, privacy, accessibility or the product goal.
+This contract governs how AXIGNAL measures acquisition, consent, identity, trial activation, completed B2G value, paid conversion, retention and expansion, and how it runs experiments without sacrificing truthfulness, privacy, accessibility, source rights or product authority.
 
-Analytics MUST connect marketing activity to delivered product value. Optimising clicks while users fail to complete a useful investigation is not success.
+Optimising impressions, clicks, citations, alerts or signups while users fail to complete useful B2G work is not success.
 
-## 2. Canonical funnel
-
-AXIGNAL MUST measure the following funnel where applicable:
+## 2. Canonical acquisition funnel
 
 ```text
-impression or referral
-→ qualified landing visit
-→ product proof interaction
-→ pricing or use-case engagement
-→ request access / signup / demo
-→ qualification
-→ attended meeting or trial start
-→ first completed investigation
-→ first inspected claim and source
-→ repeat investigation
-→ paid conversion
-→ retention
+search impression, AI citation, referral or outreach
+→ qualified public page or landing visit
+→ source and methodology engagement
+→ Tender Alert, sample investigation or trial CTA
+→ consent or passwordless signup
+→ tenant and trial-risk decision
+→ trial READY
+→ first admitted AI request starts trial
+→ qualified opportunity shortlist
+→ evidence and source inspection
+→ bid/no-bid or pursuit workflow materially advanced
+→ explicit paid package
+→ repeated use
+→ retention or renewal
 → expansion or referral
 ```
 
-Each stage MUST have an explicit event definition and denominator.
+Every stage requires an explicit event, denominator and authority source.
 
-## 3. Primary metrics
+## 3. Truth boundaries
 
-Candidate primary metrics include:
+```text
+impression ≠ visit
+visit ≠ qualified buyer
+click ≠ consent
+Tender Alert ≠ account
+account ≠ trial
+trial READY ≠ trial started
+trial started ≠ customer value
+subscription event ≠ settled payment
+paid invoice ≠ completed value
+AI citation ≠ endorsement
+Search Console position ≠ causal acquisition
+CRM stage ≠ entitlement
+```
 
-- qualified-visit rate;
-- hero CTA rate;
-- product-demo engagement rate;
-- pricing-view rate;
-- request-access or signup completion;
-- qualified-meeting rate;
-- show rate;
-- trial activation rate;
-- first-investigation completion rate;
-- time to first inspected claim and source;
-- opportunity-to-evidence completion;
-- repeat-investigation rate;
-- paid conversion;
-- retention by cohort;
-- expansion by seats, universes or usage;
-- gross margin and acquisition payback.
+## 4. Primary metrics
 
-Traffic volume alone MUST NOT be treated as validated demand.
+Candidate primary metrics:
 
-## 4. Event taxonomy
+- admitted-page impression and click rate;
+- qualified landing-visit rate;
+- opportunity or methodology engagement;
+- Tender Alert request and confirmed-opt-in rate;
+- passwordless signup completion;
+- risk-decision distribution and false-positive rate;
+- trial READY rate;
+- first admitted AI-use rate;
+- time to first relevant shortlist;
+- first evidence/source inspection;
+- first completed dossier;
+- first bid/no-bid or pursuit advancement;
+- trial-to-paid conversion;
+- paid weekly active organisations;
+- retention and renewal;
+- expansion by seats, package, library or jurisdiction;
+- contribution margin;
+- acquisition payback;
+- support burden.
 
-Events MUST be versioned and typed. Candidate event families:
+Traffic, page count, indexed URLs, token volume and AI citations are not primary success metrics.
 
-- `acquisition.page_viewed`;
-- `acquisition.cta_clicked`;
-- `acquisition.product_demo_started`;
-- `acquisition.product_demo_completed`;
-- `acquisition.pricing_viewed`;
-- `acquisition.plan_compared`;
-- `acquisition.faq_opened`;
-- `acquisition.trust_content_viewed`;
-- `lead.form_started`;
-- `lead.form_submitted`;
-- `lead.qualified`;
-- `sales.meeting_booked`;
-- `sales.meeting_attended`;
-- `product.investigation_started`;
-- `product.investigation_completed`;
+## 5. Event taxonomy
+
+Events are versioned and typed. Candidate families:
+
+### Organic discovery
+
+- `organic.page_candidate_evaluated`;
+- `organic.snapshot_published`;
+- `organic.snapshot_expired`;
+- `organic.page_viewed`;
+- `organic.source_opened`;
+- `organic.methodology_opened`;
+- `organic.ai_citation_observed`;
+- `organic.search_console_imported`.
+
+### Tender Alerts and CRM
+
+- `alert.requested`;
+- `alert.delivery_succeeded`;
+- `alert.delivery_failed`;
+- `alert.confirmed`;
+- `alert.unsubscribed`;
+- `crm.contact_created`;
+- `crm.lifecycle_changed`;
+- `crm.consent_changed`.
+
+### Identity and trial
+
+- `identity.signup_started`;
+- `identity.email_verified`;
+- `identity.passkey_bound`;
+- `identity.session_started`;
+- `trial.risk_evaluated`;
+- `trial.ready`;
+- `trial.activated`;
+- `trial.step_up_required`;
+- `trial.reused`;
+- `trial.budget_exhausted`;
+- `trial.expired`.
+
+### Product value
+
+- `product.research_run_started`;
+- `product.research_run_completed`;
+- `product.opportunity_shortlisted`;
 - `product.claim_inspected`;
 - `product.source_inspected`;
+- `product.dossier_completed`;
+- `product.bid_decision_recorded`;
+- `product.pursuit_created`;
+- `product.requirement_completed`;
+- `product.outcome_recorded`.
+
+### Billing and retention
+
 - `billing.checkout_started`;
-- `billing.subscription_started`;
+- `billing.provider_event_verified`;
+- `billing.invoice_settled`;
+- `billing.entitlement_reconciled`;
 - `billing.subscription_changed`;
-- `billing.subscription_cancelled`.
+- `billing.subscription_cancelled`;
+- `billing.refund_recorded`;
+- `billing.dispute_recorded`;
+- `retention.renewed`;
+- `expansion.seat_or_package_added`.
 
-Every event SHOULD include only fields required for analysis and operations.
+Events must not fabricate provider, identity, trial, publication or product authority.
 
-## 5. Identity and stitching
+## 6. Identity and stitching
 
-Anonymous, authenticated user and organisation identifiers MUST remain purpose-limited.
+The system distinguishes:
 
-Identity stitching MUST NOT use undisclosed fingerprinting or combine unrelated data sources merely to increase attribution accuracy.
-
-The system MUST distinguish:
-
-- anonymous session;
-- consented marketing identity;
-- product user;
+- anonymous browser session;
+- consented Tender Alert contact;
+- CRM contact;
+- verified identity;
 - organisation member;
+- trial tenant;
 - billing customer;
 - aggregate reporting cohort.
 
-## 6. Attribution
+Identity stitching must not use undisclosed invasive fingerprinting or combine unrelated data merely to improve attribution.
 
-AXIGNAL MAY record:
+HMAC or pseudonymous identifiers remain personal-data risk and require purpose, access and retention controls.
+
+## 7. Search Console evidence
+
+Google Search Console may contribute observed search-performance evidence after official API admission.
+
+Candidate dimensions:
+
+- query;
+- page;
+- country;
+- device;
+- date;
+- search appearance where available.
+
+Candidate metrics:
+
+- clicks;
+- impressions;
+- CTR;
+- average position.
+
+Requirements:
+
+- least-privilege API identity;
+- secret reference only;
+- bounded date range and row limits;
+- import timestamp and property identity;
+- data-quality state;
+- rate-limit handling;
+- audit;
+- retention;
+- revocation and kill switch.
+
+The provided DNS TXT token is verification evidence only. It is not a Search Analytics import.
+
+Search Console data cannot:
+
+- set a page to `INDEXABLE`;
+- publish or unpublish a page;
+- prove buyer quality;
+- grant a trial;
+- establish revenue causality;
+- authorise launch.
+
+## 8. MCP analytics boundary
+
+Any Search Console MCP is an external connector and tool authority.
+
+Before use, it must pass:
+
+- exact implementation and release identity;
+- maintainer and licence review;
+- dependency and supply-chain review;
+- credential and Google-scope review;
+- read/write/destructive tool classification;
+- deny-by-default allowlist;
+- prompt-injection and output-trust review;
+- audit, revocation and kill switch.
+
+MCP output is external evidence. It is not analytics authority, canonical truth or permission to mutate Search Console.
+
+## 9. Attribution
+
+AXIGNAL may record:
 
 - referrer;
-- campaign and UTM values;
-- landing variant;
-- content or research asset;
+- UTM values;
+- landing or public snapshot version;
+- content asset;
+- query/page performance from admitted Search Console imports;
 - partner or referral code;
-- first-touch and last-touch candidate attribution;
-- self-reported discovery source.
+- first- and last-touch estimates;
+- self-reported source;
+- observed AI citation.
 
-Attribution models are estimates. Reports MUST NOT present them as causal truth without controlled evidence.
+Attribution is an estimate. No report may present it as causal truth without controlled evidence.
 
-## 7. Experiment registry
+## 10. Organic SEO measurement
 
-Every experiment MUST be registered before exposure with:
+Organic reporting must separate:
+
+```text
+page candidate
+indexability decision
+published snapshot
+sitemap inclusion
+crawl observation
+index observation
+impression
+click
+qualified visit
+conversion
+completed value
+revenue
+```
+
+A page-volume increase is not a positive result unless quality, qualified activation and economics remain healthy.
+
+Guardrails:
+
+- thin-page rate;
+- duplicate or cannibalising pages;
+- stale snapshots;
+- crawl waste;
+- source-right incidents;
+- misleading structured data;
+- low-quality or unqualified traffic;
+- conversion and product-value degradation.
+
+## 11. AI citation measurement
+
+Citation events preserve:
+
+- provider;
+- answer surface;
+- cited URL;
+- protected query evidence;
+- observation source;
+- observation time;
+- snapshot version;
+- actor or import process.
+
+Reports must distinguish:
+
+- citation observed;
+- click or referral observed;
+- signup attributed;
+- trial activated;
+- value completed;
+- payment settled.
+
+Citation count alone does not justify investment.
+
+## 12. Tender Alert measurement
+
+Tender Alert metrics include:
+
+- request rate;
+- delivery success;
+- confirmation rate;
+- unsubscribe and complaint rate;
+- alert open and click under applicable consent;
+- return to admitted opportunity pages;
+- later identity creation;
+- later trial and paid conversion.
+
+The system must preserve:
+
+```text
+alert consent
+≠ marketing consent
+≠ account identity
+≠ trial eligibility
+```
+
+## 13. CRM boundary
+
+The CRM may record:
+
+- source;
+- consent state;
+- declared company and role;
+- target market or sector;
+- lifecycle stage;
+- lead score;
+- owner;
+- next action;
+- commercial outcome;
+- retention or deletion state.
+
+CRM automation cannot overwrite:
+
+- identity;
+- risk decision;
+- trial grant;
+- paid entitlement;
+- source or claim state;
+- provider billing state.
+
+## 14. Experiment registry
+
+Every experiment is registered before exposure with:
 
 - stable ID;
 - hypothesis;
@@ -122,209 +350,142 @@ Every experiment MUST be registered before exposure with:
 - affected funnel stage;
 - target population;
 - eligibility and exclusions;
+- exact copy, price, package, public-page or onboarding version;
 - primary metric;
-- guardrail metrics;
-- sample or stopping rule;
-- start and end conditions;
-- variant assignment method;
-- privacy and accessibility review;
+- guardrails;
+- stopping rule;
+- assignment method;
+- privacy, accessibility, rights and security review;
 - rollback;
-- decision outcome.
+- decision.
 
 Post-hoc metric selection is prohibited.
 
-## 8. Permitted experiment domains
+## 15. Permitted experiment domains
 
-Candidate experiments MAY test:
+Candidate experiments may test:
 
-- value-proposition language;
+- B2G value-proposition wording;
 - hero hierarchy;
-- faithful product-demo framing;
-- CTA wording and commitment level;
-- use-case routing;
-- pricing presentation;
+- faithful product proof;
+- CTA commitment level;
+- Tender Alert framing;
+- public-page layout and content depth;
+- pricing presentation without changing provider authority;
 - annual versus monthly explanation;
-- FAQ ordering;
-- methodology and Trust Center placement;
+- FAQ and methodology placement;
 - form length;
-- onboarding sequence;
-- sample-investigation selection;
-- content and acquisition channels.
+- onboarding order;
+- sample investigation;
+- qualified acquisition channels.
 
-## 9. Prohibited experiments
+## 16. Prohibited experiments
 
-Experiments MUST NOT:
+Experiments must not:
 
-- fabricate urgency, scarcity or social proof;
-- hide prices, limits or cancellation;
-- weaken disclosure of inference, prediction or uncertainty;
-- conceal Knowledge Tides or privacy controls;
+- fabricate urgency, scarcity, proof or citations;
+- hide prices, limits, cancellation or source coverage;
+- weaken evidence or uncertainty disclosure;
 - discriminate using sensitive characteristics;
 - intentionally reduce accessibility;
-- expose users to materially different contractual terms without authority;
-- misrepresent unavailable functionality;
-- use dark patterns to increase conversion;
-- optimise investment-action urgency.
+- change contractual terms without authority;
+- generate thin SEO pages;
+- expose users to an unadmitted source;
+- alter trial eligibility or abuse policy from the browser;
+- change IndexabilityGate thresholds without typed authority;
+- enable public indexing, signup or billing;
+- install or widen an MCP.
 
-## 10. Guardrail metrics
+## 17. Guardrail metrics
 
-Each conversion experiment MUST monitor relevant guardrails such as:
+Relevant guardrails include:
 
-- comprehension of AXIGNAL's purpose;
-- confusion with personalised advice or trading;
-- privacy-control discovery;
+- comprehension of B2G purpose;
+- confusion with guarantee, legal advice or autonomous bidding;
+- privacy and consent understanding;
 - accessibility failures;
-- page performance;
-- form errors;
+- performance;
+- form and passkey errors;
 - unqualified lead rate;
-- cancellation or refund rate;
-- first-investigation completion;
+- abuse false positives;
+- refund and dispute rate;
+- first-value completion;
 - support burden;
-- customer trust feedback.
+- trust feedback;
+- source-right or coverage incidents;
+- thin-page and crawl-waste rates.
 
-A conversion gain with material guardrail degradation MUST be rejected.
+A conversion gain with material guardrail degradation is rejected.
 
-## 11. Segmentation
+## 18. Segmentation and privacy
 
-Permitted analytical segments MAY include:
+Permitted segments may include:
 
 - locale;
+- country;
 - acquisition source;
-- use case;
+- public page class;
+- sector;
+- B2G role;
 - organisation type;
-- plan;
-- device class;
-- new versus returning;
-- product activation state.
+- device;
+- trial and product state;
+- candidate package.
 
-Segments MUST have sufficient population and privacy protection. Small or re-identifiable groups MUST be suppressed or aggregated.
+Small or re-identifiable groups are suppressed or aggregated. Search queries and company scope may reveal sensitive intent and require minimisation and access control.
 
-## 12. Knowledge Tides separation
+## 19. Data quality
 
-Marketing analytics, product usage analytics and Knowledge Tides MUST remain separate datasets and purposes.
-
-A marketing conversion event MUST NOT become an economic claim. A product query MAY contribute to a privacy-protected aggregate Knowledge Tide only under Contract 15 and applicable controls.
-
-## 13. CRM and lead operations
-
-Lead routing MAY integrate with a CRM and scheduling system.
-
-The system MUST record:
-
-- source and consent state;
-- requested use case;
-- organisation where voluntarily supplied;
-- lifecycle stage;
-- owner or queue;
-- next action;
-- commercial outcome;
-- lawful retention or deletion state.
-
-CRM automation MUST NOT overwrite canonical product claims or research state.
-
-## 14. Automation
-
-Permitted automation MAY include:
-
-- form confirmation;
-- meeting routing;
-- lead scoring based on declared business-fit criteria;
-- reminder and follow-up sequences;
-- trial onboarding;
-- inactivity or activation nudges;
-- sales and customer-success handoff.
-
-Automation MUST be frequency-limited, auditable, stoppable and compliant with communication preferences.
-
-## 15. Statistical discipline
-
-Experiment decisions MUST consider:
-
-- sample size;
-- exposure balance;
-- novelty effects;
-- repeated measurement;
-- multiple comparisons;
-- seasonality and channel mix;
-- practical effect size;
-- confidence or uncertainty;
-- guardrail outcomes.
-
-AXIGNAL SHOULD prefer sequential or Bayesian methods only when the method, stopping criteria and interpretation are documented. Statistical significance alone is insufficient for rollout.
-
-## 16. Qualitative evidence
-
-Quantitative analytics MUST be complemented by:
-
-- moderated usability sessions;
-- sales-call objection coding;
-- onboarding observation;
-- lost-deal reasons;
-- support themes;
-- design-partner interviews.
-
-Qualitative evidence MUST be recorded without treating individual comments as population-level truth.
-
-## 17. Data quality
-
-Analytics pipelines MUST detect:
+Pipelines must detect:
 
 - duplicate events;
-- missing identifiers;
-- impossible orderings;
-- bot and internal traffic;
+- bots and internal traffic;
+- impossible event order;
+- missing or stale snapshot versions;
+- consent mismatch;
 - clock drift;
-- schema-version mismatch;
-- delayed delivery;
-- experiment-assignment contamination;
-- consent-state inconsistency.
+- schema mismatch;
+- delayed imports;
+- Search Console partial rows or sampling limitations;
+- experiment contamination;
+- CRM/provider/identity state mismatch.
 
-Reports MUST display known data-quality limitations.
+Reports display current data-quality limitations.
 
-## 18. Privacy and consent
+## 20. Statistical and qualitative discipline
 
-Analytics collection MUST comply with Contract 06.
+Experiment decisions consider sample size, exposure balance, novelty, repeated measurement, multiple comparisons, seasonality, channel mix, practical effect size, uncertainty and guardrails.
 
-Requirements include:
+Quantitative evidence is complemented by:
 
-- purpose limitation;
-- minimisation;
-- consent or other valid basis where applicable;
-- locale-aware cookie and tracking controls;
-- deletion and access handling;
-- processor inventory;
-- retention limits;
-- no advertising disclosure that contradicts actual data use.
+- buyer interviews;
+- comprehension tests;
+- onboarding observation;
+- sales objections;
+- lost-deal reasons;
+- support themes;
+- private-acceptance interviews.
 
-## 19. Performance
+Individual comments are not population truth.
 
-Analytics and experimentation code MUST NOT materially degrade:
-
-- Core Web Vitals;
-- interaction responsiveness;
-- accessibility;
-- product-demo loading;
-- checkout reliability.
-
-Non-essential analytics SHOULD load after critical content and respect consent state.
-
-## 20. Channel validation and reinvestment
+## 21. Channel reinvestment
 
 A channel is eligible for scaled reinvestment only when evidence supports:
 
 - qualified traffic;
-- conversion beyond the landing page;
-- first-investigation activation;
+- completed consent or signup;
+- trial activation;
+- completed B2G value;
 - paid conversion or credible pipeline;
-- acceptable acquisition cost;
-- acceptable payback and margin;
-- low fraud and low refund risk.
+- acceptable CAC, payback and contribution margin;
+- low fraud, complaint and refund risk;
+- support capacity.
 
-Budget MUST NOT be scaled solely because top-of-funnel metrics are strong.
+Search impressions, rankings, citations or alert subscribers alone do not justify scaling.
 
-## 21. Decision states
+## 22. Decision states
 
-Each experiment MUST end with one state:
+Every experiment ends with:
 
 - `SHIP`;
 - `ITERATE`;
@@ -333,19 +494,36 @@ Each experiment MUST end with one state:
 - `STOPPED_FOR_GUARDRAIL`;
 - `INVALID_DATA`.
 
-Results and rejected variants MUST remain auditable.
+Results and rejected variants remain auditable.
 
-## 22. Acceptance gate
+## 23. Acceptance gate
 
-This contract advances when:
+This contract advances only when:
 
-1. the funnel and event taxonomy are implemented and documented;
-2. acquisition is connected to first-investigation value;
-3. experiment assignment and exposure are reproducible;
-4. privacy and consent behaviour pass review;
-5. guardrail metrics prevent harmful optimisation;
-6. CRM and automations are auditable and stoppable;
-7. attribution limitations are explicit;
-8. data quality is monitored;
-9. channel reinvestment follows measured economics;
-10. no experiment can silently weaken product truth or accessibility.
+1. events connect acquisition to completed product value;
+2. identity, CRM, trial, billing and product authority remain distinct;
+3. consent and deletion pass;
+4. Search Console API evidence is admitted or explicitly excluded;
+5. every connected MCP passes admission;
+6. organic page lifecycle is measured without page-volume incentives;
+7. AI citations are measured as observations only;
+8. experiment assignment is reproducible;
+9. guardrails prevent harmful optimisation;
+10. data quality is visible;
+11. reinvestment follows measured economics;
+12. P27 accepts the exact final head.
+
+## 24. Current authority
+
+```text
+P26 ORGANIC EVENT FOUNDATION      ENGINEERING PASS
+TENDER ALERT CONSENT FOUNDATION   ENGINEERING PASS
+CRM FOUNDATION                    ENGINEERING PASS
+AI CITATION LEDGER                ENGINEERING PASS
+SEARCH CONSOLE DNS                USER-ATTESTED EVIDENCE
+SEARCH CONSOLE API IMPORT         NOT PROVEN
+GSC MCP                           NOT ADMITTED
+PUBLIC ANALYTICS ACTIVATION       BLOCKED
+CHANNEL SCALE                     NOT AUTHORISED
+PUBLIC LAUNCH                     NO_GO
+```

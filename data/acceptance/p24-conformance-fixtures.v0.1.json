@@ -1,0 +1,29 @@
+{
+  "task_id": "AX-GE2E-P24-T01",
+  "fixtures": [
+    {"fixture_id":"P24-FX-001","category":"upstream","expected_decision":"PASS_ENGINEERING_ONLY","launch_mode":"NO_GO","real_evidence":false,"paid_customer":false,"human_launch_authority":false,"evidence_preserved":true},
+    {"fixture_id":"P24-FX-002","category":"global_journey","expected_decision":"PASS_ENGINEERING_ONLY","launch_mode":"NO_GO","real_evidence":false,"paid_customer":false,"human_launch_authority":false,"evidence_preserved":true},
+    {"fixture_id":"P24-FX-003","category":"sandbox_payment","expected_decision":"PASS_ENGINEERING_ONLY","launch_mode":"NO_GO","real_evidence":false,"paid_customer":false,"human_launch_authority":false,"evidence_preserved":true},
+    {"fixture_id":"P24-FX-004","category":"live_payment","expected_decision":"PASS_ENGINEERING_ONLY","launch_mode":"NO_GO","real_evidence":false,"paid_customer":false,"human_launch_authority":false,"evidence_preserved":true},
+    {"fixture_id":"P24-FX-005","category":"paid_customer","expected_decision":"PASS_ENGINEERING_ONLY","launch_mode":"NO_GO","real_evidence":false,"paid_customer":false,"human_launch_authority":false,"evidence_preserved":true},
+    {"fixture_id":"P24-FX-006","category":"security","expected_decision":"PASS_ENGINEERING_ONLY","launch_mode":"NO_GO","real_evidence":false,"paid_customer":false,"human_launch_authority":false,"evidence_preserved":true},
+    {"fixture_id":"P24-FX-007","category":"dr","expected_decision":"PASS_ENGINEERING_ONLY","launch_mode":"NO_GO","real_evidence":false,"paid_customer":false,"human_launch_authority":false,"evidence_preserved":true},
+    {"fixture_id":"P24-FX-008","category":"ux","expected_decision":"PASS_ENGINEERING_ONLY","launch_mode":"NO_GO","real_evidence":false,"paid_customer":false,"human_launch_authority":false,"evidence_preserved":true},
+    {"fixture_id":"P24-FX-009","category":"approval","expected_decision":"PASS_ENGINEERING_ONLY","launch_mode":"NO_GO","real_evidence":false,"paid_customer":false,"human_launch_authority":false,"evidence_preserved":true},
+    {"fixture_id":"P24-FX-010","category":"cohort","expected_decision":"PASS_ENGINEERING_ONLY","launch_mode":"NO_GO","real_evidence":false,"paid_customer":false,"human_launch_authority":false,"evidence_preserved":true},
+    {"fixture_id":"P24-FX-011","category":"rollback","expected_decision":"PASS_ENGINEERING_ONLY","launch_mode":"NO_GO","real_evidence":false,"paid_customer":false,"human_launch_authority":false,"evidence_preserved":true},
+    {"fixture_id":"P24-FX-012","category":"stop_condition","expected_decision":"PASS_ENGINEERING_ONLY","launch_mode":"NO_GO","real_evidence":false,"paid_customer":false,"human_launch_authority":false,"evidence_preserved":true},
+    {"fixture_id":"P24-FX-013","category":"upstream","expected_decision":"PASS_ENGINEERING_ONLY","launch_mode":"NO_GO","real_evidence":false,"paid_customer":false,"human_launch_authority":false,"evidence_preserved":true},
+    {"fixture_id":"P24-FX-014","category":"global_journey","expected_decision":"PASS_ENGINEERING_ONLY","launch_mode":"NO_GO","real_evidence":false,"paid_customer":false,"human_launch_authority":false,"evidence_preserved":true},
+    {"fixture_id":"P24-FX-015","category":"sandbox_payment","expected_decision":"PASS_ENGINEERING_ONLY","launch_mode":"NO_GO","real_evidence":false,"paid_customer":false,"human_launch_authority":false,"evidence_preserved":true},
+    {"fixture_id":"P24-FX-016","category":"live_payment","expected_decision":"PASS_ENGINEERING_ONLY","launch_mode":"NO_GO","real_evidence":false,"paid_customer":false,"human_launch_authority":false,"evidence_preserved":true},
+    {"fixture_id":"P24-FX-017","category":"paid_customer","expected_decision":"PASS_ENGINEERING_ONLY","launch_mode":"NO_GO","real_evidence":false,"paid_customer":false,"human_launch_authority":false,"evidence_preserved":true},
+    {"fixture_id":"P24-FX-018","category":"security","expected_decision":"PASS_ENGINEERING_ONLY","launch_mode":"NO_GO","real_evidence":false,"paid_customer":false,"human_launch_authority":false,"evidence_preserved":true},
+    {"fixture_id":"P24-FX-019","category":"dr","expected_decision":"PASS_ENGINEERING_ONLY","launch_mode":"NO_GO","real_evidence":false,"paid_customer":false,"human_launch_authority":false,"evidence_preserved":true},
+    {"fixture_id":"P24-FX-020","category":"ux","expected_decision":"PASS_ENGINEERING_ONLY","launch_mode":"NO_GO","real_evidence":false,"paid_customer":false,"human_launch_authority":false,"evidence_preserved":true},
+    {"fixture_id":"P24-FX-021","category":"approval","expected_decision":"PASS_ENGINEERING_ONLY","launch_mode":"NO_GO","real_evidence":false,"paid_customer":false,"human_launch_authority":false,"evidence_preserved":true},
+    {"fixture_id":"P24-FX-022","category":"cohort","expected_decision":"PASS_ENGINEERING_ONLY","launch_mode":"NO_GO","real_evidence":false,"paid_customer":false,"human_launch_authority":false,"evidence_preserved":true},
+    {"fixture_id":"P24-FX-023","category":"rollback","expected_decision":"PASS_ENGINEERING_ONLY","launch_mode":"NO_GO","real_evidence":false,"paid_customer":false,"human_launch_authority":false,"evidence_preserved":true},
+    {"fixture_id":"P24-FX-024","category":"stop_condition","expected_decision":"PASS_ENGINEERING_ONLY","launch_mode":"NO_GO","real_evidence":false,"paid_customer":false,"human_launch_authority":false,"evidence_preserved":true}
+  ]
+}

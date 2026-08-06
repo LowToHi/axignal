@@ -1,0 +1,95 @@
+name: RC6 Exact Head Provenance
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/**"
+      - "scripts/verify_release_exact_head_provenance.py"
+
+  workflow_call:
+permissions:
+  contents: read
+
+concurrency:
+  group: rc6-exact-head-provenance-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  inventory:
+    name: Inventory release workflow provenance gaps
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      AXIGNAL_EXACT_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - name: Checkout exact branch head
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Prove exact-head checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual_sha="$(git rev-parse HEAD)"
+          tree_sha="$(git rev-parse 'HEAD^{tree}')"
+          test "$actual_sha" = "$AXIGNAL_EXACT_SHA"
+          {
+            printf 'exact_head_sha=%s\n' "$actual_sha"
+            printf 'git_tree_sha=%s\n' "$tree_sha"
+          } | tee rc6-exact-head-identity.txt
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.13.14"
+
+      - name: Compile provenance verifier
+        run: python -m compileall -q scripts/verify_release_exact_head_provenance.py
+
+      - name: Inventory release workflow gaps
+        id: inventory
+        shell: bash
+        run: |
+          set -o pipefail
+          set +e
+          python scripts/verify_release_exact_head_provenance.py \
+            | tee rc6-exact-head-provenance.json
+          status=${PIPESTATUS[0]}
+          set -e
+          printf 'exit_code=%s\n' "$status" >> "$GITHUB_OUTPUT"
+
+      - name: Bundle exact Git objects
+        shell: bash
+        run: |
+          set -euo pipefail
+          git bundle create rc6-exact-head.bundle HEAD
+          git bundle verify rc6-exact-head.bundle
+
+      - name: Upload exact-head inventory and sources
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: rc6-exact-head-provenance-${{ env.AXIGNAL_EXACT_SHA }}
+          path: |
+            rc6-exact-head-identity.txt
+            rc6-exact-head-provenance.json
+            rc6-exact-head.bundle
+            .github/workflows
+            scripts/verify_release_exact_head_provenance.py
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Enforce provenance inventory
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f rc6-exact-head-provenance.json
+          exit "${{ steps.inventory.outputs.exit_code }}"

@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://axignal.com/schemas/global-e2e-v1.5-task.schema.json",
+  "title": "AXIGNAL Global E2E v1.5 Task",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "task_id",
+    "goal_id",
+    "phase",
+    "objective",
+    "engineering_state",
+    "canonical_state",
+    "governing_contracts",
+    "dependencies",
+    "acceptance_evidence",
+    "prohibited_authority",
+    "rollback"
+  ],
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "pattern": "^AX-GE2E-P(25|26|27)-T[0-9]{2,}$"
+    },
+    "goal_id": {
+      "const": "AXIGNAL-GOAL-001"
+    },
+    "phase": {
+      "enum": ["P25", "P26", "P27"]
+    },
+    "objective": {
+      "type": "string",
+      "minLength": 20
+    },
+    "engineering_state": {
+      "enum": [
+        "NOT_STARTED",
+        "ENGINEERING_IN_PROGRESS",
+        "ENGINEERING_EVIDENCE_READY",
+        "ENGINEERING_E2E_PASS",
+        "ENGINEERING_REJECTED",
+        "SUPERSEDED"
+      ]
+    },
+    "canonical_state": {
+      "enum": [
+        "CANONICAL_NOT_STARTED",
+        "CANONICAL_ACCEPTANCE_BLOCKED",
+        "CANONICALLY_ACCEPTED",
+        "PRODUCT_ADMITTED",
+        "COMMERCIAL",
+        "SUSPENDED",
+        "REVOKED",
+        "REJECTED"
+      ]
+    },
+    "governing_contracts": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^(GOAL_LOCK|AGENTS|ADR-[0-9]{3}|[0-9]{2})$"
+      }
+    },
+    "dependencies": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["phases", "tasks"],
+      "properties": {
+        "phases": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^P(0[0-9]|1[0-9]|2[0-7])$"
+          }
+        },
+        "tasks": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^AX-GE2E-P(0[0-9]|1[0-9]|2[0-7])-T[0-9]{2,}$"
+          }
+        }
+      }
+    },
+    "acceptance_evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["evidence", "status"],
+        "properties": {
+          "evidence": {
+            "type": "string",
+            "minLength": 3
+          },
+          "status": {
+            "enum": ["MISSING", "PRESENT", "PASS", "FAIL", "NOT_APPLICABLE"]
+          },
+          "location": {
+            "type": ["string", "null"]
+          }
+        }
+      }
+    },
+    "prohibited_authority": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 3
+      }
+    },
+    "rollback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["strategy", "kill_switch", "tested"],
+      "properties": {
+        "strategy": {
+          "type": "string",
+          "minLength": 10
+        },
+        "kill_switch": {
+          "type": ["string", "null"]
+        },
+        "tested": {
+          "type": "boolean"
+        }
+      }
+    },
+    "engineering_head": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

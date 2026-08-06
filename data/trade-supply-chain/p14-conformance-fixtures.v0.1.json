@@ -1,0 +1,28 @@
+{
+  "schema_version": "axignal.trade-supply-chain-workspace-fixtures/v0.1",
+  "task_id": "AX-GE2E-P14-T01",
+  "modules": [
+    "TRADE_FLOW_REGISTRY",
+    "PRODUCT_CLASSIFICATION",
+    "ORIGIN_DESTINATION_PARTNER",
+    "TARIFF_CUSTOMS_MEASURE",
+    "ROUTE_LOGISTICS_DISRUPTION",
+    "SUPPLY_OPPORTUNITY_WORKSPACE",
+    "DEPENDENCY_SCENARIO_RISK",
+    "EXTERNAL_ACTION_OUTCOME"
+  ],
+  "classes": [
+    "HAPPY_PATH",
+    "INCOMPLETE_CONTEXT",
+    "REVOKED_DEPENDENCY",
+    "CROSS_TENANT",
+    "AUTHORITY_ESCALATION"
+  ],
+  "expected_by_class": {
+    "HAPPY_PATH": {"decision": "CANDIDATE", "canonical_write": false, "external_action": false, "reason_code": "BOUNDED_CANDIDATE_ONLY"},
+    "INCOMPLETE_CONTEXT": {"decision": "REVIEW_REQUIRED", "canonical_write": false, "external_action": false, "reason_code": "MISSING_OR_CONTESTED_EVIDENCE"},
+    "REVOKED_DEPENDENCY": {"decision": "DENY", "canonical_write": false, "external_action": false, "reason_code": "REVOKED_OR_STALE_DEPENDENCY"},
+    "CROSS_TENANT": {"decision": "BLOCK", "canonical_write": false, "external_action": false, "reason_code": "TENANT_SCOPE_MISMATCH"},
+    "AUTHORITY_ESCALATION": {"decision": "BLOCK", "canonical_write": false, "external_action": false, "reason_code": "ACTOR_AUTHORITY_EXCEEDED"}
+  }
+}

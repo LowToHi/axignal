@@ -6,7 +6,10 @@ import logging
 import time
 from pathlib import Path
 
-from axignal_api.deepseek_proposals import DeepSeekV4FlashProposalAdapter
+from axignal_api.deepseek_proposals import (
+    DEEPSEEK_CHECKPOINT,
+    DeepSeekV4FlashProposalAdapter,
+)
 from axignal_api.document_proposals import (
     DocumentPipelineError,
     DocumentSecurityError,
@@ -26,6 +29,7 @@ from axignal_api.proposal_repository import (
     SOURCE_ID,
     DocumentProposalRepository,
 )
+from axignal_api.runtime_invariants import require_runtime_value
 from axignal_api.settings import Settings
 
 LOGGER = logging.getLogger("axignal.document-proposal-worker")
@@ -183,25 +187,36 @@ def _load_json(path: Path) -> dict[str, object]:
 
 def build_runtime(settings: Settings) -> PersistentDocumentProposalWorker:
     settings.require_document_proposal_worker()
-    assert settings.proposal_database_url is not None
-    assert settings.valkey_url is not None
-    assert settings.document_fixture_path is not None
-
-    repository = DocumentProposalRepository(
-        proposal_dsn=settings.proposal_database_url
+    proposal_database_url = require_runtime_value(
+        settings.proposal_database_url,
+        name="AXIGNAL_PROPOSAL_DATABASE_URL",
     )
-    queue = ValkeyDocumentProposalQueue(
+    valkey_url = require_runtime_value(
         settings.valkey_url,
+        name="AXIGNAL_VALKEY_URL",
+    )
+    document_fixture_path = require_runtime_value(
+        settings.document_fixture_path,
+        name="AXIGNAL_DOCUMENT_FIXTURE_PATH",
+    )
+
+    repository = DocumentProposalRepository(proposal_dsn=proposal_database_url)
+    queue = ValkeyDocumentProposalQueue(
+        valkey_url,
         queue_key=settings.proposal_queue_key,
     )
-    document = InstitutionalDocument.model_validate(_load_json(settings.document_fixture_path))
+    document = InstitutionalDocument.model_validate(_load_json(document_fixture_path))
 
     if settings.deepseek_proposal_enabled:
-        assert settings.deepseek_api_key is not None
+        deepseek_api_key = require_runtime_value(
+            settings.deepseek_api_key,
+            name="AXIGNAL_DEEPSEEK_API_KEY",
+        )
         gateway = DeepSeekV4FlashProposalAdapter(
-            api_key=settings.deepseek_api_key,
+            api_key=deepseek_api_key,
             base_url=settings.deepseek_base_url,
             model=settings.deepseek_model,
+            checkpoint=DEEPSEEK_CHECKPOINT,
             max_output_tokens=settings.deepseek_max_output_tokens,
             timeout_seconds=settings.deepseek_timeout_seconds,
         )
@@ -214,10 +229,11 @@ def build_runtime(settings: Settings) -> PersistentDocumentProposalWorker:
             api_key=settings.local_model_api_key or "local-only",
         )
     else:
-        assert settings.document_proposal_fixture_path is not None
-        proposal = ProposalBatch.model_validate(
-            _load_json(settings.document_proposal_fixture_path)
+        proposal_fixture_path = require_runtime_value(
+            settings.document_proposal_fixture_path,
+            name="AXIGNAL_DOCUMENT_PROPOSAL_FIXTURE_PATH",
         )
+        proposal = ProposalBatch.model_validate(_load_json(proposal_fixture_path))
         gateway = FrozenProposalAdapter(proposal)
 
     worker = PersistentDocumentProposalWorker(

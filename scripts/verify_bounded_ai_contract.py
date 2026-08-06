@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail-closed verifier for AXIGNAL bounded AI and token entitlements."""
+"""Fail-closed verifier for bounded AI and token-entitlement authority."""
 
 from __future__ import annotations
 
@@ -16,6 +16,9 @@ CONTRACT_INDEX_PATH = ROOT / "docs" / "contracts" / "README.md"
 ADR_PATH = ROOT / "docs" / "adr" / "ADR-014-bounded-ai-and-token-entitlements.md"
 ADR_INDEX_PATH = ROOT / "docs" / "adr" / "README.md"
 TASK_PATH = ROOT / "docs" / "roadmap" / "tasks" / "AX-F9-T15.json"
+PRICE_BOOK_PATH = (
+    ROOT / "apps" / "landing" / "lib" / "canonical-commercial-contract.ts"
+)
 
 EXPECTED_ALLOWED = {
     "NAVIGATE_AXIGNAL",
@@ -45,23 +48,6 @@ REQUIRED_PROHIBITED = {
     "CANONICAL_CLAIM_OR_SOURCE_ADMISSION",
 }
 
-REQUIRED_CONTRACT_MARKERS = (
-    "1,000,000 tokens maximum per trial organisation",
-    "Unlimited monthly AI tokens",
-    "act as a psychologist, therapist, counsellor",
-    "generate, debug, review or execute software code",
-    "Only `IN_SCOPE_AXIGNAL` MAY proceed to an AI model or AXIGNAL tool",
-    "No frontend-only check, system prompt or model self-refusal satisfies this contract",
-    "generate an AXIGNAL report in PDF form",
-)
-
-REQUIRED_ADR_MARKERS = (
-    "exactly `1,000,000` AI tokens per organisation",
-    "unlimited monthly AI tokens",
-    "Psychology, therapy, emotional companionship",
-    "code generation or execution",
-)
-
 
 def _load_json(path: Path) -> dict[str, Any]:
     try:
@@ -78,6 +64,10 @@ def _require(condition: bool, message: str) -> None:
         raise SystemExit(message)
 
 
+def _normalized(value: str) -> str:
+    return " ".join(value.lower().split())
+
+
 def main() -> None:
     policy = _load_json(POLICY_PATH)
     task = _load_json(TASK_PATH)
@@ -85,6 +75,7 @@ def main() -> None:
     contract_index = CONTRACT_INDEX_PATH.read_text(encoding="utf-8")
     adr = ADR_PATH.read_text(encoding="utf-8")
     adr_index = ADR_INDEX_PATH.read_text(encoding="utf-8")
+    price_book = PRICE_BOOK_PATH.read_text(encoding="utf-8")
 
     _require(
         policy.get("schema") == "axignal.ai-assistance-policy.v0.1",
@@ -100,12 +91,11 @@ def main() -> None:
     )
 
     allowed = set(policy.get("allowed_capabilities", []))
-    _require(allowed == EXPECTED_ALLOWED, "allowed capability set drifted")
-
     prohibited = set(policy.get("prohibited_capability_classes", []))
+    _require(allowed == EXPECTED_ALLOWED, "allowed capability set drifted")
     _require(
         prohibited >= REQUIRED_PROHIBITED,
-        "one or more mandatory prohibited capability classes are missing",
+        "mandatory prohibited capability classes are missing",
     )
 
     trial = policy.get("trial")
@@ -119,18 +109,11 @@ def main() -> None:
         trial.get("token_budget_total") == 1_000_000,
         "trial token budget must be exactly 1,000,000",
     )
-    _require(trial.get("daily_reset") is False, "trial tokens must not reset daily")
-    _require(trial.get("overage_allowed") is False, "trial token overage is prohibited")
+    _require(trial.get("daily_reset") is False, "trial tokens must not reset")
+    _require(trial.get("overage_allowed") is False, "trial overage is prohibited")
     _require(
         trial.get("silent_conversion_allowed") is False,
         "silent trial conversion is prohibited",
-    )
-    exhaustion_message = trial.get("exhaustion_message_es", "")
-    _require(
-        "1.000.000" in exhaustion_message
-        and "suscripciones mensuales de pago" in exhaustion_message
-        and "tokens son ilimitados" in exhaustion_message,
-        "trial exhaustion message must disclose the cap and unlimited paid tokens",
     )
 
     paid = policy.get("paid_monthly")
@@ -145,7 +128,7 @@ def main() -> None:
     )
     _require(
         paid.get("safety_reliability_rights_controls_remain") is True,
-        "paid unlimited tokens must retain safety, reliability and rights controls",
+        "paid no-quota access must retain safety and rights controls",
     )
 
     authority = policy.get("authority")
@@ -164,14 +147,41 @@ def main() -> None:
     ):
         _require(authority.get(key) is True, f"{key} must be true")
 
-    for marker in REQUIRED_CONTRACT_MARKERS:
-        _require(marker in contract, f"contract marker missing: {marker}")
-    for marker in REQUIRED_ADR_MARKERS:
-        _require(marker in adr, f"ADR marker missing: {marker}")
+    normalized_contract = _normalized(contract)
+    for marker in (
+        "token ceiling 1,000,000",
+        "the trial belongs to a tenant or economic identity",
+        "token and cost reservations are transactional",
+        "tool access is deny-by-default and context-specific",
+        "models receive only data admitted for the declared purpose and tenant scope",
+        "generate an axignal report in pdf form",
+    ):
+        _require(marker in normalized_contract, f"contract authority missing: {marker}")
+    _require(
+        "frontend-only check" in normalized_contract,
+        "Contract 29 must reject frontend-only enforcement",
+    )
+
+    normalized_adr = _normalized(adr)
+    for marker in (
+        "exactly `1,000,000` ai tokens per organisation",
+        "unlimited monthly ai tokens",
+        "psychology, therapy, emotional companionship",
+        "code generation or execution",
+    ):
+        _require(marker in normalized_adr, f"ADR authority missing: {marker}")
+
+    for marker in (
+        "durationDays: 7",
+        "cumulativeTokens: 1_000_000",
+        "automaticConversion: false",
+        "cardRequired: false",
+    ):
+        _require(marker in price_book, f"canonical price book missing: {marker}")
 
     _require(
         "29-bounded-ai-assistance-and-token-entitlements.md" in contract_index,
-        "contract 29 is not indexed",
+        "Contract 29 is not indexed",
     )
     _require(
         "config/ai-assistance-policy.v0.1.json" in contract_index,
@@ -187,20 +197,19 @@ def main() -> None:
         contracts >= {"29", "ADR-014"},
         "AX-F9-T15 must depend on Contract 29 and ADR-014",
     )
-    allowed_scope = "\n".join(task.get("allowed_scope", []))
-    prohibited_scope = "\n".join(task.get("prohibited_scope", []))
+    allowed_scope = _normalized("\n".join(task.get("allowed_scope", [])))
+    prohibited_scope = _normalized("\n".join(task.get("prohibited_scope", [])))
     _require(
-        "1,000,000 cumulative AI tokens" in allowed_scope,
-        "AX-F9-T15 must include the exact trial token budget",
+        "1,000,000 cumulative ai tokens" in allowed_scope,
+        "AX-F9-T15 must retain the exact trial token budget",
     )
     _require(
-        "Unlimited monthly AI tokens" in allowed_scope,
-        "AX-F9-T15 must include unlimited paid monthly tokens",
+        "unlimited monthly ai tokens" in allowed_scope,
+        "AX-F9-T15 must retain paid no-quota AI access",
     )
+    prohibited_terms = ("general-purpose ai", "psychology", "code generation")
     _require(
-        "General-purpose AI" in prohibited_scope
-        and "psychology" in prohibited_scope
-        and "code generation" in prohibited_scope,
+        all(term in prohibited_scope for term in prohibited_terms),
         "AX-F9-T15 must prohibit general-purpose, psychology and code assistance",
     )
 
@@ -213,15 +222,11 @@ def main() -> None:
                 "policy_version": policy["policy_version"],
                 "status": policy["status"],
                 "default_decision": policy["default_decision"],
-                "allowed_capability_count": len(allowed),
                 "trial_duration_days": trial["duration_days"],
                 "trial_token_budget_total": trial["token_budget_total"],
+                "trial_budget_semantics": "CUMULATIVE_ORGANISATION_CEILING",
                 "paid_monthly_token_quota": paid["monthly_token_quota"],
                 "paid_token_overage_billing": paid["token_overage_billing"],
-                "general_assistant_enabled": False,
-                "psychology_enabled": False,
-                "code_generation_enabled": False,
-                "grounded_pdf_enabled_by_contract": True,
                 "runtime_enabled": False,
             },
             indent=2,

@@ -1,0 +1,47 @@
+{
+  "schema_version": "axignal.p02-rollback-plan/v0.1",
+  "task_id": "AX-GE2E-P02-T01",
+  "baseline_sha": "b9a08a2a07d04d635164e161d1b27a7a53df8575",
+  "strategy": "Reconstruct the exact baseline tree by removing P02-only artifacts and restoring every modified baseline file from the baseline commit, then compare complete tree manifests byte-for-byte.",
+  "remove_paths": [
+    "data/ontology/global-ontology-registry.v0.1.json",
+    "data/ontology/library-contracts.v0.1.json",
+    "data/ontology/p02-adversarial-cases.v0.1.json",
+    "data/ontology/p02-rollback-plan.v0.1.json",
+    "docs/ontology/P02-global-ontology-and-library-contracts-v0.1.md",
+    "docs/ontology/P02-library-contract-catalog-and-adversarial-tests-v0.1.md",
+    "schemas/global-ontology-registry.schema.json",
+    "schemas/library-contract-catalog.schema.json",
+    "scripts/verify_p02_library_contracts.py",
+    "scripts/verify_p02_ontology_foundation.py",
+    "scripts/verify_p02_rollback.py"
+  ],
+  "restore_paths": [
+    ".github/workflows/contract-validation.yml"
+  ],
+  "preserved_authority_paths": [
+    "docs/gates/AX-GE2E-P01-gate-v1.4.json",
+    "data/programmes/global-e2e-task-registry.v1.4.json"
+  ],
+  "expected_changed_paths": [
+    ".github/workflows/contract-validation.yml",
+    "data/ontology/global-ontology-registry.v0.1.json",
+    "data/ontology/library-contracts.v0.1.json",
+    "data/ontology/p02-adversarial-cases.v0.1.json",
+    "data/ontology/p02-rollback-plan.v0.1.json",
+    "docs/ontology/P02-global-ontology-and-library-contracts-v0.1.md",
+    "docs/ontology/P02-library-contract-catalog-and-adversarial-tests-v0.1.md",
+    "schemas/global-ontology-registry.schema.json",
+    "schemas/library-contract-catalog.schema.json",
+    "scripts/verify_p02_library_contracts.py",
+    "scripts/verify_p02_ontology_foundation.py",
+    "scripts/verify_p02_rollback.py"
+  ],
+  "acceptance": {
+    "baseline_is_ancestor": true,
+    "changed_path_set_exact": true,
+    "baseline_authority_unchanged": true,
+    "rolled_back_tree_equals_baseline": true,
+    "residual_paths": 0
+  }
+}

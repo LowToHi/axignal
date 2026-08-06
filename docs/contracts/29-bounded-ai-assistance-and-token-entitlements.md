@@ -1,322 +1,352 @@
-# 29 — Bounded AI Assistance and Token Entitlements
+# 29 — Bounded AI Assistance and Usage Governance
 
-Version: `0.1.0-candidate`
-Status: `NORMATIVE CANDIDATE / IMPLEMENTATION REQUIRED / FAIL-CLOSED`
+Version: `0.2.0`
+Status: `NORMATIVE CANDIDATE / FAIL-CLOSED / CONTRACT 31 SUBORDINATE`
 Goal ID: `AXIGNAL-GOAL-001`
+Governing programme: `Contract 31 / ADR-016`
+Primary phases: `P19`, `P21`, `P25`, `P27`
 
 ## 1. Purpose
 
-This contract defines the maximum permitted role of generative AI inside AXIGNAL and the token-entitlement policy for seven-day trials and monthly paid subscriptions.
+This contract defines the maximum permitted role of generative AI inside AXIGNAL and the usage-governance policy for trials and paid packages.
 
-AXIGNAL MUST provide a bounded opportunity-intelligence assistant. It MUST NOT become a general-purpose chatbot merely because its interface accepts natural language.
+AXIGNAL provides bounded opportunity intelligence and operations. It must not become a general-purpose chatbot merely because Navigator accepts natural language.
 
-Where this contract is more restrictive than Contracts 00, 14, 22, 25, 26, 27 or 28, this contract governs until it is explicitly superseded by a later ADR and contract version.
+Where this contract is more restrictive than a subordinate capability contract, this contract governs unless Contract 31 or a later approved contract explicitly supersedes it.
 
-## 2. Core invariant
+## 2. AI authority ceiling
 
-The AI layer MAY operate only over:
+Generative AI may:
 
-1. the authenticated user's server-resolved AXIGNAL tenant;
-2. the current typed `InvestigationContext`;
-3. tenant-private data for which that tenant has an active entitlement and lawful purpose;
-4. admitted AXIGNAL sources, Source Objects, Evidence Objects, Candidate Claims and canonical Claim Ledger state;
-5. AXIGNAL product metadata, methodology, help content and entitlement state;
-6. bounded outputs produced by approved AXIGNAL workers and deterministic services.
+- interpret bounded user intent;
+- retrieve and rank candidate evidence;
+- extract candidate structures;
+- classify and translate;
+- propose entity links;
+- propose Candidate Claims;
+- propose Opportunity or workflow actions;
+- explain admitted state;
+- draft customer work for human review;
+- generate an AXIGNAL report in PDF form from admitted evidence.
 
-The AI layer MUST NOT use AXIGNAL as a gateway to unrestricted general knowledge, unrestricted browsing, arbitrary tools or unrelated personal assistance.
+Generative AI may not:
 
-## 3. Allowed user outcomes
+- admit a source;
+- admit canonical claims;
+- overwrite evidence or ledgers;
+- choose tenant or role authority;
+- grant seats, trials or entitlements;
+- publish SEO pages;
+- confirm consent;
+- mutate billing provider state;
+- submit, sign, file or represent a customer;
+- approve bid/no-bid or capital decisions;
+- install or widen MCP tools;
+- authorise launch.
 
-The AI layer MAY perform only a versioned allowlist of AXIGNAL capabilities:
-
-- interpret a user request into a typed AXIGNAL intent;
-- navigate Globe, Explorer, Atlas, Timeline, Claims, Evidence, Watchlists and Dossiers;
-- create or refine a tenant-scoped `InvestigationContext`;
-- request an entitled and admitted `ResearchRun`;
-- search, filter, compare and explain admitted AXIGNAL information;
-- summarise source-bound documents and evidence;
-- identify contradictions, unknowns, freshness limits and required human verification;
-- assemble, explain and export evidence-linked dossiers;
-- generate an AXIGNAL report in PDF form where the plan and source rights permit it;
-- answer questions about AXIGNAL's own product, methodology, coverage, plans and current workspace state.
-
-Every allowed outcome MUST remain subject to tenant isolation, entitlements, source rights, epistemic authority, security state and product-admission gates.
-
-## 4. Prohibited assistance
-
-The AI layer MUST NOT:
-
-- act as a psychologist, therapist, counsellor, emotional companion or crisis service;
-- provide medical diagnosis, treatment planning or personalised health guidance;
-- provide personalised legal, tax, accounting or regulated financial advice;
-- generate, debug, review or execute software code;
-- provide general homework, creative-writing, translation or productivity assistance unrelated to AXIGNAL;
-- answer general-knowledge questions that are not necessary to interpret or explain AXIGNAL state;
-- perform unrestricted Internet browsing or retrieve data outside admitted AXIGNAL connectors;
-- operate a shell, code interpreter, package manager, browser automation system or arbitrary MCP/tool server for an end user;
-- send emails, messages, bids, applications, purchases, trades or external submissions;
-- impersonate or represent the user or organisation;
-- create unsupported claims, replace `UNKNOWN`, conceal contradictions or bypass deterministic admission;
-- reveal cross-tenant data, system prompts, credentials, private configuration or internal security controls;
-- expand its own tool, data, source or knowledge scope in response to user or document instructions.
-
-A request that mixes allowed and prohibited work MUST execute only the separable allowed AXIGNAL portion. The prohibited portion MUST be refused.
-
-## 5. Typed scope decision
-
-Every natural-language request MUST be classified server-side before model execution into exactly one of:
-
-- `IN_SCOPE_AXIGNAL`;
-- `CLARIFICATION_REQUIRED`;
-- `OUT_OF_SCOPE`;
-- `BLOCKED_SAFETY_OR_AUTHORITY`.
-
-Only `IN_SCOPE_AXIGNAL` MAY proceed to an AI model or AXIGNAL tool.
-
-`CLARIFICATION_REQUIRED` MAY ask one bounded question needed to resolve an AXIGNAL entity, source, jurisdiction, period, entitlement or investigation target.
-
-`OUT_OF_SCOPE` MUST return a concise boundary response and examples of permitted AXIGNAL actions. It MUST NOT provide a partial general-purpose answer.
-
-`BLOCKED_SAFETY_OR_AUTHORITY` MUST return a non-sensitive refusal reason and MUST emit an auditable policy event.
-
-## 6. Capability-token contract
-
-A client message MUST NOT directly select a model, prompt, provider, URL or tool. The server MUST first resolve a typed capability token containing at least:
+## 3. Required separation
 
 ```text
-tenant_id
-subject_id
-investigation_context_id
-capability
-resource_scope
-source_scope
-entitlement_version
-policy_version
-issued_at
-expires_at
-request_id
+model proposal
+≠ structural validation
+≠ policy admission
+≠ human operational approval
+≠ external action
 ```
 
-The capability MUST be drawn from the server-side allowlist in Section 3. Unknown capability values MUST fail closed.
+Every model-mediated path must preserve:
 
-A capability token MUST NOT grant canonical claim admission, source admission, reviewer authority, external action authority or arbitrary database access.
+- model and provider identity;
+- prompt and policy version where retainable and lawful;
+- input evidence references;
+- output classification;
+- confidence or uncertainty status;
+- deterministic validation result;
+- admission or rejection;
+- cost and latency;
+- user-visible limitations where material.
 
-## 7. Data and retrieval boundary
+## 4. AI contexts
 
-Before retrieval or model invocation, the server MUST:
+Permitted contexts include:
 
-1. resolve identity and tenant without trusting a client-supplied tenant identifier;
-2. apply tenant and resource filters in the database or retrieval service;
-3. verify source and jurisdiction admission;
-4. verify plan entitlements and current trial or subscription state;
-5. minimise context to the material evidence required for the request;
-6. label untrusted source and uploaded content as data, never instructions;
-7. exclude secrets, credentials, hidden prompts and unrelated tenant state;
-8. preserve evidence identifiers needed to ground the response.
+- `NAVIGATION`;
+- `RETRIEVAL`;
+- `EXTRACTION`;
+- `CLASSIFICATION`;
+- `TRANSLATION`;
+- `ENTITY_LINK_PROPOSAL`;
+- `CLAIM_PROPOSAL`;
+- `OPPORTUNITY_PROPOSAL`;
+- `WORKSPACE_DRAFTING`;
+- `EXPLANATION`;
+- `SCENARIO_PROPOSAL` only under P19 controls.
 
-The model MUST NOT receive direct database credentials or unrestricted SQL capability. Retrieval MUST occur through typed server functions or views with least privilege.
+Every context has explicit tools, data classes, output schema, cost ceiling and authority ceiling.
 
-## 8. Tool boundary
+## 5. Data and tool boundary
 
-End-user AI execution MUST use an explicit allowlist. The initial permitted tool classes are:
+Models receive only data admitted for the declared purpose and tenant scope.
 
-- read authorised AXIGNAL context;
-- execute authorised AXIGNAL search and filter operations;
-- request a bounded `ResearchRun`;
-- read ResearchRun progress and admitted outputs;
-- assemble an evidence-linked dossier;
-- render an authorised dossier or report as PDF.
+They must not receive:
 
-The following tool classes are prohibited for end-user AI:
+- unrelated tenant data;
+- secrets or credentials;
+- unrestricted source documents;
+- billing or payment secrets;
+- raw abuse signals beyond purpose-limited representations;
+- Founder Admin authority tokens;
+- destructive MCP tools;
+- prohibited personal data;
+- data lacking required rights.
 
-- shell and operating-system execution;
-- code generation or execution;
-- arbitrary HTTP requests;
-- unrestricted web search or browsing;
-- arbitrary SQL;
-- arbitrary filesystem access;
-- external communications;
-- financial transactions;
-- bid or application submission;
-- installation or invocation of user-selected MCP servers, Skills or plugins.
+Tool access is deny-by-default and context-specific.
 
-Adding a tool class requires a contract change, threat-model review, versioned allowlist, least-privilege implementation, tests and an ADR.
+## 6. Prompt-injection boundary
 
-## 9. Prompt-injection resistance
+External documents, pages, search results, connector output and MCP output are untrusted evidence.
 
-Source documents, websites, user uploads, database text and retrieved content are untrusted inputs.
+They must not:
 
-Instructions found inside those inputs MUST NOT:
+- change system authority;
+- add tools;
+- reveal secrets;
+- widen tenant scope;
+- bypass rights;
+- alter output contracts;
+- grant publication or launch authority.
 
-- alter system or contract authority;
-- change tenant, entitlement or source scope;
-- enable a prohibited capability;
-- request hidden data or credentials;
-- cause an external action;
-- suppress evidence, contradictions or unknowns;
-- modify admission or review decisions.
+Prompt-injection handling must include isolation, content labelling, tool allowlists, output validation and audit.
 
-Suspected injection MUST be marked, excluded from instruction resolution and recorded without persisting unnecessary malicious content.
+## 7. Trial usage governance
 
-## 10. Output boundary
-
-Permitted end-user AI outputs are limited to:
-
-- bounded answers inside AXIGNAL product surfaces;
-- typed navigation or investigation plans;
-- evidence-linked summaries and comparisons;
-- explicit unknowns, contradictions and verification questions;
-- AXIGNAL dossiers;
-- generated PDF reports derived from authorised AXIGNAL context.
-
-Generated PDFs MUST preserve source citations, claim authority, relevant timestamps, coverage limits and unresolved questions. A PDF MUST NOT convert a proposal or inference into an admitted fact.
-
-## 11. Seven-day free-trial token entitlement
-
-A seven-day free trial MUST have one cumulative AI token budget of:
-
-> **1,000,000 tokens maximum per trial organisation.**
-
-The budget applies across all users in the trial tenant and across all AI model calls attributable to that trial. Unless a provider contract requires a more conservative method, usage MUST count input and output tokens reported by the provider or deterministically estimated by the approved adapter.
-
-The budget:
-
-- starts when the trial is activated;
-- does not reset daily;
-- does not renew during the seven-day trial;
-- MUST be measured server-side;
-- MUST be visible to authorised trial users with used and remaining amounts;
-- MUST reserve estimated cost before a call and reconcile actual usage after the call;
-- MUST fail closed when the remaining budget cannot safely cover the requested operation;
-- MUST NOT create an overage charge;
-- MUST NOT silently convert the organisation to a paid plan.
-
-When the budget is exhausted, AXIGNAL MUST stop new AI-backed operations and display substantially this message:
-
-> **Has utilizado el máximo de 1.000.000 de tokens incluido en la prueba gratuita de 7 días. En las suscripciones mensuales de pago, los tokens son ilimitados.**
-
-Non-AI read-only access MAY continue until normal trial expiry where entitlements and source rights allow it.
-
-## 12. Monthly paid-subscription token entitlement
-
-Every active monthly paid subscription MUST include:
-
-> **Unlimited monthly AI tokens.**
-
-For this contract, `unlimited monthly AI tokens` means:
-
-- no monthly token quota;
-- no token-based hard stop for ordinary authorised product use;
-- no per-token overage invoice;
-- no reduction of the plan to a token bundle.
-
-Unlimited tokens do not remove:
-
-- the AXIGNAL-only scope boundary;
-- plan-specific features, sources, jurisdictions, seats, storage, exports or API entitlements;
-- concurrency and rate controls required for reliability;
-- document-size, page, file-type and ResearchRun controls;
-- source-right and redistribution limits;
-- security, abuse, scraping and denial-of-service controls;
-- suspension, incident or kill-switch authority;
-- reasonable technical limits needed to protect service integrity.
-
-Those controls MUST be described as safety, reliability, rights or feature constraints. They MUST NOT be presented as a hidden monthly token allowance.
-
-AXIGNAL SHOULD display the paid-plan token entitlement as:
-
-> **Tokens de IA ilimitados al mes, sujetos a los guardarraíles de seguridad, alcance AXIGNAL y uso legítimo del servicio.**
-
-## 13. Internal economics
-
-Provider-token usage remains an internal cost and observability metric. It MUST NOT become the primary public value metric for paid plans.
-
-AXIGNAL MUST maintain per-tenant cost, latency, error and anomaly observability even when paid tokens are unlimited. Controls MAY intervene on abuse, compromise or service integrity, but ordinary high legitimate usage MUST NOT be reclassified as abuse merely because it is expensive.
-
-The economic gate for unlimited paid tokens requires measured gross-margin viability under realistic high-usage cohorts before broad public activation.
-
-## 14. Enforcement architecture
-
-The required order is:
+The controlled trial has a visible token ceiling and additional server-side economic controls.
 
 ```text
-authenticated identity
-→ server-resolved tenant
-→ typed scope decision
-→ capability allowlist
-→ entitlement and token-budget check
-→ source/right/security gates
-→ bounded retrieval
-→ model proposal or explanation
-→ output-policy validation
-→ evidence-linked response or PDF
-→ usage reconciliation and audit event
+duration                    7 days from first admitted AI use
+seat capacity               2
+token ceiling               1,000,000
+internal cost ceiling       server-side
+ResearchRun concurrency     1
+private connectors          restricted
+bulk export                 restricted
 ```
 
-No frontend-only check, system prompt or model self-refusal satisfies this contract.
+The trial belongs to a tenant or economic identity. A new account does not create a new budget.
 
-The system MUST enforce the boundary before model invocation and validate the output after model invocation.
+Token and cost reservations are transactional. An operation is denied when either budget or concurrency is unavailable.
 
-## 15. Required audit events
+## 8. Paid-package usage governance
 
-At minimum, append-only events MUST distinguish:
+Paid packages must not be marketed primarily as token bundles or impose unpredictable token-overage billing without a future approved contract.
 
-- scope accepted;
-- clarification required;
-- out-of-scope refused;
-- safety or authority blocked;
-- capability issued;
-- entitlement denied;
-- trial tokens reserved;
-- trial tokens reconciled;
-- trial token budget exhausted;
-- paid unlimited-token operation accepted;
-- prompt injection suspected;
-- output validation blocked.
+The current candidate commercial design may present paid AI as included within governed operational capacity, subject to:
 
-Events MUST exclude raw secrets and minimise raw user or document content.
-
-## 16. Acceptance tests
-
-The boundary is not accepted until automated tests prove:
-
-1. psychology, therapy and emotional-companion requests are refused before model invocation;
-2. code generation, debugging and execution requests are refused before model invocation;
-3. general-knowledge and unrestricted-browsing requests are refused before model invocation;
-4. AXIGNAL navigation, evidence explanation and PDF dossier requests are admitted when entitled;
-5. mixed-scope requests execute only the separable AXIGNAL portion;
-6. client-supplied tenant identifiers cannot cross the server-resolved tenant;
-7. source-document prompt injection cannot add tools or change authority;
-8. unknown capability values fail closed;
-9. the trial budget is exactly `1,000,000` cumulative tokens per organisation;
-10. concurrent reservations cannot overspend the trial budget;
-11. exhaustion stops new AI calls and produces the required upgrade message;
-12. paid monthly subscriptions have no monthly token quota or token overage path;
-13. paid safety, reliability and rights controls remain independently enforceable;
-14. no model output writes canonical claims directly;
-15. generated PDFs retain evidence and authority labels.
-
-## 17. Promotion gate
-
-The free trial and paid unlimited-token claim MUST remain disabled until:
-
-- server-side entitlement and token accounting are implemented transactionally;
-- the scope and capability gates are integrated into every end-user AI route;
-- adversarial and cross-tenant tests pass;
-- the exhaustion and upgrade surfaces pass UX review;
-- paid high-usage gross margin is measured and accepted;
-- abuse controls do not conceal a token quota;
-- all customer-facing plan copy matches this contract;
-- trial, AI and billing kill switches are independently tested.
-
-## 18. Current authority state
+- fair-use and abuse controls;
+- concurrency;
+- document and page limits;
+- workspace capacity;
+- source and rights scope;
+- export limits;
+- provider and workflow cost controls;
+- security state;
+- explicit hard-stop or approved upgrade behaviour.
 
 ```text
-BOUNDED AXIGNAL-ONLY AI POLICY DEFINED
-/ GENERAL-PURPOSE ASSISTANCE PROHIBITED
-/ PSYCHOLOGY AND CODE GENERATION PROHIBITED
-/ PDF REPORT GENERATION PERMITTED WHEN GROUNDED AND ENTITLED
-/ SEVEN-DAY TRIAL TOKEN CAP FIXED AT 1,000,000 PER ORGANISATION
-/ MONTHLY PAID TOKENS DEFINED AS UNLIMITED
-/ RUNTIME ENFORCEMENT AND BILLING ACTIVATION NOT YET AUTHORISED
+unlimited label
+≠ unbounded compute
+≠ unrestricted automation
+≠ unlimited documents
+≠ provider-cost immunity
+```
+
+Internal token accounting remains mandatory for cost, safety and capacity even when the customer does not buy tokens.
+
+## 9. Candidate package boundary
+
+Current technical package candidates:
+
+| Package | Public token quota | Internal usage governance |
+|---|---|---|
+| Controlled trial | 1,000,000 visible ceiling | Token, cost and concurrency ledgers |
+| Professional | No validated monthly token product | Internal workflow, cost, concurrency and abuse controls |
+| Team | No validated monthly token product | Internal workflow, cost, concurrency and abuse controls |
+| Enterprise | Contract-specific if approved | Quotas and controls defined in agreement and entitlement policy |
+
+No paid package may promise unrestricted AI before economic and abuse evidence.
+
+## 10. Reservation and reconciliation
+
+Before an expensive operation:
+
+```text
+identity and tenant authority
+→ package and trial state
+→ source rights
+→ operation policy
+→ token estimate
+→ cost estimate
+→ concurrency reservation
+→ provider or local execution
+→ actual usage reconciliation
+→ ledger and audit
+```
+
+Failure must release or reconcile reservations idempotently.
+
+The browser cannot declare token, cost or concurrency availability. A frontend-only check is not an enforcement boundary; scope, rights, cost and authority checks must execute server-side before model or provider execution.
+
+## 11. Provider routing
+
+Provider selection must consider:
+
+- allowed data class;
+- jurisdiction and residency;
+- model capability;
+- context window;
+- cost;
+- latency;
+- availability;
+- contractual rights;
+- retention and training terms;
+- approved fallback.
+
+A cheaper provider cannot weaken evidence, privacy or security authority.
+
+Local or deterministic methods should be preferred when they satisfy the task.
+
+## 12. Model outputs and claims
+
+A model output may become:
+
+- rejected proposal;
+- candidate extraction;
+- Candidate Claim;
+- draft explanation;
+- draft workspace content;
+- scenario proposal.
+
+It cannot become an admitted claim solely because:
+
+- JSON validates;
+- confidence is high;
+- multiple model samples agree;
+- the user prefers it;
+- a provider labels it factual;
+- an MCP returns it.
+
+## 13. Scenarios and predictions
+
+Predictive outputs require P19:
+
+- temporal holdout;
+- as-of evidence;
+- calibration;
+- frozen thresholds;
+- outcome reconciliation;
+- demotion;
+- visible uncertainty.
+
+No win probability, margin forecast, eligibility prediction or recommendation may be shown as accepted without its domain-specific gate.
+
+## 14. Abuse controls
+
+AI abuse controls may include:
+
+- route and tenant rate limits;
+- concurrency;
+- cost ceilings;
+- maximum document and context size;
+- file-type and malware controls;
+- export limits;
+- automation detection;
+- provider circuit breakers;
+- trial risk decisions;
+- human review;
+- suspension and kill switches.
+
+Weak identity or network signals cannot independently prove abuse.
+
+## 15. Observability
+
+The runtime must record, at an appropriate privacy level:
+
+- operation and context type;
+- tenant and package pseudonymous identifiers;
+- provider/model;
+- prompt-policy version;
+- input and output units;
+- estimated and actual cost;
+- latency;
+- retries and fallback;
+- validation and admission result;
+- error class;
+- user cancellation;
+- safety or abuse decision.
+
+No log may expose secrets or unnecessary customer content.
+
+## 16. Customer transparency
+
+Customer-facing surfaces must explain:
+
+- where AI is used;
+- where deterministic and human gates apply;
+- plan and trial limits;
+- hard-stop or upgrade behaviour;
+- data and source limitations;
+- model error and uncertainty;
+- whether content is a proposal, admitted claim or customer draft.
+
+## 17. Economic gate
+
+AI usage is acceptable only when:
+
+- variable cost is measurable;
+- cost reservations and reconciliation pass;
+- trial abuse is controlled;
+- provider failure does not corrupt canonical state;
+- paid-package margin remains viable;
+- support burden is measured;
+- high-cost enrichment delivers customer value;
+- fallback and kill switches exist.
+
+A token-cost model is not a pricing validation model.
+
+## 18. Reinvestment
+
+Additional AI spend may be funded only by accepted revenue and conditioned on margin, measured customer value, reserves, provider risk and workflow ROI.
+
+AXIGNAL must not universally enrich every record merely because a model is inexpensive.
+
+## 19. Acceptance gate
+
+This contract advances only when:
+
+1. every AI context has a tool and authority contract;
+2. tenant and data-class isolation pass;
+3. prompt-injection and untrusted connector output pass;
+4. proposal/admission separation passes;
+5. trial token, cost and concurrency governance passes;
+6. paid-package operational limits are reproducible;
+7. provider usage and cost are observable;
+8. customer limitations are visible;
+9. abuse, suspension and kill switches pass;
+10. scenarios and predictions remain gated;
+11. margin and value evidence are accepted;
+12. P27 accepts the final exact head.
+
+## 20. Current authority
+
+```text
+TRIAL TOKEN CEILING            1,000,000
+TRIAL COST GOVERNANCE          ENGINEERING PASS
+TRIAL CONCURRENCY              ENGINEERING PASS
+PAID TOKEN PRODUCT             NOT VALIDATED
+PAID AI                        INCLUDED CANDIDATE WITH BOUNDED CONTROLS
+PROVIDER LIVE ACCEPTANCE       MISSING
+MCP PRODUCTION ACCESS          BLOCKED
+PUBLIC SIGNUP                  BLOCKED
+PUBLIC BILLING                 BLOCKED
+PUBLIC LAUNCH                  NO_GO
 ```

@@ -1,0 +1,238 @@
+{
+  "task_id": "AX-GE2E-P03-T02",
+  "goal_id": "AXIGNAL-GOAL-001",
+  "phase": "P03",
+  "state": "EVIDENCE_READY",
+  "objective": "Renew the canonical identity, session, tenant, organisation, seat and trial journeys on the integrated AXIGNAL head and close Gate C2 without creating a second authority plane.",
+  "outcome": "All C2 technical authorities passed on predecessor head 11d8c2435ff899d0276dd4f0d6c51da45775e0dc. Acceptance remains effective only when the complete workflow matrix for the commit containing the C2 closure attestation is terminal success.",
+  "contracts": [
+    "GOAL_LOCK",
+    "AGENTS",
+    "03",
+    "05",
+    "06",
+    "18",
+    "22",
+    "25",
+    "26",
+    "29",
+    "31",
+    "ADR-016"
+  ],
+  "skills": [
+    {
+      "skill_id": "goal-keeper",
+      "version": "0.1.0",
+      "activation_reason": "Prevent C2 from expanding into a second identity, organisation, entitlement or billing implementation."
+    },
+    {
+      "skill_id": "backend-architect",
+      "version": "0.1.0",
+      "activation_reason": "Preserve server authority for identity, tenant, memberships, sessions, trial and entitlements."
+    },
+    {
+      "skill_id": "security-reviewer",
+      "version": "0.1.0",
+      "activation_reason": "Prove phishing-resistant authentication, recovery revocation, cross-tenant isolation and append-only security evidence."
+    },
+    {
+      "skill_id": "test-engineer",
+      "version": "0.1.0",
+      "activation_reason": "Compose P25, seats, entitlements, retention and protected-route evidence on one exact head."
+    }
+  ],
+  "dependencies": {
+    "phases": [
+      "P03",
+      "P21"
+    ],
+    "tasks": [
+      "AX-GE2E-P03-T01",
+      "AX-GE2E-P21-T02"
+    ],
+    "external": [
+      "C0 canonical reconciliation is CLOSED / PASS",
+      "C1 subscriber shell is CLOSED / PASS",
+      "P25 identity and trial abuse runtime is an implementation authority composed into P03 renewal evidence",
+      "Public signup and production identity-provider activation remain separately unauthorized",
+      "Stripe live mode and public launch remain outside C2 authority"
+    ]
+  },
+  "allowed_scope": [
+    "Extend the existing passwordless browser journey to execute account recovery and passkey replacement",
+    "Prove revocation of all pre-recovery sessions and authenticators",
+    "Prove recovery-code one-time use and tenant continuity",
+    "Compose existing P21-T02 seat, entitlement and retention authorities into the C2 evidence record",
+    "Produce exact-head evidence and a typed C2 closure attestation"
+  ],
+  "prohibited_scope": [
+    "No second identity service, tenant store, membership model, entitlement runtime or trial ledger",
+    "No password fallback in the public passwordless journey",
+    "No browser-selected tenant, role, seat, entitlement or trial state",
+    "No public signup activation, production provider activation, Stripe live activation or launch claim",
+    "No C3 persistence or C4 research-spine work before C2 closure",
+    "No AX_C2_IDENTITY_TENANT_TRIAL_PASS marker before final exact-head evidence is terminal success"
+  ],
+  "acceptance_evidence": [
+    {
+      "evidence_type": "TEST",
+      "description": "Real WebAuthn signup, email verification, passkey registration, opaque session, logout and session rotation.",
+      "required": true,
+      "location": "github-actions:30943693350/p25_t01_identity_trial_abuse_e2e",
+      "status": "PASS"
+    },
+    {
+      "evidence_type": "SECURITY_REVIEW",
+      "description": "Recovery from a sessionless browser revokes the active session and all previous authenticators, consumes one recovery code, rejects replay and binds a replacement AAL2 passkey.",
+      "required": true,
+      "location": "artifact:8906279065/artifacts/c2-identity-recovery-browser.json",
+      "status": "PASS"
+    },
+    {
+      "evidence_type": "TEST",
+      "description": "P25 tenant-owned trial, alias reuse, step-up, first admitted AI activation, token/cost limits and concurrency enforcement.",
+      "required": true,
+      "location": "artifact:8906279065/artifacts/identity-trial-abuse-e2e.json",
+      "status": "PASS"
+    },
+    {
+      "evidence_type": "TEST",
+      "description": "Organisation owner bootstrap, invitation acceptance, membership resolution, role authority, seat concurrency, downgrade protection and cross-tenant RLS.",
+      "required": true,
+      "location": "github-actions:30943693350/p21_t02_seat_governance_e2e",
+      "status": "PASS"
+    },
+    {
+      "evidence_type": "TEST",
+      "description": "Tenant-scoped entitlement reservation, exhaustion, expiry and paid no-quota authority.",
+      "required": true,
+      "location": "github-actions:30943693350/entitlement_runtime",
+      "status": "PASS"
+    },
+    {
+      "evidence_type": "RESTORE_TEST",
+      "description": "Trial expiry enters server-enforced read-only retention; suspension, deletion, purge, tenant isolation and restore remain deterministic.",
+      "required": true,
+      "location": "github-actions:30943693350/trial_retention_lifecycle",
+      "status": "PASS"
+    },
+    {
+      "evidence_type": "TRACE",
+      "description": "Protected routes reject missing, revoked and recovered-away sessions while replacement identity continuity is preserved.",
+      "required": true,
+      "location": "github-actions:30943693350/p25_t01_identity_trial_abuse_e2e;github-actions:30943693385/g5_web_security",
+      "status": "PASS"
+    },
+    {
+      "evidence_type": "TEST",
+      "description": "All canonical PR gates and specialised direct checks completed successfully on predecessor exact head 11d8c2435ff899d0276dd4f0d6c51da45775e0dc.",
+      "required": true,
+      "location": "github-actions:core=30943693385;runtime=30943693350;domain=30943693506;remote-pilot=30943693253;procurement=30943692976",
+      "status": "PASS"
+    }
+  ],
+  "impacts": {
+    "security": "CRITICAL",
+    "privacy": "MATERIAL",
+    "data_rights": "LOW",
+    "regulatory": "MATERIAL",
+    "multilingual": "MATERIAL",
+    "epistemic": "MATERIAL",
+    "billing": "CRITICAL"
+  },
+  "observability": {
+    "metrics": [
+      "identity_signup_total",
+      "identity_session_rotation_total",
+      "identity_recovery_total",
+      "identity_recovery_replay_denied_total",
+      "identity_revoked_credential_denied_total",
+      "trial_activation_total",
+      "trial_budget_denied_total",
+      "seat_capacity_denied_total"
+    ],
+    "logs": [
+      "email verification receipt",
+      "passkey registration decision",
+      "session rotation receipt",
+      "recovery-start revocation receipt",
+      "replacement authenticator receipt",
+      "trial activation and reservation receipt"
+    ],
+    "traces": [
+      "signup to passkey",
+      "logout to passkey reauthentication",
+      "recovery to replacement passkey",
+      "organisation membership and seat allocation",
+      "trial READY to ACTIVE to read-only retention"
+    ],
+    "alerts": [
+      "pre-recovery session remains active",
+      "revoked authenticator authenticates",
+      "recovery-code replay succeeds",
+      "cross-tenant membership visibility",
+      "browser-selected entitlement or trial authority"
+    ]
+  },
+  "rollback": {
+    "strategy": "Revert the bounded C2 evidence changes while preserving the existing identity, organisation, seat, entitlement, trial, security and retention ledgers.",
+    "kill_switch": "AXIGNAL_IDENTITY_RUNTIME_ENABLED=false",
+    "tested": true
+  },
+  "goal_lock_checks": [
+    {
+      "check_id": 1,
+      "answer": "YES",
+      "evidence": "C2 implements the contracted identity and trial prerequisite for the B2G opportunity journey."
+    },
+    {
+      "check_id": 2,
+      "answer": "YES",
+      "evidence": "No synthetic identity, tenant, membership, entitlement or trial state is presented as canonical."
+    },
+    {
+      "check_id": 3,
+      "answer": "YES",
+      "evidence": "The change does not modify Globe, Graph or Timeline."
+    },
+    {
+      "check_id": 4,
+      "answer": "YES",
+      "evidence": "Identity and trial authority remains deterministic and server-side."
+    },
+    {
+      "check_id": 5,
+      "answer": "YES",
+      "evidence": "No new locale requirement or unsupported translation claim is introduced."
+    },
+    {
+      "check_id": 6,
+      "answer": "YES",
+      "evidence": "Identity, session, security, membership, entitlement and trial state remain durable ledgers."
+    },
+    {
+      "check_id": 7,
+      "answer": "YES",
+      "evidence": "C2 does not automate bid, approval, communication, signature or submission authority."
+    },
+    {
+      "check_id": 8,
+      "answer": "YES",
+      "evidence": "Recovery, session, tenant, membership, entitlement and cross-tenant boundaries fail closed."
+    },
+    {
+      "check_id": 9,
+      "answer": "YES",
+      "evidence": "Retention expiry, deletion, purge, isolation, restore and identity rollback all passed on the predecessor exact head."
+    },
+    {
+      "check_id": 10,
+      "answer": "YES",
+      "evidence": "C2 is EVIDENCE_READY and becomes accepted only when the closure-attestation head matrix passes."
+    }
+  ],
+  "owner": "Staff Product Engineering",
+  "reviewer": null,
+  "created_at": "2026-08-04T19:10:00Z",
+  "updated_at": "2026-08-04T19:49:00Z"
+}

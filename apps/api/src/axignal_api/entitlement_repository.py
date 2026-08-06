@@ -166,10 +166,17 @@ class EntitlementRepository(ResearchRepository):
                 raise RuntimeError("Trial expiry returned no entitlement")
             return row
 
-    def usage(self, *, tenant_id: UUID) -> dict[str, Any] | None:
+    def usage(
+        self,
+        *,
+        tenant_id: UUID,
+        now: datetime | None = None,
+    ) -> dict[str, Any] | None:
+        current = now or datetime.now(UTC)
         self.expire_due_trial(
             tenant_id=tenant_id,
             actor_subject="system-entitlement-usage",
+            now=current,
         )
         with self._cursor(role="axignal_app", tenant_id=tenant_id) as cursor:
             cursor.execute(

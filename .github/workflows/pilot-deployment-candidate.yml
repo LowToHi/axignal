@@ -1,32 +1,15 @@
 name: Pilot Deployment Candidate
 
 on:
-  pull_request:
-    paths:
-      - "apps/api/src/axignal_api/application.py"
-      - "apps/api/src/axignal_api/persistent_ted_research.py"
-      - "apps/api/src/axignal_api/settings.py"
-      - "apps/api/src/axignal_api/worker.py"
-      - "apps/api/src/axignal_api/pilot_health.py"
-      - "apps/api/tests/test_pilot_health.py"
-      - "apps/web/app/api/health/**"
-      - "apps/web/app/demo/**"
-      - "apps/web/components/demo-guide*"
-      - "infra/pilot/**"
-      - "scripts/verify_pilot_candidate.py"
-      - "scripts/verify_demo_contract.py"
-      - "scripts/verify_ted_product_runtime.py"
-      - "scripts/verify_ted_security_review.py"
-      - "docs/roadmap/14-pilot-deployment-candidate.md"
-      - "docs/runbooks/pilot-deployment.md"
-      - ".github/workflows/pilot-deployment-candidate.yml"
   push:
     branches:
       - main
-      - "agent/**"
-
+  workflow_call:
 permissions:
   contents: read
+
+env:
+  AXIGNAL_EXACT_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
 
 concurrency:
   group: pilot-deployment-${{ github.ref }}
@@ -38,41 +21,75 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Checkout exact branch head
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Prove static-contract exact head
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual_sha="$(git rev-parse HEAD)"
+          tree_sha="$(git rev-parse 'HEAD^{tree}')"
+          test "$actual_sha" = "$AXIGNAL_EXACT_SHA"
+          {
+            printf 'exact_head_sha=%s\n' "$actual_sha"
+            printf 'git_tree_sha=%s\n' "$tree_sha"
+          } | tee pilot-static-exact-head.txt
+
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.13"
+
       - name: Install Python development dependencies
         run: python -m pip install --upgrade pip && python -m pip install -e ".[dev]"
+
       - name: Lint pilot boundary
         run: |
           ruff check \
+            apps/api/src/axignal_api/c4_axent_e2e.py \
             apps/api/src/axignal_api/pilot_health.py \
+            apps/api/tests/test_c4_axent_e2e_contract.py \
             apps/api/tests/test_pilot_health.py \
+            infra/pilot/remote/tests/test_axent_secret_wiring.py \
             scripts/verify_pilot_candidate.py \
             scripts/verify_demo_contract.py \
             scripts/verify_ted_product_runtime.py \
             scripts/verify_ted_security_review.py
-      - name: Test pilot health boundary
-        run: pytest apps/api/tests/test_pilot_health.py
+
+      - name: Test pilot and C4 static boundaries
+        run: |
+          pytest \
+            apps/api/tests/test_pilot_health.py \
+            apps/api/tests/test_c4_axent_e2e_contract.py \
+            infra/pilot/remote/tests/test_axent_secret_wiring.py
+
       - name: Verify deployment contract
         run: python scripts/verify_pilot_candidate.py | tee pilot-contract.json
+
       - name: Verify canonical demo
         run: python scripts/verify_demo_contract.py | tee pilot-demo.json
+
       - name: Verify accepted TED runtime contract
         run: |
           python scripts/verify_ted_product_runtime.py | tee pilot-ted-contract.json
           python scripts/verify_ted_security_review.py | tee pilot-ted-security.json
+
       - name: Validate shell syntax
         run: |
           bash -n infra/pilot/backup.sh
           bash -n infra/pilot/restore-rehearsal.sh
           bash -n infra/pilot/harden-db.sh
+
       - name: Upload static evidence
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: pilot-static-evidence
+          name: pilot-static-evidence-${{ env.AXIGNAL_EXACT_SHA }}
           path: |
+            pilot-static-exact-head.txt
             pilot-contract.json
             pilot-demo.json
             pilot-ted-contract.json
@@ -84,17 +101,45 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Checkout exact branch head
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Prove web-build exact head
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual_sha="$(git rev-parse HEAD)"
+          tree_sha="$(git rev-parse 'HEAD^{tree}')"
+          test "$actual_sha" = "$AXIGNAL_EXACT_SHA"
+          {
+            printf 'exact_head_sha=%s\n' "$actual_sha"
+            printf 'git_tree_sha=%s\n' "$tree_sha"
+          } | tee pilot-web-build-exact-head.txt
+
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "22.14.0"
+
       - run: corepack enable
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
-      - run: pnpm build
+      - run: AXIGNAL_BUILD_SHA="$AXIGNAL_EXACT_SHA" pnpm build
+
+      - name: Upload web-build identity evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: pilot-web-build-evidence-${{ env.AXIGNAL_EXACT_SHA }}
+          path: pilot-web-build-exact-head.txt
+          if-no-files-found: error
+          retention-days: 14
 
   runtime-acceptance:
-    name: Private edge, live TED, health, auth, backup and restore
+    name: Private edge, live TED, AXENT, auth, backup and restore
     runs-on: ubuntu-latest
     timeout-minutes: 50
     needs: [static-contract, web-build]
@@ -105,12 +150,30 @@ jobs:
       AXIGNAL_POSTGRES_USER: axignal
       AXIGNAL_POSTGRES_DB: axignal
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Checkout exact branch head
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Prove runtime-acceptance exact head
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual_sha="$(git rev-parse HEAD)"
+          tree_sha="$(git rev-parse 'HEAD^{tree}')"
+          test "$actual_sha" = "$AXIGNAL_EXACT_SHA"
+          {
+            printf 'exact_head_sha=%s\n' "$actual_sha"
+            printf 'git_tree_sha=%s\n' "$tree_sha"
+          } | tee pilot-runtime-exact-head.txt
+
       - name: Create synthetic CI-only pilot environment
         shell: bash
         run: |
           cat > "$AXIGNAL_PILOT_ENV_FILE" <<'ENV'
-          AXIGNAL_BUILD_SHA=${{ github.sha }}
+          AXIGNAL_BUILD_SHA=${{ env.AXIGNAL_EXACT_SHA }}
           AXIGNAL_PILOT_SITE_ADDRESS=:80
           AXIGNAL_PILOT_CADDY_SITE_ADDRESS=:80
           AXIGNAL_PILOT_EDGE_MODE=shared-traefik
@@ -132,35 +195,89 @@ jobs:
           AXIGNAL_AUTH_PASSWORD_SCRYPT='scrypt$00112233445566778899aabbccddeeff$c90f8bf5f5c77a981b682204633909aba0e58fe328cb71c9c357399c5ca92ea4a088a494b462b96f17efb7360ac400648f893f36fa31d4ec996236784dcbee94'
           AXIGNAL_SESSION_SECRET=ci-session-secret-with-at-least-32-bytes
           AXIGNAL_IDENTITY_ASSERTION_SECRET=ci-identity-secret-with-at-least-32-bytes
+          AXIGNAL_AXENT_ENCRYPTION_KEY=ci-axent-encryption-key-with-at-least-32-bytes
           AXIGNAL_VALIDATION_PARTICIPANT_SALT=ci-participant-salt-with-at-least-32-bytes
           AXIGNAL_OTEL_ENABLED=false
           ENV
+
       - name: Validate Compose rendering
         run: docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" -f "$AXIGNAL_PILOT_COMPOSE_FILE" -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE" config >/dev/null
+
       - name: Start private pilot core
         run: docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" -f "$AXIGNAL_PILOT_COMPOSE_FILE" -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE" up --build --detach --wait
+
       - name: Verify web and API readiness
         shell: bash
         run: |
           curl --fail --silent http://127.0.0.1:18080/api/health | tee pilot-web-health.json
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          health = json.loads(Path("pilot-web-health.json").read_text())
+          assert health["buildSha"] == os.environ["AXIGNAL_EXACT_SHA"], health
+          PY
           docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" -f "$AXIGNAL_PILOT_COMPOSE_FILE" -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE" exec -T api \
             python -c "import urllib.request; print(urllib.request.urlopen('http://127.0.0.1:8000/readyz').read().decode())" \
             | tee pilot-api-readiness.json
-      - name: Verify authenticated demo route
+
+      - name: Verify protected demo without reopening legacy login
         shell: bash
         run: |
-          set -o pipefail
-          curl --fail --silent --show-error \
-            --dump-header pilot-login-headers.txt \
-            --output pilot-login.json \
-            --cookie-jar pilot-cookie-jar.txt \
-            -H 'content-type: application/json' \
-            -d '{"email":"pilot@example.test","password":"pilot-password"}' \
-            http://127.0.0.1:18080/api/auth/login
-          grep -q '"authenticated":true' pilot-login.json
-          COOKIE_VALUE="$(
-            sed -n 's/^[Ss]et-[Cc]ookie: axignal_session=\([^;]*\).*/\1/p' \
-              pilot-login-headers.txt | tr -d '\r' | tail -n 1
+          set -euo pipefail
+          set -a
+          source "$AXIGNAL_PILOT_ENV_FILE"
+          set +a
+
+          LOGIN_STATUS="$(
+            curl --silent --show-error \
+              --output pilot-login-disabled.json \
+              --write-out '%{http_code}' \
+              -H 'content-type: application/json' \
+              -d '{"email":"pilot@example.test","password":"pilot-password"}' \
+              http://127.0.0.1:18080/api/auth/login
+          )"
+          test "$LOGIN_STATUS" = "404"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          payload = json.loads(Path("pilot-login-disabled.json").read_text())
+          assert payload == {
+              "error": "request_rejected",
+              "code": "legacy_password_login_disabled",
+          }
+          PY
+
+          COOKIE_VALUE="$(python - <<'PY'
+          import base64
+          import hashlib
+          import hmac
+          import json
+          import os
+          import time
+
+          version = "v1"
+          now = int(time.time())
+          claims = {
+              "sub": os.environ["AXIGNAL_AUTH_SUBJECT"],
+              "email": os.environ["AXIGNAL_AUTH_EMAIL"].lower(),
+              "iat": now,
+              "exp": now + 8 * 60 * 60,
+          }
+          encoded = base64.urlsafe_b64encode(
+              json.dumps(claims, separators=(",", ":")).encode("utf-8")
+          ).rstrip(b"=").decode("ascii")
+          signature = base64.urlsafe_b64encode(
+              hmac.new(
+                  os.environ["AXIGNAL_SESSION_SECRET"].encode("utf-8"),
+                  f"{version}.{encoded}".encode("utf-8"),
+                  hashlib.sha256,
+              ).digest()
+          ).rstrip(b"=").decode("ascii")
+          print(f"{version}.{encoded}.{signature}")
+          PY
           )"
           test -n "$COOKIE_VALUE"
           curl --fail --silent --show-error \
@@ -169,12 +286,14 @@ jobs:
             -H "Cookie: axignal_session=$COOKIE_VALUE" \
             http://127.0.0.1:18080/demo
           grep -q "From proposal to defensible knowledge" pilot-demo.html
+
       - name: Start only the bounded TED research worker
         run: |
           docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" \
             -f "$AXIGNAL_PILOT_COMPOSE_FILE" \
             -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE" \
             --profile workers up --build --detach research-worker
+
       - name: Execute live authenticated TED ResearchRun
         shell: bash
         run: |
@@ -186,7 +305,6 @@ jobs:
           import json
           import os
           import time
-          import urllib.error
           import urllib.request
           from uuid import UUID
 
@@ -257,6 +375,36 @@ jobs:
               "public_general_availability": False,
           }, sort_keys=True))
           PY
+
+      - name: Prepare C4 ResearchRun-to-AXENT state
+        shell: bash
+        run: |
+          set -o pipefail
+          docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" \
+            -f "$AXIGNAL_PILOT_COMPOSE_FILE" \
+            -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE" exec -T api \
+            python -m axignal_api.c4_axent_e2e prepare \
+            | tee pilot-c4-axent-prepare.json
+
+      - name: Restart AXENT API and web processes
+        run: |
+          docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" \
+            -f "$AXIGNAL_PILOT_COMPOSE_FILE" \
+            -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE" restart api web
+          docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" \
+            -f "$AXIGNAL_PILOT_COMPOSE_FILE" \
+            -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE" up --detach --wait api web
+
+      - name: Verify C4 persistence, isolation and governed deletion
+        shell: bash
+        run: |
+          set -o pipefail
+          docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" \
+            -f "$AXIGNAL_PILOT_COMPOSE_FILE" \
+            -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE" exec -T api \
+            python -m axignal_api.c4_axent_e2e verify \
+            | tee pilot-c4-axent-verify.json
+
       - name: Verify edge security headers
         shell: bash
         run: |
@@ -264,37 +412,43 @@ jobs:
           grep -qi '^x-frame-options: DENY' pilot-headers.txt
           grep -qi '^x-content-type-options: nosniff' pilot-headers.txt
           grep -qi '^content-security-policy:' pilot-headers.txt
+
       - name: Rehearse backup and restore
         run: bash infra/pilot/restore-rehearsal.sh | tee pilot-restore.json
+
       - name: Upload runtime evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: pilot-runtime-evidence
+          name: pilot-runtime-evidence-${{ env.AXIGNAL_EXACT_SHA }}
           path: |
+            pilot-runtime-exact-head.txt
             pilot-web-health.json
             pilot-api-readiness.json
-            pilot-login-headers.txt
-            pilot-login.json
-            pilot-cookie-jar.txt
+            pilot-login-disabled.json
             pilot-demo-headers.txt
             pilot-demo.html
             pilot-ted-runtime.json
+            pilot-c4-axent-prepare.json
+            pilot-c4-axent-verify.json
             pilot-headers.txt
             pilot-restore.json
           if-no-files-found: ignore
           retention-days: 14
+
       - name: Capture service logs
         if: failure()
         run: docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" -f "$AXIGNAL_PILOT_COMPOSE_FILE" -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE" --profile workers logs > pilot-services.log 2>&1 || true
+
       - name: Upload failure logs
         if: failure()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: pilot-failure-logs
+          name: pilot-failure-logs-${{ env.AXIGNAL_EXACT_SHA }}
           path: pilot-services.log
           if-no-files-found: ignore
           retention-days: 7
+
       - name: Destroy pilot services
         if: always()
         run: docker compose --env-file "$AXIGNAL_PILOT_ENV_FILE" -f "$AXIGNAL_PILOT_COMPOSE_FILE" -f "$AXIGNAL_PILOT_COMPOSE_EDGE_FILE" --profile workers down --volumes --remove-orphans

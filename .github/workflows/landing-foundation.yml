@@ -1,78 +1,220 @@
 name: Landing Globe
 
 on:
-  pull_request:
+  push:
+    branches:
+      - main
+      - "codex/landing-b2g-international"
     paths:
       - "skills/**/SKILL.md"
+      - "skills/axignal-cinematic-webgl-scroll/**"
+      - "skills/axignal-gsap-ui-ux/**"
       - "docs/landing/**"
-      - "docs/roadmap/16-landing-globe-foundation.md"
-      - "docs/roadmap/17-landing-globe-production.md"
       - "apps/landing/**"
       - "tests/landing/**"
-      - "playwright.landing.config.ts"
-      - "package.json"
-      - "pnpm-lock.yaml"
-      - "pnpm-workspace.yaml"
       - "scripts/verify_landing_foundation.py"
       - "scripts/verify_landing_implementation.py"
       - "scripts/acquire_globe_assets.py"
       - ".github/workflows/landing-foundation.yml"
-  push:
-    branches: [main, "agent/**"]
+  workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
+
+env:
+  AXIGNAL_EXACT_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
 
 concurrency:
   group: landing-globe-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  landing:
+  contract-static:
+    name: Contract, typecheck, build and audits
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Checkout exact branch head
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Prove exact-head checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual_sha="$(git rev-parse HEAD)"
+          tree_sha="$(git rev-parse 'HEAD^{tree}')"
+          test "$actual_sha" = "$AXIGNAL_EXACT_SHA"
+          {
+            printf 'exact_head_sha=%s\n' "$actual_sha"
+            printf 'git_tree_sha=%s\n' "$tree_sha"
+          } | tee landing-exact-head.txt
+
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "22.14.0"
+
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.13"
+
       - name: Enable pinned pnpm
         run: corepack enable
-      - name: Install JavaScript dependencies
+
+      - name: Install immutable dependencies
         run: pnpm install --frozen-lockfile
+
       - name: Install Python validation tools
         run: python -m pip install --upgrade pip ruff==0.12.12
+
       - name: Lint landing validation tooling
         run: ruff check scripts/verify_landing_foundation.py scripts/verify_landing_implementation.py scripts/acquire_globe_assets.py
-      - name: Validate landing contracts
+
+      - name: Run canonical landing contract tests
+        run: pnpm --filter @axignal/landing test
+
+      - name: Run strict landing typecheck
+        run: pnpm --filter @axignal/landing typecheck
+
+      - name: Run production build
+        run: pnpm --filter @axignal/landing build
+
+      - name: Validate foundation and implementation contracts
         shell: bash
         run: |
-          set -o pipefail
+          set -euo pipefail
           python scripts/verify_landing_foundation.py | tee landing-foundation.json
           python scripts/verify_landing_implementation.py | tee landing-implementation.json
+
       - name: Verify acquisition plan without network
         run: python scripts/acquire_globe_assets.py --output /tmp/axignal-globe-assets --dry-run | tee asset-acquisition-plan.json
-      - name: Typecheck landing
-        run: pnpm --filter @axignal/landing typecheck
-      - name: Build landing
-        run: pnpm --filter @axignal/landing build
-      - name: Install Chromium
-        run: pnpm exec playwright install --with-deps chromium
-      - name: Run landing browser contract
-        run: pnpm exec playwright test -c playwright.landing.config.ts
-      - name: Upload landing evidence
+
+      - name: Audit GSAP motion contract
+        run: |
+          node skills/axignal-gsap-ui-ux/scripts/audit-gsap-motion.mjs --self-test
+          node skills/axignal-gsap-ui-ux/scripts/audit-gsap-motion.mjs apps/landing
+
+      - name: Audit WebGL Globe contract
+        run: |
+          node skills/axignal-cinematic-webgl-scroll/scripts/audit-webgl-globe.mjs --self-test
+          node skills/axignal-cinematic-webgl-scroll/scripts/audit-webgl-globe.mjs
+
+      - name: Emit static contractual markers
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo LANDING_CANONICAL_B2G_COPY_PASS
+            echo LANDING_PUBLIC_TED_ABSENT_PASS
+            echo LANDING_PRICE_BOOK_RECONCILIATION_PASS
+            echo LANDING_B2G_TRIAL_INTAKE_PASS
+            echo LANDING_NO_INDEX_PASS
+            echo LANDING_TYPECHECK_PASS
+            echo LANDING_BUILD_PASS
+            echo LANDING_WEBGL_PASS
+            echo LANDING_STATIC_EXACT_HEAD_PASS
+          } | tee landing-contract-markers.txt
+
+      - name: Upload static evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: landing-globe-evidence
+          name: landing-static-${{ env.AXIGNAL_EXACT_SHA }}
           path: |
+            landing-exact-head.txt
             landing-foundation.json
             landing-implementation.json
             asset-acquisition-plan.json
-            playwright-report
+            landing-contract-markers.txt
+          if-no-files-found: error
+          retention-days: 30
+
+  browser-matrix:
+    name: Globe, desktop, mobile and reduced motion
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Checkout exact branch head
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ env.AXIGNAL_EXACT_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Prove exact-head checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual_sha="$(git rev-parse HEAD)"
+          tree_sha="$(git rev-parse 'HEAD^{tree}')"
+          test "$actual_sha" = "$AXIGNAL_EXACT_SHA"
+          {
+            printf 'exact_head_sha=%s\n' "$actual_sha"
+            printf 'git_tree_sha=%s\n' "$tree_sha"
+          } | tee landing-browser-exact-head.txt
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22.14.0"
+
+      - name: Enable pinned pnpm
+        run: corepack enable
+
+      - name: Install immutable dependencies and Chromium
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm exec playwright install --with-deps chromium
+
+      - name: Build landing
+        run: pnpm --filter @axignal/landing build
+
+      - name: Start exact build
+        shell: bash
+        run: |
+          set -euo pipefail
+          pnpm --filter @axignal/landing start > landing-server.log 2>&1 &
+          echo $! > landing-server.pid
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent --show-error http://127.0.0.1:3001/ >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat landing-server.log
+          exit 1
+
+      - name: Run desktop, mobile and reduced-motion browser contract
+        shell: bash
+        run: |
+          set -o pipefail
+          pnpm exec playwright test --config=tests/landing/playwright.config.ts 2>&1 | tee landing-browser.log
+
+      - name: Emit browser contractual markers
+        if: success()
+        shell: bash
+        run: |
+          {
+            echo LANDING_DESKTOP_PASS
+            echo LANDING_MOBILE_PASS
+            echo LANDING_REDUCED_MOTION_PASS
+            echo LANDING_EXACT_HEAD_MATRIX_PASS
+          } | tee landing-browser-markers.txt
+
+      - name: Upload browser evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: landing-browser-${{ env.AXIGNAL_EXACT_SHA }}
+          path: |
+            landing-browser-exact-head.txt
+            landing-browser.log
+            landing-browser-markers.txt
+            landing-server.log
             test-results
-          if-no-files-found: ignore
-          retention-days: 14
+            playwright-report
+          if-no-files-found: warn
+          retention-days: 30

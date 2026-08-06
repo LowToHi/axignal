@@ -2,25 +2,6 @@ name: First Lawful Universe
 
 on:
   workflow_dispatch:
-  pull_request:
-    branches:
-      - main
-    paths:
-      - "data/sources/ted-search-api-v3.v0.1.json"
-      - "data/universes/**"
-      - "docs/adr/ADR-012-european-public-procurement-first-universe.md"
-      - "docs/adr/README.md"
-      - "docs/contracts/11-hypothesis-register.md"
-      - "docs/research/first-lawful-universe-selection-v0.1.md"
-      - "docs/roadmap/06-current-execution-state.md"
-      - "docs/roadmap/tasks/AX-F8-*.json"
-      - "docs/sources/ted-search-api-v3.md"
-      - "apps/api/src/axignal_api/connectors/ted.py"
-      - "apps/api/tests/fixtures/ted_search_probe.json"
-      - "apps/api/tests/test_ted_connector.py"
-      - "scripts/verify_first_lawful_universe.py"
-      - "scripts/verify_ted_live_source.py"
-      - ".github/workflows/first-lawful-universe.yml"
   push:
     branches:
       - main
@@ -41,6 +22,7 @@ on:
       - "scripts/verify_ted_live_source.py"
       - ".github/workflows/first-lawful-universe.yml"
 
+  workflow_call:
 permissions:
   contents: read
 

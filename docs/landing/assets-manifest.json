@@ -6,10 +6,20 @@
       "id": "earth-albedo-february",
       "source": "NASA Blue Marble: Next Generation",
       "source_page": "https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/base-map/",
-      "acquisition_url": "https://assets.science.nasa.gov/content/dam/science/esd/eo/images/bmng/bmng-base/february/world.200402.3x21600x10800.jpg",
+      "acquisition_url": "https://assets.science.nasa.gov/content/dam/science/esd/eo/images/bmng/bmng-base/february/world.200402.3x5400x2700.jpg",
       "rights_basis": "NASA media resource; verify current NASA media-use guidance before public release",
-      "original_dimensions": [21600, 10800],
-      "derivatives": ["earth-albedo-desktop.ktx2", "earth-albedo-mobile.ktx2"],
+      "original_dimensions": [5400, 2700],
+      "derivatives": ["earth-albedo.webp", "earth-albedo-mobile.webp"],
+      "hotlink": false
+    },
+    {
+      "id": "earth-clouds-2002",
+      "source": "NASA Blue Marble: Clouds",
+      "source_page": "https://visibleearth.nasa.gov/images/57747/blue-marble-clouds/77558l",
+      "acquisition_url": "https://eoimages.gsfc.nasa.gov/images/imagerecords/57000/57747/cloud_combined_2048.jpg",
+      "rights_basis": "NASA media resource; NASA Earth Observatory credit required and no endorsement implied",
+      "original_dimensions": [2048, 1024],
+      "derivatives": ["earth-clouds.webp"],
       "hotlink": false
     },
     {
@@ -26,7 +36,7 @@
       "id": "countries-110m",
       "source": "Natural Earth",
       "source_page": "https://www.naturalearthdata.com/downloads/110m-cultural-vectors/110m-admin-0-countries/",
-      "acquisition_url": "https://naturalearth.s3.amazonaws.com/110m_cultural/ne_110m_admin_0_countries.zip",
+      "acquisition_url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson",
       "rights_basis": "public domain",
       "derivatives": ["countries-110m.simplified.geojson"],
       "hotlink": false
@@ -37,7 +47,7 @@
       "source_page": "https://www.naturalearthdata.com/downloads/50m-cultural-vectors/50m-admin-0-boundary-lines/",
       "acquisition_url": "https://naturalearth.s3.amazonaws.com/50m_cultural/ne_50m_admin_0_boundary_lines_land.zip",
       "rights_basis": "public domain",
-      "derivatives": ["boundaries-50m.simplified.geojson"],
+      "derivatives": ["europe-boundaries-50m.geojson"],
       "hotlink": false
     },
     {
@@ -46,14 +56,15 @@
       "source_page": "https://www.naturalearthdata.com/downloads/50m-physical-vectors/50m-coastline/",
       "acquisition_url": "https://naturalearth.s3.amazonaws.com/50m_physical/ne_50m_coastline.zip",
       "rights_basis": "public domain",
-      "derivatives": ["coastline-50m.simplified.geojson"],
+      "derivatives": ["europe-boundaries-50m.geojson"],
       "hotlink": false
     }
   ],
   "owned_assets": [
     "apps/web/public/brand/axignal-logo.svg",
     "apps/web/public/brand/axignal-logo-dark.svg",
-    "apps/web/public/brand/axignal-isotipo.svg"
+    "apps/web/public/brand/axignal-isotipo.svg",
+    "apps/landing/public/brand/axignal-aura.svg"
   ],
   "required_fallbacks": [
     "opengraph-image.jpg",

@@ -1,0 +1,48 @@
+{
+  "schema_version": "axignal.o01-terms-observations/v0.1",
+  "mode": "OFFLINE_TEST_FIXTURE",
+  "observed_at": "2026-08-01T12:00:00Z",
+  "expires_at": "2026-08-31T12:00:00Z",
+  "documents": {
+    "ted-legal-notice-2026": {
+      "status": "PASS",
+      "url": "https://ted.europa.eu/en/legal-notice",
+      "final_url": "https://ted.europa.eu/en/legal-notice",
+      "http_status": 200,
+      "content_sha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+      "critical_anchors_expected": 5,
+      "critical_anchors_present": 5,
+      "missing_anchors": []
+    },
+    "ted-search-api-3.0": {
+      "status": "PASS",
+      "url": "https://docs.ted.europa.eu/api/latest/search.html",
+      "final_url": "https://docs.ted.europa.eu/api/latest/search.html",
+      "http_status": 200,
+      "content_sha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+      "critical_anchors_expected": 3,
+      "critical_anchors_present": 3,
+      "missing_anchors": []
+    },
+    "ted-data-reuse-help-2026": {
+      "status": "PASS",
+      "url": "https://ted.europa.eu/en/help/data-reuse",
+      "final_url": "https://ted.europa.eu/en/help/data-reuse",
+      "http_status": 200,
+      "content_sha256": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+      "critical_anchors_expected": 3,
+      "critical_anchors_present": 3,
+      "missing_anchors": []
+    },
+    "commission-decision-2011-833-eu": {
+      "status": "PASS",
+      "url": "https://eur-lex.europa.eu/eli/dec/2011/833/oj",
+      "final_url": "https://eur-lex.europa.eu/eli/dec/2011/833/oj",
+      "http_status": 200,
+      "content_sha256": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+      "critical_anchors_expected": 3,
+      "critical_anchors_present": 3,
+      "missing_anchors": []
+    }
+  }
+}
