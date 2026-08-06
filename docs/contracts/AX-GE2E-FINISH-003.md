@@ -189,18 +189,18 @@ Durante el cierre no se permite:
 
 | Work package | Cumplidas | Total | Estado |
 |---|---:|---:|---|
-| `WP0` Canonicalización C0–C4 | 9 | 12 | `IN_PROGRESS` |
+| `WP0` Canonicalización C0–C4 | 10 | 12 | `IN_PROGRESS` |
 | `WP1` Investigación, AXENT y evidencia real | 0 | 10 | `BLOCKED_BY_WP0` |
 | `WP2` O01, Opportunity y Bid Workspace | 0 | 12 | `BLOCKED_BY_WP1` |
 | `WP3` Comercial, billing y Founder Operations | 0 | 12 | `BLOCKED_BY_WP2` |
 | `WP4` Producción, seguridad, UX y distribución | 0 | 12 | `BLOCKED_BY_WP3` |
 | `WP5` Aceptación privada | 0 | 7 | `BLOCKED_BY_WP4` |
 | `WP6` P27, release y lanzamiento | 0 | 10 | `BLOCKED_BY_WP5` |
-| **TOTAL** | **9** | **75** | **E2E INCOMPLETE** |
+| **TOTAL** | **10** | **75** | **E2E INCOMPLETE** |
 
 ```text
 ACTIVE_WORK_PACKAGE          WP0
-ACTIVE_TASK                  WP0-T10
+ACTIVE_TASK                  WP0-T11
 NEXT_CANONICAL_MARKER        AX_C0_C4_CANONICAL_MAIN_PASS
 PUBLIC_LAUNCH                NO_GO
 ```
@@ -252,9 +252,9 @@ El panel se actualizará en el mismo cambio que marque o reabra una tarea. En ca
   **Cierre:** rama actualizada respecto a `main`, sin pérdida de cambios ni ampliación de alcance; pruebas afectadas PASS.  
   **Evidencia:** `MAIN_SHA=6091795f79aec19c9dcbac71bb8b6b19877f101b`; `MERGE_BASE=6091795f79aec19c9dcbac71bb8b6b19877f101b`; `RECONCILED_HEAD=316f34d0ec3c2bc1fc91e0fa2494840a5aa8e243`; comparación `ahead_by=983`, `behind_by=0`; commit `merge(main): reconcile latest storage governance baseline`; cinco root gates exact-head `SUCCESS`.
 
-- [ ] **WP0-T10 — Dejar el PR contractual listo y protegiblemente fusionable.**  
+- [x] **WP0-T10 — Dejar el PR contractual listo y protegiblemente fusionable.**  
   **Cierre:** PR no draft, mergeable, checks obligatorios PASS, expected head verificado y cero conversaciones bloqueantes.  
-  **Evidencia requerida:** snapshot del PR y `expected_head_sha`.
+  **Evidencia:** `PR=169`; `EVIDENCE_SHA=f64fa9f0737df7725ae9f6e95fa9c5898656d34e`; `expected_head_sha=f64fa9f0737df7725ae9f6e95fa9c5898656d34e`; `state=OPEN`; `draft=false`; `mergeable=true`; `blocking_requested_changes=0`; `Core=31093095249 SUCCESS`; `Runtime=31093094248 SUCCESS`; `Domain=31093093278 SUCCESS`; `Procurement Admission=31093074068 SUCCESS`; `Remote Pilot Operations=31093074039 SUCCESS`.
 
 - [ ] **WP0-T11 — Completar el merge protegido a `main`.**  
   **Cierre:** merge realizado mediante la protección configurada, sin bypass y sobre el head esperado.  
@@ -570,7 +570,7 @@ CONTRACT_ID                  AX-GE2E-FINISH-003
 CONTRACT_VERSION             1.1.0-checklist.1
 CONTRACT_STATE               ACTIVE_BINDING
 ACTIVE_WORK_PACKAGE          WP0
-ACTIVE_TASK                  WP0-T10
+ACTIVE_TASK                  WP0-T11
 NEXT_CANONICAL_MARKER        AX_C0_C4_CANONICAL_MAIN_PASS
 PUBLIC_LAUNCH                NO_GO
 ```
