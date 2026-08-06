@@ -8,6 +8,11 @@ test-results/
 .turbo/
 .data/
 artifacts/subscriber-dev.*.log
+reports/actions-storage-*.json
+reports/actions-storage-*.md
+reports/actions-storage-*.log
+reports/actions-retention-migration.json
+reports/actions-retention-migration.log
 *.tsbuildinfo
 .env
 .env.*
