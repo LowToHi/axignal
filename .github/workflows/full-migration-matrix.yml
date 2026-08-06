@@ -68,27 +68,17 @@ jobs:
       - name: Execute C3 persistent authority backup and restore
         shell: bash
         run: |
-          set -o pipefail
-          cat > /tmp/run-c3-with-diagnostics.sh <<'BASH'
-          #!/usr/bin/env bash
-          set -Eeuo pipefail
-
-          c3_err_report() {
-            local rc=$?
-            trap - ERR
-            printf 'C3_DIAGNOSTIC rc=%s source=%s line=%s function=%s\n' \
-              "$rc" \
-              "${BASH_SOURCE[1]:-unknown}" \
-              "${BASH_LINENO[0]:-unknown}" \
-              "${FUNCNAME[1]:-main}" >&2
-            exit "$rc"
-          }
-
-          trap c3_err_report ERR
-          source scripts/verify_c3_persistent_authority_e2e.sh
-          BASH
-          bash /tmp/run-c3-with-diagnostics.sh \
+          set -euo pipefail
+          set +e
+          bash scripts/verify_c3_persistent_authority_e2e.sh \
             2>&1 | tee c3-persistent-authority-e2e.log
+          c3_status=${PIPESTATUS[0]}
+          set -e
+          if [[ "$c3_status" -ne 0 ]]; then
+            printf 'C3_DIAGNOSTIC rc=%s boundary=script_terminal\n' \
+              "$c3_status" >&2
+            exit "$c3_status"
+          fi
           python - <<'PY'
           import json
           from pathlib import Path
