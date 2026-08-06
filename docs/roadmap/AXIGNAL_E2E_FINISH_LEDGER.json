@@ -19,8 +19,8 @@
     "pull_request_state": "OPEN_READY_FOR_CONTROLLED_MERGE_AFTER_REVALIDATION",
     "canonical_main_sha": "fae293b9f2c6cc1ebfffd2302f3ce6ddcfef00c2",
     "last_validated_product_sha": "90edfb1e0697ced0e0b4eb90d7f18d93f4661c7f",
-    "current_branch_sha": "ca05c94d1e4689ffdf6acca478a42a4fc16afa33",
-    "current_branch_sha_reason": "Documentation-only successor containing the human-authority release-then-iterate amendment. This ledger commit will become the next branch head and must pass exact-head root gates before controlled merge.",
+    "current_branch_sha": "9187eb63e6c057b38ae2896963b1b294a0e5dd09",
+    "current_branch_sha_reason": "Current documentation successor containing the release-then-iterate amendment and synchronized ledger. It must pass exact-head root gates before controlled merge.",
     "documentation_contract_commit": "ca05c94d1e4689ffdf6acca478a42a4fc16afa33"
   },
   "execution": {
