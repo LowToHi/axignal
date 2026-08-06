@@ -1,13 +1,13 @@
 # AXIGNAL — Contrato canónico de cierre E2E con checklist ejecutable
 
 **Contract ID:** `AX-GE2E-FINISH-003`  
-**Versión contractual:** `1.1.0-checklist.1`  
+**Versión contractual:** `1.1.0-checklist.2`  
 **Fecha de ratificación original:** `2026-08-05T17:00:45+02:00`  
-**Fecha de enmienda operativa:** `2026-08-05T20:23:00+02:00`  
+**Fecha de enmienda operativa:** `2026-08-06T17:00:20+02:00`  
 **Estado:** `RATIFIED / ACTIVE / BINDING`  
 **Autoridad humana:** `Rafael López`  
 **Repositorio:** `LowToHi/axignal`  
-**Rama de materialización:** `agent/axignal-c0-canonical-reconciliation-v1`  
+**Rama de materialización:** `agent/axignal-wp0-post-merge-release-repair`  
 **Aplicación objetivo:** `AXIGNAL B2G Opportunity Intelligence & Operations v1.0`  
 **Resultado contractual:** una aplicación completa, desplegable, cobrable, operable y utilizable de extremo a extremo para contratación pública.
 
@@ -32,9 +32,12 @@ Desde esta versión:
 HUMAN_AUTHORITY_APPROVAL     APPROVED
 APPROVED_BY                  Rafael López
 AMENDMENT_EFFECTIVE_AT       2026-08-05T20:23:00+02:00
+CONTROL_UPDATE_AT            2026-08-06T17:00:20+02:00
 CONTRACT_STATUS              RATIFIED_ACTIVE
 PUBLIC_LAUNCH_AUTHORITY      false
 ```
+
+La actualización `1.1.0-checklist.2` registra el repair post-merge, su evidencia exact-head y el bloqueo administrativo de protección de `main`. No modifica los criterios de cierre y no marca `WP0-T11` ni `WP0-T12` como cumplidas.
 
 ---
 
@@ -189,7 +192,7 @@ Durante el cierre no se permite:
 
 | Work package | Cumplidas | Total | Estado |
 |---|---:|---:|---|
-| `WP0` Canonicalización C0–C4 | 10 | 12 | `IN_PROGRESS` |
+| `WP0` Canonicalización C0–C4 | 10 | 12 | `BLOCKED_BY_MAIN_PROTECTION` |
 | `WP1` Investigación, AXENT y evidencia real | 0 | 10 | `BLOCKED_BY_WP0` |
 | `WP2` O01, Opportunity y Bid Workspace | 0 | 12 | `BLOCKED_BY_WP1` |
 | `WP3` Comercial, billing y Founder Operations | 0 | 12 | `BLOCKED_BY_WP2` |
@@ -201,6 +204,12 @@ Durante el cierre no se permite:
 ```text
 ACTIVE_WORK_PACKAGE          WP0
 ACTIVE_TASK                  WP0-T11
+ACTIVE_BRANCH                agent/axignal-wp0-post-merge-release-repair
+ACTIVE_PULL_REQUEST          177
+EXPECTED_EXECUTABLE_HEAD     ad29aa13437ee16fb3f067949ad24a09972f0bed
+TECHNICAL_VALIDATION         EXACT_HEAD_GREEN
+ACTIVE_BLOCKER               AX-CLOSE-BLK-005_MAIN_PROTECTION
+WP0_T12_STATUS               READY_BLOCKED_BY_WP0_T11
 NEXT_CANONICAL_MARKER        AX_C0_C4_CANONICAL_MAIN_PASS
 PUBLIC_LAUNCH                NO_GO
 ```
@@ -254,15 +263,41 @@ El panel se actualizará en el mismo cambio que marque o reabra una tarea. En ca
 
 - [x] **WP0-T10 — Dejar el PR contractual listo y protegiblemente fusionable.**  
   **Cierre:** PR no draft, mergeable, checks obligatorios PASS, expected head verificado y cero conversaciones bloqueantes.  
-  **Evidencia:** `PR=169`; `EVIDENCE_SHA=f64fa9f0737df7725ae9f6e95fa9c5898656d34e`; `expected_head_sha=f64fa9f0737df7725ae9f6e95fa9c5898656d34e`; `state=OPEN`; `draft=false`; `mergeable=true`; `blocking_requested_changes=0`; `Core=31093095249 SUCCESS`; `Runtime=31093094248 SUCCESS`; `Domain=31093093278 SUCCESS`; `Procurement Admission=31093074068 SUCCESS`; `Remote Pilot Operations=31093074039 SUCCESS`.
+  **Evidencia vigente:** `PR=177`; `EVIDENCE_SHA=ad29aa13437ee16fb3f067949ad24a09972f0bed`; `expected_head_sha=ad29aa13437ee16fb3f067949ad24a09972f0bed`; `state=OPEN`; `draft=false`; `mergeable=true`; `blocking_requested_changes=0`; `Core=31111915110 SUCCESS`; `Runtime=31111916555 SUCCESS`; `Domain=31111915044 SUCCESS`; `Core gate job=92653830617 SUCCESS`; `Runtime gate job=92653269541 SUCCESS`; `Domain gate job=92652592481 SUCCESS`.  
+  **Repair acotado:** preservación de identidad de imagen Docker local inmutable durante `save/load/deploy`; sin registry, credenciales, infraestructura o autoridad de producto nuevas.
 
 - [ ] **WP0-T11 — Completar el merge protegido a `main`.**  
   **Cierre:** merge realizado mediante la protección configurada, sin bypass y sobre el head esperado.  
-  **Evidencia requerida:** SHA canónico de `main` y registro de merge.
+  **Estado exacto:** `BLOCKED_BY_MAIN_PROTECTION`; `main.protected=false`; `PR=177`; `expected_head_sha=ad29aa13437ee16fb3f067949ad24a09972f0bed`; blocker `AX-CLOSE-BLK-005`; issue `#176`.  
+  **Evidencia requerida:** SHA canónico de `main`, protección efectiva y registro de merge sin bypass.
 
 - [ ] **WP0-T12 — Ejecutar smoke post-merge y emitir el marcador WP0.**  
   **Cierre:** instalación/arranque, login, recorrido crítico C0–C4 y persistencia pasan desde `main`; ledger registra el SHA canónico.  
+  **Estado exacto:** `TECHNICALLY_READY / BLOCKED_BY_WP0_T11`; el release candidate y la matriz afectada pasan sobre `ad29aa13437ee16fb3f067949ad24a09972f0bed`, pero no existe aún merge protegido ni ejecución post-merge desde `main`.  
   **Evidencia requerida:** `AX_C0_C4_CANONICAL_MAIN_PASS`.
+
+### Registro operativo exacto del repair post-merge
+
+```text
+ORIGINAL_CANONICAL_MAIN_SHA          fae293b9f2c6cc1ebfffd2302f3ce6ddcfef00c2
+FAILED_POST_MERGE_RUN                31097383391
+FAILED_POST_MERGE_JOB                92602528596
+OBSERVED_FAILURE                     AXIGNAL_LANDING_IMAGE_REPOSITORY missing
+REPAIR_PULL_REQUEST                  177
+REPAIR_BRANCH                        agent/axignal-wp0-post-merge-release-repair
+REPAIR_EXECUTABLE_EVIDENCE_SHA       ad29aa13437ee16fb3f067949ad24a09972f0bed
+PUBLIC_LANDING_CANDIDATE_JOB         92651677368 SUCCESS
+G6_INPUTS_JOB                        92651677342 SUCCESS
+G6_DOUBLE_BUILD_JOB                  92651858417 SUCCESS
+FULL_MIGRATION_MATRIX_JOB            92651680867 SUCCESS
+BROWSER_E2E_JOB                      92651677486 SUCCESS
+C4_RUNTIME_PILOT_JOB                 92652044804 SUCCESS
+G6_ARTIFACT_ID                       8972205296
+G6_ARTIFACT_DIGEST                   sha256:563e0c6c647578269ab77a1008d962bf7037028ea8011fc68892e9690080d90f
+MAIN_PROTECTION                      false
+ACTIVE_BLOCKER_ISSUE                 176
+MERGE_AUTHORITY                      DENIED_UNTIL_MAIN_PROTECTED
+```
 
 ---
 
@@ -567,10 +602,14 @@ La ejecución de este contrato no autoriza por sí sola el lanzamiento.
 HUMAN_AUTHORITY_APPROVAL     APPROVED
 APPROVED_BY                  Rafael López
 CONTRACT_ID                  AX-GE2E-FINISH-003
-CONTRACT_VERSION             1.1.0-checklist.1
+CONTRACT_VERSION             1.1.0-checklist.2
 CONTRACT_STATE               ACTIVE_BINDING
 ACTIVE_WORK_PACKAGE          WP0
 ACTIVE_TASK                  WP0-T11
+ACTIVE_BRANCH                agent/axignal-wp0-post-merge-release-repair
+ACTIVE_PULL_REQUEST          177
+EXPECTED_EXECUTABLE_HEAD     ad29aa13437ee16fb3f067949ad24a09972f0bed
+ACTIVE_BLOCKER               AX-CLOSE-BLK-005_MAIN_PROTECTION
 NEXT_CANONICAL_MARKER        AX_C0_C4_CANONICAL_MAIN_PASS
 PUBLIC_LAUNCH                NO_GO
 ```
