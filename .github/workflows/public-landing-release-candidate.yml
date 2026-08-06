@@ -118,7 +118,7 @@ jobs:
             AXIGNAL_BUILD_SHA="${{ env.AXIGNAL_EXACT_SHA }}" \
             AXIGNAL_LANDING_PORT=18182 \
             AXIGNAL_LANDING_INTAKE_DIR="${intake_dir}" \
-              docker compose -p "${project}" -f infra/landing/compose.yaml ps -q landing
+              docker compose -p "${project}" -f infra/landing/compose.yaml ps --all --quiet landing
           )"
           test -n "${container_id}"
           test "$(docker inspect --format '{{.Image}}' "${container_id}")" = "${image_id}"
