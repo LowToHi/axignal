@@ -6,16 +6,23 @@ on:
       - agent/actions-storage-reclaim
     paths:
       - .github/workflows/actions-storage-reclaim.yml
+      - scripts/ops/reclaim_github_actions_storage.py
   workflow_dispatch:
     inputs:
       target_free_mib:
-        description: Minimum artifact storage to reclaim in MiB
+        description: Minimum storage to reclaim in MiB
         required: false
         default: "300"
+      dry_run:
+        description: Inventory and plan without deletion
+        required: false
+        type: boolean
+        default: true
 
 permissions:
   actions: write
   contents: read
+  pull-requests: read
 
 concurrency:
   group: actions-storage-reclamation
@@ -23,218 +30,44 @@ concurrency:
 
 jobs:
   reclaim:
-    name: Reclaim stale Actions artifacts
+    name: Reclaim stale Actions storage
     runs-on: ubuntu-22.04
-    timeout-minutes: 30
+    timeout-minutes: 45
     env:
+      GITHUB_TOKEN: ${{ github.token }}
       TARGET_FREE_MIB: ${{ inputs.target_free_mib || '300' }}
+      DRY_RUN: ${{ inputs.dry_run || 'true' }}
+      PRESERVE_RECENT_HOURS: "24"
+      REPORT_PATH: /tmp/axignal-actions-storage-report.json
     steps:
-      - name: Delete stale non-contractual workflow runs
+      - name: Fetch exact-head reclaimer
         shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-          REPOSITORY: ${{ github.repository }}
-          CURRENT_RUN_ID: ${{ github.run_id }}
         run: |
           set -Eeuo pipefail
-          python3 - <<'PY'
-          from __future__ import annotations
+          url="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_SHA}/scripts/ops/reclaim_github_actions_storage.py"
+          curl --fail --location --retry 5 --retry-all-errors --connect-timeout 20 \
+            "$url" --output /tmp/reclaim_github_actions_storage.py
+          python3 -m py_compile /tmp/reclaim_github_actions_storage.py
 
-          import json
-          import os
-          import time
-          import urllib.error
-          import urllib.request
-          from collections import defaultdict
-          from datetime import UTC, datetime, timedelta
+      - name: Inventory and reclaim non-contractual storage
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 /tmp/reclaim_github_actions_storage.py
 
-          repository = os.environ["REPOSITORY"]
-          token = os.environ["GH_TOKEN"]
-          current_run_id = int(os.environ["CURRENT_RUN_ID"])
-          target_mib = int(os.environ.get("TARGET_FREE_MIB", "300"))
-          target_bytes = target_mib * 1024 * 1024
-          cutoff = datetime.now(UTC) - timedelta(hours=2)
-
-          preserve_artifact_ids = {
-              8913254281,
-              8963978249,
-              8972205296,
-          }
-
-          preserve_run_ids = {
-              31092162860,
-              31092164195,
-              31092161635,
-              31092161086,
-              31092162583,
-              31113947505,
-              31113950967,
-              31113954472,
-              31097383391,
-              31117419963,
-              31122042307,
-              current_run_id,
-          }
-
-          preserve_shas = {
-              "7c551728c7d750ee35b3607a3939df493f697592",
-              "8b4149b6bf8de8ff958597c02a908a1a29fbea0f",
-              "ccac72e286d778ab0187e447f45064d3c4d2d776",
-              "c75cd325f74f281f009264b87a050b1cf866face",
-              "90edfb1e0697ced0e0b4eb90d7f18d93f4661c7f",
-              "316f34d0ec3c2bc1fc91e0fa2494840a5aa8e243",
-              "8a81d2a417d5645899c3ba50489552bbeb3f829a",
-              "dd119139555e885cc73d24d13e4b7b148797576e",
-              "2ca1cf0451ff0a1544047a2426cf397dae0bb99a",
-          }
-
-          api_root = f"https://api.github.com/repos/{repository}"
-          headers = {
-              "Accept": "application/vnd.github+json",
-              "Authorization": f"Bearer {token}",
-              "X-GitHub-Api-Version": "2022-11-28",
-              "User-Agent": "axignal-actions-storage-reclamation",
-          }
-
-          def request_json(url: str) -> tuple[dict, dict[str, str]]:
-              request = urllib.request.Request(url, headers=headers)
-              with urllib.request.urlopen(request, timeout=60) as response:
-                  return json.load(response), dict(response.headers.items())
-
-          def delete_run(run_id: int) -> tuple[bool, dict[str, str]]:
-              request = urllib.request.Request(
-                  f"{api_root}/actions/runs/{run_id}",
-                  headers=headers,
-                  method="DELETE",
-              )
-              try:
-                  with urllib.request.urlopen(request, timeout=60) as response:
-                      return response.status == 204, dict(response.headers.items())
-              except urllib.error.HTTPError as exc:
-                  if exc.code == 404:
-                      return True, dict(exc.headers.items())
-                  body = exc.read().decode("utf-8", errors="replace")
-                  raise RuntimeError(
-                      f"workflow-run delete failed id={run_id} status={exc.code}: {body}"
-                  ) from exc
-
-          first_page, _ = request_json(
-              f"{api_root}/actions/artifacts?per_page=100&page=1"
-          )
-          artifact_total = int(first_page.get("total_count", 0))
-          pages = max(1, (artifact_total + 99) // 100)
-          artifacts = list(first_page.get("artifacts", []))
-
-          for page in range(2, pages + 1):
-              payload, response_headers = request_json(
-                  f"{api_root}/actions/artifacts?per_page=100&page={page}"
-              )
-              batch = payload.get("artifacts", [])
-              if not batch:
-                  break
-              artifacts.extend(batch)
-              remaining = int(response_headers.get("X-RateLimit-Remaining", "5000"))
-              if remaining < 500:
-                  raise RuntimeError(
-                      f"insufficient API budget while inventorying artifacts: {remaining}"
-                  )
-
-          run_bytes: dict[int, int] = defaultdict(int)
-          run_created_at: dict[int, datetime] = {}
-          run_head_sha: dict[int, str] = {}
-          protected_by_artifact: set[int] = set()
-
-          for artifact in artifacts:
-              workflow_run = artifact.get("workflow_run") or {}
-              run_id_raw = workflow_run.get("id")
-              if not run_id_raw:
-                  continue
-              run_id = int(run_id_raw)
-              run_bytes[run_id] += int(artifact.get("size_in_bytes", 0))
-              run_head_sha[run_id] = str(workflow_run.get("head_sha", ""))
-              created_at = datetime.fromisoformat(
-                  str(artifact["created_at"]).replace("Z", "+00:00")
-              )
-              previous = run_created_at.get(run_id)
-              if previous is None or created_at > previous:
-                  run_created_at[run_id] = created_at
-              if int(artifact["id"]) in preserve_artifact_ids:
-                  protected_by_artifact.add(run_id)
-
-          candidates: list[tuple[int, int]] = []
-          preserved_runs = 0
-          for run_id, size in run_bytes.items():
-              head_sha = run_head_sha.get(run_id, "")
-              created_at = run_created_at[run_id]
-              if (
-                  run_id in preserve_run_ids
-                  or run_id in protected_by_artifact
-                  or head_sha in preserve_shas
-                  or created_at >= cutoff
-              ):
-                  preserved_runs += 1
-                  continue
-              candidates.append((run_id, size))
-
-          candidates.sort(key=lambda item: item[1], reverse=True)
-
-          freed = 0
-          deleted_runs = 0
-          failures: list[str] = []
-          for run_id, size in candidates:
-              if freed >= target_bytes:
-                  break
-              try:
-                  deleted_ok, response_headers = delete_run(run_id)
-                  if deleted_ok:
-                      deleted_runs += 1
-                      freed += size
-                  remaining = int(response_headers.get("X-RateLimit-Remaining", "5000"))
-                  if remaining < 75:
-                      failures.append("stopped before exhausting GitHub API rate limit")
-                      break
-              except Exception as exc:
-                  failures.append(str(exc))
-                  if len(failures) >= 10:
-                      break
-              if deleted_runs % 25 == 0 and deleted_runs:
-                  print(
-                      f"progress deleted_runs={deleted_runs} "
-                      f"freed_mib={freed / 1024 / 1024:.2f}",
-                      flush=True,
-                  )
-                  time.sleep(0.2)
-
-          summary = {
-              "schema": "axignal.actions-storage-reclamation.v2",
-              "repository": repository,
-              "artifact_inventory_total": artifact_total,
-              "artifact_inventory_loaded": len(artifacts),
-              "runs_with_artifacts": len(run_bytes),
-              "preserved_runs": preserved_runs,
-              "eligible_runs": len(candidates),
-              "deleted_runs": deleted_runs,
-              "freed_bytes": freed,
-              "freed_mib": round(freed / 1024 / 1024, 2),
-              "target_mib": target_mib,
-              "target_reached": freed >= target_bytes,
-              "failures": failures,
-          }
-          print(json.dumps(summary, indent=2, sort_keys=True))
-
-          summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
-          if summary_path:
-              with open(summary_path, "a", encoding="utf-8") as handle:
-                  handle.write("## Actions storage reclamation\n\n")
-                  handle.write("```json\n")
-                  handle.write(json.dumps(summary, indent=2, sort_keys=True))
-                  handle.write("\n```\n")
-
-          if failures:
-              raise SystemExit("workflow-run reclamation stopped with API failures")
-          if freed < target_bytes:
-              raise SystemExit(
-                  f"target not reached: freed {freed / 1024 / 1024:.2f} MiB "
-                  f"of {target_mib} MiB"
-              )
-          PY
+      - name: Publish local summary
+        if: always()
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          if [[ -f "$REPORT_PATH" ]]; then
+            {
+              echo '## AXIGNAL Actions storage reclamation'
+              echo
+              echo '```json'
+              cat "$REPORT_PATH"
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'No report was generated.' >> "$GITHUB_STEP_SUMMARY"
+          fi
