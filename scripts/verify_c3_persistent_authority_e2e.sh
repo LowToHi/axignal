@@ -480,19 +480,6 @@ require_equal "C3 schema-140 schema/authority hash" \
 assert_origin_authority "$restore_database"
 assert_origin_authority "$upgrade_database"
 
-test "$(tenant_scalar "$restore_database" "$tenant_a" "
-SELECT tenant_private.subscriber_workspace_readiness(
-  '$workspace_id', '$as_of'
-)->>'submission_ready';")" = "true"
-restored_export="$(tenant_scalar "$restore_database" "$tenant_a" "
-SELECT tenant_private.export_axent_conversation(
-  '$conversation_id', '$encryption_key', 'usr-restore-verifier', '$as_of'
-)::text;")"
-grep -F 'confidential procurement question' <<<"$restored_export" >/dev/null
-test "$(scalar "$restore_database" "
-SELECT count(*) FROM tenant_private.axent_legal_holds
-WHERE conversation_id = '$conversation_id' AND released_at IS NULL;")" = "1"
-
 apply_migrations "$restore_database" "${forward_migrations[@]}"
 apply_migrations "$upgrade_database" "${forward_migrations[@]}"
 
@@ -511,6 +498,20 @@ if [[ "$origin_restore_schema_authority_hash" = "$final_restore_schema_authority
 fi
 assert_final_authority "$restore_database"
 assert_final_authority "$upgrade_database"
+
+test "$(tenant_scalar "$restore_database" "$tenant_a" "
+SELECT tenant_private.subscriber_workspace_readiness(
+  '$workspace_id', '$as_of'
+)->>'submission_ready';")" = "true"
+restored_export="$(tenant_scalar "$restore_database" "$tenant_a" "
+SELECT tenant_private.export_axent_conversation_for_identity(
+  '$conversation_id', 'usr-owner', '$encryption_key',
+  'usr-restore-verifier', '$as_of'
+)::text;")"
+grep -F 'confidential procurement question' <<<"$restored_export" >/dev/null
+test "$(scalar "$restore_database" "
+SELECT count(*) FROM tenant_private.axent_legal_holds
+WHERE conversation_id = '$conversation_id' AND released_at IS NULL;")" = "1"
 
 tenant_exec "$database" "$tenant_a" "
 SELECT tenant_private.release_axent_legal_hold(
