@@ -168,4 +168,4 @@ jobs:
           name: o01-legal-privacy-reconciliation-${{ env.AXIGNAL_EXACT_SHA }}
           path: artifacts/o01-legal-privacy
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 1

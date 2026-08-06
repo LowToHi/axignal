@@ -104,4 +104,4 @@ jobs:
           name: o01-domain-contracts-${{ env.AXIGNAL_EXACT_SHA }}
           path: artifacts/o01-domain-contracts
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 1

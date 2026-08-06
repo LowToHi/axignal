@@ -121,7 +121,7 @@ jobs:
             ci-changed-files.txt
             ci-scope-core.json
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 1
 
   bounded_ai_contract:
     needs: scope

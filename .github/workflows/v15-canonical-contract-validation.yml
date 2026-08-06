@@ -89,3 +89,4 @@ jobs:
             data/programmes/global-e2e-task-registry.v1.5.json
             data/programmes/global-e2e-tasks-p25-p27.v1.5.json
             data/growth/google-search-console-integration.v0.1.json
+          retention-days: 30

@@ -74,7 +74,7 @@ jobs:
           name: entitlement-contract-${{ github.sha }}
           path: entitlement-contract.json
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 1
 
   transactional-e2e:
     name: Tenant, concurrency, exhaustion, expiry and paid no-quota E2E
@@ -115,7 +115,7 @@ jobs:
             artifacts/entitlement-runtime-e2e.json
             artifacts/entitlement-authority-e2e.json
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 1
       - name: Dump PostgreSQL diagnostics on failure
         if: failure()
         run: docker compose logs --no-color postgres

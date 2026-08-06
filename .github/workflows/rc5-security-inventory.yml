@@ -78,7 +78,7 @@ jobs:
             remote-io-files.txt
             remote-io-summary.json
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 1
 
   bounded-asset-acquisition:
     name: Bounded asset acquisition
@@ -143,4 +143,4 @@ jobs:
             asset-acquisition-dry-run.json
             asset-acquisition-denied.json
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 1

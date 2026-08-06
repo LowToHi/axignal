@@ -223,4 +223,4 @@ jobs:
           name: public-landing-ssh-topology-preflight
           path: public-landing-ssh-topology-preflight.json
           if-no-files-found: ignore
-          retention-days: 7
+          retention-days: 1

@@ -69,7 +69,7 @@ jobs:
           name: trial-retention-contract-${{ github.sha }}
           path: trial-retention-contract.json
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 1
 
   retention-e2e:
     name: Expiry, suspension, purge, isolation and restore E2E
@@ -129,7 +129,7 @@ jobs:
           name: trial-retention-e2e-${{ github.sha }}
           path: artifacts/trial-retention-e2e.json
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 1
       - name: Dump PostgreSQL diagnostics on failure
         if: failure()
         run: docker compose logs --no-color postgres

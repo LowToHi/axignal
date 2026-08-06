@@ -89,4 +89,4 @@ jobs:
           name: ted-eforms-sdk-example-${{ github.sha }}
           path: ted-eforms-sdk-example-evidence.json
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 1

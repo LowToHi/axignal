@@ -47,7 +47,7 @@ jobs:
           name: f1-qualified-user-validation-exact-head-1-${{ env.AXIGNAL_EXACT_SHA }}
           path: f1-qualified-user-validation-exact-head-1.txt
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 1
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.13"
@@ -70,7 +70,7 @@ jobs:
           name: f1-static-diagnostics-${{ env.AXIGNAL_EXACT_SHA }}
           path: f1-ruff.log
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 2
       - name: Run validation unit tests
         run: pytest apps/api/tests/test_validation.py
 
@@ -111,7 +111,7 @@ jobs:
           name: f1-qualified-user-validation-exact-head-2-${{ env.AXIGNAL_EXACT_SHA }}
           path: f1-qualified-user-validation-exact-head-2.txt
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 1
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.13"
@@ -142,7 +142,7 @@ jobs:
             f1-migration-rehearsal.log
             f1-validation-acceptance.log
           if-no-files-found: ignore
-          retention-days: 7
+          retention-days: 2
       - name: Destroy disposable services
         if: always()
         run: docker compose down --volumes --remove-orphans
@@ -189,7 +189,7 @@ jobs:
           name: f1-qualified-user-validation-exact-head-3-${{ env.AXIGNAL_EXACT_SHA }}
           path: f1-qualified-user-validation-exact-head-3.txt
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 1
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "22.14.0"
@@ -215,4 +215,4 @@ jobs:
             playwright-report
             test-results
           if-no-files-found: ignore
-          retention-days: 7
+          retention-days: 2

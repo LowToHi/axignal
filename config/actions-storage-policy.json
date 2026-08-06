@@ -1,0 +1,94 @@
+{
+  "schema": "axignal.actions-storage-policy.v1",
+  "repository": "LowToHi/axignal",
+  "mode": "audit_only",
+  "destructive_cleanup_enabled": false,
+  "canonical_authorities": [
+    "docs/contracts/AX-GE2E-FINISH-003.md",
+    "docs/roadmap/AXIGNAL_E2E_FINISH_LEDGER.json"
+  ],
+  "explicit_protected_artifact_ids": [
+    8913254281,
+    8963978249,
+    8972205296
+  ],
+  "explicit_protected_run_ids": [
+    31092162860,
+    31092164195,
+    31092161635,
+    31092161086,
+    31092162583,
+    31113947505,
+    31113950967,
+    31113954472,
+    31097383391,
+    31117419963,
+    31122042307
+  ],
+  "retention_days": {
+    "ephemeral": 1,
+    "diagnostic": 2,
+    "contractual": 30
+  },
+  "classification": {
+    "contractual_name_fragments": [
+      "attestation",
+      "canonical-contract",
+      "certificate",
+      "closure",
+      "evidence-bundle",
+      "full-migration",
+      "manifest",
+      "provenance",
+      "restore",
+      "sbom",
+      "signature"
+    ],
+    "diagnostic_name_fragments": [
+      "browser",
+      "coverage",
+      "diagnostic",
+      "e2e-audit",
+      "playwright",
+      "screenshot",
+      "test-results",
+      "trace",
+      "video",
+      "viewport"
+    ]
+  },
+  "workflow_limits": {
+    "maximum_upload_steps_per_workflow": 8,
+    "maximum_artifacts_per_run": 12,
+    "require_explicit_retention_days": true,
+    "forbid_dynamic_retention_days": true
+  },
+  "inventory": {
+    "preserve_recent_hours": 24,
+    "top_families": 50,
+    "minimum_api_remaining": 250
+  },
+  "trusted_runner": {
+    "name": "axignal-trusted-01",
+    "labels": [
+      "self-hosted",
+      "linux",
+      "x64",
+      "axignal",
+      "trusted"
+    ],
+    "service_user": "runner-axignal",
+    "install_root": "/opt/actions-runner-axignal",
+    "work_root": "/var/lib/axignal-runner/work",
+    "cache_root": "/var/cache/axignal",
+    "cache_budget_gib": 25,
+    "allowed_events": [
+      "push:refs/heads/main",
+      "workflow_dispatch"
+    ],
+    "forbidden_events": [
+      "pull_request",
+      "pull_request_target"
+    ]
+  }
+}

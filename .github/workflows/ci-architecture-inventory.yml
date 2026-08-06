@@ -74,4 +74,4 @@ jobs:
             ci-workflow-inventory.json
             ci-workflow-sources.tar.gz
           if-no-files-found: error
-          retention-days: 3
+          retention-days: 1

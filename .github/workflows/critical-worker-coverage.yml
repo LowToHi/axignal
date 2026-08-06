@@ -79,4 +79,4 @@ jobs:
           name: critical-worker-coverage
           path: critical-worker-coverage.json
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 2

@@ -49,7 +49,7 @@ jobs:
           name: e2e-technical-audit-exact-head-1-${{ env.AXIGNAL_EXACT_SHA }}
           path: e2e-technical-audit-exact-head-1.txt
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 1
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.13"
@@ -84,7 +84,7 @@ jobs:
             pip-audit-report.json
             detect-secrets-report.json
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 2
 
   javascript-quality-security:
     name: JavaScript quality, tests, build and security
@@ -117,7 +117,7 @@ jobs:
           name: e2e-technical-audit-exact-head-2-${{ env.AXIGNAL_EXACT_SHA }}
           path: e2e-technical-audit-exact-head-2.txt
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 1
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "22.14.0"
@@ -169,7 +169,7 @@ jobs:
           name: e2e-audit-javascript-${{ env.AXIGNAL_EXACT_SHA }}
           path: pnpm-audit-report.json
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 2
 
   repository-contracts:
     name: Repository, workflow and deployment contracts
@@ -202,7 +202,7 @@ jobs:
           name: e2e-technical-audit-exact-head-3-${{ env.AXIGNAL_EXACT_SHA }}
           path: e2e-technical-audit-exact-head-3.txt
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 1
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.13"
@@ -238,7 +238,7 @@ jobs:
             compose-ps.txt
             compose-logs.txt
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 2
       - name: Destroy disposable topology
         if: always()
         run: docker compose down --volumes --remove-orphans
@@ -274,7 +274,7 @@ jobs:
           name: e2e-technical-audit-exact-head-4-${{ env.AXIGNAL_EXACT_SHA }}
           path: e2e-technical-audit-exact-head-4.txt
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 1
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "22.14.0"
@@ -297,4 +297,4 @@ jobs:
             playwright-report
             test-results
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 2

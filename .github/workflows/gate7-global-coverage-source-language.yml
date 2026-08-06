@@ -390,4 +390,4 @@ jobs:
           name: gate7-global-coverage-${{ env.AXIGNAL_EXACT_SHA }}
           path: artifacts/gate7
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 2

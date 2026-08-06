@@ -265,7 +265,7 @@ jobs:
             deployment-evidence.json
             public-health.json
           if-no-files-found: ignore
-          retention-days: 30
+          retention-days: 1
 
       - name: Remove temporary credentials and staging
         if: always()

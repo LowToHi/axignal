@@ -136,7 +136,7 @@ jobs:
             compose-root.rendered.yaml
             compose-landing.rendered.yaml
           if-no-files-found: ignore
-          retention-days: 14
+          retention-days: 1
 
   reproducible-images:
     name: Double-build effective image manifests
@@ -381,4 +381,4 @@ jobs:
             postgres-extension-versions.txt
             postgres-runtime.log
           if-no-files-found: ignore
-          retention-days: 14
+          retention-days: 1

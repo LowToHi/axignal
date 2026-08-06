@@ -359,7 +359,7 @@ jobs:
           name: o01-approval-renewal-${{ env.AXIGNAL_EXACT_SHA }}
           path: artifacts/o01-renewal
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 1
 
       - name: Fail closed on unavailable, changed or expired authority
         if: always()
