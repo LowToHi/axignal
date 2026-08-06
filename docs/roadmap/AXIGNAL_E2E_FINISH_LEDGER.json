@@ -2,254 +2,120 @@
   "schema_version": "1.1.0",
   "contract": {
     "id": "AX-GE2E-FINISH-003",
-    "version": "1.1.0-checklist.3",
+    "version": "1.1.0-checklist.4",
     "status": "RATIFIED_ACTIVE",
     "path": "docs/contracts/AX-GE2E-FINISH-003.md",
     "approved_by": "Rafael López",
     "approved_at": "2026-08-05T17:00:45+02:00",
-    "ratification_commit": "773b9aec7c6626659ce77c38b071840661bbf181",
-    "latest_amendment_at": "2026-08-06T17:36:43+02:00",
-    "latest_amendment_commit": "ca05c94d1e4689ffdf6acca478a42a4fc16afa33"
+    "latest_amendment_at": "2026-08-06T18:31:34+02:00",
+    "documentation_contract_commit": "7c9d342fe16e90a739bd02070ed4d850290d79cf"
   },
   "repository": {
     "name": "LowToHi/axignal",
     "base_branch": "main",
-    "active_branch": "agent/axignal-wp0-post-merge-release-repair",
-    "active_pull_request": 177,
-    "pull_request_state": "OPEN_READY_FOR_CONTROLLED_MERGE_AFTER_REVALIDATION",
-    "canonical_main_sha": "fae293b9f2c6cc1ebfffd2302f3ce6ddcfef00c2",
+    "active_branch": "agent/axignal-wp0-post-merge-image-ref-repair",
+    "active_pull_request": 179,
+    "pull_request_state": "OPEN_EXACT_HEAD_VALIDATION_PENDING",
+    "canonical_main_sha": "ccac72e286d778ab0187e447f45064d3c4d2d776",
     "last_validated_product_sha": "90edfb1e0697ced0e0b4eb90d7f18d93f4661c7f",
-    "current_branch_sha": "RESOLVE_FROM_PR_HEAD_AT_EXECUTION",
-    "current_branch_sha_reason": "The ledger is itself a documentation commit; its immutable commit SHA is resolved from PR 177 immediately before exact-head validation and merge rather than self-referenced inside its own content.",
-    "documentation_contract_commit": "ca05c94d1e4689ffdf6acca478a42a4fc16afa33"
+    "current_branch_sha": "RESOLVE_FROM_PR_HEAD_AT_EXECUTION"
   },
   "execution": {
     "active_work_package": "WP0",
-    "active_task": "WP0-T11",
-    "active_blocker": null,
-    "allowed_next_transition": "REVALIDATE_DOCUMENTATION_SUCCESSOR_THEN_CONTROLLED_MERGE_PR_177_WITH_EXPECTED_HEAD",
+    "active_task": "WP0-T12",
+    "active_blocker": "AX-CLOSE-BLK-006_CROSS_DAEMON_IMAGE_LOOKUP",
+    "allowed_next_transition": "VALIDATE_PR_179_EXACT_HEAD_THEN_CONTROLLED_MERGE_AND_REPEAT_POST_MERGE_RELEASE_SMOKE",
     "next_canonical_marker": "AX_C0_C4_CANONICAL_MAIN_PASS",
-    "public_launch": "CONTROLLED_DEPLOYMENT_AUTHORIZED_RELEASE_THEN_ITERATE",
-    "commercial_live_mode": "DENIED",
-    "stripe_live_mode": "DENIED",
-    "production_source_admission": "DENIED",
     "publication_strategy": "RELEASE_THEN_ITERATE",
     "controlled_public_deployment": true,
-    "e2e_completion_claim": false
+    "e2e_completion_claim": false,
+    "commercial_live_mode": "DENIED",
+    "stripe_live_mode": "DENIED",
+    "production_source_admission": "DENIED"
   },
   "checklist": {
     "path": "docs/contracts/AX-GE2E-FINISH-003.md",
     "total_tasks": 75,
-    "completed_tasks": 10,
-    "pending_tasks": 65,
+    "completed_tasks": 11,
+    "pending_tasks": 64,
     "progress_source_of_truth": "MARKDOWN_CHECKBOXES",
-    "completion_rule": "A task is complete only when every material criterion passes and evidence is bound to an executable EVIDENCE_SHA.",
     "work_packages": {
-      "WP0": {
-        "completed": 10,
-        "total": 12,
-        "state": "READY_FOR_CONTROLLED_MERGE"
-      },
-      "WP1": {
-        "completed": 0,
-        "total": 10,
-        "state": "BLOCKED_BY_WP0"
-      },
-      "WP2": {
-        "completed": 0,
-        "total": 12,
-        "state": "BLOCKED_BY_WP1"
-      },
-      "WP3": {
-        "completed": 0,
-        "total": 12,
-        "state": "BLOCKED_BY_WP2"
-      },
-      "WP4": {
-        "completed": 0,
-        "total": 12,
-        "state": "BLOCKED_BY_WP3"
-      },
-      "WP5": {
-        "completed": 0,
-        "total": 7,
-        "state": "BLOCKED_BY_WP4"
-      },
-      "WP6": {
-        "completed": 0,
-        "total": 10,
-        "state": "BLOCKED_BY_WP5"
-      }
+      "WP0": {"completed": 11, "total": 12, "state": "POST_MERGE_RELEASE_REPAIR_IN_PROGRESS"},
+      "WP1": {"completed": 0, "total": 10, "state": "BLOCKED_BY_WP0"},
+      "WP2": {"completed": 0, "total": 12, "state": "BLOCKED_BY_WP1"},
+      "WP3": {"completed": 0, "total": 12, "state": "BLOCKED_BY_WP2"},
+      "WP4": {"completed": 0, "total": 12, "state": "BLOCKED_BY_WP3"},
+      "WP5": {"completed": 0, "total": 7, "state": "BLOCKED_BY_WP4"},
+      "WP6": {"completed": 0, "total": 10, "state": "BLOCKED_BY_WP5"}
     }
   },
-  "work_packages": {
-    "WP0": "READY_FOR_CONTROLLED_MERGE",
-    "WP1": "BLOCKED",
-    "WP2": "BLOCKED",
-    "WP3": "BLOCKED",
-    "WP4": "BLOCKED",
-    "WP5": "BLOCKED",
-    "WP6": "BLOCKED"
+  "completed_tasks": {
+    "WP0-T01": "AX_C0_CANONICAL_BASELINE_PASS",
+    "WP0-T02": "AX_C1_SUBSCRIBER_SHELL_FULL_E2E_PASS",
+    "WP0-T03": "AX_C2_IDENTITY_TENANT_TRIAL_PASS@2ca1cf0451ff0a1544047a2426cf397dae0bb99a",
+    "WP0-T04": "AX_C3_PERSISTENCE_MIGRATIONS_RESTORE_PASS@8a81d2a417d5645899c3ba50489552bbeb3f829a",
+    "WP0-T05": "C3_CONSECUTIVE_CYCLE_COMPARATOR_PASS@316f34d0ec3c2bc1fc91e0fa2494840a5aa8e243",
+    "WP0-T06": "C4_FINAL_RUNTIME_PASS@dd119139555e885cc73d24d13e4b7b148797576e",
+    "WP0-T07": "FULL_MIGRATION_MATRIX_EXACT_HEAD_PASS@316f34d0ec3c2bc1fc91e0fa2494840a5aa8e243",
+    "WP0-T08": "ROOT_GATES_EXACT_HEAD_PASS@316f34d0ec3c2bc1fc91e0fa2494840a5aa8e243",
+    "WP0-T09": "LATEST_MAIN_RECONCILIATION_PASS@316f34d0ec3c2bc1fc91e0fa2494840a5aa8e243",
+    "WP0-T10": "PR_READY_CONTROLLED_MERGE_PASS@90edfb1e0697ced0e0b4eb90d7f18d93f4661c7f",
+    "WP0-T11": {
+      "marker": "CONTROLLED_EXACT_HEAD_MAIN_MERGE_PASS",
+      "pull_request": 177,
+      "expected_head_sha": "c75cd325f74f281f009264b87a050b1cf866face",
+      "canonical_main_sha": "ccac72e286d778ab0187e447f45064d3c4d2d776",
+      "merge_api_result": "SUCCESS",
+      "commit_signature": "VERIFIED",
+      "force_push": false,
+      "direct_ref_mutation": false
+    }
   },
-  "blocker": {
+  "pending_task": {
+    "id": "WP0-T12",
+    "state": "POST_MERGE_RELEASE_FAILED_BOUNDED_REPAIR_IN_PROGRESS",
+    "required_marker": "AX_C0_C4_CANONICAL_MAIN_PASS",
+    "canonical_main_sha": "ccac72e286d778ab0187e447f45064d3c4d2d776",
+    "failed_run_id": 31117419963,
+    "failed_job_id": 92670463520,
+    "failed_step": "Deploy with rollback armed",
+    "failure": "No such image for transferred bare image ID after remote docker load",
+    "build_image_id": "sha256:7945ce0aa266ca7f14003a3401afa2d581dff3deb0d384fecb769829d7636ffc",
+    "bundle_checksum": "PASS",
+    "ssh_host_pinning": "PASS",
+    "transfer_exact_bundle": "PASS",
+    "external_route_smoke": "NOT_EXECUTED",
+    "final_deployment_evidence": "NOT_EMITTED",
+    "repair_pull_request": 179,
+    "repair_branch": "agent/axignal-wp0-post-merge-image-ref-repair",
+    "repair_head": "RESOLVE_FROM_PR_HEAD_AT_EXECUTION",
+    "repair_contract": [
+      "resolve axignal-landing:<release_sha> after loading the checksummed archive",
+      "require the local reference to resolve to the immutable expected image ID",
+      "use the verified local reference in Compose with pull_policy never",
+      "require the created container image ID to equal the immutable expected image ID",
+      "preserve rollback, host pinning, TLS, health and external smoke controls"
+    ]
+  },
+  "deferred_repository_hardening": {
     "id": "AX-CLOSE-BLK-005",
     "issue": 176,
     "task": "WP4-T06",
-    "scope": "Repository branch protection or equivalent ruleset hardening",
     "state": "DEFERRED_NON_BLOCKING_BY_HUMAN_AUTHORITY",
-    "observed_main_protection": false,
-    "risk_acceptance": {
-      "approved_by": "Rafael López",
-      "effective_at": "2026-08-06T17:36:43+02:00",
-      "strategy": "RELEASE_THEN_ITERATE",
-      "limits": [
-        "PR must be open, non-draft and mergeable",
-        "root gates must pass on exact head",
-        "expected_head_sha must be re-read immediately before merge",
-        "merge must use GitHub merge API",
-        "force push and direct ref mutation are forbidden",
-        "post-merge smoke is mandatory",
-        "material regression reopens the task"
-      ]
-    },
-    "deferred_closure_criteria": [
-      "main branch protection or equivalent ruleset is enabled",
-      "pull request is required",
-      "required status checks are configured and up to date",
-      "force pushes and branch deletion are blocked",
-      "administrative bypass is explicitly governed",
-      "the control is verified during WP4-T06"
-    ]
-  },
-  "evidence": {
-    "last_validated_product_sha": "90edfb1e0697ced0e0b4eb90d7f18d93f4661c7f",
-    "wp0_completed_tasks": {
-      "WP0-T01": "AX_C0_CANONICAL_BASELINE_PASS",
-      "WP0-T02": "AX_C1_SUBSCRIBER_SHELL_FULL_E2E_PASS",
-      "WP0-T03": {
-        "marker": "AX_C2_IDENTITY_TENANT_TRIAL_PASS",
-        "evidence_sha": "2ca1cf0451ff0a1544047a2426cf397dae0bb99a"
-      },
-      "WP0-T04": {
-        "marker": "AX_C3_PERSISTENCE_MIGRATIONS_RESTORE_PASS",
-        "evidence_sha": "8a81d2a417d5645899c3ba50489552bbeb3f829a",
-        "artifact_id": 8913254281
-      },
-      "WP0-T05": {
-        "marker": "C3_CONSECUTIVE_CYCLE_COMPARATOR_PASS",
-        "evidence_sha": "316f34d0ec3c2bc1fc91e0fa2494840a5aa8e243",
-        "run_id": 31092162860,
-        "job_id": 92585538939,
-        "artifact_id": 8963978249,
-        "artifact_digest": "sha256:e78c14cbf9e5480a0b66e1c8214a80250604c5b6dd1370733fb8f156c01f73be",
-        "origin_data_hash": "d8de8c1b64fbc238d393328c2188656d749b37fcebf005f91a40c54b4aea1f53",
-        "origin_schema_authority_hash": "4540c3e8e4445ca453f5bee01e4c76334ccade2b613e6215f2a4e72e19c3268e",
-        "final_schema_authority_hash": "b270b122a743e1fc39c13db7687b4698c7fa9bcc8b75f888e4cc00fed4023a3c"
-      },
-      "WP0-T06": {
-        "marker": "C4_FINAL_RUNTIME_PASS",
-        "evidence_sha": "dd119139555e885cc73d24d13e4b7b148797576e",
-        "job_id": 92338125477
-      },
-      "WP0-T07": {
-        "marker": "FULL_MIGRATION_MATRIX_EXACT_HEAD_PASS",
-        "evidence_sha": "316f34d0ec3c2bc1fc91e0fa2494840a5aa8e243",
-        "run_id": 31092162860,
-        "job_id": 92585538939,
-        "artifact_id": 8963978249,
-        "artifact_digest": "sha256:e78c14cbf9e5480a0b66e1c8214a80250604c5b6dd1370733fb8f156c01f73be"
-      },
-      "WP0-T08": {
-        "marker": "ROOT_GATES_EXACT_HEAD_PASS",
-        "evidence_sha": "316f34d0ec3c2bc1fc91e0fa2494840a5aa8e243",
-        "runs": {
-          "core": 31092164195,
-          "runtime": 31092162860,
-          "domain": 31092161635,
-          "procurement_admission": 31092161086,
-          "remote_pilot_operations": 31092162583
-        }
-      },
-      "WP0-T09": {
-        "marker": "LATEST_MAIN_RECONCILIATION_PASS",
-        "main_sha": "6091795f79aec19c9dcbac71bb8b6b19877f101b",
-        "merge_base": "6091795f79aec19c9dcbac71bb8b6b19877f101b",
-        "reconciled_head": "316f34d0ec3c2bc1fc91e0fa2494840a5aa8e243",
-        "ahead_by": 983,
-        "behind_by": 0,
-        "root_gates": "SUCCESS"
-      },
-      "WP0-T10": {
-        "marker": "PR_READY_CONTROLLED_MERGE_PASS",
-        "pull_request": 177,
-        "evidence_sha": "90edfb1e0697ced0e0b4eb90d7f18d93f4661c7f",
-        "expected_head_sha": "RE_READ_AFTER_DOCUMENTATION_SUCCESSORS",
-        "state": "OPEN",
-        "draft": false,
-        "mergeable": true,
-        "blocking_requested_changes": 0,
-        "runs": {
-          "core": 31113947505,
-          "runtime": 31113950967,
-          "domain": 31113954472
-        },
-        "gate_jobs": {
-          "core": 92660535386,
-          "runtime": 92662147571,
-          "domain": 92659174165
-        },
-        "runtime_attempt": 2,
-        "infrastructure_failure_job": 92660034439,
-        "infrastructure_failure_classification": "PRE_CHECKOUT_GITHUB_HOSTED_ACTION_DOWNLOAD_503_502_NO_PRODUCT_EXECUTION"
-      }
-    },
-    "wp0_pending_tasks": {
-      "WP0-T11": {
-        "state": "READY_FOR_CONTROLLED_MERGE",
-        "issue": 176,
-        "pull_request": 177,
-        "expected_head_sha": "RE_READ_IMMEDIATELY_BEFORE_MERGE",
-        "main_protected": false,
-        "last_validated_executable_head": "90edfb1e0697ced0e0b4eb90d7f18d93f4661c7f",
-        "main_protection_risk": "ACKNOWLEDGED_AND_DEFERRED_TO_WP4_T06",
-        "merge_authority": "GRANTED_BY_HUMAN_AMENDMENT"
-      },
-      "WP0-T12": {
-        "state": "READY_AFTER_CONTROLLED_MERGE",
-        "required_marker": "AX_C0_C4_CANONICAL_MAIN_PASS",
-        "candidate_jobs": {
-          "public_landing_release_candidate": 92651677368,
-          "g6_inputs": 92651677342,
-          "g6_double_build": 92651858417,
-          "full_migration_matrix": 92651680867,
-          "browser_e2e": 92651677486,
-          "c4_runtime_pilot": 92652044804
-        },
-        "g6_artifact_id": 8972205296,
-        "g6_artifact_digest": "sha256:563e0c6c647578269ab77a1008d962bf7037028ea8011fc68892e9690080d90f"
-      }
-    },
-    "post_merge_failure": {
-      "canonical_main_sha": "fae293b9f2c6cc1ebfffd2302f3ce6ddcfef00c2",
-      "run_id": 31097383391,
-      "job_id": 92602528596,
-      "failure": "AXIGNAL_LANDING_IMAGE_REPOSITORY is missing a value",
-      "repair_pr": 177,
-      "repair_evidence_sha": "90edfb1e0697ced0e0b4eb90d7f18d93f4661c7f"
-    }
+    "observed_main_protection": false
   },
   "transition": [
-    "revalidate the documentation-only successor exact head",
-    "re-read PR 177 metadata and expected_head_sha immediately before merge",
-    "complete WP0-T11 controlled API merge without force push or direct ref mutation",
-    "complete WP0-T12 post-merge smoke and canonical marker",
-    "record WP0-T11 and WP0-T12 as completed",
-    "authorize WP1-T01",
-    "close repository protection hardening during WP4-T06"
+    "validate PR 179 on its final exact head",
+    "re-read PR 179 metadata and expected_head_sha immediately before merge",
+    "complete controlled API merge without force push or direct ref mutation",
+    "repeat Public Landing Release from the resulting canonical main SHA",
+    "require local and external health, redirect, immutable image identity and deployment evidence to pass",
+    "mark WP0-T12 completed only after AX_C0_C4_CANONICAL_MAIN_PASS",
+    "authorize WP1-T01"
   ],
   "last_human_authority_change": {
     "instruction": "Do not allow repository branch protection to block progress. Continue toward publication, then iterate toward perfection through E2E audits and human review.",
     "effective_at": "2026-08-06T17:36:43+02:00",
-    "effect": "Branch protection issue 176 is reclassified as deferred non-blocking hardening under WP4-T06. Controlled public deployment is authorized under RELEASE_THEN_ITERATE. Controlled merges still require an open non-draft mergeable PR, exact-head green root gates, immediate expected_head_sha verification, GitHub merge API, no force push, and mandatory post-merge smoke."
+    "effect": "Branch protection issue 176 is deferred to WP4-T06. Controlled merges retain exact-head gates, expected_head_sha verification, GitHub merge API, no force push and mandatory post-merge smoke."
   }
 }

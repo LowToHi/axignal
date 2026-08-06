@@ -1,13 +1,13 @@
 # AXIGNAL — Contrato canónico de cierre E2E con checklist ejecutable
 
 **Contract ID:** `AX-GE2E-FINISH-003`  
-**Versión contractual:** `1.1.0-checklist.3`  
+**Versión contractual:** `1.1.0-checklist.4`  
 **Fecha de ratificación original:** `2026-08-05T17:00:45+02:00`  
-**Fecha de enmienda operativa:** `2026-08-06T17:36:43+02:00`  
+**Fecha de enmienda operativa:** `2026-08-06T18:31:34+02:00`  
 **Estado:** `RATIFIED / ACTIVE / BINDING`  
 **Autoridad humana:** `Rafael López`  
 **Repositorio:** `LowToHi/axignal`  
-**Rama de materialización:** `agent/axignal-wp0-post-merge-release-repair`  
+**Rama de materialización:** `agent/axignal-wp0-post-merge-image-ref-repair`  
 **Aplicación objetivo:** `AXIGNAL B2G Opportunity Intelligence & Operations v1.0`  
 **Resultado contractual:** una aplicación completa, desplegable, cobrable, operable y utilizable de extremo a extremo para contratación pública.
 
@@ -32,14 +32,16 @@ Desde esta versión:
 HUMAN_AUTHORITY_APPROVAL     APPROVED
 APPROVED_BY                  Rafael López
 AMENDMENT_EFFECTIVE_AT       2026-08-05T20:23:00+02:00
-CONTROL_UPDATE_AT            2026-08-06T17:36:43+02:00
+CONTROL_UPDATE_AT            2026-08-06T18:31:34+02:00
 CONTRACT_STATUS              RATIFIED_ACTIVE
 PUBLICATION_STRATEGY         RELEASE_THEN_ITERATE
 CONTROLLED_PUBLIC_DEPLOYMENT true
 E2E_COMPLETION_CLAIM         false
 ```
 
-La actualización `1.1.0-checklist.3` incorpora una enmienda expresa de la autoridad humana: AXIGNAL avanzará mediante publicación controlada seguida de auditorías E2E, revisión humana e iteración. La ausencia de branch protection o rulesets deja de ser un blocker de ejecución y pasa a ser hardening de repositorio diferido a `WP4-T06`.
+La actualización `1.1.0-checklist.4` conserva la estrategia aprobada de publicación controlada seguida de auditorías E2E, revisión humana e iteración. Registra además el merge controlado de PR `#177` en `main`, el fallo material observado por el smoke post-merge y la reparación acotada activa en PR `#179`.
+
+La ausencia de branch protection o rulesets no bloquea la ejecución y permanece como hardening de repositorio diferido a `WP4-T06`.
 
 Esta enmienda no relaja los controles técnicos del merge. Mientras `main` siga sin protección, todo merge deberá cumplir simultáneamente:
 
@@ -206,24 +208,26 @@ Durante el cierre no se permite:
 
 | Work package | Cumplidas | Total | Estado |
 |---|---:|---:|---|
-| `WP0` Canonicalización C0–C4 | 10 | 12 | `READY_FOR_CONTROLLED_MERGE` |
+| `WP0` Canonicalización C0–C4 | 11 | 12 | `POST_MERGE_RELEASE_REPAIR_IN_PROGRESS` |
 | `WP1` Investigación, AXENT y evidencia real | 0 | 10 | `BLOCKED_BY_WP0` |
 | `WP2` O01, Opportunity y Bid Workspace | 0 | 12 | `BLOCKED_BY_WP1` |
 | `WP3` Comercial, billing y Founder Operations | 0 | 12 | `BLOCKED_BY_WP2` |
 | `WP4` Producción, seguridad, UX y distribución | 0 | 12 | `BLOCKED_BY_WP3` |
 | `WP5` Aceptación privada | 0 | 7 | `BLOCKED_BY_WP4` |
 | `WP6` P27, release y lanzamiento | 0 | 10 | `BLOCKED_BY_WP5` |
-| **TOTAL** | **10** | **75** | **E2E INCOMPLETE** |
+| **TOTAL** | **11** | **75** | **E2E INCOMPLETE** |
 
 ```text
 ACTIVE_WORK_PACKAGE          WP0
-ACTIVE_TASK                  WP0-T11
-ACTIVE_BRANCH                agent/axignal-wp0-post-merge-release-repair
-ACTIVE_PULL_REQUEST          177
-EXPECTED_EXECUTABLE_HEAD     90edfb1e0697ced0e0b4eb90d7f18d93f4661c7f
-TECHNICAL_VALIDATION         EXACT_HEAD_GREEN
-ACTIVE_BLOCKER               NONE
-WP0_T12_STATUS               READY_AFTER_CONTROLLED_MERGE
+ACTIVE_TASK                  WP0-T12
+ACTIVE_BRANCH                agent/axignal-wp0-post-merge-image-ref-repair
+ACTIVE_PULL_REQUEST          179
+CANONICAL_MAIN_SHA           ccac72e286d778ab0187e447f45064d3c4d2d776
+LAST_VALIDATED_PRODUCT_SHA   90edfb1e0697ced0e0b4eb90d7f18d93f4661c7f
+CURRENT_REPAIR_HEAD          RESOLVE_FROM_PR_HEAD_AT_EXECUTION
+TECHNICAL_VALIDATION         EXACT_HEAD_REVALIDATION_PENDING
+ACTIVE_BLOCKER               AX-CLOSE-BLK-006_CROSS_DAEMON_IMAGE_LOOKUP
+WP0_T12_STATUS               REPAIR_PR_179_IN_VALIDATION
 NEXT_CANONICAL_MARKER        AX_C0_C4_CANONICAL_MAIN_PASS
 PUBLIC_DEPLOYMENT            AUTHORIZED_RELEASE_THEN_ITERATE
 ```
@@ -276,43 +280,47 @@ El panel se actualizará en el mismo cambio que marque o reabra una tarea. En ca
 
 - [x] **WP0-T10 — Dejar el PR contractual listo para merge controlado exact-head.**  
   **Cierre:** PR no draft, mergeable, checks obligatorios PASS, expected head verificado y cero conversaciones bloqueantes.  
-  **Evidencia vigente:** `PR=177`; `EVIDENCE_SHA=90edfb1e0697ced0e0b4eb90d7f18d93f4661c7f`; `state=OPEN`; `draft=false`; `mergeable=true`; `blocking_requested_changes=0`; `Core=31113947505 SUCCESS`; `Runtime=31113950967 attempt 2 SUCCESS`; `Domain=31113954472 SUCCESS`; `Core gate job=92660535386 SUCCESS`; `Runtime gate job=92662147571 SUCCESS`; `Domain gate job=92659174165 SUCCESS`; fallo inicial de infraestructura `job=92660034439` anterior a checkout, clasificado y recuperado sin cambio de código ni criterios.  
+  **Evidencia vigente:** `PR=177`; `EVIDENCE_SHA=90edfb1e0697ced0e0b4eb90d7f18d93f4661c7f`; `draft=false`; `mergeable=true`; `blocking_requested_changes=0`; `Core=31113947505 SUCCESS`; `Runtime=31113950967 attempt 2 SUCCESS`; `Domain=31113954472 SUCCESS`; `Core gate job=92660535386 SUCCESS`; `Runtime gate job=92662147571 SUCCESS`; `Domain gate job=92659174165 SUCCESS`; fallo inicial de infraestructura `job=92660034439` anterior a checkout, clasificado y recuperado sin cambio de código ni criterios.  
   **Repair acotado:** preservación de identidad de imagen Docker local inmutable durante `save/load/deploy`; sin registry, credenciales, infraestructura o autoridad de producto nuevas.
 
-- [ ] **WP0-T11 — Completar el merge controlado exact-head a `main`.**  
+- [x] **WP0-T11 — Completar el merge controlado exact-head a `main`.**  
   **Cierre:** merge realizado sobre el head reconsultado, con PR no draft y mergeable, root gates verdes y sin force push ni mutación directa del ref.  
-  **Estado exacto:** `READY_FOR_CONTROLLED_MERGE`; `main.protected=false` aceptado como riesgo temporal por la autoridad humana; `PR=177`; `LAST_VALIDATED_EXECUTABLE_HEAD=90edfb1e0697ced0e0b4eb90d7f18d93f4661c7f`; issue `#176` reclasificada como hardening no bloqueante de `WP4-T06`.  
-  **Evidencia requerida:** SHA canónico de `main`, `expected_head_sha` usado por la operación, registro de merge API y ausencia de force push.
+  **Evidencia:** `PR=177`; `EXPECTED_HEAD_SHA=c75cd325f74f281f009264b87a050b1cf866face`; `CANONICAL_MAIN_SHA=ccac72e286d778ab0187e447f45064d3c4d2d776`; merge API `SUCCESS`; commit firmado y verificado por GitHub; parent de producto `c75cd325f74f281f009264b87a050b1cf866face`; `main` avanzó sin force push ni actualización directa del ref.  
+  **Riesgo aceptado:** `main.protected=false`; issue `#176` permanece como hardening no bloqueante de `WP4-T06`.
 
 - [ ] **WP0-T12 — Ejecutar smoke post-merge y emitir el marcador WP0.**  
   **Cierre:** instalación/arranque, login, recorrido crítico C0–C4 y persistencia pasan desde `main`; ledger registra el SHA canónico.  
-  **Estado exacto:** `READY_AFTER_CONTROLLED_MERGE`; el release candidate, la matriz afectada y los root gates pasan sobre `90edfb1e0697ced0e0b4eb90d7f18d93f4661c7f`; falta el merge controlado y la ejecución post-merge desde `main`.  
+  **Estado exacto:** `POST_MERGE_RELEASE_FAILED / BOUNDED_REPAIR_IN_PROGRESS`; `CANONICAL_MAIN_SHA=ccac72e286d778ab0187e447f45064d3c4d2d776`; `RUN_ID=31117419963`; `JOB_ID=92670463520`; fallo en `Deploy with rollback armed` después de build, checksum, SSH y transferencia correctos; la ruta externa y la evidencia final no se ejecutaron.  
+  **Fallo observado:** `Error response from daemon: No such image: sha256:7945ce0aa266ca7f14003a3401afa2d581dff3deb0d384fecb769829d7636ffc`.  
+  **Repair vigente:** `PR=179`; rama `agent/axignal-wp0-post-merge-image-ref-repair`; usar la etiqueta local determinista contenida en el archive como lookup, verificar que resuelve al ID inmutable esperado, mantener `pull_policy: never` y comprobar que el contenedor usa exactamente ese ID.  
   **Evidencia requerida:** `AX_C0_C4_CANONICAL_MAIN_PASS`.
 
 ### Registro operativo exacto del repair post-merge
 
 ```text
 ORIGINAL_CANONICAL_MAIN_SHA          fae293b9f2c6cc1ebfffd2302f3ce6ddcfef00c2
-FAILED_POST_MERGE_RUN                31097383391
-FAILED_POST_MERGE_JOB                92602528596
-OBSERVED_FAILURE                     AXIGNAL_LANDING_IMAGE_REPOSITORY missing
-REPAIR_PULL_REQUEST                  177
-REPAIR_BRANCH                        agent/axignal-wp0-post-merge-release-repair
-REPAIR_EXECUTABLE_EVIDENCE_SHA       90edfb1e0697ced0e0b4eb90d7f18d93f4661c7f
-PUBLIC_LANDING_CANDIDATE_JOB         92651677368 SUCCESS
-G6_INPUTS_JOB                        92651677342 SUCCESS
-G6_DOUBLE_BUILD_JOB                  92651858417 SUCCESS
-FULL_MIGRATION_MATRIX_JOB            92651680867 SUCCESS
-BROWSER_E2E_JOB                      92651677486 SUCCESS
-C4_RUNTIME_PILOT_JOB                 92652044804 SUCCESS
-G6_ARTIFACT_ID                       8972205296
-G6_ARTIFACT_DIGEST                   sha256:563e0c6c647578269ab77a1008d962bf7037028ea8011fc68892e9690080d90f
-ROOT_CORE_RUN                       31113947505 SUCCESS
-ROOT_RUNTIME_RUN                    31113950967 ATTEMPT_2 SUCCESS
-ROOT_DOMAIN_RUN                     31113954472 SUCCESS
-ROOT_CORE_GATE_JOB                  92660535386 SUCCESS
-ROOT_RUNTIME_GATE_JOB               92662147571 SUCCESS
-ROOT_DOMAIN_GATE_JOB                92659174165 SUCCESS
+FIRST_FAILED_POST_MERGE_RUN          31097383391
+FIRST_FAILED_POST_MERGE_JOB          92602528596
+FIRST_OBSERVED_FAILURE               AXIGNAL_LANDING_IMAGE_REPOSITORY missing
+FIRST_REPAIR_PULL_REQUEST            177
+FIRST_REPAIR_EXECUTABLE_EVIDENCE_SHA 90edfb1e0697ced0e0b4eb90d7f18d93f4661c7f
+CONTROLLED_MERGE_EXPECTED_HEAD       c75cd325f74f281f009264b87a050b1cf866face
+CANONICAL_MAIN_SHA                   ccac72e286d778ab0187e447f45064d3c4d2d776
+CONTROLLED_MERGE                     SUCCESS
+POST_MERGE_RELEASE_RUN               31117419963 FAILURE
+POST_MERGE_RELEASE_JOB               92670463520 FAILURE
+POST_MERGE_FAILURE_STEP              Deploy with rollback armed
+POST_MERGE_OBSERVED_FAILURE          No such image: sha256:7945ce0aa266ca7f14003a3401afa2d581dff3deb0d384fecb769829d7636ffc
+BUILD_IMAGE_ID                       sha256:7945ce0aa266ca7f14003a3401afa2d581dff3deb0d384fecb769829d7636ffc
+BUNDLE_CHECKSUM                      PASS
+SSH_HOST_PINNING                     PASS
+TRANSFER_EXACT_BUNDLE                PASS
+EXTERNAL_ROUTE_SMOKE                 NOT_EXECUTED
+FINAL_DEPLOYMENT_EVIDENCE            NOT_EMITTED
+CURRENT_REPAIR_PULL_REQUEST          179
+CURRENT_REPAIR_BRANCH                agent/axignal-wp0-post-merge-image-ref-repair
+CURRENT_REPAIR_HEAD                  RESOLVE_FROM_PR_HEAD_AT_EXECUTION
+CURRENT_REPAIR_SCOPE                 verified local tag lookup bound to immutable image ID
 MAIN_PROTECTION                      false ACKNOWLEDGED_RISK
 DEFERRED_HARDENING_ISSUE             176
 DEFERRED_HARDENING_TASK              WP4-T06
@@ -624,14 +632,16 @@ La publicación no permite afirmar que AXIGNAL está terminado E2E hasta que las
 HUMAN_AUTHORITY_APPROVAL     APPROVED
 APPROVED_BY                  Rafael López
 CONTRACT_ID                  AX-GE2E-FINISH-003
-CONTRACT_VERSION             1.1.0-checklist.3
+CONTRACT_VERSION             1.1.0-checklist.4
 CONTRACT_STATE               ACTIVE_BINDING
 ACTIVE_WORK_PACKAGE          WP0
-ACTIVE_TASK                  WP0-T11
-ACTIVE_BRANCH                agent/axignal-wp0-post-merge-release-repair
-ACTIVE_PULL_REQUEST          177
-EXPECTED_EXECUTABLE_HEAD     90edfb1e0697ced0e0b4eb90d7f18d93f4661c7f
-ACTIVE_BLOCKER               NONE
+ACTIVE_TASK                  WP0-T12
+ACTIVE_BRANCH                agent/axignal-wp0-post-merge-image-ref-repair
+ACTIVE_PULL_REQUEST          179
+CANONICAL_MAIN_SHA           ccac72e286d778ab0187e447f45064d3c4d2d776
+LAST_VALIDATED_PRODUCT_SHA   90edfb1e0697ced0e0b4eb90d7f18d93f4661c7f
+CURRENT_REPAIR_HEAD          RESOLVE_FROM_PR_HEAD_AT_EXECUTION
+ACTIVE_BLOCKER               AX-CLOSE-BLK-006_CROSS_DAEMON_IMAGE_LOOKUP
 DEFERRED_HARDENING           AX-CLOSE-BLK-005 / ISSUE_176 / WP4-T06
 NEXT_CANONICAL_MARKER        AX_C0_C4_CANONICAL_MAIN_PASS
 PUBLICATION_STRATEGY         RELEASE_THEN_ITERATE

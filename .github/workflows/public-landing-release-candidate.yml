@@ -47,7 +47,7 @@ jobs:
           bash -n infra/landing/deploy.sh
           grep -Fq 'StrictHostKeyChecking=yes' .github/workflows/public-landing-ssh-channel-preflight.yml
           ! grep -Fq 'StrictHostKeyChecking=no' infra/landing/deploy.sh
-          AXIGNAL_LANDING_IMAGE=sha256:0000000000000000000000000000000000000000000000000000000000000000 \
+          AXIGNAL_LANDING_IMAGE=axignal-landing:contract \
           AXIGNAL_BUILD_SHA="${{ env.AXIGNAL_EXACT_SHA }}" \
           AXIGNAL_LANDING_PORT=18181 \
           AXIGNAL_LANDING_INTAKE_DIR=/tmp/axignal-intake \
@@ -68,12 +68,7 @@ jobs:
 
           cleanup() {
             set +e
-            if [[ -s "${image_id_file}" ]]; then
-              image_id="$(cat "${image_id_file}")"
-            else
-              image_id="sha256:0000000000000000000000000000000000000000000000000000000000000000"
-            fi
-            AXIGNAL_LANDING_IMAGE="${image_id}" \
+            AXIGNAL_LANDING_IMAGE="${image}" \
             AXIGNAL_BUILD_SHA="${{ env.AXIGNAL_EXACT_SHA }}" \
             AXIGNAL_LANDING_PORT=18182 \
             AXIGNAL_LANDING_INTAKE_DIR="${intake_dir}" \
@@ -102,19 +97,19 @@ jobs:
           loaded_image_id="$(docker image inspect --format '{{.Id}}' "${image}")"
           test "${loaded_image_id}" = "${image_id}"
 
-          AXIGNAL_LANDING_IMAGE="${image_id}" \
+          AXIGNAL_LANDING_IMAGE="${image}" \
           AXIGNAL_BUILD_SHA="${{ env.AXIGNAL_EXACT_SHA }}" \
           AXIGNAL_LANDING_PORT=18182 \
           AXIGNAL_LANDING_INTAKE_DIR="${intake_dir}" \
             docker compose -p "${project}" -f infra/landing/compose.yaml config -q
-          AXIGNAL_LANDING_IMAGE="${image_id}" \
+          AXIGNAL_LANDING_IMAGE="${image}" \
           AXIGNAL_BUILD_SHA="${{ env.AXIGNAL_EXACT_SHA }}" \
           AXIGNAL_LANDING_PORT=18182 \
           AXIGNAL_LANDING_INTAKE_DIR="${intake_dir}" \
             docker compose -p "${project}" -f infra/landing/compose.yaml create --no-build
 
           container_id="$(
-            AXIGNAL_LANDING_IMAGE="${image_id}" \
+            AXIGNAL_LANDING_IMAGE="${image}" \
             AXIGNAL_BUILD_SHA="${{ env.AXIGNAL_EXACT_SHA }}" \
             AXIGNAL_LANDING_PORT=18182 \
             AXIGNAL_LANDING_INTAKE_DIR="${intake_dir}" \
@@ -130,11 +125,13 @@ jobs:
         run: |
           set -Eeuo pipefail
           intake_dir="$(mktemp -d)"
+          image_ref="axignal-landing:${EXPECTED_SHA}"
           image_id="$(cat /tmp/axignal-landing-candidate.id)"
           [[ "${image_id}" =~ ^sha256:[0-9a-f]{64}$ ]]
+          test "$(docker image inspect --format '{{.Id}}' "${image_ref}")" = "${image_id}"
           cleanup() {
             docker rm -f axignal-landing-candidate >/dev/null 2>&1 || true
-            docker image rm -f "axignal-landing:${EXPECTED_SHA}" >/dev/null 2>&1 || true
+            docker image rm -f "${image_ref}" >/dev/null 2>&1 || true
             sudo rm -rf "${intake_dir}"
             rm -f \
               /tmp/axignal-landing-candidate.tar.gz \
@@ -157,7 +154,7 @@ jobs:
             -e AXIGNAL_PUBLIC_ORIGIN=http://127.0.0.1:18181 \
             -e AXIGNAL_PILOT_INTAKE_FILE=/var/lib/axignal/intake/requests.jsonl \
             -v "${intake_dir}:/var/lib/axignal/intake" \
-            "${image_id}"
+            "${image_ref}"
 
           test "$(docker inspect --format '{{.Image}}' axignal-landing-candidate)" = "${image_id}"
 

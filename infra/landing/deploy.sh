@@ -2,11 +2,13 @@
 set -Eeuo pipefail
 
 release_sha="${1:?release SHA required}"
-image_tag="${2:?image tag required}"
+expected_image_id="${2:?expected image ID required}"
 image_archive="${3:?image archive required}"
 bundle_dir="${4:-$(cd "$(dirname "$0")" && pwd)}"
+image_ref="axignal-landing:${release_sha}"
 
 [[ "${release_sha}" =~ ^[0-9a-f]{40}$ ]]
+[[ "${expected_image_id}" =~ ^sha256:[0-9a-f]{64}$ ]]
 [[ -f "${image_archive}" ]]
 [[ -f "${bundle_dir}/compose.yaml" ]]
 [[ "$(id -u)" -eq 0 ]]
@@ -175,7 +177,7 @@ rollback() {
     AXIGNAL_LANDING_INTAKE_DIR="${intake_dir}" \
       docker compose -p axignal-landing -f "${release_dir}/compose.yaml" up -d --remove-orphans
   else
-    AXIGNAL_LANDING_IMAGE="${image_tag}" \
+    AXIGNAL_LANDING_IMAGE="${image_ref}" \
     AXIGNAL_BUILD_SHA="${release_sha}" \
     AXIGNAL_LANDING_PORT=18180 \
     AXIGNAL_LANDING_INTAKE_DIR="${intake_dir}" \
@@ -191,14 +193,17 @@ rollback() {
 trap rollback ERR
 
 gzip -dc "${image_archive}" | docker load >/dev/null
-docker image inspect "${image_tag}" >/dev/null
+loaded_image_id="$(docker image inspect --format '{{.Id}}' "${image_ref}")"
+test "${loaded_image_id}" = "${expected_image_id}"
 
-export AXIGNAL_LANDING_IMAGE="${image_tag}"
+export AXIGNAL_LANDING_IMAGE="${image_ref}"
 export AXIGNAL_BUILD_SHA="${release_sha}"
 export AXIGNAL_LANDING_PORT=18180
 export AXIGNAL_LANDING_INTAKE_DIR="${intake_dir}"
 docker compose -p axignal-landing -f "${release_dir}/compose.yaml" config -q
 docker compose -p axignal-landing -f "${release_dir}/compose.yaml" up -d --remove-orphans
+container_image_id="$(docker inspect --format '{{.Image}}' axignal-landing)"
+test "${container_image_id}" = "${expected_image_id}"
 
 healthy=false
 for _ in $(seq 1 48); do
@@ -299,10 +304,11 @@ done
 [[ -n "${https_health}" ]]
 
 ln -sfn "${release_dir}" "${release_root}/current"
-printf '%s\n' "${image_tag}" > "${release_dir}/image.txt"
+printf '%s\n' "${expected_image_id}" > "${release_dir}/image.txt"
+printf '%s\n' "${image_ref}" > "${release_dir}/image-ref.txt"
 printf '%s\n' "${release_sha}" > "${release_dir}/sha.txt"
 
-RELEASE_SHA="${release_sha}" IMAGE_TAG="${image_tag}" TRAEFIK_CONTAINER="${traefik_name}" \
+RELEASE_SHA="${release_sha}" EXPECTED_IMAGE_ID="${expected_image_id}" IMAGE_REF="${image_ref}" TRAEFIK_CONTAINER="${traefik_name}" \
 HTTP_ENTRYPOINT="${HTTP_ENTRYPOINT}" HTTPS_ENTRYPOINT="${HTTPS_ENTRYPOINT}" CERT_RESOLVER="${CERT_RESOLVER}" \
 python3 - <<'PY' > "${release_dir}/deployment-evidence.json"
 import json
@@ -313,7 +319,8 @@ evidence = {
     "schema": "axignal.public-landing-deployment.v1",
     "goal_id": "AXIGNAL-GOAL-001",
     "release_sha": os.environ["RELEASE_SHA"],
-    "image": os.environ["IMAGE_TAG"],
+    "image": os.environ["EXPECTED_IMAGE_ID"],
+    "image_ref": os.environ["IMAGE_REF"],
     "deployed_at": datetime.now(UTC).isoformat(),
     "container": "axignal-landing",
     "loopback_upstream": "127.0.0.1:18180",
@@ -329,6 +336,9 @@ evidence = {
         "certificate_resolver": os.environ["CERT_RESOLVER"],
     },
     "checks": {
+        "archive_loaded": True,
+        "loaded_image_id_verified": True,
+        "container_image_id_verified": True,
         "container_healthy": True,
         "local_health": True,
         "http_redirect": True,
