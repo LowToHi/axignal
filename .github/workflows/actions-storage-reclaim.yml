@@ -24,7 +24,7 @@ concurrency:
 jobs:
   reclaim:
     name: Reclaim stale Actions artifacts
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 30
     env:
       TARGET_FREE_MIB: ${{ inputs.target_free_mib || '300' }}
@@ -55,14 +55,12 @@ jobs:
           target_bytes = target_mib * 1024 * 1024
           cutoff = datetime.now(UTC) - timedelta(hours=2)
 
-          # Content-addressed artifacts explicitly cited by AX-GE2E-FINISH-003.
           preserve_artifact_ids = {
               8913254281,
               8963978249,
               8972205296,
           }
 
-          # Workflow runs explicitly cited by the active contract and ledger.
           preserve_run_ids = {
               31092162860,
               31092164195,
@@ -78,7 +76,6 @@ jobs:
               current_run_id,
           }
 
-          # Preserve active/canonical product lines and their complete audit evidence.
           preserve_shas = {
               "7c551728c7d750ee35b3607a3939df493f697592",
               "8b4149b6bf8de8ff958597c02a908a1a29fbea0f",
@@ -179,7 +176,6 @@ jobs:
                   continue
               candidates.append((run_id, size))
 
-          # Delete the heaviest stale runs first: one API mutation can remove many artifacts.
           candidates.sort(key=lambda item: item[1], reverse=True)
 
           freed = 0
