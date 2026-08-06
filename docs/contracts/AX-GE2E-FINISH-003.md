@@ -189,18 +189,18 @@ Durante el cierre no se permite:
 
 | Work package | Cumplidas | Total | Estado |
 |---|---:|---:|---|
-| `WP0` Canonicalización C0–C4 | 5 | 12 | `IN_PROGRESS` |
+| `WP0` Canonicalización C0–C4 | 9 | 12 | `IN_PROGRESS` |
 | `WP1` Investigación, AXENT y evidencia real | 0 | 10 | `BLOCKED_BY_WP0` |
 | `WP2` O01, Opportunity y Bid Workspace | 0 | 12 | `BLOCKED_BY_WP1` |
 | `WP3` Comercial, billing y Founder Operations | 0 | 12 | `BLOCKED_BY_WP2` |
 | `WP4` Producción, seguridad, UX y distribución | 0 | 12 | `BLOCKED_BY_WP3` |
 | `WP5` Aceptación privada | 0 | 7 | `BLOCKED_BY_WP4` |
 | `WP6` P27, release y lanzamiento | 0 | 10 | `BLOCKED_BY_WP5` |
-| **TOTAL** | **5** | **75** | **E2E INCOMPLETE** |
+| **TOTAL** | **9** | **75** | **E2E INCOMPLETE** |
 
 ```text
 ACTIVE_WORK_PACKAGE          WP0
-ACTIVE_TASK                  WP0-T05
+ACTIVE_TASK                  WP0-T10
 NEXT_CANONICAL_MARKER        AX_C0_C4_CANONICAL_MAIN_PASS
 PUBLIC_LAUNCH                NO_GO
 ```
@@ -231,26 +231,26 @@ El panel se actualizará en el mismo cambio que marque o reabra una tarea. En ca
   **Cierre:** migraciones, tenant-private authority, retención, backup y restore de producto quedan demostrados.  
   **Evidencia:** `AX_C3_PERSISTENCE_MIGRATIONS_RESTORE_PASS`; `EVIDENCE_SHA=8a81d2a417d5645899c3ba50489552bbeb3f829a`; `artifact_id=8913254281`.
 
-- [ ] **WP0-T05 — Cerrar el comparador C3 de ciclos consecutivos 140→142.**  
+- [x] **WP0-T05 — Cerrar el comparador C3 de ciclos consecutivos 140→142.**  
   **Cierre:** snapshot restaurado en schema 140; equivalencia de datos y autoridad en 140; aplicación determinista de 141–142; equivalencia final de schema, datos y autoridad; hashes materiales preservados; CI afectada PASS.  
-  **Evidencia requerida:** job y artefacto C3 PASS sobre el mismo `EVIDENCE_SHA`.  
-  **Restricción:** no modificar las migraciones 141–142, no relajar ACL, no ignorar schema drift y no retirar hashes.
+  **Evidencia:** `EVIDENCE_SHA=316f34d0ec3c2bc1fc91e0fa2494840a5aa8e243`; `run_id=31092162860`; `job_id=92585538939`; `artifact_id=8963978249`; `digest=sha256:e78c14cbf9e5480a0b66e1c8214a80250604c5b6dd1370733fb8f156c01f73be`; `same_schema_140_equivalence=PASS`; `deterministic_141_142_replay=PASS`; `final_authority_contraction=PASS`; `consecutive_cycle_comparator=PASS`.  
+  **Restricción preservada:** migraciones 141–142 intactas, ACL no relajada, schema drift no ignorado y hashes materiales conservados.
 
 - [x] **WP0-T06 — Cerrar el runtime técnico C4 de Research/AXENT.**  
   **Cierre:** recorrido técnico C4, autoridad y persistencia pasan sin sustituir evidencia por fixtures finales.  
   **Evidencia:** `C4_FINAL_RUNTIME_PASS`; `EVIDENCE_SHA=dd119139555e885cc73d24d13e4b7b148797576e`; `job_id=92338125477`.
 
-- [ ] **WP0-T07 — Ejecutar y cerrar la full migration matrix exact-head.**  
+- [x] **WP0-T07 — Ejecutar y cerrar la full migration matrix exact-head.**  
   **Cierre:** bootstrap, upgrade paths, replay, backup, restore, retention y migraciones soportadas pasan en toda la matriz requerida.  
-  **Evidencia requerida:** run terminal SUCCESS y artefactos ligados al exact HEAD.
+  **Evidencia:** `EVIDENCE_SHA=316f34d0ec3c2bc1fc91e0fa2494840a5aa8e243`; `run_id=31092162860`; `job_id=92585538939`; `artifact_id=8963978249`; `digest=sha256:e78c14cbf9e5480a0b66e1c8214a80250604c5b6dd1370733fb8f156c01f73be`; conclusión `SUCCESS`.
 
-- [ ] **WP0-T08 — Ejecutar y cerrar los root gates exact-head.**  
+- [x] **WP0-T08 — Ejecutar y cerrar los root gates exact-head.**  
   **Cierre:** `Core`, `Runtime`, `Domain`, `Procurement Admission` y `Remote Pilot Operations` pasan sobre el mismo producto candidato.  
-  **Evidencia requerida:** IDs de runs, conclusiones SUCCESS y SHA común.
+  **Evidencia:** SHA común `316f34d0ec3c2bc1fc91e0fa2494840a5aa8e243`; `Core=31092164195 SUCCESS`; `Runtime=31092162860 SUCCESS`; `Domain=31092161635 SUCCESS`; `Procurement Admission=31092161086 SUCCESS`; `Remote Pilot Operations=31092162583 SUCCESS`.
 
-- [ ] **WP0-T09 — Incorporar el último `main` y resolver sólo conflictos materiales.**  
+- [x] **WP0-T09 — Incorporar el último `main` y resolver sólo conflictos materiales.**  
   **Cierre:** rama actualizada respecto a `main`, sin pérdida de cambios ni ampliación de alcance; pruebas afectadas PASS.  
-  **Evidencia requerida:** merge-base, head reconciliado y diff revisado.
+  **Evidencia:** `MAIN_SHA=6091795f79aec19c9dcbac71bb8b6b19877f101b`; `MERGE_BASE=6091795f79aec19c9dcbac71bb8b6b19877f101b`; `RECONCILED_HEAD=316f34d0ec3c2bc1fc91e0fa2494840a5aa8e243`; comparación `ahead_by=983`, `behind_by=0`; commit `merge(main): reconcile latest storage governance baseline`; cinco root gates exact-head `SUCCESS`.
 
 - [ ] **WP0-T10 — Dejar el PR contractual listo y protegiblemente fusionable.**  
   **Cierre:** PR no draft, mergeable, checks obligatorios PASS, expected head verificado y cero conversaciones bloqueantes.  
@@ -570,7 +570,7 @@ CONTRACT_ID                  AX-GE2E-FINISH-003
 CONTRACT_VERSION             1.1.0-checklist.1
 CONTRACT_STATE               ACTIVE_BINDING
 ACTIVE_WORK_PACKAGE          WP0
-ACTIVE_TASK                  WP0-T05
+ACTIVE_TASK                  WP0-T10
 NEXT_CANONICAL_MARKER        AX_C0_C4_CANONICAL_MAIN_PASS
 PUBLIC_LAUNCH                NO_GO
 ```
