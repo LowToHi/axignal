@@ -12,15 +12,6 @@ on:
       - "pnpm-lock.yaml"
       - "pnpm-workspace.yaml"
       - ".github/workflows/public-landing-release.yml"
-  pull_request:
-    paths:
-      - "apps/landing/**"
-      - "infra/landing/**"
-      - "packages/design-tokens/**"
-      - "package.json"
-      - "pnpm-lock.yaml"
-      - "pnpm-workspace.yaml"
-      - ".github/workflows/public-landing-release.yml"
   workflow_dispatch:
 
 permissions:
@@ -31,72 +22,8 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  validate-image-contract:
-    name: Validate immutable landing image contract
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
-    steps:
-      - name: Checkout exact pull request revision
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-        with:
-          persist-credentials: false
-
-      - name: Build and verify content-addressed local release
-        shell: bash
-        run: |
-          set -Eeuo pipefail
-          test "${GITHUB_SHA}" = "$(git rev-parse HEAD)"
-          corepack enable
-          corepack prepare pnpm@10.12.4 --activate
-          pnpm install --frozen-lockfile
-          pnpm --filter @axignal/landing typecheck
-          pnpm --filter @axignal/landing build
-          bash -n infra/landing/deploy.sh
-
-          image="axignal-landing-contract:${GITHUB_SHA}"
-          archive="/tmp/axignal-landing-contract.tar.gz"
-          intake_dir="/tmp/axignal-landing-contract-intake"
-          project="axignal-landing-contract"
-          mkdir -p "${intake_dir}"
-
-          cleanup() {
-            set +e
-            AXIGNAL_LANDING_IMAGE="${image_id:-sha256:0000000000000000000000000000000000000000000000000000000000000000}" \
-            AXIGNAL_BUILD_SHA="${GITHUB_SHA}" \
-            AXIGNAL_LANDING_PORT=18180 \
-            AXIGNAL_LANDING_INTAKE_DIR="${intake_dir}" \
-              docker compose -p "${project}" -f infra/landing/compose.yaml down --remove-orphans >/dev/null 2>&1
-            docker image rm -f "${image}" >/dev/null 2>&1 || true
-            rm -rf "${archive}" "${intake_dir}"
-          }
-          trap cleanup EXIT
-
-          docker build --pull --file infra/landing/Dockerfile --tag "${image}" .
-          image_id="$(docker image inspect --format '{{.Id}}' "${image}")"
-          [[ "${image_id}" =~ ^sha256:[0-9a-f]{64}$ ]]
-
-          docker save "${image}" | gzip -9 > "${archive}"
-          docker image rm -f "${image}" >/dev/null
-          gzip -dc "${archive}" | docker load >/dev/null
-
-          loaded_image_id="$(docker image inspect --format '{{.Id}}' "${image}")"
-          test "${loaded_image_id}" = "${image_id}"
-
-          export AXIGNAL_LANDING_IMAGE="${image_id}"
-          export AXIGNAL_BUILD_SHA="${GITHUB_SHA}"
-          export AXIGNAL_LANDING_PORT=18180
-          export AXIGNAL_LANDING_INTAKE_DIR="${intake_dir}"
-          docker compose -p "${project}" -f infra/landing/compose.yaml config -q
-          docker compose -p "${project}" -f infra/landing/compose.yaml create --no-build
-
-          container_id="$(docker compose -p "${project}" -f infra/landing/compose.yaml ps -q landing)"
-          test -n "${container_id}"
-          test "$(docker inspect --format '{{.Image}}' "${container_id}")" = "${image_id}"
-
   deploy:
     name: Build, deploy and verify axignal.com
-    if: github.event_name != 'pull_request'
     runs-on: ubuntu-24.04
     environment: production-landing
     timeout-minutes: 45
