@@ -61,6 +61,7 @@ jobs:
           image="axignal-landing:${{ env.AXIGNAL_EXACT_SHA }}"
           archive="/tmp/axignal-landing-candidate.tar.gz"
           image_id_file="/tmp/axignal-landing-candidate.id"
+          checksum_file="/tmp/axignal-landing-candidate.sha256"
           intake_dir="/tmp/axignal-intake-contract"
           project="axignal-landing-candidate-contract"
           mkdir -p "${intake_dir}"
@@ -93,6 +94,8 @@ jobs:
           printf '%s\n' "${image_id}" > "${image_id_file}"
 
           docker save "${image}" | gzip -9 > "${archive}"
+          sha256sum "${archive}" "${image_id_file}" > "${checksum_file}"
+          sha256sum -c "${checksum_file}"
           docker image rm -f "${image}" >/dev/null
           gzip -dc "${archive}" | docker load >/dev/null
 
@@ -133,7 +136,10 @@ jobs:
             docker rm -f axignal-landing-candidate >/dev/null 2>&1 || true
             docker image rm -f "axignal-landing:${EXPECTED_SHA}" >/dev/null 2>&1 || true
             sudo rm -rf "${intake_dir}"
-            rm -f /tmp/axignal-landing-candidate.tar.gz /tmp/axignal-landing-candidate.id
+            rm -f \
+              /tmp/axignal-landing-candidate.tar.gz \
+              /tmp/axignal-landing-candidate.id \
+              /tmp/axignal-landing-candidate.sha256
           }
           trap cleanup EXIT
           sudo chown 1000:1000 "${intake_dir}"

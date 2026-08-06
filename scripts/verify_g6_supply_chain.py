@@ -466,13 +466,15 @@ def inspect_release_build_contract(findings: list[Finding]) -> None:
         required=(
             "docker save",
             "docker load",
+            "axignal-landing-candidate.sha256",
+            "sha256sum -c",
             "loaded_image_id",
             'test "${loaded_image_id}" = "${image_id}"',
             "docker inspect --format '{{.Image}}'",
             'AXIGNAL_LANDING_IMAGE="${image_id}"',
             "create --no-build",
         ),
-        message="landing candidate does not prove save/load and Compose image identity",
+        message="landing candidate lacks archive and image-ID identity proof",
         findings=findings,
     )
 
@@ -487,7 +489,7 @@ def inspect_release_build_contract(findings: list[Finding]) -> None:
             "grep -Eq '^sha256:[0-9a-f]{64}$'",
             "./deploy.sh '${GITHUB_SHA}'",
         ),
-        message="landing production release does not checksum and validate the transferred image ID",
+        message="landing production release lacks verified image-ID transfer",
         findings=findings,
     )
 
