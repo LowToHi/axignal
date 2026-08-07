@@ -96,7 +96,7 @@ async function subscriberTarget(opportunityId: string): Promise<
     };
   }
   return {
-    contextId: `subscriber:${bootstrap.tenant.id}:${opportunity.id}`,
+    contextId: `ctx_subscriber_${bootstrap.tenant.id}_${opportunity.id}`,
     opportunityId: opportunity.id
   };
 }
