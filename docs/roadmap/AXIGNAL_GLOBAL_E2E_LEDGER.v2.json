@@ -901,7 +901,7 @@
       "title": "Cerrar el E2E O01 completo en UI",
       "status": "ENGINEERING_E2E_PASS",
       "evidence": "CONFORMANCE_SUITE_PASS: 14/14 checks contra BD real (library manifests 16, no shells, primary shell placement, source states, state machines, adapter conformance, profiles, coverage disclosure, kill switch, migrations, no forbidden shells); 6 tests de la suite; API 390/390",
-      "exact_head": null,
+      "exact_head": "909f38aa7e2de26d7946ee428476c4b559977a8f",
       "blocked_scope": null,
       "blocking_reason": null,
       "unblocked_parallel_work": null,
