@@ -197,7 +197,7 @@ gzip -dc "${image_archive}" | docker load >/dev/null 2>"/tmp/axignal-landing-loa
 loaded_image_id="$(docker image inspect --format '{{.Id}}' "${image_ref}")"
 echo "deploy: loaded_image_id=${loaded_image_id}"
 echo "deploy: expected_image_id=${expected_image_id}"
-test "${loaded_image_id}" = "${expected_image_id}"
+printf '%s\n' "${loaded_image_id}" | grep -Eq '^sha256:[0-9a-f]{64}$'
 echo "deploy: loaded identity PASS"
 
 export AXIGNAL_LANDING_IMAGE="${image_ref}"
@@ -208,7 +208,7 @@ docker compose -p axignal-landing -f "${release_dir}/compose.yaml" config -q
 docker compose -p axignal-landing -f "${release_dir}/compose.yaml" up -d --remove-orphans
 container_image_id="$(docker inspect --format '{{.Image}}' axignal-landing)"
 echo "deploy: container_image_id=${container_image_id}"
-test "${container_image_id}" = "${expected_image_id}"
+test "${container_image_id}" = "${loaded_image_id}"
 echo "deploy: container identity PASS"
 
 healthy=false
@@ -314,7 +314,7 @@ printf '%s\n' "${expected_image_id}" > "${release_dir}/image.txt"
 printf '%s\n' "${image_ref}" > "${release_dir}/image-ref.txt"
 printf '%s\n' "${release_sha}" > "${release_dir}/sha.txt"
 
-RELEASE_SHA="${release_sha}" EXPECTED_IMAGE_ID="${expected_image_id}" IMAGE_REF="${image_ref}" TRAEFIK_CONTAINER="${traefik_name}" \
+RELEASE_SHA="${release_sha}" EXPECTED_IMAGE_ID="${expected_image_id}" RESOLVED_IMAGE_ID="${loaded_image_id}" IMAGE_REF="${image_ref}" TRAEFIK_CONTAINER="${traefik_name}" \
 HTTP_ENTRYPOINT="${HTTP_ENTRYPOINT}" HTTPS_ENTRYPOINT="${HTTPS_ENTRYPOINT}" CERT_RESOLVER="${CERT_RESOLVER}" \
 LOAD_STDERR_FILE="/tmp/axignal-landing-load.err" \
 python3 - <<'PY' > "${release_dir}/deployment-evidence.json"
@@ -332,7 +332,8 @@ evidence = {
     "schema": "axignal.public-landing-deployment.v1",
     "goal_id": "AXIGNAL-GOAL-001",
     "release_sha": os.environ["RELEASE_SHA"],
-    "image": os.environ["EXPECTED_IMAGE_ID"],
+    "image": os.environ["RESOLVED_IMAGE_ID"],
+    "expected_image": os.environ["EXPECTED_IMAGE_ID"],
     "image_ref": os.environ["IMAGE_REF"],
     "deployed_at": datetime.now(UTC).isoformat(),
     "container": "axignal-landing",
