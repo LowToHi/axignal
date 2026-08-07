@@ -941,7 +941,7 @@
       "title": "Cerrar trial y economía de uso",
       "status": "ENGINEERING_E2E_PASS",
       "evidence": "F02_ENTITIES_OWNERSHIP_PASS: 16 tests, native identifiers retained, names históricos + alias, OBSERVED/INFERRED separation (observed requires source, inferred requires evidence), fingerprint reproducible y estable ante renombres (no silent merge), ownership temporal (parent/control date), PERSON solo tenant-private, aislamiento tenant-private (get_for_tenant)",
-      "exact_head": null,
+      "exact_head": "344a5425991074142e89115d325baeb6c9738a65",
       "blocked_scope": null,
       "blocking_reason": null,
       "unblocked_parallel_work": null,
