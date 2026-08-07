@@ -3562,7 +3562,7 @@
       "jurisdiction_id": null,
       "title": "E2E O01-O09",
       "status": "ENGINEERING_E2E_PASS",
-      "evidence": "O02_GRANTS_PASS: 19 tests (source admission DISCOVERED pending human, call lifecycle DRAFT/OPEN/CLOSED/CANCELLED, eligibility rules typed con source_ref, topics con rate/budget, awards con evidence, application workspace con aprobación humana) + O01_E2E previo; API 593/593",
+      "evidence": "O03_REGULATION_PASS: 19 tests (EUR-Lex reference DISCOVERED pending human, legal document lifecycle con effective_at+official_url obligatorios (legal-authority disclosure), obligations tipadas con evidence para deadlines, amendment/repeal con evidence y sin self-amendment, Market Entry & Compliance Workspace: conclusiones requieren legal-authority disclosure, nunca asesora legalmente) + O02_GRANTS + O01_E2E previos; API 612/612",
       "exact_head": "0295ad2db7b16236547a23989dc51b512d639c74",
       "blocked_scope": null,
       "blocking_reason": null,
