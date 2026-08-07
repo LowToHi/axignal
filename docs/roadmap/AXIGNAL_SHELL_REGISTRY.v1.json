@@ -1,7 +1,7 @@
 {
   "schema": "axignal.shell-registry.v1",
   "contract_id": "AX-GE2E-FINISH-004",
-  "contract_version": "2.0.0",
+  "contract_version": "2.1.0",
   "date": "2026-08-07",
   "validation": {
     "shell_count": 2,
@@ -10,7 +10,24 @@
     "shell_per_library": false,
     "shell_per_source": false,
     "shell_per_language": false,
-    "procurement_shell": false
+    "procurement_shell": false,
+    "third_shell_allowed": false,
+    "human_amendment_required_for_new_shell": true,
+    "shell_per_jurisdiction": false,
+    "shell_per_region": false,
+    "shell_per_workspace": false,
+    "shell_per_bundle": false,
+    "rejected_shell_ids": [
+      "AXIGNAL_PROCUREMENT",
+      "AXIGNAL_GLOBAL_OPPORTUNITY_INTELLIGENCE",
+      "COUNTRY_AS_SHELL",
+      "JURISDICTION_AS_SHELL",
+      "LANGUAGE_AS_SHELL",
+      "SOURCE_AS_SHELL",
+      "LIBRARY_AS_SHELL",
+      "WORKSPACE_AS_SHELL",
+      "BUNDLE_AS_SHELL"
+    ]
   },
   "shells": [
     {
@@ -18,7 +35,24 @@
       "display_name": "AXIGNAL Opportunity Intelligence",
       "status": "INHERITED_PARTIAL_IMPLEMENTATION",
       "coverage": "GLOBAL",
-      "required_libraries": ["F01", "F02", "F03", "F04", "F05", "F06", "F07", "O01", "O02", "O03", "O04", "O05", "O06", "O07", "O08", "O09"],
+      "required_libraries": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F05",
+        "F06",
+        "F07",
+        "O01",
+        "O02",
+        "O03",
+        "O04",
+        "O05",
+        "O06",
+        "O07",
+        "O08",
+        "O09"
+      ],
       "contains_procurement_library": "O01",
       "commercial_launch_authorized": false,
       "workspaces": [
@@ -31,7 +65,39 @@
         "TRADE_WORKSPACE",
         "ENERGY_CLIMATE_WORKSPACE",
         "INNOVATION_IP_WORKSPACE"
-      ]
+      ],
+      "version": "2.1.0",
+      "role": "PRIMARY_PRODUCT_SHELL",
+      "product_id": "AXIGNAL_OPPORTUNITY_INTELLIGENCE",
+      "audience": "BUSINESSES_ORGANISATIONS_AND_PROFESSIONAL_TEAMS",
+      "optional_libraries": [],
+      "domain_manifest": "PENDING",
+      "workspace_types": [
+        "BID_WORKSPACE",
+        "GRANTS_WORKSPACE",
+        "REGULATION_WORKSPACE",
+        "INFRASTRUCTURE_WORKSPACE",
+        "CORPORATE_WORKSPACE",
+        "SOVEREIGN_WORKSPACE",
+        "TRADE_WORKSPACE",
+        "ENERGY_CLIMATE_WORKSPACE",
+        "INNOVATION_IP_WORKSPACE"
+      ],
+      "capabilities": "PENDING",
+      "entitlements": "PENDING",
+      "locales": [
+        "es",
+        "en",
+        "fr",
+        "de",
+        "it",
+        "pt"
+      ],
+      "feature_flags": [],
+      "disclosure": "PENDING",
+      "commercial_status": "ACTIVE_CONTRACT_DEFINITION",
+      "live_billing": "NOT_AUTHORIZED",
+      "public_launch": "NO_GO"
     },
     {
       "shell_id": "AXIGNAL_PUBLIC_EMPLOYMENT",
@@ -48,7 +114,42 @@
         "pruebas, resultados y nombramientos",
         "workspace de candidatura y examen"
       ],
-      "implementation_during_wp0": "NOT_IMPLEMENTED_FUNCTIONALLY"
+      "implementation_during_wp0": "NOT_IMPLEMENTED_FUNCTIONALLY",
+      "version": "2.1.0",
+      "role": "SECOND_COMMERCIAL_PRODUCT",
+      "product_id": "AXIGNAL_PUBLIC_EMPLOYMENT",
+      "audience": "CANDIDATES_AND_FUTURE_ACADEMIES",
+      "required_libraries": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F05",
+        "F06",
+        "F07"
+      ],
+      "optional_libraries": [],
+      "domain_manifest": "PENDING",
+      "workspace_types": [
+        "CANDIDACY_AND_EXAM_WORKSPACE"
+      ],
+      "capabilities": "PENDING",
+      "entitlements": "PENDING",
+      "locales": [
+        "es",
+        "en",
+        "fr",
+        "de",
+        "it",
+        "pt"
+      ],
+      "feature_flags": [],
+      "disclosure": "PENDING",
+      "commercial_status": "DRAFT_INACTIVE",
+      "public_launch": "NOT_AUTHORIZED",
+      "checkout_status": "DISABLED",
+      "commercial_claims_status": "NOT_AUTHORIZED",
+      "source_coverage_claims_status": "NOT_AUTHORIZED"
     }
   ],
   "notes": {
@@ -57,6 +158,10 @@
     "no_shell_per_library": true,
     "no_shell_per_source": true,
     "no_shell_per_language": true,
-    "no_shell_per_workspace": true
+    "no_shell_per_workspace": true,
+    "public_employment_registered_as_o10": false,
+    "third_shell": false,
+    "root_products": 2,
+    "reuse_of_core_does_not_authorize_data_mixing": true
   }
 }

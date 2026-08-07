@@ -1,11 +1,29 @@
 {
   "schema": "axignal.library-registry.v2",
   "contract_id": "AX-GE2E-FINISH-004",
-  "contract_version": "2.0.0",
+  "contract_version": "2.1.0",
   "date": "2026-08-07",
   "canonical_scope": {
-    "foundational_libraries": ["F01", "F02", "F03", "F04", "F05", "F06", "F07"],
-    "opportunity_libraries": ["O01", "O02", "O03", "O04", "O05", "O06", "O07", "O08", "O09"],
+    "foundational_libraries": [
+      "F01",
+      "F02",
+      "F03",
+      "F04",
+      "F05",
+      "F06",
+      "F07"
+    ],
+    "opportunity_libraries": [
+      "O01",
+      "O02",
+      "O03",
+      "O04",
+      "O05",
+      "O06",
+      "O07",
+      "O08",
+      "O09"
+    ],
     "library_count": 16,
     "libraries_are_shells": false,
     "procurement_library_id": "O01",
@@ -23,8 +41,16 @@
       "blocked_source_count": 0,
       "workspace": null,
       "dependencies": [],
-      "product_shell_ids": [],
-      "commercial_claims_allowed": false
+      "product_shell_ids": [
+        "AXIGNAL_OPPORTUNITY_INTELLIGENCE",
+        "AXIGNAL_PUBLIC_EMPLOYMENT"
+      ],
+      "commercial_claims_allowed": false,
+      "is_shell": false,
+      "is_root_product": false,
+      "shared_foundational_library": true,
+      "available_to_both_shells": true,
+      "product_shell": null
     },
     {
       "library_id": "F02",
@@ -35,9 +61,19 @@
       "admitted_source_count": 0,
       "blocked_source_count": 0,
       "workspace": null,
-      "dependencies": ["F01"],
-      "product_shell_ids": [],
-      "commercial_claims_allowed": false
+      "dependencies": [
+        "F01"
+      ],
+      "product_shell_ids": [
+        "AXIGNAL_OPPORTUNITY_INTELLIGENCE",
+        "AXIGNAL_PUBLIC_EMPLOYMENT"
+      ],
+      "commercial_claims_allowed": false,
+      "is_shell": false,
+      "is_root_product": false,
+      "shared_foundational_library": true,
+      "available_to_both_shells": true,
+      "product_shell": null
     },
     {
       "library_id": "F03",
@@ -49,8 +85,16 @@
       "blocked_source_count": 0,
       "workspace": null,
       "dependencies": [],
-      "product_shell_ids": [],
-      "commercial_claims_allowed": false
+      "product_shell_ids": [
+        "AXIGNAL_OPPORTUNITY_INTELLIGENCE",
+        "AXIGNAL_PUBLIC_EMPLOYMENT"
+      ],
+      "commercial_claims_allowed": false,
+      "is_shell": false,
+      "is_root_product": false,
+      "shared_foundational_library": true,
+      "available_to_both_shells": true,
+      "product_shell": null
     },
     {
       "library_id": "F04",
@@ -62,8 +106,16 @@
       "blocked_source_count": 0,
       "workspace": null,
       "dependencies": [],
-      "product_shell_ids": [],
-      "commercial_claims_allowed": false
+      "product_shell_ids": [
+        "AXIGNAL_OPPORTUNITY_INTELLIGENCE",
+        "AXIGNAL_PUBLIC_EMPLOYMENT"
+      ],
+      "commercial_claims_allowed": false,
+      "is_shell": false,
+      "is_root_product": false,
+      "shared_foundational_library": true,
+      "available_to_both_shells": true,
+      "product_shell": null
     },
     {
       "library_id": "F05",
@@ -74,9 +126,19 @@
       "admitted_source_count": 0,
       "blocked_source_count": 0,
       "workspace": null,
-      "dependencies": ["F03"],
-      "product_shell_ids": [],
-      "commercial_claims_allowed": false
+      "dependencies": [
+        "F03"
+      ],
+      "product_shell_ids": [
+        "AXIGNAL_OPPORTUNITY_INTELLIGENCE",
+        "AXIGNAL_PUBLIC_EMPLOYMENT"
+      ],
+      "commercial_claims_allowed": false,
+      "is_shell": false,
+      "is_root_product": false,
+      "shared_foundational_library": true,
+      "available_to_both_shells": true,
+      "product_shell": null
     },
     {
       "library_id": "F06",
@@ -87,9 +149,20 @@
       "admitted_source_count": 0,
       "blocked_source_count": 0,
       "workspace": null,
-      "dependencies": ["F01", "F04"],
-      "product_shell_ids": [],
-      "commercial_claims_allowed": false
+      "dependencies": [
+        "F01",
+        "F04"
+      ],
+      "product_shell_ids": [
+        "AXIGNAL_OPPORTUNITY_INTELLIGENCE",
+        "AXIGNAL_PUBLIC_EMPLOYMENT"
+      ],
+      "commercial_claims_allowed": false,
+      "is_shell": false,
+      "is_root_product": false,
+      "shared_foundational_library": true,
+      "available_to_both_shells": true,
+      "product_shell": null
     },
     {
       "library_id": "F07",
@@ -100,9 +173,20 @@
       "admitted_source_count": 0,
       "blocked_source_count": 0,
       "workspace": null,
-      "dependencies": ["F05", "F06"],
-      "product_shell_ids": [],
-      "commercial_claims_allowed": false
+      "dependencies": [
+        "F05",
+        "F06"
+      ],
+      "product_shell_ids": [
+        "AXIGNAL_OPPORTUNITY_INTELLIGENCE",
+        "AXIGNAL_PUBLIC_EMPLOYMENT"
+      ],
+      "commercial_claims_allowed": false,
+      "is_shell": false,
+      "is_root_product": false,
+      "shared_foundational_library": true,
+      "available_to_both_shells": true,
+      "product_shell": null
     },
     {
       "library_id": "O01",
@@ -113,9 +197,24 @@
       "admitted_source_count": 1,
       "blocked_source_count": 1,
       "workspace": "BID_WORKSPACE",
-      "dependencies": ["F01", "F02", "F03", "F04", "F05", "F06", "F07"],
-      "product_shell_ids": ["AXIGNAL_OPPORTUNITY_INTELLIGENCE"],
-      "commercial_claims_allowed": true
+      "dependencies": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F05",
+        "F06",
+        "F07"
+      ],
+      "product_shell_ids": [
+        "AXIGNAL_OPPORTUNITY_INTELLIGENCE"
+      ],
+      "commercial_claims_allowed": true,
+      "is_shell": false,
+      "is_root_product": false,
+      "product_shell": "AXIGNAL_OPPORTUNITY_INTELLIGENCE",
+      "shared_foundational_library": false,
+      "available_to_both_shells": false
     },
     {
       "library_id": "O02",
@@ -126,9 +225,24 @@
       "admitted_source_count": 0,
       "blocked_source_count": 0,
       "workspace": "GRANTS_WORKSPACE",
-      "dependencies": ["F01", "F02", "F03", "F04", "F05", "F06", "F07"],
-      "product_shell_ids": ["AXIGNAL_OPPORTUNITY_INTELLIGENCE"],
-      "commercial_claims_allowed": true
+      "dependencies": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F05",
+        "F06",
+        "F07"
+      ],
+      "product_shell_ids": [
+        "AXIGNAL_OPPORTUNITY_INTELLIGENCE"
+      ],
+      "commercial_claims_allowed": true,
+      "is_shell": false,
+      "is_root_product": false,
+      "product_shell": "AXIGNAL_OPPORTUNITY_INTELLIGENCE",
+      "shared_foundational_library": false,
+      "available_to_both_shells": false
     },
     {
       "library_id": "O03",
@@ -139,9 +253,24 @@
       "admitted_source_count": 0,
       "blocked_source_count": 0,
       "workspace": "REGULATION_WORKSPACE",
-      "dependencies": ["F01", "F02", "F03", "F04", "F05", "F06", "F07"],
-      "product_shell_ids": ["AXIGNAL_OPPORTUNITY_INTELLIGENCE"],
-      "commercial_claims_allowed": true
+      "dependencies": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F05",
+        "F06",
+        "F07"
+      ],
+      "product_shell_ids": [
+        "AXIGNAL_OPPORTUNITY_INTELLIGENCE"
+      ],
+      "commercial_claims_allowed": true,
+      "is_shell": false,
+      "is_root_product": false,
+      "product_shell": "AXIGNAL_OPPORTUNITY_INTELLIGENCE",
+      "shared_foundational_library": false,
+      "available_to_both_shells": false
     },
     {
       "library_id": "O04",
@@ -152,9 +281,24 @@
       "admitted_source_count": 0,
       "blocked_source_count": 0,
       "workspace": "INFRASTRUCTURE_WORKSPACE",
-      "dependencies": ["F01", "F02", "F03", "F04", "F05", "F06", "F07"],
-      "product_shell_ids": ["AXIGNAL_OPPORTUNITY_INTELLIGENCE"],
-      "commercial_claims_allowed": true
+      "dependencies": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F05",
+        "F06",
+        "F07"
+      ],
+      "product_shell_ids": [
+        "AXIGNAL_OPPORTUNITY_INTELLIGENCE"
+      ],
+      "commercial_claims_allowed": true,
+      "is_shell": false,
+      "is_root_product": false,
+      "product_shell": "AXIGNAL_OPPORTUNITY_INTELLIGENCE",
+      "shared_foundational_library": false,
+      "available_to_both_shells": false
     },
     {
       "library_id": "O05",
@@ -165,9 +309,24 @@
       "admitted_source_count": 0,
       "blocked_source_count": 0,
       "workspace": "CORPORATE_WORKSPACE",
-      "dependencies": ["F01", "F02", "F03", "F04", "F05", "F06", "F07"],
-      "product_shell_ids": ["AXIGNAL_OPPORTUNITY_INTELLIGENCE"],
-      "commercial_claims_allowed": true
+      "dependencies": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F05",
+        "F06",
+        "F07"
+      ],
+      "product_shell_ids": [
+        "AXIGNAL_OPPORTUNITY_INTELLIGENCE"
+      ],
+      "commercial_claims_allowed": true,
+      "is_shell": false,
+      "is_root_product": false,
+      "product_shell": "AXIGNAL_OPPORTUNITY_INTELLIGENCE",
+      "shared_foundational_library": false,
+      "available_to_both_shells": false
     },
     {
       "library_id": "O06",
@@ -178,9 +337,24 @@
       "admitted_source_count": 0,
       "blocked_source_count": 0,
       "workspace": "SOVEREIGN_WORKSPACE",
-      "dependencies": ["F01", "F02", "F03", "F04", "F05", "F06", "F07"],
-      "product_shell_ids": ["AXIGNAL_OPPORTUNITY_INTELLIGENCE"],
-      "commercial_claims_allowed": true
+      "dependencies": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F05",
+        "F06",
+        "F07"
+      ],
+      "product_shell_ids": [
+        "AXIGNAL_OPPORTUNITY_INTELLIGENCE"
+      ],
+      "commercial_claims_allowed": true,
+      "is_shell": false,
+      "is_root_product": false,
+      "product_shell": "AXIGNAL_OPPORTUNITY_INTELLIGENCE",
+      "shared_foundational_library": false,
+      "available_to_both_shells": false
     },
     {
       "library_id": "O07",
@@ -191,9 +365,24 @@
       "admitted_source_count": 0,
       "blocked_source_count": 0,
       "workspace": "TRADE_WORKSPACE",
-      "dependencies": ["F01", "F02", "F03", "F04", "F05", "F06", "F07"],
-      "product_shell_ids": ["AXIGNAL_OPPORTUNITY_INTELLIGENCE"],
-      "commercial_claims_allowed": true
+      "dependencies": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F05",
+        "F06",
+        "F07"
+      ],
+      "product_shell_ids": [
+        "AXIGNAL_OPPORTUNITY_INTELLIGENCE"
+      ],
+      "commercial_claims_allowed": true,
+      "is_shell": false,
+      "is_root_product": false,
+      "product_shell": "AXIGNAL_OPPORTUNITY_INTELLIGENCE",
+      "shared_foundational_library": false,
+      "available_to_both_shells": false
     },
     {
       "library_id": "O08",
@@ -204,9 +393,24 @@
       "admitted_source_count": 0,
       "blocked_source_count": 0,
       "workspace": "ENERGY_CLIMATE_WORKSPACE",
-      "dependencies": ["F01", "F02", "F03", "F04", "F05", "F06", "F07"],
-      "product_shell_ids": ["AXIGNAL_OPPORTUNITY_INTELLIGENCE"],
-      "commercial_claims_allowed": true
+      "dependencies": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F05",
+        "F06",
+        "F07"
+      ],
+      "product_shell_ids": [
+        "AXIGNAL_OPPORTUNITY_INTELLIGENCE"
+      ],
+      "commercial_claims_allowed": true,
+      "is_shell": false,
+      "is_root_product": false,
+      "product_shell": "AXIGNAL_OPPORTUNITY_INTELLIGENCE",
+      "shared_foundational_library": false,
+      "available_to_both_shells": false
     },
     {
       "library_id": "O09",
@@ -217,13 +421,35 @@
       "admitted_source_count": 0,
       "blocked_source_count": 0,
       "workspace": "INNOVATION_IP_WORKSPACE",
-      "dependencies": ["F01", "F02", "F03", "F04", "F05", "F06", "F07"],
-      "product_shell_ids": ["AXIGNAL_OPPORTUNITY_INTELLIGENCE"],
-      "commercial_claims_allowed": true
+      "dependencies": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F05",
+        "F06",
+        "F07"
+      ],
+      "product_shell_ids": [
+        "AXIGNAL_OPPORTUNITY_INTELLIGENCE"
+      ],
+      "commercial_claims_allowed": true,
+      "is_shell": false,
+      "is_root_product": false,
+      "product_shell": "AXIGNAL_OPPORTUNITY_INTELLIGENCE",
+      "shared_foundational_library": false,
+      "available_to_both_shells": false
     }
   ],
   "notes": {
     "o01_admitted_source_count": "src_ted_search_api_v3 runtime admission PASS; human legal/privacy decision MISSING (blocked_source_count=1 reflects the legal blocker)",
-    "public_employment_architecture": "SHELL_02 reuses AXIGNAL Core and relevant foundational services; no new library created during WP0"
+    "public_employment_architecture": "SHELL_02 reuses AXIGNAL Core and relevant foundational services; no new library created during WP0",
+    "public_employment_is_o10": false,
+    "libraries_are_shells": false,
+    "o01_name": "Global Public Procurement",
+    "o01_workspace": "Bid Workspace",
+    "o01_is_shell": false,
+    "o01_is_root_product": false,
+    "o01_product_shell": "AXIGNAL_OPPORTUNITY_INTELLIGENCE"
   }
 }

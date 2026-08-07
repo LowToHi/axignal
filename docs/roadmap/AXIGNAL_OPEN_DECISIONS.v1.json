@@ -1,0 +1,26 @@
+{
+  "schema": "axignal.open-decisions.v1",
+  "contract_id": "AX-GE2E-FINISH-004",
+  "contract_version": "2.1.0",
+  "date": "2026-08-07",
+  "rule": "SILENCE_DOES_NOT_EQUAL_AUTHORIZATION",
+  "validation": {
+    "open_decisions_recorded": 12,
+    "decisions_resolved_by_inference": 0,
+    "human_owners_assigned": false
+  },
+  "decisions": [
+    {"decision_id": "DEC-001", "question": "Precios definitivos del Shell 1 (Opportunity Intelligence)", "options": ["PENDING"], "impact": "Pricing publication, checkout, billing", "human_owner": null, "blocked_scope": ["O1_PUBLIC_PRICING", "O1_CHECKOUT_LIVE"], "unblocked_parallel_work": ["WP15", "WP16", "WP17 contract preparation", "WP18 draft communication"], "current_status": "OPEN", "required_evidence": "economics validation, human decision", "review_date": null, "resolution_ref": null},
+    {"decision_id": "DEC-002", "question": "Precios definitivos del Shell 2 (Public Employment)", "options": ["PENDING"], "impact": "Draft plan activation", "human_owner": null, "blocked_scope": ["PE_PUBLIC_PRICING"], "unblocked_parallel_work": ["WP16 architectural proof"], "current_status": "OPEN", "required_evidence": "human decision", "review_date": null, "resolution_ref": null},
+    {"decision_id": "DEC-003", "question": "Publicación del pricing del Shell 1", "options": ["PENDING"], "impact": "Public pricing route", "human_owner": null, "blocked_scope": ["/opportunity-intelligence/pricing PUBLIC"], "unblocked_parallel_work": ["WP17", "WP18 draft"], "current_status": "OPEN", "required_evidence": "human decision", "review_date": null, "resolution_ref": null},
+    {"decision_id": "DEC-004", "question": "Política final de trial", "options": ["PENDING"], "impact": "Trial per product, no silent conversion", "human_owner": null, "blocked_scope": ["TRIAL_POLICY_FINAL"], "unblocked_parallel_work": ["WP17"], "current_status": "OPEN", "required_evidence": "human decision", "review_date": null, "resolution_ref": null},
+    {"decision_id": "DEC-005", "question": "Bundles multishell", "options": ["PENDING"], "impact": "Explicit compositions, disabled without authorization", "human_owner": null, "blocked_scope": ["BUNDLE_ACTIVATION"], "unblocked_parallel_work": ["WP17 bundle contract definition"], "current_status": "OPEN", "required_evidence": "human decision", "review_date": null, "resolution_ref": null},
+    {"decision_id": "DEC-006", "question": "Autorización de billing live", "options": ["PENDING"], "impact": "Stripe live mode", "human_owner": null, "blocked_scope": ["LIVE_BILLING"], "unblocked_parallel_work": ["WP17 sandbox implementation"], "current_status": "OPEN", "required_evidence": "human decision, production readiness", "review_date": null, "resolution_ref": null},
+    {"decision_id": "DEC-007", "question": "Autorización pública de Opportunity Intelligence", "options": ["PENDING"], "impact": "Public launch Shell 1", "human_owner": null, "blocked_scope": ["OI_PUBLIC_LAUNCH"], "unblocked_parallel_work": ["WP15-WP18"], "current_status": "OPEN", "required_evidence": "WP19 gates, human decision", "review_date": null, "resolution_ref": null},
+    {"decision_id": "DEC-008", "question": "Autorización futura de Public Employment", "options": ["PENDING"], "impact": "Future launch Shell 2", "human_owner": null, "blocked_scope": ["PE_PUBLIC_LAUNCH"], "unblocked_parallel_work": ["WP16 architectural proof"], "current_status": "OPEN", "required_evidence": "future amended contract, human decision", "review_date": null, "resolution_ref": null},
+    {"decision_id": "DEC-009", "question": "Fuentes reales de Public Employment", "options": ["PENDING"], "impact": "Source admission Shell 2", "human_owner": null, "blocked_scope": ["PE_SOURCE_ADMISSION"], "unblocked_parallel_work": ["WP16 architecture"], "current_status": "OPEN", "required_evidence": "source admission, human decision", "review_date": null, "resolution_ref": null},
+    {"decision_id": "DEC-010", "question": "Legal/privacy de TED (O01)", "options": ["PENDING"], "impact": "O01 commercial source admission", "human_owner": null, "blocked_scope": ["O01:TedSourceAdmission", "TED_COMMERCIAL_CLAIMS"], "unblocked_parallel_work": ["AXIGNAL Core", "F01-F07", "O02-O09", "WP15-WP18"], "current_status": "OPEN", "required_evidence": "human legal/privacy decision, no human signature present", "review_date": null, "resolution_ref": null},
+    {"decision_id": "DEC-011", "question": "Copy comercial definitivo", "options": ["PENDING"], "impact": "Public copy, claims, landing", "human_owner": null, "blocked_scope": ["APPROVED_PUBLIC copy"], "unblocked_parallel_work": ["WP18 draft communication"], "current_status": "OPEN", "required_evidence": "legal review, product review, human decision", "review_date": null, "resolution_ref": null},
+    {"decision_id": "DEC-012", "question": "Aceptación privada y release gates diferenciados (WP19)", "options": ["PENDING"], "impact": "Global acceptance", "human_owner": null, "blocked_scope": ["WP19 release decisions"], "unblocked_parallel_work": ["WP15-WP18"], "current_status": "OPEN", "required_evidence": "exact-head manifest, fresh-process verification, human signature", "review_date": null, "resolution_ref": null}
+  ]
+}

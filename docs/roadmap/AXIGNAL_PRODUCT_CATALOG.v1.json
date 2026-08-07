@@ -1,0 +1,107 @@
+{
+  "schema": "axignal.product-catalog.v1",
+  "contract_id": "AX-GE2E-FINISH-004",
+  "contract_version": "2.1.0",
+  "date": "2026-08-07",
+  "validation": {
+    "root_product_count": 2,
+    "canonical_product_ids": ["AXIGNAL_OPPORTUNITY_INTELLIGENCE", "AXIGNAL_PUBLIC_EMPLOYMENT"],
+    "libraries_as_root_products": false,
+    "bundles_as_root_products": false,
+    "cross_product_activation": false,
+    "active_prices_created": 0,
+    "pricing_hypotheses_recorded": 2
+  },
+  "products": [
+    {
+      "product_id": "AXIGNAL_OPPORTUNITY_INTELLIGENCE",
+      "shell_id": "AXIGNAL_OPPORTUNITY_INTELLIGENCE",
+      "display_name": "AXIGNAL Opportunity Intelligence",
+      "commercial_status": "ACTIVE_CONTRACT_DEFINITION",
+      "audience": "BUSINESSES_ORGANISATIONS_AND_PROFESSIONAL_TEAMS",
+      "billing_customer_type": "ORGANISATION",
+      "plan_ids": [
+        "OPPORTUNITY_INTELLIGENCE_STARTER",
+        "OPPORTUNITY_INTELLIGENCE_PROFESSIONAL",
+        "OPPORTUNITY_INTELLIGENCE_BUSINESS",
+        "OPPORTUNITY_INTELLIGENCE_ENTERPRISE"
+      ],
+      "add_on_ids": ["O01", "O02", "O03", "O04", "O05", "O06", "O07", "O08", "O09"],
+      "bundle_eligibility": true,
+      "supported_currencies": ["EUR"],
+      "supported_intervals": ["MONTH", "YEAR"],
+      "tax_category": "PENDING_HUMAN_DECISION",
+      "trial_policy": "PENDING_HUMAN_DECISION",
+      "refund_policy": "PENDING_HUMAN_DECISION",
+      "dunning_policy": "PENDING_HUMAN_DECISION",
+      "support_policy": "PENDING_HUMAN_DECISION",
+      "terms_version": "PENDING",
+      "privacy_notice_version": "PENDING",
+      "landing_route": "/opportunity-intelligence",
+      "pricing_route": "/opportunity-intelligence/pricing",
+      "analytics_namespace": "opportunity_intelligence",
+      "live_billing": "NOT_AUTHORIZED",
+      "public_launch": "NO_GO",
+      "plans": [
+        {"plan_id": "OPPORTUNITY_INTELLIGENCE_STARTER", "status": "CONTRACT_DEFINITION", "price": null, "pricing_hypothesis_eur": null},
+        {"plan_id": "OPPORTUNITY_INTELLIGENCE_PROFESSIONAL", "status": "CONTRACT_DEFINITION", "price": null, "pricing_hypothesis_eur": 149},
+        {"plan_id": "OPPORTUNITY_INTELLIGENCE_BUSINESS", "status": "CONTRACT_DEFINITION", "price": null, "pricing_hypothesis_eur": 399},
+        {"plan_id": "OPPORTUNITY_INTELLIGENCE_ENTERPRISE", "status": "CONTRACT_DEFINITION", "price": null, "pricing_hypothesis_eur": null}
+      ],
+      "pricing_notes": "149 EUR and 399 EUR are PRICING_HYPOTHESIS only; not publishable and not active prices until human decision and economic validation"
+    },
+    {
+      "product_id": "AXIGNAL_PUBLIC_EMPLOYMENT",
+      "shell_id": "AXIGNAL_PUBLIC_EMPLOYMENT",
+      "display_name": "AXIGNAL Public Employment",
+      "commercial_status": "DRAFT_INACTIVE",
+      "audience": "CANDIDATES_AND_FUTURE_ACADEMIES",
+      "billing_customer_type": "INDIVIDUAL_OR_ACADEMY",
+      "plan_ids": [
+        "PUBLIC_EMPLOYMENT_FREE_OR_DISCOVERY",
+        "PUBLIC_EMPLOYMENT_CANDIDATE",
+        "PUBLIC_EMPLOYMENT_CANDIDATE_PRO",
+        "PUBLIC_EMPLOYMENT_ACADEMY"
+      ],
+      "add_on_ids": [],
+      "bundle_eligibility": false,
+      "supported_currencies": ["EUR"],
+      "supported_intervals": ["MONTH", "YEAR"],
+      "tax_category": "PENDING_HUMAN_DECISION",
+      "trial_policy": "PENDING_HUMAN_DECISION",
+      "refund_policy": "PENDING_HUMAN_DECISION",
+      "dunning_policy": "PENDING_HUMAN_DECISION",
+      "support_policy": "PENDING_HUMAN_DECISION",
+      "terms_version": "PENDING",
+      "privacy_notice_version": "PENDING",
+      "landing_route": "/public-employment",
+      "pricing_route": "/public-employment/pricing",
+      "analytics_namespace": "public_employment",
+      "live_billing": "NOT_AUTHORIZED",
+      "public_launch": "NOT_AUTHORIZED",
+      "checkout_status": "DISABLED",
+      "commercial_claims_status": "NOT_AUTHORIZED",
+      "source_coverage_claims_status": "NOT_AUTHORIZED",
+      "plans": [
+        {"plan_id": "PUBLIC_EMPLOYMENT_FREE_OR_DISCOVERY", "status": "DRAFT_INACTIVE", "price": null, "pricing_hypothesis_eur": null},
+        {"plan_id": "PUBLIC_EMPLOYMENT_CANDIDATE", "status": "DRAFT_INACTIVE", "price": null, "pricing_hypothesis_eur": null},
+        {"plan_id": "PUBLIC_EMPLOYMENT_CANDIDATE_PRO", "status": "DRAFT_INACTIVE", "price": null, "pricing_hypothesis_eur": null},
+        {"plan_id": "PUBLIC_EMPLOYMENT_ACADEMY", "status": "DRAFT_INACTIVE", "price": null, "pricing_hypothesis_eur": null}
+      ],
+      "pricing_notes": "no amounts defined; draft/inactive only; no public pricing"
+    }
+  ],
+  "independence_contract": {
+    "note": "purchasing one product must not activate the other",
+    "proof_required": [
+      "PURCHASE_OPPORTUNITY_INTELLIGENCE -> PUBLIC_EMPLOYMENT_ENTITLEMENT=false",
+      "PURCHASE_PUBLIC_EMPLOYMENT -> OPPORTUNITY_INTELLIGENCE_ENTITLEMENT=false"
+    ],
+    "bundles": {
+      "status": "DISABLED_WITHOUT_HUMAN_AUTHORIZATION",
+      "are_shells": false,
+      "are_root_products": false,
+      "do_not_remove_subscription_and_entitlement_independence": true
+    }
+  }
+}

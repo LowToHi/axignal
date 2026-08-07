@@ -1,0 +1,84 @@
+{
+  "schema": "axignal.public-route-registry.v1",
+  "contract_id": "AX-GE2E-FINISH-004",
+  "contract_version": "2.1.0",
+  "date": "2026-08-07",
+  "validation": {
+    "no_root_landing_per_country": true,
+    "no_root_landing_per_jurisdiction": true,
+    "no_root_landing_per_source": true,
+    "no_root_landing_per_language": true,
+    "no_root_landing_per_library": true,
+    "hidden_routes_in_sitemap": 0
+  },
+  "routes": [
+    {
+      "route": "/",
+      "kind": "CORPORATE_PLATFORM_LANDING",
+      "visibility": "PLATFORM_LANDING",
+      "public_visibility": true,
+      "seo_indexability": "INDEX_ALLOWED_WHEN_WP19_AUTHORIZES",
+      "sitemap_inclusion": false,
+      "checkout_enabled": false,
+      "shell_id": null,
+      "product_id": "AXIGNAL_PLATFORM"
+    },
+    {
+      "route": "/opportunity-intelligence",
+      "kind": "SHELL_1_LANDING",
+      "visibility": "VISIBLE_WHEN_WP19_AUTHORIZES",
+      "public_visibility": false,
+      "seo_indexability": "INDEX_ALLOWED_WHEN_WP19_AUTHORIZES",
+      "sitemap_inclusion": false,
+      "checkout_enabled": false,
+      "shell_id": "AXIGNAL_OPPORTUNITY_INTELLIGENCE",
+      "product_id": "AXIGNAL_OPPORTUNITY_INTELLIGENCE"
+    },
+    {
+      "route": "/opportunity-intelligence/pricing",
+      "kind": "SHELL_1_PRICING",
+      "visibility": "VISIBLE_WHEN_WP19_AUTHORIZES",
+      "public_visibility": false,
+      "seo_indexability": "INDEX_ALLOWED_WHEN_WP19_AUTHORIZES",
+      "sitemap_inclusion": false,
+      "checkout_enabled": false,
+      "shell_id": "AXIGNAL_OPPORTUNITY_INTELLIGENCE",
+      "product_id": "AXIGNAL_OPPORTUNITY_INTELLIGENCE"
+    },
+    {
+      "route": "/opportunity-intelligence/libraries/{library_id}",
+      "kind": "SHELL_1_MODULE_PAGES",
+      "visibility": "O01-O09_MODULE_PAGES_WITHIN_SHELL_1",
+      "public_visibility": false,
+      "seo_indexability": "INDEX_ALLOWED_WHEN_WP19_AUTHORIZES",
+      "sitemap_inclusion": false,
+      "checkout_enabled": false,
+      "shell_id": "AXIGNAL_OPPORTUNITY_INTELLIGENCE",
+      "product_id": "AXIGNAL_OPPORTUNITY_INTELLIGENCE",
+      "library_ids": ["O01", "O02", "O03", "O04", "O05", "O06", "O07", "O08", "O09"],
+      "note": "O01-O09 pages are module pages inside Shell 1, not root landings"
+    },
+    {
+      "route": "/public-employment",
+      "kind": "SHELL_2_DRAFT_HIDDEN_LANDING",
+      "visibility": "HIDDEN",
+      "public_visibility": false,
+      "seo_indexability": "NOINDEX",
+      "sitemap_inclusion": false,
+      "checkout_enabled": false,
+      "shell_id": "AXIGNAL_PUBLIC_EMPLOYMENT",
+      "product_id": "AXIGNAL_PUBLIC_EMPLOYMENT"
+    },
+    {
+      "route": "/public-employment/pricing",
+      "kind": "SHELL_2_DRAFT_HIDDEN_PRICING",
+      "visibility": "HIDDEN",
+      "public_visibility": false,
+      "seo_indexability": "NOINDEX",
+      "sitemap_inclusion": false,
+      "checkout_enabled": false,
+      "shell_id": "AXIGNAL_PUBLIC_EMPLOYMENT",
+      "product_id": "AXIGNAL_PUBLIC_EMPLOYMENT"
+    }
+  ]
+}

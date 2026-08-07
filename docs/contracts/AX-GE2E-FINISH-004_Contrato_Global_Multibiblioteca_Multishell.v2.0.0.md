@@ -1,29 +1,23 @@
-# AXIGNAL — Contrato canónico integral de cierre E2E global, multibiblioteca, de dos shells y arquitectura comercial separada
+# AXIGNAL — Contrato canónico de cierre E2E global, multibiblioteca y de dos shells
 
 | Campo | Valor |
 |---|---|
 | **Contract ID** | `AX-GE2E-FINISH-004` |
-| **Versión** | `2.1.0` |
+| **Versión** | `2.0.0` |
 | **Fecha** | `2026-08-07` |
-| **Estado** | `HUMAN_SCOPE_DECISION_APPROVED / CANONICAL_CANDIDATE / READY_FOR_REPOSITORY_INTEGRATION / NO_PUBLIC_LAUNCH` |
+| **Estado** | `HUMAN_SCOPE_DECISION_APPROVED / READY_FOR_REPOSITORY_INTEGRATION / NO_PUBLIC_LAUNCH` |
 | **Goal ID** | `AXIGNAL-GOAL-001` |
 | **Autoridad humana** | Rafael López |
 | **Repositorio** | `LowToHi/axignal` |
-| **Rama de ingeniería heredada** | `agent/axignal-local-finalization` |
-| **Rama contractual actual reconocida** | `agent/axignal-global-e2e` |
+| **Rama de progreso reconocida** | `agent/axignal-local-finalization` |
 | **Baseline de ingeniería auditado** | `b2ff4034416892d66385173d9aacd27bce9f055b` — local y remoto coincidentes |
-| **Baseline documental WP0 previo** | `b9078a178ee20d546e82e4da5921957b0d1fa1ae` — contrato/registries previos, sin cambios funcionales; debe recanonizarse con v2.1.0 |
 | **Categoría normativa** | `Global Opportunity Intelligence, Opportunity Operations & Public Employment` |
-| **Producto gobernado** | AXIGNAL Core + F01–F07 + O01–O09 + workspaces + exactamente 2 shells técnicos y 2 unidades comerciales independientes sobre un núcleo compartido |
+| **Producto gobernado** | AXIGNAL Core + F01–F07 + O01–O09 + workspaces + exactamente 2 shells sobre un núcleo compartido |
 | **Número contractual de shells** | `2` — cardinalidad cerrada; cualquier ampliación exige enmienda humana versionada |
-| **Shell 1 — principal** | `AXIGNAL_OPPORTUNITY_INTELLIGENCE` — F01–F07 + O01–O09 + workspaces empresariales; `PRIMARY_PRODUCT_SHELL / B2B_COMMERCIAL_PRODUCT` |
-| **Shell 2 — adicional** | `AXIGNAL_PUBLIC_EMPLOYMENT` — oposiciones, procesos selectivos y empleo público; `SECOND_COMMERCIAL_PRODUCT / ARCHITECTURAL_PROOF_REQUIRED / PUBLIC_LAUNCH_NOT_AUTHORIZED` |
+| **Shell 1 — principal** | `AXIGNAL_OPPORTUNITY_INTELLIGENCE` — F01–F07 + O01–O09 + workspaces empresariales; `PRIMARY_PRODUCT_SHELL` |
+| **Shell 2 — adicional** | `AXIGNAL_PUBLIC_EMPLOYMENT` — oposiciones, procesos selectivos y empleo público; `ARCHITECTURAL_PROOF_REQUIRED` |
 | **No son shells** | países, jurisdicciones, idiomas, fuentes, bibliotecas, workspaces ni `O01 Procurement` |
-| **Unidades comerciales raíz** | `2` — un catálogo, pricing, funnel, landing y métricas propios por shell; los bundles son composiciones explícitas |
-| **Shell 1 — objetivo de cierre** | `PRODUCT_AND_COMMERCIAL_RUNTIME_READY`, sujeto a WP19 y autorización humana de lanzamiento |
-| **Shell 2 — objetivo de cierre** | `ARCHITECTURE_AND_COMMERCIAL_CONTRACT_READY`, sin claims de cobertura ni venta pública hasta contrato de lanzamiento específico |
-| **Contrato subordinado de captación** | `AXIGNAL_Contrato_Agente_Captacion_y_Auditoria_E2E.md` / `AX-CAPTURE-E2E-001 v1.1`, subordinado a este contrato; outreach y captación real no autorizados por defecto |
-| **Resultado contractual** | Plataforma global multibiblioteca acabada E2E, desplegable, operable, cobrable y auditable; `AXIGNAL_OPPORTUNITY_INTELLIGENCE` preparado para aceptación comercial y `AXIGNAL_PUBLIC_EMPLOYMENT` preparado arquitectónica y comercialmente sin lanzamiento; exactamente dos shells sobre un único núcleo |
+| **Resultado contractual** | Producto global multibiblioteca acabado E2E, desplegable, operable, cobrable y auditable con exactamente dos shells sobre un único núcleo; cualquier tercer shell exige enmienda humana |
 | **No autoriza** | lanzamiento público, facturación live general, merge automático, administración de GitHub ni despliegue sin mandato separado |
 
 ---
@@ -108,88 +102,6 @@ La decisión no invalida el trabajo ya realizado. La rama `agent/axignal-local-f
 
 ---
 
-
-## 0.2 Lenguaje normativo, completitud y regla de silencio
-
-En este contrato se utilizan los términos normativos siguientes:
-
-- **DEBE / SHALL / MUST**: obligación verificable y bloqueante.
-- **NO DEBE / SHALL NOT / MUST NOT**: prohibición verificable y bloqueante.
-- **DEBERÍA / SHOULD**: recomendación fuerte que sólo puede omitirse con ADR o justificación registrada.
-- **PUEDE / MAY**: capacidad permitida, nunca obligación ni autorización implícita.
-
-Reglas vinculantes de interpretación:
-
-1. **El silencio no equivale a autorización.** Si una acción material no aparece autorizada, permanece `NOT_AUTHORIZED`.
-2. **La ausencia de detalle no habilita al agente a inventar una decisión de producto.** Debe registrar `OPEN_DECISION_REQUIRED`.
-3. **Toda decisión abierta debe tener owner humano, alcance, opciones, impacto, fecha de revisión y trabajo paralelo no bloqueado.**
-4. **Una implementación técnicamente posible no queda automáticamente dentro de alcance.**
-5. **Una capacidad mencionada no se considera aceptada hasta satisfacer sus gates y evidencias.**
-6. **Los ejemplos no reducen las obligaciones generales.**
-7. **Los nombres canónicos, cardinalidades, identificadores y límites de autoridad son invariantes.**
-8. **Ningún agente puede convertir una hipótesis comercial, precio de referencia, copy provisional o fixture en una decisión final.**
-9. **Toda contradicción entre documentos debe resolverse por la jerarquía de autoridad; no por conveniencia de implementación.**
-10. **Toda categoría de producto, billing, landing, copy, datos, seguridad, fuente, biblioteca o shell no contemplada se registra en el Open Decision Register antes de ejecutarse.**
-
-El objetivo de esta cláusula es impedir que futuras preguntas relevantes queden respondidas mediante inferencia accidental. Si una materia está dentro de la matriz contractual, su tratamiento mínimo, su gate y su evidencia deben encontrarse en este documento o en un contrato subordinado explícitamente referenciado.
-
-## 0.3 Taxonomía canónica: qué es cada cosa
-
-| Tipo | Ejemplos | Cardinalidad | Autoridad | ¿Puede tener pricing propio? | ¿Puede ser shell? |
-|---|---|---:|---|---|---|
-| Plataforma | AXIGNAL Platform | 1 | Este contrato | No se vende sola por defecto | No aplica |
-| Core | Identity, Evidence, Claim Ledger, Billing Engine | 1 compartido | Core contracts | No como producto raíz | No |
-| Shell / producto raíz | Opportunity Intelligence, Public Employment | Exactamente 2 | Shell Registry | Sí, obligatorio e independiente | Sí |
-| Biblioteca fundacional | F01–F07 | 7 | Library Registry | Incluida o empaquetable, no producto raíz por defecto | No |
-| Biblioteca de oportunidad | O01–O09 | 9 | Library Registry | Módulo/add-on dentro del Shell 1 | No |
-| Workspace | Bid, Application, Project Pursuit | Varios | Workspace Factory | Capacidad o límite, no producto raíz por defecto | No |
-| Fuente | TED, APIs, portales, registros | Muchas | Source Registry | Coste interno o add-on excepcional | No |
-| País/jurisdicción | España, Francia, UE | Muchas | F01 | Cobertura configurable | No |
-| Idioma/locale | es-ES, en-GB, fr-FR | Muchos | F05 | No como shell | No |
-| Plan | Starter, Professional, Candidate, Academy | Versionado por shell | Product Catalog | Sí | No |
-| Price | mensual, anual, seat, usage | Versionado | Billing Catalog | Sí | No |
-| Entitlement | O01, API, seats, export | Muchos | Entitlement Engine | Deriva del plan/add-on | No |
-| Bundle | combinación de ambos shells | Opcional | Product Catalog | Sí, composición explícita | No |
-
-## 0.4 Criterio de contrato completo y Open Decision Register
-
-Debe existir:
-
-```text
-docs/roadmap/AXIGNAL_OPEN_DECISIONS.v1.json
-```
-
-Schema mínimo:
-
-```text
-decision_id
-category
-question
-status
-owner
-options
-recommended_option
-impact
-blocked_scope
-unblocked_parallel_work
-due_or_review_date
-human_decision
-contract_reference
-exact_head
-```
-
-Estados permitidos:
-
-```text
-OPEN_DECISION_REQUIRED
-UNDER_HUMAN_REVIEW
-DECIDED
-DEFERRED_WITH_SCOPE
-SUPERSEDED
-```
-
-No se permite cerrar una tarea material con una decisión abierta que afecte directamente a su aceptación. Una decisión abierta puede bloquear sólo su scope declarado y nunca todo el programa sin dependencia demostrada.
-
 # 1. Autoridad, supersession y conservación del historial
 
 ## 1.1 Jerarquía de autoridad
@@ -266,62 +178,6 @@ CANONICAL_ACCEPTED
 tras auditoría exact-head e integración en la línea canónica.
 
 ---
-
-
-## 1.5 Contratos subordinados, alcance y resolución de conflictos
-
-Se reconoce como contrato subordinado:
-
-```text
-AXIGNAL_Contrato_Agente_Captacion_y_Auditoria_E2E.md
-Contract ID esperado: AX-CAPTURE-E2E-001
-Versión reconocida por el baseline WP0: v1.1
-```
-
-Reglas:
-
-1. Se subordina a `AX-GE2E-FINISH-004` y no puede crear un tercer shell, reducir bibliotecas ni alterar la autoridad del Core.
-2. Captación, outreach, envío de comunicaciones, scraping comercial, compra de listas, automatización de contactos o activación de campañas permanecen `NOT_AUTHORIZED` salvo mandato humano separado.
-3. Puede definir flujos, agentes, auditoría y preparación técnica, pero no autoriza ejecución externa por sí mismo.
-4. Cualquier discrepancia de shell, pricing, landing, copy, datos personales, consentimiento o autoridad se resuelve a favor de este contrato.
-5. Toda integración debe quedar registrada en el ledger global con `subordinate_contract_id`, versión y scope.
-
-Otros contratos futuros deberán declarar expresamente:
-
-```text
-parent_contract=AX-GE2E-FINISH-004
-compatible_version_range
-scope
-supersedes
-conflicts
-external_actions_authorized
-```
-
-## 1.6 Change control y versionado contractual
-
-Cambios que exigen incremento de versión y decisión humana explícita:
-
-- número o identidad de shells;
-- bibliotecas obligatorias;
-- producto raíz o audiencia principal;
-- autoridad de modelos/agentes;
-- lanzamiento, billing live o acciones externas;
-- uso de datos personales y propósito;
-- pricing real publicado;
-- copy con claims materiales;
-- integración de fuente con riesgo legal significativo;
-- reducción de E2E o Definition of Done;
-- bifurcación del Core.
-
-Regla SemVer contractual:
-
-```text
-MAJOR: cambia alcance, autoridad, shell, producto o DoD
-MINOR: amplía obligaciones sin invalidar arquitectura aceptada
-PATCH: corrige redacción sin cambiar obligación
-```
-
-Esta revisión `2.1.0` amplía la arquitectura comercial, pricing, landing, copy, analytics, privacidad entre shells y gates de aceptación sin cambiar la cardinalidad de dos shells ni la misión global.
 
 # 2. Goal Lock y definición de producto acabado
 
@@ -414,26 +270,21 @@ AXIGNAL sólo podrá utilizar públicamente “global” como cobertura de produ
 
 # 3. Estado base reconocido a 2026-08-07
 
-## 3.1 Baselines de referencia auditados
+## 3.1 Baseline de referencia
 
 ```text
-main base                         7c551728c7d750ee35b3607a3939df493f697592
-engineering inherited head       b2ff4034416892d66385173d9aacd27bce9f055b
-engineering branch               agent/axignal-local-finalization
-engineering local/remote match   PASS
-WP0 documentary head             b9078a178ee20d546e82e4da5921957b0d1fa1ae
-WP0 branch                       agent/axignal-global-e2e
-WP0 functional files changed     0
-WP0 local/remote match           PASS, según auditoría entregada
+base declarada        main@7c551728c7d750ee35b3607a3939df493f697592
+rama de progreso      agent/axignal-local-finalization
+head declarado        b2ff403
+estado remoto         push declarado, pendiente de verificación independiente
 ```
 
-Interpretación:
+El agente deberá sustituir `b2ff403` por el SHA completo de 40 caracteres mediante:
 
-1. `b2ff403...` es el baseline funcional heredado y no debe reescribirse.
-2. `b9078a1...` contiene la primera canonización documental de WP0 y sus registries.
-3. La versión contractual `2.1.0` sustituye el texto anterior de `AX-GE2E-FINISH-004` y exige una recanonización documental incremental desde `b9078a1...`.
-4. No se repetirán pruebas funcionales del baseline si no cambia código funcional.
-5. Cualquier divergencia real de SHA local/remoto deberá detener el commit hasta resolverse.
+```bash
+git rev-parse HEAD
+git ls-remote origin refs/heads/agent/axignal-local-finalization
+```
 
 ## 3.2 Evidencia heredada reconocida provisionalmente
 
@@ -489,26 +340,6 @@ La aprobación Legal/Privacy de TED:
 - no bloquea pruebas con baselines permitidos, sanitizados y explícitamente no comerciales.
 
 ---
-
-
-## 3.5 Estado documental WP0 reconocido
-
-La auditoría de `b9078a178ee20d546e82e4da5921957b0d1fa1ae` reconoce provisionalmente:
-
-```text
-legacy tasks mapped             75/75
-libraries registered            16 exact: F01–F07 + O01–O09
-shells registered               2 exact
-canonical shell IDs             AXIGNAL_OPPORTUNITY_INTELLIGENCE / AXIGNAL_PUBLIC_EMPLOYMENT
-procurement_shell               false
-dependency_cycles               0
-TED blocker scope               O01 only
-capture contract                subordinated
-outreach                        NOT_AUTHORIZED
-functional files changed        0
-```
-
-La recanonización v2.1.0 deberá preservar estos resultados y ampliar los registros con Product Catalog, Copy Manifest, Public Route Registry, Open Decisions y los nuevos gates comerciales. No se permite degradar el mapeo de 75 tareas ni reintroducir un tercer shell.
 
 # 4. Arquitectura obligatoria
 
@@ -636,85 +467,6 @@ Un shell sí puede especializar:
 - packaging y entitlements.
 
 ---
-
-
-## 4.6 Separación entre plataforma técnica y productos comerciales
-
-La plataforma técnica es única. Los productos comerciales raíz son exactamente dos y coinciden con los shells:
-
-```text
-product_id=AXIGNAL_OPPORTUNITY_INTELLIGENCE
-shell_id=AXIGNAL_OPPORTUNITY_INTELLIGENCE
-
-product_id=AXIGNAL_PUBLIC_EMPLOYMENT
-shell_id=AXIGNAL_PUBLIC_EMPLOYMENT
-```
-
-No se permite crear como `product_id` raíz:
-
-- `AXIGNAL_PROCUREMENT`;
-- `O01`–`O09`;
-- un país;
-- una fuente;
-- un workspace;
-- una edición regional que replique el producto.
-
-O01–O09 pueden ser:
-
-- incluidas en un plan;
-- add-ons;
-- paquetes verticales;
-- límites de entitlement;
-- componentes de un bundle.
-
-Pero siguen perteneciendo a `AXIGNAL_OPPORTUNITY_INTELLIGENCE`.
-
-## 4.7 Identidad compartida, contextos de cliente separados
-
-El mismo sujeto humano puede acceder a ambos shells mediante una identidad compartida, pero el contexto comercial y de autorización debe ser explícito:
-
-```text
-Identity Subject
-├── Personal Account Context
-│   └── AXIGNAL_PUBLIC_EMPLOYMENT subscription/entitlements
-└── Organisation Memberships
-    └── AXIGNAL_OPPORTUNITY_INTELLIGENCE subscriptions/entitlements
-```
-
-Reglas:
-
-1. El acceso a un shell no activa el otro.
-2. La pertenencia a una organización no concede acceso a datos personales del perfil candidato.
-3. Los datos del candidato no se copian a una organización sin consentimiento y propósito compatibles.
-4. La identidad compartida no elimina la separación de billing customer, consentimientos, retención, roles y auditoría.
-5. El cambio de contexto debe ser visible, reversible y autorizado server-side.
-
-## 4.8 Separación de datos, propósito y aprendizaje entre shells
-
-Se permite reutilizar infraestructura y evidencia pública admitida. No se permite reutilizar silenciosamente datos personales o outcomes con propósito incompatible.
-
-Toda transferencia cross-shell debe declarar:
-
-```text
-source_shell
-target_shell
-data_categories
-legal_basis_or_contractual_basis
-purpose
-consent_if_required
-retention
-entitlement
-provenance
-human_visibility
-```
-
-Queda prohibido:
-
-- usar datos de candidatura para scoring empresarial;
-- usar datos de una organización para perfilar laboralmente a una persona sin base y transparencia;
-- mezclar métricas de conversión de ambos productos;
-- entrenar o calibrar modelos con datos cross-shell sin contrato de datos y aprobación;
-- presentar un claim de un shell como si hubiera sido admitido en el otro.
 
 # 5. Contratos horizontales obligatorios
 
@@ -1611,67 +1363,6 @@ Incluso en ese caso será obligatoria una enmienda humana versionada. Hasta ento
 
 ---
 
-
-## 9.8 Independencia comercial obligatoria de los shells
-
-`AXIGNAL_OPPORTUNITY_INTELLIGENCE` y `AXIGNAL_PUBLIC_EMPLOYMENT` son dos unidades comerciales independientes sobre una misma plataforma.
-
-Cada shell DEBE disponer de:
-
-- `product_id` propio;
-- catálogo de planes propio;
-- `price_id` y monedas propios;
-- límites y entitlements propios;
-- trial y reglas de conversión propios;
-- checkout diferenciable;
-- suscripción y ciclo de vida propios;
-- portal de cliente o contexto de gestión propio;
-- invoices/receipts atribuibles al producto;
-- métricas de adquisición, activación, retención, ingresos, coste y margen separadas;
-- landing o ruta comercial propia;
-- pricing page propia;
-- audiencia, propuesta de valor y copy propios;
-- disclosures de cobertura, limitaciones y autoridad propios;
-- soporte y SLA adecuados a su segmento.
-
-Compartir Core, Stripe account, identidad, ledger técnico o infraestructura no implica precio común, acceso cruzado, un único funnel ni una única propuesta de valor.
-
-## 9.9 Bundles multishell
-
-Un bundle puede combinar ambos shells, pero debe ser una composición explícita:
-
-```text
-bundle_id
-included_product_ids
-included_plan_versions
-price
-currency
-billing_interval
-entitlement_union_policy
-discount_policy
-cancellation_policy
-allocation_for_revenue_and_margin
-```
-
-Reglas:
-
-1. Un bundle no crea un tercer shell.
-2. Debe poder descomponerse para auditoría, revenue recognition, soporte y cancelación.
-3. La cancelación de un componente no debe corromper el otro.
-4. Los datos y propósitos continúan separados.
-5. No se autoriza bundle público hasta prueba E2E y decisión humana de pricing.
-
-## 9.10 Prohibición de activación cruzada implícita
-
-Deben existir pruebas negativas que demuestren:
-
-- contratar Opportunity Intelligence no activa Public Employment;
-- contratar Public Employment no activa O01–O09;
-- un entitlement de biblioteca no cambia de shell;
-- una promoción no concede capacidades no declaradas;
-- una migración de plan no altera el otro producto;
-- un fallo de billing de un shell no suspende indebidamente el otro salvo política explícita del bundle.
-
 # 10. Shell 2 preparado: AXIGNAL_PUBLIC_EMPLOYMENT
 
 ## 10.1 Definición
@@ -1849,44 +1540,6 @@ Las fuentes de empleo público se registrarán como fuentes del dominio `PUBLIC_
 
 ---
 
-
-## 10.10 Preparación comercial sin lanzamiento de Public Employment
-
-Aunque el lanzamiento público no está autorizado, la arquitectura debe dejar preparados y desactivados:
-
-```text
-product_id=AXIGNAL_PUBLIC_EMPLOYMENT
-catalog_status=DRAFT_INACTIVE
-checkout_status=DISABLED
-public_routes_status=HIDDEN_OR_NOINDEX
-commercial_claims_status=NOT_AUTHORIZED
-source_coverage_claims_status=NOT_AUTHORIZED
-```
-
-Deben existir contratos para:
-
-- plan individual Candidate;
-- plan avanzado Candidate Pro;
-- futuro plan Academy/Organisation;
-- pricing mensual/anual configurable;
-- trials y promociones, desactivados por defecto;
-- límites de convocatorias, alertas, perfiles y almacenamiento;
-- entitlements por jurisdicción y capacidad;
-- cancelación, refund y acceso al histórico;
-- copy y landing específicos, en estado draft/staging;
-- analytics separados sin datos sensibles innecesarios.
-
-No deben existir:
-
-- precios live publicados;
-- checkout accesible públicamente;
-- claims de cobertura real no probada;
-- promesas de elegibilidad, plaza, aprobado o nombramiento;
-- indexación SEO de rutas no autorizadas;
-- transferencia automática de datos de candidato a academias.
-
-La activación futura requerirá contrato o enmienda específica con fuentes reales, derechos, privacidad, pricing humano, copy aprobado, customer support y E2E comercial.
-
 # 11. Source Admission Factory y legal gates
 
 ## 11.1 Estados de fuente
@@ -1976,7 +1629,7 @@ Tareas:
 Salida:
 
 ```text
-AX_WP0_V2_1_COMMERCIAL_AND_COPY_RECANONICALIZED_PASS
+AX_WP0_GLOBAL_CONTRACT_CANONICALIZED_PASS
 ```
 
 ## WP1 — Research Spine, AXENT y Evidence Governance
@@ -2353,165 +2006,88 @@ Salida:
 AX_WP16_PUBLIC_EMPLOYMENT_ARCHITECTURE_READY_PASS
 ```
 
-## WP17 — Enterprise, arquitectura comercial, pricing y billing
-
-**Objetivo:** demostrar que ambos shells son productos comerciales independientes y que el runtime de billing compartido respeta esa separación.
-
-Tareas obligatorias:
-
-- `WP17-T01` definir `ProductCatalog` versionado;
-- `WP17-T02` registrar exactamente dos `product_id` raíz, coincidentes con los shells;
-- `WP17-T03` definir catálogo de planes de `AXIGNAL_OPPORTUNITY_INTELLIGENCE`;
-- `WP17-T04` definir catálogo draft/inactivo de `AXIGNAL_PUBLIC_EMPLOYMENT`;
-- `WP17-T05` definir add-ons O01–O09 sin convertirlos en productos raíz;
-- `WP17-T06` definir seats, roles y capacidad B2B del Shell 1;
-- `WP17-T07` definir límites individuales y futuros límites Academy del Shell 2;
-- `WP17-T08` implementar price versioning, moneda, intervalo, impuestos y rounding;
-- `WP17-T09` impedir precios hard-coded fuera del catálogo;
-- `WP17-T10` implementar trial por producto, sin conversión silenciosa;
-- `WP17-T11` implementar Stripe sandbox con Products/Prices diferenciados;
-- `WP17-T12` implementar checkout con `product_id`, `plan_id`, `price_id`, `customer_context` e idempotencia;
-- `WP17-T13` verificar firma, replay protection y orden de webhooks;
-- `WP17-T14` implementar entitlement reconciliation server-side;
-- `WP17-T15` implementar prueba negativa de no activación cruzada;
-- `WP17-T16` implementar upgrade/downgrade/proration por producto;
-- `WP17-T17` implementar cancelación inmediata/al final de periodo;
-- `WP17-T18` implementar dunning, grace period y recuperación;
-- `WP17-T19` implementar refund/dispute/chargeback con auditoría;
-- `WP17-T20` implementar invoice/receipt/tax metadata por producto;
-- `WP17-T21` implementar bundle multishell como composición explícita, desactivado si no está autorizado;
-- `WP17-T22` implementar revenue/cost/margin allocation por shell y biblioteca;
-- `WP17-T23` implementar API/webhooks comerciales con scopes;
-- `WP17-T24` implementar customer portal o gestión equivalente con contexto de shell visible;
-- `WP17-T25` implementar SSO/SCIM y enterprise controls para Shell 1 cuando el plan lo exija;
-- `WP17-T26` preparar modelo Academy/Organisation sin activación pública para Shell 2;
-- `WP17-T27` implementar anti-fraud, rate limits, abuse controls y coupon governance;
-- `WP17-T28` probar cambio de plan sin pérdida de evidencia, pursuits o candidaturas;
-- `WP17-T29` documentar soporte, SLA, refund policy y customer lifecycle por shell;
-- `WP17-T30` cerrar Founder Operations con métricas separadas por producto.
-
-Gates:
-
-```text
-PRODUCT_ROOT_COUNT=2
-CROSS_SHELL_AUTO_ACTIVATION=0
-UNVERSIONED_PRICE=0
-UNSIGNED_WEBHOOK_ACCEPTED=0
-BILLING_WITHOUT_ENTITLEMENT_RECONCILIATION=0
-PUBLIC_EMPLOYMENT_LIVE_CHECKOUT=0
-```
-
-Salida:
-
-```text
-AX_WP17_TWO_PRODUCT_COMMERCIAL_RUNTIME_PASS
-```
-
-## WP18 — Producción, seguridad, privacidad, UX, landing, copy y distribución
-
-**Objetivo:** cerrar la operación de producción y la experiencia pública sin mezclar audiencias ni publicar claims no demostrados.
-
-Tareas obligatorias de plataforma y operación:
-
-- `WP18-T01` reproducible deploy;
-- `WP18-T02` staging/production topology;
-- `WP18-T03` secret management y full secret scan;
-- `WP18-T04` SLO, alerts, logs, traces y auditability;
-- `WP18-T05` backup, restore y disaster recovery;
-- `WP18-T06` incident rehearsal y rollback;
-- `WP18-T07` security review y dependency/container scanning;
-- `WP18-T08` privacy/legal por shell, fuente y propósito;
-- `WP18-T09` DSAR/export/delete/legal hold;
-- `WP18-T10` source disclosures y coverage manifests;
-- `WP18-T11` WCAG 2.2 AA;
-- `WP18-T12` responsive y performance budgets;
-- `WP18-T13` equivalencia semántica en seis idiomas;
-- `WP18-T14` support runbooks y status communication.
-
-Tareas obligatorias de arquitectura pública y copy:
-
-- `WP18-T15` definir brand architecture: una marca plataforma, dos productos;
-- `WP18-T16` implementar landing corporativa con elección clara de producto;
-- `WP18-T17` implementar landing propia de `AXIGNAL_OPPORTUNITY_INTELLIGENCE`;
-- `WP18-T18` preparar landing draft/staging de `AXIGNAL_PUBLIC_EMPLOYMENT`, no indexada ni publicada;
-- `WP18-T19` implementar pricing page independiente por shell;
-- `WP18-T20` implementar páginas O01–O09 dentro del Shell 1, no como shells independientes;
-- `WP18-T21` definir `CopyManifest` versionado por ruta, shell, audiencia y locale;
-- `WP18-T22` enlazar claims comerciales a evidencia, coverage y fecha de expiración;
-- `WP18-T23` prohibir superlativos y garantías no demostrables;
-- `WP18-T24` implementar disclosures visibles de cobertura, frescura, derechos y límites;
-- `WP18-T25` implementar navegación que no mezcle procurement con empleo público;
-- `WP18-T26` implementar SEO técnico, canonical, hreflang, sitemap y robots por estado de publicación;
-- `WP18-T27` impedir indexación de Public Employment mientras esté desautorizado;
-- `WP18-T28` implementar analytics por shell/product/route/locale sin PII innecesaria;
-- `WP18-T29` implementar funnels independientes;
-- `WP18-T30` implementar consent management y preferencias;
-- `WP18-T31` implementar experiment governance sin dark patterns ni discriminación de pricing;
-- `WP18-T32` implementar attribution y campaign parameters con retención gobernada;
-- `WP18-T33` validar copy en los seis idiomas sin divergencia de autoridad;
-- `WP18-T34` validar estados loading/empty/partial/stale/restricted/error/recovery;
-- `WP18-T35` cerrar distribución, support entrypoints y rollback de copy/config.
-
-Gates:
-
-```text
-LANDING_CORPORATE=PASS
-LANDING_OPPORTUNITY_INTELLIGENCE=PASS
-LANDING_PUBLIC_EMPLOYMENT_PUBLIC=false
-PRICING_PAGES_SEPARATE=true
-COPY_WITHOUT_EVIDENCE=0
-INDEXED_UNAUTHORIZED_ROUTE=0
-CROSS_SHELL_FUNNEL_MERGE=0
-DARK_PATTERN_FINDINGS=0
-```
-
-Salida:
-
-```text
-AX_WP18_PRODUCTION_SECURITY_UX_COMMUNICATION_PASS
-```
-
-## WP19 — Aceptación global y release gates diferenciados
+## WP17 — Enterprise, Commercial Runtime y Billing
 
 Tareas:
 
-- `WP19-T01` E2E horizontal;
-- `WP19-T02` E2E F01–F07;
-- `WP19-T03` E2E O01–O09;
-- `WP19-T04` E2E cross-library;
-- `WP19-T05` exact two-shell conformance;
-- `WP19-T06` Public Employment architectural proof;
-- `WP19-T07` pricing/billing E2E del Shell 1 en Stripe sandbox;
-- `WP19-T08` catálogo y no-activación del Shell 2;
-- `WP19-T09` landing/copy/SEO/analytics acceptance;
-- `WP19-T10` security/privacy/legal approvals;
-- `WP19-T11` paid evidence and economics del Shell 1;
-- `WP19-T12` exact-head manifest;
-- `WP19-T13` fresh-process verification;
-- `WP19-T14` human signature;
-- `WP19-T15` release decision separada por plataforma y producto.
+- plans by shell/library;
+- seats;
+- capacity;
+- trial;
+- Stripe sandbox;
+- checkout/webhooks;
+- entitlement reconciliation;
+- upgrade/downgrade;
+- cancellation/dunning/refund;
+- invoices/tax;
+- API/webhooks;
+- SSO/SCIM;
+- private connectors;
+- margin and cost telemetry;
+- Founder Operations.
 
-Estados de release diferenciados:
+Salida:
 
 ```text
-PLATFORM_GLOBAL_E2E_COMPLETE
-OPPORTUNITY_INTELLIGENCE_RELEASE_CANDIDATE
-OPPORTUNITY_INTELLIGENCE_PUBLIC_LAUNCH_AUTHORIZED
-PUBLIC_EMPLOYMENT_ARCHITECTURE_READY
-PUBLIC_EMPLOYMENT_COMMERCIAL_CONTRACT_READY
-PUBLIC_EMPLOYMENT_PUBLIC_LAUNCH_AUTHORIZED  # defined for a future amended contract; unreachable under v2.1.0
+AX_WP17_ENTERPRISE_COMMERCIAL_RUNTIME_PASS
+```
+
+## WP18 — Producción, seguridad, privacidad, UX y distribución
+
+Tareas:
+
+- reproducible deploy;
+- staging/production topology;
+- secrets;
+- SLO/alerts;
+- backup/restore/DR;
+- incident rehearsal;
+- security review;
+- privacy/legal;
+- source disclosures;
+- accessibility WCAG 2.2 AA;
+- responsive;
+- six languages;
+- performance budgets;
+- public landing and library pages;
+- support runbooks;
+- rollback.
+
+Salida:
+
+```text
+AX_WP18_PRODUCTION_SECURITY_UX_PASS
+```
+
+## WP19 — Aceptación global y release gate
+
+Tareas:
+
+- E2E horizontal;
+- E2E F01–F07;
+- E2E O01–O09;
+- E2E cross-library;
+- two-shell proof;
+- Public Employment architecture proof;
+- Stripe external sandbox;
+- security/privacy/legal approvals;
+- paid evidence and economics;
+- exact-head manifest;
+- fresh-process verification;
+- human signature.
+
+Salidas posibles:
+
+```text
+AXIGNAL_GLOBAL_E2E_COMPLETE
+AXIGNAL_GLOBAL_ACCEPTED_FOR_PUBLIC_LAUNCH
 REJECTED
 IN_PROGRESS
 ```
 
-Reglas:
+No existe `PARTIAL_LAUNCH` como declaración de AXIGNAL completo.
 
-1. `PUBLIC_EMPLOYMENT_ARCHITECTURE_READY` no equivale a lanzamiento.
-2. El Shell 1 no puede declararse global si faltan O01–O09 o cross-library.
-3. Un release de plataforma no activa automáticamente billing live.
-4. Cada autorización pública requiere firma humana específica.
-5. No existe `PARTIAL_LAUNCH` como sinónimo de AXIGNAL global acabado.
-
+---
 
 # 13. Dependencias y paralelización
 
@@ -2655,25 +2231,6 @@ Public Employment shell proof
 billing and entitlements
 Stripe sandbox
 seats
-product catalog exact two roots
-independent plan catalogs
-price versioning
-checkout product context
-signed webhook idempotency
-cross-shell non-activation
-upgrade/downgrade per product
-cancel/dunning/refund per product
-bundle decomposition
-revenue and margin allocation
-corporate landing
-Opportunity Intelligence landing
-Public Employment hidden/noindex landing
-separate pricing pages
-CopyManifest
-evidence-backed commercial claims
-SEO publication controls
-separate analytics funnels
-consent and attribution governance
 export
 retention
 deletion
@@ -2716,48 +2273,6 @@ Bloqueadores absolutos de lanzamiento:
 Cada shell y biblioteca hereda estas reglas sin excepción.
 
 ---
-
-
-## 16.1 Seguridad y privacidad entre productos
-
-Además de los bloqueadores anteriores:
-
-- no puede existir acceso de organización a candidatura personal por identidad compartida;
-- no se puede reutilizar consentimiento de un shell en el otro;
-- no se puede activar analytics cross-shell sin purpose y minimización;
-- no se puede suspender un producto por deuda del otro salvo bundle explícito;
-- no se puede exportar datos de candidato a Academy sin contrato, roles y consentimiento;
-- no se pueden compartir modelos de scoring con datos incompatibles;
-- no se puede mostrar pricing personalizado a partir de atributos sensibles.
-
-Debe existir threat model para:
-
-```text
-account context confusion
-cross-shell entitlement escalation
-billing customer mix-up
-candidate-to-organisation data leakage
-public route accidental publication
-copy claim stale after source suspension
-analytics PII leakage
-bundle cancellation inconsistency
-```
-
-## 16.2 Privacidad y documentos legales por shell
-
-Cada shell debe tener, cuando se active públicamente:
-
-- términos o anexos específicos;
-- privacy notice específico o secciones inequívocas;
-- finalidades y bases;
-- categorías de datos;
-- retención;
-- subprocessors;
-- derechos y contacto;
-- reglas de menores si fueran relevantes;
-- consumer rights para B2C;
-- DPA y enterprise terms para B2B cuando proceda.
-
 
 # 17. UX, accesibilidad y multilingüe
 
@@ -2819,638 +2334,42 @@ No se acepta traducir etiquetas y dejar contratos, errores o permisos divergente
 
 ---
 
+# 18. Comercial, pricing y packaging
 
-## 17.5 Arquitectura de marca y navegación
-
-La marca plataforma es AXIGNAL. Los nombres de producto visibles son:
-
-```text
-AXIGNAL Opportunity Intelligence
-AXIGNAL Public Employment
-```
-
-La navegación debe:
-
-- mostrar el contexto activo;
-- permitir cambio de producto sólo con entitlement;
-- evitar que O01 aparezca como producto raíz paralelo;
-- mantener URLs, breadcrumbs y títulos coherentes;
-- adaptar vocabulario y acciones al shell;
-- impedir que el usuario candidato vea controles empresariales irrelevantes;
-- impedir que el usuario empresarial acceda a datos personales del candidato.
-
-## 17.6 Design system compartido y especialización controlada
-
-Se comparte:
-
-- tokens;
-- componentes base;
-- accesibilidad;
-- patrones de estado;
-- feedback y error handling.
-
-Puede especializarse por shell:
-
-- navegación;
-- información jerárquica;
-- copy;
-- iconografía secundaria;
-- dashboards;
-- workspaces;
-- onboarding;
-- CTAs.
-
-No se permite crear dos design systems divergentes ni forzar la misma experiencia a audiencias incompatibles.
-
-# 18. Arquitectura comercial, pricing, packaging, landing y copy
-
-## 18.1 Principio de independencia comercial
-
-La arquitectura comercial canónica es:
+La arquitectura comercial debe ser:
 
 ```text
-AXIGNAL Platform
-├── Product 1: AXIGNAL_OPPORTUNITY_INTELLIGENCE
-│   ├── plans B2B
-│   ├── O01–O09 included/add-ons
-│   ├── seats and organisation capacity
-│   ├── enterprise controls
-│   └── business-specific landing, pricing and funnel
-└── Product 2: AXIGNAL_PUBLIC_EMPLOYMENT
-    ├── plans B2C Candidate
-    ├── future B2B/B2B2C Academy plan
-    ├── individual limits and jurisdictions
-    └── candidate-specific landing, pricing and funnel
+AXIGNAL Core
++ shell
++ libraries
++ users
++ workspace capacity
++ enterprise controls
 ```
 
-Los dos productos comparten Core e infraestructura, pero no deben compartir de forma implícita:
+Los precios son hipótesis hasta aceptación comercial.
 
-- precio;
-- plan;
-- trial;
-- entitlement;
-- checkout context;
-- funnel;
-- métricas;
-- copy;
-- audiencia;
-- soporte;
-- términos específicos;
-- activación.
+Debe probarse:
 
-## 18.2 Product Catalog canónico
-
-Debe existir un catálogo versionado, preferentemente en configuración declarativa y validada, con:
-
-```text
-product_id
-shell_id
-display_name
-commercial_status
-audience
-billing_customer_type
-plan_ids
-add_on_ids
-bundle_eligibility
-supported_currencies
-supported_intervals
-tax_category
-trial_policy
-refund_policy
-dunning_policy
-support_policy
-terms_version
-privacy_notice_version
-landing_route
-pricing_route
-analytics_namespace
-```
-
-Únicos `product_id` raíz permitidos:
-
-```text
-AXIGNAL_OPPORTUNITY_INTELLIGENCE
-AXIGNAL_PUBLIC_EMPLOYMENT
-```
-
-## 18.3 Catálogo de planes del Shell 1
-
-El catálogo debe permitir, sin obligar a fijar ahora importes definitivos:
-
-```text
-OPPORTUNITY_INTELLIGENCE_STARTER
-OPPORTUNITY_INTELLIGENCE_PROFESSIONAL
-OPPORTUNITY_INTELLIGENCE_BUSINESS
-OPPORTUNITY_INTELLIGENCE_ENTERPRISE
-```
-
-Dimensiones posibles y auditables:
-
-- usuarios/seats;
-- bibliotecas incluidas;
-- países y cobertura habilitada;
-- número de pursuits/workspaces activos;
-- volumen de ResearchRuns;
-- consumo AXENT/modelos;
-- almacenamiento y retención;
-- exportaciones;
-- API y webhooks;
-- private connectors;
-- SSO/SCIM;
-- soporte y SLA;
-- controles enterprise.
-
-Los importes de referencia conocidos, como `149 €` o `399 €`, permanecen `PRICING_HYPOTHESIS` hasta decisión humana y prueba de economics. No pueden publicarse por deducción del agente.
-
-## 18.4 Catálogo de planes del Shell 2
-
-Debe permitir, en estado draft/inactivo:
-
-```text
-PUBLIC_EMPLOYMENT_FREE_OR_DISCOVERY
-PUBLIC_EMPLOYMENT_CANDIDATE
-PUBLIC_EMPLOYMENT_CANDIDATE_PRO
-PUBLIC_EMPLOYMENT_ACADEMY
-```
-
-Dimensiones posibles:
-
-- número de convocatorias seguidas;
-- perfiles profesionales;
-- jurisdicciones;
-- alertas;
-- almacenamiento de documentos;
-- calendarios y recordatorios;
-- seguimiento de solicitudes;
-- planificación de temario;
-- número de alumnos y administradores en Academy;
-- reporting y soporte.
-
-El plan Academy no autoriza acceso a datos de candidatos sin roles, consentimiento, contrato y purpose limitation.
-
-## 18.5 Price Catalog y versionado
-
-Cada price debe declarar:
-
-```text
-price_id
-product_id
-plan_id
-version
-currency
-amount_minor
-billing_interval
-interval_count
-usage_model
-tiers
-seat_rules
-tax_behavior
-country_availability
-valid_from
-valid_until
-status
-stripe_price_id
-human_approval_ref
-```
-
-Reglas:
-
-1. No hard-codear importes en frontend o lógica de negocio.
-2. Precios históricos son inmutables; se crean nuevas versiones.
-3. Suscripciones existentes conservan o migran precio mediante política explícita.
-4. La moneda mostrada y cobrada debe coincidir con checkout e invoice.
-5. VAT/impuestos, redondeo y proration deben probarse.
-6. Un `price_id` pertenece a un solo producto y plan.
-7. Public Employment no tendrá prices `ACTIVE_PUBLIC` durante este contrato.
-
-## 18.6 Packaging de bibliotecas y add-ons
-
-O01–O09 pueden empaquetarse como:
-
-- incluidas;
-- seleccionables;
-- add-ons;
-- bundles temáticos dentro del Shell 1;
-- enterprise-only.
-
-Cada configuración debe declarar:
-
-```text
-library_id
-product_id
-included_in_plan_ids
-add_on_id
-coverage_scope
-usage_limits
-rights_constraints
-source_dependencies
-commercial_claims_allowed
-```
-
-No se permite vender una biblioteca cuya fuente mínima no esté `PRODUCT_ADMITTED`, cuya cobertura no esté disclosed o cuyo E2E no esté aceptado.
-
-## 18.7 Entitlements y resolución server-side
-
-El resultado efectivo de acceso se calcula como:
-
-```text
-identity
-+ customer_context
-+ product_subscription
-+ plan_version
-+ add_ons
-+ role
-+ organisation_membership
-+ usage_state
-+ source/legal restrictions
-+ feature flags
-= effective entitlements
-```
-
-El frontend nunca es autoridad. Toda acción material debe validarse server-side.
-
-El entitlement debe incluir al menos:
-
-```text
-shell_id
-product_id
-library_id
-workspace_type
-capability
-limit
-consumed
-reset_policy
-source_scope
-jurisdiction_scope
-valid_from
-valid_until
-origin
-```
-
-## 18.8 Checkout y customer context
-
-Todo checkout debe recibir y persistir:
-
-```text
-product_id
-plan_id
-price_id
-billing_interval
-customer_context_type
-personal_account_id OR organisation_id
-locale
-currency
-promotion_id optional
-idempotency_key
-terms_version
-privacy_notice_version
-consent_receipts
-```
-
-El usuario debe ver claramente:
-
-- qué producto compra;
-- quién será el titular;
-- precio e impuestos;
-- periodicidad;
-- trial y fecha de cobro;
-- renovación;
-- cancelación;
-- capacidades incluidas;
-- lo que no está incluido;
-- si existe un bundle.
-
-## 18.9 Ciclo de vida de suscripción
-
-Estados mínimos:
-
-```text
-INCOMPLETE
-TRIALING
-ACTIVE
-PAST_DUE
-GRACE_PERIOD
-PAUSED
-CANCEL_AT_PERIOD_END
-CANCELLED
-UNPAID
-REFUNDED
-DISPUTED
-```
-
-Eventos y transiciones deben ser idempotentes, auditables y reconciliables con Stripe.
-
-La suspensión debe afectar sólo al producto correspondiente, salvo bundle con política explícita. El usuario debe conservar acceso legalmente requerido a invoices, exportación y datos históricos según política.
-
-## 18.10 Trials, promociones y dark patterns
-
-Reglas:
-
-- trial opt-in claro;
-- fecha y precio posterior visibles;
-- recordatorio cuando lo exija la política;
-- no preselección engañosa;
+- trial gobernado;
+- selección explícita de plan;
 - no conversión silenciosa;
-- coupon y promoción con alcance, expiración y elegibilidad;
-- no discriminación arbitraria o uso de atributos sensibles;
-- no countdown falso;
-- no ocultación de cancelación;
-- no bundle forzado.
+- checkout sandbox;
+- webhook firmado;
+- entitlement;
+- upgrade/downgrade;
+- cancelación;
+- dunning;
+- refund/dispute;
+- seats;
+- additional libraries;
+- margin por biblioteca;
+- source maintenance cost;
+- soporte.
 
-## 18.11 Refunds, disputes, impuestos e invoices
+El lanzamiento no puede depender de vender una versión reducida que no represente el producto contratado.
 
-Debe documentarse por producto y jurisdicción:
-
-- refund policy;
-- cooling-off/withdrawal cuando aplique;
-- dispute handling;
-- chargeback evidence;
-- VAT/tax location evidence;
-- invoice numbering y correcciones;
-- credit notes;
-- consumer vs business invoice data;
-- retention fiscal;
-- soporte y escalado humano.
-
-## 18.12 Métricas y unit economics separadas
-
-Por cada shell/producto:
-
-```text
-visitors
-qualified visits
-signup
-activation
-trial_start
-checkout_start
-purchase
-MRR/ARR
-ARPU/ARPA
-retention
-churn
-expansion
-refunds
-dunning recovery
-support cost
-model cost
-source cost
-gross margin
-contribution margin
-```
-
-No se permite mezclar métricas de ambos productos de modo que oculte desempeño o economics. Los bundles deben asignar ingresos y costes mediante regla versionada.
-
-## 18.13 Arquitectura pública de rutas
-
-Rutas canónicas orientativas, sujetas al router real:
-
-```text
-/                                      landing corporativa de plataforma
-/opportunity-intelligence              landing Shell 1
-/opportunity-intelligence/pricing      pricing Shell 1
-/opportunity-intelligence/libraries/o01 ... o09
-/public-employment                      landing Shell 2, draft/hidden hasta autorización
-/public-employment/pricing              pricing Shell 2, draft/hidden hasta autorización
-/login
-/signup
-/app/...                                superficies autenticadas con selector de contexto
-```
-
-No se crearán landings raíz por país o por fuente. Las páginas de biblioteca son páginas de producto/módulo dentro del Shell 1.
-
-## 18.14 Landing corporativa
-
-La landing corporativa debe:
-
-- explicar AXIGNAL como plataforma;
-- presentar dos productos sin mezclarlos;
-- permitir elegir audiencia;
-- no presentar Public Employment como disponible si no lo está;
-- explicar la gobernanza de evidencia sin jargon innecesario;
-- incluir disclosures verificables;
-- enlazar a legal, privacidad, cookies, status y soporte;
-- evitar un CTA único que envíe a públicos incompatibles.
-
-Estado actual permitido:
-
-```text
-Opportunity Intelligence: visible cuando WP19 lo autorice
-Public Employment: hidden/noindex o “coming later” sólo con aprobación humana
-```
-
-## 18.15 Landing y copy de Opportunity Intelligence
-
-Audiencia principal:
-
-```text
-empresas
-consultoras
-business development
-estrategia
-ventas B2G/B2B
-equipos de inteligencia
-```
-
-El copy debe comunicar:
-
-- inteligencia y operaciones de oportunidad;
-- O01–O09;
-- trazabilidad desde fuente a decisión;
-- workspaces y colaboración;
-- cobertura real, no aspiracional;
-- limitaciones de automatización;
-- pricing B2B y packaging real.
-
-No debe reducir AXIGNAL a:
-
-```text
-“buscador de licitaciones”
-“IA que resume pliegos”
-“escritor automático de ofertas”
-```
-
-Procurement puede protagonizar casos y páginas O01, pero no redefinir el shell completo.
-
-## 18.16 Landing y copy de Public Employment
-
-Audiencia principal:
-
-```text
-personas candidatas
-futuros preparadores
-gestores de academias autorizadas
-```
-
-El copy futuro debe comunicar:
-
-- descubrimiento y seguimiento de procesos selectivos;
-- requisitos con evidencia e incertidumbre;
-- plazos, documentos, listas, subsanaciones, pruebas y resultados;
-- límites de autoridad;
-- privacidad de datos de candidatura.
-
-Claims prohibidos:
-
-```text
-garantizamos que cumples requisitos
-garantizamos plaza o aprobado
-presentamos por ti sin revisión
-tenemos todas las oposiciones sin coverage probado
-somos fuente oficial
-```
-
-Mientras no exista autorización de lanzamiento, este copy se mantiene en draft/staging y no indexado.
-
-## 18.17 CopyManifest y gobernanza de claims
-
-Debe existir un manifest versionado por superficie:
-
-```text
-copy_surface_id
-route
-shell_id
-product_id
-audience
-locale
-headline
-value_proposition
-cta
-claim_ids
-evidence_refs
-coverage_manifest_ref
-legal_disclosures
-status
-approved_by
-valid_from
-expires_at
-exact_head
-```
-
-Estados:
-
-```text
-DRAFT
-LEGAL_REVIEW
-PRODUCT_REVIEW
-APPROVED_STAGING
-APPROVED_PUBLIC
-SUSPENDED
-SUPERSEDED
-```
-
-Todo claim cuantitativo, comparativo, de cobertura, ahorro, precisión, actualización o resultado debe enlazar evidencia y expiración. Un cambio de fuente o coverage puede suspender automáticamente el claim.
-
-## 18.18 Claims comerciales prohibidos o condicionados
-
-Prohibidos sin evidencia y aprobación:
-
-- “global” como sinónimo de cobertura total;
-- “todas las fuentes”;
-- “100 % preciso”;
-- “sin errores”;
-- “garantiza ganar/aprobar”;
-- “cumplimiento legal asegurado”;
-- “la mejor IA”;
-- ahorros o mejoras no medidos;
-- logos de clientes sin permiso;
-- testimonials inventados;
-- urgencia o escasez ficticia.
-
-El término “global” sólo describe la arquitectura y ambición multijurisdiccional; la cobertura efectiva se declara mediante manifest.
-
-## 18.19 SEO técnico y publicación
-
-Obligaciones:
-
-- canonical correctos;
-- hreflang coherente;
-- sitemap sólo de rutas públicas autorizadas;
-- robots/noindex para drafts;
-- structured data veraz;
-- metadata y Open Graph por shell;
-- redirects versionados;
-- no doorway pages por país;
-- no páginas programáticas sin contenido y coverage real;
-- no indexar datos personales o candidaturas;
-- monitorización de indexación accidental.
-
-## 18.20 Analytics, attribution y privacidad
-
-Todo evento debe incluir cuando corresponda:
-
-```text
-shell_id
-product_id
-route
-locale
-plan_id optional
-library_id optional
-campaign attribution optional
-consent_state
-```
-
-No debe incluir:
-
-- documentos de candidato;
-- requisitos médicos o sensibles;
-- texto completo de investigaciones;
-- secretos;
-- identificadores innecesarios.
-
-Los funnels se calculan por producto. Consentimiento, retención y proveedores deben documentarse.
-
-## 18.21 Experimentación
-
-A/B tests permitidos sólo si:
-
-- no alteran autoridad o derechos;
-- no cambian precios entre personas sin política;
-- no usan atributos sensibles;
-- no ocultan cancelación o condiciones;
-- tienen hypothesis, owner, métrica primaria, guardrails y fecha de cierre;
-- preservan accesibilidad y semántica por locale;
-- pueden apagarse.
-
-## 18.22 Soporte, SLA y comunicación operativa
-
-Cada producto debe declarar:
-
-- canales;
-- horarios;
-- severidades;
-- SLA/SLO cuando aplique;
-- escalado humano;
-- status page;
-- comunicación de incidentes;
-- soporte billing;
-- soporte legal/privacy;
-- runbooks específicos.
-
-Los planes Enterprise y Academy futuros pueden tener políticas distintas, pero deben derivar del Product Catalog.
-
-## 18.23 Aceptación comercial mínima
-
-Antes de autorizar lanzamiento de un shell deben pasar:
-
-```text
-catalog validation
-pricing approval
-checkout E2E
-webhook reconciliation
-entitlement E2E
-cancel/refund/dunning E2E
-landing and pricing route QA
-copy evidence review
-legal/privacy review
-SEO publication review
-analytics/privacy review
-support readiness
-unit economics review
-human launch signature
-```
-
-La arquitectura compartida no reduce estos gates por producto.
-
+---
 
 # 19. Anti-sobreingeniería
 
@@ -3493,7 +2412,7 @@ Schema mínimo:
 ```json
 {
   "contract": "AX-GE2E-FINISH-004",
-  "contract_version": "2.1.0",
+  "contract_version": "2.0.0",
   "goal": "AXIGNAL-GOAL-001",
   "canonical_main_sha": null,
   "recognized_progress_branch": "agent/axignal-local-finalization",
@@ -3568,46 +2487,6 @@ Los estados del ejemplo son estados normativos iniciales; cualquier cambio deber
 
 ---
 
-
-## 20.1 Campos comerciales y de comunicación obligatorios
-
-El ledger deberá admitir, cuando apliquen:
-
-```text
-shell_id
-product_id
-plan_id
-price_id
-bundle_id
-library_id
-workspace_type
-route
-copy_surface_id
-copy_status
-commercial_claim_ids
-coverage_manifest_ref
-pricing_approval_ref
-launch_authorization_ref
-analytics_namespace
-public_visibility
-seo_indexability
-```
-
-No se puede cerrar WP17, WP18 o WP19 con estos campos implícitos en texto libre.
-
-## 20.2 Registros canónicos adicionales
-
-Deben existir y validarse:
-
-```text
-docs/roadmap/AXIGNAL_PRODUCT_CATALOG.v1.json
-docs/roadmap/AXIGNAL_COPY_MANIFEST.v1.json
-docs/roadmap/AXIGNAL_PUBLIC_ROUTE_REGISTRY.v1.json
-docs/roadmap/AXIGNAL_OPEN_DECISIONS.v1.json
-```
-
-El Product Catalog debe contener exactamente dos productos raíz. El Copy Manifest no puede marcar Public Employment como `APPROVED_PUBLIC` durante este contrato. El Public Route Registry debe demostrar que ninguna ruta no autorizada está indexable.
-
 # 21. Evidencia exact-head
 
 Cada cierre de WP debe entregar:
@@ -3647,60 +2526,38 @@ No se aceptan como prueba suficiente:
 
 ---
 
+# 22. Primera transición autorizada
 
-## 21.1 Evidencia específica de producto, pricing y copy
-
-Toda aceptación comercial deberá registrar:
-
-- SHA del catálogo de productos;
-- SHA del catálogo de precios;
-- Stripe sandbox object IDs y timestamps;
-- snapshot de entitlements efectivos;
-- rutas y screenshots/DOM assertions de landing/pricing;
-- CopyManifest y evidencias enlazadas;
-- resultado de robots/sitemap/canonical/hreflang;
-- analytics event schema y prueba de ausencia de PII;
-- autorización humana de pricing y publicación;
-- prueba negativa de no activación cruzada.
-
-La evidencia visual por sí sola no sustituye contratos, datos, server enforcement ni logs.
-
-# 22. Transición autorizada desde el WP0 previo
-
-La primera ejecución bajo esta versión `2.1.0` será exclusivamente de **recanonización documental incremental**.
-
-Punto de partida esperado:
+La primera ejecución bajo este contrato será exclusivamente contractual y de auditoría.
 
 ```text
-branch=agent/axignal-global-e2e
-head=b9078a178ee20d546e82e4da5921957b0d1fa1ae
+AX-GE2E-FINISH-004 / WP0
 ```
 
 El agente deberá:
 
-1. verificar HEAD local y remoto exactos;
-2. no modificar funcionalidad;
-3. sustituir íntegramente `docs/contracts/AX-GE2E-FINISH-004.md` por esta versión `2.1.0`;
-4. conservar `AX-GE2E-FINISH-003` como superseded;
-5. preservar el mapeo 75/75 y los registries correctos;
-6. actualizar el ledger a `contract_version=2.1.0`;
-7. actualizar WP17, WP18, WP19 y sus marcadores;
-8. crear o actualizar Product Catalog, Copy Manifest, Public Route Registry y Open Decisions;
-9. mantener exactamente dos productos raíz y dos shells;
-10. registrar Public Employment como producto draft/inactivo y no indexable;
-11. mantener outreach y billing live como `NOT_AUTHORIZED`;
-12. ejecutar validación documental, JSON, ciclos, cardinalidades y `git diff --check`;
-13. realizar commit y push sólo si el mandato del agente lo autoriza;
-14. no desplegar, no abrir PR, no hacer merge y no administrar GitHub;
-15. no repetir la batería funcional salvo cambio funcional accidental o test contractual que lo exija.
+1. no modificar funcionalidad;
+2. incorporar este contrato en `docs/contracts/AX-GE2E-FINISH-004.md`;
+3. marcar `AX-GE2E-FINISH-003` como superseded sin borrarlo;
+4. obtener SHA completo de base, HEAD local y HEAD remoto;
+5. auditar el baseline heredado;
+6. migrar el ledger a v2;
+7. mapear las 75 tareas anteriores a WP0–WP19;
+8. preservar `WP1-T02..T10` como `INHERITED_ENGINEERING_PASS` hasta verificación;
+9. convertir el blocker de TED en blocker de scope local;
+10. crear Library Registry y Shell Registry iniciales con exactamente los dos IDs canónicos;
+11. producir dependency graph;
+12. ejecutar validación documental;
+13. realizar commit y push sólo si el mandato del agente lo autoriza expresamente;
+14. no desplegar;
+15. no administrar GitHub;
+16. no comenzar O02–O09 hasta cerrar la integración contractual.
 
 Salida:
 
 ```text
-AX_WP0_V2_1_COMMERCIAL_AND_COPY_RECANONICALIZED_PASS
+AX_WP0_GLOBAL_CONTRACT_CANONICALIZED_PASS
 ```
-
-Después de esta salida, el programa continuará desde la primera tarea técnica real pendiente según el ledger v2.1.
 
 ---
 
@@ -3732,64 +2589,17 @@ Backup/Restore/DR                  PASS
 Global rollback                    PASS
 Critical security findings         0
 Exact-head final manifest          PASS
-Opportunity Intelligence release decision  RECORDED
-Public Employment launch authority       NOT_AUTHORIZED
+Human launch authority             SIGNED
 ```
 
 Hasta entonces:
 
 ```text
 AXIGNAL_GLOBAL_E2E_COMPLETE = false
-OPPORTUNITY_INTELLIGENCE_PUBLIC_LAUNCH = NO_GO
-PUBLIC_EMPLOYMENT_PUBLIC_LAUNCH = NO_GO
+PUBLIC_LAUNCH = NO_GO
 ```
 
 ---
-
-
-## 23.1 Definition of Done comercial y de comunicación
-
-Para `AXIGNAL_OPPORTUNITY_INTELLIGENCE`:
-
-- producto raíz registrado;
-- planes y precios aprobados o explícitamente `PRICING_PENDING_HUMAN_DECISION` sin publicación;
-- O01–O09 empaquetadas coherentemente;
-- checkout y billing sandbox E2E;
-- no activación de Public Employment;
-- landing y pricing propias;
-- copy con evidencia;
-- coverage visible;
-- analytics y funnels propios;
-- soporte y términos listos;
-- economics revisados.
-
-Para `AXIGNAL_PUBLIC_EMPLOYMENT` en este contrato:
-
-- producto raíz registrado;
-- catálogo draft/inactivo;
-- entitlements y planes contractualmente modelados;
-- landing/pricing draft o staging no indexada;
-- checkout público deshabilitado;
-- no claims de cobertura;
-- no venta ni captación pública;
-- proof de arquitectura sin fork;
-- privacidad y purpose separation demostradas.
-
-## 23.2 Criterios absolutos de rechazo
-
-Se rechaza el cierre si ocurre cualquiera:
-
-- aparece un tercer shell o producto raíz;
-- Procurement se registra como shell;
-- una biblioteca se vende fuera del Shell 1 como producto raíz no autorizado;
-- un producto activa el otro;
-- Public Employment se publica o cobra sin autorización;
-- un claim comercial carece de evidencia o coverage;
-- se mezclan funnels o datos personales entre shells;
-- un precio no está versionado;
-- el frontend decide entitlements;
-- landing/copy contradice el producto real;
-- una decisión material abierta se oculta o se resuelve por inferencia del agente.
 
 # 24. Firma y activación
 
@@ -3807,9 +2617,7 @@ SCOPE_DECISION:
 - mantener O01 Procurement como biblioteca y Bid Workspace, nunca como shell;
 - demostrar `AXIGNAL_PUBLIC_EMPLOYMENT` como segundo shell sin fork;
 - prohibir shells por país, fuente o biblioteca;
-- no lanzar públicamente ningún producto por la mera integración del contrato;
-- permitir que Opportunity Intelligence alcance release candidate y reciba una decisión humana separada;
-- mantener Public Employment sin lanzamiento hasta una enmienda específica futura.
+- no lanzar públicamente hasta completar este contrato.
 ```
 
 ## Activación técnica
@@ -3827,7 +2635,7 @@ Este documento adquiere autoridad operativa en el repositorio cuando:
 # Anexo A — Marcadores canónicos
 
 ```text
-AX_WP0_V2_1_COMMERCIAL_AND_COPY_RECANONICALIZED_PASS
+AX_WP0_GLOBAL_CONTRACT_CANONICALIZED_PASS
 AX_WP1_RESEARCH_EVIDENCE_PLATFORM_PASS
 AX_WP2_LIBRARY_SOURCE_FACTORY_PASS
 AX_WP3_ALL_FOUNDATIONAL_LIBRARIES_PASS
@@ -3844,13 +2652,10 @@ AX_WP13_O09_INNOVATION_IP_PASS
 AX_WP14_CROSS_LIBRARY_INTELLIGENCE_PASS
 AX_WP15_TWO_SHELL_PLATFORM_PASS
 AX_WP16_PUBLIC_EMPLOYMENT_ARCHITECTURE_READY_PASS
-AX_WP17_TWO_PRODUCT_COMMERCIAL_RUNTIME_PASS
-AX_WP18_PRODUCTION_SECURITY_UX_COMMUNICATION_PASS
-PLATFORM_GLOBAL_E2E_COMPLETE
-OPPORTUNITY_INTELLIGENCE_RELEASE_CANDIDATE
-OPPORTUNITY_INTELLIGENCE_PUBLIC_LAUNCH_AUTHORIZED
-PUBLIC_EMPLOYMENT_ARCHITECTURE_READY
-PUBLIC_EMPLOYMENT_COMMERCIAL_CONTRACT_READY
+AX_WP17_ENTERPRISE_COMMERCIAL_RUNTIME_PASS
+AX_WP18_PRODUCTION_SECURITY_UX_PASS
+AXIGNAL_GLOBAL_E2E_COMPLETE
+AXIGNAL_GLOBAL_ACCEPTED_FOR_PUBLIC_LAUNCH
 ```
 
 # Anexo B — Salidas prohibidas
@@ -3911,169 +2716,4 @@ country_shell_count = 0
 source_shell_count = 0
 unauthorised_third_shell_count = 0
 ```
-
-# Anexo E — Matriz maestra de superficies y autoridad
-
-| Superficie | Shell | Audiencia | Estado actual objetivo | Pricing | Publicación | Autoridad |
-|---|---|---|---|---|---|---|
-| Landing corporativa | Plataforma | Mixta | Preparada | No directo | Sólo con WP19 | CopyManifest |
-| Opportunity Intelligence | Shell 1 | B2B | Release candidate | Independiente | Autorizable | Product Catalog + CopyManifest |
-| O01–O09 pages | Shell 1 | B2B | Obligatorias | Plan/add-on | Con coverage | Library + Product Catalog |
-| Public Employment | Shell 2 | B2C/B2B2C | Draft/staging | Independiente draft | Hidden/noindex | Human launch amendment |
-| App empresarial | Shell 1 | Usuarios con entitlement | Operativa | Derivada de plan | Autenticada | Server entitlements |
-| App candidato | Shell 2 | Persona candidata | Architectural proof | Inactivo | Autenticada/staging | Server entitlements |
-| Academy | Shell 2 | Organización futura | Contract ready | Draft | No pública | Future authorization |
-
-# Anexo F — State machines comerciales mínimas
-
-## F.1 Producto
-
-```text
-DRAFT
-→ HUMAN_REVIEW
-→ STAGING
-→ RELEASE_CANDIDATE
-→ ACTIVE_PUBLIC
-→ SUSPENDED
-→ RETIRED
-```
-
-`AXIGNAL_PUBLIC_EMPLOYMENT` no puede superar `STAGING` bajo esta versión sin enmienda.
-
-## F.2 Plan y price
-
-```text
-DRAFT
-→ APPROVED
-→ ACTIVE
-→ GRANDFATHERED
-→ INACTIVE
-→ RETIRED
-```
-
-## F.3 Copy
-
-```text
-DRAFT
-→ PRODUCT_REVIEW
-→ LEGAL_REVIEW
-→ APPROVED_STAGING
-→ APPROVED_PUBLIC
-→ SUSPENDED
-→ SUPERSEDED
-```
-
-## F.4 Fuente y claim comercial
-
-```text
-SOURCE PRODUCT_ADMITTED
-+ COVERAGE MANIFEST VALID
-+ CLAIM EVIDENCE VALID
-+ COPY APPROVED
-= COMMERCIAL CLAIM PUBLISHABLE
-```
-
-Si cualquiera deja de cumplirse, el claim debe suspenderse.
-
-# Anexo G — Checklist de aceptación de landing, pricing y copy
-
-Debe responder `PASS`:
-
-```text
-[ ] ¿La landing corporativa distingue los dos productos?
-[ ] ¿Opportunity Intelligence no se reduce a Procurement?
-[ ] ¿Public Employment no aparece como disponible sin autorización?
-[ ] ¿Cada producto tiene pricing route y catálogo propios?
-[ ] ¿O01–O09 aparecen como módulos del Shell 1?
-[ ] ¿Ningún país, fuente o biblioteca aparece como shell?
-[ ] ¿Todos los claims materiales enlazan evidencia?
-[ ] ¿Coverage, frescura y límites son visibles?
-[ ] ¿Los CTAs llevan al producto correcto?
-[ ] ¿No hay dark patterns?
-[ ] ¿Cancelación, renovación y trial son claros?
-[ ] ¿Robots/sitemap excluyen rutas no autorizadas?
-[ ] ¿Hreflang y locales son coherentes?
-[ ] ¿Analytics separa funnels y minimiza datos?
-[ ] ¿La accesibilidad alcanza WCAG 2.2 AA?
-[ ] ¿El copy multilingüe conserva autoridad y límites?
-[ ] ¿Existe rollback de configuración y copy?
-```
-
-# Anexo H — Preguntas futuras y regla de respuesta contractual
-
-Para evitar nuevas ambigüedades, cualquier pregunta futura debe resolverse así:
-
-1. localizar la categoría en la taxonomía de §0.3;
-2. localizar el contrato específico;
-3. identificar estado, owner y gate;
-4. verificar evidencia exact-head;
-5. si no existe decisión, registrar `OPEN_DECISION_REQUIRED`;
-6. no implementar ni publicar la decisión por inferencia.
-
-Ejemplos:
-
-| Pregunta | Respuesta contractual |
-|---|---|
-| ¿Un shell por país? | No; F01 + configuración regional |
-| ¿Un shell por biblioteca? | No; O01–O09 dentro del Shell 1 |
-| ¿Procurement es un shell? | No; O01 + Bid Workspace |
-| ¿Cada shell tiene pricing propio? | Sí, obligatorio |
-| ¿Pueden compartir Stripe? | Sí, con productos/precios/contextos separados |
-| ¿Comprar uno activa el otro? | No |
-| ¿Puede existir bundle? | Sí, composición explícita |
-| ¿Public Employment se lanza ahora? | No; arquitectura y contrato comercial preparados |
-| ¿Debe tener landing/copy propio? | Sí; draft/noindex hasta autorización |
-| ¿La landing global mezcla ambos públicos? | No; presenta y deriva claramente |
-| ¿Puede el agente fijar precio? | No; hipótesis hasta decisión humana |
-| ¿Puede publicar un claim “global”? | Sólo con disclosure de coverage |
-| ¿Puede reutilizar datos entre shells? | Sólo con propósito, base, entitlement y auditoría |
-| ¿Puede haber un tercer shell? | Sólo por enmienda humana versionada |
-| ¿Puede Captación hacer outreach? | No sin mandato separado |
-
-# Anexo I — Glosario mínimo
-
-- **Platform:** infraestructura compartida de AXIGNAL.
-- **Core:** capacidades horizontales autoritativas.
-- **Shell:** producto raíz con audiencia, navegación, vocabulario y ciclo comercial propios.
-- **Library:** dominio de información y oportunidad dentro del Shell 1 o fundamento compartido.
-- **Workspace:** superficie operativa especializada.
-- **Source:** origen externo registrado y gobernado.
-- **Product Catalog:** fuente de verdad de productos, planes y packaging.
-- **Price Catalog:** fuente de verdad de importes y condiciones versionadas.
-- **Entitlement:** capacidad efectiva concedida por servidor.
-- **CopyManifest:** fuente de verdad de copy, claims, evidencia y publicación.
-- **Coverage Manifest:** declaración verificable de cobertura efectiva y límites.
-- **Open Decision:** decisión humana pendiente que no puede inventarse.
-- **Release Candidate:** estado técnicamente aceptable, todavía no autorización pública.
-- **Public Launch Authorization:** decisión humana específica y auditable.
-
-# Anexo J — Índice contractual de cobertura y responsable
-
-Este índice permite verificar rápidamente si una materia está gobernada y dónde.
-
-| Materia | Sección principal | Artefacto esperado | Gate |
-|---|---|---|---|
-| Autoridad y supersession | §1 | headers + ledger | contract validation |
-| Decisiones abiertas | §0.4 | `AXIGNAL_OPEN_DECISIONS.v1.json` | no hidden decisions |
-| Core y arquitectura | §4–§5 | ADR/contracts | architecture conformance |
-| Identidad/tenant | §5.1, §4.7 | auth contracts | isolation E2E |
-| Evidence/claims | §5.2–§5.4 | schemas + ledger | deterministic admission |
-| Opportunity Operations | §5.5 | domain contracts | operational E2E |
-| F01–F07 | §6 | Library Registry | 7/7 accepted |
-| O01–O09 | §7–§8 | manifests/workspaces | 9/9 accepted |
-| Dos shells | §9 | Shell Registry | exact cardinality 2 |
-| Public Employment | §10 | Domain Manifest | architecture ready only |
-| Fuentes/derechos | §11 | Source Registry | local-scope admission |
-| Work packages | §12–§14 | ledger | exact task states |
-| Cross-library | WP14, §15 | E2E evidence | no invented causality |
-| Pricing/billing | WP17, §18 | Product/Price Catalog | two-product runtime |
-| Landing/copy/SEO | WP18, §17–§18 | Copy/Route Manifest | publication governance |
-| Seguridad/privacidad | §16 | threat model/DPIA | no critical blockers |
-| UX/accesibilidad | §17 | QA evidence | WCAG 2.2 AA |
-| Producción/DR | WP18, §15–§16 | runbooks/evidence | restore and rollback |
-| Analytics/experiments | §18.20–§18.21 | event schema | privacy/funnel separation |
-| Captación/outreach | §1.5 | subordinate contract | not authorized by default |
-| Release | WP19, §23–§24 | exact-head manifest | human product decision |
-
-Una pregunta material no cubierta por este índice debe generar `OPEN_DECISION_REQUIRED`; nunca una implementación por inferencia.
 

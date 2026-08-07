@@ -1,7 +1,7 @@
 {
   "schema": "axignal.global-dependency-graph.v2",
   "contract_id": "AX-GE2E-FINISH-004",
-  "contract_version": "2.0.0",
+  "contract_version": "2.1.0",
   "date": "2026-08-07",
   "scope": {
     "description": "Graph of dependencies and blockers for the global two-shell E2E program",
@@ -10,22 +10,26 @@
   "ted_legal_blocker": {
     "blocker_id": "TED_HUMAN_LEGAL_PRIVACY",
     "status": "BLOCKED_BY_HUMAN_LEGAL_PRIVACY",
-    "scope": "O01 source admission for commercial use (src_ted_search_api_v3)",
+    "scope": "O01:TedSourceAdmission and TED_COMMERCIAL_CLAIMS only",
     "blocked_scope": [
-      "O01_TED_COMMERCIAL_ADMISSION",
-      "O01_TED_COMMERCIAL_READY"
+      "O01:TedSourceAdmission",
+      "TED_COMMERCIAL_CLAIMS"
     ],
     "does_not_block": [
       "AXIGNAL Core",
-      "F01-F07 Foundational Libraries",
-      "O02-O09 Opportunity Libraries",
+      "F01-F07",
+      "O02-O09",
       "Workspace Factory",
-      "Multishell Platform",
-      "AXIGNAL Public Employment architectural proof",
-      "contractual integration of AX-CAPTURE-E2E-001",
+      "WP15 Two-Shell Platform",
+      "WP16 Public Employment architectural proof",
+      "WP17 commercial contract preparation",
+      "WP18 draft communication architecture",
       "identity, tenant, seats and trials",
-      "Claim Ledger and deterministic admission runtime"
-    ]
+      "Claim Ledger and deterministic admission runtime",
+      "AXIGNAL Public Employment architectural proof",
+      "contractual integration of AX-CAPTURE-E2E-001"
+    ],
+    "note": "a pending source approval is not a global blocker"
   },
   "nodes": [
     {
@@ -37,51 +41,93 @@
     },
     {
       "node_id": "F01_F07",
-      "label": "Foundational Libraries F01-F07",
+      "label": "F01-F07 Foundational Libraries",
       "status": "INHERITED_PARTIAL_IMPLEMENTATION",
-      "depends_on": ["AXIGNAL_CORE"],
+      "depends_on": [
+        "AXIGNAL_CORE"
+      ],
       "blocked_by": []
     },
     {
       "node_id": "O01",
-      "label": "O01 Public Procurement (library + Bid Workspace)",
+      "label": "O01 Global Public Procurement (library + Bid Workspace)",
       "status": "INHERITED_PARTIAL_IMPLEMENTATION",
-      "depends_on": ["AXIGNAL_CORE", "F01_F07"],
-      "blocked_by": ["TED_HUMAN_LEGAL_PRIVACY"]
+      "depends_on": [
+        "AXIGNAL_CORE",
+        "F01_F07"
+      ],
+      "blocked_by": [
+        "TED_HUMAN_LEGAL_PRIVACY"
+      ]
     },
     {
       "node_id": "O02_O09",
       "label": "O02-O09 Opportunity Libraries",
       "status": "NOT_STARTED",
-      "depends_on": ["AXIGNAL_CORE", "F01_F07"],
+      "depends_on": [
+        "AXIGNAL_CORE",
+        "F01_F07"
+      ],
       "blocked_by": []
     },
     {
       "node_id": "WORKSPACE_FACTORY",
       "label": "Workspace Factory",
       "status": "INHERITED_PARTIAL_IMPLEMENTATION",
-      "depends_on": ["AXIGNAL_CORE", "F01_F07"],
+      "depends_on": [
+        "AXIGNAL_CORE",
+        "F01_F07"
+      ],
       "blocked_by": []
     },
     {
-      "node_id": "MULTISHELL_PLATFORM",
-      "label": "Multishell Platform",
-      "status": "CONTRACTUAL_SCOPE_APPROVED",
-      "depends_on": ["AXIGNAL_CORE", "WORKSPACE_FACTORY"],
+      "node_id": "WP15_TWO_SHELL_PLATFORM",
+      "label": "WP15 Two-Shell Platform",
+      "status": "NOT_STARTED",
+      "depends_on": [
+        "AXIGNAL_CORE",
+        "WORKSPACE_FACTORY"
+      ],
       "blocked_by": []
     },
     {
-      "node_id": "AXIGNAL_PUBLIC_EMPLOYMENT",
-      "label": "AXIGNAL Public Employment architectural proof",
+      "node_id": "WP16_PUBLIC_EMPLOYMENT",
+      "label": "WP16 Public Employment architectural proof",
       "status": "ARCHITECTURAL_PROOF_PENDING",
-      "depends_on": ["AXIGNAL_CORE", "MULTISHELL_PLATFORM"],
+      "depends_on": [
+        "AXIGNAL_CORE",
+        "WP15_TWO_SHELL_PLATFORM"
+      ],
+      "blocked_by": []
+    },
+    {
+      "node_id": "WP17_COMMERCIAL",
+      "label": "WP17 commercial contract preparation",
+      "status": "NOT_STARTED",
+      "depends_on": [
+        "AXIGNAL_CORE",
+        "F01_F07"
+      ],
+      "blocked_by": []
+    },
+    {
+      "node_id": "WP18_COMMUNICATION",
+      "label": "WP18 draft communication architecture",
+      "status": "NOT_STARTED",
+      "depends_on": [
+        "AXIGNAL_CORE",
+        "F01_F07"
+      ],
       "blocked_by": []
     },
     {
       "node_id": "AX_CAPTURE_E2E_001",
       "label": "Contractual integration of AX-CAPTURE-E2E-001",
       "status": "CONTRACT_INTEGRATED",
-      "depends_on": ["AX-GE2E-FINISH-004", "AXIGNAL_CORE"],
+      "depends_on": [
+        "AX-GE2E-FINISH-004",
+        "AXIGNAL_CORE"
+      ],
       "blocked_by": []
     }
   ],
