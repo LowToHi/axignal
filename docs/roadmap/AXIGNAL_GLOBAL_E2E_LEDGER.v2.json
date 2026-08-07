@@ -3683,7 +3683,7 @@
       "title": "landing/copy/SEO/analytics acceptance",
       "status": "ENGINEERING_E2E_PASS",
       "evidence": "COPY_LANDING_SEO_PASS: 34 tests, CopyManifest versionado por ruta/shell/audiencia/locale (6 idiomas), claims comerciales ligados a evidencia+coverage+expiración, guard de superlativos/garantías, disclosures visibles obligatorias, SEO por estado (Public Employment NO_INDEX forzado), analytics sin PII con consentimiento, experiment governance sin dark patterns ni discriminación de precios, estados UI validados (ERROR requiere copy), landing corporativa + 2 landings shell + pricing por shell + 9 páginas O01-O09 en Shell 1, rollback de copy; API 756/756; T01-T14 (deploy/ops) BLOCKED por ámbito prohibido (infra/.github/VPS)",
-      "exact_head": null,
+      "exact_head": "25b8871fefc79ddaba0bd8b5c523df62d01ab59b",
       "blocked_scope": null,
       "blocking_reason": null,
       "unblocked_parallel_work": null,
