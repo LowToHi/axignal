@@ -3582,7 +3582,7 @@
       "jurisdiction_id": null,
       "title": "E2E cross-library",
       "status": "NOT_STARTED",
-      "evidence": "WP14_T01_T11_PASS: entity graph, event lineage, temporal alignment, contradiction propagation (nunca merge silencioso), causal hypotheses (nunca canonical facts), Globe layers, Graph lenses, timeline con gaps, Navigator cross-library, portfolio tenant-scoped, entitlements deny-by-default; 27 tests; commit 8a177ae; API 665/665",
+      "evidence": "CROSS_LIBRARY_E2E_PASS: journey obligatorio del contrato (regulatory change O03 -> infrastructure programme O04 -> procurement notices O01 -> corporate signals O05 -> trade dependency O07 -> energy context O08 -> opportunity graph -> pursuit -> outcome WITHDRAWN) + hipótesis causal nunca canonical + views (Globe/Graph/Timeline/Navigator) + entitlements deny-by-default + portfolio; 3 tests E2E + 27 WP14; API 668/668",
       "exact_head": null,
       "blocked_scope": null,
       "blocking_reason": null,
