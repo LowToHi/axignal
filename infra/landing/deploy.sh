@@ -148,7 +148,7 @@ previous_image=""
 previous_sha=""
 previous_current=""
 if docker inspect axignal-landing >/dev/null 2>&1; then
-  previous_image="$(docker inspect --format '{{.Config.Image}}' axignal-landing)"
+  previous_image="$(docker inspect --format '{{.Image}}' axignal-landing)"
   previous_sha="$(
     curl -fsS --max-time 3 http://127.0.0.1:18180/api/health 2>/dev/null \
       | python3 -c 'import json,sys; print(json.load(sys.stdin).get("buildSha", "rollback"))' 2>/dev/null || true
@@ -192,7 +192,7 @@ rollback() {
 }
 trap rollback ERR
 
-gzip -dc "${image_archive}" | docker load >/dev/null
+gzip -dc "${image_archive}" | docker load >/dev/null 2>"/tmp/axignal-landing-load.err" || true
 loaded_image_id="$(docker image inspect --format '{{.Id}}' "${image_ref}")"
 test "${loaded_image_id}" = "${expected_image_id}"
 
@@ -310,10 +310,17 @@ printf '%s\n' "${release_sha}" > "${release_dir}/sha.txt"
 
 RELEASE_SHA="${release_sha}" EXPECTED_IMAGE_ID="${expected_image_id}" IMAGE_REF="${image_ref}" TRAEFIK_CONTAINER="${traefik_name}" \
 HTTP_ENTRYPOINT="${HTTP_ENTRYPOINT}" HTTPS_ENTRYPOINT="${HTTPS_ENTRYPOINT}" CERT_RESOLVER="${CERT_RESOLVER}" \
+LOAD_STDERR_FILE="/tmp/axignal-landing-load.err" \
 python3 - <<'PY' > "${release_dir}/deployment-evidence.json"
 import json
 import os
 from datetime import UTC, datetime
+
+load_stderr = ""
+try:
+    load_stderr = open(os.environ.get("LOAD_STDERR_FILE", ""), encoding="utf-8", errors="replace").read().strip()
+except OSError:
+    pass
 
 evidence = {
     "schema": "axignal.public-landing-deployment.v1",
@@ -345,6 +352,7 @@ evidence = {
         "https_certificate_verified": True,
         "https_health": True,
     },
+    "load_diagnostics": load_stderr or "clean",
     "rollback_armed_during_transition": True,
     "status": "DEPLOYED_AWAITING_EXTERNAL_SMOKE",
 }
