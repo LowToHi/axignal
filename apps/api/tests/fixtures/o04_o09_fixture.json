@@ -1,0 +1,87 @@
+{
+  "source_id": "src_o04_o09_fixture_v1",
+  "source_profile": "Cross-library opportunity fixtures (O04-O09)",
+  "retrieval_mode": "FROZEN_FIXTURE",
+  "retrieved_at": "2026-08-07T10:00:00Z",
+  "libraries": {
+    "O04": {
+      "items": [
+        {
+          "item_id": "infra-renfe-hsr-2026",
+          "kind": "InfrastructureProject",
+          "title": "High-speed rail corridor electrification",
+          "country": "ES",
+          "stage": "PROCUREMENT",
+          "estimated_value_eur": 1200000000,
+          "promoter": "Renfe"
+        }
+      ]
+    },
+    "O05": {
+      "items": [
+        {
+          "item_id": "corp-iberdrola-filing-2026",
+          "kind": "CompanyRecord",
+          "title": "Annual filing published",
+          "company": "Iberdrola S.A.",
+          "country": "ES",
+          "event_type": "ANNUAL_FILING",
+          "observed_at": "2026-07-01T00:00:00Z"
+        }
+      ]
+    },
+    "O06": {
+      "items": [
+        {
+          "item_id": "macro-es-gdp-q2-2026",
+          "kind": "MacroIndicator",
+          "title": "GDP growth Q2 2026",
+          "country": "ES",
+          "indicator": "GDP_GROWTH_YOY",
+          "value": 0.021,
+          "period": "2026-Q2",
+          "scenario_boundary": "observed"
+        }
+      ]
+    },
+    "O07": {
+      "items": [
+        {
+          "item_id": "trade-es-cn-solar-2026",
+          "kind": "TradeFlow",
+          "title": "Solar panel import flow",
+          "origin_country": "CN",
+          "destination_country": "ES",
+          "product": "PV modules",
+          "value_eur": 850000000,
+          "period": "2026-H1"
+        }
+      ]
+    },
+    "O08": {
+      "items": [
+        {
+          "item_id": "energy-es-solar-capacity-2026",
+          "kind": "EnergyAsset",
+          "title": "Utility-scale solar park commissioned",
+          "country": "ES",
+          "asset_type": "SOLAR_PV",
+          "capacity_mw": 450,
+          "status": "OPERATIONAL"
+        }
+      ]
+    },
+    "O09": {
+      "items": [
+        {
+          "item_id": "ip-es-battery-patent-2026",
+          "kind": "InnovationRecord",
+          "title": "Solid-state battery patent family",
+          "country": "ES",
+          "patent_family": "EP-2026-045821",
+          "status": "PENDING"
+        }
+      ]
+    }
+  }
+}

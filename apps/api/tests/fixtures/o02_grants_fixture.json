@@ -1,0 +1,28 @@
+{
+  "source_id": "src_cordis_grants_v1",
+  "source_profile": "Grants and Non-Dilutive Funding",
+  "retrieval_mode": "FROZEN_FIXTURE",
+  "retrieved_at": "2026-08-07T10:00:00Z",
+  "calls": [
+    {
+      "call_id": "call-horizon-eic-2026",
+      "title": "EIC Accelerator 2026",
+      "agency": "European Innovation Council",
+      "status": "OPEN",
+      "deadline": "2026-11-15T17:00:00Z",
+      "total_budget_eur": 675000000,
+      "max_grant_eur": 2500000,
+      "topics": ["Deep tech", "Health", "Green transition"]
+    },
+    {
+      "call_id": "call-erc-stg-2026",
+      "title": "ERC Starting Grants 2026",
+      "agency": "European Research Council",
+      "status": "OPEN",
+      "deadline": "2026-10-09T17:00:00Z",
+      "total_budget_eur": 780000000,
+      "max_grant_eur": 1500000,
+      "topics": ["Physical sciences", "Life sciences", "Social sciences"]
+    }
+  ]
+}

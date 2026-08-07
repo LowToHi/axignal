@@ -1,0 +1,36 @@
+{
+  "source_id": "src_eurlex_regulation_v1",
+  "source_profile": "Regulation and Policy-Induced Demand",
+  "retrieval_mode": "FROZEN_FIXTURE",
+  "retrieved_at": "2026-08-07T10:00:00Z",
+  "documents": [
+    {
+      "document_id": "reg-ai-act-2024",
+      "title": "Regulation (EU) 2024/1689 Artificial Intelligence Act",
+      "jurisdiction": "EU",
+      "status": "IN_FORCE",
+      "effective_at": "2024-08-01T00:00:00Z",
+      "obligations": [
+        {
+          "obligation_id": "ob-ai-risk-classification",
+          "description": "High-risk AI systems must undergo conformity assessment before market placement",
+          "affected_sectors": ["Software", "Health", "Transport"]
+        }
+      ]
+    },
+    {
+      "document_id": "reg-csrd-2022",
+      "title": "Directive (EU) 2022/2464 Corporate Sustainability Reporting",
+      "jurisdiction": "EU",
+      "status": "IN_FORCE",
+      "effective_at": "2023-01-05T00:00:00Z",
+      "obligations": [
+        {
+          "obligation_id": "ob-csrd-reporting",
+          "description": "Large undertakings must report sustainability information",
+          "affected_sectors": ["Financial", "Manufacturing", "Energy"]
+        }
+      ]
+    }
+  ]
+}
