@@ -981,7 +981,7 @@
       "title": "Completar checkout y alta real en Stripe sandbox",
       "status": "ENGINEERING_E2E_PASS",
       "evidence": "F04_TIME_CURRENCY_UNITS_PASS: 19 tests, 8 roles temporales tipados (PUBLICATION..CANCELLATION), monedas ISO (13 conocidas), FX versionado con ventana de validez, nominal/real, tax_included requiere tax_rate, rangos con min/max/unit, unknown explícito sin bounds, 14 unidades canónicas",
-      "exact_head": null,
+      "exact_head": "7f12b4ba3f84bb6885987128fe625ff797a44b54",
       "blocked_scope": null,
       "blocking_reason": null,
       "unblocked_parallel_work": null,
