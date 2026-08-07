@@ -1,0 +1,105 @@
+{
+  "schema": "axignal.global-dependency-graph.v2",
+  "contract_id": "AX-GE2E-FINISH-004",
+  "contract_version": "2.0.0",
+  "date": "2026-08-07",
+  "scope": {
+    "description": "Graph of dependencies and blockers for the global two-shell E2E program",
+    "global_blockers": []
+  },
+  "ted_legal_blocker": {
+    "blocker_id": "TED_HUMAN_LEGAL_PRIVACY",
+    "status": "BLOCKED_BY_HUMAN_LEGAL_PRIVACY",
+    "scope": "O01 source admission for commercial use (src_ted_search_api_v3)",
+    "blocked_scope": [
+      "O01_TED_COMMERCIAL_ADMISSION",
+      "O01_TED_COMMERCIAL_READY"
+    ],
+    "does_not_block": [
+      "AXIGNAL Core",
+      "F01-F07 Foundational Libraries",
+      "O02-O09 Opportunity Libraries",
+      "Workspace Factory",
+      "Multishell Platform",
+      "AXIGNAL Public Employment architectural proof",
+      "contractual integration of AX-CAPTURE-E2E-001",
+      "identity, tenant, seats and trials",
+      "Claim Ledger and deterministic admission runtime"
+    ]
+  },
+  "nodes": [
+    {
+      "node_id": "AXIGNAL_CORE",
+      "label": "AXIGNAL Core",
+      "status": "INHERITED_PARTIAL_IMPLEMENTATION",
+      "depends_on": [],
+      "blocked_by": []
+    },
+    {
+      "node_id": "F01_F07",
+      "label": "Foundational Libraries F01-F07",
+      "status": "INHERITED_PARTIAL_IMPLEMENTATION",
+      "depends_on": ["AXIGNAL_CORE"],
+      "blocked_by": []
+    },
+    {
+      "node_id": "O01",
+      "label": "O01 Public Procurement (library + Bid Workspace)",
+      "status": "INHERITED_PARTIAL_IMPLEMENTATION",
+      "depends_on": ["AXIGNAL_CORE", "F01_F07"],
+      "blocked_by": ["TED_HUMAN_LEGAL_PRIVACY"]
+    },
+    {
+      "node_id": "O02_O09",
+      "label": "O02-O09 Opportunity Libraries",
+      "status": "NOT_STARTED",
+      "depends_on": ["AXIGNAL_CORE", "F01_F07"],
+      "blocked_by": []
+    },
+    {
+      "node_id": "WORKSPACE_FACTORY",
+      "label": "Workspace Factory",
+      "status": "INHERITED_PARTIAL_IMPLEMENTATION",
+      "depends_on": ["AXIGNAL_CORE", "F01_F07"],
+      "blocked_by": []
+    },
+    {
+      "node_id": "MULTISHELL_PLATFORM",
+      "label": "Multishell Platform",
+      "status": "CONTRACTUAL_SCOPE_APPROVED",
+      "depends_on": ["AXIGNAL_CORE", "WORKSPACE_FACTORY"],
+      "blocked_by": []
+    },
+    {
+      "node_id": "AXIGNAL_PUBLIC_EMPLOYMENT",
+      "label": "AXIGNAL Public Employment architectural proof",
+      "status": "ARCHITECTURAL_PROOF_PENDING",
+      "depends_on": ["AXIGNAL_CORE", "MULTISHELL_PLATFORM"],
+      "blocked_by": []
+    },
+    {
+      "node_id": "AX_CAPTURE_E2E_001",
+      "label": "Contractual integration of AX-CAPTURE-E2E-001",
+      "status": "CONTRACT_INTEGRATED",
+      "depends_on": ["AX-GE2E-FINISH-004", "AXIGNAL_CORE"],
+      "blocked_by": []
+    }
+  ],
+  "capture_agent": {
+    "contract_id": "AX-CAPTURE-E2E-001",
+    "version": "1.1",
+    "shell_id": "AXIGNAL_OPPORTUNITY_INTELLIGENCE",
+    "depends_on": [
+      "AX-GE2E-FINISH-004",
+      "AXIGNAL Core",
+      "admitted evidence sources",
+      "human outreach authority"
+    ],
+    "does_not_create": [
+      "a third shell",
+      "an independent Claim Ledger",
+      "a separate tenant authority",
+      "automatic outreach authorization"
+    ]
+  }
+}

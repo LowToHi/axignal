@@ -1,5 +1,15 @@
 # AXIGNAL — Contrato canónico de cierre E2E con checklist ejecutable
 
+> **SUPERSEDED_BY:** AX-GE2E-FINISH-004 v2.0.0
+> **SUPERSESSION_DATE:** 2026-08-07
+> **HISTORICAL_AUDIT_RECORD:** PRESERVED
+> **ACTIVE_EXECUTION_AUTHORITY:** NO
+>
+> Este documento queda conservado íntegramente como registro histórico y de auditoría.
+> No posee autoridad de ejecución activa. Las explicaciones sobre por qué WP1-T01
+> (admisión de fuente O01 con decisión humana Legal/Privacy) bloqueaba el avance
+> de los work packages posteriores bajo este contrato se conservan sin reescritura.
+
 **Contract ID:** `AX-GE2E-FINISH-003`  
 **Versión contractual:** `1.1.0-checklist.4`  
 **Fecha de ratificación original:** `2026-08-05T17:00:45+02:00`  

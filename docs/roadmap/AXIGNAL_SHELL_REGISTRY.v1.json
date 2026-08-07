@@ -1,0 +1,62 @@
+{
+  "schema": "axignal.shell-registry.v1",
+  "contract_id": "AX-GE2E-FINISH-004",
+  "contract_version": "2.0.0",
+  "date": "2026-08-07",
+  "validation": {
+    "shell_count": 2,
+    "invalid_shell_ids": 0,
+    "shell_per_country": false,
+    "shell_per_library": false,
+    "shell_per_source": false,
+    "shell_per_language": false,
+    "procurement_shell": false
+  },
+  "shells": [
+    {
+      "shell_id": "AXIGNAL_OPPORTUNITY_INTELLIGENCE",
+      "display_name": "AXIGNAL Opportunity Intelligence",
+      "status": "INHERITED_PARTIAL_IMPLEMENTATION",
+      "coverage": "GLOBAL",
+      "required_libraries": ["F01", "F02", "F03", "F04", "F05", "F06", "F07", "O01", "O02", "O03", "O04", "O05", "O06", "O07", "O08", "O09"],
+      "contains_procurement_library": "O01",
+      "commercial_launch_authorized": false,
+      "workspaces": [
+        "BID_WORKSPACE",
+        "GRANTS_WORKSPACE",
+        "REGULATION_WORKSPACE",
+        "INFRASTRUCTURE_WORKSPACE",
+        "CORPORATE_WORKSPACE",
+        "SOVEREIGN_WORKSPACE",
+        "TRADE_WORKSPACE",
+        "ENERGY_CLIMATE_WORKSPACE",
+        "INNOVATION_IP_WORKSPACE"
+      ]
+    },
+    {
+      "shell_id": "AXIGNAL_PUBLIC_EMPLOYMENT",
+      "display_name": "AXIGNAL Public Employment",
+      "status": "ARCHITECTURAL_PROOF_PENDING",
+      "commercial_launch_authorized": false,
+      "domain": "PUBLIC_EMPLOYMENT_AND_SELECTION_PROCESSES",
+      "scope_of_proof": [
+        "oposiciones",
+        "procesos selectivos",
+        "concurso y concurso-oposición",
+        "bolsas de empleo público",
+        "listas de admitidos y excluidos",
+        "pruebas, resultados y nombramientos",
+        "workspace de candidatura y examen"
+      ],
+      "implementation_during_wp0": "NOT_IMPLEMENTED_FUNCTIONALLY"
+    }
+  ],
+  "notes": {
+    "procurement_placement": "O01 is a library and Bid Workspace inside AXIGNAL_OPPORTUNITY_INTELLIGENCE; not a shell",
+    "no_shell_per_country": true,
+    "no_shell_per_library": true,
+    "no_shell_per_source": true,
+    "no_shell_per_language": true,
+    "no_shell_per_workspace": true
+  }
+}
