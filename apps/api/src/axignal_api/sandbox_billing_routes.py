@@ -308,6 +308,7 @@ def record_refund(
     request: RefundRequest,
     identity: Authenticated,
 ) -> dict[str, object]:
+    from psycopg.types.json import Jsonb
 
     repository = _repository()
     # Append-only refund audit (tenant-scoped table reuse via repository).
@@ -321,8 +322,8 @@ def record_refund(
             (
                 identity.tenant_id,
                 "REFUND",
-                {"refund_id": request.refund_id, "amount_cents": request.amount_cents,
-                 "reason": request.reason},
+                Jsonb({"refund_id": request.refund_id, "amount_cents": request.amount_cents,
+                       "reason": request.reason}),
             ),
         )
     return {
