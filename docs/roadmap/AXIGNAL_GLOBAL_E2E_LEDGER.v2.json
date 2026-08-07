@@ -672,8 +672,8 @@
       "shell_id": "AXIGNAL_OPPORTUNITY_INTELLIGENCE",
       "jurisdiction_id": null,
       "title": "Cerrar el manifiesto O01 de fuentes, derechos y cobertura",
-      "status": "NOT_STARTED",
-      "evidence": null,
+      "status": "ENGINEERING_E2E_PASS",
+      "evidence": "LIBRARY_MANIFEST_CONTRACT_PASS: 14 tests, canonical 16 manifests F01-F07+O01-O09, is_shell=false, O01-O09->PRIMARY_SHELL, F01-F07->both shells, O10 rejected",
       "exact_head": null,
       "blocked_scope": null,
       "blocking_reason": null,
@@ -681,7 +681,7 @@
       "dependencies": [
         "WP1-T01"
       ],
-      "acceptance_gate": null
+      "acceptance_gate": "AX_WP2_LIBRARY_SOURCE_FACTORY_PASS"
     },
     {
       "contract_id": "AX-GE2E-FINISH-004",
