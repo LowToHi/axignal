@@ -145,7 +145,13 @@ def get_catalog() -> dict[str, object]:
         CATALOGUE["plans"],  # type: ignore[arg-type]
         CATALOGUE["prices"],  # type: ignore[arg-type]
     )
-    return CATALOGUE
+    # Normalise: prices without an explicit active flag default to active.
+    prices = []
+    for price in CATALOGUE["prices"]:  # type: ignore[union-attr]
+        normalized = dict(price)  # type: ignore[arg-type]
+        normalized.setdefault("active", True)
+        prices.append(normalized)
+    return {"products": CATALOGUE["products"], "plans": CATALOGUE["plans"], "prices": prices}
 
 
 @router.get("/plans/{product_id}")
