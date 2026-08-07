@@ -58,6 +58,7 @@ def run(
 ) -> bool:
     started = time.monotonic()
     use_shell = bool(command and command[0] == "pnpm")
+    result = None
     try:
         result = subprocess.run(
             " ".join(command) if use_shell else command,
@@ -81,6 +82,11 @@ def run(
     GATES[name] = "PASS" if ok else "FAIL"
     elapsed = time.monotonic() - started
     print(f"[{'PASS' if ok else 'FAIL'}] {name} ({elapsed:.0f}s)")
+    if not ok and result:
+        tail = result.stdout[-1200:] + result.stderr[-600:]
+        print(f"--- {name} output tail ---")
+        print(tail)
+        print("--- end ---")
     return ok
 
 
