@@ -74,6 +74,25 @@ export default async function OpportunityIntelligencePage() {
           ))}
         </ul>
       )}
+      <h2>Operaciones</h2>
+      <ul>
+        <li>
+          <a href="/opportunity-intelligence/opportunities">Opportunities</a>{" "}
+          — pipeline del producto
+        </li>
+        <li>
+          <a href="/opportunity-intelligence/notices">Notices</a> — notices
+          O01 versionados
+        </li>
+        <li>
+          <a href="/opportunity-intelligence/pursuits">Pursuits</a> — ciclo
+          de vida
+        </li>
+        <li>
+          <a href="/opportunity-intelligence/workspaces">Workspaces</a> — bid
+          workspaces
+        </li>
+      </ul>
       <p>
         <a href="/opportunity-intelligence/pricing">Pricing</a>
       </p>
