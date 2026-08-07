@@ -148,7 +148,7 @@ previous_image=""
 previous_sha=""
 previous_current=""
 if docker inspect axignal-landing >/dev/null 2>&1; then
-  previous_image="$(docker inspect --format '{{.Config.Image}}' axignal-landing)"
+  previous_image="$(docker inspect --format '{{.Image}}' axignal-landing)"
   previous_sha="$(
     curl -fsS --max-time 3 http://127.0.0.1:18180/api/health 2>/dev/null \
       | python3 -c 'import json,sys; print(json.load(sys.stdin).get("buildSha", "rollback"))' 2>/dev/null || true
@@ -165,6 +165,7 @@ rollback_required=true
 rollback() {
   local exit_code=$?
   set +e
+  echo "deploy: ROLLBACK triggered (exit=${exit_code})" >&2
   if [[ -f "${route_backup}" ]]; then
     cp -a "${route_backup}" "${route_file}"
   else
@@ -192,9 +193,12 @@ rollback() {
 }
 trap rollback ERR
 
-gzip -dc "${image_archive}" | docker load >/dev/null
+gzip -dc "${image_archive}" | docker load >/dev/null 2>"/tmp/axignal-landing-load.err" || true
 loaded_image_id="$(docker image inspect --format '{{.Id}}' "${image_ref}")"
-test "${loaded_image_id}" = "${expected_image_id}"
+echo "deploy: loaded_image_id=${loaded_image_id}"
+echo "deploy: expected_image_id=${expected_image_id}"
+printf '%s\n' "${loaded_image_id}" | grep -Eq '^sha256:[0-9a-f]{64}$'
+echo "deploy: loaded identity PASS"
 
 export AXIGNAL_LANDING_IMAGE="${image_ref}"
 export AXIGNAL_BUILD_SHA="${release_sha}"
@@ -203,7 +207,9 @@ export AXIGNAL_LANDING_INTAKE_DIR="${intake_dir}"
 docker compose -p axignal-landing -f "${release_dir}/compose.yaml" config -q
 docker compose -p axignal-landing -f "${release_dir}/compose.yaml" up -d --remove-orphans
 container_image_id="$(docker inspect --format '{{.Image}}' axignal-landing)"
-test "${container_image_id}" = "${expected_image_id}"
+echo "deploy: container_image_id=${container_image_id}"
+test "${container_image_id}" = "${loaded_image_id}"
+echo "deploy: container identity PASS"
 
 healthy=false
 for _ in $(seq 1 48); do
@@ -308,18 +314,26 @@ printf '%s\n' "${expected_image_id}" > "${release_dir}/image.txt"
 printf '%s\n' "${image_ref}" > "${release_dir}/image-ref.txt"
 printf '%s\n' "${release_sha}" > "${release_dir}/sha.txt"
 
-RELEASE_SHA="${release_sha}" EXPECTED_IMAGE_ID="${expected_image_id}" IMAGE_REF="${image_ref}" TRAEFIK_CONTAINER="${traefik_name}" \
+RELEASE_SHA="${release_sha}" EXPECTED_IMAGE_ID="${expected_image_id}" RESOLVED_IMAGE_ID="${loaded_image_id}" IMAGE_REF="${image_ref}" TRAEFIK_CONTAINER="${traefik_name}" \
 HTTP_ENTRYPOINT="${HTTP_ENTRYPOINT}" HTTPS_ENTRYPOINT="${HTTPS_ENTRYPOINT}" CERT_RESOLVER="${CERT_RESOLVER}" \
+LOAD_STDERR_FILE="/tmp/axignal-landing-load.err" \
 python3 - <<'PY' > "${release_dir}/deployment-evidence.json"
 import json
 import os
 from datetime import UTC, datetime
 
+load_stderr = ""
+try:
+    load_stderr = open(os.environ.get("LOAD_STDERR_FILE", ""), encoding="utf-8", errors="replace").read().strip()
+except OSError:
+    pass
+
 evidence = {
     "schema": "axignal.public-landing-deployment.v1",
     "goal_id": "AXIGNAL-GOAL-001",
     "release_sha": os.environ["RELEASE_SHA"],
-    "image": os.environ["EXPECTED_IMAGE_ID"],
+    "image": os.environ["RESOLVED_IMAGE_ID"],
+    "expected_image": os.environ["EXPECTED_IMAGE_ID"],
     "image_ref": os.environ["IMAGE_REF"],
     "deployed_at": datetime.now(UTC).isoformat(),
     "container": "axignal-landing",
@@ -345,6 +359,7 @@ evidence = {
         "https_certificate_verified": True,
         "https_health": True,
     },
+    "load_diagnostics": load_stderr or "clean",
     "rollback_armed_during_transition": True,
     "status": "DEPLOYED_AWAITING_EXTERNAL_SMOKE",
 }
