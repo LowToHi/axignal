@@ -1081,7 +1081,7 @@
       "title": "Cerrar refunds, disputes, credit notes e invoices",
       "status": "ENGINEERING_E2E_PASS",
       "evidence": "FOUNDATIONAL_REGRESSION_PASS: 4 tests + 9 checks, 6 idiomas exactos, resolución multilingüe de jurisdicciones (Österreich/España/Deutschland), traducción preserva original y cubre los 6 idiomas, roles temporales tipados con deadline>publication, FX con ventana válida, adquisición fechada, temporalidad de jurisdicciones históricas",
-      "exact_head": null,
+      "exact_head": "50b0bf155407710ea19bb868795a4b8feacd7928",
       "blocked_scope": null,
       "blocking_reason": null,
       "unblocked_parallel_work": null,
