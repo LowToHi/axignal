@@ -840,7 +840,7 @@
       "title": "Cerrar exportación y SubmissionOrActivationRecord",
       "status": "ENGINEERING_E2E_PASS",
       "evidence": "COVERAGE_DISCLOSURE_PASS: 9 tests, bounded countries/languages/sectors/time-depth/cadence, active declarations require evidence_refs+expiry, global-coverage claims rejected, SUSPENDED/SUPERSEDED without evidence, library helper",
-      "exact_head": null,
+      "exact_head": "6f37dabc13970e0d40db9fc765f2963d3da97561",
       "blocked_scope": null,
       "blocking_reason": null,
       "unblocked_parallel_work": null,
