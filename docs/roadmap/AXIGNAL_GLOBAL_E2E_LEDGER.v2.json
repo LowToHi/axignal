@@ -3603,7 +3603,7 @@
       "title": "exact two-shell conformance",
       "status": "NOT_STARTED",
       "evidence": "TWO_SHELL_CONFORMANCE_PASS: 14 checks contra registros canónicos reales (cardinalidad exacta 2, cada shell una vez, domain manifests declarados, authorization metadata, Workspace Factory reutilizado, capability matrix, analytics disclosures, sin core split, no-fork, AXIGNAL_PROCUREMENT/países/bibliotecas rechazados como shell, tercer shell rechazado, O01-O09 en OPPORTUNITY_INTELLIGENCE, O10 inexistente); 15 tests; API 683/683",
-      "exact_head": null,
+      "exact_head": "e4725c4a758d8883ef2b067ec768f941feaa4f39",
       "blocked_scope": null,
       "blocking_reason": null,
       "unblocked_parallel_work": null,
