@@ -3828,7 +3828,9 @@
       "COMPLETED",
       "BLOCKED",
       "PENDING",
-      "SUPERSEDED"
+      "SUPERSEDED",
+      "ENGINEERING_E2E_PASS",
+      "ENGINEERING_IN_PROGRESS"
     ]
   },
   "execution": {
