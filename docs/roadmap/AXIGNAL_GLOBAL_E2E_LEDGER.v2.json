@@ -961,7 +961,7 @@
       "title": "Cerrar seats, roles y entitlements",
       "status": "ENGINEERING_E2E_PASS",
       "evidence": "F03_TAXONOMIES_PASS: 13 tests, 13 taxonomías canónicas (CPV/NUTS/NACE/ISIC/NAICS/PSC/HS/SITC/CPC/COFOG/ENERGY_CLIMATE/PATENTS/NATIONAL), códigos versionados con ventana temporal, regla crosswalk proposed != canonical (CANONICAL_EQUIVALENCE requiere confidence=1.0 + evidence), validated requiere evidence, no self-mapping",
-      "exact_head": null,
+      "exact_head": "f9312b879d311573a1ebc02eb58c4cb73b1258d3",
       "blocked_scope": null,
       "blocking_reason": null,
       "unblocked_parallel_work": null,
