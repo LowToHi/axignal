@@ -740,7 +740,7 @@
       "title": "Crear Opportunity desde InvestigationContext admitido",
       "status": "ENGINEERING_E2E_PASS",
       "evidence": "ADAPTER_SDK_PASS: 11 tests, AdapterRegistry (register/get/build, duplicates rejected), conformance (source_id match, REJECTED/REVOKED no runtime adapter, abstract detection), AdapterProbeResult bounded fields, TED adapter probe with canonical fixture (content_hash/request_hash/retrieval_mode), WDI adapter wraps existing connector",
-      "exact_head": null,
+      "exact_head": "767d7824552600b3c3374e9aa185b273e9fd03cf",
       "blocked_scope": null,
       "blocking_reason": null,
       "unblocked_parallel_work": null,
