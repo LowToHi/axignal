@@ -195,6 +195,8 @@ CREATE TABLE IF NOT EXISTS tenant_private.sandbox_subscriptions (
   ),
   trial boolean NOT NULL DEFAULT false,
   grace_until timestamptz,
+  renewed_at timestamptz,
+  last_change_direction text,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );

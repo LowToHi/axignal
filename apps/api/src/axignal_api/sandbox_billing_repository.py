@@ -288,3 +288,108 @@ class SandboxBillingRepository(ResearchRepository):
                 (tenant_id,),
             )
             return [dict(row) for row in cursor.fetchall()]
+
+    def renew_subscription(self, *, tenant_id: UUID) -> dict[str, Any]:
+        """Period renewal: ACTIVE/DUNNING -> ACTIVE with renewed_at set."""
+        with self._cursor(role="axignal_worker", tenant_id=tenant_id) as cursor:
+            cursor.execute(
+                """
+                UPDATE tenant_private.sandbox_subscriptions
+                SET status = 'ACTIVE', grace_until = NULL,
+                    renewed_at = now(), updated_at = now()
+                WHERE tenant_id = %s AND status IN ('ACTIVE', 'DUNNING')
+                RETURNING subscription_id, product_id, plan_id, status
+                """,
+                (tenant_id,),
+            )
+            row = cursor.fetchone()
+            if row is None:
+                raise LookupError("no renewable subscription")
+            return dict(row)
+
+    def change_plan_directional(
+        self, *, tenant_id: UUID, new_plan_id: str, new_price_id: str
+    ) -> dict[str, Any]:
+        """Upgrade/downgrade with direction recorded for audit."""
+        with self._cursor(role="axignal_worker", tenant_id=tenant_id) as cursor:
+            cursor.execute(
+                """
+                SELECT plan_id, price_id
+                FROM tenant_private.sandbox_subscriptions
+                WHERE tenant_id = %s FOR UPDATE
+                """,
+                (tenant_id,),
+            )
+            current = cursor.fetchone()
+            if current is None:
+                raise LookupError("no subscription")
+            cursor.execute(
+                """
+                SELECT amount_cents FROM tenant_private.sandbox_prices
+                WHERE price_id = %s
+                """,
+                (current["price_id"],),
+            )
+            current_row = cursor.fetchone()
+            current_amount = int(current_row["amount_cents"]) if current_row else 0
+            cursor.execute(
+                """
+                SELECT amount_cents FROM tenant_private.sandbox_prices
+                WHERE price_id = %s
+                """,
+                (new_price_id,),
+            )
+            new_row = cursor.fetchone()
+            new_amount = int(new_row["amount_cents"]) if new_row else 0
+            direction = "UPGRADE" if new_amount > current_amount else "DOWNGRADE"
+            cursor.execute(
+                """
+                UPDATE tenant_private.sandbox_subscriptions
+                SET plan_id = %s, price_id = %s, updated_at = now(),
+                    last_change_direction = %s
+                WHERE tenant_id = %s
+                RETURNING subscription_id, product_id, plan_id, price_id
+                """,
+                (new_plan_id, new_price_id, direction, tenant_id),
+            )
+            row = cursor.fetchone()
+            return dict(row) | {"direction": direction}
+
+    def reconcile_entitlements(self, *, tenant_id: UUID) -> dict[str, Any]:
+        """Server-side reconciliation: entitlement mirrors subscription state."""
+        subscription = self.get_subscription(tenant_id=tenant_id)
+        if subscription is None:
+            self.set_entitlement(
+                tenant_id=tenant_id,
+                product_id="AXIGNAL_OPPORTUNITY_INTELLIGENCE",
+                allowed=False,
+            )
+            return {
+                "status": "NO_SUBSCRIPTION",
+                "entitlements": self.entitlements(tenant_id=tenant_id),
+            }
+        active = subscription["status"] in ("ACTIVE", "TRIAL")
+        self.set_entitlement(
+            tenant_id=tenant_id,
+            product_id=subscription["product_id"],
+            allowed=active,
+        )
+        return {
+            "status": subscription["status"],
+            "entitlement_expected": active,
+            "entitlements": self.entitlements(tenant_id=tenant_id),
+        }
+
+    def event_sequence(self, *, tenant_id: UUID) -> list[dict[str, Any]]:
+        """Ordered billing event history (webhooks + lifecycle)."""
+        with self._cursor(role="axignal_app", tenant_id=tenant_id) as cursor:
+            cursor.execute(
+                """
+                SELECT webhook_event_id AS event_id, event_type, received_at
+                FROM tenant_private.billing_webhook_events
+                WHERE tenant_id = %s
+                ORDER BY received_at, webhook_event_id
+                """,
+                (tenant_id,),
+            )
+            return [dict(row) for row in cursor.fetchall()]

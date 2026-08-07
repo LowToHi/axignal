@@ -344,6 +344,38 @@ def get_entitlements(identity: Authenticated) -> dict[str, bool]:
     return _repository().entitlements(tenant_id=identity.tenant_id)
 
 
+@router.post("/subscription/renew")
+def renew_subscription(identity: Authenticated) -> dict[str, object]:
+    try:
+        return _repository().renew_subscription(tenant_id=identity.tenant_id)
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail="no renewable subscription") from exc
+
+
+@router.post("/subscription/change-plan-directional")
+def change_plan_directional(
+    request: ChangePlanRequest, identity: Authenticated
+) -> dict[str, object]:
+    try:
+        return _repository().change_plan_directional(
+            tenant_id=identity.tenant_id,
+            new_plan_id=request.new_plan_id,
+            new_price_id=request.new_price_id,
+        )
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail="no subscription") from exc
+
+
+@router.post("/reconcile")
+def reconcile(identity: Authenticated) -> dict[str, object]:
+    return _repository().reconcile_entitlements(tenant_id=identity.tenant_id)
+
+
+@router.get("/events")
+def event_sequence(identity: Authenticated) -> list[dict[str, object]]:
+    return _repository().event_sequence(tenant_id=identity.tenant_id)
+
+
 @router.post("/webhooks")
 def receive_webhook(
     request: WebhookRequest,

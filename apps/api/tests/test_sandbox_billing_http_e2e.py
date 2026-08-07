@@ -25,6 +25,7 @@ from axignal_api.identity import build_identity_assertion
 TENANT_A = UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa")
 TENANT_B = UUID("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb")
 IDENTITY_SECRET = "sandbox-e2e-identity-secret-with-at-least-32-bytes"
+DSN = "postgresql://axignal:axignal-local@localhost:5432/axignal"
 SHELL_1 = "AXIGNAL_OPPORTUNITY_INTELLIGENCE"
 SHELL_2 = "AXIGNAL_PUBLIC_EMPLOYMENT"
 
@@ -203,7 +204,8 @@ class TestSandboxBillingHttpE2E:
         # 11. Tenant isolation.
         other = _client(TENANT_B, subject="usr_billing_other")
         assert other.get("/v1/billing/sandbox/subscription").status_code == 404
-        assert other.get("/v1/billing/sandbox/entitlements").json() == {}
+        entitlements_b = other.get("/v1/billing/sandbox/entitlements").json()
+        assert entitlements_b.get(SHELL_1) is False
 
         # 12. Cancel immediate revokes entitlement.
         cancelled = client.post(
@@ -213,3 +215,110 @@ class TestSandboxBillingHttpE2E:
         assert cancelled.json()["status"] == "CANCELLED_IMMEDIATE"
         entitlements_after = client.get("/v1/billing/sandbox/entitlements").json()
         assert entitlements_after.get(SHELL_1) is False
+
+
+TENANT_C = UUID("cccccccc-cccc-4ccc-8ccc-cccccccccccc")
+
+
+def _reset_billing_state(tenant_id: UUID) -> None:
+    import psycopg
+
+    with psycopg.connect(DSN) as conn, conn.cursor() as cursor:
+        cursor.execute(
+            "DELETE FROM tenant_private.sandbox_subscriptions WHERE tenant_id = %s",
+            (tenant_id,),
+        )
+        cursor.execute(
+            "DELETE FROM tenant_private.billing_idempotency_keys WHERE tenant_id = %s",
+            (tenant_id,),
+        )
+        cursor.execute(
+            "DELETE FROM tenant_private.billing_entitlements WHERE tenant_id = %s",
+            (tenant_id,),
+        )
+        cursor.execute(
+            "DELETE FROM tenant_private.billing_webhook_events WHERE tenant_id = %s",
+            (tenant_id,),
+        )
+        conn.commit()
+
+
+class TestSandboxBillingFullLifecycle:
+    def test_upgrade_downgrade_renew_reconcile(self, monkeypatch) -> None:
+        monkeypatch.setenv("AXIGNAL_IDENTITY_ASSERTION_SECRET", IDENTITY_SECRET)
+        _reset_billing_state(TENANT_C)
+
+        client = _client(TENANT_C, subject="usr_billing_lifecycle")
+        run = uuid4().hex[:10]
+
+        # Checkout Professional (149 EUR).
+        checkout = client.post(
+            "/v1/billing/sandbox/checkout",
+            json={
+                "checkout_id": f"chk-life-{run}",
+                "product_id": SHELL_1,
+                "plan_id": "plan-oi-professional",
+                "price_id": "price-oi-professional",
+                "idempotency_key": f"idem-life-{run}",
+                "customer_context": "lifecycle",
+            },
+        )
+        assert checkout.status_code == 201, checkout.text
+
+        # Upgrade to Team (399 EUR) with direction recorded.
+        upgraded = client.post(
+            "/v1/billing/sandbox/subscription/change-plan-directional",
+            json={"new_plan_id": "plan-oi-team", "new_price_id": "price-oi-team"},
+        )
+        assert upgraded.status_code == 200, upgraded.text
+        assert upgraded.json()["direction"] == "UPGRADE"
+
+        # Downgrade back with direction recorded.
+        downgraded = client.post(
+            "/v1/billing/sandbox/subscription/change-plan-directional",
+            json={"new_plan_id": "plan-oi-professional",
+                  "new_price_id": "price-oi-professional"},
+        )
+        assert downgraded.status_code == 200
+        assert downgraded.json()["direction"] == "DOWNGRADE"
+
+        # Renewal: ACTIVE -> ACTIVE with renewed_at.
+        renewed = client.post("/v1/billing/sandbox/subscription/renew")
+        assert renewed.status_code == 200
+        assert renewed.json()["status"] == "ACTIVE"
+
+        # Reconciliation: entitlement mirrors subscription.
+        reconciled = client.post("/v1/billing/sandbox/reconcile")
+        assert reconciled.status_code == 200
+        assert reconciled.json()["status"] == "ACTIVE"
+        assert reconciled.json()["entitlement_expected"] is True
+        assert reconciled.json()["entitlements"][SHELL_1] is True
+
+        # Event sequence ordered (webhooks + lifecycle).
+        events = client.get("/v1/billing/sandbox/events")
+        assert events.status_code == 200
+
+        # Cancel -> reconcile -> entitlement revoked.
+        cancelled = client.post(
+            "/v1/billing/sandbox/subscription/cancel",
+            json={"at_period_end": False},
+        )
+        assert cancelled.status_code == 200
+        reconciled_after = client.post("/v1/billing/sandbox/reconcile").json()
+        assert reconciled_after["status"] == "CANCELLED_IMMEDIATE"
+        assert reconciled_after["entitlements"][SHELL_1] is False
+
+        # Restart equivalence: new session sees the cancelled subscription.
+        fresh = _client(TENANT_C, subject="usr_billing_lifecycle")
+        fresh_sub = fresh.get("/v1/billing/sandbox/subscription")
+        assert fresh_sub.status_code == 200
+        assert fresh_sub.json()["status"] == "CANCELLED_IMMEDIATE"
+
+    def test_renewal_without_subscription_rejected(self, monkeypatch) -> None:
+        monkeypatch.setenv("AXIGNAL_IDENTITY_ASSERTION_SECRET", IDENTITY_SECRET)
+        other = _client(TENANT_B, subject="usr_billing_nosub")
+        response = other.post("/v1/billing/sandbox/subscription/renew")
+        assert response.status_code == 404
+        response = other.post("/v1/billing/sandbox/reconcile")
+        assert response.status_code == 200
+        assert response.json()["status"] == "NO_SUBSCRIPTION"

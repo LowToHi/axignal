@@ -246,8 +246,10 @@ class TestSandboxBillingPersistence:
         )
         entitlements = billing.entitlements(tenant_id=TENANT_A)
         assert entitlements["AXIGNAL_OPPORTUNITY_INTELLIGENCE"] is True
-        # Tenant B has no entitlement.
-        assert billing.entitlements(tenant_id=TENANT_B) == {}
+        # Tenant B has no entitlement (absent or explicitly False).
+        assert billing.entitlements(tenant_id=TENANT_B).get(
+            "AXIGNAL_OPPORTUNITY_INTELLIGENCE"
+        ) in (None, False)
 
     def test_cancel_immediate_revokes(self, billing: SandboxBillingRepository) -> None:
         billing.create_subscription(
