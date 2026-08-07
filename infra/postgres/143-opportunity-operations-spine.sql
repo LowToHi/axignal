@@ -54,7 +54,8 @@ CREATE TABLE IF NOT EXISTS tenant_private.opportunity_workspaces (
   state text NOT NULL CHECK (
     state IN ('CREATED', 'QUALIFYING', 'GO_REVIEW', 'NO_GO_REVIEW', 'PREPARING',
               'AWAITING_INFORMATION', 'READY_FOR_INTERNAL_REVIEW',
-              'READY_FOR_SUBSCRIBER_APPROVAL', 'PRESENTED_EXTERNALLY')
+              'READY_FOR_SUBSCRIBER_APPROVAL', 'PRESENTED_EXTERNALLY',
+              'APPROVED', 'HANDED_OFF')
   ),
   created_by text NOT NULL,
   created_at timestamptz NOT NULL DEFAULT now(),

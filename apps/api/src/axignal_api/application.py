@@ -1,4 +1,5 @@
 from axignal_api.axent_routes import router as axent_router
+from axignal_api.bid_workspace_routes import router as bid_workspace_router
 from axignal_api.billing_read_routes import router as billing_read_router
 from axignal_api.billing_routes import router as billing_router
 from axignal_api.billing_test_routes import router as billing_test_router
@@ -36,6 +37,7 @@ app.include_router(billing_read_router)
 app.include_router(billing_test_router)
 app.include_router(sandbox_billing_router)
 app.include_router(opportunity_router)
+app.include_router(bid_workspace_router)
 app.include_router(seat_router)
 app.include_router(retention_router)
 app.include_router(human_review_router)
