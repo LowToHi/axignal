@@ -3622,7 +3622,7 @@
       "jurisdiction_id": null,
       "title": "Public Employment architectural proof",
       "status": "NOT_STARTED",
-      "evidence": null,
+      "evidence": "PUBLIC_EMPLOYMENT_PROOF_PASS: 16 tests, Domain Manifest 0.1.0-draft con gates DRAFT (no indexable/checkout/public copy/launch/billing), candidate/exam/call domain model, eligibility policy states con source_ref, workspace de candidatura, rutas DRAFT_HIDDEN no indexables, vocabulario español canónico, roles candidate/examiner/admin; sin lanzamiento; API 699/699",
       "exact_head": null,
       "blocked_scope": null,
       "blocking_reason": null,
