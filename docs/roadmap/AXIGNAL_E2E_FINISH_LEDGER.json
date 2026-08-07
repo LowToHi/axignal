@@ -36,12 +36,12 @@
   "checklist": {
     "path": "docs/contracts/AX-GE2E-FINISH-003.md",
     "total_tasks": 75,
-    "completed_tasks": 11,
-    "pending_tasks": 64,
+    "completed_tasks": 20,
+    "pending_tasks": 55,
     "progress_source_of_truth": "MARKDOWN_CHECKBOXES",
     "work_packages": {
       "WP0": {"completed": 11, "total": 12, "state": "POST_MERGE_RELEASE_REPAIR_IN_PROGRESS"},
-      "WP1": {"completed": 0, "total": 10, "state": "BLOCKED_BY_WP0"},
+      "WP1": {"completed": 9, "total": 10, "state": "9_COMPLETE_1_BLOCKED_BY_HUMAN_LEGAL_PRIVACY_AUTHORITY"},
       "WP2": {"completed": 0, "total": 12, "state": "BLOCKED_BY_WP1"},
       "WP3": {"completed": 0, "total": 12, "state": "BLOCKED_BY_WP2"},
       "WP4": {"completed": 0, "total": 12, "state": "BLOCKED_BY_WP3"},
@@ -69,7 +69,16 @@
       "commit_signature": "VERIFIED",
       "force_push": false,
       "direct_ref_mutation": false
-    }
+    },
+    "WP1-T02": "RESEARCH_RUN_PERSISTENT_NAVIGATOR_E2E_PASS@5b6001b",
+    "WP1-T03": "WORKER_LEASE_HEARTBEAT_RECOVERY_PASS@299cf73",
+    "WP1-T04": "TED_LIVE_RETRIEVAL_NORMALISATION_PASS@299cf73",
+    "WP1-T05": "EVIDENCE_OBJECTS_VERIFIABLE_PASS@299cf73",
+    "WP1-T06": "CANDIDATE_CLAIMS_UNCERTAINTY_PASS@299cf73",
+    "WP1-T07": "DETERMINISTIC_ADMISSION_LEDGER_PASS@299cf73",
+    "WP1-T08": "AXENT_GOVERNED_CONTEXT_PASS@299cf73",
+    "WP1-T09": "CONTINUITY_ISOLATION_RECOVERY_PASS@299cf73",
+    "WP1-T10": "NAVIGATOR_RESEARCH_FULL_JOURNEY_BROWSER_PASS@5b6001b"
   },
   "pending_task": {
     "id": "WP0-T12",

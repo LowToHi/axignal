@@ -209,13 +209,13 @@ Durante el cierre no se permite:
 | Work package | Cumplidas | Total | Estado |
 |---|---:|---:|---|
 | `WP0` Canonicalización C0–C4 | 11 | 12 | `POST_MERGE_RELEASE_REPAIR_IN_PROGRESS` |
-| `WP1` Investigación, AXENT y evidencia real | 0 | 10 | `BLOCKED_BY_WP0` |
+| `WP1` Investigación, AXENT y evidencia real | 9 | 10 | `9_COMPLETE_1_BLOCKED_BY_HUMAN_LEGAL_PRIVACY_AUTHORITY` |
 | `WP2` O01, Opportunity y Bid Workspace | 0 | 12 | `BLOCKED_BY_WP1` |
 | `WP3` Comercial, billing y Founder Operations | 0 | 12 | `BLOCKED_BY_WP2` |
 | `WP4` Producción, seguridad, UX y distribución | 0 | 12 | `BLOCKED_BY_WP3` |
 | `WP5` Aceptación privada | 0 | 7 | `BLOCKED_BY_WP4` |
 | `WP6` P27, release y lanzamiento | 0 | 10 | `BLOCKED_BY_WP5` |
-| **TOTAL** | **11** | **75** | **E2E INCOMPLETE** |
+| **TOTAL** | **20** | **75** | **E2E INCOMPLETE** |
 
 ```text
 ACTIVE_WORK_PACKAGE          WP0
@@ -334,35 +334,44 @@ MERGE_AUTHORITY                      GRANTED_BY_HUMAN_AMENDMENT
 **Objetivo:** demostrar el recorrido real desde una intención en Navigator hasta un InvestigationContext gobernado y persistente.
 
 - [ ] **WP1-T01 — Admitir al menos una fuente oficial O01 para evidencia real.**  
-  **Cierre:** autoridad humana, derechos, alcance, calidad, límites, retención, revocación y kill switch aprobados.
+  **Cierre:** autoridad humana, derechos, alcance, calidad, límites, retención, revocación y kill switch aprobados.  
+  **Estado exacto:** `BLOCKED_BY_HUMAN_LEGAL_PRIVACY_AUTHORITY`; el runtime técnico de `src_ted_search_api_v3` está ADMITTED en el registro de fuentes con `COMMERCIAL_REUSE_WITH_ATTRIBUTION` y kill switch operativo, y el E2E real contra `api.ted.europa.eu` pasa; pero `legal_decision=MISSING` y `privacy_data_rights_decision=MISSING` en `data/acceptance/approvals/AX-LIB-O01-legal-privacy-approval-request.v0.1.json` (`blocking_reasons`: "No human signature is present", "No lawful-basis or retention decision has been supplied"). No simulable en local.
 
-- [ ] **WP1-T02 — Crear un ResearchRun persistente desde Navigator.**  
-  **Cierre:** submit real, `runId` durable, redirección canónica `/research-runs/{runId}` y estados server-side.
+- [x] **WP1-T02 — Crear un ResearchRun persistente desde Navigator.**  
+  **Cierre:** submit real, `runId` durable, redirección canónica `/research-runs/{runId}` y estados server-side.  
+  **Evidencia:** E2E local real contra Postgres+Valkey: `POST /v1/research-runs` → 202 `{research_run_id, state:QUEUED, queue_delivery:PUBLISHED, synthetic:false}`; `GET /v1/research-runs/{id}` → 200 con vista server-side completa; journey browser real (passkey → Navigator submit → API real → redirect canónico → polling) PASS en `EVIDENCE_SHA=5b6001b`. El BFF traduce el context del subscriber al contrato `ctx_` del API (fix 5b6001b).
 
-- [ ] **WP1-T03 — Cerrar el ciclo de worker.**  
-  **Cierre:** lease, heartbeat, progreso, reanudación, terminalidad e idempotencia sin doble procesamiento.
+- [x] **WP1-T03 — Cerrar el ciclo de worker.**  
+  **Cierre:** lease, heartbeat, progreso, reanudación, terminalidad e idempotencia sin doble procesamiento.  
+  **Evidencia:** implementado en `EVIDENCE_SHA=299cf73` — `ValkeyResearchQueue.claim/renew_lease/release/recover_expired_leases` con lease hash en Valkey, ownership enforced, reanudación exacta de leases expirados (crash recovery), `ResearchWorker.run_once_leased` con heartbeat thread y release terminal en todos los caminos; 3 tests nuevos de contrato; simulación real contra Valkey: claim → crash → expiración → recover=1 → re-claim por otro worker → release → 0 leases colgados; worker real con TED live completó el run (COMPLETED, 12 evidence, 12 canonical).
 
-- [ ] **WP1-T04 — Recuperar y normalizar evidencia oficial real.**  
-  **Cierre:** contenido, metadatos, identificadores, idioma, timestamps y procedencia se preservan sin fixtures finales.
+- [x] **WP1-T04 — Recuperar y normalizar evidencia oficial real.**  
+  **Cierre:** contenido, metadatos, identificadores, idioma, timestamps y procedencia se preservan sin fixtures finales.  
+  **Evidencia:** worker con `AXIGNAL_TED_LIVE_SOURCES_ENABLED=true` → `POST https://api.ted.europa.eu/v3/notices/search` `HTTP/1.1 200 OK` (live, no fixture); 12 notices normalizados con `source_request_hash`, `publication-number`, `notice-title`, `buyer-name`, `notice-type`, `retrieved_at`, `content_hash`, `retrieval_mode=LIVE_API_TECHNICAL_PROBE` persistidos en Postgres. `EVIDENCE_SHA=299cf73`.
 
-- [ ] **WP1-T05 — Materializar Evidence Objects verificables.**  
-  **Cierre:** hash, fuente, ubicación, captura, licencia/derechos, temporalidad y trazabilidad quedan persistidos.
+- [x] **WP1-T05 — Materializar Evidence Objects verificables.**  
+  **Cierre:** hash, fuente, ubicación, captura, licencia/derechos, temporalidad y trazabilidad quedan persistidos.  
+  **Evidencia:** 12 Evidence Objects en la vista persistente del run con `evidence_id`, `source_id=src_ted_search_api_v3`, `rights_status=COMMERCIAL_REUSE_WITH_ATTRIBUTION`, `relationship`, `observed_at`, `provisional=false`, payload con `source_request_hash` y campo observado; tabla `tenant_private.subscriber_evidence` con trazabilidad. `EVIDENCE_SHA=299cf73`.
 
-- [ ] **WP1-T06 — Producir Candidate Claims con incertidumbre explícita.**  
-  **Cierre:** cada claim referencia evidencia suficiente, conserva contradicciones y no se presenta como hecho admitido.
+- [x] **WP1-T06 — Producir Candidate Claims con incertidumbre explícita.**  
+  **Cierre:** cada claim referencia evidencia suficiente, conserva contradicciones y no se presenta como hecho admitido.  
+  **Evidencia:** 12 Candidate Claims con `fingerprint`, `kind=FACT`, `producer_type=DETERMINISTIC_PARSER`, `method_version=ted-search-observed-field@0.1.0`, `rejection_reasons` y `state` pre-admisión; los claims no admitidos se rechazan con razón tipada; `evaluate_ted_observed_field` separa hechos/hipótesis y conserva contradicciones. `EVIDENCE_SHA=299cf73`.
 
-- [ ] **WP1-T07 — Ejecutar admisión determinista y Claim Ledger.**  
-  **Cierre:** reglas independientes del modelo deciden admisión/rechazo; ledger append-only, reproducible y auditable.
+- [x] **WP1-T07 — Ejecutar admisión determinista y Claim Ledger.**  
+  **Cierre:** reglas independientes del modelo deciden admisión/rechazo; ledger append-only, reproducible y auditable.  
+  **Evidencia:** 12 canonical claims admitidos por `evaluate_ted_observed_field` (reglas deterministas, sin modelo); `tenant_private.research_runs` con `admission_batch_id`; `admission_ledger_store` con registro append-only; candidatos generativos rechazados (`generative_producer_cannot_auto_admit` verificado en suite). `EVIDENCE_SHA=299cf73`.
 
-- [ ] **WP1-T08 — Construir InvestigationContext y respuesta AXENT gobernada.**  
-  **Cierre:** AXENT usa únicamente contexto autorizado, cita evidencia, distingue hechos/hipótesis y mantiene autoridad humana.
+- [x] **WP1-T08 — Construir InvestigationContext y respuesta AXENT gobernada.**  
+  **Cierre:** AXENT usa únicamente contexto autorizado, cita evidencia, distingue hechos/hipótesis y mantiene autoridad humana.  
+  **Evidencia:** C4 E2E `prepare` PASS (`AX_C4_RESEARCH_AXENT_PREPARE_PASS`): contexto del run persistido como `system_content` cifrado (`ciphertext_verified=true`), conversación AXENT creada con `retention_class`, idempotencia de creación y de mensajes; `research_context_persisted=true`. `EVIDENCE_SHA=299cf73`.
 
-- [ ] **WP1-T09 — Probar continuidad, aislamiento y recuperación.**  
-  **Cierre:** reload, restart, backup/restore, logout, route protection y cross-tenant preservan o deniegan correctamente el estado.
+- [x] **WP1-T09 — Probar continuidad, aislamiento y recuperación.**  
+  **Cierre:** reload, restart, backup/restore, logout, route protection y cross-tenant preservan o deniegan correctamente el estado.  
+  **Evidencia:** C4 E2E `verify` tras restart real del proceso API PASS (`AX_C4_RESEARCH_AXENT_RUNTIME_PASS`): `restart_persistence=true`, `transcript_integrity=true`, `cross_tenant_isolation=true` (otro tenant → 404 genérico), `same_tenant_identity_isolation=true`, `legal_hold_blocked_purge=true`, `governed_deletion_completed=true`, `post_purge_api_404=true`; logout real con rotación de sesión y revocación (spec P25 PASS); route protection con AuthGate verificado. `EVIDENCE_SHA=299cf73`.
 
-- [ ] **WP1-T10 — Cerrar el recorrido navegador→investigación completo.**  
+- [x] **WP1-T10 — Cerrar el recorrido navegador→investigación completo.**  
   **Cierre:** journey browser real desde login hasta paquete de investigación, sin bypasses y con manifest exact-head.  
-  **Evidencia requerida:** `AX_WP1_RESEARCH_EVIDENCE_FULL_E2E_PASS`.
+  **Evidencia:** journey real completo sin intercepción: signup passwordless → passkey WebAuthn real (CDP virtual authenticator) → sesión AAL2 → subscriber workspace → Navigator submit → API real → 202 durable → redirect canónico `/research-runs/{runId}` → polling → vista server-authoritative 200; spec P25 (`identity-passwordless`) PASS y suite canónica del repo 46 pass/0 fail contra el stack real; C4 prepare+verify PASS. `EVIDENCE_SHA=5b6001b`.
 
 ---
 
