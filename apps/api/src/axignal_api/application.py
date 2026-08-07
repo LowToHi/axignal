@@ -3,6 +3,7 @@ from axignal_api.bid_workspace_routes import router as bid_workspace_router
 from axignal_api.billing_read_routes import router as billing_read_router
 from axignal_api.billing_routes import router as billing_router
 from axignal_api.billing_test_routes import router as billing_test_router
+from axignal_api.cross_library_routes import router as cross_library_router
 from axignal_api.entitlements import router as entitlement_router
 from axignal_api.executable_library_routes import router as executable_library_router
 from axignal_api.human_review import router as human_review_router
@@ -40,6 +41,7 @@ app.include_router(sandbox_billing_router)
 app.include_router(opportunity_router)
 app.include_router(bid_workspace_router)
 app.include_router(executable_library_router)
+app.include_router(cross_library_router)
 app.include_router(seat_router)
 app.include_router(retention_router)
 app.include_router(human_review_router)
