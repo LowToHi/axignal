@@ -277,6 +277,44 @@ class ResearchRepository:
             )
             return cursor.fetchall()
 
+    def set_source_state(self, source_id: str, state: str, reason: str) -> None:
+        with self._cursor(role="axignal_worker") as cursor:
+            cursor.execute(
+                """
+                UPDATE axignal_global.sources
+                SET admission_state = %s, updated_at = now(),
+                    config = jsonb_set(
+                        COALESCE(config, '{}'::jsonb),
+                        '{last_state_change_reason}',
+                        to_jsonb(%s::text)
+                    )
+                WHERE source_id = %s
+                """,
+                (state, reason, source_id),
+            )
+            if cursor.rowcount != 1:
+                raise LookupError(f"source {source_id!r} not found")
+
+    def record_kill_switch_event(
+        self,
+        *,
+        source_id: str,
+        from_state: str,
+        to_state: str,
+        reason: str,
+        occurred_at: str,
+        exact_head: str | None = None,
+    ) -> None:
+        with self._cursor(role="axignal_worker") as cursor:
+            cursor.execute(
+                """
+                INSERT INTO axignal_global.source_control_events (
+                    source_id, from_state, to_state, reason, occurred_at, exact_head
+                ) VALUES (%s, %s, %s, %s, %s, %s)
+                """,
+                (source_id, from_state, to_state, reason, occurred_at, exact_head),
+            )
+
     def get_run_for_worker(self, *, tenant_id: UUID, run_id: UUID) -> dict[str, Any] | None:
         with self._cursor(role="axignal_worker", tenant_id=tenant_id) as cursor:
             cursor.execute(

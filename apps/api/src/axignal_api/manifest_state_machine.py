@@ -161,8 +161,13 @@ SOURCE_FORWARD: dict[SourceState, set[SourceState]] = {
         SourceState.COMMERCIAL,
         SourceState.SUSPENDED,
         SourceState.REVOKED,
+        SourceState.REJECTED,
     },
-    SourceState.COMMERCIAL: {SourceState.SUSPENDED, SourceState.REVOKED},
+    SourceState.COMMERCIAL: {
+        SourceState.SUSPENDED,
+        SourceState.REVOKED,
+        SourceState.REJECTED,
+    },
     SourceState.SUSPENDED: {
         SourceState.PRODUCT_ADMITTED,
         SourceState.COMMERCIAL,
