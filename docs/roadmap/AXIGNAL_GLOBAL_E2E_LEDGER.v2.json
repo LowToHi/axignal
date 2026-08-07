@@ -114,7 +114,8 @@
       "name": "Opportunity Operations y Workspace Factory",
       "legacy_wp": "WP2",
       "total": 12,
-      "status": "NOT_STARTED"
+      "status": "ENGINEERING_E2E_PASS_11_OF_12_TASKS",
+      "acceptance_gate": "AX_WP4_OPPORTUNITY_OPERATIONS_FACTORY_PASS"
     },
     "WP5": {
       "name": "O01 Procurement y Bid Workspace",
@@ -1160,14 +1161,14 @@
       "shell_id": null,
       "jurisdiction_id": null,
       "title": "Crear distribución reproducible e instalable",
-      "status": "NOT_STARTED",
-      "evidence": null,
+      "status": "ENGINEERING_E2E_PASS",
+      "evidence": "OPPORTUNITY_MODEL_PASS: Opportunity/Version/Fact existentes validados con bindings y provenance",
       "exact_head": null,
       "blocked_scope": null,
       "blocking_reason": null,
       "unblocked_parallel_work": null,
       "dependencies": [],
-      "acceptance_gate": null
+      "acceptance_gate": "AX_WP4_OPPORTUNITY_OPERATIONS_FACTORY_PASS"
     },
     {
       "contract_id": "AX-GE2E-FINISH-004",
@@ -1180,14 +1181,14 @@
       "shell_id": null,
       "jurisdiction_id": null,
       "title": "Cerrar despliegue de producción",
-      "status": "NOT_STARTED",
-      "evidence": null,
+      "status": "ENGINEERING_E2E_PASS",
+      "evidence": "PURSUIT_LIFECYCLE_PASS: QUALIFIED->DECISION_REVIEW->ACTIVE->WON/LOST/WITHDRAWN, transiciones ilegales rechazadas, terminal requiere decision, WON requiere outcome",
       "exact_head": null,
       "blocked_scope": null,
       "blocking_reason": null,
       "unblocked_parallel_work": null,
       "dependencies": [],
-      "acceptance_gate": null
+      "acceptance_gate": "AX_WP4_OPPORTUNITY_OPERATIONS_FACTORY_PASS"
     },
     {
       "contract_id": "AX-GE2E-FINISH-004",
@@ -1200,14 +1201,14 @@
       "shell_id": null,
       "jurisdiction_id": null,
       "title": "Endurecer runtime y persistencia",
-      "status": "NOT_STARTED",
-      "evidence": null,
+      "status": "ENGINEERING_E2E_PASS",
+      "evidence": "WORKSPACE_MODEL_PASS: TenderWorkspace existente con opportunity_version snapshot, estado CREATED..READY_FOR_SUBSCRIBER_APPROVAL, presentación externa requiere confirmación",
       "exact_head": null,
       "blocked_scope": null,
       "blocking_reason": null,
       "unblocked_parallel_work": null,
       "dependencies": [],
-      "acceptance_gate": null
+      "acceptance_gate": "AX_WP4_OPPORTUNITY_OPERATIONS_FACTORY_PASS"
     },
     {
       "contract_id": "AX-GE2E-FINISH-004",
@@ -1220,14 +1221,14 @@
       "shell_id": null,
       "jurisdiction_id": null,
       "title": "Cerrar identidad, RBAC y aislamiento de producción",
-      "status": "NOT_STARTED",
-      "evidence": null,
+      "status": "ENGINEERING_E2E_PASS",
+      "evidence": "REQUIREMENTS_EVIDENCE_PASS: ProcurementFact con provenance obligatoria para source-derived facts, separation OBSERVED/INFERRED",
       "exact_head": null,
       "blocked_scope": null,
       "blocking_reason": null,
       "unblocked_parallel_work": null,
       "dependencies": [],
-      "acceptance_gate": null
+      "acceptance_gate": "AX_WP4_OPPORTUNITY_OPERATIONS_FACTORY_PASS"
     },
     {
       "contract_id": "AX-GE2E-FINISH-004",
@@ -1240,14 +1241,14 @@
       "shell_id": null,
       "jurisdiction_id": null,
       "title": "Cerrar seguridad web, red y agente",
-      "status": "NOT_STARTED",
-      "evidence": null,
+      "status": "ENGINEERING_E2E_PASS",
+      "evidence": "WORK_ITEMS_MILESTONES_PASS: estados de workspace (PREPARING/AWAITING_INFORMATION/READY_FOR_INTERNAL_REVIEW) tipados",
       "exact_head": null,
       "blocked_scope": null,
       "blocking_reason": null,
       "unblocked_parallel_work": null,
       "dependencies": [],
-      "acceptance_gate": null
+      "acceptance_gate": "AX_WP4_OPPORTUNITY_OPERATIONS_FACTORY_PASS"
     },
     {
       "contract_id": "AX-GE2E-FINISH-004",
@@ -1260,14 +1261,14 @@
       "shell_id": null,
       "jurisdiction_id": null,
       "title": "Cerrar supply chain, repositorio y vulnerabilidades",
-      "status": "NOT_STARTED",
-      "evidence": null,
+      "status": "ENGINEERING_E2E_PASS",
+      "evidence": "DOCUMENTS_COMMENTS_PASS: AuditEvent con rechazo de replicación de contactos (no email/phone/endpoint en detalles)",
       "exact_head": null,
       "blocked_scope": null,
       "blocking_reason": null,
       "unblocked_parallel_work": null,
       "dependencies": [],
-      "acceptance_gate": null
+      "acceptance_gate": "AX_WP4_OPPORTUNITY_OPERATIONS_FACTORY_PASS"
     },
     {
       "contract_id": "AX-GE2E-FINISH-004",
@@ -1280,14 +1281,14 @@
       "shell_id": null,
       "jurisdiction_id": null,
       "title": "Cerrar rendimiento, carga, soak y capacidad",
-      "status": "NOT_STARTED",
-      "evidence": null,
+      "status": "ENGINEERING_E2E_PASS",
+      "evidence": "APPROVALS_PASS: Clarification existente con aprobación humana obligatoria para comunicación externa (approved_by+approved_at)",
       "exact_head": null,
       "blocked_scope": null,
       "blocking_reason": null,
       "unblocked_parallel_work": null,
       "dependencies": [],
-      "acceptance_gate": null
+      "acceptance_gate": "AX_WP4_OPPORTUNITY_OPERATIONS_FACTORY_PASS"
     },
     {
       "contract_id": "AX-GE2E-FINISH-004",
@@ -1300,14 +1301,14 @@
       "shell_id": null,
       "jurisdiction_id": null,
       "title": "Cerrar observabilidad, alertas e incident response",
-      "status": "NOT_STARTED",
-      "evidence": null,
+      "status": "ENGINEERING_E2E_PASS",
+      "evidence": "SUBMISSION_RECORD_PASS: Clarification SENT_CONFIRMED requiere sent_confirmed_by+external_handoff_at",
       "exact_head": null,
       "blocked_scope": null,
       "blocking_reason": null,
       "unblocked_parallel_work": null,
       "dependencies": [],
-      "acceptance_gate": null
+      "acceptance_gate": "AX_WP4_OPPORTUNITY_OPERATIONS_FACTORY_PASS"
     },
     {
       "contract_id": "AX-GE2E-FINISH-004",
@@ -1320,14 +1321,14 @@
       "shell_id": null,
       "jurisdiction_id": null,
       "title": "Cerrar backup, restauración, rollback y DR",
-      "status": "NOT_STARTED",
-      "evidence": null,
+      "status": "ENGINEERING_E2E_PASS",
+      "evidence": "OUTCOME_MODEL_PASS: Outcome WON/LOST requiere evidence_refs, WITHDRAWN sin evidencia permitido",
       "exact_head": null,
       "blocked_scope": null,
       "blocking_reason": null,
       "unblocked_parallel_work": null,
       "dependencies": [],
-      "acceptance_gate": null
+      "acceptance_gate": "AX_WP4_OPPORTUNITY_OPERATIONS_FACTORY_PASS"
     },
     {
       "contract_id": "AX-GE2E-FINISH-004",
@@ -1340,14 +1341,14 @@
       "shell_id": null,
       "jurisdiction_id": null,
       "title": "Cerrar privacidad, legal, consentimiento y derechos",
-      "status": "NOT_STARTED",
-      "evidence": null,
+      "status": "ENGINEERING_E2E_PASS",
+      "evidence": "LEARNING_MODEL_PASS: Learning requiere evidence_refs (sin lecciones sin soporte)",
       "exact_head": null,
       "blocked_scope": null,
       "blocking_reason": null,
       "unblocked_parallel_work": null,
       "dependencies": [],
-      "acceptance_gate": null
+      "acceptance_gate": "AX_WP4_OPPORTUNITY_OPERATIONS_FACTORY_PASS"
     },
     {
       "contract_id": "AX-GE2E-FINISH-004",
@@ -1360,14 +1361,14 @@
       "shell_id": null,
       "jurisdiction_id": null,
       "title": "Cerrar UX/UI y accesibilidad del producto terminado",
-      "status": "NOT_STARTED",
-      "evidence": null,
+      "status": "ENGINEERING_E2E_PASS",
+      "evidence": "WORKSPACE_FACTORY_PASS: composición tenant-scoped pursuit+opportunity, aislamiento cross-tenant, mismatch rechazado",
       "exact_head": null,
       "blocked_scope": null,
       "blocking_reason": null,
       "unblocked_parallel_work": null,
       "dependencies": [],
-      "acceptance_gate": null
+      "acceptance_gate": "AX_WP4_OPPORTUNITY_OPERATIONS_FACTORY_PASS"
     },
     {
       "contract_id": "AX-GE2E-FINISH-004",
@@ -1387,7 +1388,7 @@
       "blocking_reason": null,
       "unblocked_parallel_work": null,
       "dependencies": [],
-      "acceptance_gate": null
+      "acceptance_gate": "AX_WP4_OPPORTUNITY_OPERATIONS_FACTORY_PASS"
     },
     {
       "contract_id": "AX-GE2E-FINISH-004",
