@@ -1041,7 +1041,7 @@
       "title": "Completar upgrade, downgrade, cancelación y reactivación",
       "status": "ENGINEERING_E2E_PASS",
       "evidence": "F07_DOCUMENTS_CONTENT_PASS: 14 tests, 14 formatos mínimos (HTML..OCDS), pipeline 13 etapas en orden sin saltos (OCR opcional), malware INFECTED requiere quarantine, OCR solo cuando es necesario, estado final requiere claims propuestos, content_hash sha256",
-      "exact_head": null,
+      "exact_head": "2d6b1796534384b79848bf83fcb0ec0f2b4bd3e5",
       "blocked_scope": null,
       "blocking_reason": null,
       "unblocked_parallel_work": null,
