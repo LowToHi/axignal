@@ -22,7 +22,7 @@ from pathlib import Path
 from uuid import uuid4
 
 REPO = Path(__file__).resolve().parents[3]
-PY = r"C:\Users\usuario\AppData\Local\Programs\Python\Python313\python.exe"
+PY = sys.executable
 
 DB_URL = os.environ.get(
     "AXIGNAL_DATABASE_URL",
