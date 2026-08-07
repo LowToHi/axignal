@@ -198,7 +198,7 @@ def test_research_runtime_wiring_and_once(monkeypatch) -> None:
         publish_pending=lambda *, limit: calls.append(("publish", limit)) or 0
     )
     worker = SimpleNamespace(
-        run_once=lambda *, timeout_seconds: calls.append(("work", timeout_seconds)) or False
+        run_once_leased=lambda **_: calls.append(("work", _["timeout_seconds"])) or False
     )
     monkeypatch.setattr(sys, "argv", ["research-worker", "--once"])
     monkeypatch.setattr(research_module.Settings, "from_env", lambda: setting())
@@ -491,3 +491,148 @@ def test_scheduler_main_routes_healthcheck(monkeypatch) -> None:
         lambda value: int(value is runtime_settings) - 1,
     )
     assert scheduler_module.main() == 0
+
+
+def test_research_lease_cycle_claims_heartbeats_and_releases(monkeypatch) -> None:
+    """The leased research cycle claims, heartbeats and terminally releases."""
+    from types import SimpleNamespace
+    from uuid import UUID
+
+    import axignal_api.worker as research_module
+    from axignal_api.queue import ResearchJob
+
+    job = ResearchJob(
+        tenant_id=UUID("11111111-1111-4111-8111-111111111111"),
+        research_run_id=UUID("22222222-2222-4222-8222-222222222222"),
+        source_id="src_ted_search_api_v3",
+    )
+    calls: list[str] = []
+
+    class Queue:
+        def claim(self, *, timeout_seconds, worker_id, lease_seconds):
+            calls.append(("claim", timeout_seconds, worker_id, lease_seconds))
+            return job
+
+        def renew_lease(self, job_ref, *, worker_id, lease_seconds):
+            calls.append(("renew", worker_id))
+            return True
+
+        def release(self, job_ref, *, worker_id):
+            calls.append(("release", worker_id))
+            return True
+
+    class Repository:
+        def get_run_for_worker(self, *, tenant_id, run_id):
+            return {"state": "QUEUED", "opportunity_id": "opp", "job_kind": "TED_PROCUREMENT"}
+
+        def get_source(self, source_id):
+            return None  # unreachable source -> fail_run path
+
+        def fail_run(self, *, tenant_id, run_id, error_code, error_detail):
+            calls.append(("fail_run", error_code))
+
+        def transition_run(self, *, tenant_id, run_id, state):
+            calls.append(("transition", state))
+
+    worker = research_module.ResearchWorker(
+        repository=Repository(),  # type: ignore[arg-type]
+        queue=Queue(),  # type: ignore[arg-type]
+        world_bank_connector=SimpleNamespace(),  # type: ignore[arg-type]
+        ted_connector=SimpleNamespace(),  # type: ignore[arg-type]
+    )
+    result = worker.run_once_leased(
+        timeout_seconds=3,
+        worker_id="worker-a",
+        lease_seconds=60,
+        heartbeat_seconds=0.05,
+    )
+    assert result is True
+    assert calls[0] == ("claim", 3, "worker-a", 60)
+    assert ("release", "worker-a") in calls
+    # the terminal release must happen after the run was processed
+    assert calls.index(("release", "worker-a")) > 0
+
+
+def test_research_lease_worker_crash_is_recovered(monkeypatch) -> None:
+    """An expired lease without terminal release is re-enqueued exactly once."""
+    import axignal_api.worker as research_module
+    from axignal_api.queue import ValkeyResearchQueue
+
+    payload = (
+        '{"research_run_id":"22222222-2222-4222-8222-222222222222",'
+        '"schema_version":1,"source_id":"src_ted_search_api_v3",'
+        '"tenant_id":"11111111-1111-4111-8111-111111111111"}'
+    )
+
+    class Client:
+        def __init__(self) -> None:
+            self.lease = {payload: '{"worker_id":"worker-a","lease_expires_at":1.0}'}
+            self.queue: list[str] = []
+
+        def hgetall(self, key):
+            return dict(self.lease)
+
+        def hdel(self, key, member):
+            return self.lease.pop(member, None) is not None
+
+        def rpush(self, key, member):
+            self.queue.append(member)
+            return 1
+
+    client = Client()
+    queue = ValkeyResearchQueue("redis://localhost/0", queue_key="axignal:test:queue:v1")
+    monkeypatch.setattr(queue, "client", client)
+    monkeypatch.setattr(
+        research_module.ValkeyResearchQueue,
+        "recover_expired_leases",
+        queue.recover_expired_leases,
+    )
+
+    assert queue.recover_expired_leases() == 1
+    assert client.queue == [payload]
+    # second recovery is a no-op: the lease entry is gone
+    assert queue.recover_expired_leases() == 0
+
+
+def test_research_lease_heartbeat_ownership_is_enforced() -> None:
+    """A worker cannot renew or release a lease it does not own."""
+    from uuid import UUID
+
+    from axignal_api.queue import ResearchJob, ValkeyResearchQueue
+
+    job = ResearchJob(
+        tenant_id=UUID("11111111-1111-4111-8111-111111111111"),
+        research_run_id=UUID("22222222-2222-4222-8222-222222222222"),
+        source_id="src_ted_search_api_v3",
+    )
+    payload = (
+        '{"research_run_id":"22222222-2222-4222-8222-222222222222",'
+        '"schema_version":1,"source_id":"src_ted_search_api_v3",'
+        '"tenant_id":"11111111-1111-4111-8111-111111111111"}'
+    )
+
+    class Client:
+        def __init__(self) -> None:
+            self.lease = {payload: '{"worker_id":"worker-a","lease_expires_at":9999999999.0}'}
+
+        def hget(self, key, member):
+            return self.lease.get(member)
+
+        def hset(self, key, member, value):
+            self.lease[member] = value
+            return 1
+
+        def expire(self, key, seconds):
+            return True
+
+        def hdel(self, key, member):
+            return self.lease.pop(member, None) is not None
+
+    client = Client()
+    queue = ValkeyResearchQueue("redis://localhost/0", queue_key="axignal:test:queue:v1")
+    queue.client = client  # type: ignore[assignment]
+
+    assert queue.renew_lease(job, worker_id="worker-b", lease_seconds=60) is False
+    assert queue.release(job, worker_id="worker-b") is False
+    assert queue.renew_lease(job, worker_id="worker-a", lease_seconds=60) is True
+    assert queue.release(job, worker_id="worker-a") is True

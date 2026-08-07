@@ -12,6 +12,7 @@ artifacts/subscriber-dev.*.log
 .env
 .env.*
 !.env.example
+.axignal-local/
 .venv/
 __pycache__/
 .pytest_cache/

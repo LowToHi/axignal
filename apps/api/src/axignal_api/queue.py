@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import time
 from dataclasses import dataclass
 from typing import Any
 from uuid import UUID
@@ -41,6 +42,7 @@ class ValkeyResearchQueue:
         self.client = Redis.from_url(url, decode_responses=True)
         self.queue_key = queue_key
         self.event_stream_key = "axignal:events:v1"
+        self.lease_key = f"{queue_key}:inflight"
 
     def enqueue(self, job: ResearchJob) -> None:
         self.client.rpush(
@@ -69,6 +71,101 @@ class ValkeyResearchQueue:
         if not isinstance(payload, dict):
             raise ValueError("Research queue payload must be an object")
         return ResearchJob.from_payload(payload)
+
+    def claim(
+        self,
+        *,
+        timeout_seconds: int = 1,
+        worker_id: str,
+        lease_seconds: int,
+    ) -> ResearchJob | None:
+        """Atomically take one job and register a renewable lease for it.
+
+        The job remains in the lease hash until the worker completes it, fails
+        it or the lease expires; ``recover_expired_leases`` re-enqueues jobs
+        whose lease lapsed without a terminal transition (worker crash).
+        """
+        job = self.dequeue(timeout_seconds=timeout_seconds)
+        if job is None:
+            return None
+        payload = json.dumps(job.as_payload(), sort_keys=True, separators=(",", ":"))
+        lease = json.dumps(
+            {
+                "worker_id": worker_id,
+                "lease_expires_at": time.time() + lease_seconds,
+            },
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+        self.client.hset(self.lease_key, payload, lease)
+        self.client.expire(self.lease_key, max(lease_seconds * 3, 60))
+        return job
+
+    def renew_lease(
+        self,
+        job: ResearchJob,
+        *,
+        worker_id: str,
+        lease_seconds: int,
+    ) -> bool:
+        """Heartbeat: extend the lease only while this worker still owns it."""
+        payload = json.dumps(job.as_payload(), sort_keys=True, separators=(",", ":"))
+        current = self.client.hget(self.lease_key, payload)
+        if current is None:
+            return False
+        try:
+            holder = json.loads(current)
+        except ValueError:
+            return False
+        if holder.get("worker_id") != worker_id:
+            return False
+        renewed = json.dumps(
+            {
+                "worker_id": worker_id,
+                "lease_expires_at": time.time() + lease_seconds,
+            },
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+        self.client.hset(self.lease_key, payload, renewed)
+        self.client.expire(self.lease_key, max(lease_seconds * 3, 60))
+        return True
+
+    def release(self, job: ResearchJob, *, worker_id: str) -> bool:
+        """Terminal release: drop the lease without re-enqueueing."""
+        payload = json.dumps(job.as_payload(), sort_keys=True, separators=(",", ":"))
+        current = self.client.hget(self.lease_key, payload)
+        if current is None:
+            return False
+        try:
+            holder = json.loads(current)
+        except ValueError:
+            holder = {}
+        if holder.get("worker_id") != worker_id:
+            return False
+        return bool(self.client.hdel(self.lease_key, payload))
+
+    def recover_expired_leases(self) -> int:
+        """Re-enqueue jobs whose lease expired without a terminal transition.
+
+        Returns the number of jobs recovered. Idempotent: the lease entry is
+        removed atomically before re-enqueueing, so a concurrent worker cannot
+        double-deliver the same job.
+        """
+        recovered = 0
+        now = time.time()
+        for payload, encoded in self.client.hgetall(self.lease_key).items():
+            try:
+                lease = json.loads(encoded)
+            except ValueError:
+                continue
+            if lease.get("lease_expires_at", float("inf")) > now:
+                continue
+            if not self.client.hdel(self.lease_key, payload):
+                continue
+            self.client.rpush(self.queue_key, payload)
+            recovered += 1
+        return recovered
 
     def ping(self) -> bool:
         return bool(self.client.ping())

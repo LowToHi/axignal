@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import threading
 import time
 
 from axignal_api.admission import (
@@ -54,6 +55,60 @@ class ResearchWorker:
         if job is None:
             return False
         self.process(job)
+        return True
+
+    def run_once_leased(
+        self,
+        *,
+        timeout_seconds: int = 1,
+        worker_id: str = "research-worker",
+        lease_seconds: int = 60,
+        heartbeat_seconds: float = 20.0,
+    ) -> bool:
+        """Claim one job under a renewable lease with heartbeat and recovery.
+
+        The lease guarantees at-most-once execution: a job stays in the lease
+        hash until released terminally; if this worker dies mid-processing, the
+        lease expires and ``recover_expired_leases`` re-enqueues the job so a
+        fresh worker can resume it. The heartbeat extends the lease while the
+        job is still being processed.
+        """
+        job = self.queue.claim(
+            timeout_seconds=timeout_seconds,
+            worker_id=worker_id,
+            lease_seconds=lease_seconds,
+        )
+        if job is None:
+            return False
+
+        stop_heartbeat = threading.Event()
+
+        def heartbeat() -> None:
+            while not stop_heartbeat.wait(heartbeat_seconds):
+                try:
+                    self.queue.renew_lease(
+                        job,
+                        worker_id=worker_id,
+                        lease_seconds=lease_seconds,
+                    )
+                except Exception:
+                    LOGGER.exception(
+                        "ResearchRun %s heartbeat renewal failed",
+                        job.research_run_id,
+                    )
+
+        thread = threading.Thread(
+            target=heartbeat,
+            name=f"research-heartbeat-{job.research_run_id}",
+            daemon=True,
+        )
+        thread.start()
+        try:
+            self.process(job)
+        finally:
+            stop_heartbeat.set()
+            thread.join(timeout=heartbeat_seconds + 1)
+            self.queue.release(job, worker_id=worker_id)
         return True
 
     def process(self, job: ResearchJob) -> None:
@@ -271,6 +326,23 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="AXIGNAL persistent Research Worker")
     parser.add_argument("--once", action="store_true", help="Publish and process at most one job")
     parser.add_argument("--poll-seconds", type=float, default=2.0)
+    parser.add_argument(
+        "--worker-id",
+        default="research-worker",
+        help="Stable worker identity used for lease ownership",
+    )
+    parser.add_argument(
+        "--lease-seconds",
+        type=int,
+        default=60,
+        help="Job lease duration before another worker may recover it",
+    )
+    parser.add_argument(
+        "--heartbeat-seconds",
+        type=float,
+        default=20.0,
+        help="Lease renewal interval while a job is being processed",
+    )
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -278,13 +350,26 @@ def main() -> int:
 
     if args.once:
         publisher.publish_pending(limit=20)
-        worker.run_once(timeout_seconds=1)
+        worker.run_once_leased(
+            timeout_seconds=1,
+            worker_id=args.worker_id,
+            lease_seconds=args.lease_seconds,
+            heartbeat_seconds=args.heartbeat_seconds,
+        )
         publisher.publish_pending(limit=20)
         return 0
 
     while True:
         publisher.publish_pending(limit=20)
-        worker.run_once(timeout_seconds=max(1, int(args.poll_seconds)))
+        recovered = worker.queue.recover_expired_leases()
+        if recovered:
+            LOGGER.info("Recovered %d expired research leases", recovered)
+        worker.run_once_leased(
+            timeout_seconds=max(1, int(args.poll_seconds)),
+            worker_id=args.worker_id,
+            lease_seconds=args.lease_seconds,
+            heartbeat_seconds=args.heartbeat_seconds,
+        )
         time.sleep(max(0.1, args.poll_seconds))
 
 
