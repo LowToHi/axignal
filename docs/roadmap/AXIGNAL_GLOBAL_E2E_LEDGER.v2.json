@@ -100,7 +100,8 @@
       "name": "Ontología, Library Registry y Source Factory",
       "legacy_wp": "WP2",
       "total": 12,
-      "status": "NOT_STARTED"
+      "status": "ENGINEERING_E2E_PASS_ALL_12_TASKS",
+      "acceptance_gate": "AX_WP2_LIBRARY_SOURCE_FACTORY_PASS"
     },
     "WP3": {
       "name": "Foundational Libraries F01-F07",
@@ -703,7 +704,7 @@
       "dependencies": [
         "WP1-T01"
       ],
-      "acceptance_gate": null
+      "acceptance_gate": "AX_WP2_LIBRARY_SOURCE_FACTORY_PASS"
     },
     {
       "contract_id": "AX-GE2E-FINISH-004",
@@ -725,7 +726,7 @@
       "dependencies": [
         "WP1-T01"
       ],
-      "acceptance_gate": null
+      "acceptance_gate": "AX_WP2_LIBRARY_SOURCE_FACTORY_PASS"
     },
     {
       "contract_id": "AX-GE2E-FINISH-004",
@@ -745,7 +746,7 @@
       "blocking_reason": null,
       "unblocked_parallel_work": null,
       "dependencies": [],
-      "acceptance_gate": null
+      "acceptance_gate": "AX_WP2_LIBRARY_SOURCE_FACTORY_PASS"
     },
     {
       "contract_id": "AX-GE2E-FINISH-004",
@@ -765,7 +766,7 @@
       "blocking_reason": null,
       "unblocked_parallel_work": null,
       "dependencies": [],
-      "acceptance_gate": null
+      "acceptance_gate": "AX_WP2_LIBRARY_SOURCE_FACTORY_PASS"
     },
     {
       "contract_id": "AX-GE2E-FINISH-004",
@@ -785,7 +786,7 @@
       "blocking_reason": null,
       "unblocked_parallel_work": null,
       "dependencies": [],
-      "acceptance_gate": null
+      "acceptance_gate": "AX_WP2_LIBRARY_SOURCE_FACTORY_PASS"
     },
     {
       "contract_id": "AX-GE2E-FINISH-004",
@@ -805,7 +806,7 @@
       "blocking_reason": null,
       "unblocked_parallel_work": null,
       "dependencies": [],
-      "acceptance_gate": null
+      "acceptance_gate": "AX_WP2_LIBRARY_SOURCE_FACTORY_PASS"
     },
     {
       "contract_id": "AX-GE2E-FINISH-004",
@@ -825,7 +826,7 @@
       "blocking_reason": null,
       "unblocked_parallel_work": null,
       "dependencies": [],
-      "acceptance_gate": null
+      "acceptance_gate": "AX_WP2_LIBRARY_SOURCE_FACTORY_PASS"
     },
     {
       "contract_id": "AX-GE2E-FINISH-004",
@@ -845,7 +846,7 @@
       "blocking_reason": null,
       "unblocked_parallel_work": null,
       "dependencies": [],
-      "acceptance_gate": null
+      "acceptance_gate": "AX_WP2_LIBRARY_SOURCE_FACTORY_PASS"
     },
     {
       "contract_id": "AX-GE2E-FINISH-004",
@@ -865,7 +866,7 @@
       "blocking_reason": null,
       "unblocked_parallel_work": null,
       "dependencies": [],
-      "acceptance_gate": null
+      "acceptance_gate": "AX_WP2_LIBRARY_SOURCE_FACTORY_PASS"
     },
     {
       "contract_id": "AX-GE2E-FINISH-004",
@@ -885,7 +886,7 @@
       "blocking_reason": null,
       "unblocked_parallel_work": null,
       "dependencies": [],
-      "acceptance_gate": null
+      "acceptance_gate": "AX_WP2_LIBRARY_SOURCE_FACTORY_PASS"
     },
     {
       "contract_id": "AX-GE2E-FINISH-004",
@@ -898,14 +899,14 @@
       "shell_id": "AXIGNAL_OPPORTUNITY_INTELLIGENCE",
       "jurisdiction_id": null,
       "title": "Cerrar el E2E O01 completo en UI",
-      "status": "NOT_STARTED",
-      "evidence": null,
+      "status": "ENGINEERING_E2E_PASS",
+      "evidence": "CONFORMANCE_SUITE_PASS: 14/14 checks contra BD real (library manifests 16, no shells, primary shell placement, source states, state machines, adapter conformance, profiles, coverage disclosure, kill switch, migrations, no forbidden shells); 6 tests de la suite; API 390/390",
       "exact_head": null,
       "blocked_scope": null,
       "blocking_reason": null,
       "unblocked_parallel_work": null,
       "dependencies": [],
-      "acceptance_gate": null
+      "acceptance_gate": "AX_WP2_LIBRARY_SOURCE_FACTORY_PASS"
     },
     {
       "contract_id": "AX-GE2E-FINISH-004",
