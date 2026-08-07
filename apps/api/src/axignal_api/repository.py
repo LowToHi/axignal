@@ -270,6 +270,13 @@ class ResearchRepository:
             )
             return cursor.fetchone()
 
+    def list_sources(self) -> list[dict[str, Any]]:
+        with self._cursor(role="axignal_worker") as cursor:
+            cursor.execute(
+                "SELECT * FROM axignal_global.sources ORDER BY source_id",
+            )
+            return cursor.fetchall()
+
     def get_run_for_worker(self, *, tenant_id: UUID, run_id: UUID) -> dict[str, Any] | None:
         with self._cursor(role="axignal_worker", tenant_id=tenant_id) as cursor:
             cursor.execute(
