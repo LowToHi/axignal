@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 
+import { TransitionPursuitForm } from "@/components/opportunities/transition-pursuit-form";
+
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
@@ -38,9 +40,9 @@ export default async function PursuitsPage() {
   return (
     <main style={{ maxWidth: 960, margin: "0 auto", padding: "2rem 1rem" }}>
       <h1>Pursuits</h1>
-      <p>Tenant-scoped pursuit lifecycle over the real API.</p>
+      <p>Tenant-scoped pursuit lifecycle sobre la API real.</p>
       {pursuits.length === 0 ? (
-        <p>No pursuits yet.</p>
+        <p>No hay pursuits todavía.</p>
       ) : (
         <table style={{ borderCollapse: "collapse", width: "100%" }}>
           <thead>
@@ -48,7 +50,7 @@ export default async function PursuitsPage() {
               <th style={{ textAlign: "left", padding: "0.5rem" }}>Reference</th>
               <th style={{ textAlign: "left", padding: "0.5rem" }}>Opportunity</th>
               <th style={{ textAlign: "left", padding: "0.5rem" }}>State</th>
-              <th style={{ textAlign: "left", padding: "0.5rem" }}>Created</th>
+              <th style={{ textAlign: "left", padding: "0.5rem" }}>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -58,7 +60,7 @@ export default async function PursuitsPage() {
                 <td style={{ padding: "0.5rem" }}>{pursuit.opportunity_ref}</td>
                 <td style={{ padding: "0.5rem" }}>{pursuit.state}</td>
                 <td style={{ padding: "0.5rem" }}>
-                  {new Date(pursuit.created_at).toISOString()}
+                  <TransitionPursuitForm pursuitRef={pursuit.pursuit_ref} />
                 </td>
               </tr>
             ))}

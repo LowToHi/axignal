@@ -326,6 +326,86 @@ def list_portfolio(identity: Authenticated) -> list[dict[str, object]]:
     return _repository().list_portfolio(tenant_id=identity.tenant_id)
 
 
+
+
+# --- Pipeline opportunities (Prioridad 2: discover + open) -------------------
+
+
+class QualifyRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    decision: str = Field(pattern=r"^(BID|NO_BID|PENDING_REVIEW)$")
+    decided_by: str = Field(min_length=3, max_length=200)
+
+
+@router.get("/opportunities")
+def list_opportunities(identity: Authenticated) -> list[dict[str, object]]:
+    """Opportunities produced by the pipeline (tenant-scoped)."""
+    return _repository().list_opportunities(tenant_id=identity.tenant_id)
+
+
+@router.get("/opportunities/{opportunity_ref}")
+def get_opportunity(opportunity_ref: str, identity: Authenticated) -> dict[str, object]:
+    row = _repository().get_opportunity(
+        tenant_id=identity.tenant_id, opportunity_ref=opportunity_ref
+    )
+    if row is None:
+        raise HTTPException(status_code=404, detail="opportunity not found")
+    return row
+
+
+@router.get("/opportunities/{opportunity_ref}/claims")
+def get_opportunity_claims(
+    opportunity_ref: str, identity: Authenticated
+) -> dict[str, object]:
+    """Evidence + claims bound to the opportunity (tenant-scoped)."""
+    return _repository().get_opportunity_claims(
+        tenant_id=identity.tenant_id, opportunity_ref=opportunity_ref
+    )
+
+
+@router.post("/opportunities/{opportunity_ref}/qualify")
+def qualify_opportunity(
+    opportunity_ref: str,
+    request: QualifyRequest,
+    identity: Authenticated,
+) -> dict[str, object]:
+    """Human qualification decision (bid / no-bid / pending review)."""
+    row = _repository().get_opportunity(
+        tenant_id=identity.tenant_id, opportunity_ref=opportunity_ref
+    )
+    if row is None:
+        raise HTTPException(status_code=404, detail="opportunity not found")
+    _repository().record_qualification(
+        tenant_id=identity.tenant_id,
+        opportunity_ref=opportunity_ref,
+        decision=request.decision,
+        decided_by=request.decided_by,
+    )
+    return {
+        "opportunity_ref": opportunity_ref,
+        "qualification": request.decision,
+        "decided_by": request.decided_by,
+    }
+
+
+# --- Notices (versioned, from the O01 chain) ---------------------------------
+
+
+@router.get("/notices")
+def list_notices(identity: Authenticated) -> list[dict[str, object]]:
+    return _repository().list_notices(tenant_id=identity.tenant_id)
+
+
+@router.get("/notices/{publication_number}")
+def get_notice(publication_number: str, identity: Authenticated) -> dict[str, object]:
+    row = _repository().get_notice(
+        tenant_id=identity.tenant_id, publication_number=publication_number
+    )
+    if row is None:
+        raise HTTPException(status_code=404, detail="notice not found")
+    return row
+
 # --- Manifest states ---------------------------------------------------------
 
 

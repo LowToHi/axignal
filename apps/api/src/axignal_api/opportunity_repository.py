@@ -378,3 +378,152 @@ class OpportunityOperationsRepository(ResearchRepository):
                 (tenant_id,),
             )
             return [dict(row) for row in cursor.fetchall()]
+
+    # --- Pipeline opportunities (Prioridad 2) --------------------------------
+
+    def list_opportunities(self, *, tenant_id: UUID) -> list[dict[str, Any]]:
+        with self._cursor(role="axignal_app", tenant_id=tenant_id) as cursor:
+            cursor.execute(
+                """
+                SELECT opportunity_id, opportunity_ref, library_id,
+                       publication_number, version, content_hash, source_id,
+                       produced_by, produced_at, state, payload
+                FROM tenant_private.opportunity_objects
+                WHERE tenant_id = %s
+                ORDER BY produced_at DESC
+                """,
+                (tenant_id,),
+            )
+            return [dict(row) for row in cursor.fetchall()]
+
+    def get_opportunity(
+        self, *, tenant_id: UUID, opportunity_ref: str
+    ) -> dict[str, Any] | None:
+        with self._cursor(role="axignal_app", tenant_id=tenant_id) as cursor:
+            cursor.execute(
+                """
+                SELECT opportunity_id, opportunity_ref, library_id,
+                       publication_number, version, content_hash, source_id,
+                       produced_by, produced_at, state, payload
+                FROM tenant_private.opportunity_objects
+                WHERE tenant_id = %s AND opportunity_ref = %s
+                """,
+                (tenant_id, opportunity_ref),
+            )
+            row = cursor.fetchone()
+            return dict(row) if row else None
+
+    def record_qualification(
+        self,
+        *,
+        tenant_id: UUID,
+        opportunity_ref: str,
+        decision: str,
+        decided_by: str,
+    ) -> None:
+        with self._cursor(role="axignal_worker", tenant_id=tenant_id) as cursor:
+            cursor.execute(
+                """
+                UPDATE tenant_private.opportunity_objects
+                SET state = CASE
+                      WHEN %s = 'BID' THEN 'QUALIFIED'
+                      WHEN %s = 'NO_BID' THEN 'CLOSED'
+                      ELSE 'OPEN'
+                    END,
+                    payload = jsonb_set(
+                      COALESCE(payload, '{}'::jsonb),
+                      '{qualification}',
+                      jsonb_build_object('decision', %s::text, 'decided_by', %s::text,
+                                         'decided_at', now())
+                    )
+                WHERE tenant_id = %s AND opportunity_ref = %s
+                """,
+                (
+                    decision,
+                    decision,
+                    decision,
+                    decided_by,
+                    tenant_id,
+                    opportunity_ref,
+                ),
+            )
+
+    def get_opportunity_claims(
+        self, *, tenant_id: UUID, opportunity_ref: str
+    ) -> dict[str, Any]:
+        """Evidence + canonical claims bound to the opportunity's notices."""
+        with self._cursor(role="axignal_app", tenant_id=tenant_id) as cursor:
+            cursor.execute(
+                """
+                SELECT publication_number, current_version, current_content_hash,
+                       notice_title, buyer_name, notice_type, state
+                FROM tenant_private.opportunity_notices
+                WHERE tenant_id = %s
+                  AND publication_number IN (
+                    SELECT publication_number
+                    FROM tenant_private.opportunity_objects
+                    WHERE tenant_id = %s AND opportunity_ref = %s
+                  )
+                """,
+                (tenant_id, tenant_id, opportunity_ref),
+            )
+            notices = [dict(row) for row in cursor.fetchall()]
+            cursor.execute(
+                """
+                SELECT evidence_id, subject_id, predicate, title, relationship
+                FROM axignal_global.evidence_objects
+                WHERE subject_id LIKE 'ted_notice_%'
+                ORDER BY evidence_id
+                LIMIT 200
+                """,
+            )
+            evidence = [dict(row) for row in cursor.fetchall()]
+            cursor.execute(
+                """
+                SELECT canonical_claim_id, subject_id, predicate, statement
+                FROM axignal_global.canonical_claims
+                WHERE subject_id LIKE 'ted_notice_%'
+                ORDER BY canonical_claim_id
+                LIMIT 200
+                """,
+            )
+            claims = [dict(row) for row in cursor.fetchall()]
+            return {
+                "notices": notices,
+                "evidence": evidence,
+                "canonical_claims": claims,
+            }
+
+    # --- Notices -------------------------------------------------------------
+
+    def list_notices(self, *, tenant_id: UUID) -> list[dict[str, Any]]:
+        with self._cursor(role="axignal_app", tenant_id=tenant_id) as cursor:
+            cursor.execute(
+                """
+                SELECT notice_id, publication_number, source_id, current_version,
+                       current_content_hash, first_retrieved_at, last_retrieved_at,
+                       notice_title, buyer_name, notice_type, state
+                FROM tenant_private.opportunity_notices
+                WHERE tenant_id = %s
+                ORDER BY last_retrieved_at DESC
+                """,
+                (tenant_id,),
+            )
+            return [dict(row) for row in cursor.fetchall()]
+
+    def get_notice(
+        self, *, tenant_id: UUID, publication_number: str
+    ) -> dict[str, Any] | None:
+        with self._cursor(role="axignal_app", tenant_id=tenant_id) as cursor:
+            cursor.execute(
+                """
+                SELECT notice_id, publication_number, source_id, current_version,
+                       current_content_hash, first_retrieved_at, last_retrieved_at,
+                       notice_title, buyer_name, notice_type, state, payload
+                FROM tenant_private.opportunity_notices
+                WHERE tenant_id = %s AND publication_number = %s
+                """,
+                (tenant_id, publication_number),
+            )
+            row = cursor.fetchone()
+            return dict(row) if row else None

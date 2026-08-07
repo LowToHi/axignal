@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 
+import { WorkspaceActions } from "@/components/opportunities/workspace-actions";
+
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
@@ -38,9 +40,9 @@ export default async function WorkspacesPage() {
   return (
     <main style={{ maxWidth: 960, margin: "0 auto", padding: "2rem 1rem" }}>
       <h1>Workspaces</h1>
-      <p>Tenant-scoped opportunity workspaces over the real API.</p>
+      <p>Tenant-scoped opportunity workspaces sobre la API real.</p>
       {workspaces.length === 0 ? (
-        <p>No workspaces yet.</p>
+        <p>No hay workspaces todavía.</p>
       ) : (
         <table style={{ borderCollapse: "collapse", width: "100%" }}>
           <thead>
@@ -48,7 +50,7 @@ export default async function WorkspacesPage() {
               <th style={{ textAlign: "left", padding: "0.5rem" }}>Workspace</th>
               <th style={{ textAlign: "left", padding: "0.5rem" }}>Pursuit</th>
               <th style={{ textAlign: "left", padding: "0.5rem" }}>State</th>
-              <th style={{ textAlign: "left", padding: "0.5rem" }}>Assessment</th>
+              <th style={{ textAlign: "left", padding: "0.5rem" }}>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -58,7 +60,10 @@ export default async function WorkspacesPage() {
                 <td style={{ padding: "0.5rem" }}>{workspace.pursuit_ref}</td>
                 <td style={{ padding: "0.5rem" }}>{workspace.state}</td>
                 <td style={{ padding: "0.5rem" }}>
-                  {workspace.assessment_version}
+                  <WorkspaceActions
+                    pursuitRef={workspace.pursuit_ref}
+                    opportunityRef={workspace.opportunity_ref}
+                  />
                 </td>
               </tr>
             ))}
