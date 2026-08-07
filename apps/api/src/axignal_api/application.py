@@ -9,6 +9,7 @@ from axignal_api.identity_entitlement_routes import (
 )
 from axignal_api.identity_routes import router as identity_router
 from axignal_api.main import app
+from axignal_api.opportunity_routes import router as opportunity_router
 from axignal_api.organic_routes import router as organic_router
 from axignal_api.persistent_document_research import router as document_research_router
 from axignal_api.persistent_research import router as persistent_research_router
@@ -16,6 +17,7 @@ from axignal_api.persistent_ted_research import router as ted_research_router
 from axignal_api.pilot_health import router as pilot_health_router
 from axignal_api.research import router as prototype_research_router
 from axignal_api.retention_routes import router as retention_router
+from axignal_api.sandbox_billing_routes import router as sandbox_billing_router
 from axignal_api.seat_routes import router as seat_router
 from axignal_api.validation import router as validation_router
 
@@ -32,6 +34,8 @@ app.include_router(entitlement_router)
 app.include_router(billing_router)
 app.include_router(billing_read_router)
 app.include_router(billing_test_router)
+app.include_router(sandbox_billing_router)
+app.include_router(opportunity_router)
 app.include_router(seat_router)
 app.include_router(retention_router)
 app.include_router(human_review_router)
