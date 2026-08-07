@@ -114,7 +114,7 @@
       "name": "Opportunity Operations y Workspace Factory",
       "legacy_wp": "WP2",
       "total": 12,
-      "status": "ENGINEERING_E2E_PASS_11_OF_12_TASKS",
+      "status": "ENGINEERING_E2E_PASS_ALL_12_TASKS",
       "acceptance_gate": "AX_WP4_OPPORTUNITY_OPERATIONS_FACTORY_PASS"
     },
     "WP5": {
@@ -1381,8 +1381,8 @@
       "shell_id": null,
       "jurisdiction_id": null,
       "title": "Ejecutar smoke productivo y gate de release técnico",
-      "status": "NOT_STARTED",
-      "evidence": null,
+      "status": "ENGINEERING_E2E_PASS",
+      "evidence": "OPPORTUNITY_OPERATIONS_E2E_PASS: 3 tests, journey determinista completo (opportunity snapshot -> pursuit QUALIFIED/DECISION_REVIEW/ACTIVE -> workspace factory tenant-scoped -> clarification DRAFT con autoridad humana -> WON con outcome+learning -> rollback v2->v1 -> aislamiento cross-tenant verificado)",
       "exact_head": null,
       "blocked_scope": null,
       "blocking_reason": null,
