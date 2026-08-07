@@ -165,6 +165,7 @@ rollback_required=true
 rollback() {
   local exit_code=$?
   set +e
+  echo "deploy: ROLLBACK triggered (exit=${exit_code})" >&2
   if [[ -f "${route_backup}" ]]; then
     cp -a "${route_backup}" "${route_file}"
   else
@@ -194,7 +195,10 @@ trap rollback ERR
 
 gzip -dc "${image_archive}" | docker load >/dev/null 2>"/tmp/axignal-landing-load.err" || true
 loaded_image_id="$(docker image inspect --format '{{.Id}}' "${image_ref}")"
+echo "deploy: loaded_image_id=${loaded_image_id}"
+echo "deploy: expected_image_id=${expected_image_id}"
 test "${loaded_image_id}" = "${expected_image_id}"
+echo "deploy: loaded identity PASS"
 
 export AXIGNAL_LANDING_IMAGE="${image_ref}"
 export AXIGNAL_BUILD_SHA="${release_sha}"
@@ -203,7 +207,9 @@ export AXIGNAL_LANDING_INTAKE_DIR="${intake_dir}"
 docker compose -p axignal-landing -f "${release_dir}/compose.yaml" config -q
 docker compose -p axignal-landing -f "${release_dir}/compose.yaml" up -d --remove-orphans
 container_image_id="$(docker inspect --format '{{.Image}}' axignal-landing)"
+echo "deploy: container_image_id=${container_image_id}"
 test "${container_image_id}" = "${expected_image_id}"
+echo "deploy: container identity PASS"
 
 healthy=false
 for _ in $(seq 1 48); do
