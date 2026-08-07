@@ -3563,7 +3563,7 @@
       "title": "E2E O01-O09",
       "status": "ENGINEERING_E2E_PASS",
       "evidence": "O04-O09_LIBRARIES_PASS: 26 tests (infra: proyectos+promoters+permits; corporate: registros+ownership; macro: indicadores+revisiones+escenarios con hipótesis explícitas; trade: flujos+aranceles/embargos; energy: activos+obligaciones climáticas; innovation: patentes+assignees+legal-limit disclosures; workspaces compartidos O04-O09 tenant-scoped) + O01/O02/O03 previos; API 638/638",
-      "exact_head": "101bd8af72b8d9aebe8081ee22f038ac3d5951fc",
+      "exact_head": "91bfa0590e762454b11595bcb550c03719869b0a",
       "blocked_scope": null,
       "blocking_reason": null,
       "unblocked_parallel_work": null,
