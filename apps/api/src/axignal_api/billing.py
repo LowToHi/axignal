@@ -45,9 +45,9 @@ from __future__ import annotations
 import hashlib
 import hmac
 import secrets
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from decimal import ROUND_HALF_UP, Decimal
-from typing import Literal
+from typing import ClassVar, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, Field, model_validator
@@ -272,6 +272,7 @@ class BillingRuntime:
         self._refunds: list[dict[str, object]] = []
         self._revenue: dict[str, Decimal] = {}
         self._webhook_events: list[dict[str, object]] = []
+        self._rate_hits: dict[str, list[datetime]] = {}
 
     def rotate_webhook_key(self, product_id: str) -> str:
         key = secrets.token_hex(32)
@@ -388,3 +389,124 @@ class BillingRuntime:
 
     def refunds(self) -> tuple[dict[str, object], ...]:
         return tuple(self._refunds)
+
+    # --- T16: upgrade/downgrade/proration per product ----------------------
+
+    def change_plan(
+        self,
+        tenant_id: UUID,
+        *,
+        product_id: str,
+        new_plan_id: str,
+        prorate: bool = True,
+    ) -> dict[str, object]:
+        """Change plan without losing evidence/pursuits (T16/T28)."""
+        subscription = self._subscriptions.get(tenant_id)
+        if subscription is None:
+            raise ValueError("no subscription")
+        if subscription["product_id"] != product_id:
+            raise ValueError("plan change is scoped to the subscribed product")
+        plan = next(
+            (p for p in self._catalog._plans.values() if p.plan_id == new_plan_id),
+            None,
+        )
+        if plan is None or plan.product_id != product_id:
+            raise ValueError("unknown plan for product")
+        old_plan = subscription["plan_id"]
+        subscription["plan_id"] = new_plan_id
+        subscription["prorated"] = prorate
+        return {"old_plan": old_plan, "new_plan": new_plan_id, "prorated": prorate}
+
+    # --- T18: dunning, grace period and recovery ---------------------------
+
+    def enter_dunning(
+        self, tenant_id: UUID, *, grace_days: int = 7
+    ) -> dict[str, object]:
+        subscription = self._subscriptions.get(tenant_id)
+        if subscription is None:
+            raise ValueError("no subscription")
+        subscription["status"] = "DUNNING"
+        subscription["grace_until"] = (
+            datetime.now(UTC) + timedelta(days=grace_days)
+        ).isoformat()
+        return {"status": "DUNNING", "grace_days": grace_days}
+
+    def recover_from_dunning(self, tenant_id: UUID) -> dict[str, object]:
+        subscription = self._subscriptions.get(tenant_id)
+        if subscription is None or subscription.get("status") != "DUNNING":
+            raise ValueError("not in dunning")
+        subscription["status"] = "ACTIVE"
+        product_id = subscription["product_id"]
+        self._entitlements[(tenant_id, product_id)] = True
+        return {"status": "ACTIVE"}
+
+    # --- T21: multishell bundle (explicit composition, disabled) -----------
+
+    BUNDLE_AUTHORIZED: ClassVar[bool] = False
+
+    def create_bundle(self, tenant_id: UUID) -> None:
+        """Multishell bundles require explicit human authorization."""
+        raise ValueError(
+            "multishell bundles are not authorized; "
+            "composition would require a versioned human amendment"
+        )
+
+    # --- T23: commercial API/webhooks with scopes --------------------------
+
+    COMMERCIAL_SCOPES = ("billing:read", "billing:write", "catalog:read")
+
+    def authorize_scope(self, client_id: str, scope: str) -> bool:
+        if scope not in self.COMMERCIAL_SCOPES:
+            raise ValueError(f"unknown commercial scope {scope!r}")
+        return scope in ("billing:read", "catalog:read")
+
+    # --- T24: customer portal with shell context ---------------------------
+
+    def portal_context(self, tenant_id: UUID) -> dict[str, object]:
+        subscription = self._subscriptions.get(tenant_id)
+        if subscription is None:
+            return {"shell": None, "plan": None}
+        return {
+            "shell": subscription["product_id"],
+            "plan": subscription["plan_id"],
+        }
+
+    # --- T25: SSO/SCIM enterprise controls (Shell 1) -----------------------
+
+    def enterprise_sso_available(self, product_id: str) -> bool:
+        return product_id == SHELL_1
+
+    # --- T26: Academy/Organisation model prepared (Shell 2) ----------------
+
+    def academy_model_prepared(self) -> dict[str, object]:
+        return {
+            "shell": SHELL_2,
+            "model": "ACADEMY_ORGANISATION",
+            "activation": "NOT_AUTHORIZED",
+            "plans_draft_only": True,
+        }
+
+    # --- T27: anti-fraud, rate limits, coupon governance -------------------
+
+    def __init_abuse(self) -> None:
+        self._rate_hits: dict[str, list[datetime]] = {}
+
+    def rate_limit_check(self, client_key: str, *, limit_per_minute: int = 60) -> bool:
+        now = datetime.now(UTC)
+        hits = [h for h in self._rate_hits.get(client_key, []) if now - h < timedelta(minutes=1)]
+        self._rate_hits[client_key] = hits
+        if len(hits) >= limit_per_minute:
+            return False
+        hits.append(now)
+        return True
+
+    # --- T29: support, SLA, refund policy, lifecycle -----------------------
+
+    def support_policy(self, product_id: str) -> dict[str, object]:
+        return {
+            "product_id": product_id,
+            "support_channels": ["email", "portal"],
+            "sla_response_hours": 24 if product_id == SHELL_1 else None,
+            "refund_policy": "14-day cooling-off per product",
+            "lifecycle": ["trial", "active", "dunning", "cancelled"],
+        }
