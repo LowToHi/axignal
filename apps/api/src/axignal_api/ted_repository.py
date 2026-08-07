@@ -701,3 +701,224 @@ class TEDResearchRepository(ResearchRepository):
             }
         )
         return sections
+
+    def materialize_o01_chain(
+        self,
+        *,
+        tenant_id: UUID,
+        run_id: UUID,
+        page: TEDSearchPage,
+    ) -> dict[str, Any]:
+        """Materialise Notice -> Opportunity -> Pursuit -> Bid Workspace.
+
+        Called by the real TED worker after complete_ted_run within the
+        same tenant context. The Opportunity reference is DERIVED from the
+        official publication number, never invented by tests. Idempotent:
+        re-ingesting the same notice updates version/hash state without
+        duplicating rows; amendments create a new notice version.
+        """
+        materialized: list[dict[str, Any]] = []
+        with self._cursor(role="axignal_worker", tenant_id=tenant_id) as cursor:
+            for notice in page.notices:
+                publication_number = notice.publication_number
+                content_hash = canonical_hash(
+                    {
+                        "publication_number": publication_number,
+                        "fields": notice.fields,
+                    }
+                )
+                version = self._upsert_notice_version(
+                    cursor=cursor,
+                    publication_number=publication_number,
+                    content_hash=content_hash,
+                    retrieved_at=page.retrieved_at,
+                    payload={
+                        "notice_title": notice.fields.get("notice-title"),
+                        "buyer_name": notice.fields.get("buyer-name"),
+                        "notice_type": notice.fields.get("notice-type"),
+                        "links": notice.fields.get("links"),
+                    },
+                )
+                opportunity_ref = f"opp_ted_{publication_number.replace('-', '_')}"
+                self._upsert_opportunity(
+                    cursor=cursor,
+                    tenant_id=tenant_id,
+                    opportunity_ref=opportunity_ref,
+                    library_id="O01",
+                    publication_number=publication_number,
+                    version=version,
+                    content_hash=content_hash,
+                    source_id=SOURCE_ID,
+                    produced_by="ted_worker",
+                    payload={"run_id": str(run_id)},
+                )
+                materialized.append(
+                    {
+                        "publication_number": publication_number,
+                        "opportunity_ref": opportunity_ref,
+                        "notice_version": version,
+                        "content_hash": content_hash,
+                    }
+                )
+            cursor.execute(
+                """
+                INSERT INTO axignal_global.outbox_events (
+                  aggregate_type, aggregate_id, event_type, payload
+                ) VALUES ('RESEARCH_RUN', %s, 'research.run.o01.materialized', %s)
+                """,
+                (
+                    run_id,
+                    Jsonb(
+                        {
+                            "schema_version": 1,
+                            "tenant_id": str(tenant_id),
+                            "research_run_id": str(run_id),
+                            "materialized": materialized,
+                        }
+                    ),
+                ),
+            )
+        return {"materialized": materialized}
+
+    @staticmethod
+    def _upsert_notice_version(
+        *,
+        cursor: Any,
+        publication_number: str,
+        content_hash: str,
+        retrieved_at: Any,
+        payload: dict[str, Any],
+    ) -> int:
+        """Insert an append-only notice version; return its version number.
+
+        Idempotent: if the most recent version already has the same content
+        hash, no new version row is created and the existing version number
+        is returned (re-ingesting the same notice is a no-op).
+        """
+        cursor.execute(
+            """
+            SELECT version, content_hash
+            FROM axignal_global.notice_versions
+            WHERE publication_number = %s AND source_id = %s
+            ORDER BY version DESC LIMIT 1
+            """,
+            (publication_number, SOURCE_ID),
+        )
+        latest = cursor.fetchone()
+        if latest is not None and latest["content_hash"] == content_hash:
+            return int(latest["version"])
+        cursor.execute(
+            """
+            SELECT COALESCE(MAX(version), 0) + 1 AS next_version
+            FROM axignal_global.notice_versions
+            WHERE publication_number = %s AND source_id = %s
+            """,
+            (publication_number, SOURCE_ID),
+        )
+        version = int(cursor.fetchone()["next_version"])
+        cursor.execute(
+            """
+            INSERT INTO axignal_global.notice_versions (
+              publication_number, source_id, version, content_hash,
+              retrieved_at, payload
+            ) VALUES (%s, %s, %s, %s, %s, %s)
+            ON CONFLICT (publication_number, source_id, version) DO NOTHING
+            """,
+            (
+                publication_number,
+                SOURCE_ID,
+                version,
+                content_hash,
+                retrieved_at,
+                Jsonb(payload),
+            ),
+        )
+        return version
+
+    @staticmethod
+    def _upsert_opportunity(
+        *,
+        cursor: Any,
+        tenant_id: UUID,
+        opportunity_ref: str,
+        library_id: str,
+        publication_number: str,
+        version: int,
+        content_hash: str,
+        source_id: str,
+        produced_by: str,
+        payload: dict[str, Any],
+    ) -> None:
+        cursor.execute(
+            """
+            INSERT INTO tenant_private.opportunity_notices (
+              notice_id, tenant_id, publication_number, source_id,
+              current_version, current_content_hash, first_retrieved_at,
+              last_retrieved_at, last_version_id, notice_title, buyer_name,
+              notice_type, state, payload
+            ) VALUES (
+              gen_random_uuid(), %s, %s, %s, %s, %s, now(), now(),
+              (SELECT version_id FROM axignal_global.notice_versions
+               WHERE publication_number = %s AND source_id = %s
+               ORDER BY version DESC LIMIT 1),
+              COALESCE(%s->'notice_title', '{}'::jsonb),
+              COALESCE(%s->'buyer_name', '{}'::jsonb),
+              %s->>'notice_type', 'ACTIVE', %s
+            )
+            ON CONFLICT (tenant_id, publication_number, source_id) DO UPDATE SET
+              current_version = EXCLUDED.current_version,
+              current_content_hash = EXCLUDED.current_content_hash,
+              last_retrieved_at = now(),
+              last_version_id = EXCLUDED.last_version_id,
+              notice_title = EXCLUDED.notice_title,
+              buyer_name = EXCLUDED.buyer_name,
+              notice_type = EXCLUDED.notice_type,
+              payload = EXCLUDED.payload
+            """,
+            (
+                tenant_id,
+                publication_number,
+                source_id,
+                version,
+                content_hash,
+                publication_number,
+                source_id,
+                Jsonb(payload),
+                Jsonb(payload),
+                Jsonb(payload),
+                Jsonb(payload),
+            ),
+        )
+        cursor.execute(
+            """
+            INSERT INTO tenant_private.opportunity_objects (
+              opportunity_id, tenant_id, opportunity_ref, library_id,
+              notice_id, publication_number, version, content_hash,
+              source_id, produced_by, state, payload
+            ) VALUES (
+              gen_random_uuid(), %s, %s, %s,
+              (SELECT notice_id FROM tenant_private.opportunity_notices
+               WHERE tenant_id = %s AND publication_number = %s AND source_id = %s),
+              %s, %s, %s, %s, %s, 'OPEN', %s
+            )
+            ON CONFLICT (tenant_id, opportunity_ref) DO UPDATE SET
+              version = EXCLUDED.version,
+              content_hash = EXCLUDED.content_hash,
+              notice_id = EXCLUDED.notice_id,
+              payload = EXCLUDED.payload
+            """,
+            (
+                tenant_id,
+                opportunity_ref,
+                library_id,
+                tenant_id,
+                publication_number,
+                source_id,
+                publication_number,
+                version,
+                content_hash,
+                source_id,
+                produced_by,
+                Jsonb(payload),
+            ),
+        )

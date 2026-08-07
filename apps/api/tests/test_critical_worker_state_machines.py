@@ -64,6 +64,10 @@ class ResearchRepositoryFake:
     def complete_ted_run(self, **kwargs: object) -> None:
         self.ted_completion = kwargs
 
+    def materialize_o01_chain(self, **kwargs: object) -> dict[str, object]:
+        self.materialization = kwargs
+        return {"materialized": []}
+
 
 class ProposalRepositoryFake:
     def __init__(

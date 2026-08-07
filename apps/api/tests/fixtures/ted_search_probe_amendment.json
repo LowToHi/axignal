@@ -1,0 +1,20 @@
+{
+  "totalNoticeCount": 1,
+  "notices": [
+    {
+      "publication-number": "123456-2026",
+      "notice-title": {
+        "eng": "Cybersecurity monitoring services — AMENDED evaluation criteria",
+        "spa": "Servicios de monitorización de ciberseguridad — criterios modificados"
+      },
+      "buyer-name": {
+        "eng": "Synthetic Regional Digital Agency",
+        "spa": "Agencia Digital Regional Sintética"
+      },
+      "notice-type": "cn-standard",
+      "links": {
+        "xml": "https://ted.europa.eu/en/notice/123456-2026/xml"
+      }
+    }
+  ]
+}

@@ -268,6 +268,13 @@ class ResearchWorker:
             candidates=candidates,
             decisions=decisions,
         )
+        # Prioridad 1: materialise the continuous O01 chain (Notice ->
+        # Opportunity) from the pipeline, never from tests.
+        self.repository.materialize_o01_chain(
+            tenant_id=job.tenant_id,
+            run_id=job.research_run_id,
+            page=page,
+        )
 
     @staticmethod
     def _source_block_reason(
