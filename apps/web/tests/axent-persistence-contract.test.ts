@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { resolve, sep } from "node:path";
 import test from "node:test";
 
 const workingDirectory = process.cwd();
-const webRoot = workingDirectory.endsWith("/apps/web")
+const webRoot = workingDirectory.endsWith(`${sep}apps${sep}web`)
   ? workingDirectory
   : resolve(workingDirectory, "apps/web");
 
