@@ -1001,7 +1001,7 @@
       "title": "Completar renovación e invoice paid",
       "status": "ENGINEERING_E2E_PASS",
       "evidence": "F05_LANGUAGES_PASS: 15 tests, 6 idiomas de producto (en/es/fr/de/pt/it), original preservado, traducción con provenance+confidence, transliteración, human override con precedencia sin borrar traducción, glosarios con aprobación humana (actor+tiempo), equivalencia semántica",
-      "exact_head": null,
+      "exact_head": "57f3f7fcfaff819f8b5ca685fbce9fff9fa2b27a",
       "blocked_scope": null,
       "blocking_reason": null,
       "unblocked_parallel_work": null,
