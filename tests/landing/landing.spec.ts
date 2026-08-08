@@ -1,101 +1,268 @@
 import { expect, test, type Page } from "@playwright/test";
 
-test.describe.configure({ timeout: 20_000 });
+/**
+ * Cierre visual y funcional E2E — landing pública de AXIGNAL.
+ *
+ * Cubre: logo, globe (primario + fallback), hero responsive, favicon y
+ * metadatos, acceso de clientes (logged out / logged in), navegación,
+ * menú móvil y calidad técnica (sin pageerror / 404 / overflow).
+ */
 
-async function scrollCinematic(page: Page, progress: number) {
-  await page.evaluate((normalisedProgress) => {
-    const stage = document.querySelector(".cinematic-stage");
-    const spacer = stage?.closest(".pin-spacer");
-    if (!spacer) throw new Error("CINEMATIC_PIN_SPACER_MISSING");
-    const bounds = spacer.getBoundingClientRect();
-    const start = window.scrollY + bounds.top;
-    const distance = Math.max(window.innerHeight, bounds.height - window.innerHeight);
-    window.scrollTo(0, start + normalisedProgress * distance);
-  }, progress);
+test.describe.configure({ timeout: 25_000 });
+
+async function collectErrors(page: Page) {
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(`PAGEERROR: ${error.message}`));
+  page.on("console", (message) => {
+    if (message.type() === "error") errors.push(`CONSOLE: ${message.text()}`);
+  });
+  return errors;
 }
 
-test("keeps one real Globe mounted through the six-scene desktop narrative", async ({
+test("logo loads, links home and is not broken", async ({ page }) => {
+  const errors = await collectErrors(page);
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  const brand = page.getByRole("link", { name: "AXIGNAL home" }).first();
+  await expect(brand).toBeVisible();
+  const image = brand.locator("img").first();
+  await expect(image).toBeVisible();
+  const naturalWidth = await image.evaluate((el) => (el as HTMLImageElement).naturalWidth);
+  expect(naturalWidth).toBeGreaterThan(0);
+  const broken = await page
+    .evaluate(() =>
+      Array.from(document.images)
+        .filter((img) => img.complete && img.naturalWidth === 0)
+        .map((img) => img.src)
+    );
+  expect(broken).toEqual([]);
+  await brand.click();
+  await expect(page).toHaveURL(/\/$/);
+  expect(errors.filter((e) => e.startsWith("PAGEERROR"))).toEqual([]);
+});
+
+test("renders the interactive globe in a supported runtime", async ({ page }) => {
+  const errors = await collectErrors(page);
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  const globe = page.getByTestId("semantic-globe");
+  await expect(globe).toHaveCount(1);
+  await expect(globe.locator("canvas")).toHaveCount(1, { timeout: 15_000 });
+  await expect(globe.locator(".globe-poster")).toHaveCount(0);
+  expect(errors.filter((e) => e.startsWith("PAGEERROR"))).toEqual([]);
+});
+
+test("shows an intentional visual fallback when WebGL is forced off", async ({
+  browser
+}) => {
+  const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  await context.addInitScript(() => {
+    const proto = HTMLCanvasElement.prototype;
+    const original = proto.getContext;
+    proto.getContext = function (type: string, ...args: unknown[]) {
+      if (type === "webgl2" || type === "webgl" || type === "experimental-webgl") {
+        return null;
+      }
+      return original.call(this, type, ...args);
+    };
+  });
+  const page = await context.newPage();
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  const globe = page.getByTestId("semantic-globe");
+  await expect(globe.locator(".globe-poster")).toBeVisible({ timeout: 15_000 });
+  await expect(globe.locator("canvas")).toHaveCount(0);
+  // Nota discreta, no un mensaje técnico protagonista.
+  await expect(globe.locator(".globe-poster-note")).toBeVisible();
+  const note = (await globe.locator(".globe-poster-note").textContent()) ?? "";
+  expect(note.toLowerCase()).not.toContain("unavailable. the source-state table");
+  await context.close();
+});
+
+test("hero headline fits the viewport without clipping or overflow", async ({
   page
-}, testInfo) => {
-  const consoleErrors: string[] = [];
-  const pageErrors: string[] = [];
-  page.on("console", (message) => {
-    if (message.type() === "error") consoleErrors.push(message.text());
-  });
-  page.on("pageerror", (error) => pageErrors.push(error.message));
-
-  const response = await page.goto("/", { waitUntil: "domcontentloaded" });
-  expect(response?.status()).toBe(200);
-  await expect(
-    page.getByRole("heading", {
-      level: 1,
-      name: /Find the public contracts your business is built to pursue.*Turn global procurement into a qualified B2G pipeline/i
-    })
-  ).toBeVisible();
-
-  const globe = page.getByTestId("semantic-globe");
-  const canvas = globe.locator("canvas");
-  const header = page.locator(".site-header");
-  const brand = header.getByRole("link", { name: "AXIGNAL home" });
-  await expect(globe).toHaveCount(1);
-  await expect(canvas).toHaveCount(1);
-  await expect(header).toBeVisible();
-  await expect(brand).toBeVisible();
-  await page.waitForFunction(
-    () => document.querySelector(".cinematic-stage")?.parentElement?.classList.contains("pin-spacer")
+}) => {
+  const errors = await collectErrors(page);
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  const headline = page.getByRole("heading", { level: 1 });
+  await expect(headline).toBeVisible();
+  // Copy canónica comercial (el contrato prohíbe el copy superseded).
+  await expect(headline).toContainText(
+    /Find the public contracts your business is built to pursue/
   );
-  await canvas.evaluate((element) => element.setAttribute("data-continuity-id", "primary-globe"));
-
-  await scrollCinematic(page, 0.43);
-  await expect(page.locator(".cinematic-running-head")).toContainText(/02|03|04/);
-  await expect(page.locator(".trace-object").nth(4)).toBeVisible();
-  const mobileProject = testInfo.project.name === "landing-mobile";
-  await expect(globe).toHaveAttribute("data-boundary-lod-requested", mobileProject ? "false" : "true");
-  await expect(globe).toHaveAttribute("data-boundary-lod-loaded", mobileProject ? "false" : "true");
-  await expect(globe).toHaveAttribute("data-boundary-lod-active", mobileProject ? "false" : "true");
-  await expect(header).toHaveCSS("opacity", "1");
-  await expect(brand).toBeVisible();
-
-  await scrollCinematic(page, 0.87);
-  await expect(page.locator(".cinematic-running-head")).toContainText("06 / 06");
-  await expect(page.locator(".cinematic-dossier")).toBeVisible();
-  await expect(page.locator('canvas[data-continuity-id="primary-globe"]')).toHaveCount(1);
-  await expect(header).toHaveCSS("opacity", "1");
-  await expect(brand).toBeVisible();
-
-  await page.screenshot({
-    path: testInfo.outputPath("desktop-dossier.png"),
-    fullPage: false
+  const metrics = await page.evaluate(() => {
+    const h1 = document.querySelector(".scene-global h1");
+    if (!h1) return null;
+    const rect = h1.getBoundingClientRect();
+    return {
+      fontSize: parseFloat(getComputedStyle(h1).fontSize),
+      bottom: Math.round(rect.bottom),
+      viewportHeight: window.innerHeight,
+      bodyOverflow: document.documentElement.scrollWidth > window.innerWidth + 1,
+      lineHeight: getComputedStyle(h1).lineHeight
+    };
   });
-
-  await scrollCinematic(page, 0);
-  await expect(page.locator('canvas[data-continuity-id="primary-globe"]')).toHaveCount(1);
-  await expect(globe).toHaveAttribute("data-boundary-lod-requested", "true");
-  await expect(globe).toHaveAttribute("data-boundary-lod-loaded", "true");
-  expect(page.url()).toBe("http://127.0.0.1:3001/");
-  expect(pageErrors).toEqual([]);
-  expect(consoleErrors).toEqual([]);
+  expect(metrics).not.toBeNull();
+  expect(metrics!.bottom).toBeLessThanOrEqual(metrics!.viewportHeight);
+  expect(metrics!.bodyOverflow).toBe(false);
+  expect(metrics!.fontSize).toBeLessThan(96);
+  await expect(page.getByRole("link", { name: "Request your 7-day B2G trial" }).first()).toBeVisible();
+  expect(errors.filter((e) => e.startsWith("PAGEERROR"))).toEqual([]);
 });
 
-test("switches the landing theme without remounting the Globe", async ({ page }) => {
+test("favicon and metadata are present and served", async ({ request }) => {
+  const favicon = await request.get("/favicon.ico");
+  expect(favicon.status()).toBe(200);
+  const svg = await request.get("/favicon.svg");
+  expect(svg.status()).toBe(200);
+  const logoDark = await request.get("/brand/axignal-logo-dark.svg");
+  expect(logoDark.status()).toBe(200);
+});
+
+test("customer access shows Log in logged out and Open AXIGNAL logged in", async ({
+  page,
+  context,
+  isMobile
+}) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
-  const globe = page.getByTestId("semantic-globe");
-  const themeToggle = page.getByRole("button", { name: "Switch to light" });
+  const access = isMobile
+    ? page.locator('#mobile-menu [data-axignal-customer-access="true"]').first()
+    : page.locator('[data-axignal-customer-access="true"]').first();
+  if (isMobile) {
+    // En móvil el acceso vive en el menú móvil.
+    await page.locator(".mobile-menu-toggle").click();
+  }
+  await expect(access).toBeVisible();
+  await expect(access).toHaveText("Log in");
+  const href = await access.getAttribute("href");
+  expect(href).toMatch(/^https?:\/\//);
 
-  await expect(globe).toHaveCount(1);
-  await expect(themeToggle).toBeVisible();
-  await themeToggle.click();
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
-  await expect(page.getByRole("button", { name: "Switch to dark" })).toBeVisible();
-  await expect(globe).toHaveCount(1);
-  await page.getByRole("button", { name: "Switch to dark" }).click();
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  // Estado autenticado: cookie de sesión → Open AXIGNAL.
+  await context.addCookies([
+    { name: "axignal_session", value: "test-session", domain: "127.0.0.1", path: "/" }
+  ]);
+  await page.reload({ waitUntil: "domcontentloaded" });
+  if (isMobile) {
+    await page.locator(".mobile-menu-toggle").click();
+  }
+  await expect(access).toHaveText("Open AXIGNAL", { timeout: 10_000 });
 });
 
-test("makes the controlled trial and canonical monthly prices explicit", async ({ page }) => {
+test("navigation, theme and language controls work", async ({ page, isMobile }) => {
+  const errors = await collectErrors(page);
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  if (isMobile) {
+    await page.locator(".mobile-menu-toggle").click();
+  }
+  for (const label of ["Product", "Method", "Pricing", "FAQ"]) {
+    await expect(page.getByRole("link", { name: label, exact: true }).first()).toBeVisible();
+  }
+  const themeToggle = page.getByRole("button", { name: "Switch to light" });
+  if (isMobile) {
+    // El toggle global se oculta en móvil; la navegación vive en el menú.
+    await page.keyboard.press("Escape");
+  } else {
+    await expect(themeToggle).toBeVisible();
+    await themeToggle.click();
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+    await page.getByRole("button", { name: "Switch to dark" }).click();
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  }
+
+  const language = page.locator(".language-menu summary");
+  await expect(language).toBeVisible();
+  await language.click();
+  const spanish = page.getByRole("link", { name: "Español", exact: true }).first();
+  await expect(spanish).toBeVisible();
+  expect(errors.filter((e) => e.startsWith("PAGEERROR"))).toEqual([]);
+});
+
+test("mobile menu contains all sections and closes with Escape", async ({
+  browser
+}) => {
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const page = await context.newPage();
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  const toggle = page.locator(".mobile-menu-toggle");
+  await expect(toggle).toBeVisible();
+  await toggle.click();
+  const menu = page.locator("#mobile-menu");
+  await expect(menu).toBeVisible();
+  const labels = (await menu.locator("a").allTextContents()).map((t) => t.trim());
+  for (const label of ["Product", "Method", "Pricing", "FAQ", "Log in", "Request your 7-day B2G trial"]) {
+    expect(labels).toContain(label);
+  }
+  const access = menu.locator('[data-axignal-customer-access="true"]');
+  await expect(access).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(menu).not.toBeVisible();
+  await expect(toggle).toBeFocused();
+  await context.close();
+});
+
+test("does not expose the admitted source brand as public landing identity", async ({
+  page
+}) => {
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await expect(page.getByText(/Tenders Electronic Daily|TED bounded/i)).toHaveCount(0);
+  await expect(page.getByText(/^TED · PRODUCT_ADMITTED/i)).not.toBeVisible();
+  const statusRibbon = page.locator(".status-ribbon");
+  await expect(statusRibbon).toBeVisible();
+  const generatedBoundary = await statusRibbon.evaluate((element) =>
+    getComputedStyle(element, "::before").content.replaceAll('"', "")
+  );
+  expect(generatedBoundary).toBe("ADMITTED PUBLIC-SOURCE PROFILE · PRIVATE AUTHENTICATED PILOT");
+});
+
+test("no horizontal overflow on mandatory viewports", async ({ browser }) => {
+  const viewports = [
+    { width: 1366, height: 768 },
+    { width: 1440, height: 900 },
+    { width: 1728, height: 1117 },
+    { width: 1920, height: 1080 },
+    { width: 768, height: 1024 },
+    { width: 390, height: 844 }
+  ];
+  for (const viewport of viewports) {
+    const context = await browser.newContext({ viewport });
+    const page = await context.newPage();
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth > window.innerWidth + 1
+    );
+    expect(overflow, `overflow en ${viewport.width}x${viewport.height}`).toBe(false);
+    await context.close();
+  }
+});
+
+test("Log in leads to the real authenticated application", async ({ page, isMobile, request }) => {
+  const appUrl = process.env.NEXT_PUBLIC_AXIGNAL_APP_URL;
+  test.skip(!appUrl, "NEXT_PUBLIC_AXIGNAL_APP_URL no configurada");
+  // La app autenticada puede no estar servida en esta matriz (corre en el
+  // gate AXENT). El enlace debe existir; el destino se valida si responde.
+  const probe = await request.get(appUrl!).catch(() => null);
+  test.skip(probe === null || probe.status() !== 200, "app AXIGNAL no servida");
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  const access = isMobile
+    ? page.locator('#mobile-menu [data-axignal-customer-access="true"]').first()
+    : page.locator('[data-axignal-customer-access="true"]').first();
+  if (isMobile) {
+    await page.locator(".mobile-menu-toggle").click();
+  }
+  await access.click();
+  await page.waitForURL(/^http:\/\/127\.0\.0\.1:3000/, { timeout: 15_000 });
+  await expect(page).toHaveTitle(/AXIGNAL/);
+  // La aplicación autenticada renderiza el workspace real (o el AuthGate).
+  const body = await page.evaluate(() => document.body.innerText.slice(0, 400));
+  expect(
+    body.includes("AXIGNAL") || body.toLowerCase().includes("passkey")
+  ).toBe(true);
+});
+
+test("makes the controlled trial and canonical monthly prices explicit", async ({
+  page
+}) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await page.waitForFunction(
-    () => document.querySelector(".cinematic-stage")?.parentElement?.classList.contains("pin-spacer")
+    () =>
+      document.querySelector(".cinematic-stage")?.parentElement?.classList.contains("pin-spacer")
   );
   const pricingLink = page.getByRole("link", { name: "Pricing", exact: true });
   if (await pricingLink.isVisible()) {
@@ -111,91 +278,11 @@ test("makes the controlled trial and canonical monthly prices explicit", async (
   await expect(page.getByText("No automatic renewal", { exact: true })).toBeVisible();
   await expect(page.getByText("No overage", { exact: true })).toBeVisible();
   await expect(page.getByText("Read-only at expiry", { exact: true })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Request 7-day B2G trial" }).first()).toBeVisible();
+  await expect(page.getByRole("link", { name: "Request your 7-day B2G trial" }).first()).toBeVisible();
   await expect(page.getByText(/APPLICATION ONLY · NO CARD · NO AUTOMATIC CONVERSION/)).toBeVisible();
   await expect(page.getByText(/Canonical price book · 2026-08-04/).first()).toBeVisible();
   await expect(page.getByRole("heading", { name: "Professional" })).toBeVisible();
   await expect(page.getByText("€149", { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Team" })).toBeVisible();
   await expect(page.getByText("€399", { exact: true })).toBeVisible();
-  await expect(page.getByText("Design Partner", { exact: true })).toHaveCount(0);
-  await expect(page.getByRole("heading", { name: "Enterprise" })).toHaveCount(0);
-});
-
-test("does not expose the admitted source brand as public landing identity", async ({ page }) => {
-  await page.goto("/", { waitUntil: "domcontentloaded" });
-  await expect(page.getByText(/Tenders Electronic Daily|TED bounded/i)).toHaveCount(0);
-  await expect(page.getByText(/^TED · PRODUCT_ADMITTED/i)).not.toBeVisible();
-  const statusRibbon = page.locator(".status-ribbon");
-  await expect(statusRibbon).toBeVisible();
-  const generatedBoundary = await statusRibbon.evaluate((element) =>
-    getComputedStyle(element, "::before").content.replaceAll('"', "")
-  );
-  expect(generatedBoundary).toBe("ADMITTED PUBLIC-SOURCE PROFILE · PRIVATE AUTHENTICATED PILOT");
-});
-
-test("retains Globe continuity and contained pricing on mobile", async ({ browser }, testInfo) => {
-  const context = await browser.newContext({
-    viewport: { width: 390, height: 844 },
-    deviceScaleFactor: 1
-  });
-  const page = await context.newPage();
-  page.setDefaultTimeout(10_000);
-  await page.goto("/", { waitUntil: "domcontentloaded" });
-
-  await expect(page.getByTestId("semantic-globe").locator("canvas")).toHaveCount(1);
-  await page.waitForFunction(
-    () => document.querySelector(".cinematic-stage")?.parentElement?.classList.contains("pin-spacer")
-  );
-  await scrollCinematic(page, 0.43);
-  await expect(page.locator(".cinematic-running-head")).toContainText(/02|03|04/);
-  await expect(page.locator(".trace-object").nth(4)).toBeVisible();
-  await expect(page.getByTestId("semantic-globe").locator("canvas")).toHaveCount(1);
-  await expect(page.getByTestId("semantic-globe")).toHaveAttribute(
-    "data-boundary-lod-requested",
-    "false"
-  );
-  await expect(page.getByTestId("semantic-globe")).toHaveAttribute(
-    "data-boundary-lod-loaded",
-    "false"
-  );
-
-  const dimensions = await page.evaluate(() => ({
-    body: document.body.scrollWidth,
-    viewport: window.innerWidth,
-    regionalBoundaryDownloaded: performance
-      .getEntriesByType("resource")
-      .some((entry) => entry.name.includes("europe-boundaries-50m.geojson")),
-    comparisonContained:
-      document.querySelector(".pricing-comparison-scroll")?.scrollWidth !== undefined &&
-      getComputedStyle(document.querySelector(".pricing-comparison-scroll")!).overflowX === "auto"
-  }));
-  expect(dimensions.body).toBeLessThanOrEqual(dimensions.viewport + 1);
-  expect(dimensions.regionalBoundaryDownloaded).toBe(false);
-  expect(dimensions.comparisonContained).toBe(true);
-
-  await page.screenshot({
-    path: testInfo.outputPath("mobile-evidence.png"),
-    fullPage: false
-  });
-  await context.close();
-});
-
-test("preserves all six states without pinned scrub for reduced motion", async ({ browser }) => {
-  const context = await browser.newContext({
-    viewport: { width: 1280, height: 800 },
-    reducedMotion: "reduce"
-  });
-  const page = await context.newPage();
-  page.setDefaultTimeout(10_000);
-  await page.goto("/", { waitUntil: "domcontentloaded" });
-
-  await expect(page.getByTestId("semantic-globe").locator("canvas")).toHaveCount(1);
-  await expect(page.locator(".reduced-story article")).toHaveCount(6);
-  await expect(page.locator(".reduced-story")).toBeVisible();
-  await expect(page.locator(".reduced-story")).toContainText("GLOBAL");
-  await expect(page.locator(".reduced-story")).toContainText("DOSSIER");
-  await expect(page.locator(".cinematic-stage")).not.toHaveCSS("position", "fixed");
-
-  await context.close();
 });

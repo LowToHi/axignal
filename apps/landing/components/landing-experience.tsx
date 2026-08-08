@@ -14,6 +14,7 @@ import {
 } from "@/lib/i18n";
 import { pricingCopy, pricingRowKeys } from "@/lib/pricing-data";
 import { productProfileCopy, tedBoundedProductProfile } from "@/lib/product-profile";
+import { clientAppUrl } from "@/lib/client-access";
 import { ImpactCalculator } from "./impact-calculator";
 import { PilotAccessForm } from "./pilot-access-form";
 import { SemanticGlobe } from "./semantic-globe";
@@ -21,6 +22,7 @@ import { SemanticGlobe } from "./semantic-globe";
 type LandingExperienceProps = {
   locale: Locale;
   messages: LandingMessages;
+  hasSession?: boolean;
 };
 
 type CtaOrigin = "header" | "hero" | "pricing" | "footer";
@@ -119,7 +121,7 @@ function ThemeToggle({
   );
 }
 
-export function LandingExperience({ locale, messages: m }: LandingExperienceProps) {
+export function LandingExperience({ locale, messages: m, hasSession = false }: LandingExperienceProps) {
   const root = useRef<HTMLDivElement>(null);
   const cinematic = useRef<HTMLElement>(null);
   const cinematicStage = useRef<HTMLDivElement>(null);
@@ -128,9 +130,28 @@ export function LandingExperience({ locale, messages: m }: LandingExperienceProp
   const [activeScene, setActiveScene] = useState(0);
   const [selectedPlan, setSelectedPlan] = useState("Design Partner");
   const [theme, setTheme] = useState<LandingTheme>("dark");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const mobileMenuButton = useRef<HTMLButtonElement>(null);
   const reducedMotion = useReducedMotion();
   const profileCopy = productProfileCopy[locale];
   const plans = pricingCopy[locale];
+  const appUrl = clientAppUrl();
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMobileMenuOpen(false);
+        mobileMenuButton.current?.focus();
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    document.documentElement.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.documentElement.style.overflow = "";
+    };
+  }, [mobileMenuOpen]);
 
   useEffect(() => {
     trackLandingEvent("landing_view", { locale, landing_variant: "b2g_v1" });
@@ -502,11 +523,73 @@ export function LandingExperience({ locale, messages: m }: LandingExperienceProp
         <div className="header-actions">
           <ThemeToggle locale={locale} theme={theme} onToggle={toggleTheme} />
           <LanguageMenu locale={locale} label={m.nav.language} />
+          {appUrl ? (
+            <a
+              className="button button-ghost button-small header-login"
+              href={appUrl}
+              data-axignal-customer-access="true"
+            >
+              {hasSession ? m.nav.openApp : m.nav.login}
+            </a>
+          ) : null}
           <a className="button button-small" href="#access" onClick={() => handleCta("header")}>
             {m.nav.cta}
           </a>
+          <button
+            ref={mobileMenuButton}
+            type="button"
+            className="mobile-menu-toggle"
+            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-menu"
+            onClick={() => setMobileMenuOpen((open) => !open)}
+          >
+            <span aria-hidden="true" />
+            <span aria-hidden="true" />
+            <span aria-hidden="true" />
+          </button>
         </div>
       </header>
+
+      {mobileMenuOpen ? (
+        <div
+          id="mobile-menu"
+          className="mobile-menu"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Navigation"
+        >
+          <nav aria-label="Mobile navigation">
+            <a href="#product" onClick={() => setMobileMenuOpen(false)}>
+              {m.nav.product}
+            </a>
+            <a href="#method" onClick={() => setMobileMenuOpen(false)}>
+              {m.nav.method}
+            </a>
+            <a href="#pricing" onClick={() => setMobileMenuOpen(false)}>
+              {m.nav.pricing}
+            </a>
+            <a href="#faq" onClick={() => setMobileMenuOpen(false)}>
+              {m.nav.faq}
+            </a>
+            {appUrl ? (
+              <a href={appUrl} data-axignal-customer-access="true">
+                {hasSession ? m.nav.openApp : m.nav.login}
+              </a>
+            ) : null}
+            <a
+              className="button"
+              href="#access"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                handleCta("header");
+              }}
+            >
+              {m.nav.cta}
+            </a>
+          </nav>
+        </div>
+      ) : null}
 
       <main id="main-content">
         <section className="cinematic-shell" id="product" ref={cinematic}>

@@ -211,6 +211,17 @@ def main() -> int:
             api_env,
             AXIGNAL_API_URL="http://127.0.0.1:8000",
             AXIGNAL_PLAYWRIGHT_DEV_SERVER="true",
+        ), timeout=1200)
+
+    # 16. Landing visual/functional close (cierre visual E2E).
+    # Lanza su propio webServer de producción (build + start en 3001).
+    run("LANDING_UI_UX_BROWSER_E2E",
+        ["pnpm", "exec", "playwright", "test",
+         "--config", "tests/landing/playwright.config.ts",
+         "--project=landing-desktop"],
+        env=dict(
+            api_env,
+            NEXT_PUBLIC_AXIGNAL_APP_URL="http://127.0.0.1:3000",
         ), timeout=900)
 
     if not FAST:

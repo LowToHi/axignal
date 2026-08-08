@@ -1138,7 +1138,11 @@ export function SemanticGlobe({
             {labels.instructions}
           </div>
         ) : null}
-        {showPoster ? <div className="globe-poster">{labels.fallback}</div> : null}
+        {showPoster ? (
+          <div className="globe-poster" role="img" aria-label={labels.fallback}>
+            <span className="globe-poster-note">{labels.fallback}</span>
+          </div>
+        ) : null}
         {webglState === "SUPPORTED" || webglState === "READY" ? (
           <GlobeErrorBoundary onFailure={failWebGl}>
             <Canvas

@@ -22,6 +22,8 @@ export default async function LocalizedLandingPage({ params }: LocalePageProps) 
   const { locale } = await params;
   if (!isLocale(locale) || locale === "en") notFound();
   const structuredData = buildStructuredData(locale);
+  const { cookies } = await import("next/headers");
+  const session = (await cookies()).get("axignal_session")?.value;
 
   return (
     <>
@@ -29,7 +31,11 @@ export default async function LocalizedLandingPage({ params }: LocalePageProps) 
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }}
       />
-      <LandingExperience locale={locale} messages={getMessages(locale)} />
+      <LandingExperience
+        locale={locale}
+        messages={getMessages(locale)}
+        hasSession={Boolean(session)}
+      />
     </>
   );
 }

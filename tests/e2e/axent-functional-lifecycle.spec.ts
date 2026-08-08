@@ -13,14 +13,31 @@ import { expect, test } from "@playwright/test";
 
 const TENANT = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 
+test.describe.configure({ timeout: 90_000 });
+
+// Helper: login with retry — the dev server compiles API routes on demand,
+// so the very first POST may race compilation and return 404/500.
+async function loginWithRetry(context: {
+  request: import("@playwright/test").APIRequestContext;
+}) {
+  let lastStatus = 0;
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const login = await context.request.post("/api/auth/login", {
+      data: { email: "test-runtime@axignal.test", password: "axignal-test-pass" },
+    });
+    lastStatus = login.status();
+    if (lastStatus === 200) return login;
+    await new Promise((resolve) => setTimeout(resolve, 2500));
+  }
+  throw new Error(`login failed after retries: HTTP ${lastStatus}`);
+}
+
 test("AXENT functional lifecycle over the real stack", async ({
   page,
   context,
 }) => {
   // 1. Real test-runtime login (browser session, server-side identity).
-  const login = await context.request.post("/api/auth/login", {
-    data: { email: "test-runtime@axignal.test", password: "axignal-test-pass" },
-  });
+  const login = await loginWithRetry(context);
   expect(login.status()).toBe(200);
 
   // 2. Onboarding journey is persisted and resumable.
@@ -144,9 +161,7 @@ test("AXENT contextual explanation from an opportunity route", async ({
   page,
   context,
 }) => {
-  const login = await context.request.post("/api/auth/login", {
-    data: { email: "test-runtime@axignal.test", password: "axignal-test-pass" },
-  });
+  const login = await loginWithRetry(context);
   expect(login.status()).toBe(200);
 
   await page.goto("/opportunity-intelligence");

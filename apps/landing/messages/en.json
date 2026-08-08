@@ -9,7 +9,10 @@
     "pricing": "Pricing",
     "faq": "FAQ",
     "language": "Language",
-    "cta": "Design Partner access"
+    "cta": "Design Partner access",
+    "login": "Log in",
+    "openApp": "Open AXIGNAL",
+    "clientAccess": "Client access"
   },
   "hero": {
     "eyebrow": "GLOBAL OPPORTUNITY INTELLIGENCE · FIRST COMMERCIAL EXPRESSION",
@@ -19,7 +22,11 @@
     "summary": "Find, qualify and investigate public opportunities with every material conclusion linked to its evidence.",
     "primary": "Apply for Design Partner access",
     "secondary": "Explore the product demo",
-    "proof": ["Source-linked evidence", "Contradictions visible", "Human authority preserved"],
+    "proof": [
+      "Source-linked evidence",
+      "Contradictions visible",
+      "Human authority preserved"
+    ],
     "status": "Synthetic product demonstration · live procurement sources disabled"
   },
   "problem": {
@@ -27,9 +34,18 @@
     "title": "Public demand is visible. Decision-ready context is not.",
     "body": "Opportunities sit across portals, languages, amendments, documents and deadlines. Teams rebuild the same context by hand, then make a bid/no-bid call before they can test every assumption.",
     "items": [
-      ["Fragmented discovery", "Different portals, formats, taxonomies and update rhythms."],
-      ["Expensive qualification", "Eligibility, fit, timing and evidence are reviewed repeatedly."],
-      ["Context loss", "Source changes and contradictions disappear into tabs and spreadsheets."]
+      [
+        "Fragmented discovery",
+        "Different portals, formats, taxonomies and update rhythms."
+      ],
+      [
+        "Expensive qualification",
+        "Eligibility, fit, timing and evidence are reviewed repeatedly."
+      ],
+      [
+        "Context loss",
+        "Source changes and contradictions disappear into tabs and spreadsheets."
+      ]
     ]
   },
   "storyIntro": {
@@ -107,7 +123,12 @@
     "label": "NAVIGATOR · SYNTHETIC DEMO",
     "prompt": "Find public infrastructure opportunities in Western Europe that fit our delivery capacity and require evidence-backed qualification.",
     "response": "I created a bounded investigation. The TED profile is admitted for the private authenticated pilot; the other visible systems remain discovery candidates.",
-    "context": ["Western Europe", "Infrastructure services", "12–24 month horizon", "Evidence required"]
+    "context": [
+      "Western Europe",
+      "Infrastructure services",
+      "12–24 month horizon",
+      "Evidence required"
+    ]
   },
   "globe": {
     "label": "SOURCE PROGRAM VIEW",
@@ -124,12 +145,13 @@
     "layers": "Layers",
     "recenter": "Recenter",
     "instructions": "Drag to rotate, pinch or scroll to zoom. Select a marker for its source state.",
-    "fallback": "Interactive globe unavailable. The source-state table below contains the same information.",
+    "fallback": "Static coverage view · interactive globe needs WebGL",
     "activeRule": "Only ADMITTED sources are active product coverage. Current bounded pilot count: 1.",
     "tableCaption": "Procurement source-state alternative to the globe",
     "source": "Source",
     "jurisdiction": "Jurisdiction",
-    "state": "State"
+    "state": "State",
+    "fallbackTitle": "Global public-procurement coverage"
   },
   "dossier": {
     "eyebrow": "SYNTHETIC OPPORTUNITY DOSSIER",
@@ -138,12 +160,30 @@
     "location": "Southern Europe",
     "deadline": "42 days · synthetic",
     "fields": [
-      ["Fit", "Strong capability overlap · calculated from demo inputs"],
-      ["Eligibility", "Consortium rule unresolved"],
-      ["Value", "€8–12m synthetic range"],
-      ["Documents", "14 demo records · 2 amendments"],
-      ["Contradiction", "Delivery window conflicts with one annex"],
-      ["Next action", "Human review of eligibility evidence"]
+      [
+        "Fit",
+        "Strong capability overlap · calculated from demo inputs"
+      ],
+      [
+        "Eligibility",
+        "Consortium rule unresolved"
+      ],
+      [
+        "Value",
+        "€8–12m synthetic range"
+      ],
+      [
+        "Documents",
+        "14 demo records · 2 amendments"
+      ],
+      [
+        "Contradiction",
+        "Delivery window conflicts with one annex"
+      ],
+      [
+        "Next action",
+        "Human review of eligibility evidence"
+      ]
     ],
     "disclaimer": "All dossier entities, values and documents are synthetic and do not describe a live procurement."
   },
@@ -152,13 +192,38 @@
     "title": "Trust is a visible system state.",
     "body": "The vector discovers; the graph contextualises; the runtime admits. Models never become authoritative by presentation.",
     "claims": [
-      ["OBSERVED", "The notice states a two-stage procedure.", "Synthetic source extract · T−2d"],
-      ["CALCULATED", "The deadline is 42 days away.", "Versioned date transformation"],
-      ["INFERRED", "A consortium may improve capability fit.", "Explicit demo inference"],
-      ["CONTRADICTED", "The delivery window differs across annexes.", "Material counter-evidence"],
-      ["UNKNOWN", "Subcontracting limit not located.", "Coverage gap remains open"]
+      [
+        "OBSERVED",
+        "The notice states a two-stage procedure.",
+        "Synthetic source extract · T−2d"
+      ],
+      [
+        "CALCULATED",
+        "The deadline is 42 days away.",
+        "Versioned date transformation"
+      ],
+      [
+        "INFERRED",
+        "A consortium may improve capability fit.",
+        "Explicit demo inference"
+      ],
+      [
+        "CONTRADICTED",
+        "The delivery window differs across annexes.",
+        "Material counter-evidence"
+      ],
+      [
+        "UNKNOWN",
+        "Subcontracting limit not located.",
+        "Coverage gap remains open"
+      ]
     ],
-    "pipeline": ["Candidate", "Structural validation", "Admissibility policy", "Canonical ledger"]
+    "pipeline": [
+      "Candidate",
+      "Structural validation",
+      "Admissibility policy",
+      "Canonical ledger"
+    ]
   },
   "outcomes": {
     "eyebrow": "OPERATIONAL VALUE",
@@ -184,21 +249,56 @@
     "current": "Current validation path",
     "cta": "Select and apply",
     "plans": [
-      ["Design Partner", "€300–600", "organisation / month", "Bounded workflow validation, direct product feedback and preferential candidate terms."],
-      ["Professional", "€349–499", "month", "Individual investigation, dossiers, monitoring and evidence exports."],
-      ["Team / Growth", "€899–1,499", "month", "Shared investigations, review workflow, governance and expanded usage."],
-      ["Enterprise", "€18k–45k", "year", "Security, integration, support, data and API obligations scoped by contract."]
+      [
+        "Design Partner",
+        "€300–600",
+        "organisation / month",
+        "Bounded workflow validation, direct product feedback and preferential candidate terms."
+      ],
+      [
+        "Professional",
+        "€349–499",
+        "month",
+        "Individual investigation, dossiers, monitoring and evidence exports."
+      ],
+      [
+        "Team / Growth",
+        "€899–1,499",
+        "month",
+        "Shared investigations, review workflow, governance and expanded usage."
+      ],
+      [
+        "Enterprise",
+        "€18k–45k",
+        "year",
+        "Security, integration, support, data and API obligations scoped by contract."
+      ]
     ]
   },
   "faq": {
     "eyebrow": "QUESTIONS BEFORE ACCESS",
     "title": "What the current landing does—and does not—promise.",
     "items": [
-      ["Does AXIGNAL cover procurement globally today?", "No. The repository contains a worldwide research catalogue, but no global coverage claim is authorised. Sources advance independently through admission."],
-      ["Is TED available in the product?", "The bounded TED Search API product profile is admitted for the private authenticated pilot. Public access and unrestricted source use remain disabled."],
-      ["Does AXIGNAL write or submit bids?", "No. AXIGNAL supports research, qualification and investigation. It does not submit procurement responses or make final decisions."],
-      ["Are the prices final?", "No. Design Partner and plan ranges are candidate commercial hypotheses that require paid evidence."],
-      ["Is there a free trial?", "A controlled 7-day trial is application-only while public trial access remains disabled. Approved organisations receive 1,000,000 cumulative tokens, no card, no renewal or overage, and read-only access at expiry."]
+      [
+        "Does AXIGNAL cover procurement globally today?",
+        "No. The repository contains a worldwide research catalogue, but no global coverage claim is authorised. Sources advance independently through admission."
+      ],
+      [
+        "Is TED available in the product?",
+        "The bounded TED Search API product profile is admitted for the private authenticated pilot. Public access and unrestricted source use remain disabled."
+      ],
+      [
+        "Does AXIGNAL write or submit bids?",
+        "No. AXIGNAL supports research, qualification and investigation. It does not submit procurement responses or make final decisions."
+      ],
+      [
+        "Are the prices final?",
+        "No. Design Partner and plan ranges are candidate commercial hypotheses that require paid evidence."
+      ],
+      [
+        "Is there a free trial?",
+        "A controlled 7-day trial is application-only while public trial access remains disabled. Approved organisations receive 1,000,000 cumulative tokens, no card, no renewal or overage, and read-only access at expiry."
+      ]
     ]
   },
   "form": {
@@ -213,14 +313,27 @@
     "organisation": "Organisation",
     "role": "Role",
     "rolePlaceholder": "Select a role",
-    "roles": ["Bid / proposal lead", "Business development", "Public-sector sales", "Procurement intelligence", "Executive / founder", "Consultant", "Other"],
+    "roles": [
+      "Bid / proposal lead",
+      "Business development",
+      "Public-sector sales",
+      "Procurement intelligence",
+      "Executive / founder",
+      "Consultant",
+      "Other"
+    ],
     "countries": "Priority countries or jurisdictions",
     "volume": "Opportunities reviewed per month",
     "process": "Current process or tools",
     "useCase": "Primary use case",
     "problem": "Most expensive problem in the workflow",
     "timeframe": "Evaluation timeframe",
-    "timeframes": ["Now", "Within 30 days", "This quarter", "Exploring"],
+    "timeframes": [
+      "Now",
+      "Within 30 days",
+      "This quarter",
+      "Exploring"
+    ],
     "consent": "I agree that AXIGNAL may use this information only to assess and respond to this Design Partner request. No lead details are sent to analytics.",
     "next": "Continue",
     "back": "Back",

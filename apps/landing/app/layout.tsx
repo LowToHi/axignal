@@ -15,7 +15,10 @@ export const metadata: Metadata = {
   description:
     "Find, qualify and investigate public contracts with traceable evidence and human authority.",
   icons: {
-    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+    icon: [
+      { url: "/favicon.ico", sizes: "32x32" },
+      { url: "/favicon.svg", type: "image/svg+xml" }
+    ],
     apple: [{ url: "/favicon.svg", type: "image/svg+xml" }]
   },
   manifest: "/manifest.webmanifest"
