@@ -203,7 +203,8 @@ class AxentOnboardingRepository(ResearchRepository):
                     return {"intervention_id": existing["intervention_id"],
                             "state": "MUTED", "proposed": False}
                 if (
-                    existing["cooldown_until"] is not None
+                    cooldown_hours > 0
+                    and existing["cooldown_until"] is not None
                     and existing["cooldown_until"] > now
                 ):
                     return {"intervention_id": existing["intervention_id"],

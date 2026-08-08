@@ -1,3 +1,4 @@
+from axignal_api.axent_assistant_routes import router as axent_assistant_router
 from axignal_api.axent_routes import router as axent_router
 from axignal_api.bid_workspace_routes import router as bid_workspace_router
 from axignal_api.billing_read_routes import router as billing_read_router
@@ -33,6 +34,7 @@ app.include_router(document_research_router)
 app.include_router(persistent_research_router)
 app.include_router(ted_research_router)
 app.include_router(axent_router)
+app.include_router(axent_assistant_router)
 app.include_router(entitlement_router)
 app.include_router(billing_router)
 app.include_router(billing_read_router)
