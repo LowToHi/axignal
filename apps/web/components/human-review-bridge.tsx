@@ -43,6 +43,7 @@ export function HumanReviewBridge() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
+    if (process.env.NEXT_PUBLIC_AXIGNAL_HUMAN_REVIEW_UI_ENABLED !== "true") return;
     let cancelled = false;
     void listHumanReviewCases().then((items) => {
       if (cancelled) return;

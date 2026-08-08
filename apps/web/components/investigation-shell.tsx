@@ -362,7 +362,7 @@ export function InvestigationShell() {
         <div className="messages" aria-live="polite">
           {messages.map((message) => (
             <article key={message.id} className={`message ${message.actor}`}>
-              <div><strong>{message.actor === "user" ? "TÚ" : "AXIGNAL"}</strong><time>{new Date(message.occurredAt).toLocaleTimeString("es", { hour: "2-digit", minute: "2-digit" })}</time></div>
+              <div><strong>{message.actor === "user" ? "TÚ" : "AXIGNAL"}</strong><time suppressHydrationWarning>{new Date(message.occurredAt).toLocaleTimeString("es", { hour: "2-digit", minute: "2-digit" })}</time></div>
               <p>{message.text}</p>
               {message.actor === "axignal" && <button type="button" onClick={() => setShowInterpretation((value) => !value)}>Ver interpretación</button>}
             </article>

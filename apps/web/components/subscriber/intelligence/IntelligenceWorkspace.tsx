@@ -146,7 +146,7 @@ export function IntelligenceWorkspace({
         <div className={styles.messageList} aria-live="polite">
           {data.messages.map((message) => (
             <article key={message.id} data-actor={message.actor}>
-              <div><strong>{message.actor === "subscriber" ? "YOU" : "AXIGNAL"}</strong><time dateTime={message.occurredAt}>{new Date(message.occurredAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</time></div>
+              <div><strong>{message.actor === "subscriber" ? "YOU" : "AXIGNAL"}</strong><time dateTime={message.occurredAt} suppressHydrationWarning>{new Date(message.occurredAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</time></div>
               <p>{message.body}</p>
               {message.actionLabel ? <button type="button">{message.actionLabel}</button> : null}
             </article>
