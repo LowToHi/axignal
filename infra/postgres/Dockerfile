@@ -41,3 +41,12 @@ COPY 132-retention-late-domain-purge.sql /docker-entrypoint-initdb.d/132-axignal
 COPY 140-subscriber-persistent-authority.sql /docker-entrypoint-initdb.d/140-axignal-subscriber-persistent-authority.sql
 COPY 141-c4-axent-idempotency.sql /docker-entrypoint-initdb.d/141-axignal-c4-axent-idempotency.sql
 COPY 142-c4-axent-upgrade-hardening.sql /docker-entrypoint-initdb.d/142-axignal-c4-axent-upgrade-hardening.sql
+COPY 143-opportunity-operations-spine.sql /docker-entrypoint-initdb.d/143-axignal-opportunity-operations-spine.sql
+COPY 144-o01-continuous-chain.sql /docker-entrypoint-initdb.d/144-axignal-o01-continuous-chain.sql
+COPY 145-bid-workspace-spine.sql /docker-entrypoint-initdb.d/145-axignal-bid-workspace-spine.sql
+COPY 146-executable-libraries.sql /docker-entrypoint-initdb.d/146-axignal-executable-libraries.sql
+COPY 147-cross-library-graph.sql /docker-entrypoint-initdb.d/147-axignal-cross-library-graph.sql
+COPY 148-axent-core-spine.sql /docker-entrypoint-initdb.d/148-axignal-axent-core-spine.sql
+COPY 149-axent-support-spine.sql /docker-entrypoint-initdb.d/149-axignal-axent-support-spine.sql
+COPY 150-axent-onboarding-spine.sql /docker-entrypoint-initdb.d/150-axignal-axent-onboarding-spine.sql
+COPY 151-axent-operations.sql /docker-entrypoint-initdb.d/151-axignal-axent-operations.sql
