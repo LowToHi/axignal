@@ -184,6 +184,37 @@ def main() -> int:
     else:
         gate("LOG_HYGIENE", True)
 
+    # 12. Health + readiness (BEFORE backup/restore: it probes the live
+    # system state; the scratch restore below can hold locks on the main
+    # database and make this transiently 503 otherwise). One bounded retry
+    # window tolerates the load burst of the surrounding integration gates
+    # (the readiness probe is a system-state signal, not an operation).
+    try:
+        import time as _time
+
+        from fastapi.testclient import TestClient
+
+        from axignal_api.application import app
+
+        client = TestClient(app)
+        health = client.get("/health")
+        ready = client.get("/readyz")
+        attempts = 0
+        while ready.status_code != 200 and attempts < 4:
+            _time.sleep(2)
+            ready = client.get("/readyz")
+            attempts += 1
+        body_note = ""
+        if ready.status_code != 200:
+            body_note = f", body={ready.text[:160]}"
+        gate(
+            "HEALTH_READINESS",
+            health.status_code == 200 and ready.status_code == 200,
+            f"(health={health.status_code}, readyz={ready.status_code}{body_note})",
+        )
+    except Exception as exc:  # noqa: BLE001
+        gate("HEALTH_READINESS", False, str(exc))
+
     # 10. Backup/restore: pg_dump -> restore into scratch database.
     try:
         scratch = "axignal_backup_restore_check"

@@ -30,8 +30,8 @@ def _valkey_ready() -> bool:
         return False
     client = Redis.from_url(
         valkey_url,
-        socket_connect_timeout=3,
-        socket_timeout=3,
+        socket_connect_timeout=8,
+        socket_timeout=8,
         decode_responses=True,
     )
     try:

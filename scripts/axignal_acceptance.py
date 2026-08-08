@@ -95,9 +95,18 @@ def main() -> int:
     head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=REPO, text=True).strip()
     print(f"HEAD: {head}")
 
+    # Local-stack runtime variables are injected explicitly: the parent
+    # shell may not propagate them into this process env, and the
+    # readiness/identity probes of the integration gates depend on them.
+    local_runtime_env = {
+        "AXIGNAL_VALKEY_URL": "redis://localhost:6379/0",
+        "AXIGNAL_IDENTITY_ASSERTION_SECRET": "local-dev-identity-assertion-secret-32-bytes",
+    }
+
     api_env = {
         **{key: value for key, value in os.environ.items()
            if key != "AXIGNAL_DATABASE_URL"},
+        **local_runtime_env,
         "PYTHONPATH": str(REPO / "apps/api/src"),
     }
 
@@ -105,9 +114,16 @@ def main() -> int:
     run("API_TESTS", [PY, "-m", "pytest", "apps/api/tests", "-q", "--disable-warnings"],
         timeout=600)
     # 2. API integration tests (PostgreSQL).
+    # The opportunity/bid-workspace HTTP suites assert identities with the
+    # canonical local-dev secret; set it explicitly so the gate is
+    # independent of the parent shell state.
     run("API_INTEGRATION_TESTS",
         [PY, "-m", "pytest", "apps/api/tests", "-q", "--disable-warnings"],
-        env=dict(api_env, AXIGNAL_INTEGRATION_TESTS="1"), timeout=900)
+        env=dict(
+            api_env,
+            AXIGNAL_INTEGRATION_TESTS="1",
+            AXIGNAL_IDENTITY_ASSERTION_SECRET="local-dev-identity-assertion-secret-32-bytes",
+        ), timeout=900)
     # 3. Ruff.
     run("RUFF", [PY, "-m", "ruff", "check", "apps/api/src/axignal_api", "apps/api/tests"],
         timeout=300)
@@ -147,6 +163,40 @@ def main() -> int:
             **api_env,
             "AXIGNAL_DATABASE_URL": "postgresql://axignal:axignal-local@localhost:5432/axignal",
         })
+
+    # 14. AXENT gates (Mandato AXENT — secciones 6-18).
+    run("AXENT_CORE_PERSISTENCE_E2E",
+        [PY, "-m", "pytest", "apps/api/tests/test_axent_core_e2e.py",
+         "-q", "--disable-warnings"],
+        env=dict(api_env, AXIGNAL_INTEGRATION_TESTS="1"), timeout=600)
+    run("AXENT_NL_QUERY_PLANNER_AND_RAG_E2E",
+        [PY, "-m", "pytest", "apps/api/tests/test_axent_rag_e2e.py",
+         "-q", "--disable-warnings"],
+        env=dict(api_env, AXIGNAL_INTEGRATION_TESTS="1"), timeout=600)
+    run("AXENT_TOOLS_AND_POLICY_E2E",
+        [PY, "-m", "pytest", "apps/api/tests/test_axent_tools_e2e.py",
+         "-q", "--disable-warnings"],
+        env=dict(api_env, AXIGNAL_INTEGRATION_TESTS="1"), timeout=600)
+    run("AXENT_SUPPORT_AND_GOVERNED_KNOWLEDGE_E2E",
+        [PY, "-m", "pytest", "apps/api/tests/test_axent_support_e2e.py",
+         "-q", "--disable-warnings"],
+        env=dict(api_env, AXIGNAL_INTEGRATION_TESTS="1"), timeout=600)
+    run("AXENT_ONBOARDING_AND_ACCOMPANIMENT_E2E",
+        [PY, "-m", "pytest", "apps/api/tests/test_axent_onboarding_e2e.py",
+         "-q", "--disable-warnings"],
+        env=dict(api_env, AXIGNAL_INTEGRATION_TESTS="1"), timeout=600)
+    run("AXENT_CONTEXT_AND_DEGRADATION_E2E",
+        [PY, "-m", "pytest", "apps/api/tests/test_axent_context_e2e.py",
+         "-q", "--disable-warnings"],
+        env=dict(api_env, AXIGNAL_INTEGRATION_TESTS="1"), timeout=600)
+    run("AXENT_HTTP_SURFACE_E2E",
+        [PY, "-m", "pytest", "apps/api/tests/test_axent_http_e2e.py",
+         "-q", "--disable-warnings"],
+        env=dict(api_env, AXIGNAL_INTEGRATION_TESTS="1"), timeout=600)
+    run("AXENT_CUSTOMER_LIFECYCLE_AND_CAPACITY_E2E",
+        [PY, "-m", "pytest", "apps/api/tests/test_axent_lifecycle_e2e.py",
+         "-q", "--disable-warnings"],
+        env=dict(api_env, AXIGNAL_INTEGRATION_TESTS="1"), timeout=900)
 
     if not FAST:
         # 14. Migrations from zero (scratch database).

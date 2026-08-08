@@ -3857,8 +3857,28 @@
    "AX_BACKUP_RESTORE": "PASS",
    "AX_PORTABILITY": "PASS",
    "AX_EXACT_HEAD_REPRODUCIBLE_CI": "PASS",
-   "AX_FRESH_INSTALL": "PASS"
+   "AX_FRESH_INSTALL": "PASS",
+   "AX_AXENT_CORE_CONVERSATION_PERSISTENCE": "PASS",
+   "AX_AXENT_CONTEXT_BUILDER": "PASS",
+   "AX_AXENT_CONVERSATIONAL_MEMORY": "PASS",
+   "AX_AXENT_NATURAL_LANGUAGE_QUERY_PLANNER": "PASS",
+   "AX_AXENT_OPPORTUNITY_RAG_SEARCH_E2E": "PASS",
+   "AX_AXENT_GROUNDED_RESPONSES_E2E": "PASS",
+   "AX_AXENT_WORKSPACE_CRUD_E2E": "PASS",
+   "AX_AXENT_PURSUIT_OPERATIONS_E2E": "PASS",
+   "AX_AXENT_CONSENTED_ACTIONS_E2E": "PASS",
+   "AX_AXENT_GLOBAL_AND_CONTEXTUAL_UI_E2E": "PASS",
+   "AX_AXENT_ONBOARDING_FIRST_VALUE_E2E": "PASS",
+   "AX_AXENT_CONTEXTUAL_ACCOMPANIMENT_E2E": "PASS",
+   "AX_AXENT_CUSTOMER_SUPPORT_E2E": "PASS",
+   "AX_AXENT_HUMAN_ESCALATION_ROUND_TRIP": "PASS",
+   "AX_AXENT_GOVERNED_KNOWLEDGE_E2E": "PASS",
+   "AX_AXENT_INCIDENT_DEDUPLICATION_E2E": "PASS",
+   "AX_AXENT_CUSTOMER_LIFECYCLE_FULL_E2E": "PASS",
+   "AX_AXENT_DETERMINISTIC_CAPACITY": "PASS",
+   "AX_AXENT_MODEL_OUTAGE_DEGRADATION": "PASS",
+   "AX_AXENT_EXACT_HEAD_CI": "PASS"
   },
-  "campaign_evidence": "Mandato de finalización técnica al 100% ejecutado desde 29fdcbf; API 805/805 con integración PostgreSQL, monorepo test/lint/typecheck/build PASS, e2e_real_stack PASS, e2e_o01_continuous PASS, security_ops_gates 12/12 (backup/restore 85 tablas), migraciones 001-147 desde cero PASS, matriz exact-head scripts/axignal_acceptance.py 14/14; ledger 179/179 terminales (100 UNIT_PASS, 32 BLOCKED_EXTERNAL alineados, 11 INTEGRATION_PASS, 10 PRODUCT_E2E_PASS, 11 COMPLETED, 9 INHERITED, 6 MODEL_PASS)"
+  "campaign_evidence": "Mandato de finalización técnica al 100% ejecutado desde 29fdcbf; API 805/805 con integración PostgreSQL, monorepo test/lint/typecheck/build PASS, e2e_real_stack PASS, e2e_o01_continuous PASS, security_ops_gates 12/12 (backup/restore 85 tablas), migraciones 001-147 desde cero PASS, matriz exact-head scripts/axignal_acceptance.py 14/14; ledger 179/179 terminales (100 UNIT_PASS, 32 BLOCKED_EXTERNAL alineados, 11 INTEGRATION_PASS, 10 PRODUCT_E2E_PASS, 11 COMPLETED, 9 INHERITED, 6 MODEL_PASS) Mandato AXENT (recuperacion selectiva desde a259b88b + finalizacion integral) ejecutado sobre agent/axignal-global-e2e: migraciones 148-150 (core conversacional, soporte/knowledge gobernado, onboarding); 20 gates AXENT PASS (core persistente, context builder server-authoritative, query planner NL tipado, RAG hibrido, respuestas fundamentadas, tools+policy, CRUD workspaces/pursuits consentido, UI global web 2/2 Playwright, onboarding first-value, acompanamiento anti-spam, soporte con dedup de incidentes y escalado humano, knowledge gobernado, ciclo de vida completo, capacidad determinista 40 consultas, degradacion sin modelo); suite API 841/841; superficie /v1/axent + C4 intacta. Matriz de aceptacion exact-head (scripts/axignal_acceptance.py, 22 gates) EXIT=0: API_TESTS, API_INTEGRATION_TESTS (841/841 con PostgreSQL), RUFF, FRONTEND_TESTS, LINT, TYPECHECK, BUILD, RESTART_RECOVERY, O01_CONTINUOUS_E2E, O02_O09_VERTICAL_SLICES, CROSS_LIBRARY_E2E, BILLING_SANDBOX_E2E, SECURITY_GATE 12/12 (HEALTH_READINESS con retry bounded; env runtime local inyectado), AXENT gates 8/8, MIGRATION_FROM_ZERO 150 migraciones; ENGINEERING_100=PASS. Fixes de la matriz: secret de identidad y VALKEY_URL inyectados explicitamente en el env de subprocesos (el shell padre no los propaga); HEALTH_READINESS reordenado antes del backup/restore con retry bounded; pilot_health detail restaurado byte-a-byte (test fail-closed preexistente)."
  }
 }
