@@ -63,7 +63,7 @@ CONFIRMATION_TOOLS = frozenset(
         "record_bid_no_bid", "assign_pursuit_owner", "unlink_opportunity_from_workspace",
         "close_pursuit", "reopen_pursuit", "archive_workspace",
         "restore_workspace", "dismiss_opportunity", "record_outcome",
-        "assign_task", "create_support_case",
+        "assign_task", "create_support_case", "add_to_workspace",
     }
 )
 

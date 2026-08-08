@@ -195,7 +195,7 @@ class QueryPlanner:
         if value_max is not None and value_max < 0:
             raise QueryPlanError("value_max cannot be negative")
 
-        currencies = tuple(raw.get("currencies") or ("EUR",))
+        currencies = tuple(raw.get("currencies") or ())
         for currency in currencies:
             if not CURRENCY_RE.match(str(currency)):
                 raise QueryPlanError(f"unsupported currency {currency!r}")
@@ -300,6 +300,27 @@ class QueryPlanner:
                       "rail", "infraestructura"):
             if token in lowered:
                 keywords.append(token)
+        # Generic content-term extraction: meaningful words after the
+        # command prefix (stopwords excluded) become keywords, so any
+        # query like "muéstrame obras públicas en España" retrieves real
+        # opportunities instead of an empty vocabulary match.
+        if not keywords:
+            _STOP = frozenset({
+                "muéstrame", "muestrame", "busca", "buscar", "enséñame",
+                "ensename", "encuentra", "encuentrame", "list", "listame",
+                "lista", "licitaciones", "licitacion", "tender", "tenders",
+                "oportunidades", "oportunidad", "los", "las", "un", "una",
+                "del", "de", "la", "el", "en", "y", "para", "sobre", "por",
+                "que", "con", "al",
+                "me", "te", "se", "su", "sus", "todos", "todas", "nuevas",
+                "nuevos", "actuales", "vigentes", "publicadas", "españa",
+                "espana", "europa", "ue", "estado", "nacional", "regional",
+                "abiertas", "abiertos", "abierto",
+            })
+            tokens = re.findall(r"[a-záéíóúñ]{4,}", lowered)
+            content = [t for t in tokens if t not in _STOP][:3]
+            if content:
+                keywords = content
         if keywords:
             raw["keywords"] = keywords
 
@@ -309,6 +330,9 @@ class QueryPlanner:
                 countries.append(code)
         if countries:
             raw["countries"] = countries
+
+        if "abiertas" in lowered or "abiertos" in lowered or "abierto" in lowered:
+            raw["status"] = ["OPEN"]
 
         amount = re.search(r"([\d.,]+)\s*(?:euros|€|eur)", lowered)
         if amount:

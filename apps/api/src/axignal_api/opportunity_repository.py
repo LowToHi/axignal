@@ -115,7 +115,7 @@ class OpportunityOperationsRepository(ResearchRepository):
                 """
                 SELECT pursuit_id, pursuit_ref, opportunity_ref, state,
                        workspace_ref, created_by, created_at, decided_by,
-                       decided_at, outcome_ref, evidence_refs
+                       decided_at, outcome_ref, evidence_refs, priority
                 FROM tenant_private.opportunity_pursuits
                 WHERE tenant_id = %s
                 ORDER BY created_at DESC
@@ -130,7 +130,7 @@ class OpportunityOperationsRepository(ResearchRepository):
                 """
                 SELECT pursuit_id, pursuit_ref, opportunity_ref, state,
                        workspace_ref, created_by, created_at, decided_by,
-                       decided_at, outcome_ref, evidence_refs
+                       decided_at, outcome_ref, evidence_refs, priority
                 FROM tenant_private.opportunity_pursuits
                 WHERE tenant_id = %s AND pursuit_ref = %s
                 """,
@@ -152,6 +152,7 @@ class OpportunityOperationsRepository(ResearchRepository):
         subscriber_profile_version: str,
         assessment_version: str,
         created_by: str,
+        title: str | None = None,
     ) -> None:
         with self._cursor(role="axignal_worker", tenant_id=tenant_id) as cursor:
             cursor.execute(
@@ -159,13 +160,59 @@ class OpportunityOperationsRepository(ResearchRepository):
                 INSERT INTO tenant_private.opportunity_workspaces
                   (workspace_id, tenant_id, pursuit_ref, opportunity_ref,
                    opportunity_version_digest, subscriber_profile_version,
-                   assessment_version, state, created_by)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, 'CREATED', %s)
+                   assessment_version, state, created_by, title)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, 'CREATED', %s, %s)
                 """,
                 (workspace_id, tenant_id, pursuit_ref, opportunity_ref,
                  opportunity_version_digest, subscriber_profile_version,
-                 assessment_version, created_by),
+                 assessment_version, created_by, title),
             )
+
+    def get_workspace_by_title(
+        self, *, tenant_id: UUID, title: str
+    ) -> dict[str, Any] | None:
+        """Resolve a workspace by its human-readable title (tenant-scoped)."""
+        with self._cursor(role="axignal_app", tenant_id=tenant_id) as cursor:
+            cursor.execute(
+                """
+                SELECT workspace_id, pursuit_ref, opportunity_ref, state,
+                       title, created_by, created_at
+                FROM tenant_private.opportunity_workspaces
+                WHERE tenant_id = %s AND title = %s
+                ORDER BY created_at ASC
+                LIMIT 1
+                """,
+                (tenant_id, title),
+            )
+            row = cursor.fetchone()
+            return dict(row) if row else None
+
+    def set_pursuit_priority(
+        self,
+        *,
+        tenant_id: UUID,
+        pursuit_ref: str,
+        priority: str,
+    ) -> dict[str, Any]:
+        """Set the pursuit priority (typed: HIGH/MEDIUM/LOW)."""
+        if priority not in ("HIGH", "MEDIUM", "LOW"):
+            raise ValueError(f"invalid pursuit priority {priority!r}")
+        with self._cursor(role="axignal_worker", tenant_id=tenant_id) as cursor:
+            cursor.execute(
+                """
+                UPDATE tenant_private.opportunity_pursuits
+                SET priority = %s
+                WHERE tenant_id = %s AND pursuit_ref = %s
+                RETURNING pursuit_id, pursuit_ref, state, priority
+                """,
+                (priority, tenant_id, pursuit_ref),
+            )
+            row = cursor.fetchone()
+            if row is None:
+                raise LookupError(f"pursuit {pursuit_ref!r} not found")
+            result = dict(row)
+            result["pursuit_id"] = str(result["pursuit_id"])
+            return result
 
     def update_workspace_state(
         self,
@@ -201,7 +248,7 @@ class OpportunityOperationsRepository(ResearchRepository):
                        opportunity_version_digest, subscriber_profile_version,
                        assessment_version, state, created_by, created_at,
                        presented_externally_confirmed_by,
-                       presented_externally_confirmed_at
+                       presented_externally_confirmed_at, title
                 FROM tenant_private.opportunity_workspaces
                 WHERE tenant_id = %s AND workspace_id = %s
                 """,
@@ -215,7 +262,7 @@ class OpportunityOperationsRepository(ResearchRepository):
             cursor.execute(
                 """
                 SELECT workspace_id, pursuit_ref, opportunity_ref, state,
-                       assessment_version, created_by, created_at
+                       assessment_version, created_by, created_at, title
                 FROM tenant_private.opportunity_workspaces
                 WHERE tenant_id = %s
                 ORDER BY created_at DESC

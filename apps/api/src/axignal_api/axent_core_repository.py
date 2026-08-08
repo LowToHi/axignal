@@ -397,6 +397,48 @@ class AxentCoreRepository(ResearchRepository):
                 raise LookupError("confirmation not found or already resolved")
             return dict(row)
 
+    def list_pending_confirmations(
+        self, *, tenant_id: UUID, conversation_id: UUID
+    ) -> list[dict[str, Any]]:
+        """Pending confirmations for a conversation (newest first)."""
+        with self._cursor(role="axignal_app", tenant_id=tenant_id) as cursor:
+            cursor.execute(
+                """
+                SELECT c.confirmation_id, c.invocation_id, c.action_type,
+                       c.parameters_hash, c.before_state_hash, c.expires_at,
+                       i.parameters_json, i.tool_name, i.risk_class
+                FROM tenant_private.axent_confirmations c
+                JOIN tenant_private.axent_tool_invocations i
+                  ON i.invocation_id = c.invocation_id
+                WHERE c.tenant_id = %s AND c.conversation_id = %s
+                  AND c.state = 'PENDING'
+                ORDER BY c.issued_at DESC
+                """,
+                (tenant_id, conversation_id),
+            )
+            return [dict(row) for row in cursor.fetchall()]
+
+    def get_confirmation(
+        self, *, tenant_id: UUID, confirmation_id: UUID
+    ) -> dict[str, Any] | None:
+        """Fetch a confirmation with its conversation + invocation context."""
+        with self._cursor(role="axignal_app", tenant_id=tenant_id) as cursor:
+            cursor.execute(
+                """
+                SELECT c.confirmation_id, c.conversation_id, c.invocation_id,
+                       c.action_type, c.parameters_hash, c.before_state_hash,
+                       c.state, c.expires_at,
+                       i.parameters_json, i.tool_name, i.risk_class
+                FROM tenant_private.axent_confirmations c
+                JOIN tenant_private.axent_tool_invocations i
+                  ON i.invocation_id = c.invocation_id
+                WHERE c.tenant_id = %s AND c.confirmation_id = %s
+                """,
+                (tenant_id, confirmation_id),
+            )
+            row = cursor.fetchone()
+            return dict(row) if row else None
+
     # --- Notifications -------------------------------------------------------
 
     def create_notification(

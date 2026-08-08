@@ -110,10 +110,8 @@ class TestToolExecutor:
                 tenant_id=TENANT_A, actor_subject="usr_tools",
             )
 
-        # Extra forbidden fields rejected by the schema.
-        from pydantic import ValidationError
-
-        with pytest.raises(ValidationError):
+        # Extra forbidden fields rejected by the schema (wrapped).
+        with pytest.raises(ToolExecutionError):
             executor.execute(
                 tool_name="create_pursuit",
                 parameters={"opportunity_ref": "opp_x", "decision": "BID",

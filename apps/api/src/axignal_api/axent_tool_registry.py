@@ -47,28 +47,37 @@ class CreatePursuitParams(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     opportunity_ref: str = Field(min_length=3, max_length=200)
-    decision: str = Field(pattern=r"^(BID|NO_BID)$")
+    decision: str = Field(default="BID", pattern=r"^(BID|NO_BID)$")
 
 
 class UpdatePursuitStateParams(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     pursuit_ref: str = Field(min_length=3, max_length=200)
-    state: str = Field(min_length=3, max_length=60)
+    state: str = Field(
+        pattern=r"^(QUALIFIED|DECISION_REVIEW|ACTIVE|WON|LOST|WITHDRAWN)$"
+    )
 
 
 class LinkOpportunityParams(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    workspace_id: str = Field(min_length=3, max_length=200)
+    workspace_id: str = Field(min_length=8, max_length=64)
     opportunity_ref: str = Field(min_length=3, max_length=200)
+
+
+class AddToWorkspaceParams(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    workspace_title: str = Field(min_length=2, max_length=200)
+    opportunity_refs: list[str] = Field(min_length=1, max_length=10)
 
 
 class CreateTaskParams(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    workspace_id: str = Field(min_length=3, max_length=200)
-    title: str = Field(min_length=3, max_length=300)
+    workspace_id: str = Field(min_length=8, max_length=64)
+    title: str = Field(min_length=2, max_length=300)
     assignee: str | None = None
     due_at: str | None = None
 
@@ -77,13 +86,13 @@ class UpdatePriorityParams(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     pursuit_ref: str = Field(min_length=3, max_length=200)
-    priority: str = Field(pattern=r"^(LOW|NORMAL|HIGH|URGENT)$")
+    priority: str = Field(pattern=r"^(HIGH|MEDIUM|LOW)$")
 
 
 class SaveSearchParams(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    name: str = Field(min_length=3, max_length=200)
+    name: str = Field(min_length=2, max_length=200)
     query_json: dict = Field(default_factory=dict)
 
 
@@ -91,7 +100,7 @@ class RecordOutcomeParams(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     pursuit_ref: str = Field(min_length=3, max_length=200)
-    outcome: str = Field(min_length=3, max_length=200)
+    outcome: str = Field(pattern=r"^(WON|LOST|WITHDRAWN)$")
     notes: str | None = None
 
 
@@ -102,6 +111,12 @@ class RecordBidNoBidParams(BaseModel):
     decision: str = Field(pattern=r"^(BID|NO_BID)$")
 
 
+class DismissOpportunityParams(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    opportunity_ref: str = Field(min_length=3, max_length=200)
+
+
 SCHEMAS: dict[str, type[BaseModel]] = {
     "search_opportunities": SearchOpportunitiesParams,
     "get_opportunity": GetOpportunityParams,
@@ -109,11 +124,13 @@ SCHEMAS: dict[str, type[BaseModel]] = {
     "create_pursuit": CreatePursuitParams,
     "update_pursuit_state": UpdatePursuitStateParams,
     "link_opportunity_to_workspace": LinkOpportunityParams,
+    "add_to_workspace": AddToWorkspaceParams,
     "create_task": CreateTaskParams,
     "update_internal_priority": UpdatePriorityParams,
     "save_search": SaveSearchParams,
     "record_outcome": RecordOutcomeParams,
     "record_bid_no_bid": RecordBidNoBidParams,
+    "dismiss_opportunity": DismissOpportunityParams,
 }
 
 
@@ -156,11 +173,13 @@ class AxentToolExecutor:
             "create_pursuit": self._create_pursuit,
             "update_pursuit_state": self._update_pursuit_state,
             "link_opportunity_to_workspace": self._link_opportunity,
+            "add_to_workspace": self._add_to_workspace,
             "create_task": self._create_task,
             "update_internal_priority": self._update_priority,
             "save_search": self._save_search,
             "record_outcome": self._record_outcome,
             "record_bid_no_bid": self._record_bid_no_bid,
+            "dismiss_opportunity": self._dismiss_opportunity,
         }
         for name, handler in handlers.items():
             self._tools[name] = ToolSpec(
@@ -181,6 +200,8 @@ class AxentToolExecutor:
         ]
 
     def policy_for(self, tool_name: str, *, assurance_level: str = "AAL1") -> PolicyResult:
+        if tool_name not in self._tools:
+            raise ToolExecutionError(f"unknown tool {tool_name!r}")
         return self.policy.decision_for(tool_name, assurance_level=assurance_level)
 
     def execute(
@@ -190,26 +211,24 @@ class AxentToolExecutor:
         parameters: dict[str, Any],
         tenant_id: UUID,
         actor_subject: str,
-        assurance_level: str = "AAL1",
     ) -> dict[str, Any]:
-        spec = self._tools.get(tool_name)
-        if spec is None:
+        """Validate the typed schema, then execute through the domain."""
+        if tool_name not in self._tools:
             raise ToolExecutionError(f"unknown tool {tool_name!r}")
-        policy_result = self.policy.decision_for(
-            tool_name, assurance_level=assurance_level
-        )
-        if policy_result.decision.value in ("DENY", "REQUIRE_STEP_UP_AUTH"):
+        spec = self._tools[tool_name]
+        try:
+            validated = spec.schema.model_validate(parameters)
+        except Exception as exc:  # noqa: BLE001
             raise ToolExecutionError(
-                f"tool {tool_name!r} not permitted: {policy_result.reasons}"
-            )
-        validated = spec.schema.model_validate(parameters)
+                f"invalid parameters for {tool_name}: {exc}"
+            ) from exc
         return spec.handler(
             tenant_id=tenant_id,
             actor_subject=actor_subject,
             **validated.model_dump(),
         )
 
-    # --- Handlers (domain authorities only) ----------------------------------
+    # --- Handlers -------------------------------------------------------------
 
     def _search_opportunities(
         self, *, tenant_id: UUID, actor_subject: str, **params: Any
@@ -244,21 +263,40 @@ class AxentToolExecutor:
     def _compare_opportunities(
         self, *, tenant_id: UUID, actor_subject: str, opportunity_refs: list[str]
     ) -> dict[str, Any]:
+        from datetime import datetime
+
         rows = []
         for ref in opportunity_refs:
             opportunity = self.domain.opportunities.get_opportunity(
                 tenant_id=tenant_id, opportunity_ref=ref
             )
             if opportunity is not None:
-                rows.append(opportunity)
+                row = dict(opportunity)
+                for key, value in list(row.items()):
+                    if isinstance(value, UUID):
+                        row[key] = str(value)
+                    elif isinstance(value, datetime):
+                        row[key] = value.isoformat()
+                rows.append(row)
         return {"tool": "compare_opportunities", "compared": len(rows), "rows": rows}
 
     def _create_pursuit(
         self, *, tenant_id: UUID, actor_subject: str,
-        opportunity_ref: str, decision: str,
+        opportunity_ref: str, decision: str = "BID",
     ) -> dict[str, Any]:
         pursuit_ref = f"prs_{opportunity_ref}"
+        # Canonical pursuit states: BID -> QUALIFIED, NO_BID -> WITHDRAWN.
         state = "QUALIFIED" if decision == "BID" else "WITHDRAWN"
+        existing = self.domain.opportunities.get_pursuit(
+            tenant_id=tenant_id, pursuit_ref=pursuit_ref
+        )
+        if existing is not None:
+            return {
+                "tool": "create_pursuit",
+                "receipt": {"pursuit_ref": pursuit_ref,
+                            "pursuit_id": str(existing["pursuit_id"]),
+                            "state": existing["state"], "already_exists": True},
+            }
         pursuit_id = self.domain.opportunities.create_pursuit(
             tenant_id=tenant_id, pursuit_ref=pursuit_ref,
             opportunity_ref=opportunity_ref, state=state,
@@ -284,18 +322,96 @@ class AxentToolExecutor:
         self, *, tenant_id: UUID, actor_subject: str,
         workspace_id: str, opportunity_ref: str,
     ) -> dict[str, Any]:
-        # The domain link is pursuit.workspace_ref: a pursuit created inside
-        # the workspace IS the workspace link (no parallel link table).
+        """Link an opportunity to an existing workspace (by workspace_id).
+
+        The workspace link is represented by a pursuit created inside the
+        workspace (workspace_ref set). The pursuit starts QUALIFIED when
+        the opportunity is being worked, DECISION_REVIEW otherwise.
+        """
+        workspace = self.domain.opportunities.get_workspace(
+            tenant_id=tenant_id, workspace_id=UUID(workspace_id)
+        )
+        if workspace is None:
+            raise ToolExecutionError(f"workspace {workspace_id!r} not found")
         pursuit_ref = f"prs_{opportunity_ref}"
         pursuit_id = self.domain.opportunities.create_pursuit(
             tenant_id=tenant_id, pursuit_ref=pursuit_ref,
-            opportunity_ref=opportunity_ref, state="QUALIFYING",
+            opportunity_ref=opportunity_ref, state="QUALIFIED",
             created_by=actor_subject, workspace_ref=UUID(workspace_id),
         )
         return {
             "tool": "link_opportunity_to_workspace",
-            "receipt": {"pursuit_ref": pursuit_ref, "pursuit_id": str(pursuit_id),
-                        "workspace_id": workspace_id, "state": "QUALIFIED"},
+            "receipt": {
+                "pursuit_ref": pursuit_ref, "pursuit_id": str(pursuit_id),
+                "workspace_id": workspace_id,
+                "workspace_title": workspace.get("title"),
+                "state": "QUALIFIED",
+            },
+        }
+
+    def _add_to_workspace(
+        self, *, tenant_id: UUID, actor_subject: str,
+        workspace_title: str, opportunity_refs: list[str],
+    ) -> dict[str, Any]:
+        """Add one or more opportunities to a workspace resolved by title.
+
+        If the workspace does not exist it is created (title-scoped);
+        each opportunity becomes a pursuit linked to the workspace.
+        """
+        workspace = self.domain.opportunities.get_workspace_by_title(
+            tenant_id=tenant_id, title=workspace_title
+        )
+        workspace_id = workspace["workspace_id"] if workspace else None
+        if workspace_id is None:
+            workspace_id = uuid4()
+            self.domain.opportunities.create_workspace(
+                tenant_id=tenant_id, workspace_id=workspace_id,
+                pursuit_ref=f"prs_{opportunity_refs[0]}",
+                opportunity_ref=opportunity_refs[0],
+                opportunity_version_digest="sha256:" + "0" * 64,
+                subscriber_profile_version="v1",
+                assessment_version="v1",
+                created_by=actor_subject, title=workspace_title,
+            )
+        receipts = []
+        for ref in opportunity_refs:
+            opportunity = self.domain.opportunities.get_opportunity(
+                tenant_id=tenant_id, opportunity_ref=ref
+            )
+            if opportunity is None:
+                raise ToolExecutionError(f"opportunity {ref!r} not found")
+            pursuit_ref = f"prs_{ref}"
+            existing = self.domain.opportunities.get_pursuit(
+                tenant_id=tenant_id, pursuit_ref=pursuit_ref
+            )
+            if existing is not None:
+                # Idempotent: the pursuit is already linked to a workspace.
+                receipts.append({
+                    "opportunity_ref": ref,
+                    "pursuit_ref": pursuit_ref,
+                    "pursuit_id": str(existing["pursuit_id"]),
+                    "already_linked": True,
+                    "workspace_ref": str(existing["workspace_ref"])
+                    if existing.get("workspace_ref") else str(workspace_id),
+                })
+                continue
+            pursuit_id = self.domain.opportunities.create_pursuit(
+                tenant_id=tenant_id, pursuit_ref=pursuit_ref,
+                opportunity_ref=ref, state="QUALIFIED",
+                created_by=actor_subject, workspace_ref=workspace_id,
+            )
+            receipts.append({
+                "opportunity_ref": ref,
+                "pursuit_ref": pursuit_ref,
+                "pursuit_id": str(pursuit_id),
+            })
+        return {
+            "tool": "add_to_workspace",
+            "receipt": {
+                "workspace_id": str(workspace_id),
+                "workspace_title": workspace_title,
+                "added": receipts,
+            },
         }
 
     def _create_task(
@@ -316,13 +432,11 @@ class AxentToolExecutor:
         self, *, tenant_id: UUID, actor_subject: str,
         pursuit_ref: str, priority: str,
     ) -> dict[str, Any]:
-        # Priority is stored via the qualification decision payload.
-        self.domain.opportunities.record_qualification(
-            tenant_id=tenant_id, opportunity_ref=pursuit_ref,
-            decision=priority, decided_by=actor_subject,
+        # Priority is a first-class pursuit field (HIGH/MEDIUM/LOW).
+        updated = self.domain.opportunities.set_pursuit_priority(
+            tenant_id=tenant_id, pursuit_ref=pursuit_ref, priority=priority,
         )
-        return {"tool": "update_internal_priority",
-                "receipt": {"pursuit_ref": pursuit_ref, "priority": priority}}
+        return {"tool": "update_internal_priority", "receipt": updated}
 
     def _save_search(
         self, *, tenant_id: UUID, actor_subject: str, name: str, query_json: dict
@@ -360,3 +474,17 @@ class AxentToolExecutor:
         )
         return {"tool": "record_bid_no_bid",
                 "receipt": {"pursuit_ref": pursuit_ref, "decision": decision}}
+
+    def _dismiss_opportunity(
+        self, *, tenant_id: UUID, actor_subject: str,
+        opportunity_ref: str,
+    ) -> dict[str, Any]:
+        """Dismiss an opportunity (no-bid): canonical qualification NO_BID."""
+        self.domain.opportunities.record_qualification(
+            tenant_id=tenant_id, opportunity_ref=opportunity_ref,
+            decision="NO_BID", decided_by=actor_subject,
+        )
+        return {
+            "tool": "dismiss_opportunity",
+            "receipt": {"opportunity_ref": opportunity_ref, "state": "CLOSED"},
+        }

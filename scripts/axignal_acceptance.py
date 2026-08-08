@@ -198,6 +198,21 @@ def main() -> int:
          "-q", "--disable-warnings"],
         env=dict(api_env, AXIGNAL_INTEGRATION_TESTS="1"), timeout=900)
 
+    # 15. Functional-close gates (cierre funcional E2E).
+    run("AXENT_FUNCTIONAL_CLOSE_E2E",
+        [PY, "-m", "pytest", "apps/api/tests/test_axent_functional_close_e2e.py",
+         "-q", "--disable-warnings"],
+        env=dict(api_env, AXIGNAL_INTEGRATION_TESTS="1"), timeout=900)
+    run("AXENT_BROWSER_LIFECYCLE_E2E",
+        ["pnpm", "exec", "playwright", "test",
+         "tests/e2e/axent-functional-lifecycle.spec.ts",
+         "--project=chromium-desktop"],
+        env=dict(
+            api_env,
+            AXIGNAL_API_URL="http://127.0.0.1:8000",
+            AXIGNAL_PLAYWRIGHT_DEV_SERVER="true",
+        ), timeout=900)
+
     if not FAST:
         # 14. Migrations from zero (scratch database).
         migrations_dir = REPO / "infra" / "postgres"
