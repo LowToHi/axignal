@@ -33,6 +33,8 @@ pytestmark = pytest.mark.skipif(
 @pytest.fixture(autouse=True)
 def _set_dsn(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("AXIGNAL_DATABASE_URL", DSN)
+    monkeypatch.setenv("AXIGNAL_IDENTITY_ASSERTION_SECRET", IDENTITY_SECRET)
+    monkeypatch.setenv("AXIGNAL_VALKEY_URL", "redis://localhost:6379/0")
 
 
 def _client(tenant_id: UUID, subject: str = "usr_bid_e2e") -> TestClient:

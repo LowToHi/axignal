@@ -21,6 +21,13 @@ pytestmark = pytest.mark.skipif(
 )
 
 
+@pytest.fixture(autouse=True)
+def _set_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("AXIGNAL_DATABASE_URL", "postgresql://axignal:axignal-local@localhost:5432/axignal")
+    monkeypatch.setenv("AXIGNAL_IDENTITY_ASSERTION_SECRET", IDENTITY_SECRET)
+    monkeypatch.setenv("AXIGNAL_VALKEY_URL", "redis://localhost:6379/0")
+
+
 def _client(tenant_id: UUID) -> TestClient:
     return TestClient(
         app,
