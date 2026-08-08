@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import Script from "next/script";
+import { AxentGlobalAssistant } from "@/components/axent/axent-global";
 import "@axignal/design-tokens/tokens.css";
 import "./globals.css";
 import "./context.css";
@@ -40,6 +41,7 @@ export default async function RootLayout({
       <body>
         <Script src="/theme-bootstrap.js" strategy="beforeInteractive" />
         {children}
+        <AxentGlobalAssistant />
       </body>
     </html>
   );

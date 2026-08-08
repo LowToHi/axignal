@@ -64,6 +64,16 @@ export default defineConfig({
             ? "test"
             : "development",
           AXIGNAL_AXENT_ASSISTANT_DEEPSEEK_ENABLED: "false",
+          // Test-runtime legacy identity so the AXENT assistant E2E can
+          // exercise the REAL browser -> Next proxy -> FastAPI -> PostgreSQL
+          // path (login then grounded conversation).
+          AXIGNAL_AUTH_REQUIRED: "true",
+          AXIGNAL_AUTH_EMAIL: "test-runtime@axignal.test",
+          AXIGNAL_AUTH_SUBJECT: "test-runtime-subject",
+          AXIGNAL_AUTH_TENANT_ID: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          AXIGNAL_SESSION_SECRET: "local-dev-session-secret-32-bytes-minimum!",
+          AXIGNAL_AUTH_PASSWORD_SCRYPT:
+            "scrypt$a1b2c3d4e5f60718293a4b5c6d7e8f90$f7287b6c2d361d0b0357d4ec8b691fa91ba2699dcf571a09c98c415fd4b7930d",
         },
       },
 });
