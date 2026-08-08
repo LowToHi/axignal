@@ -790,6 +790,14 @@ export function LandingExperience({ locale, messages: m, hasSession = false }: L
               <span>{plans.designPartnerLabel}</span>
               <h3>{plans.designPartnerTitle}</h3>
               <p>{plans.designPartnerBody}</p>
+              <ul className="trial-terms">
+                <li>7 days</li>
+                <li>1,000,000 cumulative tokens per organisation</li>
+                <li>No card</li>
+                <li>No automatic renewal</li>
+                <li>No overage</li>
+                <li>Read-only at expiry</li>
+              </ul>
             </div>
             <div>
               <small>{plans.indicative}</small>
@@ -798,7 +806,7 @@ export function LandingExperience({ locale, messages: m, hasSession = false }: L
                 className="button"
                 href="#access"
                 onClick={() => {
-                  selectPlan("Design Partner");
+                  selectPlan("Controlled Trial");
                 }}
               >
                 {plans.designPartnerCta}
@@ -806,30 +814,29 @@ export function LandingExperience({ locale, messages: m, hasSession = false }: L
             </div>
           </article>
 
-          <div className="pricing-comparison-scroll" tabIndex={0}>
-            <div className="pricing-comparison">
-              <div className="comparison-corner">
-                <span>{plans.indicative}</span>
-                <strong>OPERATING BOUNDARY</strong>
-              </div>
-              {plans.plans.map((plan) => (
-                <article className="plan-header" data-plan={plan.id} key={plan.id}>
-                  <span>{plan.availability}</span>
+          <div className="paid-plans-grid">
+            {plans.plans
+              .filter((plan) => plan.id !== "controlled-trial")
+              .map((plan) => (
+                <article className="paid-plan-card" data-plan={plan.id} key={plan.id}>
+                  <span className="paid-plan-availability">{plan.availability}</span>
                   <h3>{plan.name}</h3>
-                  <strong>{plan.price}</strong>
-                  <small>{plan.period}</small>
-                  {plan.id === "controlled-trial" ? (
-                    <ul className="trial-terms">
-                      <li>7 days</li>
-                      <li>1,000,000 cumulative tokens per organisation</li>
-                      <li>No card</li>
-                      <li>No automatic renewal</li>
-                      <li>No overage</li>
-                      <li>Read-only at expiry</li>
-                    </ul>
-                  ) : null}
+                  <p className="paid-plan-price">
+                    <strong>{plan.price}</strong>
+                    <small>{plan.period}</small>
+                  </p>
+                  <ul className="paid-plan-values">
+                    {pricingRowKeys.map((rowKey, rowIndex) =>
+                      rowKey === "users" ? null : (
+                        <li key={rowKey}>
+                          <span>{plans.rowLabels[rowKey]}</span>
+                          <strong>{plan.values[rowIndex]}</strong>
+                        </li>
+                      )
+                    )}
+                  </ul>
                   <a
-                    className={plan.id === "controlled-trial" ? "button" : "button button-ghost"}
+                    className="button button-ghost"
                     href="#access"
                     onClick={() => selectPlan(plan.name)}
                   >
@@ -837,16 +844,6 @@ export function LandingExperience({ locale, messages: m, hasSession = false }: L
                   </a>
                 </article>
               ))}
-
-              {pricingRowKeys.map((rowKey, rowIndex) => (
-                <div className="comparison-row" key={rowKey}>
-                  <strong>{plans.rowLabels[rowKey]}</strong>
-                  {plans.plans.map((plan) => (
-                    <span key={`${plan.id}-${rowKey}`}>{plan.values[rowIndex]}</span>
-                  ))}
-                </div>
-              ))}
-            </div>
           </div>
         </section>
 

@@ -2653,56 +2653,22 @@ footer {
   letter-spacing: -0.04em;
 }
 
-.pricing-comparison-scroll {
-  width: 100%;
-  overflow-x: auto;
-  overscroll-behavior-inline: contain;
-  border: 1px solid var(--landing-line-strong);
-  scrollbar-color: var(--landing-signal) var(--landing-panel);
+.paid-plans-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  align-items: stretch;
 }
 
-.pricing-comparison {
-  display: grid;
-  min-width: 74rem;
-  grid-template-columns: 12.5rem repeat(4, minmax(14rem, 1fr));
+.paid-plan-card {
+  display: flex;
+  flex-direction: column;
+  padding: clamp(1.5rem, 3vw, 2.2rem);
+  border: 1px solid var(--landing-line-strong);
   background: var(--landing-panel);
 }
 
-.comparison-corner,
-.plan-header {
-  min-height: 27rem;
-  padding: 1.15rem;
-  border-right: 1px solid var(--landing-line);
-  border-bottom: 1px solid var(--landing-line);
-}
-
-.comparison-corner {
-  display: grid;
-  align-content: space-between;
-  color: var(--landing-muted);
-  font-family: var(--ax-font-mono);
-  font-size: 0.55rem;
-}
-
-.comparison-corner span {
-  color: var(--landing-signal-soft);
-}
-
-.comparison-corner strong {
-  font-size: 0.62rem;
-  font-weight: 500;
-}
-
-.plan-header {
-  display: flex;
-  flex-direction: column;
-}
-
-.plan-header[data-plan="controlled-trial"] {
-  background: rgba(0, 225, 207, 0.045);
-}
-
-.plan-header > span {
+.paid-plan-availability {
   min-height: 2.5rem;
   color: var(--landing-muted);
   font-family: var(--ax-font-mono);
@@ -2710,30 +2676,72 @@ footer {
   letter-spacing: 0.05em;
 }
 
-.plan-header[data-plan="controlled-trial"] > span {
-  color: var(--landing-signal-soft);
-}
-
-.plan-header h3 {
+.paid-plan-card h3 {
   margin: 1rem 0 0;
   font-size: 1.05rem;
   font-weight: 560;
 }
 
-.plan-header > strong {
-  margin-top: 1.4rem;
+.paid-plan-price {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin: 1.4rem 0 0;
+}
+
+.paid-plan-price strong {
   font-size: clamp(1.55rem, 2.4vw, 2.4rem);
   font-weight: 500;
   letter-spacing: -0.05em;
 }
 
-.plan-header > small {
+.paid-plan-price small {
   color: var(--landing-muted);
 }
 
-.plan-header .button {
+.paid-plan-values {
+  display: grid;
+  gap: 0.5rem;
+  margin: 1.4rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.paid-plan-values li {
+  display: grid;
+  grid-template-columns: minmax(6.5rem, 0.8fr) minmax(0, 1.2fr);
+  gap: 0.8rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--landing-line);
+  font-size: 0.69rem;
+}
+
+.paid-plan-values li:last-child {
+  border-bottom: 0;
+}
+
+.paid-plan-values li span {
+  color: var(--landing-signal-soft);
+  font-family: var(--ax-font-mono);
+  font-size: 0.56rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.paid-plan-values li strong {
+  color: var(--landing-muted);
+  font-weight: 400;
+}
+
+.paid-plan-card .button {
   width: 100%;
   margin-top: auto;
+}
+
+@media (max-width: 900px) {
+  .paid-plans-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .trial-terms {

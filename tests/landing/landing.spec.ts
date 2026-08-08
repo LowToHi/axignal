@@ -186,11 +186,18 @@ test("mobile menu contains all sections and closes with Escape", async ({
   const menu = page.locator("#mobile-menu");
   await expect(menu).toBeVisible();
   const labels = (await menu.locator("a").allTextContents()).map((t) => t.trim());
-  for (const label of ["Product", "Method", "Pricing", "FAQ", "Log in", "Request your 7-day B2G trial"]) {
+  for (const label of ["Product", "Method", "Pricing", "FAQ", "Request your 7-day B2G trial"]) {
     expect(labels).toContain(label);
   }
+  // El acceso de clientes solo se renderiza cuando la app autenticada está
+  // configurada (NEXT_PUBLIC_AXIGNAL_APP_URL); sin ella, no hay Log in.
   const access = menu.locator('[data-axignal-customer-access="true"]');
-  await expect(access).toBeVisible();
+  if (process.env.NEXT_PUBLIC_AXIGNAL_APP_URL) {
+    expect(labels).toContain("Log in");
+    await expect(access).toBeVisible();
+  } else {
+    await expect(access).toHaveCount(0);
+  }
   await page.keyboard.press("Escape");
   await expect(menu).not.toBeVisible();
   await expect(toggle).toBeFocused();
@@ -272,17 +279,80 @@ test("makes the controlled trial and canonical monthly prices explicit", async (
   }
   await expect(page.locator("#pricing")).toBeInViewport();
   await expect(page.getByRole("heading", { name: /Choose the contracted operating boundary/i })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Controlled Trial" }).first()).toBeVisible();
+  // Trial destacado: exactamente una vez (sin tarjeta duplicada).
+  const trialHeadings = page.getByRole("heading", { name: "Controlled Trial" });
+  await expect(trialHeadings).toHaveCount(1);
+  await expect(trialHeadings).toBeVisible();
   await expect(page.getByText("1,000,000 cumulative tokens per organisation")).toBeVisible();
   await expect(page.getByText("No card", { exact: true })).toBeVisible();
   await expect(page.getByText("No automatic renewal", { exact: true })).toBeVisible();
   await expect(page.getByText("No overage", { exact: true })).toBeVisible();
   await expect(page.getByText("Read-only at expiry", { exact: true })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Request your 7-day B2G trial" }).first()).toBeVisible();
-  await expect(page.getByText(/APPLICATION ONLY · NO CARD · NO AUTOMATIC CONVERSION/)).toBeVisible();
+  await expect(page.getByRole("link", { name: "Request 7-day B2G trial" }).first()).toBeVisible();
+  await expect(page.getByText(/CONTROLLED 7-DAY TRIAL/)).toBeVisible();
   await expect(page.getByText(/Canonical price book · 2026-08-04/).first()).toBeVisible();
+  // Planes contratados: dos tarjetas de igual anchura, sin columna vacía.
   await expect(page.getByRole("heading", { name: "Professional" })).toBeVisible();
   await expect(page.getByText("€149", { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Team" })).toBeVisible();
   await expect(page.getByText("€399", { exact: true })).toBeVisible();
+  await expect(page.locator(".paid-plan-card")).toHaveCount(2);
+  await expect(page.locator(".paid-plan-card[data-plan='professional']")).toBeVisible();
+  await expect(page.locator(".paid-plan-card[data-plan='team']")).toBeVisible();
+  // Sin columna USERS: la fila de usuarios no se renderiza (price book no la define).
+  await expect(page.getByText("Users", { exact: true })).toHaveCount(0);
+  // CTA visibles en ambas tarjetas.
+  await expect(page.getByRole("link", { name: "Request Professional access" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Request Team access" })).toBeVisible();
+  // Sin desbordamiento horizontal.
+  const overflow = await page.evaluate(
+    () => document.documentElement.scrollWidth > window.innerWidth + 1
+  );
+  expect(overflow).toBe(false);
+});
+
+test("pricing paid plans are equal-width on desktop and stacked on mobile", async ({
+  browser
+}) => {
+  // Contextos explícitos: el test es independiente del project (corre en
+  // desktop y mobile) y fija su propio viewport para cada caso.
+  const desktopContext = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  const page = desktopContext.pages()[0] ?? (await desktopContext.newPage());
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.waitForFunction(
+    () =>
+      document.querySelector(".cinematic-stage")?.parentElement?.classList.contains("pin-spacer")
+  );
+  await page.locator("#pricing").scrollIntoViewIfNeeded();
+  await expect(page.locator(".paid-plan-card")).toHaveCount(2);
+
+  // Desktop (1440): 2 columnas, misma anchura.
+  const widthsDesktop = await page.locator(".paid-plan-card").evaluateAll((cards) =>
+    cards.map((c) => Math.round(c.getBoundingClientRect().width))
+  );
+  expect(widthsDesktop[0]).toBeGreaterThan(400);
+  expect(Math.abs(widthsDesktop[0] - widthsDesktop[1])).toBeLessThanOrEqual(2);
+  await desktopContext.close();
+
+  // Móvil (390): 1 columna, tarjetas apiladas.
+  const mobileContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const mobilePage = mobileContext.pages()[0] ?? (await mobileContext.newPage());
+  await mobilePage.goto("/", { waitUntil: "domcontentloaded" });
+  await mobilePage.waitForFunction(
+    () =>
+      document.querySelector(".cinematic-stage")?.parentElement?.classList.contains("pin-spacer")
+  );
+  await mobilePage.locator("#pricing").scrollIntoViewIfNeeded();
+  await expect(mobilePage.locator(".paid-plan-card")).toHaveCount(2);
+  const widthsMobile = await mobilePage.locator(".paid-plan-card").evaluateAll((cards) =>
+    cards.map((c) => Math.round(c.getBoundingClientRect().width))
+  );
+  expect(Math.abs(widthsMobile[0] - widthsMobile[1])).toBeLessThanOrEqual(2);
+  expect(widthsMobile[0]).toBeGreaterThan(300);
+  // Sin desbordamiento horizontal en móvil.
+  const overflowMobile = await mobilePage.evaluate(
+    () => document.documentElement.scrollWidth > window.innerWidth + 1
+  );
+  expect(overflowMobile).toBe(false);
+  await mobileContext.close();
 });
